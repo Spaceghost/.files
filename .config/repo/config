@@ -1,0 +1,17 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+	precomposeunicode = true
+[status]
+	showUntrackedFiles = no
+[remote "origin"]
+	url = git@git.sr.ht:~spaceghost/.files
+	fetch = +refs/heads/*:refs/remotes/origin/*
+	pushurl = git@github.com:spaceghost/.files
+	pushurl = git@git.sr.ht:~spaceghost/.files
+[branch "base"]
+	remote = origin
+	merge = refs/heads/base
