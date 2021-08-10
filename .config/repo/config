@@ -10,6 +10,7 @@
 	merge = refs/heads/base
 [remote "origin"]
 	url = git@git.sr.ht:~spaceghost/.files
+	url = git@github.com:spaceghost/.files
 	fetch = +refs/heads/*:refs/remotes/sr.ht/*
 	fetch = +refs/heads/*:refs/remotes/gh/*
 	pushurl = git@git.sr.ht:~spaceghost/.files
