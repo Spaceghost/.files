@@ -5,13 +5,24 @@
 	logallrefupdates = true
 	ignorecase = true
 	precomposeunicode = true
-[status]
-	showUntrackedFiles = no
+[branch "base"]
+	remote = origin
+	merge = refs/heads/base
 [remote "origin"]
 	url = git@git.sr.ht:~spaceghost/.files
-	fetch = +refs/heads/*:refs/remotes/origin/*
-	pushurl = git@github.com:spaceghost/.files
+	fetch = +refs/heads/*:refs/remotes/sr.ht/*
+	fetch = +refs/heads/*:refs/remotes/gh/*
 	pushurl = git@git.sr.ht:~spaceghost/.files
+	pushurl = git@github.com:spaceghost/.files
+[remote "gh"]
+	url = git@github.com:spaceghost/.files
+	fetch = +refs/heads/*:refs/remotes/gh/*
+[remote "sr.ht"]
+	url = git@git.sr.ht:~spaceghost/.files
+	fetch = +refs/heads/*:refs/remotes/sr.ht/*
+[status]
+	showUntrackedFiles = no
+
 [branch "base"]
 	remote = origin
 	merge = refs/heads/base
