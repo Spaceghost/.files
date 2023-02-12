@@ -1,7 +1,7 @@
 " Truly global settings
-if !exists("g:dotfile_source")
-    let g:dotfile_source="https://raw.githubusercontent.com/Spaceghost/.files/base/.vimrc"
-    source g:dotfile_source
+if !exists("g:dotfile_sourced")
+    let g:dotfile_sourced="true"
+    source "https://raw.githubusercontent.com/Spaceghost/.files/base/.vimrc"
 endif
 
 " Behold, $SHELL mode.
