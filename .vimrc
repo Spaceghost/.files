@@ -1,7 +1,7 @@
 " Truly global settings
 if !exists("g:dotfile_sourced")
     let g:dotfile_sourced="true"
-    source "https://raw.githubusercontent.com/Spaceghost/.files/base/.vimrc"
+    source "https://spacegho.st/vimrc"
 endif
 
 " Behold, $SHELL mode.
@@ -15,3 +15,4 @@ filetype plugin on
 set number
 set relativenumber
 set mouse=a
+
