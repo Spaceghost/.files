@@ -5,6 +5,9 @@ if !exists("g:dotfile_sourced")
       source "https://spacegho.st/vimrc"
     endif
 endif
+function! PatchDotfile()
+    let patch = system("diff <(curl -s https://spacegho.st/vimrc) ~/.vimrc -u | patch -b")
+endfunction
 
 " Behold, $SHELL mode.
 augroup VimStartup                                                                                                                
