@@ -1,7 +1,9 @@
 " Truly global settings
 if !exists("g:dotfile_sourced")
     let g:dotfile_sourced="true"
-    source "https://spacegho.st/vimrc"
+    if v:version >= 900
+      source "https://spacegho.st/vimrc"
+    endif
 endif
 
 " Behold, $SHELL mode.
