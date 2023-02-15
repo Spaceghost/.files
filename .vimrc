@@ -9,7 +9,7 @@ endif
 " Behold, $SHELL mode.
 augroup VimStartup                                                                                                                
   au!
-  au VimEnter * if expand("%") == "" && bufnr('$') == 1 | term ++curwin ++close sh -c "exec zsh || fish || bash"
+  au VimEnter * if expand("%") == "" && bufnr('$') == 1 | term ++curwin ++close sh -c "exec bash || fish || zsh"
 augroup END
 
 set nocp
