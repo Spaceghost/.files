@@ -1,0 +1,52 @@
+# devbuntu.yml
+users:
+  - default
+  - name: jack
+    ssh_import_id: gh:spaceghost
+    lock_passwd: true
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /usr/bin/zsh
+
+package_update: true
+package_upgrade: true
+# package_reboot_if_required: true
+packages:
+  - zsh
+  - tmux
+  - curl
+
+snap:
+  commands:
+    - ['install', 'lxd']
+
+no_ssh_fingerprints: true
+ssh:
+  emit_keys_to_console: false
+
+write_files:
+- path: /etc/systemd/resolved.conf
+  append: true
+  content: |
+    MulticastDNS=yes
+
+- path: /etc/systemd/system/mdns@.service
+  content: |
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/bin/systemd-resolve --set-mdns=yes --interface=%i
+    After=sys-subsystem-net-devices-%i.device
+
+    [Install]
+    WantedBy=sys-subsystem-net-devices-%i.device
+
+runcmd:
+- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+-  curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin
+- systemctl restart systemd-resolved.service
+- systemctl start mdns@enp0s2.service
+- systemctl enable mdns@enp0s2.service
+
+power_state:
+  delay: now
+  mode: reboot
+  message: Going down for a reboot! Bye Bye 👻
