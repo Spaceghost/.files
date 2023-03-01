@@ -1,8 +1,9 @@
 #cloud-config
+#lxc launch images:ubuntu/jammy/cloud home:devbuntu <<((<<(printf '%s\n' 'config:' '  cloud-init.user-data: |')<<(cat | sed 's/^/    /')) < devbuntu.yml)
 users:
   - default
   - name: jack
-    ssh_import_id: gh:spaceghost
+    gecos: Johnneyle Jack Rollins
     lock_passwd: true
     sudo: ALL=(ALL) NOPASSWD:ALL
     shell: /usr/bin/zsh
@@ -11,9 +12,11 @@ package_update: true
 package_upgrade: true
 # package_reboot_if_required: true
 packages:
+  - ssh-import-id
   - zsh
   - tmux
   - curl
+  - git
 
 snap:
   commands:
@@ -39,9 +42,21 @@ write_files:
     [Install]
     WantedBy=sys-subsystem-net-devices-%i.device
 
+- path: /etc/zsh/zshrc
+  append: true
+  content: |
+    export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+
+- path: /etc/bash.bashrc
+  append: true
+  content: |
+    export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+
+
 runcmd:
-- /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
--  curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin
+- [su, -, jack, -c, 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
+- [su, -, jack, -c, "curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin"]
+- [su, -, jack, -c, "ssh-import-id gh:spaceghost"]
 - systemctl restart systemd-resolved.service
 - systemctl start mdns@enp0s2.service
 - systemctl enable mdns@enp0s2.service
