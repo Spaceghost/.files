@@ -19,8 +19,8 @@ brew "libffi"
 
 # Dev
 brew "asdf", args: ['HEAD']
-brew "lxc", args: ['HEAD']
 
+brew "lxc"
 brew "coreutils"
 brew "ca-certificates"
 brew "automake"
