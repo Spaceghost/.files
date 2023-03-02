@@ -1,0 +1,70 @@
+config:
+  cloud-init.user-data: |
+    #cloud-config
+    #lxc launch images:ubuntu/jammy/cloud home:devbuntu <<((<<(printf '%s\n' 'config:' '  cloud-init.user-data: |')<<(cat | sed 's/^/    /')) < devbuntu.yml)
+    users:
+      - default
+      - name: jack
+        gecos: Johnneyle Jack Rollins
+        lock_passwd: true
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /usr/bin/zsh
+
+    package_update: true
+    package_upgrade: true
+    # package_reboot_if_required: true
+    packages:
+      - ssh-import-id
+      - zsh
+      - tmux
+      - curl
+      - git
+      - build-essential
+
+    snap:
+      commands:
+        - ['install', 'lxd']
+
+    no_ssh_fingerprints: true
+    ssh:
+      emit_keys_to_console: false
+
+    write_files:
+    - path: /etc/systemd/resolved.conf
+      append: true
+      content: |
+        MulticastDNS=yes
+
+    - path: /etc/systemd/system/mdns@.service
+      content: |
+        [Service]
+        Type=oneshot
+        ExecStart=/usr/bin/systemd-resolve --set-mdns=yes --interface=%i
+        After=sys-subsystem-net-devices-%i.device
+
+        [Install]
+        WantedBy=sys-subsystem-net-devices-%i.device
+
+    - path: /etc/zsh/zshenv
+      append: true
+      content: |
+        export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+
+    - path: /etc/bash.bashrc
+      append: true
+      content: |
+        export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+
+
+    runcmd:
+    - [su, -, jack, -c, 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
+    - [su, -, jack, -c, "curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin"]
+    - [su, -, jack, -c, "ssh-import-id gh:spaceghost"]
+    - systemctl restart systemd-resolved.service
+    - systemctl start mdns@enp0s2.service
+    - systemctl enable mdns@enp0s2.service
+
+    power_state:
+      delay: now
+      mode: reboot
+      message: Going down for a reboot! Bye Bye 👻
