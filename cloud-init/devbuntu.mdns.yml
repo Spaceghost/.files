@@ -43,7 +43,7 @@ write_files:
     [Install]
     WantedBy=sys-subsystem-net-devices-%i.device
 
-- path: /etc/zsh/zshrc
+- path: /etc/zsh/zshenv
   append: true
   content: |
     export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
