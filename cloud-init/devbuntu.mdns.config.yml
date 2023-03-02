@@ -1,7 +1,6 @@
 config:
   cloud-init.user-data: |
     #cloud-config
-    #lxc launch images:ubuntu/jammy/cloud home:devbuntu <<((<<(printf '%s\n' 'config:' '  cloud-init.user-data: |')<<(cat | sed 's/^/    /')) < devbuntu.yml)
     users:
       - default
       - name: jack
