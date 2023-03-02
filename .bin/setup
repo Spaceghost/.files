@@ -1,5 +1,4 @@
 #!/bin/bash
 
 curl -s https://spacegho.st/~/cloud-init/devbuntu.mdns.config.yml | lxc launch ubuntu: dev
-sleep 2
-lxc exec dev -- tail -f /var/log/cloud-init-output.log
+lxc exec dev -- tail -F /var/log/cloud-init-output.log

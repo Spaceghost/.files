@@ -7,7 +7,7 @@ brew "zsh"
 
 # Files
 brew "rclone"
-brew "duck"
+# brew "duck" # Stalls on linux idkwhy
 
 # Utilities
 brew "htop"
