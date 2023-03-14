@@ -8,7 +8,6 @@ config:
         lock_passwd: true
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /usr/bin/zsh
-
     package_update: true
     package_upgrade: true
     # package_reboot_if_required: true
@@ -19,28 +18,22 @@ config:
       - curl
       - git
       - build-essential
-
     no_ssh_fingerprints: true
     ssh:
       emit_keys_to_console: false
-
     - path: /etc/zsh/zshenv
       append: true
       content: |
         export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
-
     - path: /etc/bash.bashrc
       append: true
       content: |
         export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
-
-    # - [su, -, jack, -c, ""]
     runcmd:
     - [su, -, jack, -c, 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
     - [su, -, jack, -c, "curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin"]
     - [su, -, jack, -c, "ssh-import-id gh:spaceghost"]
     - [su, -, jack, -c, "curl https://spacegho.st/~/.bin/👻 | sh"]
-
     power_state:
       delay: now
       mode: reboot
