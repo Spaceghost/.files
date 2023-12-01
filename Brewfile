@@ -18,10 +18,10 @@ brew "ripgrep"
 brew "libffi"
 
 # Dev
+brew "git"
 brew "asdf", args: ['HEAD']
 
 brew "lxc"
-brew "coreutils"
 brew "ca-certificates"
 brew "automake"
 brew "autoconf"
