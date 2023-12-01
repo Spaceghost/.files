@@ -47,12 +47,12 @@ config:
     - path: /etc/zsh/zshenv
       append: true
       content: |
-        export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+        export PATH="$(gem env gemdir)/bin":/home/linuxbrew/.linuxbrew/bin:$PATH 
 
     - path: /etc/bash.bashrc
       append: true
       content: |
-        export PATH=/home/linuxbrew/.linuxbrew/bin:$PATH
+        export PATH="$(gem env gemdir)/bin":/home/linuxbrew/.linuxbrew/bin:$PATH
 
     # - [su, -, jack, -c, ""]
     runcmd:
