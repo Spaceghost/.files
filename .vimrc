@@ -1,23 +1,41 @@
-" Truly global settings
-if !exists("g:dotfile_sourced")
-    let g:dotfile_sourced="true"
-    if v:version >= 900
-      source "https://spacegho.st/vimrc"
-    endif
+if exists('g:spaceghost_dotfiles_loaded')
+  finish
 endif
-function! PatchDotfile()
-    let patch = system("diff <(curl -s https://spacegho.st/vimrc) ~/.vimrc -u | patch -b")
-endfunction
+let g:spaceghost_dotfiles_loaded = 1
 
-" Behold, $SHELL mode.
-augroup VimStartup                                                                                                                
-  au!
-  au VimEnter * if expand("%") == "" && bufnr('$') == 1 | term ++curwin ++close sh -c "exec zsh || fish || bash || csh"
-augroup END
+set nocompatible
+filetype plugin indent on
+syntax enable
 
-set nocp
-filetype plugin on
 set number
 set relativenumber
 set mouse=a
+set hidden
+set confirm
+set autoread
+set splitbelow
+set splitright
+set scrolloff=3
+set sidescrolloff=5
 
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+set wildmenu
+set completeopt=menuone,noselect
+
+set expandtab
+set tabstop=2
+set softtabstop=2
+set shiftwidth=2
+set autoindent
+set updatetime=250
+
+if has('termguicolors')
+  set termguicolors
+endif
+
+let mapleader = ' '
+nnoremap <silent> <leader>w :write<CR>
+nnoremap <silent> <leader>q :quit<CR>
