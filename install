@@ -1,0 +1,116 @@
+#!/bin/sh
+set -eu
+
+repo_dir=$(CDPATH= cd "$(dirname "$0")" && pwd)
+target_home=${DOTFILES_HOME:-$HOME}
+dry_run=false
+
+usage() {
+  printf 'usage: %s [--dry-run]\n' "$0"
+}
+
+case ${1:-} in
+  '') ;;
+  -n|--dry-run) dry_run=true ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if [ -n "${DOTFILES_HOME:-}" ]; then
+  state_home=$target_home/.local/state
+else
+  state_home=${XDG_STATE_HOME:-"$HOME/.local/state"}
+fi
+backup_root=$state_home/dotfiles/backups/$(date -u +%Y%m%dT%H%M%SZ)
+
+note() {
+  printf '%s\n' "$*"
+}
+
+ensure_dir() {
+  if [ "$dry_run" = true ]; then
+    return
+  fi
+  mkdir -p "$1"
+}
+
+link_file() {
+  source=$repo_dir/$1
+  target=$2
+
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+    note "ok     ${target#$target_home/}"
+    return
+  fi
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    relative=${target#$target_home/}
+    backup=$backup_root/$relative
+    note "backup ${relative} -> $backup"
+    if [ "$dry_run" = false ]; then
+      mkdir -p "$(dirname "$backup")"
+      mv "$target" "$backup"
+    fi
+  fi
+
+  note "link   ${target#$target_home/} -> $1"
+  if [ "$dry_run" = false ]; then
+    mkdir -p "$(dirname "$target")"
+    ln -s "$source" "$target"
+  fi
+}
+
+link_ssh_config() {
+  source=$repo_dir/.ssh/config
+  target=$target_home/.ssh/config
+  local_config=$target_home/.ssh/config.local
+
+  if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
+    note "ok     .ssh/config"
+    return
+  fi
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    if [ -f "$target" ] && [ ! -e "$local_config" ] && [ ! -L "$local_config" ]; then
+      note "keep   .ssh/config -> .ssh/config.local"
+      note "link   .ssh/config -> .ssh/config"
+      if [ "$dry_run" = false ]; then
+        mkdir -p "$target_home/.ssh"
+        chmod 700 "$target_home/.ssh"
+        mv "$target" "$local_config"
+        ln -s "$source" "$target"
+      fi
+      return
+    fi
+
+    note "skip   .ssh/config (existing config and local include need review)"
+    return
+  fi
+
+  if [ "$dry_run" = false ]; then
+    ensure_dir "$target_home/.ssh"
+    chmod 700 "$target_home/.ssh"
+  fi
+  link_file .ssh/config "$target"
+}
+
+link_file .zshenv "$target_home/.zshenv"
+link_file .zprofile "$target_home/.zprofile"
+link_file .zshrc "$target_home/.zshrc"
+link_file .vimrc "$target_home/.vimrc"
+link_file .tmux.conf "$target_home/.tmux.conf"
+link_file .config/nvim/init.vim "$target_home/.config/nvim/init.vim"
+link_file .bin/devbox "$target_home/.local/bin/devbox"
+link_ssh_config
+
+if [ "$dry_run" = true ]; then
+  note 'dry run complete; nothing changed'
+else
+  note 'dotfiles linked'
+fi

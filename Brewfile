@@ -1,32 +1,28 @@
-tap "homebrew/bundle"
-tap "homebrew/core"
-
-# Base
-brew "tmux"
+# Shell and editor
 brew "zsh"
+brew "tmux"
+brew "neovim"
 
-# Files
-brew "rclone"
-# brew "duck" # Stalls on linux idkwhy
-
-# Utilities
-brew "htop"
-brew "neofetch"
-brew "ripgrep"
-
-# Libraries
-brew "libffi"
-
-# Dev
+# Everyday command line
 brew "git"
-brew "asdf", args: ['HEAD']
+brew "ripgrep"
+brew "fd"
+brew "fzf"
+brew "jq"
+brew "miller"
+brew "rclone"
+brew "htop"
 
-brew "lxc"
-brew "ca-certificates"
-brew "automake"
+# Development
+brew "asdf"
+brew "incus"
+brew "shellcheck"
+
+# Native build dependencies
 brew "autoconf"
+brew "automake"
+brew "libffi"
+brew "openssl@3"
+brew "pkgconf"
 brew "readline"
-brew "expect"
 brew "sqlite"
-brew "tcl-tk"
-

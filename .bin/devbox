@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+cloud_config="$repo_dir/cloud-init/dev.yml"
+name=${DEVBOX_NAME:-dev}
+
+if [[ -n ${DEVBOX_RUNTIME:-} ]]; then
+  runtime=$DEVBOX_RUNTIME
+elif command -v incus >/dev/null 2>&1; then
+  runtime=incus
+elif command -v lxc >/dev/null 2>&1; then
+  runtime=lxc
+else
+  printf 'devbox: install Incus (preferred) or the LXD lxc client first\n' >&2
+  exit 1
+fi
+
+if ! command -v "$runtime" >/dev/null 2>&1; then
+  printf 'devbox: runtime not found: %s\n' "$runtime" >&2
+  exit 1
+fi
+
+if [[ $runtime == incus ]]; then
+  default_image=images:ubuntu/24.04/cloud
+else
+  default_image=ubuntu:24.04
+fi
+image=${DEVBOX_IMAGE:-$default_image}
+
+if "$runtime" info "$name" >/dev/null 2>&1; then
+  printf 'devbox: %s already exists\n' "$name"
+  "$runtime" list "$name"
+  exit 0
+fi
+
+printf 'devbox: init %s from %s with %s\n' "$name" "$image" "$runtime"
+"$runtime" init "$image" "$name"
+"$runtime" config set "$name" cloud-init.user-data - < "$cloud_config"
+"$runtime" start "$name"
+
+printf 'devbox: waiting for cloud-init\n'
+"$runtime" exec "$name" -- cloud-init status --wait
+"$runtime" list "$name"
+printf 'devbox: ready; ssh dev\n'

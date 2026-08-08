@@ -1,0 +1,47 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dotfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Install validators
+        run: sudo apt-get update && sudo apt-get install -y cloud-init neovim python3-yaml shellcheck tmux zsh
+
+      - name: Check shell files
+        run: |
+          sh -n install
+          bash -n .bin/devbox
+          shellcheck install .bin/devbox
+          zsh -n .zshenv .zprofile .zshrc
+
+      - name: Check cloud-init YAML
+        run: |
+          python3 -c 'import yaml; yaml.safe_load(open("cloud-init/dev.yml"))'
+          cloud-init schema --config-file cloud-init/dev.yml
+
+      - name: Check editors and tmux
+        run: |
+          vim -Nu .vimrc -n -es '+qa!'
+          nvim --headless -u .config/nvim/init.vim '+qa!'
+          tmux -L dotfiles-check -f .tmux.conf new-session -d -s check
+          tmux -L dotfiles-check kill-server
+
+      - name: Smoke-test installer
+        run: |
+          test_home=$(mktemp -d)
+          DOTFILES_HOME="$test_home" ./install
+          DOTFILES_HOME="$test_home" ./install
+          test -L "$test_home/.zshrc"
+          test -L "$test_home/.config/nvim/init.vim"
+          test -L "$test_home/.local/bin/devbox"
