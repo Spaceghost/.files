@@ -1,70 +1,34 @@
 config:
   cloud-init.user-data: |
     #cloud-config
+    hostname: dev
+    manage_etc_hosts: true
+
     users:
       - default
       - name: jack
-        gecos: Johnneyle Jack Rollins
         lock_passwd: true
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /usr/bin/zsh
 
     package_update: true
     package_upgrade: true
-    # package_reboot_if_required: true
     packages:
-      - ssh-import-id
-      - zsh
-      - tmux
+      - avahi-daemon
+      - build-essential
       - curl
       - git
-      - build-essential
-
-    snap:
-      commands:
-        - ['install', 'lxd']
+      - libnss-mdns
+      - ssh-import-id
+      - tmux
+      - zsh
 
     no_ssh_fingerprints: true
     ssh:
       emit_keys_to_console: false
 
-    write_files:
-    - path: /etc/systemd/resolved.conf
-      append: true
-      content: |
-        MulticastDNS=yes
-
-    - path: /etc/systemd/system/mdns@.service
-      content: |
-        [Service]
-        Type=oneshot
-        ExecStart=/usr/bin/systemd-resolve --set-mdns=yes --interface=%i
-        After=sys-subsystem-net-devices-%i.device
-
-        [Install]
-        WantedBy=sys-subsystem-net-devices-%i.device
-
-    - path: /etc/zsh/zshenv
-      append: true
-      content: |
-        export PATH="$(gem env gemdir)/bin":/home/linuxbrew/.linuxbrew/bin:$PATH 
-
-    - path: /etc/bash.bashrc
-      append: true
-      content: |
-        export PATH="$(gem env gemdir)/bin":/home/linuxbrew/.linuxbrew/bin:$PATH
-
-    # - [su, -, jack, -c, ""]
     runcmd:
-    - [su, -, jack, -c, 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
-    - [su, -, jack, -c, "curl https://spacegho.st/~/Brewfile | brew bundle --file=/dev/stdin"]
-    - [su, -, jack, -c, "ssh-import-id gh:spaceghost"]
-    - [su, -, jack, -c, "curl https://spacegho.st/~/.bin/👻 | sh"]
-    - systemctl restart systemd-resolved.service
-    - systemctl start mdns@enp0s2.service
-    - systemctl enable mdns@enp0s2.service
-
-    power_state:
-      delay: now
-      mode: reboot
-      message: Going down for a reboot! Bye Bye 👻
+      - [su, -, jack, -c, 'NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"']
+      - [su, -, jack, -c, 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && curl -fsSL https://raw.githubusercontent.com/Spaceghost/.files/base/Brewfile | brew bundle --file=/dev/stdin']
+      - [su, -, jack, -c, 'ssh-import-id gh:Spaceghost']
+      - [systemctl, enable, --now, avahi-daemon]
