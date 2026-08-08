@@ -1,0 +1,46 @@
+name: check
+
+on:
+  pull_request:
+  push:
+    branches: [base]
+
+permissions:
+  contents: read
+
+jobs:
+  dotfiles:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends neovim python3-yaml ruby shellcheck tmux zsh
+
+      - name: Check shell and Brewfile syntax
+        run: |
+          shellcheck .bin/setup '.bin/👻'
+          bash -n .bin/setup
+          sh -n '.bin/👻'
+          zsh -n .zshenv .zshrc
+          ruby -c Brewfile
+
+      - name: Load editor and tmux configs
+        run: |
+          HOME="$PWD" XDG_CONFIG_HOME="$PWD/.config" nvim --headless '+qa'
+          tmux -L dotfiles-check -f "$PWD/.tmux.conf" new-session -d -s dotfiles-check
+          tmux -L dotfiles-check kill-server
+
+      - name: Parse cloud-init YAML
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          for path in Path("cloud-init").glob("*.yml"):
+              with path.open(encoding="utf-8") as source:
+                  yaml.safe_load(source)
+              print(f"ok: {path}")
+          PY
