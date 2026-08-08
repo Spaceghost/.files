@@ -1,32 +1,26 @@
-tap "homebrew/bundle"
-tap "homebrew/core"
-
-# Base
+# Shell and editor
+brew "neovim"
 brew "tmux"
 brew "zsh"
 
-# Files
-brew "rclone"
-# brew "duck" # Stalls on linux idkwhy
-
-# Utilities
+# Everyday tools
+brew "git"
 brew "htop"
-brew "neofetch"
+brew "jq"
+brew "rclone"
 brew "ripgrep"
 
-# Libraries
-brew "libffi"
-
-# Dev
-brew "git"
-brew "asdf", args: ['HEAD']
-
-brew "lxc"
-brew "ca-certificates"
-brew "automake"
+# Development
+brew "asdf"
 brew "autoconf"
-brew "readline"
+brew "automake"
+brew "ca-certificates"
 brew "expect"
+brew "libffi"
+brew "openssl@3"
+brew "readline"
 brew "sqlite"
 brew "tcl-tk"
 
+# LXD client for the disposable dev box
+brew "lxc"
