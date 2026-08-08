@@ -2,8 +2,8 @@
 set -euo pipefail
 
 name="${1:-dev}"
-image="${LXD_IMAGE:-ubuntu:24.04}"
-config_url="${DOTFILES_DEV_CONFIG_URL:-https://raw.githubusercontent.com/Spaceghost/.files/base/cloud-init/devbuntu.mdns.config.yml}"
+image="${LXD_IMAGE:-ubuntu:}"
+config_url="${DOTFILES_DEV_CONFIG_URL:-https://spacegho.st/~/cloud-init/devbuntu.mdns.config.yml}"
 
 if ! command -v lxc >/dev/null 2>&1; then
   printf 'lxc is required; install the Brewfile or your distro package first\n' >&2
