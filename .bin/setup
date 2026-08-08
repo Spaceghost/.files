@@ -1,4 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-curl -s https://spacegho.st/~/cloud-init/devbuntu.mdns.config.yml | tee >(less) | lxc launch ubuntu: dev
-lxc exec dev -- tail -F /var/log/cloud-init-output.log
+name="${1:-dev}"
+image="${LXD_IMAGE:-ubuntu:24.04}"
+config_url="${DOTFILES_DEV_CONFIG_URL:-https://raw.githubusercontent.com/Spaceghost/.files/base/cloud-init/devbuntu.mdns.config.yml}"
+
+if ! command -v lxc >/dev/null 2>&1; then
+  printf 'lxc is required; install the Brewfile or your distro package first\n' >&2
+  exit 127
+fi
+
+if lxc info "$name" >/dev/null 2>&1; then
+  printf 'instance %s already exists; refusing to replace it\n' "$name" >&2
+  exit 1
+fi
+
+printf 'launching %s from %s\n' "$name" "$image"
+curl -fsSL "$config_url" | lxc launch "$image" "$name"
+
+printf 'waiting for cloud-init\n'
+lxc exec "$name" -- cloud-init status --wait
+printf 'ready: ssh %s\n' "$name"
