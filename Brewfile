@@ -4,6 +4,7 @@ tap "homebrew/core"
 # Base
 brew "tmux"
 brew "zsh"
+brew "neovim"
 
 # Files
 brew "rclone"
@@ -13,9 +14,11 @@ brew "rclone"
 brew "htop"
 brew "neofetch"
 brew "ripgrep"
+brew "jq"
 
 # Libraries
 brew "libffi"
+brew "openssl@3"
 
 # Dev
 brew "git"

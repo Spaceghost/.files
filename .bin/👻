@@ -1,5 +1,11 @@
-#!/bin/bash
-function 👻() {
-  asdf plugin add ruby
-}
-👻
+#!/usr/bin/env sh
+set -eu
+
+if ! command -v asdf >/dev/null 2>&1; then
+  printf 'asdf is required; run brew bundle first\n' >&2
+  exit 127
+fi
+
+if ! asdf plugin list | grep -qx ruby; then
+  asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
+fi
