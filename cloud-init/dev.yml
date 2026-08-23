@@ -1,0 +1,43 @@
+#cloud-config
+hostname: dev
+manage_etc_hosts: true
+
+package_update: true
+package_upgrade: true
+packages:
+  - avahi-daemon
+  - build-essential
+  - curl
+  - fzf
+  - git
+  - htop
+  - jq
+  - libnss-mdns
+  - neovim
+  - openssh-server
+  - ripgrep
+  - ssh-import-id
+  - tmux
+  - zsh
+
+users:
+  - default
+  - name: jack
+    groups: [adm, sudo]
+    lock_passwd: true
+    shell: /usr/bin/zsh
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_import_id:
+      - gh:Spaceghost
+
+disable_root: true
+ssh_pwauth: false
+ssh:
+  emit_keys_to_console: false
+
+runcmd:
+  - [systemctl, enable, --now, avahi-daemon]
+  - [su, -, jack, -c, "git clone --depth=1 https://github.com/Spaceghost/.files.git /home/jack/.files"]
+  - [su, -, jack, -c, "/home/jack/.files/install"]
+
+final_message: devbox ready
