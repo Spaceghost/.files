@@ -1,0 +1,17 @@
+# Known-good deployment composed on Fedora Sway Atomic 44.20260825.0.
+# Base commit: 81975beed4ef41633fa720a04c8cb9e20c183a4a535b57eceee527a7cd607d96
+SwayNotificationCenter 0:0.12.6-1.fc44.x86_64
+gtklock 0:4.0.0-3.fc44.x86_64
+jetbrains-mono-fonts 0:2.304-10.fc44.noarch
+nushell 0:0.99.1-8.fc44.x86_64
+nwg-bar 0:0.1.6-10.fc44.x86_64
+nwg-dock 0:0.4.1-10.fc44.x86_64
+nwg-drawer 0:0.4.9-2.fc42.x86_64
+nwg-panel 0:0.10.5-6.fc44.noarch
+papirus-icon-theme 0:20250501-2.fc44.noarch
+wlogout 0:1.2.2-5.fc44.x86_64
+
+# User-local compositor/runtime pins.
+swayfx 0.5.3 commit 660c119
+scenefx 0.4.1 COPR build 10699112
+

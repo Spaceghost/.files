@@ -1,0 +1,28 @@
+# SwayFX is a strict visual overlay over the same functional Sway config.
+include ~/.config/sway/config
+
+corner_radius 12
+blur enable
+blur_xray disable
+blur_passes 2
+blur_radius 3
+blur_noise 0.02
+blur_brightness 0.92
+blur_contrast 0.95
+blur_saturation 1.08
+shadows enable
+shadows_on_csd enable
+shadow_blur_radius 24
+shadow_color #00000088
+shadow_inactive_color #00000055
+shadow_offset 0 6
+default_dim_inactive 0.04
+
+layer_effects "waybar" {
+    blur enable
+    blur_xray enable
+    blur_ignore_transparent enable
+    shadows enable
+    corner_radius 16
+}
+

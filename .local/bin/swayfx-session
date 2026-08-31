@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+swayfx_root="${SWAYFX_ROOT:-$HOME/.local/opt/swayfx}"
+swayfx_bin="$swayfx_root/bin/sway"
+
+if [[ ! -x "$swayfx_bin" ]]; then
+  printf 'SwayFX is not installed at %s. Run ~/dotfiles/build-swayfx.sh first.\n' "$swayfx_bin" >&2
+  exit 127
+fi
+
+export LD_LIBRARY_PATH="$swayfx_root/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$swayfx_bin" --config "$HOME/.config/swayfx/config" "$@"
+

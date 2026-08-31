@@ -1,0 +1,65 @@
+@define-color base #1e1e2e;
+@define-color mantle #181825;
+@define-color crust #11111b;
+@define-color text #cdd6f4;
+@define-color subtext #a6adc8;
+@define-color surface #313244;
+@define-color overlay #45475a;
+@define-color blue #89b4fa;
+@define-color mauve #cba6f7;
+@define-color green #a6e3a1;
+@define-color yellow #f9e2af;
+@define-color red #f38ba8;
+
+* {
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+  font-family: "Adwaita Sans", "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+window#waybar {
+  background: alpha(@mantle, 0.90);
+  color: @text;
+  border: 1px solid alpha(@overlay, 0.68);
+  border-radius: 16px;
+}
+
+tooltip {
+  background: @base;
+  color: @text;
+  border: 1px solid @overlay;
+  border-radius: 12px;
+}
+
+tooltip label { padding: 6px; }
+
+#custom-launcher, #custom-power, #custom-notification, #custom-remote-sessions,
+#idle_inhibitor, #pulseaudio, #network, #cpu, #memory, #battery, #clock, #tray,
+#mode, #scratchpad, #window {
+  padding: 0 10px;
+  margin: 5px 2px;
+  background: alpha(@surface, 0.72);
+  border-radius: 11px;
+}
+
+#custom-launcher { color: @mauve; padding: 0 13px; }
+#custom-power { color: @red; padding: 0 13px; margin-right: 5px; }
+#custom-notification { color: @blue; }
+#custom-remote-sessions.connected { color: @yellow; }
+#pulseaudio { color: @green; }
+#network { color: @blue; }
+#battery { color: @yellow; }
+#battery.charging { color: @green; }
+#battery.critical:not(.charging) { color: @red; }
+#clock { color: @mauve; }
+#window { color: @subtext; padding: 0 16px; }
+
+#workspaces { margin: 5px 2px; padding: 0 4px; background: alpha(@surface, 0.72); border-radius: 11px; }
+#workspaces button { color: @subtext; padding: 0 8px; margin: 3px 1px; border-radius: 8px; }
+#workspaces button:hover { background: @overlay; color: @text; }
+#workspaces button.focused, #workspaces button.active { background: @blue; color: @crust; }
+#workspaces button.urgent { background: @red; color: @crust; }
+

@@ -1,0 +1,40 @@
+configuration {
+  modi: "drun,run,window";
+  show-icons: true;
+  display-drun: "Apps";
+  display-run: "Run";
+  display-window: "Windows";
+  drun-display-format: "{name}";
+  font: "Adwaita Sans 12";
+}
+
+* {
+  bg: #1e1e2eee;
+  bg-alt: #313244dd;
+  fg: #cdd6f4ff;
+  muted: #a6adc8ff;
+  accent: #89b4faff;
+  urgent: #f38ba8ff;
+  background-color: transparent;
+  text-color: @fg;
+}
+
+window {
+  width: 42%;
+  border: 2px;
+  border-color: @accent;
+  border-radius: 18px;
+  background-color: @bg;
+  padding: 18px;
+}
+
+mainbox { spacing: 14px; }
+inputbar { children: [prompt, entry]; background-color: @bg-alt; border-radius: 12px; padding: 12px 16px; }
+prompt { text-color: @accent; padding: 0 10px 0 0; }
+entry { placeholder: "Search applications…"; placeholder-color: @muted; }
+listview { lines: 8; columns: 1; fixed-height: false; spacing: 5px; }
+element { padding: 10px 12px; border-radius: 10px; }
+element selected { background-color: @accent; text-color: #11111bff; }
+element-icon { size: 24px; margin: 0 12px 0 0; }
+element-text { vertical-align: 0.5; }
+

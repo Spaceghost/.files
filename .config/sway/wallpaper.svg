@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="22%" r="76%">
+      <stop offset="0" stop-color="#89b4fa" stop-opacity=".30"/>
+      <stop offset=".42" stop-color="#cba6f7" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#11111b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#11111b"/>
+      <stop offset=".55" stop-color="#181825"/>
+      <stop offset="1" stop-color="#1e1e2e"/>
+    </linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="70"/></filter>
+  </defs>
+  <rect width="2560" height="1440" fill="url(#base)"/>
+  <rect width="2560" height="1440" fill="url(#glow)"/>
+  <circle cx="2070" cy="190" r="390" fill="#89b4fa" opacity=".09" filter="url(#blur)"/>
+  <circle cx="390" cy="1320" r="430" fill="#f5c2e7" opacity=".08" filter="url(#blur)"/>
+  <path d="M-120 1160 C460 850 700 1240 1210 920 S2060 520 2720 760" fill="none" stroke="#cba6f7" stroke-opacity=".10" stroke-width="3"/>
+  <path d="M-100 1210 C470 910 760 1290 1250 970 S2100 590 2700 810" fill="none" stroke="#89b4fa" stroke-opacity=".14" stroke-width="2"/>
+</svg>
+

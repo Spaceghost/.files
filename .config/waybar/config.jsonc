@@ -1,0 +1,98 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 38,
+  "margin-top": 8,
+  "margin-left": 12,
+  "margin-right": 12,
+  "spacing": 6,
+
+  "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode", "sway/scratchpad"],
+  "modules-center": ["sway/window"],
+  "modules-right": ["custom/remote-sessions", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "battery", "clock", "custom/notification", "tray", "custom/power"],
+
+  "custom/launcher": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "rofi -show drun",
+    "on-click-right": "sh -lc 'command -v nwg-drawer >/dev/null && nwg-drawer'"
+  },
+  "sway/workspaces": {
+    "disable-scroll": false,
+    "all-outputs": true,
+    "format": "{icon}",
+    "format-icons": {
+      "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
+      "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
+      "urgent": "", "focused": "", "default": ""
+    }
+  },
+  "sway/window": {
+    "format": "{title}",
+    "max-length": 56,
+    "rewrite": {"(.*) — Mozilla Firefox": "$1"}
+  },
+  "sway/mode": {"format": "󰌌  {}"},
+  "sway/scratchpad": {
+    "format": " {count}",
+    "show-empty": false,
+    "tooltip": true,
+    "tooltip-format": "{app}: {title}"
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {"activated": "", "deactivated": ""}
+  },
+  "pulseaudio": {
+    "scroll-step": 3,
+    "format": "{icon} {volume}%",
+    "format-muted": "",
+    "format-bluetooth": " {volume}%",
+    "format-icons": {"headphone": "", "default": ["", "", ""]},
+    "on-click": "pavucontrol"
+  },
+  "network": {
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰖪",
+    "tooltip-format": "{ifname}  {ipaddr}/{cidr}\n{essid}"
+  },
+  "cpu": {"format": " {usage}%", "interval": 3},
+  "memory": {"format": " {percentage}%", "interval": 3},
+  "battery": {
+    "states": {"warning": 30, "critical": 15},
+    "format": "{icon} {capacity}%",
+    "format-charging": " {capacity}%",
+    "format-icons": ["", "", "", "", ""]
+  },
+  "clock": {
+    "format": "  {:%H:%M}",
+    "format-alt": "  {:%a, %b %d}",
+    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+  },
+  "custom/notification": {
+    "tooltip": true,
+    "format": "{0} {icon}",
+    "format-icons": {"notification": "", "none": "", "dnd-notification": "", "dnd-none": ""},
+    "return-type": "json",
+    "exec-if": "command -v swaync-client",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+  "custom/remote-sessions": {
+    "exec": "~/.local/bin/waybar-remote-sessions",
+    "return-type": "json",
+    "interval": 2,
+    "hide-empty-text": true,
+    "tooltip": true
+  },
+  "tray": {"icon-size": 17, "spacing": 9},
+  "custom/power": {
+    "format": "",
+    "tooltip": false,
+    "on-click": "~/.local/bin/desktop-power-menu"
+  }
+}
+

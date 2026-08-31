@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if command -v wlogout >/dev/null; then
+  exec wlogout
+elif command -v nwg-bar >/dev/null; then
+  exec nwg-bar
+else
+  exec swaynag -t warning -m 'End this session?' -B 'Logout' 'swaymsg exit'
+fi
+

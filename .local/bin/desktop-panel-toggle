@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+start_waybar() {
+  pkill -x nwg-panel 2>/dev/null || true
+  pgrep -xu "$USER" waybar >/dev/null || nohup waybar >/dev/null 2>&1 &
+}
+
+start_nwg() {
+  pkill -x waybar 2>/dev/null || true
+  pgrep -xu "$USER" nwg-panel >/dev/null || nohup nwg-panel >/dev/null 2>&1 &
+}
+
+case "${1:-toggle}" in
+  waybar) start_waybar ;;
+  nwg) start_nwg ;;
+  toggle)
+    if pgrep -xu "$USER" waybar >/dev/null; then start_nwg; else start_waybar; fi
+    ;;
+  *) printf 'usage: %s [waybar|nwg|toggle]\n' "$0" >&2; exit 2 ;;
+esac
+

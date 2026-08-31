@@ -1,0 +1,4 @@
+# Fedora owns the durable base configuration.  User snippets below are tracked
+# in this repository and loaded by Fedora's layered-include helper.
+include /etc/sway/config
+
