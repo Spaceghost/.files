@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -u
+
+kind="${1:-}"
+
+case "$kind" in
+    dropdown)
+        app_id="sway-dropdown-terminal"
+        launch=(foot --config="$HOME/.config/foot/dropdown.ini")
+        ;;
+    htop)
+        app_id="sway-htop"
+        launch=(foot --app-id="$app_id" --title="htop" htop)
+        ;;
+    *)
+        echo "usage: ${0##*/} {dropdown|htop}" >&2
+        exit 2
+        ;;
+esac
+
+window_exists() {
+    swaymsg --raw --type get_tree |
+        jq --exit-status --arg app_id "$app_id" \
+            '.. | objects | select(.app_id? == $app_id)' >/dev/null
+}
+
+if window_exists; then
+    exec swaymsg --quiet "[app_id=\"$app_id\"] scratchpad show"
+fi
+
+"${launch[@]}" >/dev/null 2>&1 &
+
+# Put the newly mapped window in Sway's scratchpad, then reveal it. Waiting for
+# its app-id avoids depending on foot startup speed.
+for _ in {1..40}; do
+    if window_exists; then
+        swaymsg --quiet "[app_id=\"$app_id\"] move scratchpad"
+        exec swaymsg --quiet "[app_id=\"$app_id\"] scratchpad show"
+    fi
+    sleep 0.05
+done
+
+exit 1

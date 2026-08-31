@@ -9,6 +9,8 @@ A shared, rollback-friendly Fedora Sway configuration with a Catppuccin-inspired
 - `~/.config/swayfx/config` includes the normal Sway configuration, then adds blur, shadows, rounded corners, and layer-shell effects.
 - Waybar is the default panel. Press `Mod+Shift+B` to toggle between Waybar and nwg-panel.
 - Rofi is `Mod+D`; nwg-drawer is `Mod+Shift+D`; notifications are `Mod+N`; the power menu is `Mod+Shift+E`.
+- `Mod+grave` toggles a transparent drop-down Foot terminal; `Mod+Shift+grave` toggles an `htop` popup.
+- `Mod+Shift+L` locks directly. A supervised Swayidle service also locks after five minutes and powers the display down after six.
 - Nushell is installed and configured, but Bash remains the login shell.
 - `packages/fedora-atomic.lock` records the exact known-good base commit, RPM versions, and SwayFX/scenefx source pins.
 

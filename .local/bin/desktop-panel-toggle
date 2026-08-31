@@ -3,20 +3,37 @@ set -euo pipefail
 
 start_waybar() {
   pkill -x nwg-panel 2>/dev/null || true
-  pgrep -xu "$USER" waybar >/dev/null || nohup waybar >/dev/null 2>&1 &
+  swaymsg --quiet bar mode dock bar-0
 }
 
 start_nwg() {
-  pkill -x waybar 2>/dev/null || true
+  command -v nwg-panel >/dev/null || {
+    printf 'desktop-panel-toggle: nwg-panel is not installed\n' >&2
+    return 1
+  }
+  swaymsg --quiet bar mode invisible bar-0
   pgrep -xu "$USER" nwg-panel >/dev/null || nohup nwg-panel >/dev/null 2>&1 &
+}
+
+toggle_waybar() {
+  local mode
+  mode="$(swaymsg -t get_bar_config bar-0 | jq -r '.mode // "dock"')"
+  if [[ "$mode" == "invisible" ]]; then
+    start_waybar
+  else
+    swaymsg --quiet bar mode invisible bar-0
+  fi
 }
 
 case "${1:-toggle}" in
   waybar) start_waybar ;;
   nwg) start_nwg ;;
   toggle)
-    if pgrep -xu "$USER" waybar >/dev/null; then start_nwg; else start_waybar; fi
+    if command -v nwg-panel >/dev/null; then
+      if pgrep -xu "$USER" nwg-panel >/dev/null; then start_waybar; else start_nwg; fi
+    else
+      toggle_waybar
+    fi
     ;;
   *) printf 'usage: %s [waybar|nwg|toggle]\n' "$0" >&2; exit 2 ;;
 esac
-

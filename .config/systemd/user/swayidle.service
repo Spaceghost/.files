@@ -1,0 +1,14 @@
+[Unit]
+Description=Idle manager and lock dispatcher for Sway
+Documentation=man:swayidle(1)
+PartOf=sway-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w timeout 300 '%h/.local/bin/desktop-lock' timeout 360 '/usr/bin/swaymsg "output * power off"' resume '/usr/bin/swaymsg "output * power on"' before-sleep '%h/.local/bin/desktop-lock' lock '%h/.local/bin/desktop-lock' unlock '/usr/bin/swaymsg "output * power on"'
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=sway-session.target

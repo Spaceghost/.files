@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# --daemonize returns only after the lock surface is ready. If another
+# swaylock already owns the session-lock protocol, there is nothing to do.
+if /usr/bin/pidof swaylock >/dev/null 2>&1; then
+    exit 0
+fi
+
+exec /usr/bin/swaylock --daemonize

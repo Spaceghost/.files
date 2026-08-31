@@ -1,86 +1,140 @@
 {
+  "name": "command-center",
   "layer": "top",
   "position": "top",
-  "height": 38,
-  "margin-top": 8,
-  "margin-left": 12,
-  "margin-right": 12,
-  "spacing": 6,
+  "height": 46,
+  "margin-top": 4,
+  "margin-left": 14,
+  "margin-right": 14,
+  "spacing": 0,
+  "fixed-center": true,
+  "ipc": true,
+  "reload_style_on_change": true,
+  "on-sigusr2": "reload",
 
-  "modules-left": ["custom/launcher", "sway/workspaces", "sway/mode", "sway/scratchpad"],
-  "modules-center": ["sway/window"],
-  "modules-right": ["custom/remote-sessions", "idle_inhibitor", "pulseaudio", "network", "cpu", "memory", "battery", "clock", "custom/notification", "tray", "custom/power"],
+  "modules-left": [
+    "custom/launcher",
+    "sway/workspaces",
+    "sway/mode",
+    "sway/scratchpad",
+    "sway/window"
+  ],
+  "modules-center": ["mpris", "clock"],
+  "modules-right": [
+    "privacy",
+    "custom/remote-sessions",
+    "group/system",
+    "idle_inhibitor",
+    "pulseaudio",
+    "group/connectivity",
+    "custom/notification",
+    "tray",
+    "custom/power"
+  ],
 
   "custom/launcher": {
     "format": "",
     "tooltip": false,
     "on-click": "rofi -show drun",
+    "on-click-middle": "foot",
     "on-click-right": "sh -lc 'command -v nwg-drawer >/dev/null && nwg-drawer'"
   },
+
   "sway/workspaces": {
-    "disable-scroll": false,
     "all-outputs": true,
-    "format": "{icon}",
+    "disable-scroll": false,
+    "disable-scroll-wraparound": true,
+    "smooth-scrolling-threshold": 4,
+    "warp-on-scroll": false,
+    "format": "{name}",
     "format-icons": {
-      "1": "1", "2": "2", "3": "3", "4": "4", "5": "5",
-      "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
-      "urgent": "", "focused": "", "default": ""
+      "urgent": "",
+      "focused": "",
+      "default": ""
     }
   },
+
   "sway/window": {
     "format": "{title}",
-    "max-length": 56,
-    "rewrite": {"(.*) — Mozilla Firefox": "$1"}
+    "icon": true,
+    "icon-size": 17,
+    "max-length": 68,
+    "rewrite": {
+      "(.*) — Mozilla Firefox": "$1",
+      "(.*) - Mozilla Firefox": "$1",
+      "(.*) — Chromium": "$1",
+      "(.*) - Visual Studio Code": "$1"
+    }
   },
-  "sway/mode": {"format": "󰌌  {}"},
+
+  "sway/mode": {
+    "format": "󰌌  {}"
+  },
+
   "sway/scratchpad": {
     "format": " {count}",
     "show-empty": false,
     "tooltip": true,
     "tooltip-format": "{app}: {title}"
   },
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {"activated": "", "deactivated": ""}
+
+  "mpris": {
+    "format": "{player_icon}  {dynamic}",
+    "format-paused": "{status_icon}  <i>{dynamic}</i>",
+    "tooltip-format": "{player_icon}  {title}\n{artist} — {album}\n{status}  [{position}/{length}]",
+    "dynamic-order": ["title", "artist"],
+    "dynamic-importance-order": ["title", "artist"],
+    "dynamic-separator": "  ·  ",
+    "title-len": 34,
+    "artist-len": 20,
+    "album-len": 24,
+    "dynamic-len": 52,
+    "player-icons": {
+      "default": "",
+      "firefox": "",
+      "chromium": "",
+      "spotify": ""
+    },
+    "status-icons": {
+      "playing": "",
+      "paused": "",
+      "stopped": ""
+    },
+    "on-click": "playerctl play-pause",
+    "on-click-middle": "playerctl previous",
+    "on-click-right": "playerctl next"
   },
-  "pulseaudio": {
-    "scroll-step": 3,
-    "format": "{icon} {volume}%",
-    "format-muted": "",
-    "format-bluetooth": " {volume}%",
-    "format-icons": {"headphone": "", "default": ["", "", ""]},
-    "on-click": "pavucontrol"
-  },
-  "network": {
-    "format-wifi": "  {signalStrength}%",
-    "format-ethernet": "󰈀",
-    "format-disconnected": "󰖪",
-    "tooltip-format": "{ifname}  {ipaddr}/{cidr}\n{essid}"
-  },
-  "cpu": {"format": " {usage}%", "interval": 3},
-  "memory": {"format": " {percentage}%", "interval": 3},
-  "battery": {
-    "states": {"warning": 30, "critical": 15},
-    "format": "{icon} {capacity}%",
-    "format-charging": " {capacity}%",
-    "format-icons": ["", "", "", "", ""]
-  },
+
   "clock": {
-    "format": "  {:%H:%M}",
-    "format-alt": "  {:%a, %b %d}",
-    "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>"
+    "interval": 1,
+    "format": "  {:%a %d %b   %H:%M}",
+    "format-alt": "  {:%H:%M:%S}     {:%Z}",
+    "tooltip-format": "<span size=\"large\" weight=\"bold\">{:%B %Y}</span>\n<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "weeks-pos": "right",
+      "on-scroll": 1,
+      "format": {
+        "months": "<span color=\"#cba6f7\"><b>{}</b></span>",
+        "weekdays": "<span color=\"#89b4fa\"><b>{}</b></span>",
+        "weeks": "<span color=\"#6c7086\">W{}</span>",
+        "days": "<span color=\"#cdd6f4\">{}</span>",
+        "today": "<span color=\"#11111b\" background=\"#89b4fa\"><b> {} </b></span>"
+      }
+    }
   },
-  "custom/notification": {
-    "tooltip": true,
-    "format": "{0} {icon}",
-    "format-icons": {"notification": "", "none": "", "dnd-notification": "", "dnd-none": ""},
-    "return-type": "json",
-    "exec-if": "command -v swaync-client",
-    "exec": "swaync-client -swb",
-    "on-click": "swaync-client -t -sw",
-    "on-click-right": "swaync-client -d -sw",
-    "escape": true
+
+  "privacy": {
+    "icon-spacing": 7,
+    "icon-size": 16,
+    "transition-duration": 180,
+    "modules": [
+      {"type": "screenshare", "tooltip": true, "tooltip-icon-size": 22},
+      {"type": "audio-in", "tooltip": true, "tooltip-icon-size": 22}
+    ],
+    "ignore-monitor": true
   },
+
   "custom/remote-sessions": {
     "exec": "~/.local/bin/waybar-remote-sessions",
     "return-type": "json",
@@ -88,11 +142,153 @@
     "hide-empty-text": true,
     "tooltip": true
   },
-  "tray": {"icon-size": 17, "spacing": 9},
+
+  "group/system": {
+    "orientation": "horizontal",
+    "drawer": {
+      "transition-duration": 220,
+      "transition-left-to-right": false,
+      "children-class": "system-drawer"
+    },
+    "modules": ["cpu", "memory", "temperature", "disk", "power-profiles-daemon"]
+  },
+
+  "cpu": {
+    "interval": 2,
+    "format": "  {usage:>2}%",
+    "tooltip-format": "CPU {usage}%  ·  {avg_frequency:.1f} GHz\nClick for htop",
+    "states": {"warning": 75, "critical": 90},
+    "on-click": "~/.local/bin/sway-popup-terminal htop"
+  },
+
+  "memory": {
+    "interval": 3,
+    "format": "  {percentage}%",
+    "tooltip-format": "Memory {used:0.1f} / {total:0.1f} GiB\nSwap {swapUsed:0.1f} / {swapTotal:0.1f} GiB",
+    "states": {"warning": 75, "critical": 90},
+    "on-click": "~/.local/bin/sway-popup-terminal htop"
+  },
+
+  "temperature": {
+    "hwmon-path": "/sys/class/hwmon/hwmon3/temp1_input",
+    "interval": 3,
+    "critical-threshold": 85,
+    "format": "  {temperatureC}°",
+    "format-critical": "  {temperatureC}°",
+    "tooltip-format": "CPU package: {temperatureC}°C"
+  },
+
+  "disk": {
+    "path": "/var/home/jack",
+    "interval": 30,
+    "format": "  {percentage_used}%",
+    "tooltip-format": "Home storage\n{used} used  ·  {free} free",
+    "states": {"warning": 80, "critical": 92}
+  },
+
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}\nClick to cycle",
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": ""
+    }
+  },
+
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "",
+      "deactivated": ""
+    },
+    "tooltip-format-activated": "Idle lock inhibited",
+    "tooltip-format-deactivated": "Idle lock enabled"
+  },
+
+  "pulseaudio": {
+    "scroll-step": 3,
+    "max-volume": 120,
+    "format": "{icon}  {volume}%",
+    "format-muted": "  muted",
+    "format-bluetooth": "  {volume}%",
+    "format-bluetooth-muted": "  muted",
+    "format-icons": {
+      "headphone": "",
+      "headset": "",
+      "phone": "",
+      "default": ["", "", ""]
+    },
+    "tooltip-format": "{desc}\nScroll to adjust volume",
+    "on-click": "pavucontrol",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+  },
+
+  "group/connectivity": {
+    "orientation": "horizontal",
+    "drawer": {
+      "transition-duration": 180,
+      "transition-left-to-right": false,
+      "children-class": "connectivity-drawer"
+    },
+    "modules": ["network", "bluetooth"]
+  },
+
+  "network": {
+    "interval": 2,
+    "format-wifi": "  {signalStrength}%",
+    "format-ethernet": "",
+    "format-linked": "  …",
+    "format-disconnected": "󰖪",
+    "format-disabled": "",
+    "tooltip-format-wifi": "{essid}  ·  {signalStrength}%\n{ifname}  {ipaddr}/{cidr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+    "tooltip-format-ethernet": "{ifname}  {ipaddr}/{cidr}\nGateway {gwaddr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+    "tooltip-format-disconnected": "Network disconnected",
+    "on-click": "nm-connection-editor"
+  },
+
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "",
+    "format-off": "",
+    "format-no-controller": "",
+    "format-connected": "  {num_connections}",
+    "format-connected-battery": "  {device_battery_percentage}%",
+    "tooltip-format": "{controller_alias}\n{num_connections} connected",
+    "tooltip-format-connected": "{controller_alias}\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "tooltip-format-enumerate-connected-battery": "{device_alias}  {device_battery_percentage}%",
+    "on-click": "blueman-manager"
+  },
+
+  "custom/notification": {
+    "tooltip": true,
+    "format": "{0} {icon}",
+    "format-icons": {
+      "notification": "",
+      "none": "",
+      "dnd-notification": "",
+      "dnd-none": ""
+    },
+    "return-type": "json",
+    "exec": "sh -lc 'if command -v swaync-client >/dev/null; then exec swaync-client -swb; else exec sleep infinity; fi'",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+
+  "tray": {
+    "icon-size": 17,
+    "spacing": 9,
+    "show-passive-items": false
+  },
+
   "custom/power": {
     "format": "",
-    "tooltip": false,
-    "on-click": "~/.local/bin/desktop-power-menu"
+    "tooltip": true,
+    "tooltip-format": "Session controls\nRight-click to lock",
+    "on-click": "~/.local/bin/desktop-power-menu",
+    "on-click-right": "loginctl lock-session"
   }
 }
-
