@@ -21,8 +21,8 @@ tmux source-file ~/.tmux.conf
 swaync-client --reload-css
 ```
 
-Waybar centers the focused-app title and media controls in the space between
-the left and right sections (`"fixed-center": false` in its configuration).
+Waybar places the focused-app title and media controls immediately before the
+right-hand status group; its center module list is empty.
 It watches CSS changes. Its artwork widget preserves left/right/middle
 click and scroll, and adds Command/Super+left-click generation. New terminal
 windows read all Foot settings; the refresh command recolors existing Foot

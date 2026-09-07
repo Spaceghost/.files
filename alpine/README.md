@@ -29,7 +29,8 @@ swaymsg reload
 | Panel modules and appearance | `desktop/.config/waybar/config.jsonc`, `style.css` |
 | Launcher and notifications | `desktop/.config/fuzzel/`, `desktop/.config/swaync/` |
 | Terminals, prompt, editor | `desktop/.config/foot/`, `starship.toml`, `nvim/` |
-| GTK and Qt colours | `desktop/.config/gtk-{3,4}.0/gtk.css`, `theme/spaceghost.conf` |
+| GTK and Qt colours | `desktop/.config/gtk-{3,4}.0/gtk.css`, `desktop/.config/qt6ct/` |
+| Hold-to-help trigger and LXQt palette | `desktop/.config/hold-to-help/config.toml`, `desktop/.local/share/lxqt/palettes/Gruvbox-Dark` |
 | Rotation and generated painting prompts | `wallpapers/gallery.json`, `wallpapers/prompts.json` |
 | Active artwork theme and palette | `themes/current`, `themes/gruvbox-dark.json` |
 | Window titles and borders | `desktop/.config/sway/theme.conf` |
@@ -46,6 +47,9 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
 ## Useful controls
 
 - **Super+Enter / Super+D:** terminal / applications.
+- **Hold Super alone:** contextual shortcut guide; release or press another key
+  to dismiss it. Scroll without moving keyboard focus. The physical Caps Lock
+  trigger is also configurable in [Hold to Help](../projects/hold-to-help/README.md).
 - **Super+Shift+D:** Ghost command deck; the panel's Ghost badge opens it too.
 - **Super+G:** painting picker. **Super+Ctrl+Left/Right:** previous/next painting.
 - **Super+Shift+P:** pause/resume rotation. **Super+Shift+N:** notifications.
@@ -84,6 +88,10 @@ reproduced [SwayFX](packages/swayfx/README.md) and
 bundles, code host, app server, sandbox tools and response proxy are archived;
 [its installer](packages/codex/README.md) uses no npm.
 
+[Hold to Help](packages/hold-to-help/README.md) also ships source and signed
+main/doc APKs with two identical offline builds. It uses the desktop's Qt
+palette, fonts and style; local qt6ct and LXQt settings select Gruvbox Dark.
+
 This provides exact binary package restoration and source rebuilds of the
 custom packages. It does not claim a source compilation of every Alpine
 package or of the upstream Codex bundles. Fresh AI generation is deliberately
@@ -100,7 +108,14 @@ belong to the `video` group for brightness control. There is no disk-erasing ins
 
 ## Security state
 
-OpenSnitch is installed and its custom packet gate passed isolated IPv4/IPv6
-allow/deny and daemon-failure tests. The live gate and radio controller remain
-staged pending their separate integration. A purple indicator is not evidence
-of enforcement. See `security/` and [current verification](PROGRESS.md).
+OpenSnitch and its packet gate are active and enabled for boot. A fresh process
+produced a real interactive prompt; IPv4/IPv6 filtering and fresh Codex access
+passed. Existing saved rules remain in place, so matching connections skip
+prompts. See [interactive verification](security/firewall/interactive-verification.json).
+
+Radio-device permissions now preserve status reads while restricting direct
+writes to root. The full Wi-Fi controller remains staged: exact trusted network
+identities and WPA/DHCP integration still need resolution before activation.
+Existing unrestricted wheel `doas` authority remains unchanged. Follow the
+[radio activation record](security/radio/README.md) for the current scope;
+reboot, suspend and physical RF behavior remain unverified.

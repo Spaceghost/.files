@@ -1,8 +1,8 @@
 # Spaceghost desktop overlay
 
-This is the deployable HOME overlay for the Oldbook Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: deep violet surfaces, magenta highlights, and spectral-white text. It contains no wallpaper, credential, network profile, or machine secret.
+This is the deployable HOME overlay for the Oldbook Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: Gruvbox Dark charcoal surfaces, cream text, and warm amber highlights with Space Ghost artwork. It contains no wallpaper, credential, network profile, or machine secret.
 
-`~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway and swaylock use it when present; the lock screen falls back to solid violet if it is temporarily absent.
+`~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then solid Gruvbox charcoal (`#282828`).
 
 All workspaces now share the same painting and gallery timer. Foot uses 78%
 opacity with 4-pixel padding; Sway keeps a small 4-pixel outer gap. Ghostty is
@@ -26,6 +26,10 @@ array and reload Waybar with SIGUSR2. The top bar remains the first object.
 
 The package snapshot must include `sway`, `swayidle`, `swaylock`, `waybar`, `fuzzel`, `swaync`, `foot`, `zsh`, `starship`, `eza`, `zoxide`, `neovim`, `btop`, `cava`, `grim`, `slurp`, `swappy`, `jq`, `libnotify`, `playerctl`, `pavucontrol`, `pipewire`, `pipewire-pulse`, `wireplumber`, `wlsunset`, `polkit-gnome`, `qt6ct`, `adw-gtk3`, and `papirus-icon-theme`. JetBrains Mono and a Nerd Font symbols font provide the intended metrics and icons.
 
+The contextual guide uses the locally packaged `hold-to-help` and its Qt 6,
+layer-shell-qt and keyboard-input dependencies. Its [portable guide](../../projects/hold-to-help/README.md)
+documents desktop support and exact build requirements.
+
 `oldbook-session` deliberately owns session services once per current UID. On every Sway reload it checks the existing Waybar, SwayNC, Swayidle, PipeWire, WirePlumber, Pulse, and polkit-agent processes before starting anything. This avoids reliance on the release-dependent `/usr/libexec/pipewire-launcher` behavior and prevents duplicate panels, idle daemons, color processes, or authentication agents.
 
 Start a new session through `oldbook-sway`, which wraps Sway in `dbus-run-session` when no session bus is already present. For a pre-existing Sway process that lacks `DBUS_SESSION_BUS_ADDRESS`, `oldbook-session` uses the user runtime bus when available or starts a user-local bus and passes it to the desktop services it launches. It never uses the systemd-specific `dbus-update-activation-environment --systemd` path because this is an OpenRC setup.
@@ -47,6 +51,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Control | Action |
 | --- | --- |
 | `Super+Enter`, `Super+D` | Foot terminal, Spaceghost application menu |
+| Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
 | `Super+Escape` | Lock with the installed `swaylockd` PAM-compatible binary |
 | `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot |
 | Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback |
@@ -54,7 +59,14 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Click the panel audio icon | Open pavucontrol |
 | Click the notification glyph | Toggle the Spaceghost notification center |
 | Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
+| Shift + left click the artwork icon | Edit shared artwork guidance and scene prompts |
 | `Caps Lock` | Escape (including with Shift); the original Escape key still works |
+
+The shortcut guide starts through `sway/local.d/shortcuts.conf` and stays hidden
+while the session is locked or inactive. It combines Sway bindings with relevant
+application profiles; profiles are useful baselines, not exhaustive shortcut lists.
+`oldbook-shortcuts status` reports its state. The default trigger remains Super,
+so Caps Lock retains its Escape behavior and notification indicator.
 
 The artwork icon keeps its original controls and tooltip: left click next,
 right click gallery, middle click pause, and scroll previous/next. Its small
