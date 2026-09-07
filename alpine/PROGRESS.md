@@ -447,3 +447,22 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   and existing grants preserved. Super remains selected pending trigger preference;
   physical Caps support is available. Public source location and maintainer contact
   are still required before distro submission; no publication was performed.
+
+## Gallery hover instructions
+
+- Fixed an unescaped ampersand in the generation instruction that made GTK
+  reject the entire tooltip. All plain control text is now escaped at the
+  Pango boundary, alongside title, story, collection and generation status.
+- Restored Space Ghost control-room wording, Moltar/Zorak rotation comments,
+  every original mouse gesture and both added modifier-click instructions.
+  The live symlinked helper refreshes automatically; no package rebuild or
+  bar restart is needed.
+- All 12 artwork tests pass. The regression parses actual Pango markup in
+  rotating/paused × idle/generating states and verifies visible literal text.
+  Real private-compositor hover rendering and independent review pass;
+  screenshot/evidence: `verification/waybar-art-tooltip.{png,json}`.
+- The broad suite passed 252 of 254 tests. Its two shortcut-status failures
+  also reproduce in the unchanged committed checkout (17 of 19 shortcut
+  service tests pass). They remain outside this tooltip fix. Physical hover
+  on the active display was not injected; native verification uses a private
+  virtual pointer and makes no generation requests.

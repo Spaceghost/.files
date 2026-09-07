@@ -41,6 +41,19 @@ package and restarting Waybar. `verification.json` records two-build hashes.
 
 ## Verify
 
+Check real hover tooltips from the production status helper, including rotating,
+paused and generating states:
+
+```sh
+alpine/packages/waybar-art/verify-tooltip-headless \
+    --helper "$HOME/.local/bin/oldbook-wallpaper" --output /tmp/waybar-art-tooltips
+```
+
+This uses a private HOME and compositor, moves only a private virtual pointer,
+and saves popup screenshots. It never requests generation. The Python artwork
+tests also parse the complete tooltip with Pango: a raw ampersand in an
+instruction used to invalidate the entire popup despite passing text-only tests.
+
 ```sh
 alpine/packages/waybar-art/verify-headless --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-art-test
 ```

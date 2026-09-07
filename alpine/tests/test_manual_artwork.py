@@ -214,21 +214,40 @@ class ManualArtworkTests(unittest.TestCase):
             self.assertTrue(art.read_state()['paused'])
             self.assertEqual(art.read_state()['next_at'], 6200)
 
-    def test_busy_tooltip_keeps_the_original_click_and_scroll_help(self):
-        for busy in (None, {'title': 'New painting'}):
-            output = io.StringIO()
-            with self.subTest(busy=busy), mock.patch.object(art, 'read_state', return_value={
-                    'title': 'A <painting>', 'description': 'Its story', 'paused': True}), \
-                    mock.patch.object(art, 'generation_status', return_value=busy), \
-                    contextlib.redirect_stdout(output):
-                art.status()
-            state = json.loads(output.getvalue())
-            self.assertEqual(state['class'], 'paused' if busy is None else 'generating')
-            for instruction in ('Click: next', 'scroll: browse', 'Middle: pause',
-                                'right: gallery', 'Super+click: generate & switch',
-                                'Shift+click: edit prompts', 'Paused'):
-                self.assertIn(instruction, state['tooltip'])
-            self.assertIn('A &lt;painting&gt;', state['tooltip'])
+    def test_hover_tooltip_renders_full_help_in_every_state(self):
+        import gi
+        gi.require_version('Pango', '1.0')
+        from gi.repository import Pango
+
+        for paused in (False, True):
+            for busy in (None, {'title': 'New <painting> & more'}):
+                with self.subTest(paused=paused, busy=busy):
+                    output = io.StringIO()
+                    with mock.patch.object(art, 'read_state', return_value={
+                            'title': 'A <painting> & its frame',
+                            'description': 'Its story & <literal> details',
+                            'theme_name': 'Gold & <Violet>', 'paused': paused}), \
+                            mock.patch.object(art, 'generation_status', return_value=busy), \
+                            contextlib.redirect_stdout(output):
+                        art.status()
+                    state = json.loads(output.getvalue())
+                    self.assertEqual(state['class'], 'generating' if busy else
+                                     'paused' if paused else 'rotating')
+                    try:
+                        valid, _attributes, visible, _accelerator = Pango.parse_markup(
+                            state['tooltip'], -1, '\0')
+                    except Exception as error:
+                        self.fail(f'Tooltip cannot render in GTK: {error}')
+                    self.assertTrue(valid)
+                    for instruction in ('Click: next', 'scroll: browse', 'Middle: pause',
+                                        'right: gallery', 'Super+click: generate & switch',
+                                        'Shift+click: edit prompts'):
+                        self.assertIn(instruction, visible)
+                    for value in ('A <painting> & its frame', 'Its story & <literal> details',
+                                  'Gold & <Violet>', 'Paused' if paused else 'Changes every'):
+                        self.assertIn(value, visible)
+                    if busy:
+                        self.assertIn(busy['title'], visible)
 
 
 if __name__ == '__main__':

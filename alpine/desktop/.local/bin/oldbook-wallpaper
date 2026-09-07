@@ -256,13 +256,20 @@ def status():
     state = read_state()
     title = state.get('title', 'Space Ghost gallery')
     minutes = max(1, int(state.get('interval_seconds', 1200)) // 60)
-    mode = 'Paused' if state.get('paused') else f'Changes every {minutes} minutes'
-    tooltip = '<b>' + html.escape(title) + '</b>\n' + html.escape(state.get('description', ''))
-    tooltip += '\n\n' + mode + '\nClick: next · scroll: browse\nMiddle: pause · right: gallery'
-    tooltip += '\nCommand/Super+click: generate & switch'
-    tooltip += '\nShift+click: edit prompts'
+    mode = ('Paused · Moltar is holding this frame.' if state.get('paused') else
+            f'Changes every {minutes} minutes · Zorak runs the projector.')
+    tooltip = '<b>SPACE GHOST · GHOST GALLERY</b>\n\n'
+    tooltip += '<b>' + html.escape(title) + '</b>\n' + html.escape(state.get('description', ''))
+    tooltip += '\n\n' + html.escape(mode)
     if state.get('theme_name'):
         tooltip += '\nCollection: ' + html.escape(state['theme_name'])
+    # GTK consumes Pango markup, so instructions need escaping just like titles.
+    controls = ('Click: next · scroll: browse (↑ previous / ↓ next)\n'
+                'Middle: pause/resume · right: gallery & themes\n'
+                'Command/Super+click: generate & switch\n'
+                'Shift+click: edit prompts · “Zorak, fix the script!”\n'
+                'Modified clicks use the left button.')
+    tooltip += '\n\n<b>YOUR CONTROL ROOM</b>\n' + html.escape(controls)
     busy = generation_status()
     if busy is not None:
         tooltip = '<b>Space Ghost is painting…</b>\n' + html.escape(busy.get('title', 'New artwork')) + '\n\n' + tooltip
