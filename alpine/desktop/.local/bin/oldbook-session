@@ -109,7 +109,21 @@ fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
 fi
+# Keeps GTK loaded so the show-desktop swipe starts moving immediately; it holds
+# a per-session lock and exits with Sway, so a reload cannot stack copies.
+if command -v oldbook-showdesktop >/dev/null 2>&1; then
+    oldbook-showdesktop daemon 9>&- >>"$art_state/showdesktop.log" 2>&1 &
+fi
 if command -v oldbook-wallpaper >/dev/null 2>&1; then
     oldbook-wallpaper refresh >>"$art_state/wallpaper.log" 2>&1 || true
     oldbook-wallpaper daemon 9>&- >>"$art_state/wallpaper.log" 2>&1 &
+fi
+
+# Desktop panels are refitted to each new wallpaper by oldbook-wallpaper itself.
+if command -v oldbook-conky >/dev/null 2>&1; then
+    oldbook-conky start 9>&- >>"$art_state/conky.log" 2>&1 &
+fi
+# The bar holds its own single-instance lock, so a reload can never stack copies.
+if command -v oldbook-scripture-bar >/dev/null 2>&1; then
+    start_service scripture-bar oldbook-scripture-bar
 fi

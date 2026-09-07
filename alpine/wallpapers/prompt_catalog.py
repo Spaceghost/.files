@@ -14,10 +14,11 @@ import random
 import re
 import uuid
 
-BANKS = ('scenes', 'insertions')
+BANKS = ('scenes', 'insertions', 'mediums')
 SELECTION_MODES = ('rotate', 'random', 'shuffle')
 DEFAULT_MODE = 'shuffle'
-MODE_KEYS = {'scenes': 'scene_selection', 'insertions': 'insertion_selection'}
+MODE_KEYS = {'scenes': 'scene_selection', 'insertions': 'insertion_selection',
+             'mediums': 'medium_selection'}
 LIMITS = {'title': 120, 'description': 4000}
 
 
@@ -105,18 +106,20 @@ class PaintHistory:
         temporary.write_text(json.dumps(document, indent=2) + '\n')
         temporary.replace(self.path)
 
-    def record(self, scene_id, insertion_id, seed=None):
-        self.records.append({'scene': scene_id, 'insertion': insertion_id, 'seed': seed,
+    def record(self, scene_id, insertion_id, medium_id=None, seed=None):
+        self.records.append({'scene': scene_id, 'insertion': insertion_id,
+                             'medium': medium_id, 'seed': seed,
                              'painted_utc': dt.datetime.now(dt.timezone.utc).isoformat()})
 
     def pairs(self):
-        return [(record.get('scene'), record.get('insertion')) for record in self.records]
+        return [(record.get('scene'), record.get('insertion'), record.get('medium'))
+                for record in self.records]
 
     def used(self):
         return set(self.pairs())
 
     def last(self, name):
-        key = 'scene' if name == 'scenes' else 'insertion'
+        key = {'scenes': 'scene', 'insertions': 'insertion', 'mediums': 'medium'}[name]
         for record in reversed(self.records):
             if record.get(key):
                 return record[key]
@@ -133,38 +136,42 @@ def _rotated(items, previous):
     return [items[(start + offset) % len(items)] for offset in range(len(items))]
 
 
-def choose(catalog, history, *, scene_id=None, insertion_id=None, rng=None):
-    """Pick a scene and insertion, preferring a pair the gallery has never painted.
+def choose(catalog, history, *, scene_id=None, insertion_id=None, medium_id=None, rng=None):
+    """Pick a scene, insertion and medium, preferring a set never painted before.
 
-    ``rotate`` walks both banks in order, ``random`` draws freely, and ``shuffle``
-    exhausts every enabled pair before any repeat. When explicit IDs are given they
-    win, and when every pair has been painted the least recently used one returns.
+    ``rotate`` walks a bank in order, ``random`` draws freely, and ``shuffle``
+    exhausts every enabled combination before any repeat. Explicit IDs win, and
+    when everything has been painted the least recently used set returns.
     """
     rng = rng or random
-    scenes = _resolve(catalog, 'scenes', scene_id)
-    insertions = _resolve(catalog, 'insertions', insertion_id) or [None]
-    pairs = [(scene, insertion) for scene in scenes for insertion in insertions]
-    if len(pairs) == 1:
-        return pairs[0]
+    banks = {name: (_resolve(catalog, name, identifier) or [None])
+             for name, identifier in (('scenes', scene_id), ('insertions', insertion_id),
+                                      ('mediums', medium_id))}
+    # A scene that parodies a specific painting carries its own medium, so it is
+    # never paired with one from the bank.
+    combinations = [(scene, insertion, None if (scene or {}).get('fixed_medium') else medium)
+                    for scene in banks['scenes']
+                    for insertion in banks['insertions']
+                    for medium in banks['mediums']]
+    combinations = list({_key(item): item for item in combinations}.values())
+    if len(combinations) == 1:
+        return combinations[0]
     used = history.used()
-    fresh = [pair for pair in pairs if _key(pair) not in used]
-    scene_mode = selection_mode(catalog, 'scenes')
-    insertion_mode = selection_mode(catalog, 'insertions')
-    if scene_mode == 'rotate' or insertion_mode == 'rotate':
-        ordered = _rotation_order(scenes, insertions, history, scene_mode, insertion_mode)
-        preferred = [pair for pair in ordered if _key(pair) in {_key(p) for p in fresh}]
+    fresh = [item for item in combinations if _key(item) not in used]
+    modes = {name: selection_mode(catalog, name) for name in BANKS}
+    if 'rotate' in modes.values():
+        ordered = _rotation_order(banks, history, modes)
+        available = {_key(item) for item in fresh}
+        preferred = [item for item in ordered if _key(item) in available]
         return (preferred or ordered)[0]
-    if fresh and (scene_mode == 'shuffle' or insertion_mode == 'shuffle'):
-        return rng.choice(fresh)
     if fresh:
         return rng.choice(fresh)
     recency = history.last_use_index()
-    return min(pairs, key=lambda pair: recency.get(_key(pair), -1))
+    return min(combinations, key=lambda item: recency.get(_key(item), -1))
 
 
-def _key(pair):
-    scene, insertion = pair
-    return (scene['id'], insertion['id'] if insertion else None)
+def _key(combination):
+    return tuple(entry['id'] if entry else None for entry in combination)
 
 
 def _resolve(catalog, name, identifier):
@@ -177,28 +184,37 @@ def _resolve(catalog, name, identifier):
     return [chosen]
 
 
-def _rotation_order(scenes, insertions, history, scene_mode, insertion_mode):
-    scene_order = (_rotated(scenes, history.last('scenes')) if scene_mode == 'rotate'
-                   else list(scenes))
-    insertion_order = (_rotated([i for i in insertions if i], history.last('insertions'))
-                       if insertion_mode == 'rotate' and any(insertions) else list(insertions))
-    return [(scene, insertion) for scene in scene_order for insertion in (insertion_order or [None])]
+def _rotation_order(banks, history, modes):
+    ordered = {}
+    for name, items in banks.items():
+        present = [item for item in items if item]
+        if modes[name] == 'rotate' and present:
+            ordered[name] = _rotated(present, history.last(name))
+        else:
+            ordered[name] = items
+    combinations = [(scene, insertion, None if (scene or {}).get('fixed_medium') else medium)
+                    for scene in ordered['scenes']
+                    for insertion in ordered['insertions']
+                    for medium in ordered['mediums']]
+    return list({_key(item): item for item in combinations}.values())
 
 
 def variation_seed():
     return uuid.uuid4().hex
 
 
-def compose_prompt(catalog, theme, scene, insertion, seed):
-    """Build the exact painting request, recorded verbatim in the artwork sidecar."""
+def compose_prompt(catalog, theme, scene, insertion, medium, seed):
+    """Build the exact request, recorded verbatim in the artwork sidecar."""
     prompt = catalog['style']
     if theme.get('image_style'):
         prompt += '\n\nTheme: ' + theme['name'] + '. ' + theme['image_style']
-    prompt += '\n\nScene: ' + scene['description']
+    if medium:
+        prompt += '\n\nMedium and treatment: ' + medium['description']
+    prompt += '\n\nSubject: ' + scene['description']
     if insertion:
         prompt += '\n\nSpace Ghost insertion style: ' + insertion['description']
-    prompt += ('\n\nThis painting joins a long running series. Compose it so it could never be '
-               'mistaken for an earlier version of the same scene: choose a fresh viewpoint, '
+    prompt += ('\n\nThis image joins a long running series. Compose it so it could never be '
+               'mistaken for an earlier version of the same subject: choose a fresh viewpoint, '
                'hour, weather and arrangement of figures rather than repeating an obvious '
                'composition. Variation seed: ' + seed)
     return prompt

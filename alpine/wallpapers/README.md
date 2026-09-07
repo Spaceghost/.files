@@ -55,6 +55,73 @@ multiple daemons, including when no graphical session is available yet.
 workspaces does not change the painting. Previous per-workspace selections remain
 saved but inactive under `~/.local/state/oldbook/wallpaper/workspaces/`.
 
+## Scenes, insertions, mediums and never painting the same thing
+
+`prompts.json` holds three switchable banks. **Scenes** describe the painting;
+**insertions** describe how Space Ghost enters it — a tiny cameo, a stained
+glass saint, a woven tapestry figure, a cast shadow, a kneeling donor portrait,
+marginalia in an illuminated manuscript, or simply interrupting the moment with
+the wrong equipment. One of each is combined for every painting, so the two
+banks multiply into several hundred distinct requests.
+
+**Mediums** decide how the image is actually made, so the gallery is no longer
+all oil paintings: film stills, documentary and large-format photography,
+screenprints, risographs, woodcuts, engravings, watercolour, gouache, matte
+paintings, 3D renders, cyanotypes, tilt-shift, long exposures, aerials and
+stop-motion. A scene that parodies one specific painting carries
+`fixed_medium: true` and is never paired with a medium from the bank.
+
+Each entry has an `enabled` switch, so any of them can be taken out of the
+rotation without deleting its wording. `scene_selection`, `insertion_selection`
+and `medium_selection` choose how the next one is picked:
+
+- `shuffle` (the default) uses every entry before any repeat.
+- `random` draws freely each time.
+- `rotate` walks straight through the list in order.
+
+Whatever the mode, a combination the gallery has already painted is skipped
+while an unpainted one remains, and each request carries a fresh variation seed
+and an instruction to compose the scene so it could not be mistaken for an
+earlier version. Super/Command+click therefore always paints the current theme
+and always paints something new. What has been painted is recorded in
+`~/.local/state/oldbook/wallpaper-generation/history.json`; when every
+combination has been used the least recently painted one returns.
+
+Every sidecar records the scene, the insertion style and the variation seed
+alongside the full prompt. The prompt editor (**Shift+click** on the artwork
+icon) edits both banks and their selection modes on separate tabs.
+
+```sh
+python3 alpine/wallpapers/generate.py --manual --activate
+python3 alpine/wallpapers/generate.py --manual --scene observatory-night --medium cyanotype
+```
+
+## Reverence
+
+The shared guidance carries hard limits that override everything else in a
+request. Space Ghost and his companions are never depicted as Christ, God, the
+Holy Spirit, an angel, a saint or any holy person; they never receive a halo,
+nimbus or devotional attribute, are never the object of veneration or worship,
+and are never shown as clergy performing a sacrament. Scripture, the
+crucifixion, the Mass, the Eucharist, baptism and prayer are never parodied, and
+altars, crucifixes, icons and relics are never props. Where a church or sacred
+art appears it is rendered straight and reverently, and the humour comes only
+from Space Ghost being somewhere he plainly does not belong.
+
+The insertion bank follows the same rule: the stained-glass and commemorative
+styles are explicitly civic rather than ecclesiastical, and the statue and
+marginalia styles state where they may not appear. `test_prompt_catalog.py`
+guards these limits against reappearing.
+
+## Deleting a painting
+
+**Delete this painting permanently** in the gallery actions removes the image
+and its sidecar after asking for confirmation, moving the desktop on to the next
+artwork first so it never points at a missing file. Only generated artwork under
+`alpine/assets/gallery/` can be deleted; curated entries listed in
+`gallery.json` are refused. The removal is staged in Fossil and stays pending
+for review. The same operation without a prompt is `oldbook-wallpaper delete`.
+
 ## Theme collections
 
 New artwork has separate, additive collections:

@@ -42,6 +42,8 @@ bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+d exec ~/.local/bin/oldbook-control
 bindsym $mod+g exec ~/.local/bin/oldbook-wallpaper pick
+bindsym $mod+Shift+g exec ~/.local/bin/oldbook-conky toggle
+bindsym $mod+slash exec ~/.local/bin/oldbook-scripture find
 bindsym $mod+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
 bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
 bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause

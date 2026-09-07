@@ -349,6 +349,13 @@ class PromptEditor:
             'combined with a scene every time, so the same scene never looks the same twice.')
         notebook.append_page(self.insertions.page, Gtk.Label(label='Space Ghost'))
 
+        self.mediums = _Bank(
+            self, 'mediums', 'Medium',
+            'Each medium decides how the image is actually made - oil painting, film still, '
+            'screenprint, cyanotype and so on. Scenes that parody a specific painting keep '
+            'their own medium and ignore this bank.')
+        notebook.append_page(self.mediums.page, Gtk.Label(label='Mediums'))
+
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.status = Gtk.Label(
             label='Edits apply to future paintings and new theme designs.')
@@ -387,7 +394,7 @@ class PromptEditor:
         editor.get_buffer().set_text(value)
 
     def save(self, _button):
-        for bank in (self.scenes, self.insertions):
+        for bank in (self.scenes, self.insertions, self.mediums):
             bank.store()
             bank.commit_mode()
         self.document.set_style(self._text(self.style_view))

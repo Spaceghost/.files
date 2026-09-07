@@ -87,9 +87,15 @@ so `Jude 4` and `3 John 4` resolve the way they are normally written. With
 nothing selected the desktop shows the reflection for the day, which walks the
 whole set in turn.
 
-The search bar rests on the desktop layer and takes the keyboard only when
-clicked or summoned. Typing searches the reflections by figure and the verse
-text by words; Enter or a click sets what the desktop panel shows.
+**Super+/** opens the scripture picker: every reflection and all 31,102 verses
+in one type-to-filter list, which takes focus properly over any window. The bar
+resting on the desktop opens the same picker when clicked.
+
+A layer-shell surface only holds the keyboard while the compositor grants it,
+which made an in-place text entry unreliable, so the bar is a button rather than
+a field. Selecting a passage writes it to a small state file; the panel picks it
+up on its own two-second poll. Nothing signals Conky, because Conky treats
+SIGUSR1 as *reload configuration* and that visibly restarts every panel.
 
 ## Coast to Coast notebook
 

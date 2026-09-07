@@ -169,8 +169,10 @@ class ThemedArtworkTests(unittest.TestCase):
         selected_options = []
         def menu(command, **kwargs):
             options = kwargs['input'].splitlines()
-            self.assertTrue(options[0].startswith('01  legacy'))
-            self.assertIn('Space Ghost', options[0])
+            if 'Gallery actions…' in options:
+                self.assertTrue(options[0].startswith('01  legacy'))
+                self.assertIn('Space Ghost', options[0])
+                return subprocess.CompletedProcess(command, 0, 'Gallery actions…\n', '')
             for text in ('Next artwork', 'Previous artwork', 'Pause / resume rotation',
                          'Help & gallery controls', 'Open command deck', 'Generate new artwork'):
                 self.assertTrue(any(text in option for option in options), text)

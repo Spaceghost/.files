@@ -78,6 +78,7 @@ class NewThemeTests(unittest.TestCase):
         phrase = 'Moon books; $(touch /tmp/nope)'
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
                 mock.patch.object(art.subprocess, 'run', side_effect=[
+                    CompletedProcess([], 0, 'Gallery actions…\n', ''),
                     CompletedProcess([], 0, '✦  New theme from a phrase/title\n', ''),
                     CompletedProcess([], 0, phrase + '\n', '')]), \
                 mock.patch.object(art, 'start_generation') as start:

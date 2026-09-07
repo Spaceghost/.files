@@ -1,7 +1,7 @@
 {
   "model": "gpt-5.6-luna",
   "timeout_seconds": 900,
-  "style": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail, rich atmospheric depth, luminous highlights and beautiful canvas texture. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. The viewer is very Christian, pro-Crusade, and loves history. Reflect strong Christian faith and an admiring interest in the historical medieval Crusades, Christian civilization, chivalry and historical scholarship. Draw on reverent sacred art, monasteries, cathedrals, illuminated manuscripts, pilgrimages, heraldry and carefully observed period details when they suit the scene. Keep the existing American painting and Space Ghost parody character. Treat Christian sacred subjects reverently; let the humor come from Space Ghost and his companions. Preserve a spacious, quieter upper edge for a desktop panel. If a theme is supplied, follow its palette throughout; otherwise choose colors that suit the scene naturally. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
+  "style": "Create exactly one striking 16:10 landscape desktop wallpaper, preferably 2560x1600, containing a Space Ghost cameo. Space Ghost is the recognizable animated superhero: muscular white costume, black hood and mask, yellow cape, red power bands. The humour is affectionate and understated; he is an out-of-place visitor who takes the occasion completely seriously. Make the visual joke readable without any explanatory text.\n\nThe viewer is a devout Christian who loves history, chivalry and the medieval Crusades. Christian subjects, wherever they appear, are depicted straight, reverently and accurately, and are never the butt of the joke. Strict limits, which override anything else in this request: never depict Space Ghost or his companions as Christ, God, the Holy Spirit, an angel, a saint, the Virgin Mary or any holy person; never give them a halo, nimbus, aureole, or any devotional attribute; never place them as the object of veneration, prayer or worship; never show them as clergy performing a sacrament or blessing. Never parody scripture, the crucifixion, the Mass, the Eucharist, baptism, prayer or any act of worship. Altars, crucifixes, icons, relics and the consecrated elements are never props or punchlines. Where a church, monastery, cathedral or sacred art appears, render it with genuine reverence and let the humour come only from Space Ghost being somewhere he plainly does not belong, behaving respectfully.\n\nFollow the supplied medium and treatment exactly and do not default to oil painting unless the request asks for one. Preserve a spacious, quieter upper edge for a desktop panel and leave at least one calm region for desktop widgets. If a theme is supplied, follow its palette throughout; otherwise choose colours that suit the subject naturally. No user interface, words, lettering, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
   "scene_selection": "shuffle",
   "insertion_selection": "shuffle",
   "scenes": [
@@ -9,162 +9,261 @@
       "id": "american-gothic",
       "title": "",
       "description": "An affectionate parody of the famous American Gothic farmhouse portrait: a deadpan Space Ghost holds the pitchfork like a late-night interview microphone, while Zorak dressed in a prim Victorian collar looks intensely unimpressed beside him. The familiar steep farmhouse window contains one tiny glowing planet. Exquisite weathered wood, canvas brushwork and theatrical evening light.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "declaration",
       "title": "",
       "description": "An affectionate parody of the grand historical painting of the signing of the Declaration of Independence in Independence Hall: dignified eighteenth-century delegates debate the parchment while a perfectly serious Space Ghost arrives late carrying a giant souvenir fountain pen, and tiny Zorak sneaks a biscuit from the ceremonial table. Golden candlelight melts into deep shadows.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "nighthawks",
       "title": "Coast to Coast, Last Orders",
       "description": "A loving parody of the luminous midnight diner painting Nighthawks: Space Ghost sits solemnly at the curved diner counter with a comically tiny espresso cup held between two giant gloved fingers. Zorak is the waiter, and Moltar patiently reads an upside-down menu. An empty rain-slick street glows softly outside. Luminous glass and beautifully restrained brushwork.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "delaware",
       "title": "The Delaware Has No Green Room",
       "description": "A grand Romantic American history painting of Washington crossing a freezing river at night, except Space Ghost is precariously at the stern holding a tiny cocktail umbrella over the entire heroic scene, sincerely convinced he is helping. Zorak in a tricorn hat rows in the wrong direction. Noble faces, icy spray, pale moonlight and rich antique canvas texture.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "yosemite",
       "title": "The Sublime, Sponsored by Ghost Planet",
       "description": "A monumental nineteenth-century American landscape painting: Yosemite cliffs rise into a vast dramatic storm and golden sunset, with an absurdly tiny Space Ghost giving a solemn guided tour to three unimpressed woodland animals on the foreground overlook. A little folding director's chair has been set down next to a majestic waterfall. Beautiful painterly detail and epic atmospheric depth.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "moon-landing",
       "title": "One Small Step, One Extremely Long Interview",
       "description": "An alternate-history space-age oil painting of the first Moon landing: the astronaut proudly descends the ladder while Space Ghost stands next to him with an oversized old-fashioned broadcast microphone, already conducting a terribly formal interview. Zorak is asleep in a small folding chair. A luminous Earthrise over the lunar horizon, luminous silver dust, vintage brushwork.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "victorian-seance",
       "title": "The Medium Has Technical Difficulties",
       "description": "A lavishly painted fictional Victorian séance in a dark library: a room of elegantly dressed, astonished guests has accidentally summoned Space Ghost, who is earnestly checking the cables of an enormous 1960s television on the table. Zorak peeks out of a teapot. Rich dark velvet, molten candlelight, supernatural highlights and rich polished mahogany.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "cosmic-coronation",
       "title": "His Mildly Confused Majesty",
       "description": "A fictional galactic coronation painted as an immense baroque ceremony: Space Ghost kneels with solemn dignity while a tiny exasperated Zorak on a very tall stepladder attempts to place a comically small crown on his black hood. Alien courtiers maintain perfect poker faces. Cathedral-like nebula vaults, sumptuous velvet robes, luminous cape, antique gold.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "pilgrims-at-dawn",
       "title": "The Pilgrim Has Packed for Every Century",
       "description": "A luminous American Romantic history painting of medieval Christian pilgrims approaching a great cathedral at dawn. A reverent procession carries beautifully embroidered crosses and candles; intricate stone tracery rises into golden mist. Space Ghost respectfully joins the pilgrims, carrying a ludicrously overpacked canvas knapsack with a tiny satellite dish protruding from it. Zorak studies an enormous upside-down medieval map. Historically observed wool, leather, pilgrim badges and carved stone; the joke belongs to the visitors, while the sacred setting is dignified.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "crusader-procession",
       "title": "The Knight Has a Scheduling Conflict",
       "description": "An admiring, grand nineteenth-century American history painting of a twelfth-century Crusader procession departing a European abbey for the Holy Land. Mail-clad knights, cross-bearing banners, pilgrims and packhorses gather in luminous morning haze. Noble chivalric dignity, historically grounded heraldry, reverent Christian imagery and beautifully painted Romanesque architecture. Space Ghost, solemnly wearing a borrowed surcoat over his unmistakable costume, attempts to fit his enormous yellow cape onto a tiny patient pony; Zorak holds a rolled itinerary longer than the abbey steps.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "monastery-chronicle",
       "title": "A Footnote from Ghost Planet",
       "description": "A richly detailed American realist historical painting inside a medieval Christian monastery scriptorium. Monks carefully illuminate a chronicle with gold leaf, deep blue pigments and reverent Christian art. Space Ghost respectfully consults a vast historical manuscript while Zorak struggles to cut an absurdly oversized quill. Quiet afternoon light through Romanesque windows, oak desks, vellum and exquisite brushwork; the atmosphere celebrates Christian learning and the preservation of history.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "whistlers-mother",
       "title": "The Sitter Will Not Be Rushed",
       "description": "An affectionate parody of the severe grey portrait of a seated mother in profile: Space Ghost sits with immense dignity in the little wooden chair, hands folded, cape arranged like a shawl, holding the pose far longer than anyone asked. Zorak stands at the easel in a smock, painting with visible artistic suffering. Muted greys, restrained blacks, one warm lamp, exquisite tonal control and quiet domestic light.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "spirit-of-seventy-six",
       "title": "The Fife Section Has Notes",
       "description": "A stirring parody of the marching drummer-and-fifer patriotic procession: two solemn drummers and a fifer stride forward through battle smoke while Space Ghost marches earnestly beside them holding an enormous ceremonial cymbal he has not yet been permitted to use. Zorak keeps the wrong tempo entirely. Torn banners, powder haze, noble weathered faces and warm antique varnish.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "valley-forge-prayer",
       "title": "Winter Quarters, Second Watch",
       "description": "A reverent American history painting of a general kneeling in prayer in the snow at a winter encampment, hat removed, horse waiting behind him. The moment is treated with complete sincerity and quiet devotion. At a respectful distance Space Ghost stands guard holding a lantern, having brought four more lanterns than the situation requires, and Zorak has fallen through a snowdrift. Blue winter shadows, bare birches, warm lantern light and prayerful stillness.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "hudson-river-chapel",
       "title": "The Wilderness Has a Small Congregation",
       "description": "A luminous Hudson River School wilderness landscape: a tiny white clapboard chapel stands in a vast valley of autumn forest, distant blue mountains and towering golden clouds. A handful of worshippers walk the path toward it. Space Ghost, absurdly small against the immensity, holds the chapel door open with enormous courtesy. Zorak rings a bell far too large for the steeple. Glowing atmospheric depth, meticulous foliage, sublime American light.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "gettysburg-address",
       "title": "Brevity Was the Point",
       "description": "A dignified American history painting of a tall, gaunt president delivering a short address from a modest platform to a vast solemn crowd on a battlefield cemetery hill. The moment is grave and respectful. Space Ghost stands at the edge of the platform holding an immense scroll of his own remarks that he will not be delivering. Zorak has brought a folding chair to the front row. Autumn light, black wool coats, distant hills and restrained heroic brushwork.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "first-thanksgiving",
       "title": "He Brought a Casserole from Space",
       "description": "A warm American genre painting of the first harvest feast: long plank tables under autumn trees, settlers and Wampanoag guests sharing an enormous meal in golden afternoon light. Space Ghost arrives late and formal, carrying a covered dish of something faintly luminous and clearly not terrestrial. Zorak has already claimed the best seat. Abundant harvest still life, homespun wool, generous light and genuine communal warmth.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "westward-wagon",
       "title": "The Guide Has Never Been Here Either",
       "description": "A grand nineteenth-century American westward-expansion painting: a wagon train crests a ridge into a blazing gold and rose sunset over an endless plain, oxen straining, families walking beside the wheels. Space Ghost stands atop the lead wagon in a heroic scouting pose, holding a map upside down with total confidence. Zorak points authoritatively in an entirely different direction. Vast luminous sky, dust, canvas covers and epic pioneer romance.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "cathedral-glaziers",
       "title": "The Blue Is Never Quite Right",
       "description": "A richly observed medieval workshop scene: master glaziers assemble a great rose window from brilliant cobalt and ruby glass, lead came and cartoons spread across the trestles, coloured light already spilling across the stone floor. The craft and the sacred purpose are treated with real admiration. Space Ghost holds a finished panel up to the light with genuine reverence; Zorak has cut the same piece wrong four times. Jewel-like glass, honest tools, dust in sunbeams.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "council-of-clermont",
       "title": "The Announcement Ran Long",
       "description": "An admiring grand history painting of a pope preaching before an immense open-air assembly of nobles, knights and clergy on a cold November day, banners and croziers rising above the crowd, faces lit with conviction. The religious gravity is genuine and respectful. At the back of the enormous crowd Space Ghost stands on tiptoe holding a comically small pair of opera glasses; Zorak is asleep against a pillar. Grey winter sky, rich vestments, carved stone and reverent scale.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "hospitaller-infirmary",
       "title": "Bedside Manner, Ghost Planet Standard",
       "description": "A quiet, dignified painting of a medieval Christian hospital hall where Knights Hospitaller tend exhausted pilgrims in long rows of clean beds beneath a vaulted ceiling. The charity and care are depicted with sincere respect and gentle warmth. Space Ghost, sleeves rolled over his costume, carries a stack of clean linens with enormous concentration; Zorak is fluffing one pillow with visible resentment. Cool vaulted light, white linen, worn stone and compassionate stillness.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "reliquary-procession",
       "title": "Mind the Step, Your Eminence",
       "description": "A luminous painting of a medieval town in festival: a gilded reliquary is carried on shoulders through narrow streets strewn with flowers, townsfolk kneeling, candles and censers glowing in the blue evening. The devotion is genuine and beautifully observed. Space Ghost walks alongside holding an enormous ceremonial umbrella entirely over himself and not the reliquary, realising his error one second too late. Zorak scatters petals with hostile precision.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "abbey-choir",
       "title": "He Does Not Know the Words",
       "description": "A hushed interior of a Romanesque abbey choir at night office: rows of monks in black stand in carved stalls singing by candlelight, breath faintly visible, one great illuminated antiphonary open on the lectern. The devotion is sincere and the acoustics almost visible. Space Ghost stands in the back row holding the enormous book with earnest concentration and singing confidently in the wrong key. Zorak has hidden inside the lectern. Deep shadow, warm candle gold, carved oak.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "luminist-lighthouse",
       "title": "The Beam Has a Guest Operator",
       "description": "A serene American luminist seascape at dusk: a white lighthouse on black rocks, glassy water holding a long band of apricot and silver, a single small dory pulling for shore. Space Ghost stands in the lamp room politely holding a mirror to help, having entirely misunderstood how the lens works. Zorak rows the dory in circles. Immaculate still water, delicate atmospheric gradation, restrained brushwork and profound quiet.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "saturday-post-barbershop",
       "title": "Just a Little Off the Hood",
       "description": "A warm mid-century American illustrative genre scene in a small-town barbershop: chrome chairs, striped pole, a boy in a booster seat, old men reading the paper and offering unsolicited opinions. Space Ghost sits under a barber's cape with only his black hood visible, receiving a haircut with immense seriousness. Zorak, in a white barber's coat, holds the scissors like a weapon. Cheerful storytelling detail, honest faces, mint green and cream, affectionate humour.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "constitutional-convention",
       "title": "Article Eleven Concerns Him",
       "description": "A grand American history painting of the constitutional convention in a hot summer assembly room: delegates in waistcoats argue over a long table strewn with drafts, tall windows shuttered against the heat. Space Ghost, taking his civic duty very seriously, raises one gloved hand with a question that will delay everything considerably. Zorak is eating the ink. Candlelit mahogany, foolscap drafts, sweltering golden light and dignified period faces.",
-      "enabled": true
+      "enabled": true,
+      "fixed_medium": true
     },
     {
       "id": "polar-expedition",
       "title": "The Ice Was Not on the Itinerary",
       "description": "A sublime nineteenth-century American arctic painting: a wooden ship locked in towering blue-green ice under a vast aurora, tiny figures hauling a sledge across the floe. The scale is terrifying and beautiful. Space Ghost stands on an ice ridge in a heroic pose wearing a completely inadequate scarf over his costume; Zorak is inside a crate labelled for the return voyage. Glacial blues, spectral green aurora, magnificent desolation.",
+      "enabled": true,
+      "fixed_medium": true
+    },
+    {
+      "id": "observatory-night",
+      "title": "The Guest Observer",
+      "description": "A mountaintop observatory with the dome cracked open on a freezing clear night, the great telescope aimed at the zenith and the Milky Way blazing overhead. An astronomer checks a clipboard by red torchlight while Space Ghost waits his turn at the eyepiece with enormous patience, having brought his own folding stool.",
+      "enabled": true
+    },
+    {
+      "id": "library-closing",
+      "title": "Fifteen Minutes to Closing",
+      "description": "The upper galleries of a vast old library at closing time: brass lamps, iron spiral stairs, a trolley of unshelved books and dust turning in the last shaft of light. Space Ghost is halfway up a rolling ladder holding eleven volumes he has clearly not been given permission to borrow.",
+      "enabled": true
+    },
+    {
+      "id": "harbour-dawn",
+      "title": "First Boats In",
+      "description": "A working fishing harbour at first light: wet stone quay, stacked creels, gulls, crates of ice and crews unloading in oilskins while steam rises off mugs of tea. Space Ghost helps carry one end of a crate, entirely out of step with the man at the other end.",
+      "enabled": true
+    },
+    {
+      "id": "rocket-rollout",
+      "title": "Slow Roll to the Pad",
+      "description": "A launch vehicle creeping to the pad on its crawler before sunrise, floodlit against a violet sky, engineers walking alongside in hard hats and hi-vis. Space Ghost strides among them with a clipboard and a hard hat balanced impossibly on his hood.",
+      "enabled": true
+    },
+    {
+      "id": "luthier-bench",
+      "title": "The Long Apprenticeship",
+      "description": "A violin maker's workshop: curls of spruce shaving, gouges racked on the wall, an unvarnished body clamped in the vice and afternoon light through a dusty window. Space Ghost holds a tiny finished violin in one enormous glove with immense delicacy.",
+      "enabled": true
+    },
+    {
+      "id": "alpine-rescue",
+      "title": "The Extra Volunteer",
+      "description": "A mountain rescue team crossing a snowfield at dusk with a stretcher and avalanche probes, rope tight between them, storm light on the ridge above. Space Ghost brings up the rear carrying a thermos the size of a barrel and a great deal of unnecessary rope.",
+      "enabled": true
+    },
+    {
+      "id": "press-room",
+      "title": "The Late Edition",
+      "description": "A newspaper press room at two in the morning: the great web press running, ink haze, folded papers streaming off the delivery, men in aprons watching the register. Space Ghost holds up one fresh copy to inspect it with the gravity of a man reading his own obituary.",
+      "enabled": true
+    },
+    {
+      "id": "antarctic-station",
+      "title": "Resupply Delayed",
+      "description": "A polar research station half buried in drift, orange huts glowing against a blizzard, a line of flags marking the safe route and a wind sock straight out. Space Ghost leans hard into the wind carrying two shopping bags, cape snapping horizontally behind him.",
+      "enabled": true
+    },
+    {
+      "id": "terminus-dawn",
+      "title": "The 05:42",
+      "description": "A grand railway terminus at dawn: iron and glass roof, pigeons, steam, long shafts of light across an almost empty concourse and one early train at the platform. Space Ghost studies the departure board with total concentration, holding a ticket for somewhere that is not listed.",
+      "enabled": true
+    },
+    {
+      "id": "stonemasons-yard",
+      "title": "Cutting the Replacement",
+      "description": "A cathedral restoration yard: banker masons cutting new tracery from fresh limestone, templates and dust everywhere, scaffolding rising behind them against the old walls. The craft and the building are treated with real respect; Space Ghost holds a mallet correctly but has clearly never used one.",
+      "enabled": true
+    },
+    {
+      "id": "desert-motel",
+      "title": "No Vacancy, No Explanation",
+      "description": "An empty desert highway at dusk with a lone motel, its neon just flickering on, a single car at the pump and mountains going purple in the distance. Space Ghost stands at the ice machine, considering it with the seriousness of a man reading a monument.",
+      "enabled": true
+    },
+    {
+      "id": "orchard-harvest",
+      "title": "The Ladder Is Not Long Enough",
+      "description": "An old orchard at harvest: ladders in the trees, crates of apples, low golden light through the leaves and a dog asleep in the grass. Space Ghost reaches for the highest apple from a ladder that is comically, obviously too short.",
       "enabled": true
     }
   ],
@@ -195,8 +294,8 @@
     },
     {
       "id": "stained-glass",
-      "title": "Stained glass saint",
-      "description": "Space Ghost appears rendered as a figure in a stained glass window, in reverent medieval glazing style with lead came and jewel colours, haloed and solemn, holding his power bands like attributes.",
+      "title": "Stained glass, civic not sacred",
+      "description": "Space Ghost appears as a figure in a stained glass window of a secular building - a railway station, guildhall, library or grand hotel - in decorative leaded glass with bold colour and strong lead lines. Never a church window, never haloed, and never among sacred figures.",
       "enabled": true
     },
     {
@@ -208,13 +307,13 @@
     {
       "id": "illuminated-marginalia",
       "title": "Manuscript marginalia",
-      "description": "Space Ghost appears as marginalia in an illuminated manuscript visible within the scene, drawn in the margins among vines and drolleries by a scribe who clearly enjoyed himself far too much.",
+      "description": "Space Ghost appears as marginalia in the borders of an old manuscript visible within the scene, drawn among vines and drolleries by a scribe who enjoyed himself far too much. Keep him in the decorated border of an ordinary chronicle or herbal, never on a page of scripture and never among sacred imagery.",
       "enabled": true
     },
     {
       "id": "statue",
       "title": "As a statue",
-      "description": "Space Ghost appears as carved stone or cast bronze among the architecture or monuments, weathered and pigeon-marked, sculpted with total seriousness by someone who had never seen him.",
+      "description": "Space Ghost appears as carved stone or cast bronze among secular architecture, civic monuments or garden statuary, weathered and pigeon-marked, sculpted with total seriousness by someone who had never seen him. Never a sacred image and never inside a church.",
       "enabled": true
     },
     {
@@ -255,8 +354,8 @@
     },
     {
       "id": "donor-portrait",
-      "title": "Kneeling donor",
-      "description": "Space Ghost kneels at the edge of the composition in the pose of a Renaissance donor portrait, hands pressed together, smaller than the sacred figures and painted with the same devotional seriousness.",
+      "title": "Commemorative plaque",
+      "description": "Space Ghost appears on a commemorative civic plaque, medallion, trophy or founder's portrait hung in a secular hall, rendered with the pompous dignity such things always have and regarded by nobody. Keep it entirely civic; no devotional pose and no sacred setting.",
       "enabled": true
     },
     {
@@ -275,6 +374,117 @@
       "id": "companions-carry-it",
       "title": "Zorak and Moltar take over",
       "description": "Space Ghost is barely present at the far edge of the frame while Zorak and Moltar occupy the foreground causing the actual trouble. The joke belongs entirely to the companions this time.",
+      "enabled": true
+    }
+  ],
+  "medium_selection": "shuffle",
+  "mediums": [
+    {
+      "id": "oil-painting",
+      "title": "Classical oil painting",
+      "description": "A classical oil painting on canvas: visible brushwork, glazed shadows, warm varnish and real canvas tooth.",
+      "enabled": true
+    },
+    {
+      "id": "cinematic-still",
+      "title": "Cinematic film still",
+      "description": "A cinematic film still shot on anamorphic lenses: shallow depth of field, gentle lens flare, motivated practical lighting, subtle film grain and a wide dramatic frame.",
+      "enabled": true
+    },
+    {
+      "id": "documentary-photo",
+      "title": "Documentary photograph",
+      "description": "A candid documentary photograph on 35mm colour film: available light, honest imperfect framing, natural skin tones and fine grain. Nothing posed.",
+      "enabled": true
+    },
+    {
+      "id": "large-format-photo",
+      "title": "Large format photograph",
+      "description": "A large format view camera photograph: enormous detail, deep depth of field, perfectly controlled verticals, calm even light and rich tonality.",
+      "enabled": true
+    },
+    {
+      "id": "screenprint",
+      "title": "Screenprinted poster",
+      "description": "A limited-palette screenprinted poster: four or five flat spot inks, bold simplified shapes, visible halftone dots and slight ink misregistration.",
+      "enabled": true
+    },
+    {
+      "id": "risograph",
+      "title": "Risograph print",
+      "description": "A risograph print in two or three spot inks with visible misregistration, coarse grain, paper texture showing through and luminous overprinted colour.",
+      "enabled": true
+    },
+    {
+      "id": "woodcut",
+      "title": "Woodcut relief print",
+      "description": "A woodcut relief print: bold black carved lines, vigorous gouge marks, stark contrast and hand-inked texture on rough paper.",
+      "enabled": true
+    },
+    {
+      "id": "engraving",
+      "title": "Copperplate engraving",
+      "description": "A fine copperplate line engraving: dense cross-hatching, delicate tonal build-up, precise linework and the cool grey of printer's ink on laid paper.",
+      "enabled": true
+    },
+    {
+      "id": "watercolour",
+      "title": "Watercolour",
+      "description": "A watercolour on cold-pressed paper: wet-in-wet bleeds, granulating pigment, luminous untouched white paper and soft edges.",
+      "enabled": true
+    },
+    {
+      "id": "gouache",
+      "title": "Mid-century gouache illustration",
+      "description": "A mid-century gouache illustration: flat opaque colour, confident simplified shapes, textured dry-brush passages and a warm limited palette.",
+      "enabled": true
+    },
+    {
+      "id": "matte-painting",
+      "title": "Matte painting",
+      "description": "A cinematic matte painting: vast believable scale, layered atmospheric haze, meticulous architectural detail and dramatic god rays.",
+      "enabled": true
+    },
+    {
+      "id": "render-3d",
+      "title": "Physically based render",
+      "description": "A physically based 3D render: accurate materials, soft global illumination, gentle depth of field, clean studio realism and subtle imperfection in every surface.",
+      "enabled": true
+    },
+    {
+      "id": "travel-poster",
+      "title": "Art deco travel poster",
+      "description": "An art deco travel poster: flat geometric shapes, a confident restricted palette, stylised clouds and long dramatic shadows. No lettering of any kind.",
+      "enabled": true
+    },
+    {
+      "id": "cyanotype",
+      "title": "Cyanotype blueprint",
+      "description": "A cyanotype blueprint: deep Prussian blue, white line work, uneven hand-coated edges and the soft bloom of contact printing.",
+      "enabled": true
+    },
+    {
+      "id": "tilt-shift",
+      "title": "Tilt-shift photograph",
+      "description": "A tilt-shift photograph from a high vantage: a narrow plane of focus that makes the whole scene read as an exquisite miniature, saturated colour and crisp tiny detail.",
+      "enabled": true
+    },
+    {
+      "id": "long-exposure",
+      "title": "Long exposure at night",
+      "description": "A long exposure night photograph: light trails, still water like glass, deep blue hour sky, star movement and pinpoint highlights blooming softly.",
+      "enabled": true
+    },
+    {
+      "id": "aerial-photo",
+      "title": "Aerial photograph",
+      "description": "An aerial photograph looking down from height: strong graphic pattern, long raking shadows, tiny legible figures and beautiful geometry in the landscape.",
+      "enabled": true
+    },
+    {
+      "id": "claymation",
+      "title": "Stop-motion still",
+      "description": "A stop-motion animation still: handmade clay and fabric models, visible fingerprints and fibres, shallow macro focus and warm miniature stage lighting.",
       "enabled": true
     }
   ]

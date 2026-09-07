@@ -269,7 +269,7 @@ def activate_artwork(record, metadata, entry):
 
 
 def run_once(scene_override=None, *, manual=False, activate=False, theme='active',
-             new_theme=None, insertion_override=None):
+             new_theme=None, insertion_override=None, medium_override=None):
     STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(STATE, 0o700)
     with (STATE / 'generation.lock').open('a+') as lock:
@@ -324,15 +324,18 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             raise RuntimeError('Artwork destination must be a regular directory in the gallery')
         history = load_history()
         if new_theme is not None:
-            scene = {'id': 'debut', 'title': selected_theme['name'], 'description': selected_theme['scene']}
-            insertion = None
+            scene = {'id': 'debut', 'title': selected_theme['name'],
+                     'description': selected_theme['scene'], 'fixed_medium': True}
+            insertion, medium = None, None
         else:
-            scene, insertion = prompt_catalog.choose(
-                config, history, scene_id=scene_override, insertion_id=insertion_override)
+            scene, insertion, medium = prompt_catalog.choose(
+                config, history, scene_id=scene_override, insertion_id=insertion_override,
+                medium_id=medium_override)
         seed = prompt_catalog.variation_seed()
         started = time.time()
         metadata = {'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
-                    'insertion': insertion['id'] if insertion else None, 'variation_seed': seed,
+                    'insertion': insertion['id'] if insertion else None,
+                    'medium': medium['id'] if medium else None, 'variation_seed': seed,
                     'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
                     'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
         # Reserve before making a model request. Daily failures cannot retry.
@@ -350,7 +353,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if manual:
                 destination_notice = 'appear on your desktop' if activate else 'be saved in the gallery'
                 notify('Space Ghost is painting…', scene['title'] + '. Your new artwork will ' + destination_notice + ' when ready.')
-            prompt = prompt_catalog.compose_prompt(config, selected_theme, scene, insertion, seed)
+            prompt = prompt_catalog.compose_prompt(config, selected_theme, scene, insertion,
+                                                   medium, seed)
             source_path = generate_native(config, prompt, env, record.with_suffix('.jsonl'))
             source, width, height = validate_image(source_path,
                                                    Path(env['CODEX_HOME']) / 'generated_images', started)
@@ -358,7 +362,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if has_symlink(gallery, REPO):
                 raise RuntimeError('Artwork destination must remain a regular directory in the gallery')
             gallery.mkdir(parents=True, exist_ok=True)
-            history.record(scene['id'], insertion['id'] if insertion else None, seed)
+            history.record(scene['id'], insertion['id'] if insertion else None,
+                           medium['id'] if medium else None, seed)
             history.save()
             stem = f'{day}-{selected_theme["id"]}-{scene["id"]}-{digest[:12]}'
             destination = gallery / f'{stem}.png'
@@ -370,6 +375,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             entry = {'id': stem, 'title': scene['title'], 'description': scene['description'],
                      'insertion': insertion['id'] if insertion else None,
                      'insertion_title': insertion['title'] if insertion else '',
+                     'medium': medium['id'] if medium else None,
+                     'medium_title': medium['title'] if medium else '',
                      'variation_seed': seed,
                      'file': str(destination.relative_to(REPO)), 'sha256': digest,
                      'width': width, 'height': height, 'prompt': prompt,
@@ -403,6 +410,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scene', help='Select a named scene from prompts.json.')
     parser.add_argument('--insertion', help='Select a named Space Ghost insertion style.')
+    parser.add_argument('--medium', help='Select a named medium and treatment.')
     parser.add_argument('--theme', default='active', help='active (default), none, or a theme ID from alpine/themes/.')
     parser.add_argument('--new-theme', nargs='?', const='', help='Create a collection from a phrase, or random if empty.')
     parser.add_argument('--manual', action='store_true', help='One explicit request, independent of the daily schedule.')
@@ -410,15 +418,16 @@ def main():
     parser.add_argument('--print-command', action='store_true', help='Show the cron-safe command without generating.')
     args = parser.parse_args()
     if args.new_theme is not None and (not args.manual or args.scene or args.insertion
-                                       or args.theme != 'active'):
+                                       or args.medium or args.theme != 'active'):
         parser.error('--new-theme requires --manual and cannot combine with --scene, '
-                     '--insertion or --theme')
+                     '--insertion, --medium or --theme')
     if args.print_command:
         import shlex
         print(shlex.join(['/usr/bin/python3', str(Path(__file__).resolve())]))
         return
     sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme,
-                      new_theme=args.new_theme, insertion_override=args.insertion))
+                      new_theme=args.new_theme, insertion_override=args.insertion,
+                      medium_override=args.medium))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Space Ghost gallery: rotate, browse and expose a Waybar status."""
 import argparse
+import datetime as dt
 import fcntl
 import hashlib
 import html
@@ -154,7 +155,62 @@ def apply(entry):
         temporary.unlink(missing_ok=True)
         raise RuntimeError('Sway rejected wallpaper command')
     temporary.replace(CURRENT)
+    relayout_panels()
     return socket
+
+
+def panel_command(action):
+    helper = REPO / 'alpine/desktop/.local/bin/oldbook-conky'
+    if not helper.is_file():
+        return
+    try:
+        subprocess.Popen(['/usr/bin/python3', str(helper), action], stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    except OSError:
+        pass
+
+
+def relayout_panels():
+    """Refit the desktop panels to the calm areas of the artwork now on screen."""
+    panel_command('layout')
+
+
+def delete_current(confirm=True):
+    """Remove the artwork now on screen from the gallery, after moving on from it."""
+    gallery_root = (REPO / 'alpine/assets/gallery').resolve()
+    entries, _ = load_gallery()
+    state = read_state()
+    entry = next((item for item in entries if item['id'] == state.get('id')), None)
+    if entry is None:
+        raise RuntimeError('No current artwork to delete')
+    image = Path(entry['path']).resolve()
+    sidecar = image.with_suffix('.json')
+    if not image.is_relative_to(gallery_root):
+        raise RuntimeError('Only generated gallery artwork can be deleted; '
+                           'curated images are listed in gallery.json')
+    for path in (image, sidecar):
+        if path.is_symlink() or (path.exists() and not path.is_file()):
+            raise RuntimeError('Refusing to delete anything but regular gallery files')
+    if confirm:
+        answer = gallery_menu('Delete "' + entry['title'] + '"? ',
+                              ['Keep it', 'Delete this painting permanently'])
+        if answer != 'Delete this painting permanently':
+            return 0
+    # Move the desktop on first so it never points at a file that is gone.
+    if len(entries) > 1:
+        update('next')
+    for path in (image, sidecar):
+        path.unlink(missing_ok=True)
+    # Keep the checkout consistent; the removal stays pending for review.
+    relative = [str(path.relative_to(REPO.resolve())) for path in (image, sidecar)]
+    try:
+        subprocess.run(['fossil', 'rm', '--hard', '--', *relative], cwd=REPO,
+                       stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=30)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    print('Deleted ' + entry['title'])
+    return 0
 
 
 def update(action, selected=None):
@@ -266,7 +322,8 @@ def status():
     # GTK consumes Pango markup, so instructions need escaping just like titles.
     controls = ('Click: next · scroll: browse (↑ previous / ↓ next)\n'
                 'Middle: pause/resume · right: gallery & themes\n'
-                'Command/Super+click: generate & switch\n'
+                'Command/Super+click: generate & switch · always a new painting\n'
+                'Super+Shift+G: desktop panels on/off\n'
                 'Shift+click: edit prompts · “Zorak, fix the script!”\n'
                 'Modified clicks use the left button.')
     tooltip += '\n\n<b>YOUR CONTROL ROOM</b>\n' + html.escape(controls)
@@ -278,14 +335,42 @@ def status():
                       'tooltip': tooltip}))
 
 
+def artwork_date(entry):
+    """Prefer archived creation dates; old artwork can fall back to file mtime."""
+    for key in ('generated_utc', 'created'):
+        try:
+            date = dt.datetime.fromisoformat(entry[key])
+            if date.tzinfo is None:
+                date = date.replace(tzinfo=dt.timezone.utc)
+            return date.timestamp()
+        except (KeyError, TypeError, ValueError, OverflowError):
+            pass
+    try:
+        return Path(entry['path']).stat().st_mtime
+    except (KeyError, OSError):
+        return 0
+
+
+def gallery_menu(prompt, options):
+    result = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'),
+                             '--dmenu', '--no-sort', '--prompt', prompt,
+                             '--lines', str(min(9, len(options))), '--width', '48'],
+                            input='\n'.join(options) + '\n', capture_output=True, text=True)
+    return result.stdout.rstrip('\n') if result.returncode == 0 else None
+
+
 def pick():
     entries, _ = load_gallery()
-    labels = [f'{i + 1:02d}  {e["title"]}'
+    entries = sorted(entries, key=lambda entry: (artwork_date(entry), str(entry['id'])), reverse=True)
+    labels = [f'{i + 1:02d}  ' + ' '.join(e["title"].split())
               + (' · ' + e['theme_name'] if e.get('theme_name') else '')
               for i, e in enumerate(entries)]
     generate_label = '✦  Generate new artwork & switch to it'
     controls = {'→  Next artwork': 'next', '←  Previous artwork': 'prev',
                 '⏯  Pause / resume rotation': 'pause'}
+    delete_label = '󰩹  Delete this painting permanently'
+    panels_label = '󰕮  Desktop panels · switch on/off'
+    refit_label = '󰃨  Refit desktop panels to this painting'
     help_label = '?  Help & gallery controls'
     deck_label = '󰊠  Open command deck · all desktop commands'
     edit_label = '✎  Edit artwork prompts · Shift+click'
@@ -294,17 +379,37 @@ def pick():
                             for theme in available_themes(REPO)})
     random_label = '✦  Random new theme'
     phrase_label = '✦  New theme from a phrase/title'
-    options = [*labels, *controls, help_label, deck_label, edit_label, generate_label,
-               random_label, phrase_label, *themed_commands]
-    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ ',
-                             '--lines', str(min(28, len(options))), '--width', '62'],
-                            input='\n'.join(options) + '\n', capture_output=True, text=True)
-    selected = result.stdout.rstrip('\n')
-    if result.returncode == 0:
+    actions = [*controls, delete_label, panels_label, refit_label, help_label, deck_label,
+               edit_label, generate_label, random_label, phrase_label, *themed_commands]
+    page = 0
+    page_size = 6
+    page_count = max(1, (len(entries) + page_size - 1) // page_size)
+    while True:
+        options = labels[page * page_size:(page + 1) * page_size]
+        if page:
+            options += ['← Newer images']
+        if page + 1 < page_count:
+            options += ['Older images →']
+        options += ['Gallery actions…']
+        selected = gallery_menu(f'Gallery {page + 1}/{page_count} ❯ ', options)
+        if selected not in options:
+            return
+        if selected == 'Older images →':
+            page += 1
+            continue
+        if selected == '← Newer images':
+            page -= 1
+            continue
+        if selected == 'Gallery actions…':
+            selected = gallery_menu('Gallery actions ❯ ', ['← Back to images', *actions])
+            if selected is None or selected == '← Back to images':
+                continue
+        break
+    if selected is not None:
         if selected == random_label:
             start_generation(new_theme='')
         elif selected == phrase_label:
-            phrase = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Theme phrase/title ❯ ',
+            phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Theme phrase/title ❯ ',
                                      '--lines', '0', '--width', '62'],
                                     input='', capture_output=True, text=True)
             if phrase.returncode == 0 and phrase.stdout.strip():
@@ -317,6 +422,12 @@ def pick():
             update('pick', entries[labels.index(selected)]['id'])
         elif selected in controls:
             update(controls[selected])
+        elif selected == delete_label:
+            delete_current()
+        elif selected == panels_label:
+            panel_command('toggle')
+        elif selected == refit_label:
+            panel_command('layout')
         elif selected == help_label:
             subprocess.Popen(['foot', '--title=Ghost Gallery Help', '-e', 'less',
                               str(REPO / 'alpine/wallpapers/README.md')], start_new_session=True)
@@ -371,7 +482,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='status',
                         choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh',
-                                 'generate', 'select', 'edit-prompts'])
+                                 'generate', 'select', 'edit-prompts', 'delete'])
     parser.add_argument('artwork_id', nargs='?', help='Exact gallery ID for select')
     parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
     args = parser.parse_args()
@@ -389,6 +500,8 @@ def main():
         start_generation(args.theme)
     elif args.action == 'edit-prompts':
         edit_prompts()
+    elif args.action == 'delete':
+        return delete_current(confirm=False)
     else:
         update(args.action, args.artwork_id)
 

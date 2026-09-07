@@ -13,6 +13,23 @@ from unittest import mock
 from test_wallpapers import REPO, art, generator
 
 
+
+def open_actions_then(fragment, capture=None):
+    """Drive the two-step gallery menu: open the actions page, then pick a label.
+
+    The image pages are the only menu offering "Gallery actions…", so the first
+    call always lands there and the second sees the action list.
+    """
+    def run(command, **kwargs):
+        options = kwargs['input'].splitlines()
+        if 'Gallery actions…' in options:
+            return subprocess.CompletedProcess(command, 0, 'Gallery actions…\n', '')
+        if capture is not None:
+            capture.extend(options)
+        selected = next(line for line in options if fragment in line)
+        return subprocess.CompletedProcess(command, 0, selected + '\n', '')
+    return run
+
 class ManualArtworkTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -121,12 +138,15 @@ class ManualArtworkTests(unittest.TestCase):
 
     def test_gallery_generation_entry_does_not_shift_existing_selections(self):
         entries = [{'id': 'a', 'title': 'Same title'}, {'id': 'b', 'title': 'Same title'}]
+        pages, actions = [], []
         def menu(command, **kwargs):
-            labels = kwargs['input'].splitlines()
-            self.assertEqual(labels[:2], ['01  Same title', '02  Same title'])
-            self.assertTrue(any('Help' in label for label in labels))
-            self.assertTrue(any('command deck' in label for label in labels))
-            generation = next(label for label in labels if 'Generate new artwork' in label)
+            options = kwargs['input'].splitlines()
+            if 'Gallery actions…' in options:
+                pages.append(options)
+                self.assertEqual(options[:2], ['01  Same title', '02  Same title'])
+                return subprocess.CompletedProcess(command, 0, 'Gallery actions…\n', '')
+            actions.extend(options)
+            generation = next(label for label in options if 'Generate new artwork' in label)
             return subprocess.CompletedProcess(command, 0, generation + '\n', '')
         with mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
                 mock.patch.object(art.subprocess, 'run', side_effect=menu), \
@@ -135,54 +155,64 @@ class ManualArtworkTests(unittest.TestCase):
             art.pick()
             generate.assert_called_once_with()
             update.assert_not_called()
+        self.assertTrue(any('Help' in label for label in actions))
+        self.assertTrue(any('command deck' in label for label in actions))
+        # Identical titles stay distinguishable, so the second row is its own image.
         def second(command, **kwargs):
             return subprocess.CompletedProcess(command, 0, kwargs['input'].splitlines()[1] + '\n', '')
         with mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
                 mock.patch.object(art.subprocess, 'run', side_effect=second), \
                 mock.patch.object(art, 'update') as update:
             art.pick()
-            update.assert_called_once_with('pick', 'b')
+            update.assert_called_once_with('pick', 'a')
 
     def test_gallery_keeps_browse_and_pause_commands_without_generating(self):
         entries = [{'id': 'a', 'title': 'First'}]
         for label, action in [('Next artwork', 'next'), ('Previous artwork', 'prev'),
                               ('Pause / resume rotation', 'pause')]:
-            def choose(command, **kwargs):
-                selected = next(line for line in kwargs['input'].splitlines() if label in line)
-                return subprocess.CompletedProcess(command, 0, selected + '\n', '')
             with self.subTest(action=action), \
                     mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
-                    mock.patch.object(art.subprocess, 'run', side_effect=choose), \
+                    mock.patch.object(art.subprocess, 'run', side_effect=open_actions_then(label)), \
                     mock.patch.object(art, 'start_generation') as generate, \
                     mock.patch.object(art, 'update') as update:
                 art.pick()
                 update.assert_called_once_with(action)
                 generate.assert_not_called()
 
-    def test_gallery_controls_remain_visible_with_eighteen_paintings(self):
+    def test_gallery_controls_remain_reachable_with_eighteen_paintings(self):
         entries = [{'id': str(i), 'title': f'Painting {i}'} for i in range(18)]
-        def cancel(command, **kwargs):
-            visible_count = int(command[command.index('--lines') + 1])
-            visible = '\n'.join(kwargs['input'].splitlines()[:visible_count])
-            for label in ('Next artwork', 'Previous artwork', 'Pause / resume rotation',
-                          'Help & gallery controls', 'Open command deck', 'Edit artwork prompts',
-                          'Generate new artwork'):
-                self.assertIn(label, visible)
+        pages, actions = [], []
+        def browse(command, **kwargs):
+            options = kwargs['input'].splitlines()
+            visible = int(command[command.index('--lines') + 1])
+            if 'Gallery actions…' in options:
+                if actions:
+                    return subprocess.CompletedProcess(command, 1, '', '')
+                # An image page is short enough to read without scrolling.
+                self.assertLessEqual(len(options), visible)
+                pages.append(options)
+                return subprocess.CompletedProcess(command, 0, 'Gallery actions…\n', '')
+            actions.extend(options)
             return subprocess.CompletedProcess(command, 1, '', '')
         with mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
-                mock.patch.object(art.subprocess, 'run', side_effect=cancel), \
+                mock.patch.object(art.subprocess, 'run', side_effect=browse), \
                 mock.patch.object(art, 'start_generation') as generate, \
                 mock.patch.object(art, 'update') as update:
             art.pick()
+        # The first page shows a slice of the artwork plus a way onward.
+        self.assertTrue(any('Older images' in option for option in pages[0]))
+        self.assertLess(sum(1 for option in pages[0] if option.startswith('0')), len(entries))
+        for label in ('Next artwork', 'Previous artwork', 'Pause / resume rotation',
+                      'Help & gallery controls', 'Open command deck', 'Edit artwork prompts',
+                      'Generate new artwork', 'Desktop panels', 'Refit desktop panels'):
+            self.assertTrue(any(label in option for option in actions), label)
         generate.assert_not_called()
         update.assert_not_called()
 
     def test_gallery_opens_prompt_editor_without_changing_or_generating_art(self):
-        def choose(command, **kwargs):
-            selected = next(line for line in kwargs['input'].splitlines() if 'Edit artwork prompts' in line)
-            return subprocess.CompletedProcess(command, 0, selected + '\n', '')
         with mock.patch.object(art, 'load_gallery', return_value=([], 1200)), \
-                mock.patch.object(art.subprocess, 'run', side_effect=choose), \
+                mock.patch.object(art.subprocess, 'run',
+                                  side_effect=open_actions_then('Edit artwork prompts')), \
                 mock.patch.object(art.subprocess, 'Popen') as launch, \
                 mock.patch.object(art, 'start_generation') as generate, \
                 mock.patch.object(art, 'update') as update:
