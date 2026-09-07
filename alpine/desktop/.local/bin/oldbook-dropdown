@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Toggle one persistent Foot scratchpad terminal on the focused output."""
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+APP_ID = 'oldbook-dropdown'
+
+
+def ipc(kind, command=None):
+    args = ['swaymsg', '-r', '-t', kind]
+    if command:
+        args.append(command)
+    result = subprocess.run(args, check=True, capture_output=True, text=True, timeout=3)
+    data = json.loads(result.stdout)
+    if kind == 'command' and any(not entry.get('success') for entry in data):
+        raise RuntimeError(str(data))
+    return data
+
+
+def terminal(node, workspace=None):
+    if node.get('type') == 'workspace':
+        workspace = node['name']
+    if node.get('app_id') == APP_ID:
+        return node, workspace
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        found = terminal(child, workspace)
+        if found:
+            return found
+    return None
+
+
+def toggle():
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    session = hashlib.sha256(os.environ['SWAYSOCK'].encode()).hexdigest()[:16]
+    with (runtime / f'oldbook-dropdown-{session}.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        found = terminal(ipc('get_tree'))
+        if not found:
+            subprocess.Popen(['foot', '--app-id=' + APP_ID, '--title=Drop-down terminal',
+                              '--override=colors-dark.alpha=1.0'],
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                found = terminal(ipc('get_tree'))
+                if found:
+                    break
+                time.sleep(0.05)
+            if not found:
+                raise RuntimeError('Foot did not open within five seconds')
+            ipc('command', f'[con_id={found[0]["id"]}] floating enable, move scratchpad')
+            found = found[0], '__i3_scratch'
+        node, workspace = found
+        criteria = f'[con_id={node["id"]}]'
+        if workspace != '__i3_scratch':
+            ipc('command', criteria + ' move scratchpad')
+            return
+        output = next(output for output in ipc('get_outputs') if output.get('focused'))
+        rect = output['rect']
+        width, height = round(rect['width'] * .9), round(rect['height'] * .5)
+        x, y = rect['x'] + round(rect['width'] * .05), rect['y'] + 44
+        ipc('command', criteria + ' scratchpad show')
+        ipc('command', criteria + f' resize set {width} px {height} px, '
+            f'move absolute position {x} px {y} px, focus')
+
+
+if __name__ == '__main__':
+    try:
+        toggle()
+    except (OSError, KeyError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        raise SystemExit(f'oldbook-dropdown: {error}')

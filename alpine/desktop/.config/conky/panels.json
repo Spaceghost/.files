@@ -1,0 +1,57 @@
+{
+  "font": "JetBrainsMono Nerd Font:size=9",
+  "update_interval": 60,
+  "gap": 1,
+  "panels": [
+    {
+      "id": "masthead",
+      "title": "Masthead",
+      "enabled": true,
+      "priority": 100,
+      "prefer": "top",
+      "width": 372,
+      "height": 80,
+      "text": "${font JetBrainsMono Nerd Font:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet · Coast to Coast"
+    },
+    {
+      "id": "power",
+      "title": "Power",
+      "enabled": true,
+      "priority": 72,
+      "prefer": "right",
+      "width": 286,
+      "height": 80,
+      "text": "${color1}󰁹 POWER${color2} ${hr 1}\n${color}batt ${color6}${battery_bar 5,150 {{battery}}}${color} ${battery_percent {{battery}}}%\n${color2}${battery {{battery}}}${alignr}${color2}${battery_time {{battery}}}"
+    },
+    {
+      "id": "gallery",
+      "title": "Ghost Gallery",
+      "enabled": true,
+      "priority": 96,
+      "prefer": "bottom",
+      "width": 360,
+      "height": 112,
+      "text": "${color1}󰸉 GHOST GALLERY${color2} ${hr 1}\n${color}${execi 120 {{bin}} gallery-text}"
+    },
+    {
+      "id": "ghost",
+      "title": "Coast to Coast",
+      "enabled": true,
+      "priority": 58,
+      "prefer": "bottom",
+      "width": 360,
+      "height": 84,
+      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 {{bin}} ghost-line}"
+    }
+  ],
+  "ghost_lines": [
+    "Zorak is not the administrator. Zorak has never been the administrator.",
+    "Moltar, roll the telemetry. Moltar, that is the wrong telemetry.",
+    "This desktop is broadcasting live from the Ghost Planet.",
+    "Brak asked what a kernel is. We are not taking further questions.",
+    "The interview will continue after these system metrics.",
+    "Everything is nominal. That is the most suspicious reading of all.",
+    "Space Ghost does not read logs. Space Ghost is read by logs.",
+    "Tonight on Coast to Coast: this laptop, and its feelings."
+  ]
+}

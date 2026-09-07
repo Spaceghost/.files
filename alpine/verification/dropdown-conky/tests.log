@@ -1,0 +1,477 @@
+test_browser_requires_an_exact_identity_and_validated_origin_hint (test_ai_notification_stream.AINotificationAttributionTests.test_browser_requires_an_exact_identity_and_validated_origin_hint) ... ok
+test_exact_native_names_and_desktop_entries_are_attributed (test_ai_notification_stream.AINotificationAttributionTests.test_exact_native_names_and_desktop_entries_are_attributed) ... ok
+test_stream_is_passive_content_free_and_preserves_normal_delivery (test_ai_notification_stream.AINotificationBusTests.test_stream_is_passive_content_free_and_preserves_normal_delivery) ... ok
+test_browser_chatgpt_requires_a_clear_app_or_title_signal (test_app_identity.ApplicationResolverTests.test_browser_chatgpt_requires_a_clear_app_or_title_signal) ... ok
+test_browser_claude_requires_a_clear_title_signal (test_app_identity.ApplicationResolverTests.test_browser_claude_requires_a_clear_title_signal) ... ok
+test_codex_launcher_app_id_uses_foreground_descendant_tty (test_app_identity.ApplicationResolverTests.test_codex_launcher_app_id_uses_foreground_descendant_tty) ... ok
+test_control_characters_are_removed_and_missing_pids_are_harmless (test_app_identity.ApplicationResolverTests.test_control_characters_are_removed_and_missing_pids_are_harmless) ... ok
+test_ghostty_resolves_foreground_codex_and_claude (test_app_identity.ApplicationResolverTests.test_ghostty_resolves_foreground_codex_and_claude) ... ok
+test_native_codex_title_supplies_state_but_process_name_alone_does_not (test_app_identity.ApplicationResolverTests.test_native_codex_title_supplies_state_but_process_name_alone_does_not) ... ok
+test_terminal_uses_foreground_process_and_ignores_background_codex (test_app_identity.ApplicationResolverTests.test_terminal_uses_foreground_process_and_ignores_background_codex) ... ok
+test_tmux_is_queried_once_per_snapshot_instead_of_per_terminal (test_app_identity.ApplicationResolverTests.test_tmux_is_queried_once_per_snapshot_instead_of_per_terminal) ... ok
+test_tmux_title_with_encoded_newline_cannot_inject_codex_state (test_app_identity.ApplicationResolverTests.test_tmux_title_with_encoded_newline_cannot_inject_codex_state) ... ok
+test_tmux_uses_largest_pane_in_clients_displayed_window (test_app_identity.ApplicationResolverTests.test_tmux_uses_largest_pane_in_clients_displayed_window) ... ok
+test_tmux_zoom_uses_active_pane_even_if_fixture_reports_smaller_geometry (test_app_identity.ApplicationResolverTests.test_tmux_zoom_uses_active_pane_even_if_fixture_reports_smaller_geometry) ... ok
+test_allowlist_rejects_native_and_private_source_paths (test_bazzite_profile.BazziteProfileTest.test_allowlist_rejects_native_and_private_source_paths) ... ok
+test_apply_uses_safe_journal_and_rollback_restores_original (test_bazzite_profile.BazziteProfileTest.test_apply_uses_safe_journal_and_rollback_restores_original) ... ok
+test_check_detects_target_drift_and_missing_native_module (test_bazzite_profile.BazziteProfileTest.test_check_detects_target_drift_and_missing_native_module) ... ok
+test_deployed_overlay_theme_reads_the_checkout_palette (test_bazzite_profile.BazziteProfileTest.test_deployed_overlay_theme_reads_the_checkout_palette) ... ok
+test_every_retained_oldbook_sway_binding_has_a_deployed_helper (test_bazzite_profile.BazziteProfileTest.test_every_retained_oldbook_sway_binding_has_a_deployed_helper) ... ok
+test_preview_is_read_only_and_reports_managed_changes (test_bazzite_profile.BazziteProfileTest.test_preview_is_read_only_and_reports_managed_changes) ... ok
+test_profile_excludes_alpine_services_and_uses_user_systemd (test_bazzite_profile.BazziteProfileTest.test_profile_excludes_alpine_services_and_uses_user_systemd) ... ok
+test_repo_dependent_gallery_helpers_keep_the_source_checkout (test_bazzite_profile.BazziteProfileTest.test_repo_dependent_gallery_helpers_keep_the_source_checkout) ... ok
+test_waybar_uses_per_user_glibc_module_without_losing_art_controls (test_bazzite_profile.BazziteProfileTest.test_waybar_uses_per_user_glibc_module_without_losing_art_controls) ... ok
+test_broken_settings_symlink_is_never_replaced (test_claude_notifications.ClaudeNotificationInstallerTests.test_broken_settings_symlink_is_never_replaced) ... ok
+test_install_is_idempotent_for_its_exact_handlers (test_claude_notifications.ClaudeNotificationInstallerTests.test_install_is_idempotent_for_its_exact_handlers) ... ok
+test_install_preserves_settings_and_existing_hooks (test_claude_notifications.ClaudeNotificationInstallerTests.test_install_preserves_settings_and_existing_hooks) ... ok
+test_rollback_refuses_after_a_later_settings_change (test_claude_notifications.ClaudeNotificationInstallerTests.test_rollback_refuses_after_a_later_settings_change) ... ok
+test_rollback_removes_settings_created_by_install (test_claude_notifications.ClaudeNotificationInstallerTests.test_rollback_removes_settings_created_by_install) ... ok
+test_rollback_restores_exact_settings (test_claude_notifications.ClaudeNotificationInstallerTests.test_rollback_restores_exact_settings) ... ok
+test_non_attention_notification_types_are_ignored (test_claude_notifications.ClaudeNotifyTests.test_non_attention_notification_types_are_ignored) ... ok
+test_permission_request_notifies_without_answering_it (test_claude_notifications.ClaudeNotifyTests.test_permission_request_notifies_without_answering_it) ... ok
+test_stop_notifies_only_when_no_background_work_is_reported (test_claude_notifications.ClaudeNotifyTests.test_stop_notifies_only_when_no_background_work_is_reported) ... ok
+test_supported_input_notifications_are_content_free (test_claude_notifications.ClaudeNotifyTests.test_supported_input_notifications_are_content_free) ... ok
+test_unknown_and_malformed_input_is_ignored (test_claude_notifications.ClaudeNotifyTests.test_unknown_and_malformed_input_is_ignored) ... ok
+test_broken_config_symlink_is_never_replaced (test_codex_notifications.CodexNotificationInstallerTests.test_broken_config_symlink_is_never_replaced) ... ok
+test_existing_notify_refuses_without_changing_either_file (test_codex_notifications.CodexNotificationInstallerTests.test_existing_notify_refuses_without_changing_either_file) ... ok
+test_install_preserves_config_and_existing_hooks_while_adding_callbacks (test_codex_notifications.CodexNotificationInstallerTests.test_install_preserves_config_and_existing_hooks_while_adding_callbacks) ... ok
+test_rollback_refuses_if_installed_files_were_changed (test_codex_notifications.CodexNotificationInstallerTests.test_rollback_refuses_if_installed_files_were_changed) ... ok
+test_rollback_restores_exact_files_and_removes_new_hooks_file (test_codex_notifications.CodexNotificationInstallerTests.test_rollback_restores_exact_files_and_removes_new_hooks_file) ... ok
+test_completion_is_content_free_and_records_transient_routing_metadata (test_codex_notifications.CodexNotifyTests.test_completion_is_content_free_and_records_transient_routing_metadata) ... ok
+test_controlling_tty_number_maps_without_inherited_standard_descriptors (test_codex_notifications.CodexNotifyTests.test_controlling_tty_number_maps_without_inherited_standard_descriptors) ... ok
+test_expired_record_is_removed_on_the_next_event (test_codex_notifications.CodexNotifyTests.test_expired_record_is_removed_on_the_next_event) ... ok
+test_new_user_prompt_clears_that_sessions_recent_event (test_codex_notifications.CodexNotifyTests.test_new_user_prompt_clears_that_sessions_recent_event) ... ok
+test_permission_hook_notifies_but_never_answers_the_request (test_codex_notifications.CodexNotifyTests.test_permission_hook_notifies_but_never_answers_the_request) ... ok
+test_unknown_or_malformed_input_is_ignored (test_codex_notifications.CodexNotifyTests.test_unknown_or_malformed_input_is_ignored) ... ok
+test_a_theme_without_a_palette_still_resolves (test_conky_layout.ColourTests.test_a_theme_without_a_palette_still_resolves) ... ok
+test_contrast_ratio_spans_black_to_white (test_conky_layout.ColourTests.test_contrast_ratio_spans_black_to_white) ... ok
+test_palette_keeps_supplied_colours_and_derives_the_missing_series (test_conky_layout.ColourTests.test_palette_keeps_supplied_colours_and_derives_the_missing_series) ... ok
+test_parses_and_formats_colours (test_conky_layout.ColourTests.test_parses_and_formats_colours) ... ok
+test_readable_darkens_a_pale_colour_on_a_bright_region (test_conky_layout.ColourTests.test_readable_darkens_a_pale_colour_on_a_bright_region) ... ok
+test_readable_lifts_a_dim_colour_off_a_dark_region (test_conky_layout.ColourTests.test_readable_lifts_a_dim_colour_off_a_dark_region) ... ok
+test_rejects_a_colour_that_is_not_six_hex_digits (test_conky_layout.ColourTests.test_rejects_a_colour_that_is_not_six_hex_digits) ... ok
+test_text_colours_adapt_to_a_bright_region (test_conky_layout.ColoursForRegionTests.test_text_colours_adapt_to_a_bright_region) ... ok
+test_text_colours_reach_the_contrast_floor_over_a_dark_region (test_conky_layout.ColoursForRegionTests.test_text_colours_reach_the_contrast_floor_over_a_dark_region) ... ok
+test_config_is_transparent_and_wayland_native (test_conky_layout.ConfigTests.test_config_is_transparent_and_wayland_native) ... ok
+test_config_pins_the_computed_rectangle_and_body (test_conky_layout.ConfigTests.test_config_pins_the_computed_rectangle_and_body) ... ok
+test_lua_strings_escape_quotes (test_conky_layout.ConfigTests.test_lua_strings_escape_quotes) ... ok
+test_live_panel_file_is_valid (test_conky_layout.PanelFileTests.test_live_panel_file_is_valid) ... ok
+test_rejects_a_panel_without_text_or_size (test_conky_layout.PanelFileTests.test_rejects_a_panel_without_text_or_size) ... ok
+test_rejects_duplicate_panel_identifiers (test_conky_layout.PanelFileTests.test_rejects_duplicate_panel_identifiers) ... ok
+test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced (test_conky_layout.PlacementTests.test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced) ... ok
+test_higher_priority_panels_choose_first (test_conky_layout.PlacementTests.test_higher_priority_panels_choose_first) ... ok
+test_panel_avoids_the_busy_centre_of_the_painting (test_conky_layout.PlacementTests.test_panel_avoids_the_busy_centre_of_the_painting) ... ok
+test_panels_never_overlap_each_other (test_conky_layout.PlacementTests.test_panels_never_overlap_each_other) ... ok
+test_placement_respects_the_bar_and_edge_insets (test_conky_layout.PlacementTests.test_placement_respects_the_bar_and_edge_insets) ... ok
+test_plan_produces_one_config_per_placed_panel (test_conky_layout.PlanTests.test_plan_produces_one_config_per_placed_panel) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_partial_deployment_rolls_back_all_originals (test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_focus_command_uses_numeric_identity_not_untrusted_window_title (test_expo.ExpoTests.test_focus_command_uses_numeric_identity_not_untrusted_window_title) ... ok
+test_miniature_keeps_floating_windows_inside_card_on_offset_output (test_expo.ExpoTests.test_miniature_keeps_floating_windows_inside_card_on_offset_output) ... ok
+test_overview_keeps_empty_desktops_and_excludes_scratchpad (test_expo.ExpoTests.test_overview_keeps_empty_desktops_and_excludes_scratchpad) ... ok
+test_concurrent_helpers_start_one_gui_and_hold_lock_for_its_lifetime (test_firewall_ui.FirewallUITests.test_concurrent_helpers_start_one_gui_and_hold_lock_for_its_lifetime) ... ok
+test_disabled_or_partially_enabled_setup_does_nothing (test_firewall_ui.FirewallUITests.test_disabled_or_partially_enabled_setup_does_nothing) ... ok
+test_enabled_setup_launches_background_gui_with_private_socket (test_firewall_ui.FirewallUITests.test_enabled_setup_launches_background_gui_with_private_socket) ... ok
+test_existing_gui_is_not_restarted_focused_or_notified (test_firewall_ui.FirewallUITests.test_existing_gui_is_not_restarted_focused_or_notified) ... ok
+test_listening_grpc_socket_suppresses_duplicate_without_unlink (test_firewall_ui.FirewallUITests.test_listening_grpc_socket_suppresses_duplicate_without_unlink) ... ok
+test_service_names_without_valid_runlevel_links_do_not_enable (test_firewall_ui.FirewallUITests.test_service_names_without_valid_runlevel_links_do_not_enable) ... ok
+test_socket_file_and_symlink_lock_are_preserved_and_rejected (test_firewall_ui.FirewallUITests.test_socket_file_and_symlink_lock_are_preserved_and_rejected) ... ok
+test_unsafe_runtime_permissions_owner_and_symlink_are_rejected (test_firewall_ui.FirewallUITests.test_unsafe_runtime_permissions_owner_and_symlink_are_rejected) ... ok
+test_bootstrap_command_is_executable (test_fossil_bootstrap.FossilBootstrapTests.test_bootstrap_command_is_executable) ... ok
+test_failure_removes_partial_repository_and_checkout (test_fossil_bootstrap.FossilBootstrapTests.test_failure_removes_partial_repository_and_checkout) ... ok
+test_help_documents_safe_defaults (test_fossil_bootstrap.FossilBootstrapTests.test_help_documents_safe_defaults) ... ok
+test_imports_git_history_and_opens_requested_branch (test_fossil_bootstrap.FossilBootstrapTests.test_imports_git_history_and_opens_requested_branch) ... ok
+test_refuses_an_existing_repository_or_checkout (test_fossil_bootstrap.FossilBootstrapTests.test_refuses_an_existing_repository_or_checkout) ... ok
+test_backup_dangling_metadata_symlink_is_not_followed (test_fossil_publication.PublicationTests.test_backup_dangling_metadata_symlink_is_not_followed) ... ok
+test_diverged_remote_is_not_overwritten (test_fossil_publication.PublicationTests.test_diverged_remote_is_not_overwritten) ... git init /tmp/oldbook-publication-test-3wn934__/mirror
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+Initialized empty Git repository in /tmp/oldbook-publication-test-3wn934__/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/oldbook-publication-test-3wn934__/mirror
+git update-ref "refs/heads/alpine-oldbook" 275b66f3c9dcad0817d1a168a12b661424ec649c
+git update-ref "refs/heads/base" 1ca84fe499d0aa3f14eed0c300a075f6fe722804
+git repack -adf
+To /tmp/oldbook-publication-test-3wn934__/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+no changes
+To /tmp/oldbook-publication-test-3wn934__/remote.git
+ ! [rejected]        alpine-oldbook -> alpine-oldbook (fetch first)
+error: failed to push some refs to '/tmp/oldbook-publication-test-3wn934__/remote.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+ok
+test_mirror_symlink_into_checkout_is_rejected (test_fossil_publication.PublicationTests.test_mirror_symlink_into_checkout_is_rejected) ... ok
+test_public_backup_retains_history_uv_and_identity_without_passwords (test_fossil_publication.PublicationTests.test_public_backup_retains_history_uv_and_identity_without_passwords) ... ok
+test_publish_retry_and_incremental_preserve_other_branch (test_fossil_publication.PublicationTests.test_publish_retry_and_incremental_preserve_other_branch) ... git init /tmp/oldbook-publication-test-09yd7z9_/mirror
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+Initialized empty Git repository in /tmp/oldbook-publication-test-09yd7z9_/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/oldbook-publication-test-09yd7z9_/mirror
+git update-ref "refs/heads/alpine-oldbook" 36ce82958d50b7c112b6da94f9c5f6ae6bbbd7eb
+git update-ref "refs/heads/base" 561810c9e606552412b99ff5dde0c7453fff4151
+git repack -adf
+To /tmp/oldbook-publication-test-09yd7z9_/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+no changes
+Everything up-to-date
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/1      1 check-ins added to the /tmp/oldbook-publication-test-09yd7z9_/mirror
+git update-ref "refs/heads/alpine-oldbook" c785aba54596509e795c05dba65b90bf822ecaba
+To /tmp/oldbook-publication-test-09yd7z9_/remote.git
+   36ce829..c785aba  alpine-oldbook -> alpine-oldbook
+ok
+test_separate_push_destination_is_rejected (test_fossil_publication.PublicationTests.test_separate_push_destination_is_rejected) ... git init /tmp/oldbook-publication-test-gbznb9uz/mirror
+hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+Initialized empty Git repository in /tmp/oldbook-publication-test-gbznb9uz/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/oldbook-publication-test-gbznb9uz/mirror
+git update-ref "refs/heads/alpine-oldbook" 57205a623d48df88baedbbbd7c5df88b3a5c064b
+git update-ref "refs/heads/base" 163206e3a7fcc491776c346ec2395299a1c4ae43
+git repack -adf
+To /tmp/oldbook-publication-test-gbznb9uz/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+no changes
+ok
+test_closing_without_save_leaves_source_and_backup_untouched (test_gallery_prompts.GalleryPromptDocumentTests.test_closing_without_save_leaves_source_and_backup_untouched) ... ok
+test_external_change_refuses_overwrite_and_creates_no_backup (test_gallery_prompts.GalleryPromptDocumentTests.test_external_change_refuses_overwrite_and_creates_no_backup) ... ok
+test_save_changes_only_editable_fields_and_backs_up_exact_bytes (test_gallery_prompts.GalleryPromptDocumentTests.test_save_changes_only_editable_fields_and_backs_up_exact_bytes) ... ok
+test_concurrent_calls_wait_for_one_real_readiness_event (test_lock.LockRegressionTests.test_concurrent_calls_wait_for_one_real_readiness_event) ... ok
+test_nonprivate_runtime_is_rejected_before_launch (test_lock.LockRegressionTests.test_nonprivate_runtime_is_rejected_before_launch) ... ok
+test_process_name_alone_never_proves_readiness (test_lock.LockRegressionTests.test_process_name_alone_never_proves_readiness) ... ok
+test_unready_helper_is_killed_and_never_records_success (test_lock.LockRegressionTests.test_unready_helper_is_killed_and_never_records_success) ... ok
+test_actual_lxqt_plugin_reads_and_follows_private_configuration (test_lxqt_theme.LXQtThemeTests.test_actual_lxqt_plugin_reads_and_follows_private_configuration) ... /usr/lib/python3.14/enum.py:677: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f4fc993ec50>
+  def __call__(cls, value, names=_not_given, *values, module=None, qualname=None, type=None, start=1, boundary=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/enum.py:677: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f4fc84775b0>
+  def __call__(cls, value, names=_not_given, *values, module=None, qualname=None, type=None, start=1, boundary=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/enum.py:677: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f4fc8477970>
+  def __call__(cls, value, names=_not_given, *values, module=None, qualname=None, type=None, start=1, boundary=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/enum.py:677: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f4fc7e206d0>
+  def __call__(cls, value, names=_not_given, *values, module=None, qualname=None, type=None, start=1, boundary=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/usr/lib/python3.14/enum.py:677: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f4fc7e20b80>
+  def __call__(cls, value, names=_not_given, *values, module=None, qualname=None, type=None, start=1, boundary=None):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_font_and_icon_preferences_match_existing_desktop (test_lxqt_theme.LXQtThemeTests.test_font_and_icon_preferences_match_existing_desktop) ... ok
+test_native_palette_and_preset_match_existing_qt6ct_colors (test_lxqt_theme.LXQtThemeTests.test_native_palette_and_preset_match_existing_qt6ct_colors) ... ok
+test_activation_failure_keeps_successful_checkpoint_and_artifact (test_manual_artwork.ManualArtworkTests.test_activation_failure_keeps_successful_checkpoint_and_artifact) ... ok
+test_edit_prompts_command_opens_editor (test_manual_artwork.ManualArtworkTests.test_edit_prompts_command_opens_editor) ... ok
+test_failed_native_request_never_selects_or_creates_artwork (test_manual_artwork.ManualArtworkTests.test_failed_native_request_never_selects_or_creates_artwork) ... ok
+test_gallery_controls_remain_visible_with_eighteen_paintings (test_manual_artwork.ManualArtworkTests.test_gallery_controls_remain_visible_with_eighteen_paintings) ... ok
+test_gallery_generation_entry_does_not_shift_existing_selections (test_manual_artwork.ManualArtworkTests.test_gallery_generation_entry_does_not_shift_existing_selections) ... ok
+test_gallery_keeps_browse_and_pause_commands_without_generating (test_manual_artwork.ManualArtworkTests.test_gallery_keeps_browse_and_pause_commands_without_generating) ... ok
+test_gallery_opens_prompt_editor_without_changing_or_generating_art (test_manual_artwork.ManualArtworkTests.test_gallery_opens_prompt_editor_without_changing_or_generating_art) ... ok
+test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release (test_manual_artwork.ManualArtworkTests.test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release) ... ok
+test_hover_tooltip_renders_full_help_in_every_state (test_manual_artwork.ManualArtworkTests.test_hover_tooltip_renders_full_help_in_every_state) ... ok
+test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image (test_manual_artwork.ManualArtworkTests.test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image) ... ok
+test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit (test_manual_artwork.ManualArtworkTests.test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit) ... ok
+test_select_resets_rotation_deadline_and_preserves_pause (test_manual_artwork.ManualArtworkTests.test_select_resets_rotation_deadline_and_preserves_pause) ... ok
+test_cancelled_phrase_menu_does_not_launch (test_new_themes.NewThemeTests.test_cancelled_phrase_menu_does_not_launch) ... ok
+test_invalid_model_output_never_writes_descriptor (test_new_themes.NewThemeTests.test_invalid_model_output_never_writes_descriptor) ... ok
+test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline) ... ok
+test_phrase_menu_passes_literal_text_to_background_job (test_new_themes.NewThemeTests.test_phrase_menu_passes_literal_text_to_background_job) ... ok
+test_random_and_phrase_prompts (test_new_themes.NewThemeTests.test_random_and_phrase_prompts) ... ok
+test_save_unique_discoverable_collection_without_replacing_existing (test_new_themes.NewThemeTests.test_save_unique_discoverable_collection_without_replacing_existing) ... ok
+test_symlink_theme_directory_is_rejected (test_new_themes.NewThemeTests.test_symlink_theme_directory_is_rejected) ... ok
+test_theme_design_receives_saved_artwork_guidance (test_new_themes.NewThemeTests.test_theme_design_receives_saved_artwork_guidance) ... ok
+test_attention_keeps_flashing_until_no_window_is_pending (test_notification_led.NotificationLedTests.test_attention_keeps_flashing_until_no_window_is_pending) ... ok
+test_caps_led_control_leaves_other_lights_alone (test_notification_led.NotificationLedTests.test_caps_led_control_leaves_other_lights_alone) ... ok
+test_codex_route_ignores_malformed_types_and_handles_equal_ties (test_notification_led.NotificationLedTests.test_codex_route_ignores_malformed_types_and_handles_equal_ties) ... ok
+test_control_subscriber_eof_cannot_silently_acknowledge_a_later_alert (test_notification_led.NotificationLedTests.test_control_subscriber_eof_cannot_silently_acknowledge_a_later_alert) ... ok
+test_exact_windows_clear_individually_on_focus_or_close (test_notification_led.NotificationLedTests.test_exact_windows_clear_individually_on_focus_or_close) ... ok
+test_focused_target_is_already_seen_and_never_becomes_pending (test_notification_led.NotificationLedTests.test_focused_target_is_already_seen_and_never_becomes_pending) ... ok
+test_hotplug_and_external_reset_recover_without_a_new_notification (test_notification_led.NotificationLedTests.test_hotplug_and_external_reset_recover_without_a_new_notification) ... ok
+test_new_alert_does_not_reset_the_existing_flash_phase (test_notification_led.NotificationLedTests.test_new_alert_does_not_reset_the_existing_flash_phase) ... ok
+test_no_candidate_fallback_clears_on_provider_focus_or_control_center (test_notification_led.NotificationLedTests.test_no_candidate_fallback_clears_on_provider_focus_or_control_center) ... ok
+test_notification_center_visibility_only_acknowledges_fallback (test_notification_led.NotificationLedTests.test_notification_center_visibility_only_acknowledges_fallback) ... ok
+test_only_attributed_ai_attention_events_start_flashing (test_notification_led.NotificationLedTests.test_only_attributed_ai_attention_events_start_flashing) ... ok
+test_only_window_lifecycle_and_focus_events_trigger_snapshots (test_notification_led.NotificationLedTests.test_only_window_lifecycle_and_focus_events_trigger_snapshots) ... ok
+test_recent_owned_codex_record_supplies_exact_route (test_notification_led.NotificationLedTests.test_recent_owned_codex_record_supplies_exact_route) ... ok
+test_sigterm_clears_led_and_stops_subscription (test_notification_led.NotificationLedTests.test_sigterm_clears_led_and_stops_subscription) ... ok
+test_singleton_subscription_restart_and_session_exit_clear_led (test_notification_led.NotificationLedTests.test_singleton_subscription_restart_and_session_exit_clear_led) ... ok
+test_unrouted_alert_queues_every_candidate_until_each_is_visited (test_notification_led.NotificationLedTests.test_unrouted_alert_queues_every_candidate_until_each_is_visited) ... ok
+test_invalid_theme_cannot_inject_css (test_overlay_theme.OverlayThemeTests.test_invalid_theme_cannot_inject_css) ... ok
+test_qt_and_gtk_consume_the_same_theme (test_overlay_theme.OverlayThemeTests.test_qt_and_gtk_consume_the_same_theme) ... ok
+test_running_qt_overlay_refreshes_after_palette_edit (test_overlay_theme.OverlayThemeTests.test_running_qt_overlay_refreshes_after_palette_edit) ... ok
+test_theme_switch_updates_surface_and_accent_without_restart (test_overlay_theme.OverlayThemeTests.test_theme_switch_updates_surface_and_accent_without_restart) ... ok
+test_cache_symlink_is_rejected (test_package_archive.PackageArchiveTest.test_cache_symlink_is_rejected) ... ok
+test_corrupt_cached_apk_is_rejected_without_overwrite (test_package_archive.PackageArchiveTest.test_corrupt_cached_apk_is_rejected_without_overwrite) ... ok
+test_corrupt_fossil_export_is_not_published_and_retry_succeeds (test_package_archive.PackageArchiveTest.test_corrupt_fossil_export_is_not_published_and_retry_succeeds) ... Published alpine-oldbook: 275b66f3c9dcad0817d1a168a12b661424ec649c
+/tmp/oldbook-publication-test-_92rpu2d/public.fossil
+SHA256 5369169db28644f6679d9a6c417aa4d8214dc90f5453bb3a2ee00be076d2962e
+Archived inputs: 1
+Published alpine-oldbook: 36ce82958d50b7c112b6da94f9c5f6ae6bbbd7eb
+Published alpine-oldbook: 36ce82958d50b7c112b6da94f9c5f6ae6bbbd7eb
+Published alpine-oldbook: c785aba54596509e795c05dba65b90bf822ecaba
+Published alpine-oldbook: 57205a623d48df88baedbbbd7c5df88b3a5c064b
+Verified 1 archived APKs
+ok
+test_failed_install_preserves_evidence_and_target_can_retry (test_package_archive.PackageArchiveTest.test_failed_install_preserves_evidence_and_target_can_retry) ... Verified 1 archived APKs
+Verified 1 archived APKs
+Compared package versions, native architectures and APK identities: 1
+ok
+test_host_identity_failure_retains_backup_and_does_not_publish_locked_world (test_package_archive.PackageArchiveTest.test_host_identity_failure_retains_backup_and_does_not_publish_locked_world) ... Exact package closure restored and compared: /tmp/tmp5nkngbge/root
+Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmpldhzoqkg/host/var/backups/oldbook/install-host-sesqt1rn
+ok
+test_host_install_requires_root_before_export (test_package_archive.PackageArchiveTest.test_host_install_requires_root_before_export) ... ok
+test_host_preserves_extras_and_private_backup_and_applies_locked_world (test_package_archive.PackageArchiveTest.test_host_preserves_extras_and_private_backup_and_applies_locked_world) ... Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmpqfxll37t/host/var/backups/oldbook/install-host-7_slrba3
+Locked APK identities verified; extra installed packages retained: extra
+Host package set is not an exact closure match.
+ok
+test_host_signature_failure_leaves_configuration_and_database_untouched (test_package_archive.PackageArchiveTest.test_host_signature_failure_leaves_configuration_and_database_untouched) ... Verified 1 archived APKs
+ok
+test_host_simulation_rejects_removals_before_install (test_package_archive.PackageArchiveTest.test_host_simulation_rejects_removals_before_install) ... Verified 1 archived APKs
+ok
+test_lock_rejects_corrupt_key_before_restore (test_package_archive.PackageArchiveTest.test_lock_rejects_corrupt_key_before_restore) ... ok
+test_lock_rejects_duplicate_package (test_package_archive.PackageArchiveTest.test_lock_rejects_duplicate_package) ... ok
+test_lock_rejects_modified_metadata_even_with_valid_json (test_package_archive.PackageArchiveTest.test_lock_rejects_modified_metadata_even_with_valid_json) ... ok
+test_lock_rejects_path_traversal_before_restore (test_package_archive.PackageArchiveTest.test_lock_rejects_path_traversal_before_restore) ... ok
+test_missing_fetch_does_not_resolve_cached_custom_package (test_package_archive.PackageArchiveTest.test_missing_fetch_does_not_resolve_cached_custom_package) ... ok
+test_missing_or_extra_package_is_rejected (test_package_archive.PackageArchiveTest.test_missing_or_extra_package_is_rejected) ... ok
+test_noarch_restore_matches_identity_despite_original_index_arch (test_package_archive.PackageArchiveTest.test_noarch_restore_matches_identity_despite_original_index_arch) ... Compared package versions, native architectures and APK identities: 1
+ok
+test_nonempty_target_is_never_modified (test_package_archive.PackageArchiveTest.test_nonempty_target_is_never_modified) ... ok
+test_same_name_version_and_arch_with_wrong_identity_is_rejected (test_package_archive.PackageArchiveTest.test_same_name_version_and_arch_with_wrong_identity_is_rejected) ... ok
+test_snapshot_accepts_noarch_only_when_control_identity_matches (test_package_archive.PackageArchiveTest.test_snapshot_accepts_noarch_only_when_control_identity_matches) ... ok
+test_snapshot_rejects_same_version_from_different_signed_build (test_package_archive.PackageArchiveTest.test_snapshot_rejects_same_version_from_different_signed_build) ... ok
+test_wrong_native_architecture_is_rejected (test_package_archive.PackageArchiveTest.test_wrong_native_architecture_is_rejected) ... ok
+test_each_seed_is_distinct (test_prompt_catalog.ComposeTests.test_each_seed_is_distinct) ... ok
+test_prompt_carries_style_theme_scene_insertion_and_seed (test_prompt_catalog.ComposeTests.test_prompt_carries_style_theme_scene_insertion_and_seed) ... ok
+test_unthemed_prompt_omits_the_theme_paragraph (test_prompt_catalog.ComposeTests.test_unthemed_prompt_omits_the_theme_paragraph) ... ok
+test_a_fully_disabled_bank_falls_back_rather_than_painting_nothing (test_prompt_catalog.EnabledTests.test_a_fully_disabled_bank_falls_back_rather_than_painting_nothing) ... ok
+test_disabled_entries_are_skipped (test_prompt_catalog.EnabledTests.test_disabled_entries_are_skipped) ... ok
+test_damaged_history_falls_back_to_the_bootstrap (test_prompt_catalog.HistoryTests.test_damaged_history_falls_back_to_the_bootstrap) ... ok
+test_round_trips_recorded_pairs (test_prompt_catalog.HistoryTests.test_round_trips_recorded_pairs) ... ok
+test_a_catalog_without_insertions_still_selects_a_scene (test_prompt_catalog.SelectionTests.test_a_catalog_without_insertions_still_selects_a_scene) ... ok
+test_a_painted_pair_is_avoided_while_fresh_pairs_remain (test_prompt_catalog.SelectionTests.test_a_painted_pair_is_avoided_while_fresh_pairs_remain) ... ok
+test_an_exhausted_bank_returns_the_least_recently_painted_pair (test_prompt_catalog.SelectionTests.test_an_exhausted_bank_returns_the_least_recently_painted_pair) ... ok
+test_explicit_identifiers_win_over_the_bank (test_prompt_catalog.SelectionTests.test_explicit_identifiers_win_over_the_bank) ... ok
+test_rotate_advances_from_the_last_painted_scene (test_prompt_catalog.SelectionTests.test_rotate_advances_from_the_last_painted_scene) ... ok
+test_shuffle_exhausts_every_pair_before_any_repeat (test_prompt_catalog.SelectionTests.test_shuffle_exhausts_every_pair_before_any_repeat) ... ok
+test_unknown_identifier_is_rejected (test_prompt_catalog.SelectionTests.test_unknown_identifier_is_rejected) ... ok
+test_accepts_a_catalog_without_the_newer_banks (test_prompt_catalog.ValidationTests.test_accepts_a_catalog_without_the_newer_banks) ... ok
+test_live_catalog_validates_and_offers_many_combinations (test_prompt_catalog.ValidationTests.test_live_catalog_validates_and_offers_many_combinations) ... ok
+test_rejects_an_unknown_selection_mode (test_prompt_catalog.ValidationTests.test_rejects_an_unknown_selection_mode) ... ok
+test_rejects_duplicate_and_malformed_identifiers (test_prompt_catalog.ValidationTests.test_rejects_duplicate_and_malformed_identifiers) ... ok
+test_rejects_turning_every_scene_off (test_prompt_catalog.ValidationTests.test_rejects_turning_every_scene_off) ... ok
+test_concurrent_reload_starts_services_once (test_session.SessionTests.test_concurrent_reload_starts_services_once) ... ok
+test_budget_exhaustion_cancels_and_next_poll_visits_waiting_keyboard (test_shortcut_hold.EvdevMonitorTests.test_budget_exhaustion_cancels_and_next_poll_visits_waiting_keyboard) ... ok
+test_close_is_idempotent_and_clears_all_devices (test_shortcut_hold.EvdevMonitorTests.test_close_is_idempotent_and_clears_all_devices) ... ok
+test_disconnect_during_drop_resync_ignores_remaining_packet_bytes (test_shortcut_hold.EvdevMonitorTests.test_disconnect_during_drop_resync_ignores_remaining_packet_bytes) ... ok
+test_disconnect_removes_pressed_state_and_closes_device (test_shortcut_hold.EvdevMonitorTests.test_disconnect_removes_pressed_state_and_closes_device) ... ok
+test_discovers_keyboards_without_treating_a_mouse_as_one (test_shortcut_hold.EvdevMonitorTests.test_discovers_keyboards_without_treating_a_mouse_as_one) ... ok
+test_each_poll_has_an_explicit_event_budget (test_shortcut_hold.EvdevMonitorTests.test_each_poll_has_an_explicit_event_budget) ... ok
+test_exposed_state_can_cancel_visibility_for_session_gating (test_shortcut_hold.EvdevMonitorTests.test_exposed_state_can_cancel_visibility_for_session_gating) ... ok
+test_initial_down_state_cannot_trigger_a_delayed_overlay (test_shortcut_hold.EvdevMonitorTests.test_initial_down_state_cannot_trigger_a_delayed_overlay) ... ok
+test_key_on_a_non_super_keyboard_cancels_another_keyboard_hold (test_shortcut_hold.EvdevMonitorTests.test_key_on_a_non_super_keyboard_cancels_another_keyboard_hold) ... ok
+test_poll_parses_key_packets_and_returns_visibility (test_shortcut_hold.EvdevMonitorTests.test_poll_parses_key_packets_and_returns_visibility) ... ok
+test_syn_dropped_cancels_and_resynchronizes_without_a_flash (test_shortcut_hold.EvdevMonitorTests.test_syn_dropped_cancels_and_resynchronizes_without_a_flash) ... ok
+test_unreadable_and_disconnected_devices_do_not_break_polling (test_shortcut_hold.EvdevMonitorTests.test_unreadable_and_disconnected_devices_do_not_break_polling) ... ok
+test_cancel_and_device_removal_require_a_fresh_press (test_shortcut_hold.HoldStateTests.test_cancel_and_device_removal_require_a_fresh_press) ... ok
+test_chord_after_threshold_hides_immediately_and_stays_hidden (test_shortcut_hold.HoldStateTests.test_chord_after_threshold_hides_immediately_and_stays_hidden) ... ok
+test_chord_cancels_until_super_is_released (test_shortcut_hold.HoldStateTests.test_chord_cancels_until_super_is_released) ... ok
+test_keys_on_multiple_keyboards_form_one_global_chord (test_shortcut_hold.HoldStateTests.test_keys_on_multiple_keyboards_form_one_global_chord) ... ok
+test_lone_super_appears_at_exact_threshold_and_release_hides_it (test_shortcut_hold.HoldStateTests.test_lone_super_appears_at_exact_threshold_and_release_hides_it) ... ok
+test_quick_tap_never_appears_later (test_shortcut_hold.HoldStateTests.test_quick_tap_never_appears_later) ... ok
+test_repeat_events_do_not_cancel_or_restart_the_timer (test_shortcut_hold.HoldStateTests.test_repeat_events_do_not_cancel_or_restart_the_timer) ... ok
+test_super_pressed_while_another_key_is_down_is_suppressed (test_shortcut_hold.HoldStateTests.test_super_pressed_while_another_key_is_down_is_suppressed) ... ok
+test_two_super_keys_are_conservatively_suppressed (test_shortcut_hold.HoldStateTests.test_two_super_keys_are_conservatively_suppressed) ... ok
+test_abandoned_temporary_status_file_does_not_break_startup (test_shortcut_service.RuntimeSafetyTests.test_abandoned_temporary_status_file_does_not_break_startup) ... ok
+test_different_sway_sockets_have_distinct_lock_and_status_files (test_shortcut_service.RuntimeSafetyTests.test_different_sway_sockets_have_distinct_lock_and_status_files) ... ok
+test_graphical_guard_caches_probe_and_always_checks_lock (test_shortcut_service.RuntimeSafetyTests.test_graphical_guard_caches_probe_and_always_checks_lock) ... ok
+test_missing_wayland_socket_with_live_lock_record_fails_conservative (test_shortcut_service.RuntimeSafetyTests.test_missing_wayland_socket_with_live_lock_record_fails_conservative) ... ok
+test_nonprivate_runtime_is_rejected_before_state_is_created (test_shortcut_service.RuntimeSafetyTests.test_nonprivate_runtime_is_rejected_before_state_is_created) ... ok
+test_same_sway_session_excludes_duplicate_but_releases_cleanly (test_shortcut_service.RuntimeSafetyTests.test_same_sway_session_excludes_duplicate_but_releases_cleanly) ... ok
+test_slow_activity_probe_never_blocks_input_poll_or_release (test_shortcut_service.RuntimeSafetyTests.test_slow_activity_probe_never_blocks_input_poll_or_release) ... ok
+test_socket_watch_detects_peer_shutdown (test_shortcut_service.RuntimeSafetyTests.test_socket_watch_detects_peer_shutdown) ... ok
+test_status_command_uses_package_imports_without_loading_gtk (test_shortcut_service.RuntimeSafetyTests.test_status_command_uses_package_imports_without_loading_gtk) ... FAIL
+test_status_marks_a_crashed_process_record_stale (test_shortcut_service.RuntimeSafetyTests.test_status_marks_a_crashed_process_record_stale) ... FAIL
+test_valid_live_lock_record_suppresses_overlay_but_stale_record_does_not (test_shortcut_service.RuntimeSafetyTests.test_valid_live_lock_record_suppresses_overlay_but_stale_record_does_not) ... ok
+test_close_is_idempotent (test_shortcut_service.ShortcutServiceTests.test_close_is_idempotent) ... ok
+test_guard_failure_ends_controller_and_closes_resources (test_shortcut_service.ShortcutServiceTests.test_guard_failure_ends_controller_and_closes_resources) ... ok
+test_inactive_graphical_session_hides_and_cancels_hold (test_shortcut_service.ShortcutServiceTests.test_inactive_graphical_session_hides_and_cancels_hold) ... ok
+test_loading_uses_background_focused_output_before_snapshot (test_shortcut_service.ShortcutServiceTests.test_loading_uses_background_focused_output_before_snapshot) ... ok
+test_repeated_cancelled_holds_coalesce_behind_one_bounded_stale_job (test_shortcut_service.ShortcutServiceTests.test_repeated_cancelled_holds_coalesce_behind_one_bounded_stale_job) ... ok
+test_slow_snapshot_never_delays_release_or_reappears_stale (test_shortcut_service.ShortcutServiceTests.test_slow_snapshot_never_delays_release_or_reappears_stale) ... ok
+test_sway_disconnect_ends_controller_and_closes_resources (test_shortcut_service.ShortcutServiceTests.test_sway_disconnect_ends_controller_and_closes_resources) ... ok
+test_visible_snapshot_refreshes_only_when_content_changes (test_shortcut_service.ShortcutServiceTests.test_visible_snapshot_refreshes_only_when_content_changes) ... ok
+test_background_tmux_client_does_not_replace_foreground_shell (test_shortcut_sources.ShortcutProviderTests.test_background_tmux_client_does_not_replace_foreground_shell) ... ok
+test_canonical_include_is_loaded_only_once_across_sibling_directives (test_shortcut_sources.ShortcutProviderTests.test_canonical_include_is_loaded_only_once_across_sibling_directives) ... ok
+test_configured_oldbook_helpers_receive_readable_labels (test_shortcut_sources.ShortcutProviderTests.test_configured_oldbook_helpers_receive_readable_labels) ... ok
+test_current_nested_includes_apply_in_place_with_variables_globs_and_cycles (test_shortcut_sources.ShortcutProviderTests.test_current_nested_includes_apply_in_place_with_variables_globs_and_cycles) ... ok
+test_custom_profile_rejects_text_that_needs_control_character_cleanup (test_shortcut_sources.ShortcutProviderTests.test_custom_profile_rejects_text_that_needs_control_character_cleanup) ... ok
+test_default_mode_expands_variables_and_honors_overrides_unbinds_options_and_groups (test_shortcut_sources.ShortcutProviderTests.test_default_mode_expands_variables_and_honors_overrides_unbinds_options_and_groups) ... ok
+test_emacs_copy_mode_reads_the_real_copy_mode_table (test_shortcut_sources.ShortcutProviderTests.test_emacs_copy_mode_reads_the_real_copy_mode_table) ... ok
+test_focused_leaf_and_its_output_win_over_focused_ancestors (test_shortcut_sources.ShortcutProviderTests.test_focused_leaf_and_its_output_win_over_focused_ancestors) ... ok
+test_home_include_is_expanded_without_running_shell_syntax (test_shortcut_sources.ShortcutProviderTests.test_home_include_is_expanded_without_running_shell_syntax) ... ok
+test_malformed_custom_profile_is_reported_without_hiding_builtin_profiles (test_shortcut_sources.ShortcutProviderTests.test_malformed_custom_profile_is_reported_without_hiding_builtin_profiles) ... ok
+test_modifier_order_is_normalized_for_override_but_key_case_is_distinct (test_shortcut_sources.ShortcutProviderTests.test_modifier_order_is_normalized_for_override_but_key_case_is_distinct) ... ok
+test_mouse_region_options_and_xkb_groups_remain_distinct (test_shortcut_sources.ShortcutProviderTests.test_mouse_region_options_and_xkb_groups_remain_distinct) ... ok
+test_only_the_active_sway_mode_is_shown (test_shortcut_sources.ShortcutProviderTests.test_only_the_active_sway_mode_is_shown) ... ok
+test_redefined_include_variable_selects_the_later_file (test_shortcut_sources.ShortcutProviderTests.test_redefined_include_variable_selects_the_later_file) ... ok
+test_sway_failure_is_bounded_and_explicit (test_shortcut_sources.ShortcutProviderTests.test_sway_failure_is_bounded_and_explicit) ... ok
+test_terminal_uses_active_tmux_pane_and_orders_context_sections (test_shortcut_sources.ShortcutProviderTests.test_terminal_uses_active_tmux_pane_and_orders_context_sections) ... ok
+test_tmux_copy_mode_table_is_added_only_when_pane_reports_it (test_shortcut_sources.ShortcutProviderTests.test_tmux_copy_mode_table_is_added_only_when_pane_reports_it) ... ok
+test_tmux_key_case_and_literal_dash_remain_distinct (test_shortcut_sources.ShortcutProviderTests.test_tmux_key_case_and_literal_dash_remain_distinct) ... ok
+test_unknown_application_is_explicit_and_keeps_sway_second (test_shortcut_sources.ShortcutProviderTests.test_unknown_application_is_explicit_and_keeps_sway_second) ... ok
+test_valid_custom_profile_matches_alias_and_is_strictly_normalized (test_shortcut_sources.ShortcutProviderTests.test_valid_custom_profile_matches_alias_and_is_strictly_normalized) ... ok
+test_variable_redefinition_changes_only_later_bindings (test_shortcut_sources.ShortcutProviderTests.test_variable_redefinition_changes_only_later_bindings) ... ok
+test_verified_codex_process_uses_partial_versioned_profile (test_shortcut_sources.ShortcutProviderTests.test_verified_codex_process_uses_partial_versioned_profile) ... ok
+test_corrupt_cache_is_preserved_and_rejected (test_source_archive.SourceArchiveTests.test_corrupt_cache_is_preserved_and_rejected) ... ok
+test_corrupt_export_never_publishes_destination (test_source_archive.SourceArchiveTests.test_corrupt_export_never_publishes_destination) ... ok
+test_manifest_rejects_path_traversal_and_digest_alias (test_source_archive.SourceArchiveTests.test_manifest_rejects_path_traversal_and_digest_alias) ... ok
+test_symlink_cache_and_symlink_artifacts_are_rejected (test_source_archive.SourceArchiveTests.test_symlink_cache_and_symlink_artifacts_are_rejected) ... ok
+test_dry_run_reports_targets_without_output_to_their_ptys (test_terminal_theme.TerminalThemeTests.test_dry_run_reports_targets_without_output_to_their_ptys) ... ok
+test_duplicate_foot_descriptors_refresh_one_private_pty_once (test_terminal_theme.TerminalThemeTests.test_duplicate_foot_descriptors_refresh_one_private_pty_once) ... ok
+test_invalid_palette_cannot_inject_control_sequences (test_terminal_theme.TerminalThemeTests.test_invalid_palette_cannot_inject_control_sequences) ... ok
+test_other_users_and_non_foot_processes_never_receive_palette (test_terminal_theme.TerminalThemeTests.test_other_users_and_non_foot_processes_never_receive_palette) ... ok
+test_palette_sets_colors_without_requesting_replies_or_resetting_screen (test_terminal_theme.TerminalThemeTests.test_palette_sets_colors_without_requesting_replies_or_resetting_screen) ... ok
+test_symlink_and_regular_file_tty_paths_are_left_untouched (test_terminal_theme.TerminalThemeTests.test_symlink_and_regular_file_tty_paths_are_left_untouched) ... ok
+test_wrong_tty_owner_is_rejected_after_open (test_terminal_theme.TerminalThemeTests.test_wrong_tty_owner_is_rejected_after_open) ... ok
+test_destination_changed_during_generation_never_receives_artwork (test_themed_artwork.ThemedArtworkTests.test_destination_changed_during_generation_never_receives_artwork) ... ok
+test_gallery_adds_theme_and_general_generation_after_existing_controls (test_themed_artwork.ThemedArtworkTests.test_gallery_adds_theme_and_general_generation_after_existing_controls) ... ok
+test_manual_active_theme_records_palette_and_saves_nested_pair (test_themed_artwork.ThemedArtworkTests.test_manual_active_theme_records_palette_and_saves_nested_pair) ... ok
+test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art (test_themed_artwork.ThemedArtworkTests.test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art) ... ok
+test_symlinked_theme_configuration_never_reserves_or_generates (test_themed_artwork.ThemedArtworkTests.test_symlinked_theme_configuration_never_reserves_or_generates) ... ok
+test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available (test_themed_artwork.ThemedArtworkTests.test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available) ... ok
+test_unsafe_or_unknown_theme_does_not_reserve_attempt (test_themed_artwork.ThemedArtworkTests.test_unsafe_or_unknown_theme_does_not_reserve_attempt) ... ok
+test_unthemed_generation_uses_general_folder_without_active_palette (test_themed_artwork.ThemedArtworkTests.test_unthemed_generation_uses_general_folder_without_active_palette) ... ok
+test_accepts_explicit_https_and_rejects_unsafe_or_missing_sources (test_video_background.VideoBackgroundTests.test_accepts_explicit_https_and_rejects_unsafe_or_missing_sources) ... ok
+test_picker_passes_an_explicit_selection_through_validation (test_video_background.VideoBackgroundTests.test_picker_passes_an_explicit_selection_through_validation) ... ok
+test_replacement_stops_only_the_previously_recorded_group (test_video_background.VideoBackgroundTests.test_replacement_stops_only_the_previously_recorded_group) ... ok
+test_start_and_stop_use_one_owned_group_and_literal_arguments (test_video_background.VideoBackgroundTests.test_start_and_stop_use_one_owned_group_and_literal_arguments) ... ok
+test_waybar_reload_targets_only_same_executable_and_compositor (test_video_background.VideoBackgroundTests.test_waybar_reload_targets_only_same_executable_and_compositor) ... ok
+test_checkpoint_accepts_themed_and_general_pairs_without_other_changes (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_checkpoint_accepts_themed_and_general_pairs_without_other_changes) ... ok
+test_checkpoint_commits_pair_only_and_preserves_unrelated_edits (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_checkpoint_commits_pair_only_and_preserves_unrelated_edits) ... ok
+test_checkpoint_failure_keeps_files_and_daily_reservation (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_checkpoint_failure_keeps_files_and_daily_reservation) ... ok
+test_checkpoint_rejects_arbitrary_subdirectories_and_symlinked_theme_directory (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_checkpoint_rejects_arbitrary_subdirectories_and_symlinked_theme_directory) ... ok
+test_configured_hooks_are_refused_without_running_or_bypassing (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_configured_hooks_are_refused_without_running_or_bypassing) ... ok
+test_new_theme_checkpoint_preserves_descriptor_and_unrelated_work (test_wallpaper_checkpoint.WallpaperCheckpointTests.test_new_theme_checkpoint_preserves_descriptor_and_unrelated_work) ... ok
+test_cron_keeps_unrelated_jobs_and_is_idempotent (test_wallpapers.WallpaperTests.test_cron_keeps_unrelated_jobs_and_is_idempotent) ... ok
+test_gallery_rejects_traversal_and_modified_hash (test_wallpapers.WallpaperTests.test_gallery_rejects_traversal_and_modified_hash) ... ok
+test_generated_image_must_be_new_native_landscape (test_wallpapers.WallpaperTests.test_generated_image_must_be_new_native_landscape) ... ok
+test_generation_environment_excludes_api_keys_and_session_overrides (test_wallpapers.WallpaperTests.test_generation_environment_excludes_api_keys_and_session_overrides) ... ok
+test_native_request_is_sandboxed_and_has_no_dangerous_flags (test_wallpapers.WallpaperTests.test_native_request_is_sandboxed_and_has_no_dangerous_flags) ... ok
+test_pause_preserves_art_and_next_updates_only_after_sway_success (test_wallpapers.WallpaperTests.test_pause_preserves_art_and_next_updates_only_after_sway_success) ... ok
+test_rejects_malformed_cron_block (test_wallpapers.WallpaperTests.test_rejects_malformed_cron_block) ... ok
+test_reserved_day_never_launches_codex_again (test_wallpapers.WallpaperTests.test_reserved_day_never_launches_codex_again) ... ok
+test_workspace_rotation_restores_image_pause_and_timer_independently (test_wallpapers.WallpaperTests.test_workspace_rotation_restores_image_pause_and_timer_independently) ... ok
+test_first_instance_moves_once_and_extras_stay_put (test_workspace_defaults.WorkspaceDefaultsTests.test_first_instance_moves_once_and_extras_stay_put) ... ok
+test_initial_existing_windows_are_adopted_without_moving (test_workspace_defaults.WorkspaceDefaultsTests.test_initial_existing_windows_are_adopted_without_moving) ... ok
+test_restart_keeps_manual_moves_and_pending_terminal_identity (test_workspace_defaults.WorkspaceDefaultsTests.test_restart_keeps_manual_moves_and_pending_terminal_identity) ... ok
+test_rotations_avoid_other_workspace_choices_and_wrap (test_workspace_defaults.WorkspaceDefaultsTests.test_rotations_avoid_other_workspace_choices_and_wrap) ... ok
+test_codex_launcher_uses_resolver_recognized_app_id (test_workspaces.WorkspaceServiceTests.test_codex_launcher_uses_resolver_recognized_app_id) ... ok
+test_event_tty_takes_precedence_over_inherited_tmux_pane (test_workspaces.WorkspaceServiceTests.test_event_tty_takes_precedence_over_inherited_tmux_pane) ... ok
+test_events_match_exact_panes_and_disappear_when_cleared (test_workspaces.WorkspaceServiceTests.test_events_match_exact_panes_and_disappear_when_cleared) ... ok
+test_malformed_or_expired_events_do_not_crash_or_set_badges (test_workspaces.WorkspaceServiceTests.test_malformed_or_expired_events_do_not_crash_or_set_badges) ... ok
+test_records_are_reused_only_for_the_current_sway_socket (test_workspaces.WorkspaceServiceTests.test_records_are_reused_only_for_the_current_sway_socket) ... ok
+test_rename_refuses_names_sway_cannot_address_losslessly (test_workspaces.WorkspaceServiceTests.test_rename_refuses_names_sway_cannot_address_losslessly) ... ok
+test_restore_ignores_malformed_record_collections_and_entries (test_workspaces.WorkspaceServiceTests.test_restore_ignores_malformed_record_collections_and_entries) ... ok
+test_status_falls_back_to_idle_for_bad_or_stale_state (test_workspaces.WorkspaceServiceTests.test_status_falls_back_to_idle_for_bad_or_stale_state) ... ok
+test_status_falls_back_to_idle_for_fresh_malformed_ai_state (test_workspaces.WorkspaceServiceTests.test_status_falls_back_to_idle_for_fresh_malformed_ai_state) ... ok
+test_workspace_runtime_directories_are_private_or_rejected (test_workspaces.WorkspaceServiceTests.test_workspace_runtime_directories_are_private_or_rejected) ... ok
+test_application_text_cannot_inject_commands_or_markup (test_workspaces.WorkspaceTests.test_application_text_cannot_inject_commands_or_markup) ... ok
+test_claude_window_is_named_and_available_in_ai_switcher (test_workspaces.WorkspaceTests.test_claude_window_is_named_and_available_in_ai_switcher) ... ok
+test_floating_window_and_focus_tie_are_accounted_for (test_workspaces.WorkspaceTests.test_floating_window_and_focus_tie_are_accounted_for) ... ok
+test_fullscreen_subtree_wins_even_with_stale_small_geometry (test_workspaces.WorkspaceTests.test_fullscreen_subtree_wins_even_with_stale_small_geometry) ... ok
+test_inactive_tab_cannot_supply_the_workspace_label (test_workspaces.WorkspaceTests.test_inactive_tab_cannot_supply_the_workspace_label) ... ok
+test_inactive_workspace_still_gets_its_largest_app (test_workspaces.WorkspaceTests.test_inactive_workspace_still_gets_its_largest_app) ... ok
+test_largest_app_wins_over_small_focused_window (test_workspaces.WorkspaceTests.test_largest_app_wins_over_small_focused_window) ... ok
+test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) ... ok
+test_manual_workspace_rename_becomes_the_new_base (test_workspaces.WorkspaceTests.test_manual_workspace_rename_becomes_the_new_base) ... ok
+test_names_keep_numbers_and_do_not_accumulate_suffixes (test_workspaces.WorkspaceTests.test_names_keep_numbers_and_do_not_accumulate_suffixes) ... ok
+test_review_workspace_keeps_strata_when_browser_changes (test_workspaces.WorkspaceTests.test_review_workspace_keeps_strata_when_browser_changes) ... ok
+test_scratchpad_is_excluded_from_workspace_scan (test_workspaces.WorkspaceTests.test_scratchpad_is_excluded_from_workspace_scan) ... ok
+test_unaddressable_manual_workspace_name_is_left_unchanged (test_workspaces.WorkspaceTests.test_unaddressable_manual_workspace_name_is_left_unchanged) ... ok
+test_browser_selection_stores_reference_only_and_reaches_playback (test_youtube_library.YoutubeLibraryTests.test_browser_selection_stores_reference_only_and_reaches_playback) ... ok
+test_browsing_playlist_selects_video_without_loading_playlist_as_video (test_youtube_library.YoutubeLibraryTests.test_browsing_playlist_selects_video_without_loading_playlist_as_video) ... ok
+test_cancel_browsing_preserves_current_queue (test_youtube_library.YoutubeLibraryTests.test_cancel_browsing_preserves_current_queue) ... ok
+test_cookie_reference_is_never_sent_to_arbitrary_hosts (test_youtube_library.YoutubeLibraryTests.test_cookie_reference_is_never_sent_to_arbitrary_hosts) ... ok
+test_empty_history_is_valid_and_failed_login_is_actionable (test_youtube_library.YoutubeLibraryTests.test_empty_history_is_valid_and_failed_login_is_actionable) ... ok
+test_pagination_fetches_lookahead_without_duplicate_page_boundary (test_youtube_library.YoutubeLibraryTests.test_pagination_fetches_lookahead_without_duplicate_page_boundary) ... ok
+test_private_feed_requires_selected_account (test_youtube_library.YoutubeLibraryTests.test_private_feed_requires_selected_account) ... ok
+test_search_is_literal_and_page_normalizes_videos_and_playlists (test_youtube_library.YoutubeLibraryTests.test_search_is_literal_and_page_normalizes_videos_and_playlists) ... ok
+test_background_exists_only_on_output_showing_workspace_one (test_youtube_queue.YoutubeQueueTests.test_background_exists_only_on_output_showing_workspace_one) ... ok
+test_empty_playlist_cannot_fall_back_to_mpv_playlist_autoplay (test_youtube_queue.YoutubeQueueTests.test_empty_playlist_cannot_fall_back_to_mpv_playlist_autoplay) ... ok
+test_end_requires_a_decision_and_rewatch_does_not_advance (test_youtube_queue.YoutubeQueueTests.test_end_requires_a_decision_and_rewatch_does_not_advance) ... ok
+test_keep_and_remove_record_different_decisions_and_stop_at_end (test_youtube_queue.YoutubeQueueTests.test_keep_and_remove_record_different_decisions_and_stop_at_end) ... ok
+
+======================================================================
+FAIL: test_status_command_uses_package_imports_without_loading_gtk (test_shortcut_service.RuntimeSafetyTests.test_status_command_uses_package_imports_without_loading_gtk)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_shortcut_service.py", line 447, in test_status_command_uses_package_imports_without_loading_gtk
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : oldbook-shortcuts: no shortcut service status for this display
+
+
+======================================================================
+FAIL: test_status_marks_a_crashed_process_record_stale (test_shortcut_service.RuntimeSafetyTests.test_status_marks_a_crashed_process_record_stale)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_shortcut_service.py", line 471, in test_status_marks_a_crashed_process_record_stale
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : oldbook-shortcuts: no shortcut service status for this display
+
+
+----------------------------------------------------------------------
+Ran 329 tests in 173.241s
+
+FAILED (failures=2)
