@@ -397,3 +397,34 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   OpenRC startup, packet-gate/OpenSnitch renewal policy, exact trusted SSIDs,
   profile RA/SLAAC decisions, orphan-state recovery, controlled legacy-owner
   migration and reboot/suspend acceptance. The live WPA/DHCP owners remain.
+
+## Combined radio failure and packet-policy checks — 2026-09-07
+
+- Seven combined fault cases passed in 19.20 seconds using the production
+  guardian, owner, CLI, DHCP client and native applier in private namespaces.
+  Cancellation during WPA/native waits, client/hook death, competing guardians
+  and reciprocal guardian/owner death behaved as required. Blocking preceded
+  teardown; all host comparisons matched and no test processes survived.
+- Six packet-policy cases passed in 28.17 seconds with the installed BusyBox,
+  nftables and OpenSnitch. Actual same-client unicast renewal passed through
+  the existing DHCP exception. Controlled IPv4 UDP/TCP DNS rules distinguished
+  executable, UID and resolver, including nested PID namespaces. Real IPv6
+  DAD/neighbor discovery passed, and daemon death denied fresh DNS.
+- The fixture explicitly prevents DNS eBPF module loading with a verified empty
+  private module directory. OpenSnitch's DNS listener startup is independent of
+  process monitoring; selecting proc alone does not disable it. This correction
+  and four failed packet-fixture runs remain in the evidence. The first fault
+  harness reporting failure also remains recorded without reconstructed results.
+- Sources and reports are committed as `e8fe6ee814` and `6043a19199`.
+  `security/radio/fault-verification.json` and
+  `security/firewall/radio-policy-verification.json` reference source hashes and
+  content-addressed Fossil evidence. Production runtime and live rules were
+  unchanged in this pass; the earlier 213-test component suite remains applicable.
+- `security/radio/INSTALL-PLAN.md` now describes the persistent owner handoff.
+  `ORPHAN-RECOVERY.md` specifies same-boot crash recovery but is unimplemented.
+  Owner death currently retains its marker and refuses replacement. OpenRC
+  startup, recovery implementation, exact trusted profiles, deliberate live
+  policy/owner migration and reboot/suspend acceptance remain unfinished.
+- The current 1,080-package lock still exactly matches installed identities,
+  world, repository configuration and public keys. Existing Hold to Help,
+  Gruvbox theme settings, desktop controls and OpenSnitch choices are preserved.
