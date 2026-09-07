@@ -112,13 +112,16 @@ enabling controller-managed networking. Exact trusted profile identities and a
 working root-only WPA control socket also remain activation prerequisites.
 The staged controller's isolated deadline, protocol and soft/hard state checks
 are recorded in [controller-verification.json](controller-verification.json).
-The staged lease parser, persistent client manager and bounded event hook now
-have isolated tests, including real DHCP acquisition and renewal. They remain
+The staged lease parser, persistent client manager, bounded event hook and
+owned network applier now have isolated tests, including real DHCP acquisition,
+renewal and native address/route/DNS cleanup. They remain
 separate from this legacy CLI, whose one-shot path must not be activated.
 See [LEASE-OWNER.md](LEASE-OWNER.md) for the component contracts and
 [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining WLAN migration and
-recovery work. The installed, archived openresolv dependency has not taken
-ownership of the live resolver file.
+recovery work. The installed, reproducibly patched openresolv dependency adds
+PID-namespace lock compatibility; it has not taken ownership of the live
+resolver file or changed its subscriber configuration. See
+[RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) for the compatibility contract.
 
 `root/etc/wpa_supplicant/privacy-policy.conf` is a merge-only policy fragment.
 It uses the documented `passive_scan=1` and `p2p_disabled=1` global options;

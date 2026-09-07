@@ -1,0 +1,131 @@
+{
+  "name": "openresolv",
+  "version": "3.17.4-r1",
+  "release_status": "local main package installed; DNS and radio ownership activation remain staged",
+  "license": "BSD-2-Clause",
+  "source_date_epoch": 1766616122,
+  "source": {
+    "filename": "openresolv-3.17.4.tar.xz",
+    "sha256": "901d83a15520b80e117aeca8cb6f5b70ceb205ba050a638d45cebcf304df729b",
+    "size": 25660,
+    "artifact": "sha256/901d83a15520b80e117aeca8cb6f5b70ceb205ba050a638d45cebcf304df729b/openresolv-3.17.4.tar.xz",
+    "url": "https://github.com/NetworkConfiguration/openresolv/releases/download/v3.17.4/openresolv-3.17.4.tar.xz"
+  },
+  "host_pid_lock_abi": 1,
+  "resolver_sha256": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3",
+  "build_inputs": [
+    {
+      "filename": "APKBUILD",
+      "sha256": "c003b3524a8e70dcda0da2276199ee80f8fe32ea4f7fa89e1a4f3b6a80c5457e",
+      "size": 1554,
+      "artifact": "sha256/c003b3524a8e70dcda0da2276199ee80f8fe32ea4f7fa89e1a4f3b6a80c5457e/APKBUILD"
+    },
+    {
+      "filename": "host-pid-lock.patch",
+      "sha256": "11fdf01b04044619ce70d683d94be64d125767b9317de9a7ebae041376b76694",
+      "size": 2847,
+      "artifact": "sha256/11fdf01b04044619ce70d683d94be64d125767b9317de9a7ebae041376b76694/host-pid-lock.patch"
+    },
+    {
+      "filename": "detect_init-remove-irrelevant.patch",
+      "sha256": "8ca34b183e46d7732ddc6dcc26804fd532fca90012e54be9f48af678a4b815bd",
+      "size": 2956,
+      "artifact": "sha256/8ca34b183e46d7732ddc6dcc26804fd532fca90012e54be9f48af678a4b815bd/detect_init-remove-irrelevant.patch"
+    },
+    {
+      "filename": "test-host-pid-lock.py",
+      "sha256": "f62a197c36b610cb0aacf3b7a5f4c94d230ffc78da0ec7c9f856ed1a36d7b105",
+      "size": 5784,
+      "artifact": "sha256/f62a197c36b610cb0aacf3b7a5f4c94d230ffc78da0ec7c9f856ed1a36d7b105/test-host-pid-lock.py"
+    },
+    {
+      "filename": "build-offline",
+      "sha256": "c5753c4ea3a706d39ddb20984d37e3d898da5f44a5ad785bd1b0ada8f1c6b88b",
+      "size": 2147,
+      "artifact": "sha256/c5753c4ea3a706d39ddb20984d37e3d898da5f44a5ad785bd1b0ada8f1c6b88b/build-offline"
+    },
+    {
+      "filename": "jack-6a9e83bd.rsa.pub",
+      "sha256": "320fc4876bd089417ed9d145074013f4000f2586bf499176853c412261122e94",
+      "size": 800,
+      "artifact": "sha256/320fc4876bd089417ed9d145074013f4000f2586bf499176853c412261122e94/jack-6a9e83bd.rsa.pub"
+    }
+  ],
+  "packages": [
+    {
+      "filename": "openresolv-3.17.4-r1.apk",
+      "sha256": "d0f82483fa7845e0aad466de6816257b1b08f9737c9f7398efe490b5755ce4c6",
+      "size": 20023,
+      "artifact": "sha256/d0f82483fa7845e0aad466de6816257b1b08f9737c9f7398efe490b5755ce4c6/openresolv-3.17.4-r1.apk",
+      "cache_path": "/home/jack/.local/share/oldbook/apks/openresolv-3.17.4-r1.apk"
+    },
+    {
+      "filename": "openresolv-doc-3.17.4-r1.apk",
+      "sha256": "a8ce67ac3b882e648f9d3e92111c46fe980a83e19cb888adafdb3d68a4953c23",
+      "size": 11760,
+      "artifact": "sha256/a8ce67ac3b882e648f9d3e92111c46fe980a83e19cb888adafdb3d68a4953c23/openresolv-doc-3.17.4-r1.apk",
+      "cache_path": "/home/jack/.local/share/oldbook/apks/openresolv-doc-3.17.4-r1.apk"
+    }
+  ],
+  "build_logs": [
+    {
+      "filename": "openresolv-build-a.log",
+      "sha256": "b38779680941548a4f4f1c7c2d81a480aa2a3abd8b990d16fa805365697a3225",
+      "size": 8972,
+      "artifact": "sha256/b38779680941548a4f4f1c7c2d81a480aa2a3abd8b990d16fa805365697a3225/openresolv-build-a.log"
+    },
+    {
+      "filename": "openresolv-build-b.log",
+      "sha256": "4ae5f58f2821ea293435d18b48e3810d21c760b9000e040ec67724bd343879c0",
+      "size": 8972,
+      "artifact": "sha256/4ae5f58f2821ea293435d18b48e3810d21c760b9000e040ec67724bd343879c0/openresolv-build-b.log"
+    }
+  ],
+  "documents": [
+    {
+      "filename": "README.md",
+      "sha256": "667b956a5a39a063c90071bb89f588ef53b692f5599303e27b25441aa4ecf149",
+      "size": 4109,
+      "artifact": "sha256/667b956a5a39a063c90071bb89f588ef53b692f5599303e27b25441aa4ecf149/README.md"
+    },
+    {
+      "filename": "verification.json",
+      "sha256": "b2a1a3606e25a86543fb573ad22b4f2dfd8b013f31e41779c92c1f502e06e7d5",
+      "size": 7128,
+      "artifact": "sha256/b2a1a3606e25a86543fb573ad22b4f2dfd8b013f31e41779c92c1f502e06e7d5/verification.json"
+    }
+  ],
+  "verification": {
+    "private_fixture_tests": 6,
+    "native_concurrency_groups": 6,
+    "native_invalid_context_checks": 10,
+    "native_lease_application_cases": 7,
+    "offline_builds": 2,
+    "apks_identical": true,
+    "signature_verified": true,
+    "fossil_exports_verified": true,
+    "apk_cache_verified": true
+  },
+  "verification_file": "verification.json",
+  "build_tool_versions": {
+    "abuild": "3.18.0_rc5-r1",
+    "apk-tools": "3.0.8-r0",
+    "busybox": "1.38.0-r4",
+    "doas": "6.8.2-r8",
+    "fakeroot": "1.37.2-r0",
+    "fossil": "2.28-r0",
+    "make": "4.4.1-r4",
+    "openssl": "3.5.8-r0",
+    "patch": "2.8-r0",
+    "python3": "3.14.7-r0",
+    "tar": "1.35-r5",
+    "util-linux-misc": "2.42.3-r1",
+    "xz": "5.8.3-r0"
+  },
+  "alpine_init_patch_source": "https://raw.githubusercontent.com/alpinelinux/aports/master/main/openresolv/detect_init-remove-irrelevant.patch",
+  "installed": true,
+  "installed_packages": [
+    "openresolv-3.17.4-r1"
+  ],
+  "installation_evidence": "alpine/security/radio/resolver-bridge-install-verification.json"
+}

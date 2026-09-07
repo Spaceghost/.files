@@ -8,3 +8,11 @@ root/etc/elogind/system-sleep/95-radio-off	/etc/elogind/system-sleep/95-radio-of
 root/etc/udev/rules.d/71-privacy-bluetooth-off.rules	/etc/udev/rules.d/71-privacy-bluetooth-off.rules	root:root	0644	Bluetooth-only soft block on Linux/eudev add or state-change events; WLAN unchanged
 root/etc/udev/rules.d/72-privacy-rfkill.rules	/etc/udev/rules.d/72-privacy-rfkill.rules	root:root	0644	remove session uaccess write grant before elogind queues it; preserve radio status reads
 root/etc/wpa_supplicant/privacy-policy.conf	merge into root-only active configuration	root:root	0600	non-secret scan and P2P policy
+root/usr/local/lib/privacyctl_runtime/__init__.py	/usr/local/lib/privacyctl_runtime/__init__.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/lease.py	/usr/local/lib/privacyctl_runtime/lease.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/dhcp.py	/usr/local/lib/privacyctl_runtime/dhcp.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/launch.py	/usr/local/lib/privacyctl_runtime/launch.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/hook.py	/usr/local/lib/privacyctl_runtime/hook.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/network.py	/usr/local/lib/privacyctl_runtime/network.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/libexec/privacyctl-dhcp-launch	/usr/local/libexec/privacyctl-dhcp-launch	root:root	0750	private persistent DHCP implementation; not a user command
+root/usr/local/libexec/privacyctl-dhcp-event	/usr/local/libexec/privacyctl-dhcp-event	root:root	0750	private persistent DHCP implementation; not a user command

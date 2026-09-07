@@ -38,6 +38,33 @@ The synthetic 16-second lease exposed BusyBox reporting deconfig after lease
 expiry. Therefore the owner checks its own expiry clock independently of
 BusyBox notifications. Healthy renewals extend the lease without a session TTL.
 
+## Owned address, route and resolver application
+
+`LeaseApplier` accepts typed leases and separate private `IPv6Profile` values.
+It records interface identity, generation and a current immutable ownership
+record. Addresses and routes use protocol 196; explicit route metrics and
+`noprefixroute` avoid adopting unrelated kernel state. Deletion checks the
+recorded resource and protects unrelated IPv4 secondary addresses. An empty
+IPv6 profile removes only previously owned static values; returning home
+explicitly reapplies its configured addresses and gateways.
+
+DNS uses an exact generation-specific openresolv provider. Cleanup checks its
+contents and the subscriber output, preserving other providers. Apply and
+remove each share a three-second budget across their operations. Partial errors
+carry `NetworkError.owned`; `applier.current` remains available after an
+interruption. The owner must block first and then remove that recorded state.
+
+Each native command has bounded capture and a contained process lifetime.
+Ordinary openresolv PID locking needed an explicit compatibility patch; see
+[RESOLVER-LOCKING.md](RESOLVER-LOCKING.md). Stock capability, unmanaged resolver
+files and unreviewed service/cache hooks are refused before lease mutation.
+This does not change the machine's existing resolver configuration or hooks.
+
+Real private tests cover renewal, home → hotspot → home, unrelated IPv6 and
+DNS preservation, stale ownership and off-prefix `/32` gateways. The stock
+locking failure, patched lock coexistence and native application results are
+recorded separately in [network-verification.json](network-verification.json).
+
 ## Reproduce the isolated checks
 
 Run from the repository checkout:
@@ -45,7 +72,9 @@ Run from the repository checkout:
 ```sh
 python3 -m unittest discover -s alpine/security/radio/tests -p test_lease.py -v
 doas python3 -m unittest discover -s alpine/security/radio/tests -p test_dhcp.py -v
-python3 alpine/security/radio/tests/verify_dhcp_network.py --help
+python3 alpine/security/radio/tests/verify_dhcp_network.py --output /tmp/dhcp-fixture-proof
+python3 alpine/security/radio/tests/verify_dhcp_network.py --production-manager --output /tmp/dhcp-manager-proof
+python3 alpine/security/radio/tests/verify_dhcp_network.py --production-manager --exercise-cleanup --output /tmp/dhcp-cleanup-proof
 ```
 
 The native harness creates private network, PID and mount namespaces before
@@ -55,9 +84,11 @@ are hidden. It exercises acquisition, same-process renewal, NAK, server silence
 and no offers, and records both host-state equality and owned-child cleanup.
 The fixture must never run Alpine's default DHCP hook against the host.
 
-The fixture-client proof alone does not prove the production manager, lease
-application, radio owner or firewall renewal path. Evidence records the actual
-tested components and their source hashes. Unicast renewal UDP 68 → 67 and
+The separate production-manager run uses the real manager and hook, with only
+private fixture address application. It proves manager integration, independent
+expiry and teardown, while lease application, radio ownership and firewall
+renewal remain separate checks. [dhcp-verification.json](dhcp-verification.json)
+records each tested component and its source hash. Unicast renewal UDP 68 → 67 and
 offered DNS still need separate packet-gate/OpenSnitch proof; do not silently
 widen grants to make those checks pass.
 

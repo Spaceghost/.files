@@ -1,8 +1,9 @@
 # Network ownership migration
 
-This migration is not activated. The persistent DHCP transport, lease parser
-and isolated network harness are implemented separately from the existing CLI;
-see [LEASE-OWNER.md](LEASE-OWNER.md) for their current integration and proof scope.
+This migration is not activated. The persistent DHCP transport, lease parser,
+owned network applier and isolated harnesses are implemented separately from
+the existing CLI; see [LEASE-OWNER.md](LEASE-OWNER.md) for their current
+integration and proof scope.
 No live client was signalled, no service was started, and no scan was requested.
 Exact home and iPhone SSIDs still require
 confirmation; neither a hostname nor a guessed hotspot name establishes trust.
@@ -115,10 +116,21 @@ and Bluetooth-only preparation do not resolve this network ownership work.
 
 ## Resolver handoff
 
-Alpine's signed `openresolv 3.17.4-r0` is installed and archived in the package
-lock. Its APK has no install/trigger script, resolver-file payload or services;
-installing it preserved the live resolver contents and existing owner commands.
+The installed dependency is locally patched `openresolv 3.17.4-r1`; its source,
+build inputs and signed APK are archived with the current package lock. The
+original Alpine `3.17.4-r0` remains archived for rollback and negative tests.
+The upgrade changes only the resolver script, adding explicit compatibility
+with the native runner's PID namespace. It preserved live addresses, routes,
+DNS, radio state and DHCP identities; see
+[resolver-bridge-install-verification.json](resolver-bridge-install-verification.json).
 The active BusyBox hook continues writing its unmanaged resolver file directly.
+Installing the capability does not activate a DNS provider or change hooks.
+
+Native private tests now verify lease application, renewal, home/hotspot IPv6
+restoration and ownership-preserving cleanup. The production backend requires
+a reviewed libc-only subscriber configuration; the existing live configuration
+is deliberately unchanged. See [RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) for
+the native locking failure, packaged fix and repeatable acceptance checks.
 
 Initial `resolvconf -u` is a separate, deliberate migration: it takes ownership
 of the unmanaged file and creates a backup. Do not invoke it during routine

@@ -120,14 +120,14 @@ Root-only implementation paths are fixed by the service, not supplied by CLI.
 is root-private, separate from DHCP data. The owner supplies cancellation checks
 between bounded kernel/resolver operations.
 
-- [ ] Reproduce partial address/route/resolver failures before implementation.
-- [ ] Apply/verify normalized addresses and tagged routes through argument
+- [x] Reproduce partial address/route/resolver failures before implementation.
+- [x] Apply/verify normalized addresses and tagged routes through argument
   arrays; never interpolate server values into shell commands.
-- [ ] Use a dedicated openresolv provider and check ownership before deletion;
+- [x] Use a dedicated openresolv provider and check ownership before deletion;
   preserve another interface's newer resolver state.
-- [ ] Exercise home → hotspot → home IPv6 restoration, including explicit
+- [x] Exercise home → hotspot → home IPv6 restoration, including explicit
   reapplication of home static addresses/gateway after hotspot flushing.
-- [ ] Keep DHCP/resolver firewall policy separate. Broadcast acquisition does
+- [x] Keep DHCP/resolver firewall policy separate. Broadcast acquisition does
   not prove that unicast renewal or a newly offered DNS server is permitted.
 
 ## Task 4: Owner service and compatible command routing
@@ -165,13 +165,15 @@ verification JSON under `alpine/security/radio/`.
 
 ## Task 6: Review and reproducibility
 
-- [ ] Run the existing and new isolated suites and independent code review.
+- [x] Run the existing and new isolated suites and independent code review.
   Match source hashes to the exercised versions before recording evidence.
-- [ ] Update migration/activation instructions with actual implemented scope
+- [x] Update migration instructions with actual implemented component scope
   and remaining trusted-profile, live migration and reboot requirements.
-- [ ] Commit scoped paths with Fossil; preserve other threads' PROGRESS edits.
-  Archive new build dependencies if any; verify the current APK lock still
-  matches the installed world. Create a consistent complete Fossil backup.
+- [x] Archive the openresolv compatibility source, recipe and identical signed
+  builds; verify the current 1,080-package lock against the installed world.
+- [ ] After owner integration, update the activation plan and commit its scoped
+  paths with Fossil; preserve other threads' PROGRESS edits. Refresh the APK
+  lock if dependencies changed and create a consistent complete Fossil backup.
 
 Live activation is a subsequent verified transition after these requirements
 and the exact trusted identities are satisfied. A successful isolated component
