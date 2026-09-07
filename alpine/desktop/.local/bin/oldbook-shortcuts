@@ -1,16 +1,47 @@
 #!/usr/bin/env python3
-"""Launch the contextual shortcut overlay service."""
-import sys
+"""Keep the Oldbook command and profile path while using standalone Hold to Help."""
+import os
 from pathlib import Path
+import sys
 
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
-
-from oldbook.shortcut_overlay import main
+def main():
+    launcher = Path(__file__).resolve()
+    arguments = sys.argv[1:]
+    if os.environ.get('OLDBOOK_SHORTCUTS_LEGACY') == '1':
+        sys.path.insert(0, str(launcher.parents[1] / 'lib'))
+        from oldbook.shortcut_overlay import main as legacy_main
+        return legacy_main(arguments)
+    # The normal deployed symlink resolves inside the Fossil checkout, so
+    # Python edits become effective on the next service restart.
+    project = next((parent / 'projects/hold-to-help' for parent in launcher.parents
+                    if (parent / 'projects/hold-to-help/hold_to_help/cli.py').is_file()), None)
+    if project is not None:
+        sys.path.insert(0, str(project))
+    else:
+        sys.path.insert(0, '/usr/share/hold-to-help')
+    from hold_to_help.cli import main as portable_main
+    from hold_to_help.config import config_home
+    legacy_profiles = config_home() / 'oldbook/shortcuts.json'
+    portable_profiles = config_home() / 'hold-to-help/profiles.json'
+    if legacy_profiles.is_file() and not portable_profiles.exists():
+        arguments = ['--profiles', str(legacy_profiles), *arguments]
+    # Preserve read-only inspection from a TTY using the existing owned Sway
+    # socket discovery. Graphical launches retain the actual session environment.
+    if (any(value in arguments for value in ('status', 'dump', '--dump'))
+            and not any(os.environ.get(key) for key in ('DISPLAY', 'WAYLAND_DISPLAY', 'SWAYSOCK'))
+            and not any(value == '--socket' or value.startswith('--socket=') for value in arguments)
+            and os.environ.get('XDG_RUNTIME_DIR')):
+        from hold_to_help.service import find_sway_socket
+        socket = find_sway_socket(Path(os.environ['XDG_RUNTIME_DIR']))
+        arguments = ['--socket', str(socket), *arguments]
+    if os.environ.get('SWAYSOCK') or any(value == '--socket' or value.startswith('--socket=') for value in arguments):
+        os.environ.setdefault('QT_QPA_PLATFORMTHEME', 'qt6ct')
+    return portable_main(arguments)
 
 
 if __name__ == '__main__':
     try:
-        main()
-    except (ConnectionError, OSError, RuntimeError, ValueError) as error:
+        raise SystemExit(main())
+    except (ConnectionError, ImportError, OSError, RuntimeError, ValueError) as error:
         sys.exit(f'oldbook-shortcuts: {error}')

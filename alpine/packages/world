@@ -2,6 +2,7 @@
 abuild
 adw-gtk3
 alpine-base
+bash
 basu-dev
 blkid
 brightnessctl
@@ -12,6 +13,7 @@ busybox-mdev-openrc
 cairo-dev
 cava@testing
 chrony
+cmake
 cryptsetup
 curl
 doas
@@ -38,7 +40,10 @@ gnome-keyring
 go
 grim
 grub-efi
+gtk+3.0-dev
 hicolor-icon-theme
+hold-to-help><Q1KbLWAAQqpZVBfz1vge+ANN65Mv4=
+hold-to-help-doc><Q1Yz+oE/mTEcalgv+lmwvii84SdWM=
 htop
 i3status
 imv
@@ -46,6 +51,8 @@ iproute2
 iw
 jq
 json-c-dev
+json-glib-dev
+layer-shell-qt-dev
 libdrm-dev
 libevdev-dev
 libinput-dev
@@ -66,6 +73,7 @@ linux-firmware-rtl_bt
 linux-headers
 linux-lts
 lvm2
+lxqt-qtplugin
 mesa-dev
 meson
 mpv
@@ -74,9 +82,11 @@ neovim
 nftables
 nftables-openrc
 nwg-look@testing
-opensnitch><Q1BTTgAs58g27iNOPWxEJGIaf7wGs=
-opensnitch-openrc><Q1TYkQH97s55O9cTAww/TAyKLdoNU=
-opensnitch-ui><Q1k45MoRgfghl7/trss5xErYb0Wlc=
+oldbook-waybar-art><Q1GeRZY/1SEcBCetwuiTNcijfXS8U=
+openbox
+opensnitch><Q1VDSF9c2M/GtTqjAdRoBIiDgS6Lw=
+opensnitch-openrc><Q14bZxdRs5E0q1zk8PHwvlBU+SSRQ=
+opensnitch-ui><Q1gygX/cZ2d/VrV7R0xbCZInvrq/A=
 openssl
 pango-dev
 papirus-icon-theme
@@ -86,7 +96,7 @@ pcre2-dev
 pipewire
 pipewire-pulse
 pipewire-tools
-pithos
+pithos@testing
 pixman-dev
 pkgconf
 playerctl
@@ -104,7 +114,9 @@ py3-qt6
 py3-setuptools
 py3-slugify
 py3-wheel
+py3-xlib
 python3
+qt6-qtbase-dev
 qt6-qtbase-sqlite
 qt6ct@testing
 ripgrep
@@ -112,13 +124,14 @@ samurai
 scdoc
 scenefx-dev
 shellcheck
+simp1e-cursors-gruvbox-dark@testing
 simp1e-cursors-rose-pine@testing
 slurp
 starship
 swappy@testing
 sway
 swaybg
-swayfx><Q1Wt+DEuNKnK85VwxCKM1s3CVgmgo=
+swayfx><Q18ewSRdAM2/kKu09tcmSamxZ8YEM=
 swayidle
 swaylockd
 swaync
@@ -140,10 +153,12 @@ wlroots0.20-dev
 wlsunset
 wmenu
 wpa_supplicant
+wtype
 xcb-util-wm-dev
 xdg-desktop-portal-gtk
 xdg-desktop-portal-wlr
+xvfb
 xwayland
+yt-dlp
 zoxide
 zsh
-yt-dlp

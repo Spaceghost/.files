@@ -1,0 +1,5 @@
+# Copy to $XDG_CONFIG_HOME/hold-to-help/config.toml (usually ~/.config).
+# Observe the physical key; this does not change keyboard mappings or Caps state.
+trigger = "super" # "super" or "capslock"
+hold_seconds = 0.5 # finite duration between 0.15 and 3 seconds
+backend = "auto" # "auto", "sway", or "x11"

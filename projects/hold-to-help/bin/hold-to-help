@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""Run from either a standalone source tree or a CMake installation."""
+from pathlib import Path
+import sys
+
+prefix = Path(__file__).resolve().parent.parent
+modules = prefix if (prefix / "hold_to_help").is_dir() else prefix / "share/hold-to-help"
+sys.path.insert(0, str(modules))
+from hold_to_help.cli import main
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except (ConnectionError, OSError, RuntimeError, ValueError) as error:
+        sys.exit(f"hold-to-help: {error}")

@@ -1,0 +1,38 @@
+{
+  "name": "hold-to-help",
+  "version": "0.1.0",
+  "source_date_epoch": 1788739200,
+  "source": {
+    "filename": "hold-to-help-0.1.0.tar.gz",
+    "sha256": "5a87cd9744374b4740ffe7dc366d173492e59a66f5f66bd4567d0124a12b90d5",
+    "artifact": "sha256/5a87cd9744374b4740ffe7dc366d173492e59a66f5f66bd4567d0124a12b90d5/hold-to-help-0.1.0.tar.gz"
+  },
+  "release_status": "local release candidate; not published",
+  "packages": [
+    {
+      "filename": "hold-to-help-0.1.0-r0.apk",
+      "sha256": "b3a9bb7f09b1a69f03276fc44d30368ffe377fde63769cc832e6ca70c6dc2572",
+      "artifact": "sha256/b3a9bb7f09b1a69f03276fc44d30368ffe377fde63769cc832e6ca70c6dc2572/hold-to-help-0.1.0-r0.apk"
+    },
+    {
+      "filename": "hold-to-help-doc-0.1.0-r0.apk",
+      "sha256": "f4c04ee1425a29bc78e99ccfeb4f8b9b88f40b44aa1ba5876834f36c76fbc089",
+      "artifact": "sha256/f4c04ee1425a29bc78e99ccfeb4f8b9b88f40b44aa1ba5876834f36c76fbc089/hold-to-help-doc-0.1.0-r0.apk"
+    }
+  ],
+  "verification": {
+    "unit_tests": 108,
+    "source_archives_identical": true,
+    "offline_apk_builds": 2,
+    "apks_identical": true,
+    "signature_verified": true,
+    "build_network": "unshare --net; abuild -d",
+    "tested_arch": "x86_64",
+    "tested_alpine": "edge",
+    "tested_qt": "6.11.1-r2",
+    "tested_layer_shell_qt": "6.7.4-r0",
+    "package_restore_count": 1079
+  },
+  "package_lock": "alpine/packages/locks/10265f085b5a34747518.json",
+  "native_library_sha256": "6845669c7f9e1779f2346f977ac1aafb5b7c89a9daa07052f511981c754cf0bf"
+}

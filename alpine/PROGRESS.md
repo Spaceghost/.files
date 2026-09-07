@@ -2,6 +2,40 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Hold to Help and interactive firewall — 2026-09-07
+
+- **Hold to Help 0.1.0** is installed as signed main/doc APKs and runs locally
+  through the preserved `oldbook-shortcuts` command. The original GTK source
+  remains for rollback. Workspace Python edits take effect on service restart.
+- Super remains the half-second hold trigger; physical Caps is configurable
+  without changing Caps-to-Escape. Existing shortcut sections, custom profiles,
+  pointer scrolling, release/chord cancellation and focus behavior are retained.
+- Qt supplies palette, fonts and style. Local qt6ct and native LXQt settings
+  both select Gruvbox Dark, Inter and Oldbook icons; LXQt palette/font changes
+  reached a running test application. The app does not force a desktop theme.
+- All 108 package tests and three LXQt checks passed. Native private Sway/X11
+  checks cover monitor changes, no keyboard focus, scroll, fast chords,
+  Caps-to-Escape, repeat keys, lock suppression, singleton and bounded failures.
+  The installed Wayland library passed again. Physical user hold after unlock
+  and a complete LXQt desktop session remain unobserved.
+- Two isolated builds produced identical signed APKs from identical source
+  archives. Source and all 1,079 APK identities are in Fossil; lock
+  `packages/locks/10265f085b5a34747518.json` restored into an empty directory
+  with networking disabled. Restored CLI and native library loading passed.
+  This proves a package/filesystem restore, not a bootable disk image.
+- The new daemon is running, sees two keyboards, and stays hidden while locked;
+  the old daemon exited. See `verification/hold-to-help.json` and its native
+  preview. CMake sources, GPL license, examples, manual, contribution guide and
+  release tool are under `projects/hold-to-help`; no public upload was made.
+- OpenSnitch and the permanent packet gate are **active and enabled for boot**.
+  A fresh non-root program caused a real prompt and a Deny decision; IPv4/IPv6
+  filtering plus fresh authenticated Codex/curl access passed. All 28 saved
+  rules and popup defaults were preserved. Broad root/443 grants still skip
+  prompts; an unlocked human Allow click and reboot remain untested. Evidence:
+  `security/firewall/interactive-verification.json`, commit `e63360f71a`.
+- Radio hardening remains staged pending the trusted-network identity and
+  physical checks recorded below; this work makes no new radio-silence claim.
+
 ## Desktop and automation
 
 - Live Sway loads the linked HOME overlay; Space Ghost artwork and the floating
