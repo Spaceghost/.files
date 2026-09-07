@@ -1,0 +1,48 @@
+#!/bin/sh
+# Online maintainer step. Normal/offline builds use the preserved archives.
+set -eu
+out=${1:?usage: prepare-inputs OUTPUT_DIRECTORY}
+mkdir -p "$out"
+out=$(CDPATH='' cd -- "$out" && pwd)
+work=$(mktemp -d "${TMPDIR:-/tmp}/oldbook-opensnitch-inputs.XXXXXX")
+trap 'chmod -R u+w "$work"; rm -r -- "$work"' EXIT HUP INT TERM
+export GOTOOLCHAIN=local
+export GOMODCACHE="$work/modules"
+export GOPROXY=https://proxy.golang.org
+export GOSUMDB=sum.golang.org
+export GOBIN="$work/bin"
+cd "$work"
+wget -O opensnitch-1.8.0.tar.gz \
+    https://github.com/evilsocket/opensnitch/archive/refs/tags/v1.8.0.tar.gz
+printf '%s\n' 'bddcfff04202f3ef7713944a69ca8ebaab19ee32e8f01e5a55995bff54f412b7  opensnitch-1.8.0.tar.gz' | sha256sum -c -
+tar -xzf opensnitch-1.8.0.tar.gz
+go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.1
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0
+(
+    cd opensnitch-1.8.0
+    PATH="$GOBIN:$PATH" protoc -I proto proto/ui.proto \
+        --go_out=daemon/ui/protocol --go-grpc_out=daemon/ui/protocol \
+        --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative
+    cd daemon
+    go mod vendor
+)
+mkdir -p inputs/daemon inputs/tools
+cp -a opensnitch-1.8.0/daemon/vendor inputs/daemon/
+cp -a "$GOMODCACHE/google.golang.org/protobuf@v1.34.1" inputs/tools/protoc-gen-go
+cp -a "$GOMODCACHE/google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0" inputs/tools/protoc-gen-go-grpc
+chmod -R u+w inputs/tools
+(
+    cd inputs/tools/protoc-gen-go
+    go mod vendor
+)
+(
+    cd inputs/tools/protoc-gen-go-grpc
+    go mod vendor
+)
+tar --sort=name --mtime=@1765715806 --owner=0 --group=0 --numeric-owner \
+    --mode='u+rwX,go+rX,go-w,a-s,a-t' \
+    -cf opensnitch-inputs-1.8.0.tar inputs
+gzip -n opensnitch-inputs-1.8.0.tar
+cp opensnitch-1.8.0.tar.gz opensnitch-inputs-1.8.0.tar.gz "$out/"
+cd "$out"
+sha256sum opensnitch-1.8.0.tar.gz opensnitch-inputs-1.8.0.tar.gz

@@ -1,0 +1,15 @@
+#!/sbin/openrc-run
+# shellcheck shell=sh disable=SC2034
+# Run in the boot runlevel before network services can start a connection.
+description='soft-block Wi-Fi and Bluetooth before networking'
+
+depend() {
+  need dev localmount
+  before networking wpa_supplicant bluetooth privacyctl-supervisor
+}
+
+start() {
+  ebegin 'Soft-blocking Wi-Fi and Bluetooth'
+  /usr/local/sbin/privacyctl off
+  eend $?
+}

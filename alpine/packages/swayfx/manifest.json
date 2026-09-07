@@ -1,0 +1,25 @@
+{
+  "name": "swayfx",
+  "version": "0.6",
+  "commit": "fd71a6bdc061bd633b488ae7b83e8a6981d22f86",
+  "commit_time": "2026-08-05T04:45:37Z",
+  "source": {
+    "url": "https://github.com/wlrfx/swayfx/archive/fd71a6bdc061bd633b488ae7b83e8a6981d22f86.tar.gz",
+    "filename": "swayfx-0.6.tar.gz",
+    "sha256": "ec382be4afc7daeb7cb988a02abba6b1e4af26108c0dcc7a8fbb69c2bb15589b",
+    "artifact": "sha256/ec382be4afc7daeb7cb988a02abba6b1e4af26108c0dcc7a8fbb69c2bb15589b/swayfx-0.6.tar.gz"
+  },
+  "upstream_release": "https://github.com/wlrfx/swayfx/releases/tag/0.6",
+  "source_date_epoch": 1785905137,
+  "package": {
+    "filename": "swayfx-0.6-r0.apk",
+    "sha256": "cb5ce0b33f3f9c9f5a4f3469a051fa3ad25aa2fb03b164b07f142c4331839aad",
+    "artifact": "sha256/cb5ce0b33f3f9c9f5a4f3469a051fa3ad25aa2fb03b164b07f142c4331839aad/swayfx-0.6-r0.apk"
+  },
+  "binary_sha256": "11b793b841603ed41bdfbb4782627dce39b95795ba7ecaccad3fd9c0e25aac92",
+  "shared_dependencies": {
+    "scenefx": "0.5-r0",
+    "wlroots0.20": "0.20.2-r1",
+    "source": "Exact official APK inputs captured by the repository package lock."
+  }
+}

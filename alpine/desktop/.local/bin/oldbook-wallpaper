@@ -1,0 +1,203 @@
+#!/usr/bin/env python3
+"""Space Ghost gallery: rotate, browse and expose a Waybar status."""
+import argparse
+import fcntl
+import hashlib
+import html
+import json
+import os
+from pathlib import Path
+import signal
+import stat
+import subprocess
+import sys
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+STATE = Path.home() / '.local/state/oldbook/wallpaper'
+CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
+
+
+def atomic_json(path, value):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(value, indent=2) + '\n')
+    temporary.replace(path)
+
+
+def read_state():
+    try:
+        return json.loads((STATE / 'state.json').read_text())
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def load_gallery(repo=REPO):
+    config = json.loads((repo / 'alpine/wallpapers/gallery.json').read_text())
+    candidates = list(config['entries'])
+    for sidecar in sorted((repo / 'alpine/assets/gallery').glob('*.json')):
+        try:
+            entry = json.loads(sidecar.read_text())
+            if isinstance(entry, dict) and entry.get('title'):
+                entry.setdefault('id', sidecar.stem)
+                entry.setdefault('file', str(sidecar.with_suffix('.png').relative_to(repo)))
+                entry.setdefault('description', entry.get('note', ''))
+                candidates.append(entry)
+        except (ValueError, OSError):
+            continue
+    entries, seen = [], set()
+    for candidate in candidates:
+        entry = dict(candidate)
+        source = (repo / entry['file']).resolve()
+        if not source.is_relative_to((repo / 'alpine/assets').resolve()):
+            continue
+        if not source.is_file() or entry['id'] in seen:
+            continue
+        if entry.get('sha256') and hashlib.sha256(source.read_bytes()).hexdigest() != entry['sha256']:
+            print(f"Skipping changed artwork: {entry['file']}", file=sys.stderr)
+            continue
+        entry['path'] = str(source)
+        entries.append(entry)
+        seen.add(entry['id'])
+    if not entries:
+        raise RuntimeError('Gallery has no usable artwork')
+    return entries, max(60, int(config.get('interval_seconds', 1200)))
+
+
+def sway_socket():
+    runtime = Path('/run/user') / str(os.getuid())
+    candidates = []
+    if os.environ.get('SWAYSOCK'):
+        candidates.append(Path(os.environ['SWAYSOCK']))
+    candidates.extend(sorted(runtime.glob(f'sway-ipc.{os.getuid()}.*.sock'),
+                             key=lambda p: p.stat().st_mtime, reverse=True))
+    for path in dict.fromkeys(candidates):
+        try:
+            info = path.lstat()
+            if path.parent != runtime or info.st_uid != os.getuid() or not stat.S_ISSOCK(info.st_mode):
+                continue
+            response = subprocess.run(['swaymsg', '-s', str(path), '-r', '-t', 'get_outputs'],
+                                      capture_output=True, text=True, timeout=3)
+            outputs = json.loads(response.stdout)
+            if response.returncode == 0 and any(o.get('active') and not o['name'].startswith(('HEADLESS', 'WL-')) for o in outputs):
+                return str(path)
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            continue
+    raise RuntimeError('No owned active physical Sway session found')
+
+
+def apply(entry):
+    socket = sway_socket()
+    CURRENT.parent.mkdir(parents=True, exist_ok=True)
+    temporary = CURRENT.with_name(CURRENT.name + f'.{os.getpid()}.tmp')
+    temporary.unlink(missing_ok=True)
+    temporary.symlink_to(entry['path'])
+    # JSON quoting matches Sway's double-quoted string escaping, no shell involved.
+    command = 'output * bg ' + json.dumps(entry['path']) + ' fill'
+    response = subprocess.run(['swaymsg', '-s', socket, '-r', command],
+                              capture_output=True, text=True, timeout=5)
+    results = json.loads(response.stdout)
+    if response.returncode or not results or not all(item.get('success') for item in results):
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError('Sway rejected wallpaper command')
+    temporary.replace(CURRENT)
+    return socket
+
+
+def update(action, selected=None):
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (STATE / 'state.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        state = read_state()
+        if action == 'tick' and state.get('id') and CURRENT.exists():
+            if state.get('paused') or time.time() < state.get('next_at', 0):
+                if sway_socket() == state.get('socket'):
+                    return
+                action = 'refresh'
+        entries, interval = load_gallery()
+        if action == 'pause':
+            state['paused'] = not state.get('paused', False)
+            state['next_at'] = time.time() + interval
+        else:
+            index = next((i for i, entry in enumerate(entries) if entry['id'] == state.get('id')), -1)
+            if selected is not None:
+                index = next(i for i, entry in enumerate(entries) if entry['id'] == selected)
+            elif action == 'prev':
+                index = (index - 1) % len(entries)
+            elif action == 'refresh' and index >= 0:
+                pass
+            else:
+                index = (index + 1) % len(entries)
+            entry = entries[index]
+            socket = apply(entry)
+            state.update({k: entry.get(k, '') for k in ('id', 'title', 'description', 'file')})
+            state.update({'next_at': time.time() + interval, 'socket': socket})
+        state['interval_seconds'] = interval
+        atomic_json(STATE / 'state.json', state)
+
+
+def status():
+    state = read_state()
+    title = state.get('title', 'Space Ghost gallery')
+    minutes = max(1, int(state.get('interval_seconds', 1200)) // 60)
+    mode = 'Paused' if state.get('paused') else f'Changes every {minutes} minutes'
+    tooltip = '<b>' + html.escape(title) + '</b>\n' + html.escape(state.get('description', ''))
+    tooltip += '\n\n' + mode + '\nClick: next · scroll: browse\nMiddle: pause · right: gallery'
+    print(json.dumps({'text': '󰸉', 'alt': title,
+                      'class': 'paused' if state.get('paused') else 'rotating', 'tooltip': tooltip}))
+
+
+def pick():
+    entries, _ = load_gallery()
+    labels = [f'{i + 1:02d}  {e["title"]}' for i, e in enumerate(entries)]
+    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ '],
+                            input='\n'.join(labels) + '\n', capture_output=True, text=True)
+    if result.returncode == 0 and result.stdout.rstrip('\n') in labels:
+        update('pick', entries[labels.index(result.stdout.rstrip('\n'))]['id'])
+
+
+def daemon():
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (STATE / 'daemon.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+        # Restore after compositor restart even when rotation is paused.
+        refresh = True
+        last_error = None
+        while True:
+            try:
+                update('refresh' if refresh else 'tick')
+                refresh, last_error = False, None
+            except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+                message = str(error)
+                if message != last_error:
+                    print(message, file=sys.stderr, flush=True)
+                    last_error = message
+                refresh = True
+            time.sleep(30)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='status',
+                        choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh'])
+    args = parser.parse_args()
+    if args.action == 'status':
+        status()
+    elif args.action == 'pick':
+        pick()
+    elif args.action == 'daemon':
+        daemon()
+    else:
+        update(args.action)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+        print(f'oldbook-wallpaper: {error}', file=sys.stderr)
+        sys.exit(1)

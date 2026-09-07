@@ -1,0 +1,7 @@
+#!/bin/sh
+# shellcheck shell=sh
+# elogind invokes this with "pre" before sleep and "post" after resume.
+case ${1:-} in
+    pre|post) exec /usr/local/sbin/privacyctl off ;;
+    *) exit 64 ;;
+esac

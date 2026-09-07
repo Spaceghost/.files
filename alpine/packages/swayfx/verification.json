@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-07",
+  "package_signature": "apk verify passed against the local public key installed in /etc/apk/keys",
+  "network": "Both builds executed in unshare --net with no network devices",
+  "independent_builds": [
+    "oldbook/swayfx",
+    "independent-v2/oldbook/swayfx"
+  ],
+  "signed_apks_identical": true,
+  "signed_apk_sha256": "cb5ce0b33f3f9c9f5a4f3469a051fa3ad25aa2fb03b164b07f142c4331839aad",
+  "executable_sha256": "11b793b841603ed41bdfbb4782627dce39b95795ba7ecaccad3fd9c0e25aac92",
+  "interpreter": "/lib/ld-musl-x86_64.so.1",
+  "headless_renderers": [
+    "AMD radeonsi verde, ACO, DRM2.51",
+    "Mesa Intel Iris Pro Graphics P5200 (HSW GT3)"
+  ],
+  "checks": [
+    "SwayFX effects config parser succeeds",
+    "GLES renderer produces wallpaper screenshot",
+    "Intel renders floating translucent Foot terminal with rounded corners and shadows",
+    "IPC reports SwayFX0.6 / original Sway1.12.0",
+    "Compositor exits cleanly"
+  ],
+  "limits": [
+    "Headless output tests do not test physical display takeover or suspend/resume.",
+    "Original Sway session has not been replaced or restarted.",
+    "Build uses pinned official shared-library APKs; those libraries were not rebuilt from source in this check."
+  ]
+}

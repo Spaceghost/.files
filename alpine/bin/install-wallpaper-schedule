@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+"""Install the current user's daily Space Ghost generator without replacing other jobs."""
+import argparse
+import datetime as dt
+import os
+from pathlib import Path
+import shlex
+import subprocess
+
+REPO = Path(__file__).resolve().parents[2]
+BEGIN = '# BEGIN oldbook-wallpaper (managed by alpine/bin/install-wallpaper-schedule)'
+END = '# END oldbook-wallpaper'
+
+
+def update_crontab(existing, command=None):
+    lines, managed = [], False
+    for line in existing.splitlines():
+        if line == BEGIN:
+            if managed:
+                raise RuntimeError('Nested managed cron marker')
+            managed = True
+        elif line == END:
+            if not managed:
+                raise RuntimeError('Orphan managed cron marker')
+            managed = False
+        elif not managed:
+            lines.append(line)
+    if managed:
+        raise RuntimeError('Unclosed managed cron marker')
+    if command is not None:
+        if lines and lines[-1]:
+            lines.append('')
+        lines.extend([BEGIN, '# Hourly wake check; generator reserves at most one attempt per local calendar day.',
+                      '17 * * * * ' + command, END])
+    return '\n'.join(lines).rstrip('\n') + ('\n' if lines else '')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--remove', action='store_true')
+    parser.add_argument('--print', action='store_true', dest='print_only')
+    args = parser.parse_args()
+    state = Path.home() / '.local/state/oldbook/wallpaper-generation'
+    # Cron treats unescaped percent as stdin even inside shell quotes.
+    values = [str(Path.home()), str(REPO), str(state)]
+    if any('\n' in value or '%' in value for value in values):
+        raise RuntimeError('Cron paths cannot contain newline or percent characters')
+    command = (shlex.join(['/usr/bin/env', 'HOME=' + str(Path.home()),
+                          'PATH=/usr/local/bin:/usr/bin:/bin', '/usr/bin/python3',
+                          str(REPO / 'alpine/wallpapers/generate.py')])
+               + ' >>' + shlex.quote(str(state / 'cron.log')) + ' 2>&1')
+    current = subprocess.run(['crontab', '-l'], capture_output=True, text=True)
+    if current.returncode and 'no crontab' not in current.stderr.lower() and 'no such file' not in current.stderr.lower():
+        raise RuntimeError('Cannot read existing crontab: ' + current.stderr.strip())
+    revised = update_crontab(current.stdout, None if args.remove else command)
+    if args.print_only:
+        print(revised, end='')
+        return
+    if current.stdout == revised:
+        print('Wallpaper schedule already current.')
+        return
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(state, 0o700)
+    backup = state / ('crontab-before-' + dt.datetime.now().strftime('%Y%m%dT%H%M%S%f') + '.txt')
+    backup.write_text(current.stdout)
+    subprocess.run(['crontab', '-'], input=revised, text=True, check=True)
+    print(('Removed' if args.remove else 'Installed') + f' wallpaper schedule. Previous crontab: {backup}')
+
+
+if __name__ == '__main__':
+    main()

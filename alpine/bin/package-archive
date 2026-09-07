@@ -1,0 +1,374 @@
+#!/usr/bin/env python3
+"""Snapshot, verify, and restore exact APK closures through Fossil artifacts."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tarfile
+import tempfile
+
+REPO = Path(__file__).resolve().parents[2]
+LOCKS = REPO / 'alpine/packages/locks'
+
+
+def run(args, **kw):
+    return subprocess.run([str(x) for x in args], check=True, **kw)
+
+
+def output(args):
+    return subprocess.check_output([str(x) for x in args], text=True)
+
+
+def sha(path):
+    with path.open('rb') as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
+
+
+def parse_index(data):
+    """Read identities from APK's v2 installed database or generated index."""
+    result = []
+    names = set()
+    fields = {'P': 'name', 'V': 'version', 'A': 'arch', 'C': 'apk_identity'}
+    for record in data.strip().split('\n\n'):
+        item = {}
+        for line in record.splitlines():
+            if len(line) > 2 and line[1] == ':' and line[0] in fields:
+                key = fields[line[0]]
+                if key in item:
+                    raise RuntimeError(f'Duplicate APK metadata: {key}')
+                item[key] = line[2:]
+        if not item or set(item) != set(fields.values()):
+            raise RuntimeError('Incomplete APK identity metadata')
+        if item['name'] in names:
+            raise RuntimeError(f'Duplicate APK package: {item["name"]}')
+        names.add(item['name'])
+        result.append(item)
+    return sorted(result, key=lambda x: x['name'])
+
+
+def packages(root='/'):
+    return parse_index((Path(root)/'lib/apk/db/installed').read_text())
+
+
+def artifact_packages(paths):
+    # Let apk compute its own identity. In particular, repository indexes may
+    # rewrite noarch to the repository architecture; the APK retains noarch.
+    with tempfile.TemporaryDirectory(prefix='oldbook-index-') as td:
+        index = Path(td)/'APKINDEX.tar.gz'
+        run(['apk', 'index', '--no-warnings', '--output', index] + paths,
+            stdout=subprocess.DEVNULL)
+        with tarfile.open(index, 'r:gz') as archive:
+            return parse_index(archive.extractfile('APKINDEX').read().decode())
+
+
+def fetch_missing(installed, cache, repositories):
+    missing = [x for x in installed
+               if not (cache/f"{x['name']}-{x['version']}.apk").is_file()]
+    if not missing:
+        return
+    with tempfile.TemporaryDirectory(prefix='oldbook-fetch-') as td:
+        repos = Path(td)/'repositories'
+        repos.write_text('\n'.join(line.split(maxsplit=1)[-1]
+                                   if line.startswith('@') else line
+                                   for line in repositories.splitlines())+'\n')
+        # apk fetch requires recursive solver mode to interpret version
+        # constraints. Only missing APKs enter that solver: already cached
+        # local packages need no official repository entry.
+        run(['apk', '--repositories-file', repos, 'fetch', '--recursive', '--output', cache] +
+            [f"{x['name']}={x['version']}" for x in missing])
+
+
+def public_keys():
+    return [{'name': key.name, 'content': key.read_text(), 'sha256': sha(key)}
+            for key in sorted(Path('/etc/apk/keys').glob('*.pub'))]
+
+
+def validate_artifacts(installed, artifacts):
+    if len(artifacts) != len(installed):
+        raise RuntimeError('Archive package count differs from installed closure')
+    for original, artifact in zip(installed, artifacts):
+        if any(original[k] != artifact[k] for k in ('name', 'version', 'apk_identity')):
+            raise RuntimeError(f'Cached APK differs from installed identity: {original["name"]}')
+        if artifact['arch'] not in (original['arch'], 'noarch'):
+            raise RuntimeError(f'Cached APK architecture differs: {original["name"]}')
+
+
+def uv_add(path, name, known):
+    if name not in known:
+        run(['fossil', 'uv', 'add', path, '--as', name], cwd=REPO,
+            stdout=subprocess.DEVNULL)
+        known.add(name)
+
+
+def snapshot(cache):
+    cache.mkdir(parents=True, exist_ok=True)
+    installed = packages()
+    world = Path('/etc/apk/world').read_text()
+    repositories = Path('/etc/apk/repositories').read_text()
+    keys = public_keys()
+    fetch_missing(installed, cache, repositories)
+    paths = [cache/f"{x['name']}-{x['version']}.apk" for x in installed]
+    artifacts = artifact_packages(paths)
+    validate_artifacts(installed, artifacts)
+    known = set(output(['fossil', 'uv', 'ls'],).splitlines())
+    entries=[]
+    for i, (item, artifact) in enumerate(zip(installed, artifacts), 1):
+        path=cache/f"{item['name']}-{item['version']}.apk"
+        if not path.is_file():
+            raise RuntimeError(f'Missing archive: {path}')
+        run(['apk', 'verify', path], stdout=subprocess.DEVNULL)
+        checksum=sha(path)
+        uv=f"sha256/{checksum}/{path.name}"
+        uv_add(path, uv, known)
+        entries.append(dict(item, artifact_arch=artifact['arch'],
+                            filename=path.name, sha256=checksum, artifact=uv))
+        if i % 50 == 0:
+            print(f'Archived {i}/{len(installed)} APKs', flush=True)
+    if (installed != packages() or world != Path('/etc/apk/world').read_text()
+            or repositories != Path('/etc/apk/repositories').read_text()
+            or keys != public_keys()):
+        raise RuntimeError('APK state changed during snapshot; rerun when apk is idle')
+    manifest={'schema':2,'arch':output(['apk','--print-arch']).strip(),
+              'alpine_release':Path('/etc/alpine-release').read_text().strip(),
+              'world':world,'repositories':repositories,'keys':keys,'packages':entries}
+    encoded=json.dumps(manifest,sort_keys=True,indent=2)+'\n'
+    ident=hashlib.sha256(encoded.encode()).hexdigest()[:20]
+    LOCKS.mkdir(parents=True,exist_ok=True)
+    path=LOCKS/f'{ident}.json'
+    if path.exists():
+        if path.read_text() != encoded:
+            raise RuntimeError(f'Immutable lock collision: {path}')
+    else:
+        with path.open('x') as stream:
+            stream.write(encoded)
+    (REPO/'alpine/packages/current-lock').write_text(str(path.relative_to(REPO))+'\n')
+    print('Snapshot:',path,flush=True)
+
+
+def load_lock(path):
+    encoded = path.read_bytes()
+    if path.name != hashlib.sha256(encoded).hexdigest()[:20]+'.json':
+        raise RuntimeError('Lock content does not match its immutable filename')
+    m=json.loads(encoded)
+    if m.get('schema') not in (1, 2) or not m.get('packages'):
+        raise RuntimeError('Unsupported/empty snapshot')
+    names = set()
+    for pkg in m['packages']:
+        expected=f"{pkg['name']}-{pkg['version']}.apk"
+        if pkg['filename'] != expected or Path(expected).name != expected:
+            raise RuntimeError('Unsafe package filename')
+        if len(pkg['sha256']) != 64 or any(c not in '0123456789abcdef' for c in pkg['sha256']):
+            raise RuntimeError('Invalid checksum')
+        if pkg['artifact'] != f"sha256/{pkg['sha256']}/{expected}":
+            raise RuntimeError('Invalid artifact identity')
+        if pkg['name'] in names:
+            raise RuntimeError('Duplicate package in snapshot')
+        names.add(pkg['name'])
+        if m['schema'] == 2:
+            if (not pkg.get('apk_identity') or
+                    pkg.get('artifact_arch') not in (pkg['arch'], 'noarch') or
+                    pkg['arch'] not in (m['arch'], 'noarch')):
+                raise RuntimeError('Invalid APK identity or architecture metadata')
+    names = set()
+    for key in m['keys']:
+        if (Path(key['name']).name != key['name'] or not key['name'].endswith('.pub')
+                or key['name'] in names):
+            raise RuntimeError('Invalid public key name')
+        names.add(key['name'])
+        if hashlib.sha256(key['content'].encode()).hexdigest() != key['sha256']:
+            raise RuntimeError('Public key checksum mismatch')
+    return m
+
+
+def export(m, cache):
+    cache.mkdir(parents=True,exist_ok=True)
+    for i,pkg in enumerate(m['packages'],1):
+        path=cache/pkg['filename']
+        if path.is_symlink():
+            raise RuntimeError(f'Archive cache symlink is not supported: {path}')
+        if not path.exists():
+            with tempfile.TemporaryDirectory(prefix='.export-', dir=cache) as td:
+                partial=Path(td)/pkg['filename']
+                run(['fossil','uv','export',pkg['artifact'],partial],cwd=REPO)
+                if sha(partial) != pkg['sha256']:
+                    raise RuntimeError(f'Corrupt Fossil artifact: {pkg["artifact"]}')
+                partial.rename(path)
+        if sha(path) != pkg['sha256']:
+            raise RuntimeError(f'Checksum mismatch: {path}')
+    print('Verified',len(m['packages']),'archived APKs',flush=True)
+
+
+def verify_closure(m, root):
+    if m['schema'] != 2:
+        raise RuntimeError('Restore comparison requires a schema 2 snapshot; create a new snapshot')
+    actual = packages(root)
+    expected = sorted([{'name': x['name'], 'version': x['version'],
+                        'arch': x['artifact_arch'], 'apk_identity': x['apk_identity']}
+                       for x in m['packages']], key=lambda x: x['name'])
+    if actual != expected:
+        actual_by_name = {x['name']: x for x in actual}
+        expected_by_name = {x['name']: x for x in expected}
+        different = sorted(name for name in actual_by_name.keys() | expected_by_name.keys()
+                           if actual_by_name.get(name) != expected_by_name.get(name))
+        raise RuntimeError('Restored package closure differs from snapshot: '+', '.join(different))
+    print('Compared package versions, native architectures and APK identities:', len(actual), flush=True)
+
+
+def restore(m, cache, root):
+    if os.geteuid() != 0:
+        raise RuntimeError('Restore requires root for isolated-root package scripts')
+    if m['schema'] != 2:
+        raise RuntimeError('Restore requires a schema 2 snapshot; create a new snapshot')
+    if root.is_symlink():
+        raise RuntimeError('Restore target must not be a symlink')
+    root=root.resolve()
+    if root==Path('/') or root.exists() and (not root.is_dir() or any(root.iterdir())):
+        raise RuntimeError('Restore target must be a new or empty directory')
+    if cache.resolve().is_relative_to(root):
+        raise RuntimeError('Archive cache must be outside the restore target')
+    if m['arch'] != output(['apk','--print-arch']).strip():
+        raise RuntimeError('Cross-architecture restore is not supported')
+    export(m,cache)
+    root.parent.mkdir(parents=True, exist_ok=True)
+    stage=Path(tempfile.mkdtemp(prefix=f'.{root.name}.restore-', dir=root.parent))
+    try:
+        keys=stage/'etc/apk/keys'
+        keys.mkdir(parents=True)
+        for key in m['keys']:
+            (keys/key['name']).write_text(key['content'])
+        run(['apk','--root',stage,'--arch',m['arch'],'--keys-dir',keys,
+             '--repositories-file','/dev/null','--no-network','add','--initdb']+
+            [cache/x['filename'] for x in m['packages']])
+        verify_closure(m,stage)
+        (stage/'etc/apk/world').write_text(m['world'])
+        (stage/'etc/apk/repositories').write_text(m['repositories'])
+        stage.chmod(0o755)
+        stage.rename(root)
+    except Exception as error:
+        raise RuntimeError(f'Restore failed; evidence retained at {stage}; '
+                           f'target {root} is safe to retry: {error}') from error
+    print('Exact package closure restored and compared:',root)
+
+
+def verify_installed_subset(m, root, original_extras):
+    """Check locked identities while keeping unrelated installed packages."""
+    actual = {x['name']: x for x in packages(root)}
+    locked = {x['name']: x for x in m['packages']}
+    different = []
+    for name, expected in locked.items():
+        found = actual.get(name)
+        if (found is None or any(found[k] != expected[k]
+                                 for k in ('version', 'apk_identity')) or
+                found['arch'] not in (expected['artifact_arch'], expected['arch'])):
+            different.append(name)
+    if different:
+        raise RuntimeError('Installed locked packages differ: '+', '.join(sorted(different)))
+    lost = set(original_extras) - actual.keys()
+    if lost:
+        raise RuntimeError('Unmanaged packages were unexpectedly removed: '+', '.join(sorted(lost)))
+    return sorted(actual.keys() - locked.keys())
+
+
+def install_host(m, cache, root=Path('/')):
+    """Install on the running host; root override is internal for isolated tests."""
+    if os.geteuid() != 0:
+        raise RuntimeError('install-host requires root')
+    if m['schema'] != 2:
+        raise RuntimeError('install-host requires a schema 2 snapshot')
+    if m['arch'] != output(['apk', '--print-arch']).strip():
+        raise RuntimeError('Cross-architecture installation is not supported')
+    root = root.resolve()
+    export(m, cache)
+    paths = [cache / x['filename'] for x in m['packages']]
+    # Validate all keys, signatures and APK identities before changing the
+    # installed database or trusting new keys on the host.
+    with tempfile.TemporaryDirectory(prefix='oldbook-install-keys-') as td:
+        keys = Path(td)
+        for key in m['keys']:
+            if (Path(key['name']).name != key['name'] or not key['name'].endswith('.pub') or
+                    hashlib.sha256(key['content'].encode()).hexdigest() != key['sha256']):
+                raise RuntimeError('Invalid snapshot public key')
+            (keys / key['name']).write_text(key['content'])
+        run(['apk', '--keys-dir', keys, '--no-network', 'verify'] + paths,
+            stdout=subprocess.DEVNULL)
+        validate_artifacts(m['packages'], artifact_packages(paths))
+        original = packages(root)
+        locked_names = {x['name'] for x in m['packages']}
+        original_extras = sorted(x['name'] for x in original if x['name'] not in locked_names)
+        command = ['apk', '--root', root, '--arch', m['arch'], '--keys-dir', keys,
+                   '--repositories-file', '/dev/null', '--no-network', 'add'] + paths
+        simulation = run(command[:1]+['--simulate']+command[1:],
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
+                         env=dict(os.environ, LC_ALL='C')).stdout
+        if re.search(r'\)\s+(?:Purging|Removing)\s', simulation):
+            raise RuntimeError('Offline install would remove existing packages; '
+                               'resolve conflicts explicitly before retrying:\n'+simulation)
+        if original != packages(root):
+            raise RuntimeError('Installed packages changed during preflight; retry when apk is idle')
+        backup_parent = root / 'var/backups/oldbook'
+        backup_parent.mkdir(parents=True, exist_ok=True)
+        backup = Path(tempfile.mkdtemp(prefix='install-host-', dir=backup_parent))
+        # This local root-only backup may contain machine secrets. It never
+        # enters the checkout, lock manifest, or Fossil artifacts.
+        with tarfile.open(backup / 'etc.tar', 'w') as archive:
+            archive.add(root / 'etc', arcname='etc', recursive=True)
+        shutil.copytree(root / 'lib/apk/db', backup / 'apk-db', symlinks=True)
+        (backup / 'simulation.log').write_text(simulation)
+        (backup / 'lock.json').write_text(json.dumps(m, sort_keys=True, indent=2)+'\n')
+        print('Host configuration and APK database backup:', backup, flush=True)
+        try:
+            run(command)
+            extras = verify_installed_subset(m, root, original_extras)
+            destination_keys = root / 'etc/apk/keys'
+            destination_keys.mkdir(parents=True, exist_ok=True)
+            for key in m['keys']:
+                (destination_keys / key['name']).write_text(key['content'])
+            (root / 'etc/apk/world').write_text(m['world'])
+            (root / 'etc/apk/repositories').write_text(m['repositories'])
+        except Exception as error:
+            raise RuntimeError(f'Host installation did not complete; partial changes may remain. '
+                               f'Backup and simulation are at {backup}. '
+                               f'Do not restore the APK database alone: {error}') from error
+    if extras:
+        print('Locked APK identities verified; extra installed packages retained: '+', '.join(extras),
+              flush=True)
+        print('Host package set is not an exact closure match.', flush=True)
+    else:
+        print('Host package closure matches locked versions, architectures and APK identities.',
+              flush=True)
+    return extras
+
+
+def main():
+    p=argparse.ArgumentParser(description=__doc__)
+    p.add_argument('action',choices=['snapshot','verify','restore','verify-root','install-host'])
+    p.add_argument('--cache',type=Path,required=True)
+    p.add_argument('--lock',type=Path)
+    p.add_argument('--root',type=Path)
+    a=p.parse_args()
+    if a.root and a.action not in ('restore', 'verify-root'):
+        p.error('--root is only supported for restore/verify-root')
+    os.chdir(REPO)
+    a.cache=a.cache.resolve()
+    if a.action=='snapshot':
+        snapshot(a.cache);return
+    path=a.lock or REPO/(REPO/'alpine/packages/current-lock').read_text().strip()
+    m=load_lock(path)
+    if a.action == 'install-host':
+        install_host(m, a.cache)
+    elif a.action in ('restore', 'verify-root'):
+        if not a.root:p.error('--root is required for restore/verify-root')
+        if a.action == 'restore':
+            restore(m,a.cache,a.root)
+        else:
+            export(m,a.cache)
+            verify_closure(m,a.root)
+    else:export(m,a.cache)
+
+
+if __name__=='__main__':
+    main()

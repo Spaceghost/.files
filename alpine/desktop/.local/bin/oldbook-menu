@@ -1,0 +1,6 @@
+#!/bin/sh
+# Desktop launcher; fuzzel reads installed desktop entries and performs no scan.
+if command -v fuzzel >/dev/null 2>&1; then
+    exec fuzzel --show drun
+fi
+notify-send -u critical 'Spaceghost launcher unavailable' 'Install fuzzel to use the application menu.'

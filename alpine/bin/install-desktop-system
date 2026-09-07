@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""Install the desktop entrypoint and shared palette, preserving conflicts."""
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import time
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def main():
+    if os.geteuid() != 0:
+        raise SystemExit('Run with doas to install the desktop entrypoint.')
+    backup = Path('/var/backups/alpine-rice') / ('desktop-' + str(time.time_ns()))
+    wrapper = '''#!/bin/sh
+# The user overlay selects SwayFX; a user without it gets stock Sway.
+if [ -x "$HOME/.local/bin/oldbook-sway" ]; then
+    exec "$HOME/.local/bin/oldbook-sway" "$@"
+fi
+exec /usr/bin/sway "$@"
+'''
+    desktop = '''[Desktop Entry]
+Name=Space Ghost
+Comment=The Oldbook desktop: SwayFX, violet glass, and late-night transmissions
+Exec=/usr/local/bin/sway
+Type=Application
+DesktopNames=sway
+'''
+    backlight = '''# Desktop video-group access to kernel brightness; no privileged shell helper.
+ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
+'''
+    for dest, content, mode in [(Path('/etc/udev/rules.d/90-oldbook-backlight.rules'), backlight, 0o644),
+                                (Path('/usr/local/bin/sway'), wrapper, 0o755),
+                                (Path('/usr/share/wayland-sessions/oldbook.desktop'), desktop, 0o644)]:
+        if dest.is_file() and not dest.is_symlink() and dest.read_bytes() == content.encode():
+            continue
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists() or dest.is_symlink():
+            saved = backup / dest.relative_to('/')
+            saved.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(dest), str(saved))
+        dest.write_text(content)
+        dest.chmod(mode)
+    palette = Path('/usr/share/qt6ct/colors/spaceghost.conf')
+    source = REPO / 'alpine/theme/spaceghost.conf'
+    if not (palette.is_symlink() and palette.resolve() == source):
+        palette.parent.mkdir(parents=True, exist_ok=True)
+        if palette.exists() or palette.is_symlink():
+            backup.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(palette), str(backup / 'spaceghost.conf'))
+        palette.symlink_to(source)
+    subprocess.run(['udevadm', 'control', '--reload-rules'], check=True)
+    subprocess.run(['udevadm', 'trigger', '--subsystem-match=backlight', '--action=add'], check=True)
+    print('Desktop entrypoint installed. Existing sessions continue; next sway launch uses the overlay.')
+    if backup.exists():
+        print('Previous files:', backup)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""Build a pinned SwayFX APK with networking disabled; never install packages."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import shlex
+import shutil
+import subprocess
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--source", required=True, type=Path, help="Archived swayfx-0.6.tar.gz")
+parser.add_argument("--work", required=True, type=Path, help="New, nonexisting build directory")
+args = parser.parse_args()
+recipe = Path(__file__).resolve().parent
+manifest = json.loads((recipe / "manifest.json").read_text())
+source = args.source.resolve(strict=True)
+if hashlib.sha256(source.read_bytes()).hexdigest() != manifest["source"]["sha256"]:
+    parser.error("Source SHA-256 does not match the pinned release")
+if os.geteuid() == 0:
+    parser.error("Run as your ordinary build user; doas is used only to isolate networking")
+work = args.work.absolute()
+work.mkdir(parents=True, exist_ok=False)
+stage = work / "oldbook" / "swayfx"
+stage.mkdir(parents=True)
+for name in ["APKBUILD", "swayfx.desktop", "oldbook-effects.conf"]:
+    shutil.copy2(recipe / name, stage / name)
+shutil.copy2(source, stage / manifest["source"]["filename"])
+user = pwd.getpwuid(os.getuid()).pw_name
+command = ["abuild", "-d", "-K", "-P", str(work / "apks"), "-s", str(work / "distfiles")]
+# su sets the build user's HOME so abuild can use that user's private signing key.
+# All actual compilation runs without a network device, and -d never alters APK state.
+isolated = ["doas", "-n", "unshare", "--net", "--", "su", user, "-s", "/bin/sh",
+            "-c", "cd " + shlex.quote(str(stage)) + " && exec " + shlex.join(command)]
+with (work / "build.log").open("w") as log:
+    result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
+if result.returncode:
+    raise SystemExit(f"Build failed; see {work / 'build.log'}")
+apk = next((work / "apks" / "oldbook" / "x86_64").glob("swayfx-*.apk"))
+print(apk)
+print("SHA-256", hashlib.sha256(apk.read_bytes()).hexdigest())

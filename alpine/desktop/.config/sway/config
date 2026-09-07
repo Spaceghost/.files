@@ -1,0 +1,136 @@
+# Spaceghost / Oldbook Sway session — MacBookPro11,5 internal panel (2880x1800, 2x).
+# The deployer expands this overlay into HOME; wallpaper is supplied separately.
+set $mod Mod4
+set $term foot
+set $menu ~/.local/bin/oldbook-menu
+set $lock ~/.local/bin/oldbook-lock
+set $wallpaper ~/.local/share/oldbook/wallpaper.png
+
+seat * xcursor_theme simp1e-cursors-rose-pine 24
+
+font pango:JetBrainsMono Nerd Font 11
+default_border pixel 2
+default_floating_border normal 2
+gaps inner 10
+gaps outer 14
+smart_gaps off
+focus_follows_mouse no
+mouse_warping output
+focus_on_window_activation smart
+
+# Stable, native panel settings.  Do not apply an unverified external display mode.
+output eDP-1 mode 2880x1800@60Hz scale 2 position 0 0
+output * bg $wallpaper fill
+
+input type:touchpad {
+    tap enabled
+    tap_button_map lrm
+    natural_scroll enabled
+    dwt enabled
+    click_method clickfinger
+    middle_emulation enabled
+    accel_profile adaptive
+    pointer_accel 0.2
+}
+input type:keyboard {
+    xkb_layout us
+    xkb_options caps:escape
+    xkb_capslock disabled
+    xkb_numlock enabled
+}
+
+# Purple glass: narrow borders make the high-density display feel intentional.
+client.focused          #dca7ff #3a185d #fff7ff #dca7ff #dca7ff
+client.focused_inactive #241237 #170b26 #bca9cf #241237 #241237
+client.unfocused        #1a1027 #100817 #8f7ea1 #1a1027 #1a1027
+client.urgent           #ff5cbb #57153e #fff7ff #ff5cbb #ff5cbb
+client.placeholder      #241237 #170b26 #bca9cf #241237 #241237
+
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+d exec ~/.local/bin/oldbook-control
+bindsym $mod+g exec ~/.local/bin/oldbook-wallpaper pick
+bindsym $mod+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
+bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
+bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
+bindsym $mod+Shift+n exec swaync-client -t
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+bindsym $mod+Escape exec $lock
+bindsym $mod+Shift+r mode "resize"
+
+# Vim navigation is also directional on the physical arrow keys.
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+bindsym $mod+Shift+1 move container to workspace number 1
+bindsym $mod+Shift+2 move container to workspace number 2
+bindsym $mod+Shift+3 move container to workspace number 3
+bindsym $mod+Shift+4 move container to workspace number 4
+bindsym $mod+Shift+5 move container to workspace number 5
+bindsym $mod+Shift+6 move container to workspace number 6
+bindsym $mod+Shift+7 move container to workspace number 7
+bindsym $mod+Shift+8 move container to workspace number 8
+bindsym $mod+Shift+9 move container to workspace number 9
+bindsym $mod+Shift+0 move container to workspace number 10
+
+bindsym $mod+b splith
+bindsym $mod+v splitv
+bindsym $mod+f fullscreen toggle
+bindsym $mod+space floating toggle
+bindsym $mod+Shift+space focus mode_toggle
+bindsym $mod+a focus parent
+bindsym $mod+Shift+a focus child
+bindsym $mod+Tab workspace back_and_forth
+
+bindsym Print exec ~/.local/bin/oldbook-screenshot full
+bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
+bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
+bindsym XF86AudioRaiseVolume exec ~/.local/bin/oldbook-audio up
+bindsym XF86AudioLowerVolume exec ~/.local/bin/oldbook-audio down
+bindsym XF86AudioMute exec ~/.local/bin/oldbook-audio mute
+bindsym XF86AudioMicMute exec ~/.local/bin/oldbook-audio mic-mute
+bindsym XF86MonBrightnessUp exec ~/.local/bin/oldbook-brightness up
+bindsym XF86MonBrightnessDown exec ~/.local/bin/oldbook-brightness down
+
+mode "resize" {
+    bindsym h resize shrink width 10 px or 5 ppt
+    bindsym j resize grow height 10 px or 5 ppt
+    bindsym k resize shrink height 10 px or 5 ppt
+    bindsym l resize grow width 10 px or 5 ppt
+    bindsym Left resize shrink width 10 px or 5 ppt
+    bindsym Down resize grow height 10 px or 5 ppt
+    bindsym Up resize shrink height 10 px or 5 ppt
+    bindsym Right resize grow width 10 px or 5 ppt
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
+for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
+for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt
+
+# oldbook-session is per-UID idempotent: reloads reuse the existing services.
+exec_always --no-startup-id ~/.local/bin/oldbook-session
+include ~/.config/sway/local.d/*

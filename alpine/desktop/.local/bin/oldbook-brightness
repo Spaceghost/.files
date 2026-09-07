@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+action=${1:-}
+for device in /sys/class/backlight/*; do
+    [ -r "$device/brightness" ] && [ -r "$device/max_brightness" ] || continue
+    current=$(cat "$device/brightness")
+    maximum=$(cat "$device/max_brightness")
+    step=$((maximum / 20))
+    [ "$step" -gt 0 ] || step=1
+    case "$action" in
+        up) next=$((current + step)) ;;
+        down) next=$((current - step)) ;;
+        *) printf '%s\n' 'usage: oldbook-brightness {up|down}' >&2; exit 64 ;;
+    esac
+    [ "$next" -le "$maximum" ] || next=$maximum
+    [ "$next" -ge 1 ] || next=1
+    if printf '%s\n' "$next" > "$device/brightness" 2>/dev/null; then
+        percent=$((next * 100 / maximum))
+        notify-send -h int:value:"$percent" -h string:x-canonical-private-synchronous:spaceghost-brightness 'Brightness' "$percent%"
+        exit 0
+    fi
+    notify-send -u normal 'Brightness needs device permission' "Cannot write $device/brightness. Grant the active seat write access or install a seat-aware brightness control."
+    exit 1
+done
+notify-send -u normal 'No backlight device' 'The kernel did not expose a backlight under /sys/class/backlight.'
+exit 1

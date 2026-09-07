@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+# shellcheck shell=sh disable=SC2034
+description='Fail off radio when the trusted wpa_supplicant session is lost'
+supervisor=supervise-daemon
+command=/usr/local/sbin/privacyctl
+command_args=supervise
+supervise_daemon_args='--respawn-delay 2 --respawn-max 0'
+
+depend() {
+    need radio-off wpa_supplicant
+    after wpa_supplicant
+    before networking
+}

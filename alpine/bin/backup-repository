@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+"""Make a consistent portable Fossil database copy, including archived inputs."""
+import argparse
+import hashlib
+import json
+from pathlib import Path
+import sqlite3
+import subprocess
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    args = parser.parse_args()
+    info = subprocess.check_output(['fossil', 'info'], cwd=REPO, text=True)
+    repository = next(line.split(':', 1)[1].strip() for line in info.splitlines()
+                      if line.startswith('repository:'))
+    checkin = next(line.split(':', 1)[1].strip().split()[0] for line in info.splitlines()
+                   if line.startswith('checkout:'))
+    output = args.output.absolute()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.with_suffix(output.suffix + '.json').exists():
+        raise SystemExit('A backup metadata file already exists at this destination.')
+    # Exclusive creation protects a previous backup from accidental replacement.
+    with output.open('xb'):
+        pass
+    output.chmod(0o600)
+    try:
+        with sqlite3.connect(Path(repository).as_uri() + '?mode=ro', uri=True) as source:
+            with sqlite3.connect(output) as target:
+                source.backup(target)
+                if target.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
+                    raise RuntimeError('Backup database failed integrity check')
+                archived = target.execute('SELECT count(*) FROM unversioned').fetchone()[0]
+        with output.open('rb') as stream:
+            digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+        metadata = {'file': output.name, 'sha256': digest, 'checkin': checkin,
+                    'sqlite_integrity': 'ok', 'unversioned_entries': archived,
+                    'includes': 'Committed history and all archived APK/source/runtime artifacts',
+                    'excludes': 'Uncommitted working files, machine credentials and private signing keys'}
+        output.with_suffix(output.suffix + '.json').write_text(json.dumps(metadata, indent=2) + '\n')
+        print(output)
+        print('SHA256', digest)
+        print('Archived inputs:', archived)
+    except BaseException:
+        # Retain a failed copy for inspection; never describe it as verified.
+        print('Backup did not complete; inspect the output before using it.')
+        raise
+
+
+if __name__ == '__main__':
+    main()

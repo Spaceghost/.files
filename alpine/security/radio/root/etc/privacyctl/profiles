@@ -1,0 +1,11 @@
+# Root-owned allowlist.  Install as root:root, mode 0600 (or 0400).
+#
+# Format: profile|controller-name|wpa-network-id|exact-SSID
+# The controller compares the configured wpa_supplicant ID with this exact SSID
+# before it unblocks Wi-Fi.  No PSK belongs in this file.
+#
+# Add the current numeric ID for this already-saved network during activation:
+# profile|shmecklebucket|0|shmecklebucket
+#
+# Do not add an iPhone line until the owner supplies its exact local SSID:
+# profile|iphone-hotspot|1|EXACT LOCAL HOTSPOT SSID

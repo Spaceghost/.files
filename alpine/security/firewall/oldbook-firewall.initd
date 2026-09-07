@@ -1,0 +1,35 @@
+#!/sbin/openrc-run
+description="Persistent default-deny Oldbook network and application gate"
+extra_commands="check"
+extra_started_commands="reload"
+
+depend() {
+    need localmount
+    after modules
+    before net networking wpa_supplicant opensnitchd
+}
+
+check() {
+    /usr/sbin/nft --check --file /etc/oldbook/firewall.nft
+}
+
+start() {
+    ebegin "Loading persistent Oldbook firewall"
+    if /usr/sbin/nft list table inet oldbook >/dev/null 2>&1; then
+        reload
+    else
+        /usr/sbin/nft --file /etc/oldbook/firewall.nft
+    fi
+    eend $?
+}
+
+reload() {
+    # Delete and rebuild only our table in one atomic nft transaction.
+    { printf '%s\n' 'delete table inet oldbook'; cat /etc/oldbook/firewall.nft; } |
+        /usr/sbin/nft --file -
+}
+
+stop() {
+    ewarn "Firewall rules retained; stopping a service must not open the network."
+    return 0
+}

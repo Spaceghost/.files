@@ -1,0 +1,327 @@
+#!/usr/bin/python3
+"""Fail-closed root radio controller; it never reads credential material."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import secrets
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+RFKILL = "/usr/sbin/rfkill"
+IP = "/sbin/ip"
+UDHCPC = "/sbin/udhcpc"
+INTERFACE = "wlan0"
+CONTROL_SOCKET = "/run/wpa_supplicant/wlan0"
+CONTROL_DIR = "/run/wpa_supplicant"
+PROFILE_FILE = Path("/etc/privacyctl/profiles")
+LOCK_FILE = Path("/run/privacyctl.lock")
+SESSION_FILE = Path("/run/privacyctl/session.json")
+ALLOWED = {"shmecklebucket", "iphone-hotspot"}
+CONNECT_DEADLINE = 20
+SCAN_DEADLINE = 15
+
+
+class PrivacyError(RuntimeError):
+    pass
+
+
+def run_checked(args):
+    result = subprocess.run(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE, text=True, check=False)
+    if result.returncode:
+        raise PrivacyError("command failed: " + args[0])
+    return result.stdout
+
+
+class RadioLock:
+    def __enter__(self):
+        self.fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR | os.O_CLOEXEC, 0o600)
+        fcntl.flock(self.fd, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, _type, _value, _traceback):
+        fcntl.flock(self.fd, fcntl.LOCK_UN)
+        os.close(self.fd)
+
+
+class WpaControl:
+    """Minimal wpa_ctrl client: unsolicited events never count as replies."""
+    def __init__(self, endpoint=CONTROL_SOCKET, directory=CONTROL_DIR):
+        self.local = os.path.join(directory, ".privacyctl-" + secrets.token_hex(12))
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        try:
+            self.sock.bind(self.local)
+            self.sock.connect(endpoint)
+            self.expect_ok("ATTACH")
+        except OSError as error:
+            self.close()
+            raise PrivacyError("wpa control socket unavailable") from error
+
+    def close(self):
+        try:
+            self.sock.close()
+        finally:
+            try:
+                os.unlink(self.local)
+            except FileNotFoundError:
+                pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, _type, _value, _traceback):
+        self.close()
+
+    def request(self, command, deadline=3):
+        self.sock.send(command.encode("ascii"))
+        end = time.monotonic() + deadline
+        while True:
+            remaining = end - time.monotonic()
+            if remaining <= 0:
+                raise PrivacyError("wpa command timed out")
+            self.sock.settimeout(remaining)
+            try:
+                message = self.sock.recv(65535).decode("utf-8", "strict").strip()
+            except (OSError, UnicodeError) as error:
+                raise PrivacyError("wpa control protocol failed") from error
+            if not message.startswith("<"):
+                return message
+
+    def expect_ok(self, command):
+        if self.request(command) != "OK":
+            raise PrivacyError("wpa rejected " + command.split(" ", 1)[0])
+
+    def wait_event(self, fragment, deadline):
+        end = time.monotonic() + deadline
+        while True:
+            remaining = end - time.monotonic()
+            if remaining <= 0:
+                raise PrivacyError("expected wpa event did not arrive")
+            self.sock.settimeout(remaining)
+            try:
+                message = self.sock.recv(65535).decode("utf-8", "strict").strip()
+            except (OSError, UnicodeError) as error:
+                raise PrivacyError("wpa event stream failed") from error
+            if message.startswith("<") and fragment in message:
+                return
+
+    def status(self):
+        values = {}
+        for line in self.request("STATUS").splitlines():
+            key, separator, value = line.partition("=")
+            if separator and key in {"wpa_state", "id", "ssid"}:
+                values[key] = value
+        return values
+
+    def network_ssid(self, network_id):
+        found = []
+        for line in self.request("LIST_NETWORKS").splitlines()[1:]:
+            columns = line.split("\t")
+            if len(columns) >= 2 and columns[0] == str(network_id):
+                found.append(columns[1])
+        if len(found) != 1:
+            raise PrivacyError("configured network id is absent or ambiguous")
+        return found[0]
+
+
+class System:
+    def states(self, kind):
+        states = []
+        for entry in Path("/sys/class/rfkill").glob("rfkill*"):
+            try:
+                if (entry / "type").read_text().strip() == kind:
+                    states.append((entry / "state").read_text().strip())
+            except OSError:
+                continue
+        if not states:
+            raise PrivacyError("rfkill device missing: " + kind)
+        return states
+
+    def block_all(self):
+        errors = []
+        for kind in ("wlan", "bluetooth"):
+            try:
+                run_checked([RFKILL, "block", kind])
+            except PrivacyError as error:
+                errors.append(str(error))
+        for kind in ("wlan", "bluetooth"):
+            try:
+                if any(value != "0" for value in self.states(kind)):
+                    errors.append("rfkill state remains unblocked: " + kind)
+            except PrivacyError as error:
+                errors.append(str(error))
+        if errors:
+            raise PrivacyError("; ".join(errors))
+
+    def unblock_wifi(self):
+        run_checked([RFKILL, "unblock", "wlan"])
+        if any(value != "1" for value in self.states("wlan")):
+            raise PrivacyError("rfkill state remains blocked: wlan")
+        if any(value != "0" for value in self.states("bluetooth")):
+            raise PrivacyError("bluetooth is not blocked")
+
+    def prepare_addresses(self, profile):
+        run_checked([IP, "-4", "route", "flush", "dev", INTERFACE])
+        run_checked([IP, "-4", "addr", "flush", "dev", INTERFACE, "scope", "global"])
+        if profile == "iphone-hotspot":
+            run_checked([IP, "-6", "route", "flush", "dev", INTERFACE])
+            run_checked([IP, "-6", "addr", "flush", "dev", INTERFACE, "scope", "global"])
+        run_checked([UDHCPC, "-i", INTERFACE, "-n", "-q", "-t", "5", "-T", "3"])
+
+
+def read_profile(profile, path=PROFILE_FILE):
+    if profile not in ALLOWED:
+        raise PrivacyError("unsupported profile")
+    try:
+        info = path.lstat()
+    except OSError as error:
+        raise PrivacyError("profile policy is unavailable") from error
+    if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o077:
+        raise PrivacyError("profile policy must be root-owned and private")
+    matches = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        if raw and not raw.startswith("#"):
+            fields = raw.split("|")
+            if len(fields) == 4 and fields[:2] == ["profile", profile] and fields[2].isdigit() and fields[3]:
+                matches.append((int(fields[2]), fields[3]))
+    if len(matches) != 1:
+        raise PrivacyError("profile is absent or invalid")
+    network_id, ssid = matches[0]
+    if profile == "shmecklebucket" and ssid != "shmecklebucket":
+        raise PrivacyError("home profile must use the exact home SSID")
+    return network_id, ssid
+
+
+def write_session(profile, network_id, ssid):
+    temporary = SESSION_FILE.with_name(".privacyctl-" + secrets.token_hex(12))
+    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as output:
+        json.dump({"profile": profile, "id": network_id, "ssid": ssid}, output)
+        output.flush()
+        os.fsync(output.fileno())
+    os.replace(temporary, SESSION_FILE)
+
+
+def clear_session():
+    try:
+        SESSION_FILE.unlink()
+    except FileNotFoundError:
+        pass
+
+
+class Controller:
+    def __init__(self, system=None, wpa_factory=WpaControl):
+        self.system = system or System()
+        self.wpa_factory = wpa_factory
+
+    def off(self):
+        clear_session()
+        self.system.block_all()
+
+    def scan(self):
+        try:
+            self.system.block_all()
+            with self.wpa_factory() as wpa:
+                wpa.expect_ok("DISCONNECT")
+                wpa.expect_ok("DISABLE_NETWORK all")
+                self.system.unblock_wifi()
+                wpa.expect_ok("SCAN")
+                wpa.wait_event("CTRL-EVENT-SCAN-RESULTS", SCAN_DEADLINE)
+                results = wpa.request("SCAN_RESULTS")
+                if not results.startswith("bssid"):
+                    raise PrivacyError("fresh scan results rejected")
+                return results
+        except Exception:
+            self.off()
+            raise
+        finally:
+            self.system.block_all()
+
+    def connect(self, profile):
+        try:
+            self.system.block_all()
+            clear_session()
+            network_id, expected_ssid = read_profile(profile, PROFILE_FILE)
+            with self.wpa_factory() as wpa:
+                wpa.expect_ok("DISCONNECT")
+                wpa.expect_ok("DISABLE_NETWORK all")
+                if wpa.network_ssid(network_id) != expected_ssid:
+                    raise PrivacyError("configured network does not match policy")
+                wpa.expect_ok("SELECT_NETWORK " + str(network_id))
+                wpa.expect_ok("ENABLE_NETWORK " + str(network_id))
+                self.system.unblock_wifi()
+                wpa.expect_ok("RECONNECT")
+                end = time.monotonic() + CONNECT_DEADLINE
+                while time.monotonic() < end:
+                    status = wpa.status()
+                    if (status.get("wpa_state") == "COMPLETED" and status.get("id") == str(network_id)
+                            and status.get("ssid") == expected_ssid):
+                        self.system.prepare_addresses(profile)
+                        write_session(profile, network_id, expected_ssid)
+                        return
+                    time.sleep(0.25)
+                raise PrivacyError("trusted association did not complete")
+        except Exception:
+            self.off()
+            raise
+
+    def status(self):
+        data = {"wifi": {"interface": INTERFACE}, "bluetooth": {}}
+        for kind, output in (("wlan", data["wifi"]), ("bluetooth", data["bluetooth"])):
+            try:
+                output["soft_blocked"] = all(value == "0" for value in self.system.states(kind))
+            except PrivacyError:
+                output["soft_blocked"] = None
+        data["wifi"]["wpa_state"] = "UNAVAILABLE"
+        return data
+
+    def supervise(self):
+        while True:
+            if not SESSION_FILE.exists():
+                time.sleep(1)
+                continue
+            try:
+                session = json.loads(SESSION_FILE.read_text(encoding="utf-8"))
+                with self.wpa_factory() as wpa:
+                    status = wpa.status()
+                if (status.get("wpa_state") != "COMPLETED" or status.get("id") != str(session["id"])
+                        or status.get("ssid") != session["ssid"]):
+                    raise PrivacyError("trusted session lost")
+                time.sleep(1)
+            except PrivacyError:
+                with RadioLock():
+                    if SESSION_FILE.exists():
+                        self.off()
+
+
+def main(argv):
+    try:
+        if not argv:
+            raise PrivacyError("usage: privacyctl {status [--json]|off|scan|connect PROFILE|supervise}")
+        command, *args = argv
+        controller = Controller()
+        if command == "status" and args in ([], ["--json"]):
+            result = controller.status()
+            print(json.dumps(result, separators=(",", ":") if args else None, indent=None if args else 2))
+        elif command == "off" and not args:
+            with RadioLock(): controller.off()
+        elif command == "scan" and not args:
+            with RadioLock(): print(controller.scan())
+        elif command == "connect" and len(args) == 1:
+            with RadioLock(): controller.connect(args[0])
+        elif command == "supervise" and not args and os.geteuid() == 0:
+            controller.supervise()
+        else:
+            raise PrivacyError("usage: privacyctl {status [--json]|off|scan|connect PROFILE|supervise}")
+        return 0
+    except PrivacyError as error:
+        print("privacyctl: " + str(error), file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

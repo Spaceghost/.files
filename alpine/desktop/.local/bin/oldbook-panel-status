@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Read-only Waybar status. Network observations never request wireless scans."""
+import html
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+
+def read(path, fallback=""):
+    try:
+        return Path(path).read_text().strip()
+    except OSError:
+        return fallback
+
+
+def emit(text, tooltip, css):
+    print(json.dumps({"text": text, "tooltip": tooltip, "class": css}, ensure_ascii=False))
+
+
+def radios():
+    result = []
+    for node in sorted(Path("/sys/class/rfkill").glob("rfkill*")):
+        kind = read(node / "type", "radio")
+        name = html.escape(read(node / "name", node.name))
+        blocked = read(node / "soft") == "1" or read(node / "hard") == "1"
+        result.append((kind, name, blocked))
+    return result
+
+
+def radio():
+    entries = radios()
+    blocked = bool(entries) and all(entry[2] for entry in entries)
+    lines = ["<b>RADIO STATE</b>"]
+    lines.extend(f"{html.escape(kind)} · {name}: {'blocked' if off else 'enabled'}" for kind, name, off in entries)
+    lines += ["", "Kernel rfkill state; not proof of physical RF silence.", "Click for connection controls. No scan runs on hover."]
+    emit("󰤭" if blocked else "󰀁", "\n".join(lines), "blocked" if blocked else "enabled")
+
+
+def firewall():
+    running = subprocess.run(["pgrep", "-x", "opensnitchd"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    emit("󰒃" if running else "󱨫", "<b>APPLICATION FIREWALL</b>\n" + ("OpenSnitch daemon is running." if running else "OpenSnitch daemon is not running.") + "\nProcess status does not verify active firewall rules.\n\nClick to open the application firewall interface.", "running" if running else "staged")
+
+
+def rate(value):
+    for suffix in ("B", "K", "M", "G"):
+        if value < 1024 or suffix == "G":
+            return f"{value:.0f}{suffix}"
+        value /= 1024
+
+
+def network():
+    iface = ""
+    for line in read("/proc/net/route").splitlines()[1:]:
+        fields = line.split()
+        if len(fields) > 3 and fields[1] == "00000000" and int(fields[3], 16) & 1:
+            iface = fields[0]
+            break
+    if not iface:
+        entries = [p for p in Path("/sys/class/net").iterdir() if p.name != "lo" and read(p / "operstate") == "up"]
+        iface = entries[0].name if entries else ""
+    if not iface:
+        emit("󰤭 offline", "<b>TRANSMISSION OFFLINE</b>\nNo connected interface.\n\nClick for network controls. Status never requests a scan.", "offline")
+        return
+    net = Path("/sys/class/net") / iface
+    now = time.monotonic()
+    rx, tx = [int(read(net / "statistics" / field, "0")) for field in ("rx_bytes", "tx_bytes")]
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}"))
+    cache = runtime / "oldbook-netrate.json"
+    down = up = 0.0
+    try:
+        previous = json.loads(cache.read_text())
+        elapsed = now - previous["time"]
+        if previous["iface"] == iface and 0 < elapsed < 60:
+            down = max(0, rx - previous["rx"]) / elapsed
+            up = max(0, tx - previous["tx"]) / elapsed
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    try:
+        temporary = cache.with_suffix(f".{os.getpid()}.tmp")
+        temporary.write_text(json.dumps({"iface": iface, "time": now, "rx": rx, "tx": tx}))
+        os.chmod(temporary, 0o600)
+        temporary.replace(cache)
+    except OSError:
+        pass
+    signal = ""
+    for line in read("/proc/net/wireless").splitlines()[2:]:
+        fields = line.split()
+        if fields and fields[0] == f"{iface}:":
+            signal = f"\nSignal: {fields[3].rstrip('.')} dBm"
+    glyph = "󰤨" if (net / "wireless").exists() else "󰈀"
+    addresses = []
+    try:
+        data = subprocess.run(["ip", "-j", "address", "show", "dev", iface], capture_output=True, text=True, timeout=2)
+        for item in json.loads(data.stdout):
+            addresses.extend(html.escape(addr["local"]) for addr in item.get("addr_info", []) if addr.get("scope") == "global")
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        pass
+    tooltip = f"<b>TRANSMISSION · {html.escape(iface)}</b>\n↓ {rate(down)}/s  ↑ {rate(up)}/s{signal}\n" + "\n".join(addresses)
+    tooltip += "\n\nKernel counters and address data only; no Wi-Fi scan.\nLeft: controls · Right: connection report\nHover to reveal radio and firewall status."
+    emit(f"{glyph} ↓{rate(down)}", tooltip, "connected")
+
+
+if __name__ == "__main__":
+    actions = {"network": network, "radio": radio, "firewall": firewall}
+    if len(sys.argv) != 2 or sys.argv[1] not in actions:
+        raise SystemExit("usage: oldbook-panel-status {network|radio|firewall}")
+    actions[sys.argv[1]]()

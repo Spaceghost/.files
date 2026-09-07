@@ -1,0 +1,8 @@
+# source	target	owner	mode	purpose
+root/usr/local/sbin/privacyctl	/usr/local/sbin/privacyctl	root:root	0750	fixed privileged controller and supervisor
+root/etc/privacyctl/profiles	/etc/privacyctl/profiles	root:root	0600	SSID and saved-network-ID allowlist without credentials
+root/etc/doas.d/privacyctl.conf	/etc/doas.d/privacyctl.conf	root:root	0400	exact noninteractive controller commands for jack
+root/etc/init.d/radio-off	/etc/init.d/radio-off	root:root	0755	early OpenRC soft-block service
+root/etc/init.d/privacyctl-supervisor	/etc/init.d/privacyctl-supervisor	root:root	0755	restarting OpenRC trusted-session fail-off supervisor
+root/etc/elogind/system-sleep/95-radio-off	/etc/elogind/system-sleep/95-radio-off	root:root	0755	actual elogind pre-suspend and post-resume block hook
+root/etc/wpa_supplicant/privacy-policy.conf	merge into root-only active configuration	root:root	0600	non-secret scan and P2P policy
