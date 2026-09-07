@@ -176,14 +176,9 @@ def relayout_panels():
     panel_command('layout')
 
 
-def delete_current(confirm=True):
-    """Remove the artwork now on screen from the gallery, after moving on from it."""
+def removable(entry):
+    """Validate one gallery entry and return its image and sidecar paths."""
     gallery_root = (REPO / 'alpine/assets/gallery').resolve()
-    entries, _ = load_gallery()
-    state = read_state()
-    entry = next((item for item in entries if item['id'] == state.get('id')), None)
-    if entry is None:
-        raise RuntimeError('No current artwork to delete')
     image = Path(entry['path']).resolve()
     sidecar = image.with_suffix('.json')
     if not image.is_relative_to(gallery_root):
@@ -192,25 +187,104 @@ def delete_current(confirm=True):
     for path in (image, sidecar):
         if path.is_symlink() or (path.exists() and not path.is_file()):
             raise RuntimeError('Refusing to delete anything but regular gallery files')
+    return image, sidecar
+
+
+def remove_artwork(chosen):
+    """Delete one or more gallery entries, stepping off any that is on screen."""
+    if not chosen:
+        return 0
+    entries, _ = load_gallery()
+    paths = [removable(entry) for entry in chosen]
+    doomed = {entry['id'] for entry in chosen}
+    surviving = [entry for entry in entries if entry['id'] not in doomed]
+    # Move the desktop on first so it never points at a file that is gone.
+    if read_state().get('id') in doomed and surviving:
+        update('next')
+    relative = []
+    for image, sidecar in paths:
+        for path in (image, sidecar):
+            path.unlink(missing_ok=True)
+            relative.append(str(path.relative_to(REPO.resolve())))
+    # Keep the checkout consistent; the removal stays pending for review.
+    try:
+        subprocess.run(['fossil', 'rm', '--hard', '--', *relative], cwd=REPO,
+                       stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return len(chosen)
+
+
+def delete_current(confirm=True):
+    """Remove the artwork now on screen from the gallery, after moving on from it."""
+    entries, _ = load_gallery()
+    entry = next((item for item in entries if item['id'] == read_state().get('id')), None)
+    if entry is None:
+        raise RuntimeError('No current artwork to delete')
+    removable(entry)
     if confirm:
         answer = gallery_menu('Delete "' + entry['title'] + '"? ',
                               ['Keep it', 'Delete this painting permanently'])
         if answer != 'Delete this painting permanently':
             return 0
-    # Move the desktop on first so it never points at a file that is gone.
-    if len(entries) > 1:
-        update('next')
-    for path in (image, sidecar):
-        path.unlink(missing_ok=True)
-    # Keep the checkout consistent; the removal stays pending for review.
-    relative = [str(path.relative_to(REPO.resolve())) for path in (image, sidecar)]
-    try:
-        subprocess.run(['fossil', 'rm', '--hard', '--', *relative], cwd=REPO,
-                       stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=30)
-    except (OSError, subprocess.SubprocessError):
-        pass
+    remove_artwork([entry])
     print('Deleted ' + entry['title'])
     return 0
+
+
+def delete_many(entries, labels):
+    """Tick several paintings, then remove them in one confirmed step."""
+    marked = set()
+    while True:
+        done = f'󰩹  Delete {len(marked)} selected…' if marked else None
+        options = [option for option in (done, '← Back to the gallery') if option]
+        options += [('[x] ' if index in marked else '[  ] ') + label
+                    for index, label in enumerate(labels)]
+        chosen = gallery_menu(f'Select images to delete ({len(marked)}) ❯ ', options)
+        if chosen is None or chosen == '← Back to the gallery':
+            return 0
+        if done is not None and chosen == done:
+            break
+        for index, label in enumerate(labels):
+            if chosen[5:] == label:
+                marked.symmetric_difference_update({index})
+                break
+        else:
+            return 0
+    picked = [entries[index] for index in sorted(marked)]
+    answer = gallery_menu(f'Permanently delete {len(picked)} painting(s)? ',
+                          ['Keep them', f'Delete {len(picked)} permanently'])
+    if answer != f'Delete {len(picked)} permanently':
+        return 0
+    removed = remove_artwork(picked)
+    print(f'Deleted {removed} painting(s)')
+    return 0
+
+
+def switch_theme():
+    """Apply an existing theme, rather than generating new artwork in its style."""
+    active = current_theme_id()
+    themes = available_themes(REPO)
+    labels = {}
+    for theme in themes:
+        mark = '●' if theme['id'] == active else '○'
+        suffix = '' if (REPO / 'alpine/themes/profiles' / theme['id']).is_dir() else '  (palette only)'
+        labels[f'{mark}  {theme["name"]}{suffix}'] = theme['id']
+    chosen = gallery_menu('Switch theme ❯ ', ['← Back to the gallery', *labels])
+    if chosen is None or chosen not in labels:
+        return 0
+    if labels[chosen] == active:
+        return 0
+    subprocess.Popen(['/usr/bin/python3', str(Path(__file__).resolve().parent / 'oldbook-theme'),
+                      'use', labels[chosen]], start_new_session=True)
+    return 0
+
+
+def current_theme_id():
+    try:
+        return (REPO / 'alpine/themes/current').read_text().strip() or 'none'
+    except OSError:
+        return 'none'
 
 
 def update(action, selected=None):
@@ -369,18 +443,25 @@ def pick():
     controls = {'→  Next artwork': 'next', '←  Previous artwork': 'prev',
                 '⏯  Pause / resume rotation': 'pause'}
     delete_label = '󰩹  Delete this painting permanently'
+    delete_many_label = '󰩹  Delete several paintings…'
+    theme_label = '󰸌  Switch theme · change the desktop look'
     panels_label = '󰕮  Desktop panels · switch on/off'
     refit_label = '󰃨  Refit desktop panels to this painting'
     help_label = '?  Help & gallery controls'
     deck_label = '󰊠  Open command deck · all desktop commands'
     edit_label = '✎  Edit artwork prompts · Shift+click'
     themed_commands = {'✦  Generate unthemed artwork & switch to it': 'none'}
-    themed_commands.update({'✦  Generate ' + theme['name'] + ' artwork & switch to it': theme['id']
+    themed_commands.update({'✦  Paint a new ' + theme['name'] + ' image (takes a while)': theme['id']
                             for theme in available_themes(REPO)})
     random_label = '✦  Random new theme'
     phrase_label = '✦  New theme from a phrase/title'
-    actions = [*controls, delete_label, panels_label, refit_label, help_label, deck_label,
-               edit_label, generate_label, random_label, phrase_label, *themed_commands]
+    actions = [theme_label, *controls, delete_label, delete_many_label, panels_label,
+               refit_label, help_label, deck_label, edit_label, generate_label,
+               random_label, phrase_label, *themed_commands]
+    try:
+        active_name = load_theme(REPO)['name']
+    except (OSError, ValueError, RuntimeError):
+        active_name = 'Unthemed'
     page = 0
     page_size = 6
     page_count = max(1, (len(entries) + page_size - 1) // page_size)
@@ -391,7 +472,8 @@ def pick():
         if page + 1 < page_count:
             options += ['Older images →']
         options += ['Gallery actions…']
-        selected = gallery_menu(f'Gallery {page + 1}/{page_count} ❯ ', options)
+        selected = gallery_menu(
+            f'Gallery {page + 1}/{page_count} · {active_name} ❯ ', options)
         if selected not in options:
             return
         if selected == 'Older images →':
@@ -424,6 +506,10 @@ def pick():
             update(controls[selected])
         elif selected == delete_label:
             delete_current()
+        elif selected == delete_many_label:
+            delete_many(entries, labels)
+        elif selected == theme_label:
+            switch_theme()
         elif selected == panels_label:
             panel_command('toggle')
         elif selected == refit_label:

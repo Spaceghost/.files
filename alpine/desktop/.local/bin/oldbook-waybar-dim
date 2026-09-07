@@ -10,6 +10,8 @@ small stylesheet that the bar imports, which costs a style reload only on the
 rare frames where the fullscreen state actually changes.  The hover rule itself
 is static in style.css and needs no help from here.
 """
+import fcntl
+import hashlib
 import os
 from pathlib import Path
 import runpy
@@ -86,6 +88,15 @@ def main():
     ipc = runpy.run_path(str(Path(__file__).resolve().parent / 'oldbook-workspaces'))
     runtime = Path(os.environ['XDG_RUNTIME_DIR'])
     sway = ipc['find_socket'](runtime)
+    # One watcher per Sway socket: exec_always runs this again on every reload.
+    lock_directory = runtime / 'oldbook'
+    lock_directory.mkdir(mode=0o700, exist_ok=True)
+    identity = hashlib.sha256(str(sway).encode()).hexdigest()[:12]
+    lock = (lock_directory / ('waybar-dim-' + identity + '.lock')).open('a')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return
     directory = style_directory()
     if not directory.is_dir():
         raise RuntimeError(f'no Waybar configuration directory: {directory}')

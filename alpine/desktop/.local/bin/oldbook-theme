@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Show and switch the active desktop theme.
+
+`alpine/themes/current` names the palette every overlay reads, and
+`alpine/themes/profiles/<id>/` holds that theme's HOME overlay: Sway and SwayFX
+chrome, Waybar, Foot, GTK, Qt, btop and the shell prompts.  Both existed before
+this command and neither had anything that wrote to them, so choosing a theme in
+the gallery only ever offered to *generate* artwork in its style and nothing
+actually changed.  This applies a theme: it repoints the deployed HOME symlinks
+at the theme's profile, records the selection, and reloads what is already
+running so the change is visible without logging out.
+"""
+import argparse
+import os
+from pathlib import Path
+import runpy
+import signal
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
+
+THEMES = REPO / 'alpine/themes'
+
+
+def profile_directory(identity):
+    """Return the theme's HOME overlay, or None when it only carries a palette."""
+    profile = THEMES / 'profiles' / identity
+    if not safe_theme_id(identity) or has_symlink(profile, REPO) or not profile.is_dir():
+        return None
+    return profile
+
+
+def current_identity():
+    try:
+        return (THEMES / 'current').read_text().strip() or 'none'
+    except OSError:
+        return 'none'
+
+
+def describe(theme, active):
+    mark = '●' if theme['id'] == active else '○'
+    profile = '' if profile_directory(theme['id']) else '   (palette only)'
+    return f'{mark} {theme["name"]}{profile}'
+
+
+def record(identity):
+    """Write the selection where every palette-aware overlay reads it."""
+    target = THEMES / 'current'
+    if has_symlink(target, REPO):
+        raise RuntimeError('The active theme must be a regular file in the checkout')
+    temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(identity + '\n')
+    temporary.replace(target)
+
+
+def reload_desktop():
+    """Nudge the running session; anything else picks the theme up when it starts."""
+    notes = []
+    result = subprocess.run(['swaymsg', 'reload'], capture_output=True, text=True)
+    notes.append('sway reloaded' if result.returncode == 0 else 'sway reload failed')
+    signalled = 0
+    for entry in os.listdir('/proc'):
+        if not entry.isdigit():
+            continue
+        try:
+            argv = (Path('/proc') / entry / 'cmdline').read_bytes().split(b'\0')
+        except OSError:
+            continue
+        if argv and argv[0].split(b'/')[-1] == b'waybar':
+            try:
+                os.kill(int(entry), signal.SIGUSR2)
+                signalled += 1
+            except OSError:
+                continue
+    notes.append(f'waybar reloaded ({signalled})')
+    terminals = Path(__file__).resolve().parent / 'oldbook-refresh-terminal-theme'
+    if terminals.is_file():
+        outcome = subprocess.run(['/usr/bin/python3', str(terminals)],
+                                 capture_output=True, text=True)
+        notes.append('terminals repainted' if outcome.returncode == 0
+                     else 'terminals unchanged')
+    return notes
+
+
+def use(identity, *, reload=True):
+    theme = load_theme(REPO, identity)
+    profile = profile_directory(theme['id'])
+    deployed = None
+    if profile is not None:
+        # The deployer owns the symlink journal and its rollback, so switching
+        # themes reuses it rather than inventing a second way to write HOME.
+        deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
+        deployed = deployer['deploy'](Path.home(), profile)
+    record(theme['id'])
+    notes = reload_desktop() if reload else []
+    return theme, profile, deployed, notes
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('list', 'current', 'use'))
+    parser.add_argument('theme', nargs='?')
+    parser.add_argument('--no-reload', action='store_true',
+                        help='apply the files without touching the running session')
+    args = parser.parse_args()
+    active = current_identity()
+    if args.action == 'current':
+        print(active)
+        return 0
+    if args.action == 'list':
+        for theme in available_themes(REPO):
+            print(theme['id'] + '\t' + describe(theme, active))
+        return 0
+    if not args.theme:
+        parser.error('use requires a theme ID')
+    theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload)
+    print(f'Switched to {theme["name"]}')
+    if profile is None:
+        print('  This collection carries only a palette, so overlays follow it '
+              'but application configuration is unchanged.')
+    elif deployed is None:
+        print('  Configuration already matched this theme.')
+    else:
+        print(f'  Previous configuration backed up to {deployed}')
+    for note in notes:
+        print('  ' + note)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, RuntimeError) as error:
+        sys.exit(f'oldbook-theme: {error}')
