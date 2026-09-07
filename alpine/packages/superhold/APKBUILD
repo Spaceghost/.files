@@ -1,0 +1,49 @@
+# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+pkgname=superhold
+pkgver=0.1.0
+pkgrel=0
+pkgdesc="Theme-aware contextual shortcut guide for Sway and X11 desktops"
+url="https://github.com/Spaceghost/.files"
+arch="all"
+license="GPL-3.0-or-later"
+depends="python3 py3-qt6 py3-xlib xkbcomp dbus qt6-qtwayland layer-shell-qt"
+makedepends="cmake ninja qt6-qtbase-dev layer-shell-qt-dev"
+subpackages="$pkgname-doc"
+provides="hold-to-help=$pkgver-r$pkgrel"
+replaces="hold-to-help"
+source="$pkgname-$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+options="!net"
+export SOURCE_DATE_EPOCH=1788739200
+export PYTHONDONTWRITEBYTECODE=1
+
+build() {
+    cmake -S . -B build -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_INSTALL_LIBDIR=lib \
+        -DBUILD_TESTING=ON
+    cmake --build build
+}
+
+check() {
+    QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure
+    python3 bin/superhold --version
+}
+
+package() {
+    DESTDIR="$pkgdir" cmake --install build
+    mkdir -p "$pkgdir/usr/lib/hold-to-help"
+    ln -s ../superhold/libsuperhold-layer-shell.so \
+        "$pkgdir/usr/lib/hold-to-help/libhold-to-help-layer-shell.so"
+}
+
+doc() {
+    default_doc
+    provides="hold-to-help-doc=$pkgver-r$pkgrel"
+    replaces="hold-to-help-doc"
+}
+
+sha512sums="
+76394364c5ca065afcbd063dabacc68cfd864e89af07c65223640b374ca53d5d13e2794faa72d5d976848e3640947fe80d1fa102bac516d6a3c2738cc1e525d8  superhold-0.1.0.tar.gz
+"

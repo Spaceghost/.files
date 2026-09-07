@@ -26,8 +26,8 @@ array and reload Waybar with SIGUSR2. The top bar remains the first object.
 
 The package snapshot must include `sway`, `swayidle`, `swaylock`, `waybar`, `fuzzel`, `swaync`, `foot`, `zsh`, `starship`, `eza`, `zoxide`, `neovim`, `btop`, `cava`, `grim`, `slurp`, `swappy`, `jq`, `libnotify`, `playerctl`, `pavucontrol`, `pipewire`, `pipewire-pulse`, `wireplumber`, `wlsunset`, `polkit-gnome`, `qt6ct`, `adw-gtk3`, and `papirus-icon-theme`. JetBrains Mono and a Nerd Font symbols font provide the intended metrics and icons.
 
-The contextual guide uses the locally packaged `hold-to-help` and its Qt 6,
-layer-shell-qt and keyboard-input dependencies. Its [portable guide](../../projects/hold-to-help/README.md)
+The contextual guide uses the locally packaged `superhold` and its Qt 6,
+layer-shell-qt and keyboard-input dependencies. Its [portable guide](../../projects/superhold/README.md)
 documents desktop support and exact build requirements.
 
 `oldbook-session` deliberately owns session services once per current UID. On every Sway reload it checks the existing Waybar, SwayNC, Swayidle, PipeWire, WirePlumber, Pulse, and polkit-agent processes before starting anything. This avoids reliance on the release-dependent `/usr/libexec/pipewire-launcher` behavior and prevents duplicate panels, idle daemons, color processes, or authentication agents.

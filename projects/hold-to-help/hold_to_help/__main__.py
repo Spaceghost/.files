@@ -1,7 +1,2 @@
-import sys
-from .cli import main
-
-try:
-    raise SystemExit(main())
-except (ConnectionError, OSError, RuntimeError, ValueError) as error:
-    sys.exit(f"hold-to-help: {error}")
+"""Compatibility source module command."""
+from superhold.__main__ import *

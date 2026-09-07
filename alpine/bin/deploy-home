@@ -86,18 +86,38 @@ def reject_interrupted(target):
             raise RuntimeError(f'Interrupted deployment: run deploy-home --target {target} --rollback {path.parent}')
 
 
-def deploy(target, overlay, wallpaper=None):
+def deploy(target, overlay, wallpaper=None, *, only=None):
+    pairs = [(p, p.relative_to(overlay)) for p in sorted(overlay.rglob('*'))
+             if p.is_file() and not p.is_symlink()
+             and p.relative_to(overlay).parts[0] != 'README.md'
+             and '__pycache__' not in p.relative_to(overlay).parts
+             and p.suffix not in ('.pyc', '.pyo')]
+    config = Path('.config/superhold/config.toml')
+    legacy = Path('.config/hold-to-help/config.toml')
+    if any(relative == config for _, relative in pairs) and not os.path.lexists(overlay / legacy):
+        # Both installed names edit the same versioned configuration.
+        pairs.append((overlay / config, legacy))
+    if wallpaper:
+        pairs.append((wallpaper, Path('.local/share/oldbook/wallpaper.png')))
+    if only is not None:
+        if not only or isinstance(only, (str, bytes)):
+            raise ValueError('Deployment selection must contain exact relative file paths')
+        selected = set()
+        for value in only:
+            relative = Path(value)
+            if (relative.is_absolute() or '..' in relative.parts or not relative.parts
+                    or str(relative) != os.fspath(value)):
+                raise ValueError(f'Unsafe deployment selection: {value}')
+            selected.add(relative)
+        available = {relative for _, relative in pairs}
+        missing = selected - available
+        if missing:
+            raise ValueError('Unavailable deployment selection: ' + ', '.join(map(str, sorted(missing))))
+        pairs = [(source, relative) for source, relative in pairs if relative in selected]
     target = target.resolve()
     target.mkdir(parents=True, exist_ok=True)
     with deployment_guard(target):
         reject_interrupted(target)
-        pairs = [(p, p.relative_to(overlay)) for p in sorted(overlay.rglob('*'))
-                 if p.is_file() and not p.is_symlink()
-                 and p.relative_to(overlay).parts[0] != 'README.md'
-                 and '__pycache__' not in p.relative_to(overlay).parts
-                 and p.suffix not in ('.pyc', '.pyo')]
-        if wallpaper:
-            pairs.append((wallpaper, Path('.local/share/oldbook/wallpaper.png')))
         entries = []
         for source, relative in pairs:
             source = source.resolve()
@@ -215,7 +235,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', type=Path, default=Path.home())
     parser.add_argument('--rollback', type=Path)
+    parser.add_argument('--only', action='append', metavar='PATH',
+                        help='deploy only this exact HOME-relative file (repeatable)')
     args = parser.parse_args()
+    if args.rollback and args.only is not None:
+        parser.error('--only cannot be combined with --rollback')
     if args.rollback:
         rollback(args.target, args.rollback)
         print('Restored files from', args.rollback)
@@ -224,7 +248,7 @@ def main():
         if not wallpaper.is_file():
             wallpaper = REPO / 'alpine/assets/violet-eclipse.png'
         result = deploy(args.target, REPO / 'alpine/desktop',
-                        wallpaper if wallpaper.is_file() else None)
+                        wallpaper if wallpaper.is_file() else None, only=args.only)
         print('Already current' if result is None else f'Backup: {result}')
 
 

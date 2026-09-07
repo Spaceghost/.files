@@ -1,3 +1,6 @@
-"""Hold to Help: contextual desktop shortcut guidance."""
+"""Preserve the old checkout import path without a duplicate implementation."""
+from pathlib import Path
+import sys
 
-__version__ = "0.1.0"
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'superhold'))
+from superhold import __path__, __version__

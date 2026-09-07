@@ -1,10 +1,15 @@
 import importlib.machinery
 import importlib.util
 import errno
+import io
 import json
 import os
 from pathlib import Path
 import tempfile
+import sys
+import types
+import socket
+import subprocess
 import unittest
 from unittest import mock
 
@@ -43,6 +48,84 @@ class DeployTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             m.deploy(self.home, self.overlay)
         self.assertEqual(list(external.iterdir()), [])
+
+    def test_superhold_config_alias_shares_edits_and_restores_legacy_file(self):
+        source = self.overlay / '.config/superhold/config.toml'
+        source.parent.mkdir(parents=True)
+        source.write_text('trigger = "super"\n')
+        old = self.home / '.config/hold-to-help/config.toml'
+        old.parent.mkdir(parents=True)
+        old.write_text('trigger = "capslock"\n')
+        new = self.home / '.config/superhold/config.toml'
+        saved = m.deploy(self.home, self.overlay)
+        self.assertEqual(old.resolve(), new.resolve())
+        old.write_text('hold_seconds = 0.7\n')
+        self.assertEqual(new.read_text(), source.read_text())
+        self.assertIsNone(m.deploy(self.home, self.overlay))
+        m.rollback(self.home, saved)
+        self.assertEqual(old.read_text(), 'trigger = "capslock"\n')
+        self.assertFalse(new.exists())
+
+    def test_only_selects_exact_config_pair_and_excludes_unrelated_files(self):
+        source = self.overlay / '.config/superhold/config.toml'
+        source.parent.mkdir(parents=True)
+        source.write_text('trigger = "super"\n')
+        wallpaper = self.root / 'wallpaper.png'
+        wallpaper.write_bytes(b'wallpaper')
+        selected = ['.config/superhold/config.toml', '.config/hold-to-help/config.toml']
+        saved = m.deploy(self.home, self.overlay, wallpaper, only=selected)
+        self.assertEqual({entry['path'] for entry in json.loads(
+            (saved / 'manifest.json').read_text())['entries']}, set(selected))
+        for relative in selected:
+            self.assertEqual((self.home / relative).resolve(), source)
+        self.assertFalse((self.home / '.config/app').exists())
+        self.assertFalse((self.home / '.local/share').exists())
+
+    def test_only_rejects_missing_and_unsafe_selections_before_target_changes(self):
+        for selected in ([], ['missing'], ['.config/app'], ['/absolute'], ['../escape'],
+                         [''], ['.'], ['.config/app/../app/config'],
+                         ['.config/app/config', 'missing']):
+            with self.subTest(selected=selected):
+                with self.assertRaisesRegex(ValueError, 'selection'):
+                    m.deploy(self.home, self.overlay, only=selected)
+                self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_explicit_legacy_overlay_config_is_not_replaced_by_alias(self):
+        for name in ('superhold', 'hold-to-help'):
+            source = self.overlay / '.config' / name / 'config.toml'
+            source.parent.mkdir(parents=True)
+            source.write_text(name)
+        m.deploy(self.home, self.overlay)
+        self.assertEqual((self.home / '.config/hold-to-help/config.toml').read_text(),
+                         'hold-to-help')
+
+    def test_existing_legacy_overlay_symlink_does_not_create_alias(self):
+        source = self.overlay / '.config/superhold/config.toml'
+        source.parent.mkdir(parents=True)
+        source.write_text('new')
+        legacy = self.overlay / '.config/hold-to-help/config.toml'
+        legacy.parent.mkdir(parents=True)
+        legacy.symlink_to(self.root / 'missing')
+        with self.assertRaisesRegex(ValueError, 'selection'):
+            m.deploy(self.home, self.overlay, only=['.config/hold-to-help/config.toml'])
+        self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback(self):
+        with mock.patch.object(sys, 'argv', ['deploy-home', '--target', str(self.home),
+                '--only', '.config/app/config', '--only', '.config/other/config']), \
+                mock.patch.object(m, 'deploy', return_value=None) as deploy, \
+                mock.patch.object(sys, 'stdout', io.StringIO()):
+            m.main()
+        self.assertEqual(deploy.call_args.kwargs['only'],
+                         ['.config/app/config', '.config/other/config'])
+        with mock.patch.object(sys, 'argv', ['deploy-home', '--only', '.config/app/config',
+                '--rollback', str(self.root / 'backup')]), \
+                mock.patch.object(m, 'rollback') as rollback, \
+                mock.patch.object(sys, 'stderr', io.StringIO()):
+            with self.assertRaises(SystemExit) as error:
+                m.main()
+        self.assertEqual(error.exception.code, 2)
+        rollback.assert_not_called()
 
     def test_rollback_refuses_changed_destination(self):
         backup = m.deploy(self.home, self.overlay)
@@ -160,6 +243,61 @@ class DeployTest(unittest.TestCase):
             {'path': '.config/app/config', 'source': str(source), 'saved': True}]))
         m.rollback(self.home, backup)
         self.assertEqual(dest.read_text(), 'legacy original')
+
+
+class WrapperMigrationTest(unittest.TestCase):
+    def test_portable_profiles_precede_oldbook_with_legacy_fallback(self):
+        wrapper_loader = importlib.machinery.SourceFileLoader('shortcut_wrapper',
+            str(Path(__file__).parents[1] / 'desktop/.local/bin/oldbook-shortcuts'))
+        wrapper_spec = importlib.util.spec_from_loader(wrapper_loader.name, wrapper_loader)
+        wrapper = importlib.util.module_from_spec(wrapper_spec)
+        wrapper_loader.exec_module(wrapper)
+        for portable in ('superhold', 'hold-to-help', 'dangling', None):
+            with self.subTest(portable=portable), tempfile.TemporaryDirectory() as directory:
+                config = Path(directory)
+                legacy = config / 'oldbook/shortcuts.json'
+                legacy.parent.mkdir(parents=True)
+                legacy.write_text('{}')
+                if portable:
+                    path = config / ('superhold' if portable == 'dangling' else portable) / 'profiles.json'
+                    path.parent.mkdir(parents=True)
+                    if portable == 'dangling':
+                        path.symlink_to(config / 'missing')
+                    else:
+                        path.write_text('{}')
+                cli = types.SimpleNamespace(main=lambda arguments: arguments)
+                with mock.patch.dict(os.environ, {'XDG_CONFIG_HOME': directory}, clear=True), \
+                        mock.patch.dict(sys.modules, {'superhold.cli': cli, 'hold_to_help.cli': cli}), \
+                        mock.patch.object(sys, 'path', [str(Path(__file__).parents[2] /
+                            'projects/superhold'), *sys.path]), \
+                        mock.patch.object(sys, 'argv', ['oldbook-shortcuts', 'status']):
+                    expected = ['status'] if portable else ['--profiles', str(legacy), 'status']
+                    self.assertEqual(wrapper.main(), expected)
+
+    def test_wrapper_reads_superhold_runtime_status_without_a_display(self):
+        repo = Path(__file__).parents[2]
+        with mock.patch.object(sys, 'path', [str(repo / 'projects/superhold'), *sys.path]):
+            from superhold.service import SessionLease
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory)
+            config.chmod(0o700)
+            session = config / 'sway-ipc.test.sock'
+            with socket.socket(socket.AF_UNIX) as listener:
+                listener.bind(str(session))
+                lease = SessionLease(config, session)
+                lease.acquire()
+                try:
+                    result = subprocess.run([str(repo / 'alpine/desktop/.local/bin/oldbook-shortcuts'),
+                        'status', '--socket', str(session)],
+                        env={'PATH': os.environ['PATH'], 'HOME': directory,
+                             'XDG_CONFIG_HOME': directory, 'XDG_RUNTIME_DIR': directory},
+                        capture_output=True, text=True, timeout=3)
+                finally:
+                    lease.close()
+            self.assertEqual(result.returncode, 0, result.stderr)
+            status = json.loads(result.stdout)
+            self.assertTrue(status['live'])
+            self.assertEqual(status['socket_id'], lease.socket_id)
 
 
 if __name__ == '__main__':

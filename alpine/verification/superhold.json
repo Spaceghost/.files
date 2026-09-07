@@ -1,0 +1,506 @@
+{
+  "schema_version": 1,
+  "name": "Superhold",
+  "version": "0.1.0",
+  "status": "passed",
+  "scope": "Final source release, reproducible Alpine packages, installed compatibility, isolated native desktops, scoped configuration migration and offline package restore.",
+  "reviewed_at_utc": "2026-09-07T19:34:25.708640+00:00",
+  "source": {
+    "filename": "superhold-0.1.0.tar.gz",
+    "sha256": "48a3186cda2b86baeaa551f438f1aaf599c44dc8c9efe07f05d431bde337983f",
+    "artifact": "sha256/48a3186cda2b86baeaa551f438f1aaf599c44dc8c9efe07f05d431bde337983f/superhold-0.1.0.tar.gz",
+    "manifest": "projects/superhold/SOURCE_MANIFEST",
+    "regular_entries": 41,
+    "archive_matches_checkout": true,
+    "repeated_archive_identical": true
+  },
+  "unit_tests": {
+    "framework": "unittest",
+    "passed": 114,
+    "seconds": 1.803,
+    "log": {
+      "bundle": "core",
+      "path": "unit/superhold-final-green.log",
+      "sha256": "bf0b70d63e8f0b67a37e8c893484857a588188a238348325c954f3a6b105c161"
+    }
+  },
+  "packages": {
+    "manifest": "alpine/packages/superhold/manifest.json",
+    "artifacts": [
+      {
+        "filename": "superhold-0.1.0-r0.apk",
+        "sha256": "3fe54beeef2c64a769aac6b9e033ea44b1094a9c4078c93ae6626b199006f31f",
+        "artifact": "sha256/3fe54beeef2c64a769aac6b9e033ea44b1094a9c4078c93ae6626b199006f31f/superhold-0.1.0-r0.apk"
+      },
+      {
+        "filename": "superhold-doc-0.1.0-r0.apk",
+        "sha256": "a2ef76e3452fefb7f5a27054d83d5a2601f060d8deb9a046fc78c62d5b07a2ee",
+        "artifact": "sha256/a2ef76e3452fefb7f5a27054d83d5a2601f060d8deb9a046fc78c62d5b07a2ee/superhold-doc-0.1.0-r0.apk"
+      }
+    ],
+    "offline_builds": 2,
+    "signed_apks_byte_identical": true,
+    "signature_verification": "apk verify: both main and documentation APKs OK; second build is byte-identical.",
+    "isolation_method": "Reviewed build-offline runs abuild -d inside a separate empty network namespace, using installed dependencies and the pinned archive.",
+    "builds": [
+      {
+        "name": "one",
+        "unit_tests": 114,
+        "unit_seconds": 1.313,
+        "log": {
+          "bundle": "core",
+          "path": "builds/one/build.log",
+          "sha256": "5daf7f53f1d048098b2ec5b10b21c5b988e5406a33ef271976c758551f96c6c2"
+        },
+        "test_log": {
+          "bundle": "core",
+          "path": "builds/one/LastTest.log",
+          "sha256": "c9d706dff65ecda4ca58dd452f7f70a1ed17e0e0d8a273564f8cccf7d80483a6"
+        },
+        "recipe": {
+          "bundle": "core",
+          "path": "builds/one/APKBUILD",
+          "sha256": "c0d82b92b9d61167dae5ee430648ed61737f0193cebc6023efacd2a6a7dc0884"
+        }
+      },
+      {
+        "name": "two",
+        "unit_tests": 114,
+        "unit_seconds": 1.348,
+        "log": {
+          "bundle": "core",
+          "path": "builds/two/build.log",
+          "sha256": "c3accdebb425be28d0824262c8e1842157869b08ed1f2f6e9d05d60f272a9770"
+        },
+        "test_log": {
+          "bundle": "core",
+          "path": "builds/two/LastTest.log",
+          "sha256": "9035ae089be7e1d744660b6847f384a3331d63266e9c8d47f1f6c7bee28f4c39"
+        },
+        "recipe": {
+          "bundle": "core",
+          "path": "builds/two/APKBUILD",
+          "sha256": "c0d82b92b9d61167dae5ee430648ed61737f0193cebc6023efacd2a6a7dc0884"
+        }
+      }
+    ],
+    "build_warning": "LayerShellQt::Shell::useLayerShell is deprecated on the tested newer Qt stack; both builds and native checks passed.",
+    "installed": [
+      {
+        "name": "superhold",
+        "version": "0.1.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1qCK3zjANQjb+GMDtdlB7kSOvPPs="
+      },
+      {
+        "name": "superhold-doc",
+        "version": "0.1.0-r0",
+        "arch": "noarch",
+        "apk_identity": "Q1ImiGMA+OV9qZNMi2S6BbCQV8LE0="
+      }
+    ],
+    "delta": {
+      "removed": [
+        "hold-to-help",
+        "hold-to-help-doc"
+      ],
+      "added": [
+        "superhold",
+        "superhold-doc"
+      ],
+      "changed_existing": [],
+      "packages": 1090
+    },
+    "delta_independently_recomputed": true,
+    "delta_evidence": {
+      "bundle": "core",
+      "path": "migration/package-delta.json",
+      "sha256": "32a90a0cc203dd52a1aa4f168c887aef65cd4ebbe3de83b96ed3ea1fab4af989"
+    },
+    "build_environment_lock": "alpine/packages/locks/c89b6eacc0617add1da5.json"
+  },
+  "installed_compatibility": {
+    "python_files_matching_source": 12,
+    "python_hashes": {
+      "/usr/share/superhold/superhold/config.py": "83500db8deba55c1493de2465e4304970ca4b55a36f558220e751da0cbd25ba4",
+      "/usr/share/superhold/superhold/cli.py": "0b1c5111e48ae155d062f20c093633d705ba4ad3f31d65c1882df96c1ed458b6",
+      "/usr/share/superhold/superhold/sources.py": "bcf602f77667a8c03daf187a7160580baef2ac13c66aa6d033b925643d7484d9",
+      "/usr/share/superhold/superhold/x11.py": "60deb83349ea25103305944512c5331ce4c383108f8cd9ce0e14532ab5075ced",
+      "/usr/share/superhold/superhold/__init__.py": "0fc1d7e347229fd66bd9b2265bcd88e88544a866d807b199e1c744a0f6c8cd7f",
+      "/usr/share/superhold/superhold/service.py": "d22416a3738371623a0b0693d961355f10242d2b4a45ba552f99f325ccc2ba97",
+      "/usr/share/superhold/superhold/qt_overlay.py": "7a7f900ccc00fa440caa65aeea0411cfa4f50d49fcdaa4299b27c113f6ecf308",
+      "/usr/share/superhold/superhold/profiles.py": "0ef1e15065fcf7d05a9301d2696147fd122c11c0ee50705a58279fcb1cfd56ae",
+      "/usr/share/superhold/superhold/__main__.py": "dd8af155839598de8a9b7f44354b047540e9a45864a4cc89fccb98b685ad562d",
+      "/usr/share/superhold/superhold/hold.py": "9ebd00288dd999adb54d1a822fd7c87cb8df8cb574cd076e634f2b375fe4578e",
+      "/usr/share/superhold/hold_to_help/__init__.py": "597adf40543a711f2d6cf8d4d70b648b72dde07b4ed0974780e0baab92db294a",
+      "/usr/share/superhold/hold_to_help/__main__.py": "ae0080437750f29583c257458251e1b7c50f945cc419927dd95967dbf4d0deb6"
+    },
+    "both_command_scripts_match_source": true,
+    "command_sha256": "9aafd01d79d59b986df695e7a136336d4fee3c783286181232adac6e6839f04d",
+    "native_library": "/usr/lib/superhold/libsuperhold-layer-shell.so",
+    "native_library_sha256": "82748a93c96c77468c679afb93ef3e355b70ade84fb7cd87ce8916b5556a0858",
+    "legacy_native_path": "/usr/lib/hold-to-help/libhold-to-help-layer-shell.so",
+    "legacy_native_symlink_target": "../superhold/libsuperhold-layer-shell.so",
+    "legacy_native_path_resolves_to_current": true,
+    "exported_symbols": [
+      "superhold_layer_shell_prepare",
+      "superhold_layer_shell_configure",
+      "hth_layer_shell_prepare",
+      "hth_layer_shell_configure"
+    ],
+    "symbol_verification": "Read-only nm -D --defined-only of the installed bridge.",
+    "source_and_package_compatibility_wrappers": [
+      {
+        "bundle": "core",
+        "path": "repository/projects/hold-to-help/README.md",
+        "sha256": "e866cc55a5b2201c48084c49ccf3e3cd99277619904ae430549e208571dc2e85"
+      },
+      {
+        "bundle": "core",
+        "path": "repository/projects/hold-to-help/bin/hold-to-help",
+        "sha256": "0e25706338a68620de629a7c7d5901fd9f07dfc5905a8cdbf1f7709c3143b3f2"
+      },
+      {
+        "bundle": "core",
+        "path": "repository/projects/hold-to-help/hold_to_help/__init__.py",
+        "sha256": "79beb2b238623a4cc4a065153018ebf0e05bc75008a6187a2be12028aece0e05"
+      },
+      {
+        "bundle": "core",
+        "path": "repository/projects/hold-to-help/hold_to_help/__main__.py",
+        "sha256": "38efd0875abb96a468a0168320758c66778516d395384630e75ca88f017a4d6e"
+      },
+      {
+        "bundle": "core",
+        "path": "repository/alpine/packages/hold-to-help/README.md",
+        "sha256": "2b0067b835c07246f877f3d88f35646ff0d0bf348b3298c6d7b9d9814224e43a"
+      },
+      {
+        "bundle": "core",
+        "path": "repository/alpine/packages/hold-to-help/build-offline",
+        "sha256": "9746ab2d29bdc9cb46ef8ee83a3fd10f3703404b18074064bd7cb67a52a2e893"
+      }
+    ],
+    "runtime_directory": "$XDG_RUNTIME_DIR/hold-to-help",
+    "config_policy": "Each default file prefers superhold and falls back to hold-to-help only when absent; invalid selected config paths fail. Installed commands find share/superhold; python -m requires source/PYTHONPATH."
+  },
+  "native": {
+    "wayland": {
+      "status": "passed",
+      "live_session_changes": 0,
+      "checks": [
+        {
+          "stage": "first-output",
+          "focused": [
+            "superhold-focus-proof"
+          ]
+        },
+        {
+          "stage": "second-output",
+          "focused": [
+            "superhold-focus-proof"
+          ]
+        },
+        {
+          "stage": "repeat-hold",
+          "focused": [
+            "superhold-focus-proof"
+          ]
+        },
+        {
+          "stage": "wayland-protocol",
+          "surfaces": [
+            "[19:26:33.300389] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#31, wl_surface#26, wl_output#23, 3, \"superhold\")",
+            "[19:26:34.906918] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#39, wl_surface#36, wl_output#21, 3, \"superhold\")",
+            "[19:26:36.562098] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#39, wl_surface#36, wl_output#21, 3, \"superhold\")"
+          ],
+          "keyboard_interactivity": 0,
+          "exclusive_zone": 0
+        }
+      ],
+      "dependencies": {
+        "sway": "/usr/bin/sway",
+        "swaymsg": "/usr/bin/swaymsg",
+        "foot": "/usr/bin/foot",
+        "grim": "/usr/bin/grim"
+      },
+      "library": "/usr/lib/superhold/libsuperhold-layer-shell.so",
+      "library_sha256": "82748a93c96c77468c679afb93ef3e355b70ade84fb7cd87ce8916b5556a0858"
+    },
+    "x11_qt6ct": {
+      "backend": "xcb",
+      "platform_theme": "qt6ct",
+      "initial_window_color": "#282828",
+      "font": "Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0",
+      "visible_surface": true,
+      "wm_hints_input": false,
+      "focus_preserved_show_scroll_palette_hide": true,
+      "physical_wheel_scrolled": true,
+      "palette_event_repaint": "#123456",
+      "hidden_surface_unmapped": true,
+      "synthetic_context_only": true
+    },
+    "x11_lxqt": {
+      "backend": "xcb",
+      "platform_theme": "lxqt",
+      "initial_window_color": "#282828",
+      "font": "Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0",
+      "visible_surface": true,
+      "wm_hints_input": false,
+      "focus_preserved_show_scroll_palette_hide": true,
+      "physical_wheel_scrolled": true,
+      "palette_event_repaint": "#123456",
+      "hidden_surface_unmapped": true,
+      "synthetic_context_only": true
+    },
+    "x11_daemon": {
+      "private_display": true,
+      "host_input_unchanged": true,
+      "triggers": {
+        "super": {
+          "config_selected_trigger": "super",
+          "tap_stays_hidden": true,
+          "held_shows_context": true,
+          "same_flush_chord_cancels_until_release": true,
+          "fresh_hold_after_chord": true,
+          "pointer_wheel_keeps_visible": true,
+          "release_hides_seconds": 0.015637358999811113,
+          "focus_preserved": true,
+          "duplicate_daemon_excluded": true,
+          "xdg_profiles_and_ewmh_context": true,
+          "autorepeat_keeps_visible": true,
+          "screensaver_cancels_until_fresh_hold": true,
+          "physical_caps_remapped_escape": false
+        },
+        "capslock": {
+          "config_selected_trigger": "capslock",
+          "tap_stays_hidden": true,
+          "held_shows_context": true,
+          "same_flush_chord_cancels_until_release": true,
+          "fresh_hold_after_chord": true,
+          "pointer_wheel_keeps_visible": true,
+          "release_hides_seconds": 0.0460616049967939,
+          "focus_preserved": true,
+          "duplicate_daemon_excluded": true,
+          "xdg_profiles_and_ewmh_context": true,
+          "autorepeat_keeps_visible": true,
+          "screensaver_cancels_until_fresh_hold": true,
+          "physical_caps_remapped_escape": true
+        }
+      },
+      "stalled_display_setup_fails_within_seconds": 1.6314059380019899
+    }
+  },
+  "native_evidence": {
+    "wayland": {
+      "bundle": "core",
+      "path": "native/superhold-wayland-final/evidence.json",
+      "sha256": "54d9582a52030f1f67b994206a928cdb10ea4f0862b57a4ad2465266ea9e2978"
+    },
+    "x11_qt6ct": {
+      "bundle": "core",
+      "path": "native/superhold-x11-qt6ct-final/evidence.json",
+      "sha256": "7dc1ce203cc7f4632dc41a7183f80bfc4c31447173a125d6fa4e705ad4b70803"
+    },
+    "x11_lxqt": {
+      "bundle": "core",
+      "path": "native/superhold-x11-lxqt-final/evidence.json",
+      "sha256": "12c4b9b1b6487d01222cf3d560f8f8890e8f30a5808684cdc560322b5006bab6"
+    },
+    "x11_daemon": {
+      "bundle": "core",
+      "path": "native/superhold-x11-daemon-final/evidence.json",
+      "sha256": "585f49c0a956d8215fb74a7f86225a1a2d193085589ef8d98bd7725b08524984"
+    }
+  },
+  "native_source_scope": "Harnesses import the exact pinned source Python, independently verified byte-identical to all installed modules; Wayland uses the installed native bridge. Private Xvfb/Sway displays contain all synthetic input and screenshots.",
+  "tested_packages": {
+    "python3": "3.14.7-r0",
+    "py3-qt6": "6.11.0-r0",
+    "py3-xlib": "0.33-r5",
+    "qt6-qtbase": "6.11.1-r2",
+    "layer-shell-qt": "6.7.4-r0",
+    "lxqt-qtplugin": "2.4.0-r1",
+    "xkbcomp": "1.5.0-r0",
+    "sway": "1.12-r0",
+    "abuild": "3.18.0_rc5-r1"
+  },
+  "screenshots": [
+    {
+      "bundle": "core",
+      "path": "native/superhold-wayland-final/first-output.png",
+      "sha256": "0d42dd0232f567cf4e34b4c647f7a02739abe41c848bcc9b96b24298809e7dda",
+      "width": 2464,
+      "height": 900,
+      "synthetic_context_only": true,
+      "image_generated_or_edited": false
+    },
+    {
+      "bundle": "core",
+      "path": "native/superhold-wayland-final/repeat-hold.png",
+      "sha256": "2be7f5f651d196d5bcc315e9d736fab567fb42c3b57121db2b23d633943d19e7",
+      "width": 2464,
+      "height": 900,
+      "synthetic_context_only": true,
+      "image_generated_or_edited": false
+    },
+    {
+      "bundle": "core",
+      "path": "native/superhold-wayland-final/second-output.png",
+      "sha256": "2be7f5f651d196d5bcc315e9d736fab567fb42c3b57121db2b23d633943d19e7",
+      "width": 2464,
+      "height": 900,
+      "synthetic_context_only": true,
+      "image_generated_or_edited": false
+    },
+    {
+      "bundle": "core",
+      "path": "native/superhold-x11-lxqt-final/desktop-native-theme.png",
+      "sha256": "6a13f6d7567f7341effd9b861460f2720851a673310c813bbdcae78fd88728e3",
+      "width": 1280,
+      "height": 960,
+      "synthetic_context_only": true,
+      "image_generated_or_edited": false
+    },
+    {
+      "bundle": "core",
+      "path": "native/superhold-x11-qt6ct-final/desktop-native-theme.png",
+      "sha256": "f181b5b538ec23e08319536d990a070e7816cb44c6074675ae2681d71d1da518",
+      "width": 1280,
+      "height": 960,
+      "synthetic_context_only": true,
+      "image_generated_or_edited": false
+    }
+  ],
+  "desktop_integration": {
+    "source_hashes": {
+      "alpine/bin/deploy-home": "b9e021e34bf43c6223ca9add3cdd39802c172eea646dcac2f86360d43d23b0dc",
+      "alpine/tests/test_deploy.py": "15e9f8ebd9f6bcf611bc8b552785c6de8158281832b8946d98243e1273fe3076",
+      "alpine/desktop/.local/bin/oldbook-shortcuts": "920d73aeba7e91dac859cd5d6d59440b550953fa683e73dd1100cd45e19a519c",
+      "alpine/desktop/.config/superhold/config.toml": "fed796e36879c97c38498f5bb99c92a38466430ed9450578df140073f6d1c2e7",
+      "alpine/desktop/README.md": "1f847589197d691cf1e2427f6ef8328c64f81fce9c5e84a88c2f0e8ef8b880a6"
+    },
+    "tests": {
+      "deployment": 18,
+      "deployment_log": {
+        "bundle": "deployment",
+        "path": "desktop/superhold-deploy-green.log",
+        "sha256": "cd2e950f9a361740203a04b392b3ac42355e80db4ae5ec451b70d88dbab2e6f3"
+      },
+      "legacy_gtk_opt_in": 2,
+      "legacy_environment": "OLDBOOK_SHORTCUTS_LEGACY=1",
+      "legacy_log": {
+        "bundle": "deployment",
+        "path": "desktop/superhold-wrapper-legacy-green.log",
+        "sha256": "cee87a2ff70dcfadbb7ec8259130f38ccbb453915ec96bcc0216aadba913546c"
+      },
+      "legacy_scope": "These two tests cover the earlier GTK compatibility mode, not Superhold leases; the 18 deployment tests include a separate current Superhold lease/status case."
+    },
+    "config_links": {
+      "new": "/home/jack/.config/superhold/config.toml",
+      "legacy": "/home/jack/.config/hold-to-help/config.toml",
+      "source": "/home/jack/.files/alpine/desktop/.config/superhold/config.toml",
+      "same_target": true
+    },
+    "config_links_independently_checked": true,
+    "live_restart": {
+      "previous_pid": 8625,
+      "new_pid": 27036,
+      "previous_exited": true,
+      "new_ready": true,
+      "device_count": 2,
+      "trigger": "super",
+      "native_library": "/usr/lib/superhold/libsuperhold-layer-shell.so",
+      "config_journal": "/home/jack/.local/state/oldbook/backups/1788809358691480428"
+    },
+    "live_restart_source": {
+      "bundle": "deployment",
+      "path": "migration/live-restart.json",
+      "sha256": "d2be25f25cb015f3c169d82854309f348ea6d0cf1bba28552a9dbe595373618d"
+    },
+    "review_report": {
+      "bundle": "deployment",
+      "path": "desktop/superhold-desktop-integration-task.md",
+      "sha256": "49a6fa2923b845deefc748223f54e9afe78e25a38dcbb66bd0de4bf1e954e912"
+    }
+  },
+  "offline_restore": {
+    "lock": "alpine/packages/locks/c89b6eacc0617add1da5.json",
+    "sha256": "c89b6eacc0617add1da53116deba6bdd4c7ebed0d994378d3ee3c53ed33719ac",
+    "package_count": 1090,
+    "exact_identity_comparison": true,
+    "network": false,
+    "target": "/home/jack/.local/state/alpine-rice/restore-root-c89b6eacc0617add1da5",
+    "both_commands_version": "Superhold 0.1.0",
+    "native_bridge_and_legacy_path_load": true,
+    "summary": {
+      "bundle": "deployment",
+      "path": "migration/restore-summary.json",
+      "sha256": "60fe6a510fd6d865e275ff5d294c5e23312568375487c525cd8110c1c8d967f5"
+    },
+    "snapshot_log": {
+      "bundle": "deployment",
+      "path": "migration/package-snapshot.log",
+      "sha256": "daff46c4783cd6f47f3e78d092b2fb1a1e8a647b385ab3d9e67ce08a80ee1d67"
+    },
+    "restore_log": {
+      "bundle": "deployment",
+      "path": "migration/package-restore.log",
+      "sha256": "421536d589233df059997c59d6b880ed0a718398096e39e1bed55e105e9cc893"
+    },
+    "boot_test": false
+  },
+  "archives": {
+    "core": {
+      "filename": "superhold-0.1.0-verification.tar.gz",
+      "sha256": "8d7959265273879be9a413edc438b4343a7d9248b6b567e6c4b3946ea89f5e7a",
+      "artifact": "sha256/8d7959265273879be9a413edc438b4343a7d9248b6b567e6c4b3946ea89f5e7a/superhold-0.1.0-verification.tar.gz",
+      "entries": 95,
+      "bytes": 436235
+    },
+    "deployment": {
+      "filename": "superhold-0.1.0-deployment-verification.tar.gz",
+      "sha256": "94b88f37983eac82ee0a0368a57716aec2321ee20da2eed694e1f1a5ac1b4de7",
+      "artifact": "sha256/94b88f37983eac82ee0a0368a57716aec2321ee20da2eed694e1f1a5ac1b4de7/superhold-0.1.0-deployment-verification.tar.gz",
+      "entries": 19,
+      "bytes": 30687,
+      "export_verified": true
+    }
+  },
+  "fossil_exports_verified": [
+    {
+      "artifact": "sha256/8d7959265273879be9a413edc438b4343a7d9248b6b567e6c4b3946ea89f5e7a/superhold-0.1.0-verification.tar.gz",
+      "sha256": "8d7959265273879be9a413edc438b4343a7d9248b6b567e6c4b3946ea89f5e7a",
+      "verified": true
+    },
+    {
+      "artifact": "sha256/48a3186cda2b86baeaa551f438f1aaf599c44dc8c9efe07f05d431bde337983f/superhold-0.1.0.tar.gz",
+      "sha256": "48a3186cda2b86baeaa551f438f1aaf599c44dc8c9efe07f05d431bde337983f",
+      "verified": true
+    },
+    {
+      "artifact": "sha256/3fe54beeef2c64a769aac6b9e033ea44b1094a9c4078c93ae6626b199006f31f/superhold-0.1.0-r0.apk",
+      "sha256": "3fe54beeef2c64a769aac6b9e033ea44b1094a9c4078c93ae6626b199006f31f",
+      "verified": true
+    },
+    {
+      "artifact": "sha256/a2ef76e3452fefb7f5a27054d83d5a2601f060d8deb9a046fc78c62d5b07a2ee/superhold-doc-0.1.0-r0.apk",
+      "sha256": "a2ef76e3452fefb7f5a27054d83d5a2601f060d8deb9a046fc78c62d5b07a2ee",
+      "verified": true
+    },
+    {
+      "artifact": "sha256/94b88f37983eac82ee0a0368a57716aec2321ee20da2eed694e1f1a5ac1b4de7/superhold-0.1.0-deployment-verification.tar.gz",
+      "sha256": "94b88f37983eac82ee0a0368a57716aec2321ee20da2eed694e1f1a5ac1b4de7",
+      "verified": true
+    }
+  ],
+  "release_status": "Local release candidate; no public publication or LXQt endorsement. Public source hosting and maintainer contact remain prerequisites.",
+  "limitations": [
+    "No human physical hold in the active desktop was observed by these isolated checks; the restarted daemon was reported ready with two devices and Super selected.",
+    "LXQt platform-theme rendering was tested on private X11/Openbox; a complete LXQt desktop session was not tested.",
+    "Minimum declared Qt6.10 and layer-shell-qt6.6 versions were not built or run; tested versions are recorded above.",
+    "Other Wayland compositors are unsupported; application shortcut profiles remain partial documented baselines or user additions.",
+    "Real keyboard hotplug, VT switching and reboot persistence were not repeated; the offline restore is not a boot test.",
+    "No full backup result is claimed here. Earlier source failures and failed legacy-mode setup remain distinct archived evidence, not final passes."
+  ]
+}
