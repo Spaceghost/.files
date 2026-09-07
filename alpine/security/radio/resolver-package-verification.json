@@ -40,7 +40,7 @@
     "comparison_note": "Host comparison uses stored installed arch; restored-root comparison uses artifact_arch. Signed noarch APKs may appear as x86_64 in a repository-installed database."
   },
   "limits": [
-    "No new full empty-root restore is claimed for this added dependency. The prior1079-package lock has independent offline restore proof.",
+    "No new full empty-root restore is claimed for this added dependency. The prior 1079-package lock has independent offline restore proof.",
     "Routine lease application and initial resolver takeover still require isolated integration tests and controlled activation."
   ]
 }

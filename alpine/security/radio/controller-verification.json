@@ -1,19 +1,14 @@
 {
   "schema": 1,
-  "verified_at_utc": "2026-09-07T13:56:36.805083+00:00",
+  "verified_at_utc": "2026-09-07T15:01:03.775112+00:00",
   "scope": "Offline staged-controller verification only. Real temporary Unix datagram sockets, synthetic child processes, fake radio adapters and temporary session state; no live rfkill, WPA, network, service or package mutation.",
   "source_sha256": {
-    "alpine/security/radio/root/usr/local/sbin/privacyctl": "72b6fc96968c322ae1f1d8e3c60c4757d3e2e1c6a2ad50d28fe48113433a8859",
-    "alpine/security/radio/tests/test_privacyctl.py": "24ef305e46b1aeeccb039325933feadd3611f750066b8e3b0bf2ef8ced43f25d"
+    "alpine/security/radio/root/usr/local/sbin/privacyctl": "54ce9003ecbdfab0c13816e88aaedc176dfd5c830661a91130710c6060779625",
+    "alpine/security/radio/tests/test_privacyctl.py": "842cf2afbdabf4f124d06acfbe0c0b2c07ef7f4b3b98961aad8db9758325c2ab"
   },
   "controller_tests": {
-    "command": "python3 -m unittest discover -s alpine/security/radio/tests -p 'test_privacyctl.py' -v",
-    "passed": 35
-  },
-  "complete_radio_suite": {
-    "command": "python3 -m unittest discover -s alpine/security/radio/tests -v",
-    "passed": 44,
-    "scope": "35 controller tests plus 9 independent installer tests at verification time"
+    "command": "python3 -B -m unittest discover -s alpine/security/radio/tests -p test_privacyctl.py -q",
+    "passed": 43
   },
   "test_first": {
     "existing_controller_baseline": 23,
@@ -21,7 +16,8 @@
       "A full Unix datagram send queue blocked the initial WPA request before its receive deadline began.",
       "A rejected ATTACH left the private Unix client socket path behind.",
       "Deprecated rfkill state=2 rejected a valid simultaneous soft and hard block and misreported soft_blocked.",
-      "An unreadable adapter soft attribute could not be distinguished by the old state-only verification."
+      "An unreadable adapter soft attribute could not be distinguished by the old state-only verification.",
+      "A real scan completion delivered before its command reply was discarded, causing a false timeout."
     ]
   },
   "reproductions": [
@@ -70,6 +66,10 @@
         "RfkillStateTests.test_invalid_soft_value_is_not_a_verified_block"
       ],
       "result": "Fake sysfs adapters cover all four soft/hard combinations, reject hard-only blocking as a persistent software block, and reject missing/invalid soft state."
+    },
+    {
+      "name": "scan_event_order_and_identity",
+      "result": "Real Unix datagrams cover events before/after the reply, queued old events, delayed old IDs, substring/duplicate-ID traps, numeric ID bounds, bounded event flooding and nonblocking consumption. SCAN use_id=1 completion requires an exact ID match."
     }
   ],
   "deadlines_seconds": {
@@ -96,5 +96,19 @@
   ],
   "not_verified": [
     "Live wireless association, scan, sleep/resume or reboot; these require deployment verification."
-  ]
+  ],
+  "previous_verification": {
+    "checkin": "3b1ed08f02155e8fe11e629e28d230470f6ecaee358b9cd60b25a32b51cebe1a",
+    "verified_at_utc": "2026-09-07T13:56:36.805083+00:00",
+    "source_sha256": {
+      "alpine/security/radio/root/usr/local/sbin/privacyctl": "72b6fc96968c322ae1f1d8e3c60c4757d3e2e1c6a2ad50d28fe48113433a8859",
+      "alpine/security/radio/tests/test_privacyctl.py": "24ef305e46b1aeeccb039325933feadd3611f750066b8e3b0bf2ef8ced43f25d"
+    }
+  },
+  "wpa_scan_id_sources": [
+    "https://raw.githubusercontent.com/freebsd/freebsd-src/releng/15.0/contrib/wpa/src/common/version.h",
+    "https://raw.githubusercontent.com/freebsd/freebsd-src/releng/15.0/contrib/wpa/wpa_supplicant/ctrl_iface.c",
+    "https://raw.githubusercontent.com/freebsd/freebsd-src/releng/15.0/contrib/wpa/wpa_supplicant/events.c"
+  ],
+  "wpa_source_basis": "Official vendor-import WPA2.11 source plus installed Alpine2.11 version and compiled scan-ID strings. No exact upstream tar archive verification or live scan claimed."
 }

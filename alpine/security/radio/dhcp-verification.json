@@ -1,0 +1,607 @@
+{
+  "schema": 1,
+  "verified_at_utc": "2026-09-07T15:01:03.775112+00:00",
+  "status": "staged components; no live radio owner or CLI integration",
+  "scope": "Production parser, persistent DHCPManager, launcher and hook exercised against synthetic clients and a real private DHCPv4 server. Network application in the manager fixture is test-only; LeaseApplier and radio/WPA/firewall integration are separate.",
+  "component_tests": {
+    "status": "passed",
+    "scope": "Task2 synthetic-process DHCP manager, no production DHCP client",
+    "command": "doas -n /usr/bin/python3 -B -m unittest discover -s alpine/security/radio/tests -p test_dhcp.py -v",
+    "tests_passed": 18,
+    "duration_seconds": 3.795,
+    "test_cases": [
+      "test_acquisition_and_lease_expiry_are_independent_of_events",
+      "test_child_exit_reports_failure",
+      "test_initial_deconfig_then_bound_and_renew_keep_one_pid",
+      "test_launch_context_is_sealed_and_plain_file_is_rejected",
+      "test_launcher_and_client_death_remove_detached_descendants",
+      "test_launcher_rejects_mismatched_owner_before_namespace_exec",
+      "test_overlapping_start_and_other_manager_are_rejected",
+      "test_partial_and_oversized_packets_fail_without_hanging",
+      "test_post_bound_loss_events_report_failure_without_stopping_first",
+      "test_readiness_handshake_shares_one_total_deadline",
+      "test_real_manager_owner_death_kills_client_and_detached_hooks",
+      "test_silent_hook_socket_has_finite_deadline",
+      "test_stale_generation_inside_client_namespace_is_discarded",
+      "test_stale_or_host_namespace_frames_cannot_authorize_lease",
+      "test_stop_kills_detached_hook_namespace_and_allows_new_generation",
+      "test_successful_application_delay_does_not_extend_lease",
+      "test_unanswered_lease_hook_times_out_and_rejected_reply_cannot_bind",
+      "test_unsafe_runtime_and_invalid_generation_are_rejected"
+    ],
+    "sha256": {
+      "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/dhcp.py": "84fc00759ee7cbf1943e7fe26582ae516b2949a4403e528fdad5437c17551df8",
+      "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+      "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/hook.py": "8fdcba813da12f647437bfaa8f6fcea93d88df1035040fd6585e7e7e8894f1dd",
+      "alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-launch": "ee9857880a292f835baf65ba3417a17ef5fbdf517f72aab07e816d1de54e81de",
+      "alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-event": "9c242a9ab5bc9a59a02a8081561b3859bc6450a7799ebd7ddca77262bd93500f",
+      "alpine/security/radio/tests/test_dhcp.py": "c18a62a9d74561fa0d0ac0060171aa4dfdaccef3b14282c8196bd88ad1cf5b6d"
+    },
+    "production_manager_owner_launcher_client_death_proved": true,
+    "radio_network_dns_firewall_mutations": false,
+    "native_dhcp_integration": "See this record native.manager, independently exercised after core tests."
+  },
+  "native": {
+    "fixture": {
+      "schema_version": 1,
+      "namespaces": [
+        {
+          "net": "net:[4026533258]",
+          "mnt": "mnt:[4026533256]",
+          "pid": "pid:[4026533257]"
+        },
+        {
+          "net": "net:[4026533446]",
+          "mnt": "mnt:[4026533256]",
+          "pid": "pid:[4026533257]"
+        }
+      ],
+      "lease_seconds_offered": 16,
+      "cases": [
+        {
+          "name": "one_shot_negative_control",
+          "bound": true,
+          "client_exited": true,
+          "renewal_capable": false,
+          "events": [
+            {
+              "event": "deconfig",
+              "monotonic": 22815.482192259,
+              "hook_pid": 22,
+              "client_pid": 21,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "d698952004b21a479d7696f3ea6c3f75",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "bound",
+              "monotonic": 22815.606909429,
+              "hook_pid": 24,
+              "client_pid": 21,
+              "payload": {
+                "interface": "dhcp-client",
+                "ip": "192.0.2.10",
+                "subnet": "255.255.255.0",
+                "mask": "24",
+                "router": "192.0.2.1",
+                "dns": "192.0.2.53",
+                "lease": "16",
+                "serverid": "192.0.2.1"
+              },
+              "generation": "d698952004b21a479d7696f3ea6c3f75",
+              "net_namespace": "net:[4026533258]"
+            }
+          ],
+          "client_log": "udhcpc: started, v1.38.0\nudhcpc: broadcasting discover\nudhcpc: broadcasting select for 192.0.2.10, server 192.0.2.1\nudhcpc: lease of 192.0.2.10 obtained from 192.0.2.1, lease time 16\n"
+        },
+        {
+          "name": "persistent_renewal_and_nak",
+          "same_client_pid": true,
+          "renewal_delay_seconds": 15.067888467998273,
+          "nak_followed_by_deconfig": true,
+          "events": [
+            {
+              "event": "deconfig",
+              "monotonic": 22815.686349752,
+              "hook_pid": 28,
+              "client_pid": 27,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "f2550b4933cd9124b56143b975452683",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "bound",
+              "monotonic": 22815.795970878,
+              "hook_pid": 30,
+              "client_pid": 27,
+              "payload": {
+                "interface": "dhcp-client",
+                "ip": "192.0.2.10",
+                "subnet": "255.255.255.0",
+                "mask": "24",
+                "router": "192.0.2.1",
+                "dns": "192.0.2.53",
+                "lease": "16",
+                "serverid": "192.0.2.1"
+              },
+              "generation": "f2550b4933cd9124b56143b975452683",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "renew",
+              "monotonic": 22830.863859346,
+              "hook_pid": 33,
+              "client_pid": 27,
+              "payload": {
+                "interface": "dhcp-client",
+                "ip": "192.0.2.10",
+                "subnet": "255.255.255.0",
+                "mask": "24",
+                "router": "192.0.2.1",
+                "dns": "192.0.2.53",
+                "lease": "16",
+                "serverid": "192.0.2.1"
+              },
+              "generation": "f2550b4933cd9124b56143b975452683",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "nak",
+              "monotonic": 22845.918232319,
+              "hook_pid": 36,
+              "client_pid": 27,
+              "payload": {
+                "interface": "dhcp-client",
+                "ip": "0.0.0.0",
+                "serverid": "192.0.2.1"
+              },
+              "generation": "f2550b4933cd9124b56143b975452683",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "deconfig",
+              "monotonic": 22845.960357593,
+              "hook_pid": 37,
+              "client_pid": 27,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "f2550b4933cd9124b56143b975452683",
+              "net_namespace": "net:[4026533258]"
+            }
+          ],
+          "client_log": "udhcpc: started, v1.38.0\nudhcpc: broadcasting discover\nudhcpc: broadcasting select for 192.0.2.10, server 192.0.2.1\nudhcpc: lease of 192.0.2.10 obtained from 192.0.2.1, lease time 16\nudhcpc: sending renew to server 192.0.2.1\nudhcpc: lease of 192.0.2.10 obtained from 192.0.2.1, lease time 16\nudhcpc: sending renew to server 192.0.2.1\nudhcpc: received DHCP NAK\nudhcpc: broadcasting discover\nudhcpc: received SIGTERM\n"
+        },
+        {
+          "name": "server_silence_expires_lease",
+          "expiry_delay_seconds": 19.13887428199814,
+          "events": [
+            {
+              "event": "deconfig",
+              "monotonic": 22846.108392501,
+              "hook_pid": 40,
+              "client_pid": 39,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "b463126ffaa27eb9583641192ad8b29a",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "bound",
+              "monotonic": 22846.226452666,
+              "hook_pid": 42,
+              "client_pid": 39,
+              "payload": {
+                "interface": "dhcp-client",
+                "ip": "192.0.2.10",
+                "subnet": "255.255.255.0",
+                "mask": "24",
+                "router": "192.0.2.1",
+                "dns": "192.0.2.53",
+                "lease": "16",
+                "serverid": "192.0.2.1"
+              },
+              "generation": "b463126ffaa27eb9583641192ad8b29a",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "deconfig",
+              "monotonic": 22865.365326948,
+              "hook_pid": 45,
+              "client_pid": 39,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "b463126ffaa27eb9583641192ad8b29a",
+              "net_namespace": "net:[4026533258]"
+            }
+          ],
+          "client_log": "udhcpc: started, v1.38.0\nudhcpc: broadcasting discover\nudhcpc: broadcasting select for 192.0.2.10, server 192.0.2.1\nudhcpc: lease of 192.0.2.10 obtained from 192.0.2.1, lease time 16\nudhcpc: sending renew to server 192.0.2.1\nudhcpc: broadcasting renew\nudhcpc: broadcasting renew\nudhcpc: broadcasting renew\nudhcpc: lease lost, entering init state\nudhcpc: broadcasting discover\nudhcpc: received SIGTERM\n"
+        },
+        {
+          "name": "no_initial_offer",
+          "nonzero_client_exit": true,
+          "events": [
+            {
+              "event": "deconfig",
+              "monotonic": 22865.460752059,
+              "hook_pid": 48,
+              "client_pid": 47,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "b0bc2cb320ab8db228244d532b69408b",
+              "net_namespace": "net:[4026533258]"
+            },
+            {
+              "event": "leasefail",
+              "monotonic": 22868.606162317,
+              "hook_pid": 50,
+              "client_pid": 47,
+              "payload": {
+                "interface": "dhcp-client"
+              },
+              "generation": "b0bc2cb320ab8db228244d532b69408b",
+              "net_namespace": "net:[4026533258]"
+            }
+          ],
+          "client_log": "udhcpc: started, v1.38.0\nudhcpc: broadcasting discover\nudhcpc: broadcasting discover\nudhcpc: broadcasting discover\nudhcpc: no lease, failing\n"
+        }
+      ],
+      "server_packets": [
+        {
+          "type": 1,
+          "mode": "ack",
+          "monotonic": 22815.51732939
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22815.547284956
+        },
+        {
+          "type": 1,
+          "mode": "ack",
+          "monotonic": 22815.715144565
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22815.734272188
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22830.81839331
+        },
+        {
+          "type": 3,
+          "mode": "nak",
+          "monotonic": 22845.874598249
+        },
+        {
+          "type": 1,
+          "mode": "nak",
+          "monotonic": 22846.030231222
+        },
+        {
+          "type": 1,
+          "mode": "ack",
+          "monotonic": 22846.130239573
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22846.162319914
+        },
+        {
+          "type": 3,
+          "mode": "silent",
+          "monotonic": 22861.24821173
+        },
+        {
+          "type": 3,
+          "mode": "silent",
+          "monotonic": 22862.26416107
+        },
+        {
+          "type": 3,
+          "mode": "silent",
+          "monotonic": 22863.288471653
+        },
+        {
+          "type": 3,
+          "mode": "silent",
+          "monotonic": 22864.305254303
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22865.391310755
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22865.499153109
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22866.522416989
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22867.540149747
+        }
+      ],
+      "same_namespace_guard_rejects": true,
+      "host_radio_and_config_paths_hidden": true,
+      "alpine_default_hook_invoked": false,
+      "owned_processes_exited": true,
+      "cleanup": {
+        "remaining_namespace_members": []
+      },
+      "host_state_unchanged": true,
+      "host_checks": {
+        "namespaces": true,
+        "addresses_digest": true,
+        "routes_digest": true,
+        "dns_digest": true,
+        "radio_states": true,
+        "dhcp_clients": true
+      },
+      "elapsed_seconds": 53.52511977499671,
+      "verified_at_utc": "2026-09-07T14:56:39Z",
+      "source_sha256": {
+        "tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "tests/fixtures/dhcp_event.py": "d916540b508a8bbf66f4be1eb8fbb81948171f4092a067f54f4edc185c6d638d"
+      }
+    },
+    "manager": {
+      "schema_version": 1,
+      "namespaces": [
+        {
+          "net": "net:[4026533254]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533253]"
+        },
+        {
+          "net": "net:[4026533442]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533253]"
+        },
+        {
+          "net": "net:[4026533254]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533771]"
+        },
+        {
+          "net": "net:[4026533254]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533772]"
+        }
+      ],
+      "lease_seconds_offered": 16,
+      "cases": [
+        {
+          "name": "manager_persistent_renewal_and_nak",
+          "same_client_identity": true,
+          "events": [
+            {
+              "kind": "bound",
+              "received_at": 22709.894634355,
+              "lease": {
+                "interface": "dhcp-client",
+                "address": "192.0.2.10/24",
+                "routers": [
+                  "192.0.2.1"
+                ],
+                "dns": [
+                  "192.0.2.53"
+                ],
+                "server": "192.0.2.1",
+                "lease_seconds": 16
+              },
+              "expiry": 22725.894634355
+            },
+            {
+              "kind": "renew",
+              "received_at": 22724.953417592,
+              "lease": {
+                "interface": "dhcp-client",
+                "address": "192.0.2.10/24",
+                "routers": [
+                  "192.0.2.1"
+                ],
+                "dns": [
+                  "192.0.2.53"
+                ],
+                "server": "192.0.2.1",
+                "lease_seconds": 16
+              },
+              "expiry": 22740.953417592
+            }
+          ],
+          "failure": "DHCP authorization lost: nak",
+          "client_and_socket_removed": true
+        },
+        {
+          "name": "manager_silence_expiry_deadline",
+          "event": {
+            "kind": "bound",
+            "received_at": 22740.231149254,
+            "lease": {
+              "interface": "dhcp-client",
+              "address": "192.0.2.10/24",
+              "routers": [
+                "192.0.2.1"
+              ],
+              "dns": [
+                "192.0.2.53"
+              ],
+              "server": "192.0.2.1",
+              "lease_seconds": 16
+            },
+            "expiry": 22756.231149254
+          },
+          "failure": "DHCP lease expired",
+          "expiry_delay_seconds": 16.00043527299931,
+          "client_and_socket_removed": true
+        },
+        {
+          "name": "manager_no_initial_offer",
+          "failure": "DHCP authorization lost: leasefail",
+          "failure_delay_seconds": 15.30497653600105,
+          "client_and_socket_removed": true
+        }
+      ],
+      "server_packets": [
+        {
+          "type": 1,
+          "mode": "ack",
+          "monotonic": 22709.832108707
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22709.853169981
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22724.918299359
+        },
+        {
+          "type": 3,
+          "mode": "nak",
+          "monotonic": 22739.972646786
+        },
+        {
+          "type": 1,
+          "mode": "ack",
+          "monotonic": 22740.139258828
+        },
+        {
+          "type": 3,
+          "mode": "ack",
+          "monotonic": 22740.167267418
+        },
+        {
+          "type": 3,
+          "mode": "silent",
+          "monotonic": 22755.239970957
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22756.37320512
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22759.398307312
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22762.428152295
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22765.455295912
+        },
+        {
+          "type": 1,
+          "mode": "silent",
+          "monotonic": 22768.483477374
+        }
+      ],
+      "same_namespace_guard_rejects": true,
+      "host_radio_and_config_paths_hidden": true,
+      "alpine_default_hook_invoked": false,
+      "owned_processes_exited": true,
+      "cleanup": {
+        "remaining_namespace_members": []
+      },
+      "host_state_unchanged": true,
+      "host_checks": {
+        "namespaces": true,
+        "addresses_digest": true,
+        "routes_digest": true,
+        "dns_digest": true,
+        "radio_states": true,
+        "dhcp_clients": true
+      },
+      "elapsed_seconds": 62.27314150199891,
+      "verified_at_utc": "2026-09-07T14:55:02Z",
+      "source_sha256": {
+        "tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "tests/fixtures/dhcp_event.py": "d916540b508a8bbf66f4be1eb8fbb81948171f4092a067f54f4edc185c6d638d",
+        "tests/fixtures/dhcp_manager.py": "96569cdcaa52d7d2ef3261ca3ddfff9c412b8aa8507a89b7176aea6cf90010f0",
+        "root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+        "root/usr/local/lib/privacyctl_runtime/dhcp.py": "84fc00759ee7cbf1943e7fe26582ae516b2949a4403e528fdad5437c17551df8",
+        "root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+        "root/usr/local/lib/privacyctl_runtime/hook.py": "8fdcba813da12f647437bfaa8f6fcea93d88df1035040fd6585e7e7e8894f1dd",
+        "root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba"
+      }
+    },
+    "manager_failure_cleanup": {
+      "schema_version": 1,
+      "namespaces": [
+        {
+          "net": "net:[4026533254]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533253]"
+        },
+        {
+          "net": "net:[4026533442]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533253]"
+        },
+        {
+          "net": "net:[4026533254]",
+          "mnt": "mnt:[4026533252]",
+          "pid": "pid:[4026533771]"
+        }
+      ],
+      "expected_failure_exercised": true,
+      "worker_exit_status": 1,
+      "cases": [
+        {
+          "name": "failure_with_live_private_owners"
+        }
+      ],
+      "cleanup": {
+        "remaining_namespace_members": []
+      },
+      "host_state_unchanged": true,
+      "host_checks": {
+        "namespaces": true,
+        "addresses_digest": true,
+        "routes_digest": true,
+        "dns_digest": true,
+        "radio_states": true,
+        "dhcp_clients": true
+      },
+      "elapsed_seconds": 0.6910634140003822,
+      "verified_at_utc": "2026-09-07T14:53:38Z",
+      "source_sha256": {
+        "tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "tests/fixtures/dhcp_event.py": "d916540b508a8bbf66f4be1eb8fbb81948171f4092a067f54f4edc185c6d638d",
+        "tests/fixtures/dhcp_manager.py": "96569cdcaa52d7d2ef3261ca3ddfff9c412b8aa8507a89b7176aea6cf90010f0",
+        "root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+        "root/usr/local/lib/privacyctl_runtime/dhcp.py": "84fc00759ee7cbf1943e7fe26582ae516b2949a4403e528fdad5437c17551df8",
+        "root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+        "root/usr/local/lib/privacyctl_runtime/hook.py": "8fdcba813da12f647437bfaa8f6fcea93d88df1035040fd6585e7e7e8894f1dd",
+        "root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba"
+      }
+    }
+  }
+}

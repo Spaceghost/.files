@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 """Fail-closed root radio controller; it never reads credential material."""
 import fcntl
+from collections import deque
 from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
+import re
 import secrets
+import select
 import signal
 import socket
 import stat
@@ -131,6 +134,8 @@ class RadioLock:
 class WpaControl:
     """Minimal wpa_ctrl client: unsolicited events never count as replies."""
     def __init__(self, endpoint=CONTROL_SOCKET, directory=CONTROL_DIR):
+        self.events = deque()
+        self.scan_id = None
         self.local = os.path.join(directory, ".privacyctl-" + secrets.token_hex(12))
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         try:
@@ -176,10 +181,66 @@ class WpaControl:
                 raise PrivacyError("wpa control protocol failed") from error
             if not message.startswith("<"):
                 return message
+            if len(self.events) >= 128:
+                raise PrivacyError("wpa event queue overflow")
+            self.events.append(message)
 
     def expect_ok(self, command):
         if self.request(command) != "OK":
             raise PrivacyError("wpa rejected " + command.split(" ", 1)[0])
+
+    def read_event(self, timeout=0):
+        """Consume one attached event, including events received before an OK."""
+        if timeout < 0:
+            raise ValueError("event timeout must be nonnegative")
+        if self.events:
+            return self.events.popleft()
+        try:
+            if not select.select([self.sock], [], [], timeout)[0]:
+                return None
+            self.sock.setblocking(False)
+            message = self.sock.recv(65535).decode("utf-8", "strict").strip()
+        except (OSError, UnicodeError) as error:
+            raise PrivacyError("wpa event stream failed") from error
+        if not message.startswith("<"):
+            raise PrivacyError("unexpected wpa reply outside a command")
+        return message
+
+    def start_scan(self):
+        # Attached events from earlier commands must not satisfy this scan.
+        # Bound the drain so an event flood cannot keep the radio clear forever.
+        self.scan_id = None
+        self.events.clear()
+        for _ in range(128):
+            if self.read_event() is None:
+                # Native wpa_supplicant 2.11 tags this request's completion,
+                # including an event delivered before its numeric reply.
+                reply = self.request("SCAN use_id=1")
+                if not re.fullmatch(r"[0-9]{1,10}", reply) or int(reply) > 0xffffffff:
+                    raise PrivacyError("wpa rejected scan identifier")
+                self.scan_id = int(reply)
+                return self.scan_id
+        raise PrivacyError("wpa event stream did not become idle before scan")
+
+    def wait_scan(self, deadline):
+        """Wait for this scan's exact completion ID, never an older result."""
+        if self.scan_id is None:
+            raise PrivacyError("no pending wpa scan identifier")
+        expected = self.scan_id
+        end = time.monotonic() + deadline
+        try:
+            while True:
+                remaining = end - time.monotonic()
+                if remaining <= 0:
+                    raise PrivacyError("expected wpa scan event did not arrive")
+                message = self.read_event(remaining)
+                if message is None:
+                    continue
+                match = re.fullmatch(r"<[0-9]+>CTRL-EVENT-SCAN-RESULTS id=([0-9]{1,10})", message)
+                if match and int(match[1]) == expected:
+                    return expected
+        finally:
+            self.scan_id = None
 
     def wait_event(self, fragment, deadline):
         end = time.monotonic() + deadline
@@ -187,12 +248,8 @@ class WpaControl:
             remaining = end - time.monotonic()
             if remaining <= 0:
                 raise PrivacyError("expected wpa event did not arrive")
-            self.sock.settimeout(remaining)
-            try:
-                message = self.sock.recv(65535).decode("utf-8", "strict").strip()
-            except (OSError, UnicodeError) as error:
-                raise PrivacyError("wpa event stream failed") from error
-            if message.startswith("<") and fragment in message:
+            message = self.read_event(remaining)
+            if message is not None and fragment in message:
                 return
 
     def status(self):
@@ -400,8 +457,8 @@ class Controller:
                 wpa.expect_ok("DISCONNECT")
                 wpa.expect_ok("DISABLE_NETWORK all")
                 self.system.unblock_wifi()
-                wpa.expect_ok("SCAN")
-                wpa.wait_event("CTRL-EVENT-SCAN-RESULTS", SCAN_DEADLINE)
+                wpa.start_scan()
+                wpa.wait_scan(SCAN_DEADLINE)
                 results = wpa.request("SCAN_RESULTS")
                 if not results.startswith("bssid"):
                     raise PrivacyError("fresh scan results rejected")

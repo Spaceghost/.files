@@ -1,8 +1,10 @@
 # Network ownership migration
 
-This is a proposed implementation, not an activated network change. Research
-used read-only checks on 2026-09-07. No client was signalled, no service was
-started, and no scan was requested. Exact home and iPhone SSIDs still require
+This migration is not activated. The persistent DHCP transport, lease parser
+and isolated network harness are implemented separately from the existing CLI;
+see [LEASE-OWNER.md](LEASE-OWNER.md) for their current integration and proof scope.
+No live client was signalled, no service was started, and no scan was requested.
+Exact home and iPhone SSIDs still require
 confirmation; neither a hostname nor a guessed hotspot name establishes trust.
 
 ## Existing owners
@@ -31,7 +33,6 @@ The proposed child command is:
 
 ```text
 /sbin/udhcpc -f -n -t 5 -T 3 -i wlan0 \
-  -p /run/privacyctl/udhcpc-wlan0.pid \
   -s /usr/local/libexec/privacyctl-dhcp-event
 ```
 
@@ -39,6 +40,12 @@ Omit `-q` and `-b`: the same process must remain available for renewal, and its
 supervisor must retain its identity. Keep the 20-second initial acquisition
 deadline; success means an authenticated `bound` event followed by verified
 address/route application, not that the DHCP process exited.
+
+The implementation uses a private PID namespace and records host PID, start
+time, pidfd and namespace identity during a readiness handshake. Do not add a
+`-p` file containing namespace PID 1 or signal a host process using that value.
+The launcher inherits parent-death protection; killing namespace init removes
+its descendants, including hooks that create separate process sessions.
 
 The hook should send bounded, validated event data to the owning daemon using
 a private Unix socket and per-connection generation token. The daemon applies
@@ -100,7 +107,24 @@ the existing association without interruption.
   configuration must create its socket without starting discovery. Preserve
   logs of both successful migration and exact-backup recovery.
 
-The persistent owner, event hook and migration installer are **not implemented**.
-Keep the existing live DHCP/WPA owners until those proofs and trusted-profile
-confirmation are complete. Permission and Bluetooth-only preparation do not
-resolve this network ownership work.
+The persistent client manager and event hook are implemented as staged library
+components. The radio owner service, compatible CLI routing and migration
+installer are **not integrated**. Keep the existing live DHCP/WPA owners until
+the remaining proofs and trusted-profile confirmation are complete. Permission
+and Bluetooth-only preparation do not resolve this network ownership work.
+
+## Resolver handoff
+
+Alpine's signed `openresolv 3.17.4-r0` is installed and archived in the package
+lock. Its APK has no install/trigger script, resolver-file payload or services;
+installing it preserved the live resolver contents and existing owner commands.
+The active BusyBox hook continues writing its unmanaged resolver file directly.
+
+Initial `resolvconf -u` is a separate, deliberate migration: it takes ownership
+of the unmanaged file and creates a backup. Do not invoke it during routine
+leases or seed it with old DHCP values that would survive disconnection.
+Use a generation-specific `privacyctl.<generation>.<interface>` provider with
+`resolvconf -a` and exact-key `resolvconf -f -d`. Subscriber failure can occur
+after the provider changed; inspect and remove only recorded owned state.
+Private tests must isolate `/etc`, `/run` and subscriber side effects as well
+as the network namespace. Native resolver state is not network-namespaced.

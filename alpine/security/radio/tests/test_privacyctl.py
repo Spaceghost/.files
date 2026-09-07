@@ -85,6 +85,15 @@ class FakeWpa:
         self.timeline.append("wpa:WAIT:" + fragment)
         if not self.event:
             raise privacyctl.PrivacyError("expected wpa event did not arrive")
+    def start_scan(self):
+        command = "SCAN use_id=1"
+        self.calls.append(command)
+        self.timeline.append("wpa:" + command)
+        if self.replies.get(command, "1") != "1":
+            raise privacyctl.PrivacyError("wpa rejected SCAN")
+        return 1
+    def wait_scan(self, deadline):
+        self.wait_event("CTRL-EVENT-SCAN-RESULTS", deadline)
     def request(self, command):
         self.calls.append(command)
         self.timeline.append("wpa:" + command)
@@ -157,7 +166,7 @@ class ControllerTests(unittest.TestCase):
         self.assertIn("DISABLE_NETWORK all", self.wpa.calls)
 
     def test_scan_rejects_fail_reply(self):
-        self.wpa.replies["SCAN"] = "FAIL"
+        self.wpa.replies["SCAN use_id=1"] = "FAIL"
         with self.assertRaises(privacyctl.PrivacyError): self.controller.scan()
         self.assertTrue(self.system.blocked)
 
@@ -310,10 +319,230 @@ class RuntimeDirectoryTests(unittest.TestCase):
 
 
 class ProtocolTests(unittest.TestCase):
+    def test_scan_id_rejects_unbounded_or_nonnumeric_replies(self):
+        from collections import deque
+        for reply in ("OK", "FAIL-BUSY", "-1", "4294967296", "42x", "9" * 10000, "٤٢"):
+            with self.subTest(reply=reply[:20]):
+                control = object.__new__(privacyctl.WpaControl)
+                control.events = deque()
+                control.read_event = mock.Mock(return_value=None)
+                control.request = mock.Mock(return_value=reply)
+                with self.assertRaisesRegex(privacyctl.PrivacyError, "scan identifier"):
+                    control.start_scan()
+
+    def test_inflight_mismatched_scan_ids_and_substrings_cannot_complete_scan(self):
+        import socket
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / "wpa")
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server:
+                server.bind(endpoint)
+                server.settimeout(1)
+                failures = []
+
+                def respond():
+                    try:
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"ATTACH")
+                        server.sendto(b"OK\n", peer)
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"SCAN use_id=1")
+                        # An old completion arrives after this request starts,
+                        # including one before its numeric reply is received.
+                        server.sendto(b"<3>CTRL-EVENT-SCAN-RESULTS id=41\n", peer)
+                        server.sendto(b"42\n", peer)
+                        for event in (b"<3>CTRL-EVENT-SCAN-RESULTS id=420",
+                                      b"<3>CTRL-EVENT-SCAN-RESULTS id=42x",
+                                      b"<3>CTRL-EVENT-SCAN-RESULTS",
+                                      b"<3>FAKE-CTRL-EVENT-SCAN-RESULTS id=42",
+                                      b"<3>CTRL-EVENT-SCAN-RESULTS id=41 id=42"):
+                            server.sendto(event, peer)
+                    except BaseException as error:
+                        failures.append(error)
+
+                worker = threading.Thread(target=respond)
+                worker.start()
+                try:
+                    with privacyctl.WpaControl(endpoint, directory) as control:
+                        self.assertEqual(control.start_scan(), 42)
+                        with self.assertRaisesRegex(privacyctl.PrivacyError, "did not arrive"):
+                            control.wait_scan(.05)
+                        self.assertIsNone(control.scan_id)
+                finally:
+                    worker.join(timeout=1.2)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(failures, [])
+
+    def test_socket_event_after_attach_reply_is_drained_before_scan(self):
+        import socket
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / "wpa")
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server:
+                server.bind(endpoint)
+                server.settimeout(1)
+                queued = threading.Event()
+                failures = []
+
+                def respond():
+                    try:
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"ATTACH")
+                        server.sendto(b"OK\n", peer)
+                        server.sendto(b"<3>CTRL-EVENT-SCAN-RESULTS\n", peer)
+                        queued.set()
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"SCAN use_id=1")
+                        server.sendto(b"42\n", peer)
+                    except BaseException as error:
+                        failures.append(error)
+
+                worker = threading.Thread(target=respond)
+                worker.start()
+                try:
+                    with privacyctl.WpaControl(endpoint, directory) as control:
+                        self.assertTrue(queued.wait(1))
+                        self.assertEqual(len(control.events), 0)
+                        control.start_scan()
+                        with self.assertRaisesRegex(privacyctl.PrivacyError, "did not arrive"):
+                            control.wait_scan(.05)
+                finally:
+                    worker.join(timeout=1.2)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(failures, [])
+
+    def test_command_event_flood_fails_with_bounded_memory(self):
+        import socket
+        import threading
+        from collections import deque
+        client, server = socket.socketpair(socket.AF_UNIX, socket.SOCK_DGRAM)
+        with client, server:
+            server.settimeout(1)
+            control = object.__new__(privacyctl.WpaControl)
+            control.sock = client
+            control.events = deque()
+            failures = []
+
+            def respond():
+                try:
+                    self.assertEqual(server.recv(1024), b"PING")
+                    for _ in range(129):
+                        server.send(b"<3>CTRL-EVENT-CONNECTED")
+                except BaseException as error:
+                    failures.append(error)
+
+            worker = threading.Thread(target=respond)
+            worker.start()
+            try:
+                with self.assertRaisesRegex(privacyctl.PrivacyError, "queue overflow"):
+                    control.request("PING", deadline=1)
+                self.assertEqual(len(control.events), 128)
+            finally:
+                worker.join(timeout=1.2)
+            self.assertFalse(worker.is_alive())
+            self.assertEqual(failures, [])
+
+    def test_nonidle_event_stream_cannot_delay_scan_without_bound(self):
+        from collections import deque
+        control = object.__new__(privacyctl.WpaControl)
+        control.events = deque(["<3>CTRL-EVENT-SCAN-RESULTS"])
+        control.read_event = mock.Mock(return_value="<3>CTRL-EVENT-CONNECTED")
+        control.expect_ok = mock.Mock()
+        with self.assertRaisesRegex(privacyctl.PrivacyError, "did not become idle"):
+            control.start_scan()
+        self.assertEqual(control.read_event.call_count, 128)
+        self.assertEqual(len(control.events), 0)
+        control.expect_ok.assert_not_called()
+
+    def test_events_from_before_scan_do_not_count_as_fresh_results(self):
+        import socket
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / "wpa")
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server:
+                server.bind(endpoint)
+                server.settimeout(1)
+                failures = []
+
+                def respond():
+                    try:
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"ATTACH")
+                        server.sendto(b"<3>CTRL-EVENT-SCAN-RESULTS\n", peer)
+                        server.sendto(b"OK\n", peer)
+                        command, peer = server.recvfrom(1024)
+                        self.assertEqual(command, b"SCAN use_id=1")
+                        server.sendto(b"42\n", peer)
+                    except BaseException as error:
+                        failures.append(error)
+
+                worker = threading.Thread(target=respond)
+                worker.start()
+                try:
+                    with privacyctl.WpaControl(endpoint, directory) as control:
+                        control.start_scan()
+                        with self.assertRaisesRegex(privacyctl.PrivacyError, "did not arrive"):
+                            control.wait_scan(.05)
+                finally:
+                    worker.join(timeout=1.2)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(failures, [])
+
+    def test_event_reader_is_nonblocking_and_rejects_orphan_reply(self):
+        import socket
+        from collections import deque
+        client, server = socket.socketpair(socket.AF_UNIX, socket.SOCK_DGRAM)
+        with client, server:
+            control = object.__new__(privacyctl.WpaControl)
+            control.sock = client
+            control.events = deque(["<3>CTRL-EVENT-CONNECTED"])
+            self.assertEqual(control.read_event(), "<3>CTRL-EVENT-CONNECTED")
+            self.assertIsNone(control.read_event())
+            server.send(b"<3>CTRL-EVENT-DISCONNECTED")
+            self.assertEqual(control.read_event(), "<3>CTRL-EVENT-DISCONNECTED")
+            server.send(b"OK")
+            with self.assertRaisesRegex(privacyctl.PrivacyError, "outside a command"):
+                control.read_event()
+
     def test_non_ok_reply_is_never_success(self):
         control = object.__new__(privacyctl.WpaControl)
         control.request = lambda _: "FAIL-BUSY"
         with self.assertRaises(privacyctl.PrivacyError): control.expect_ok("RECONNECT")
+
+    def test_scan_event_arriving_before_command_reply_is_retained(self):
+        import socket
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / "wpa")
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server:
+                server.bind(endpoint)
+                server.settimeout(1)
+                failures = []
+
+                def respond():
+                    try:
+                        command, peer = server.recvfrom(1024)
+                        if command != b"ATTACH":
+                            raise AssertionError("expected attachment")
+                        server.sendto(b"OK\n", peer)
+                        command, peer = server.recvfrom(1024)
+                        if command != b"SCAN use_id=1":
+                            raise AssertionError("expected scan")
+                        server.sendto(b"<3>CTRL-EVENT-SCAN-RESULTS id=42\n", peer)
+                        server.sendto(b"42\n", peer)
+                    except BaseException as error:
+                        failures.append(error)
+
+                worker = threading.Thread(target=respond)
+                worker.start()
+                try:
+                    with privacyctl.WpaControl(endpoint, directory) as control:
+                        control.start_scan()
+                        self.assertEqual(control.wait_scan(.05), 42)
+                finally:
+                    worker.join(timeout=1.2)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(failures, [])
 
 
 class BluetoothEnforcementTests(unittest.TestCase):

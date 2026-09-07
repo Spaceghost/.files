@@ -33,9 +33,10 @@ out of Fossil. Reboot and seat-change persistence remain unverified.
 ## Staged controller behavior
 
 `privacyctl` uses the wpa_supplicant Unix datagram control protocol directly;
-every mutating command requires the literal `OK` reply. `off` blocks and then
+ordinary mutating commands require the literal `OK` reply. `off` blocks and then
 verifies both radio classes through `/sys/class/rfkill`. `scan` disables saved
-networks while blocked, requires a post-request `CTRL-EVENT-SCAN-RESULTS`, and
+networks while blocked, requests a numeric ID with `SCAN use_id=1`, requires an
+exactly matching `CTRL-EVENT-SCAN-RESULTS id=...`, and
 re-blocks both radios on every error. `connect` selects the permitted saved ID
 while blocked, verifies its exact SSID, requires the completed ID and SSID,
 clears stale routes, runs DHCP, and then records a supervised session. It is
@@ -96,15 +97,28 @@ limit. WPA requests, including ATTACH, allow 3 seconds beginning before send;
 ordinary commands allow 5 seconds and DHCP allows 20 seconds. Timed-out command
 groups, including ordinary DHCP hook children, are terminated before fail-off.
 
-Full activation still needs one DHCP owner and a lease-renewal design. The live
+WPA events received before their command reply are retained in a bounded queue.
+Before scanning, already buffered events are drained; native scan-ID matching
+also rejects older completions still in flight. Real datagram tests cover both
+orders, mismatched IDs, malformed replies and event-flood limits. Protocol
+semantics were checked against the official FreeBSD vendor import of WPA 2.11
+and the installed Alpine binary's version and scan-ID strings. This verifies
+the protocol path without requesting a live radio scan.
+
+Full activation still needs the persistent radio owner and CLI integration. The live
 `udhcpc` daemon remains running; the staged controller's one-shot `udhcpc -q`
 cannot renew leases after it exits. Resolve ownership and test renewal before
 enabling controller-managed networking. Exact trusted profile identities and a
 working root-only WPA control socket also remain activation prerequisites.
 The staged controller's isolated deadline, protocol and soft/hard state checks
 are recorded in [controller-verification.json](controller-verification.json).
-See [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for the remaining WLAN
-migration and recovery work.
+The staged lease parser, persistent client manager and bounded event hook now
+have isolated tests, including real DHCP acquisition and renewal. They remain
+separate from this legacy CLI, whose one-shot path must not be activated.
+See [LEASE-OWNER.md](LEASE-OWNER.md) for the component contracts and
+[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining WLAN migration and
+recovery work. The installed, archived openresolv dependency has not taken
+ownership of the live resolver file.
 
 `root/etc/wpa_supplicant/privacy-policy.conf` is a merge-only policy fragment.
 It uses the documented `passive_scan=1` and `p2p_disabled=1` global options;
