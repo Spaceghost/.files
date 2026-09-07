@@ -1,12 +1,12 @@
-"""On-demand workspace overview; all navigation uses Sway container identities."""
+"""Fuzzel workspace/window picker, with session-scoped show/toggle/close control."""
 import fcntl
 import hashlib
-import json
 import os
 from pathlib import Path
 import runpy
 import socket
-import sys
+import select
+import subprocess
 
 
 def walk(node):
@@ -15,16 +15,16 @@ def walk(node):
         yield from walk(child)
 
 
-def workspace_cards(tree):
-    cards = {num: {'num': num, 'name': f'{num}:STRATA' if num == 6 else f'Desktop {num}',
-                   'windows': [], 'rect': {'x': 0, 'y': 0, 'width': 1440, 'height': 900}}
+def workspaces(tree):
+    desktops = {num: {'num': num, 'name': f'{num}:STRATA' if num == 6 else f'Desktop {num}',
+                   'windows': []}
              for num in range(1, 11)}
     for node in walk(tree):
         if node.get('type') != 'workspace' or node.get('num', -1) < 0:
             continue
         windows = [view for view in walk(node) if view.get('app_id') or view.get('window')]
-        cards[node['num']] = dict(node, windows=windows)
-    return [cards[num] for num in sorted(cards)]
+        desktops[node['num']] = dict(node, windows=windows)
+    return [desktops[num] for num in sorted(desktops)]
 
 
 def focus_command(target):
@@ -33,14 +33,28 @@ def focus_command(target):
     return f'workspace number {int(target["num"])}'
 
 
-def miniature_rect(rect, workspace, width, height):
-    scale = min(width / max(1, workspace.get('width', width)),
-                height / max(1, workspace.get('height', height)))
-    w = min(width, max(48, int(rect.get('width', 200) * scale)))
-    h = min(height, max(30, int(rect.get('height', 150) * scale)))
-    x = min(width - w, max(0, int((rect.get('x', 0) - workspace.get('x', 0)) * scale)))
-    y = min(height - h, max(0, int((rect.get('y', 0) - workspace.get('y', 0)) * scale)))
-    return x, y, w, h
+def menu_entries(tree):
+    entries = []
+    desktops = workspaces(tree)
+    clean = lambda value: ' '.join(str(value or '').split())[:300]
+    for desktop in desktops:
+        for view in desktop['windows']:
+            app = view.get('app_id') or view.get('window_properties', {}).get('class', '')
+            label = 'Window · ' + clean(desktop['name']) + ' · ' + clean(app) + ' · ' + clean(view.get('name'))
+            entries.append((label, {'id': view['id']}))
+    for desktop in desktops:
+        count = len(desktop['windows'])
+        label = 'Workspace · ' + clean(desktop['name']) + ' · ' + str(count) + (' window' if count == 1 else ' windows')
+        entries.append((label, {'num': desktop['num']}))
+    return entries
+
+
+def selected_target(output, entries):
+    try:
+        index = int(output.strip())
+    except (ValueError, TypeError):
+        return None
+    return entries[index][1] if 0 <= index < len(entries) else None
 
 
 def main(action='toggle'):
@@ -72,194 +86,35 @@ def main(action='toggle'):
 
 
 def show(ipc, sway, control):
-    import gi
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('GtkLayerShell', '0.1')
-    from gi.repository import Gtk, Gdk, GLib, Pango, GtkLayerShell
-
-    window = Gtk.Window(title='Ghost Expo')
-    window.set_name('ghost-expo')
-    GtkLayerShell.init_for_window(window)
-    GtkLayerShell.set_namespace(window, 'oldbook-expo')
-    GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
-    GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
-    GtkLayerShell.set_exclusive_zone(window, -1)
-    for edge in (GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM,
-                 GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT):
-        GtkLayerShell.set_anchor(window, edge, True)
-    outputs = ipc['request'](sway, 3)
-    focused = next((o.get('rect') for o in outputs if o.get('focused')), None)
-    display = Gdk.Display.get_default()
-    for index in range(display.get_n_monitors()):
-        monitor = display.get_monitor(index)
-        geometry = monitor.get_geometry()
-        if focused and geometry.x == focused['x'] and geometry.y == focused['y']:
-            GtkLayerShell.set_monitor(window, monitor)
-            break
-    from overlay_theme import read_palette, gtk_css
-    css = Gtk.CssProvider()
-    template = '''
-#ghost-expo { background: alpha(@theme_background_hard, 0.97); color: @theme_foreground; }
-#expo-title { font: bold 28px sans-serif; color: @theme_accent; }
-#expo-hint { color: @theme_muted; }
-#ghost-expo entry { background: @theme_surface; color: @theme_foreground; border: 1px solid @theme_border; border-radius: 8px; padding: 10px; }
-#ghost-expo .workspace { background: @theme_background; border: 1px solid @theme_border; border-radius: 10px; padding: 10px; }
-#ghost-expo .active { border-color: @theme_accent; }
-#ghost-expo button { background: @theme_surface; color: @theme_foreground; border: 1px solid @theme_border; border-radius: 6px; padding: 5px; }
-#ghost-expo button:hover, #ghost-expo button:focus { background: @theme_border; border-color: @theme_accent; }
-#ghost-expo .workspace-title { font-weight: bold; background: transparent; border: 0; }
-'''
-    theme = read_palette()
-    css.load_from_data(gtk_css(template, theme))
-    Gtk.StyleContext.add_provider_for_screen(window.get_screen(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-    root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-    root.set_border_width(28)
-    window.add(root)
-    heading = Gtk.Box(spacing=12)
-    title = Gtk.Label(label='EXPO', xalign=0)
-    title.set_name('expo-title')
-    heading.pack_start(title, True, True, 0)
-    close = Gtk.Button(label='Close · Esc')
-    close.connect('clicked', lambda *_: Gtk.main_quit())
-    heading.pack_end(close, False, False, 0)
-    root.pack_start(heading, False, False, 0)
-    hint = Gtk.Label(label='Choose a window or desktop · 3/4 fingers down to close · 1–9 / 0 jump to desktop', xalign=0)
-    hint.set_name('expo-hint')
-    root.pack_start(hint, False, False, 0)
-    search = Gtk.SearchEntry(placeholder_text='Find a window, app, or workspace…')
-    root.pack_start(search, False, False, 0)
-    scroll = Gtk.ScrolledWindow()
-    scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
-    root.pack_start(scroll, True, True, 0)
-    flow = Gtk.FlowBox()
-    flow.set_selection_mode(Gtk.SelectionMode.NONE)
-    flow.set_homogeneous(True)
-    flow.set_min_children_per_line(1)
-    flow.set_max_children_per_line(4)
-    flow.set_row_spacing(14)
-    flow.set_column_spacing(14)
-    scroll.add(flow)
-    targets = []
-    fingerprint = None
-
-    def select_target(target):
-        ipc['command'](sway, focus_command(target))
-        Gtk.main_quit()
-
-    def button(text, target):
-        item = Gtk.Button()
-        label = Gtk.Label(label=text)
-        label.set_ellipsize(Pango.EllipsizeMode.END)
-        label.set_max_width_chars(28)
-        item.add(label)
-        item.set_tooltip_text(text)
-        item.connect('clicked', lambda *_: select_target(target))
-        return item
-
-    def refresh(force=False):
-        nonlocal fingerprint, theme
-        current_theme = read_palette()
-        if current_theme != theme:
-            css.load_from_data(gtk_css(template, current_theme))
-            theme = current_theme
-        try:
-            tree = ipc['request'](sway, 4)
-        except (OSError, RuntimeError):
-            Gtk.main_quit()
-            return False
-        query = search.get_text().casefold()
-        current = json.dumps(tree, sort_keys=True) + query
-        if current == fingerprint and not force:
-            return True
-        fingerprint = current
-        targets.clear()
-        for child in flow.get_children():
-            flow.remove(child)
-        for card in workspace_cards(tree):
-            windows = card['windows']
-            text = card['name'] + ' ' + ' '.join(str(w.get('name', '')) + ' ' + str(w.get('app_id', '')) for w in windows)
-            if query and query not in text.casefold():
-                continue
-            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8)
-            box.get_style_context().add_class('workspace')
-            if card.get('focused') or any(w.get('focused') for w in windows):
-                box.get_style_context().add_class('active')
-            count = str(len(windows)) + (' window' if len(windows) == 1 else ' windows')
-            title_button = button(card['name'] + '  ·  ' + count, {'num': card['num']})
-            title_button.get_style_context().add_class('workspace-title')
-            box.pack_start(title_button, False, False, 0)
-            miniature = Gtk.Fixed()
-            miniature.set_size_request(280, 155)
-            for view in windows:
-                item = button(str(view.get('name') or view.get('app_id') or 'Window'), view)
-                x, y, width, height = miniature_rect(view.get('rect', {}), card['rect'], 280, 155)
-                item.set_size_request(width, height)
-                miniature.put(item, x, y)
-                if query and query in (str(view.get('name', '')) + ' ' + str(view.get('app_id', ''))).casefold():
-                    targets.append(view)
-            if not windows:
-                label = Gtk.Label(label='Empty desktop')
-                miniature.put(label, 82, 65)
-            box.pack_start(miniature, True, True, 0)
-            flow.add(box)
-            targets.append({'num': card['num']})
-        flow.show_all()
-        return True
-
-    def keypress(_, event):
-        if event.keyval == Gdk.KEY_Escape:
-            Gtk.main_quit()
-            return True
-        if event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter) and search.has_focus():
-            activate_search()
-            return True
-        if not search.get_text() and Gdk.KEY_0 <= event.keyval <= Gdk.KEY_9:
-            select_target({'num': (event.keyval - Gdk.KEY_0) or 10})
-            return True
-        return False
-
-    swipe = [0.0, 0.0]
-    def gesture(_, event):
-        if event.type != Gdk.EventType.TOUCHPAD_SWIPE:
-            return False
-        data = event.touchpad_swipe
-        if data.n_fingers not in (3, 4):
-            return False
-        if data.phase == Gdk.TouchpadGesturePhase.BEGIN:
-            swipe[:] = [0.0, 0.0]
-        elif data.phase == Gdk.TouchpadGesturePhase.UPDATE:
-            swipe[0] += data.dx
-            swipe[1] += data.dy
-        elif data.phase == Gdk.TouchpadGesturePhase.END:
-            if swipe[1] > 40 and abs(swipe[1]) > abs(swipe[0]):
-                Gtk.main_quit()
-            elif abs(swipe[0]) > 60 and abs(swipe[0]) > abs(swipe[1]):
-                ipc['command'](sway, 'workspace next' if swipe[0] < 0 else 'workspace prev')
-                Gtk.main_quit()
-        return True
-
-    def incoming(*_):
-        action = control.recv(32).decode()
-        if action in ('toggle', 'close'):
-            Gtk.main_quit()
-        return True
-
-    def activate_search(*_):
-        refresh(True)
-        if targets:
-            select_target(targets[0])
-
-    window.add_events(Gdk.EventMask.TOUCHPAD_GESTURE_MASK)
-    window.connect('event', gesture)
-    window.connect('key-press-event', keypress)
-    window.connect('destroy', lambda *_: Gtk.main_quit() if Gtk.main_level() else None)
-    search.connect('key-press-event', keypress)
-    search.connect('search-changed', lambda *_: refresh(True))
-    search.connect('activate', activate_search)
-    GLib.io_add_watch(control.fileno(), GLib.IO_IN, incoming)
-    GLib.timeout_add(1000, refresh)
-    refresh()
-    window.show_all()
-    search.grab_focus()
-    Gtk.main()
-    window.destroy()
+    from overlay_theme import read_palette
+    palette = read_palette()
+    entries = menu_entries(ipc['request'](sway, 4))
+    command = ['fuzzel', '--dmenu', '--index', '--namespace', 'oldbook-expo',
+               '--prompt', 'Workspaces & windows ❯ ', '--width', '72',
+               '--lines', str(min(14, len(entries)))]
+    colors = {'background': 'background', 'text': 'foreground', 'prompt': 'muted',
+              'input': 'foreground', 'match': 'accent', 'selection': 'border',
+              'selection-text': 'foreground', 'selection-match': 'accent', 'border': 'accent'}
+    for option, role in colors.items():
+        command += ['--' + option + '-color=' + palette[role][1:] + ('fa' if option == 'background' else 'ff')]
+    child = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+    try:
+        child.stdin.write('\n'.join(label for label, _ in entries) + '\n')
+        child.stdin.close()
+        while child.poll() is None:
+            ready, _, _ = select.select([control], [], [], .1)
+            if ready and control.recv(32) in (b'close', b'toggle'):
+                return
+        if child.returncode == 0:
+            target = selected_target(child.stdout.read(), entries)
+            if target is not None:
+                ipc['command'](sway, focus_command(target))
+    finally:
+        if child.poll() is None:
+            child.terminate()
+            try:
+                child.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                child.kill()
+                child.wait()
+        child.stdout.close()

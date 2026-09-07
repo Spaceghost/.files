@@ -73,12 +73,12 @@ using [the restore instructions](../packages/RESTORE.md).
 ## Expo and Super-hold palettes
 
 Ghost Expo and the Oldbook Super-hold launcher read the palette selected by
-`alpine/themes/current`. Both refresh their colors while running, within about
-one second of a descriptor or selection change. Gruvbox Dark supplies charcoal
-surfaces, cream text, muted brown labels, and amber highlights. Other descriptors
-use the same semantic roles; compact generated palettes receive matching defaults.
+`alpine/themes/current`. The Fuzzel workspace/window picker reads colors when it
+opens; Super-hold refreshes while running, within about one second. Gruvbox Dark
+supplies charcoal surfaces, cream text, muted brown labels, and amber highlights.
+Other descriptors use the same semantic roles.
 
-The shared adapter is `desktop/.local/lib/oldbook/overlay_theme.py`. Expo consumes
-GTK named colors; the Oldbook launcher applies Qt palette roles locally to Hold
-to Help. The standalone Hold to Help project retains native platform theming.
-Fonts, window behavior, and shortcut/gesture handling are unchanged.
+The shared adapter is `desktop/.local/lib/oldbook/overlay_theme.py`. The picker
+passes palette colors to Fuzzel while retaining its configured fonts and shape;
+the Oldbook launcher applies Qt palette roles locally to Hold to Help. The
+standalone Hold to Help project retains native platform theming.

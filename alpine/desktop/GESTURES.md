@@ -19,24 +19,21 @@ input grab, compositor replacement, or extra package is required.
 **Super+E** toggles Expo. It is also available as **Ghost Expo** in the launcher
 and **Expo · all workspaces** in the command deck.
 
-Expo displays desktop 1–10 plus any additional numbered workspaces, with window
-layout cards that refresh while open. Click a window to focus it, or click a
-workspace heading to enter it. Search filters names, applications and titles;
-Enter activates the first match. With search empty, 1–9 and 0 select desktops
-1–10. Escape, Close, or a downward swipe dismisses the overview. Empty desktops
-are selectable; scratchpad windows are excluded. There is no background process
-when the overview is closed.
+Expo now opens Fuzzel, the same launcher used elsewhere on this desktop.
+It lists open windows with their workspace and app names, followed by desktops
+1–10 and any additional numbered workspaces. Type to filter, select with the
+arrow keys or mouse, and press Enter to switch. Escape cancels. Selecting an
+empty workspace enters it; scratchpad windows stay out of the list.
 
-The miniature cards show window geometry and titles, not live content thumbnails.
-Sway does not expose hidden workspace screenshots through ordinary screen capture;
-this overview never flips through workspaces to photograph them. Choosing Expo
-also leaves application zoom gestures alone.
+The picker inherits Fuzzel's fonts, sizing, and shape, with colors from the
+active theme at launch. It closes after selection and has no background service.
+Repeated upward swipes reuse the open picker; Super+E toggles it.
 
 Sway does not handle compositor gesture bindings when the pointer is over a bar's
-exclusive region. Start swipes over an application or desktop. Expo handles its
-own downward and horizontal swipes while it owns the pointer. Browser-specific
-back/forward, zoom, and other gestures depend on that application's support;
-these bindings do not emulate every macOS gesture or Force Touch feature.
+exclusive region. Start swipes over an application or desktop. Escape is always
+available to dismiss the picker. Browser-specific back/forward, zoom, and other
+gestures depend on that application's support; these bindings do not emulate
+every macOS gesture or Force Touch feature.
 
 Configuration: `~/.config/sway/gestures.conf`. The existing Sway configuration
 includes it, so it survives login/reload. Runtime verification identified Apple's

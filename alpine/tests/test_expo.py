@@ -15,7 +15,7 @@ class ExpoTests(unittest.TestCase):
             {'type':'workspace','id':99,'num':-1,'name':'__i3_scratch','nodes':[{'id':7,'app_id':'secret'}]},
             {'type':'workspace','id':5,'num':6,'name':'6:STRATA','rect':{'width':1000,'height':700},
              'nodes':[{'id':8,'app_id':'firefox','name':'Review','rect':{'x':0,'y':0,'width':900,'height':600}}]}]}
-        cards=self.api['workspace_cards'](tree)
+        cards=self.api['workspaces'](tree)
         self.assertEqual([c['num'] for c in cards],list(range(1,11)))
         self.assertEqual(cards[5]['name'],'6:STRATA')
         self.assertEqual([w['id'] for c in cards for w in c['windows']],[8])
@@ -25,9 +25,17 @@ class ExpoTests(unittest.TestCase):
         self.assertEqual(self.api['focus_command']({'num':6}), 'workspace number 6')
         with self.assertRaises(ValueError):self.api['focus_command']({'id':'1; exit'})
 
-    def test_miniature_keeps_floating_windows_inside_card_on_offset_output(self):
-        rectangle=self.api['miniature_rect']({'x':1800,'y':-40,'width':600,'height':600},
-                                          {'x':1920,'y':0,'width':1000,'height':700},320,160)
-        x,y,width,height=rectangle
-        self.assertGreaterEqual(x,0);self.assertGreaterEqual(y,0)
-        self.assertLessEqual(x+width,320);self.assertLessEqual(y+height,160)
+    def test_picker_keeps_duplicate_titles_distinct_and_removes_line_breaks(self):
+        tree={'type':'workspace','num':1,'name':'1:Work','nodes':[
+            {'id':11,'app_id':'foot','name':'Same\ntitle'},
+            {'id':12,'app_id':'foot','name':'Same title'}]}
+        entries=self.api['menu_entries'](tree)
+        windows=[entry for entry in entries if 'id' in entry[1]]
+        self.assertEqual([entry[1]['id'] for entry in windows],[11,12])
+        self.assertTrue(all('\n' not in entry[0] for entry in entries))
+        self.assertEqual(self.api['selected_target']('1',entries)['id'],12)
+
+    def test_cancelled_or_invalid_menu_output_never_selects_a_window(self):
+        entries=[('Window',{'id':11})]
+        for value in ('','not an index','-1','99'):
+            self.assertIsNone(self.api['selected_target'](value,entries))
