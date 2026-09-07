@@ -19,6 +19,24 @@ identity. A disconnect, wrong identity, or wpa_supplicant control failure
 removes the session and blocks both radios. Successful association deliberately
 leaves Wi-Fi enabled until an explicit `privacyctl off`.
 
+Each supervisor check takes the radio lock without waiting. It skips an active
+scan/connect command, whose lock covers the complete authorized transition.
+Missing, malformed, or unreadable session state fails off once that command
+finishes. Session cleanup errors still trigger radio blocking. The controller
+creates its runtime directory privately and refuses symlinked, shared, or
+wrong-owner directories; these behaviors are covered by isolated tests.
+During a healthy trusted Wi-Fi session it also checks Bluetooth and re-blocks
+that radio without disconnecting Wi-Fi. If the Bluetooth block cannot be
+verified, the controller fails the session off and attempts to block both.
+
+The staged `72-privacy-rfkill.rules` removes direct user access to `/dev/rfkill`.
+Its ordering is deliberate: installed `70-uaccess.rules` adds the `uaccess`
+tag, then `73-seat-late.rules` queues elogind's ACL grant. Removing the tag
+between those files prevents that grant; placing the override after `73`
+would be too late. eudev 3.2.14 supports this tag-removal operation in its
+[rule evaluator](https://github.com/eudev-project/eudev/blob/v3.2.14/src/udev/udev-rules.c).
+Existing ACLs need separate revocation during activation, as described below.
+
 The root policy file maps a controller profile to an existing numeric
 wpa_supplicant network ID and its exact SSID.  Before connecting, the
 controller queries the control protocol `LIST_NETWORKS` command and rejects an ID whose configured

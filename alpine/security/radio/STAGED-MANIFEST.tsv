@@ -5,4 +5,5 @@ root/etc/doas.d/privacyctl.conf	/etc/doas.d/privacyctl.conf	root:root	0400	exact
 root/etc/init.d/radio-off	/etc/init.d/radio-off	root:root	0755	early OpenRC soft-block service
 root/etc/init.d/privacyctl-supervisor	/etc/init.d/privacyctl-supervisor	root:root	0755	restarting OpenRC trusted-session fail-off supervisor
 root/etc/elogind/system-sleep/95-radio-off	/etc/elogind/system-sleep/95-radio-off	root:root	0755	actual elogind pre-suspend and post-resume block hook
+root/etc/udev/rules.d/72-privacy-rfkill.rules	/etc/udev/rules.d/72-privacy-rfkill.rules	root:root	0644	remove session uaccess grant before elogind queues it; root-only rfkill access
 root/etc/wpa_supplicant/privacy-policy.conf	merge into root-only active configuration	root:root	0600	non-secret scan and P2P policy

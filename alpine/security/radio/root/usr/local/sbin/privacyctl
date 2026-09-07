@@ -38,9 +38,16 @@ def run_checked(args):
 
 
 class RadioLock:
+    def __init__(self, blocking=True):
+        self.blocking = blocking
+
     def __enter__(self):
-        self.fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR | os.O_CLOEXEC, 0o600)
-        fcntl.flock(self.fd, fcntl.LOCK_EX)
+        self.fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+        try:
+            fcntl.flock(self.fd, fcntl.LOCK_EX | (0 if self.blocking else fcntl.LOCK_NB))
+        except OSError:
+            os.close(self.fd)
+            raise
         return self
 
     def __exit__(self, _type, _value, _traceback):
@@ -164,6 +171,11 @@ class System:
         if any(value != "0" for value in self.states("bluetooth")):
             raise PrivacyError("bluetooth is not blocked")
 
+    def block_bluetooth(self):
+        run_checked([RFKILL, "block", "bluetooth"])
+        if any(value != "0" for value in self.states("bluetooth")):
+            raise PrivacyError("rfkill state remains unblocked: bluetooth")
+
     def prepare_addresses(self, profile):
         run_checked([IP, "-4", "route", "flush", "dev", INTERFACE])
         run_checked([IP, "-4", "addr", "flush", "dev", INTERFACE, "scope", "global"])
@@ -196,21 +208,82 @@ def read_profile(profile, path=PROFILE_FILE):
     return network_id, ssid
 
 
+def session_directory(create=False):
+    """Open the private runtime directory without following a directory symlink."""
+    directory = SESSION_FILE.parent
+    descriptor = None
+    try:
+        if create:
+            directory.mkdir(mode=0o700, exist_ok=True)
+        descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        info = os.fstat(descriptor)
+        if info.st_uid != os.geteuid() or info.st_mode & 0o077:
+            raise PrivacyError("session directory must be owned by the controller and private")
+        return descriptor
+    except Exception as error:
+        if descriptor is not None:
+            os.close(descriptor)
+        if isinstance(error, FileNotFoundError):
+            raise
+        if isinstance(error, OSError):
+            raise PrivacyError("session directory is unavailable or unsafe") from error
+        raise
+
+
 def write_session(profile, network_id, ssid):
-    temporary = SESSION_FILE.with_name(".privacyctl-" + secrets.token_hex(12))
-    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC, 0o600)
-    with os.fdopen(fd, "w", encoding="utf-8") as output:
-        json.dump({"profile": profile, "id": network_id, "ssid": ssid}, output)
-        output.flush()
-        os.fsync(output.fileno())
-    os.replace(temporary, SESSION_FILE)
+    directory = session_directory(create=True)
+    temporary = ".privacyctl-" + secrets.token_hex(12)
+    try:
+        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_CLOEXEC | os.O_NOFOLLOW,
+                     0o600, dir_fd=directory)
+        with os.fdopen(fd, "w", encoding="utf-8") as output:
+            json.dump({"profile": profile, "id": network_id, "ssid": ssid}, output)
+            output.flush()
+            os.fsync(output.fileno())
+        os.replace(temporary, SESSION_FILE.name, src_dir_fd=directory, dst_dir_fd=directory)
+        os.fsync(directory)
+    finally:
+        try:
+            try:
+                os.unlink(temporary, dir_fd=directory)
+            except FileNotFoundError:
+                pass
+        finally:
+            os.close(directory)
+
+
+def read_session():
+    directory = session_directory()
+    try:
+        descriptor = os.open(SESSION_FILE.name, os.O_RDONLY | os.O_CLOEXEC | os.O_NOFOLLOW | os.O_NONBLOCK,
+                             dir_fd=directory)
+        with os.fdopen(descriptor, "r", encoding="utf-8") as source:
+            info = os.fstat(source.fileno())
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                    or info.st_mode & 0o077 or info.st_size > 4096):
+                raise PrivacyError("session file is unsafe")
+            session = json.load(source)
+        if (not isinstance(session, dict) or session.get("profile") not in ALLOWED
+                or type(session.get("id")) is not int or session["id"] < 0
+                or not isinstance(session.get("ssid"), str) or not session["ssid"]):
+            raise PrivacyError("session identity is malformed")
+        return session
+    finally:
+        os.close(directory)
 
 
 def clear_session():
     try:
-        SESSION_FILE.unlink()
+        directory = session_directory()
     except FileNotFoundError:
-        pass
+        return
+    try:
+        try:
+            os.unlink(SESSION_FILE.name, dir_fd=directory)
+        except FileNotFoundError:
+            pass
+    finally:
+        os.close(directory)
 
 
 class Controller:
@@ -219,8 +292,11 @@ class Controller:
         self.wpa_factory = wpa_factory
 
     def off(self):
-        clear_session()
-        self.system.block_all()
+        try:
+            clear_session()
+        finally:
+            # A broken or unreadable session file must never prevent blocking.
+            self.system.block_all()
 
     def scan(self):
         try:
@@ -281,21 +357,29 @@ class Controller:
 
     def supervise(self):
         while True:
-            if not SESSION_FILE.exists():
-                time.sleep(1)
-                continue
             try:
-                session = json.loads(SESSION_FILE.read_text(encoding="utf-8"))
-                with self.wpa_factory() as wpa:
-                    status = wpa.status()
-                if (status.get("wpa_state") != "COMPLETED" or status.get("id") != str(session["id"])
-                        or status.get("ssid") != session["ssid"]):
-                    raise PrivacyError("trusted session lost")
-                time.sleep(1)
-            except PrivacyError:
-                with RadioLock():
-                    if SESSION_FILE.exists():
+                # Scan/connect hold this lock through their intentional radio
+                # transitions. Skip that cycle rather than interrupting them.
+                with RadioLock(blocking=False):
+                    try:
+                        session = read_session()
+                        with self.wpa_factory() as wpa:
+                            status = wpa.status()
+                        if (status.get("wpa_state") != "COMPLETED"
+                                or status.get("id") != str(session["id"])
+                                or status.get("ssid") != session["ssid"]):
+                            raise PrivacyError("trusted session lost")
+                        if any(value != "0" for value in self.system.states("bluetooth")):
+                            self.system.block_bluetooth()
+                    except (PrivacyError, OSError, ValueError, KeyError, TypeError):
                         self.off()
+            except BlockingIOError:
+                pass
+            except (PrivacyError, OSError) as error:
+                # Continue retrying the fail-off action if a transient device
+                # or runtime failure kept the previous attempt from completing.
+                print("privacyctl: supervisor check failed: " + str(error), file=sys.stderr)
+            time.sleep(1)
 
 
 def main(argv):

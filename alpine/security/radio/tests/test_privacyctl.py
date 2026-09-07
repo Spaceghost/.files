@@ -6,6 +6,9 @@ from pathlib import Path
 import tempfile
 import unittest
 import sys
+import os
+import stat
+from unittest import mock
 
 sys.dont_write_bytecode = True
 
@@ -20,12 +23,19 @@ class FakeSystem:
     def __init__(self, timeline=None):
         self.calls = []
         self.blocked = True
+        self.bluetooth_blocked = True
         self.timeline = timeline if timeline is not None else []
 
     def block_all(self):
         self.calls.append("block-all")
         self.timeline.append("system:block-all")
         self.blocked = True
+        self.bluetooth_blocked = True
+
+    def block_bluetooth(self):
+        self.calls.append("block-bluetooth")
+        self.timeline.append("system:block-bluetooth")
+        self.bluetooth_blocked = True
 
     def unblock_wifi(self):
         self.calls.append("unblock-wifi")
@@ -37,7 +47,8 @@ class FakeSystem:
         self.timeline.append("system:dhcp:" + profile)
 
     def states(self, kind):
-        return ["0" if self.blocked else "1"]
+        blocked = self.bluetooth_blocked if kind == "bluetooth" else self.blocked
+        return ["0" if blocked else "1"]
 
 
 class FakeWpa:
@@ -85,16 +96,19 @@ class ControllerTests(unittest.TestCase):
         self.controller = privacyctl.Controller(self.system, lambda: self.wpa)
         self.old_profile = privacyctl.PROFILE_FILE
         self.old_session = privacyctl.SESSION_FILE
+        self.old_lock = privacyctl.LOCK_FILE
         self.old_read_profile = privacyctl.read_profile
         self.temp = tempfile.TemporaryDirectory()
         privacyctl.PROFILE_FILE = Path(self.temp.name) / "profiles"
         privacyctl.SESSION_FILE = Path(self.temp.name) / "session"
+        privacyctl.LOCK_FILE = Path(self.temp.name) / "lock"
         privacyctl.read_profile = lambda profile, _path=None: (
             (0, "shmecklebucket") if profile == "shmecklebucket" else (1, "Exact iPhone"))
 
     def tearDown(self):
         privacyctl.PROFILE_FILE = self.old_profile
         privacyctl.SESSION_FILE = self.old_session
+        privacyctl.LOCK_FILE = self.old_lock
         privacyctl.read_profile = self.old_read_profile
         self.temp.cleanup()
 
@@ -151,12 +165,169 @@ class ControllerTests(unittest.TestCase):
         self.controller.connect("iphone-hotspot")
         self.assertIn("dhcp:iphone-hotspot", self.system.calls)
 
+    def one_supervisor_cycle(self):
+        with mock.patch.object(privacyctl.time, "sleep", side_effect=StopIteration):
+            with self.assertRaises(StopIteration):
+                self.controller.supervise()
+
+    def test_idle_missing_session_reblocks_unowned_radio_state(self):
+        self.system.blocked = False
+        self.one_supervisor_cycle()
+        self.assertTrue(self.system.blocked)
+
+    def test_malformed_or_incomplete_session_fails_off(self):
+        for content in ('{', '[]', '{}', '{"id": 0, "ssid": "other"}'):
+            with self.subTest(content=content):
+                privacyctl.SESSION_FILE.write_text(content)
+                privacyctl.SESSION_FILE.chmod(0o600)
+                self.system.blocked = False
+                self.one_supervisor_cycle()
+                self.assertTrue(self.system.blocked)
+                self.assertFalse(privacyctl.SESSION_FILE.exists())
+
+    def test_failed_control_socket_fails_off(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.system.blocked = False
+
+        def unavailable():
+            raise privacyctl.PrivacyError("control socket unavailable")
+
+        self.controller.wpa_factory = unavailable
+        self.one_supervisor_cycle()
+        self.assertTrue(self.system.blocked)
+        self.assertFalse(privacyctl.SESSION_FILE.exists())
+
+    def test_valid_trusted_session_keeps_wifi_enabled(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.system.blocked = False
+        self.one_supervisor_cycle()
+        self.assertFalse(self.system.blocked)
+        self.assertTrue(privacyctl.SESSION_FILE.exists())
+        self.assertEqual(self.wpa.calls, ["STATUS"])
+
+    def test_trusted_session_reblocks_bluetooth_without_disconnecting_wifi(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.system.blocked = False
+        self.system.bluetooth_blocked = False
+        self.one_supervisor_cycle()
+        self.assertTrue(self.system.bluetooth_blocked)
+        self.assertFalse(self.system.blocked)
+        self.assertTrue(privacyctl.SESSION_FILE.exists())
+        self.assertEqual(self.system.calls, ["block-bluetooth"])
+
+    def test_failed_bluetooth_reblock_fails_trusted_session_off(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.system.blocked = False
+        self.system.bluetooth_blocked = False
+        with mock.patch.object(self.system, "block_bluetooth",
+                               side_effect=privacyctl.PrivacyError("Bluetooth block failed")):
+            self.one_supervisor_cycle()
+        self.assertTrue(self.system.blocked)
+        self.assertFalse(privacyctl.SESSION_FILE.exists())
+
+    def test_session_read_os_error_still_attempts_radio_block(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.system.blocked = False
+        original = privacyctl.os.open
+
+        def cannot_read(path, flags, *args, **kwargs):
+            if path == privacyctl.SESSION_FILE.name and (flags & os.O_ACCMODE) == os.O_RDONLY:
+                raise PermissionError("test unreadable session")
+            return original(path, flags, *args, **kwargs)
+
+        with mock.patch.object(privacyctl.os, "open", cannot_read):
+            self.one_supervisor_cycle()
+        self.assertTrue(self.system.blocked)
+
+    def test_supervisor_does_not_interrupt_command_holding_radio_lock(self):
+        # A scan/connect may temporarily have no session or an older session.
+        for has_session in (False, True):
+            with self.subTest(has_session=has_session):
+                if has_session:
+                    privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+                self.system.blocked = False
+                self.wpa.calls.clear()
+                with privacyctl.RadioLock():
+                    self.one_supervisor_cycle()
+                self.assertFalse(self.system.blocked)
+                self.assertEqual(self.wpa.calls, [])
+
+    def test_off_blocks_radios_even_if_session_cannot_be_removed(self):
+        self.system.blocked = False
+        with mock.patch.object(privacyctl, "clear_session", side_effect=PermissionError("test cleanup failure")):
+            with self.assertRaises((OSError, privacyctl.PrivacyError)):
+                self.controller.off()
+        self.assertTrue(self.system.blocked)
+
+
+class RuntimeDirectoryTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.old_session = privacyctl.SESSION_FILE
+        self.addCleanup(setattr, privacyctl, "SESSION_FILE", self.old_session)
+        privacyctl.SESSION_FILE = self.root / "runtime" / "session.json"
+
+    def test_first_session_creates_private_runtime_directory_and_file(self):
+        privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.assertEqual(stat.S_IMODE(privacyctl.SESSION_FILE.parent.stat().st_mode), 0o700)
+        self.assertEqual(stat.S_IMODE(privacyctl.SESSION_FILE.stat().st_mode), 0o600)
+        self.assertEqual(privacyctl.SESSION_FILE.stat().st_uid, os.geteuid())
+
+    def test_symlink_runtime_directory_is_rejected_without_writing_through(self):
+        destination = self.root / "elsewhere"
+        destination.mkdir()
+        privacyctl.SESSION_FILE.parent.symlink_to(destination, target_is_directory=True)
+        with self.assertRaises(privacyctl.PrivacyError):
+            privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.assertEqual(list(destination.iterdir()), [])
+
+    def test_shared_runtime_directory_is_rejected(self):
+        privacyctl.SESSION_FILE.parent.mkdir(mode=0o777)
+        privacyctl.SESSION_FILE.parent.chmod(0o777)
+        with self.assertRaises(privacyctl.PrivacyError):
+            privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.assertFalse(privacyctl.SESSION_FILE.exists())
+
+    def test_runtime_directory_owned_by_someone_else_is_rejected(self):
+        privacyctl.SESSION_FILE.parent.mkdir(mode=0o700)
+        original = privacyctl.os.fstat
+
+        def different_owner(descriptor):
+            result = original(descriptor)
+            fields = list(result)
+            fields[4] = os.geteuid() + 1
+            return os.stat_result(fields)
+
+        with mock.patch.object(privacyctl.os, "fstat", side_effect=different_owner):
+            with self.assertRaises(privacyctl.PrivacyError):
+                privacyctl.write_session("shmecklebucket", 0, "shmecklebucket")
+        self.assertFalse(privacyctl.SESSION_FILE.exists())
+
 
 class ProtocolTests(unittest.TestCase):
     def test_non_ok_reply_is_never_success(self):
         control = object.__new__(privacyctl.WpaControl)
         control.request = lambda _: "FAIL-BUSY"
         with self.assertRaises(privacyctl.PrivacyError): control.expect_ok("RECONNECT")
+
+
+class BluetoothEnforcementTests(unittest.TestCase):
+    def test_bluetooth_only_block_verifies_every_device_without_touching_wifi(self):
+        system = privacyctl.System()
+        calls = []
+        with mock.patch.object(privacyctl, "run_checked", side_effect=lambda command: calls.append(command)):
+            with mock.patch.object(system, "states", return_value=["0", "0"]):
+                system.block_bluetooth()
+        self.assertEqual(calls, [["/usr/sbin/rfkill", "block", "bluetooth"]])
+
+    def test_bluetooth_block_rejects_an_unblocked_device_after_successful_command(self):
+        system = privacyctl.System()
+        with mock.patch.object(privacyctl, "run_checked", return_value=""):
+            with mock.patch.object(system, "states", return_value=["0", "1"]):
+                with self.assertRaises(privacyctl.PrivacyError):
+                    system.block_bluetooth()
 
 
 if __name__ == "__main__":

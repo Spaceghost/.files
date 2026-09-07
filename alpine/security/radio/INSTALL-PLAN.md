@@ -19,10 +19,15 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    | `root/etc/init.d/radio-off` | `/etc/init.d/radio-off` | `0755` |
    | `root/etc/init.d/privacyctl-supervisor` | `/etc/init.d/privacyctl-supervisor` | `0755` |
    | `root/etc/elogind/system-sleep/95-radio-off` | same path | `0755` |
+   | `root/etc/udev/rules.d/72-privacy-rfkill.rules` | same path | `0644` |
 
    Create `/etc/privacyctl` as `root:root`, `0700`.  Verify every installed
    file has `root:root`; do not make the profile policy writable by `jack`,
    wheel, or a service account.
+
+   The controller creates `/run/privacyctl` as `root:root`, `0700` when it
+   records the first trusted session. A missing session means radios stay
+   blocked; it is not permission for automatic reconnection.
 
 2. In a root-only editor, find the saved wpa_supplicant network ID for the
    existing `shmecklebucket` entry.  Put only its ID and the literal SSID in
@@ -53,27 +58,60 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    same spelling; then separately enable the commented exact doas rule.  No
    wildcard SSID, BSSID-only policy, or guessed iPhone name is acceptable.
 
-4. Add `radio-off` to the OpenRC `boot` runlevel and
+4. Revoke the existing per-user rfkill ACL after installing the udev rule.
+   The rule must sort after `70-uaccess.rules` and before `73-seat-late.rules`:
+   the first adds the tag and the second queues elogind's user-access grant.
+   A rule loaded after `73` cannot undo that already queued grant.
+
+   Run these commands only during activation; they have not been run by this
+   staging work. Python is already a controller dependency, so no extra ACL
+   package is needed:
+
+   ```sh
+   doas python3 - <<'PY'
+   import errno, os
+   try:
+       os.removexattr('/dev/rfkill', 'system.posix_acl_access')
+   except OSError as error:
+       if error.errno not in (errno.ENODATA, errno.ENOTSUP):
+           raise
+   os.chmod('/dev/rfkill', 0o600)
+   PY
+   doas udevadm control --reload-rules
+   doas udevadm trigger --action=change --subsystem-match=misc --sysname-match=rfkill
+   doas udevadm settle
+   ```
+
+   As `jack`, verify `test ! -w /dev/rfkill` succeeds. Inspect
+   `udevadm info --query=property --name=/dev/rfkill` and confirm its tags no
+   longer include `uaccess`; confirm root can still run `privacyctl status`.
+   Repeat the access check after a seat/session change and reboot. ACL changes
+   do not revoke already-open file descriptors, so inspect existing rfkill
+   handles before claiming exclusive controller access. This permissions step
+   does not itself block, unblock, scan, or disconnect either radio. Root and
+   separately granted doas privileges retain their existing authority.
+
+5. Add `radio-off` to the OpenRC `boot` runlevel and
    `privacyctl-supervisor` to the default runlevel. Its dependencies place the
    block before networking/wpa_supplicant and the supervisor after
    wpa_supplicant. Leave saved credentials root-only and automatic selection
    disabled until an explicit `privacyctl connect` call selects one permitted
    saved ID.
 
-5. This host boots GRUB. In a root-only editor append exactly
+6. This host boots GRUB. In a root-only editor append exactly
    `rfkill.default_state=0` to `GRUB_CMDLINE_LINUX_DEFAULT` in
    `/etc/default/grub`, then regenerate `/boot/grub/grub.cfg` with the locally
    installed `grub-mkconfig`. Check `/proc/cmdline` and the running kernel’s
    rfkill parameter after reboot. This complements OpenRC; it does not prove
    that firmware or hardware emitted no RF before Linux takes control.
 
-6. Validate first on the local console: `doas privacyctl status --json`,
+7. Validate first on the local console: `doas privacyctl status --json`,
    `doas privacyctl off`, then `doas privacyctl scan`.  Confirm Wi-Fi is
    blocked when the scan command exits, including after a deliberately failed
    wpa_cli request.  Only then test `doas privacyctl connect shmecklebucket`.
    Restore with `doas privacyctl off` before leaving the console.
 
-7. Install the staged elogind hook at `/etc/elogind/system-sleep/95-radio-off`.
+8. Install the staged elogind hook at `/etc/elogind/system-sleep/95-radio-off`.
    This host’s elogind binary explicitly loads that directory and invokes the
    hook before sleep and after resume. Test that both radios remain soft-blocked
    after wake.

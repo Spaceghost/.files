@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+"""Stage explicit OpenSnitch HTTPS and resolver rules; never install or activate them."""
+import argparse
+import hashlib
+import ipaddress
+import json
+import os
+from pathlib import Path
+import re
+import stat
+
+# Policy revision date, kept fixed so repeated staging is reproducible.
+POLICY_TIMESTAMP = "2026-09-07T00:00:00Z"
+
+
+def absolute_path(value):
+    if (not value.startswith("/") or value != os.path.normpath(value)
+            or value.startswith("//") or any(ord(char) < 32 or ord(char) == 127 for char in value)):
+        raise ValueError("paths must be normalized absolute paths without control characters")
+    return Path(value)
+
+
+def open_directory(path):
+    """Walk without following symlinks, retaining an fd across pathname races."""
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC
+    descriptor = os.open("/", flags)
+    try:
+        for part in path.parts[1:]:
+            child = os.open(part, flags, dir_fd=descriptor)
+            os.close(descriptor)
+            descriptor = child
+        return descriptor
+    except BaseException:
+        os.close(descriptor)
+        raise
+
+
+def executable_record(value):
+    path = absolute_path(value)
+    parent = open_directory(path.parent)
+    try:
+        descriptor = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC | os.O_NONBLOCK,
+                             dir_fd=parent)
+    finally:
+        os.close(parent)
+    with os.fdopen(descriptor, "rb") as source:
+        before = os.fstat(source.fileno())
+        if not stat.S_ISREG(before.st_mode) or not before.st_mode & 0o111:
+            raise ValueError(f"not an executable regular file: {path}")
+        md5 = hashlib.md5(usedforsecurity=False)
+        sha256 = hashlib.sha256()
+        while chunk := source.read(1024 * 1024):
+            md5.update(chunk)
+            sha256.update(chunk)
+        after = os.fstat(source.fileno())
+        if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (
+                after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+            raise ValueError(f"executable changed while hashing: {path}")
+    return {"path": str(path), "md5": md5.hexdigest(), "sha256": sha256.hexdigest(),
+            "size": before.st_size, "owner_uid": before.st_uid,
+            "owner_gid": before.st_gid, "mode": oct(stat.S_IMODE(before.st_mode))}
+
+
+def operand(name, data, kind="simple"):
+    return {"type": kind, "operand": name, "data": str(data), "sensitive": True}
+
+
+def allow_rule(name, identity, conditions):
+    return {"created": POLICY_TIMESTAMP, "updated": POLICY_TIMESTAMP,
+            "name": name, "enabled": True, "precedence": False,
+            "action": "allow", "duration": "always", "nolog": False,
+            "operator": {"type": "list", "operand": "list",
+                         "list": identity + conditions}}
+
+
+def make_rules(uid, executables, resolvers):
+    rules = {}
+    for record in executables:
+        identifier = hashlib.sha256(record["path"].encode()).hexdigest()
+        identity = [operand("process.path", record["path"]), operand("user.id", uid),
+                    operand("process.hash.md5", record["md5"])]
+        name = f"oldbook-bootstrap-{uid}-{identifier}-https"
+        rules[name + ".json"] = allow_rule(name, identity, [
+            operand("protocol", "^tcp6?$", "regexp"), operand("dest.port", 443)])
+        for index, resolver in enumerate(resolvers):
+            name = f"oldbook-bootstrap-{uid}-{identifier}-dns-{index}"
+            rules[name + ".json"] = allow_rule(name, identity, [
+                operand("protocol", "^(tcp|udp)6?$", "regexp"), operand("dest.port", 53),
+                operand("dest.ip", resolver)])
+    return rules
+
+
+def write_json(directory, name, value):
+    raw = (json.dumps(value, indent=2, sort_keys=True) + "\n").encode()
+    descriptor = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW
+                         | os.O_CLOEXEC, 0o600, dir_fd=directory)
+    with os.fdopen(descriptor, "wb") as output:
+        os.fchmod(output.fileno(), 0o600)
+        output.write(raw)
+        output.flush()
+        os.fsync(output.fileno())
+    return hashlib.sha256(raw).hexdigest()
+
+
+def stage(uid, executables, resolvers, output):
+    # Validate and hash every input before creating the destination.
+    output = absolute_path(output)
+    if output == Path("/"):
+        raise ValueError("output must be a new directory")
+    if len(set(executables)) != len(executables):
+        raise ValueError("duplicate executable")
+    records = [executable_record(value) for value in sorted(executables)]
+    addresses = []
+    for value in resolvers:
+        if "%" in value:
+            raise ValueError("resolver must be an IP address without a scope suffix")
+        address = ipaddress.ip_address(value)
+        if address.is_unspecified or address.is_multicast or str(address) == "255.255.255.255":
+            raise ValueError("resolver must be a unicast IP address")
+        addresses.append(str(address))
+    if len(set(addresses)) != len(addresses):
+        raise ValueError("duplicate resolver")
+    addresses.sort()
+    rules = make_rules(uid, records, addresses)
+    parent = open_directory(output.parent)
+    try:
+        os.mkdir(output.name, 0o700, dir_fd=parent)
+        directory = os.open(output.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+                            | os.O_CLOEXEC, dir_fd=parent)
+        try:
+            os.fchmod(directory, 0o700)
+            os.mkdir("rules", 0o700, dir_fd=directory)
+            rule_directory = os.open("rules", os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+                                     | os.O_CLOEXEC, dir_fd=directory)
+            try:
+                os.fchmod(rule_directory, 0o700)
+                hashes = {name: write_json(rule_directory, name, rule)
+                          for name, rule in sorted(rules.items())}
+                os.fsync(rule_directory)
+            finally:
+                os.close(rule_directory)
+            write_json(directory, "manifest.json", {
+                "schema": 1, "uid": uid, "resolvers": addresses, "executables": records,
+                "rules": hashes,
+                "checksum_scope": "MD5 is supplemental; OpenSnitch can match missing or disabled checksums. "
+                                  "SHA256 is audit evidence, not an enforced rule operand.",
+                "installation": "Staged only. A trusted installer must verify this manifest, executable "
+                                "identities and policy, then install only rules/*.json as root:root mode 0600."})
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+        os.fsync(parent)
+    finally:
+        os.close(parent)
+    return len(rules)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--uid", required=True, help="Exact numeric Linux UID")
+    parser.add_argument("--executable", action="append", required=True,
+                        help="Explicit absolute executable path; symlinks are rejected; repeat as needed")
+    parser.add_argument("--resolver", action="append", required=True,
+                        help="Exact resolver IP address; repeat as needed")
+    parser.add_argument("--output", required=True, help="Absolute NEW staging directory; parent must exist")
+    args = parser.parse_args()
+    try:
+        if not re.fullmatch(r"[0-9]+", args.uid) or not 0 <= int(args.uid) < 4294967295:
+            raise ValueError("UID must be an integer from 0 through 4294967294")
+        count = stage(int(args.uid), args.executable, args.resolver, args.output)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    print(f"Staged {count} rules in {args.output}/rules; audit manifest: {args.output}/manifest.json")
+
+
+if __name__ == "__main__":
+    main()

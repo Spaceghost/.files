@@ -1,0 +1,345 @@
+#!/usr/bin/python3
+"""Apply a first-time firewall trial with an independent rollback watchdog.
+
+Install this reviewed file as root, for example mode0755 at
+/usr/local/sbin/oldbook-firewall-activate; do not run a trial from a user-writable
+checkout. The detached watchdog verifies the same helper SHA256 before arming.
+Confirmation enables both services in OpenRC's boot runlevel, before networking.
+"""
+import argparse
+from contextlib import contextmanager
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import stat
+import subprocess
+import sys
+import time
+
+BASE = Path('/run/oldbook-firewall-activation')
+SERVICES = ('oldbook-firewall', 'opensnitchd')
+RUNLEVEL = 'boot'
+TERMINAL = ('confirmed', 'rolled-back')
+
+
+def identity(pid):
+    try:
+        fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+        if fields[0] == 'Z':
+            return None
+        return {'pid': pid, 'start_ticks': fields[19],
+                'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip()}
+    except (OSError, IndexError):
+        return None
+
+
+def alive(record):
+    return bool(record) and identity(record['pid']) == record
+
+
+class Backend:
+    def __init__(self, runlevels=Path('/etc/runlevels')):
+        self.runlevels = Path(runlevels)
+
+    def run(self, command, check=True):
+        return subprocess.run(command, capture_output=True, text=True, timeout=12,
+                              check=check, env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin', 'LC_ALL': 'C'})
+
+    def table(self):
+        data = json.loads(self.run(['/usr/sbin/nft', '-j', 'list', 'tables']).stdout)
+        return any(item.get('table', {}).get('family') == 'inet' and
+                   item['table'].get('name') == 'oldbook' for item in data['nftables'])
+
+    def active(self):
+        return self.run(['/sbin/rc-service', 'opensnitchd', 'status'], check=False).returncode == 0
+
+    def gate_active(self):
+        return self.run(['/sbin/rc-service', 'oldbook-firewall', 'status'], check=False).returncode == 0
+
+    def queue(self):
+        try:
+            return any(line.split()[0] == '0' for line in
+                       Path('/proc/net/netfilter/nfnetlink_queue').read_text().splitlines() if line.split())
+        except FileNotFoundError:
+            return False
+
+    def daemon(self):
+        matches = []
+        for proc in Path('/proc').iterdir():
+            if not proc.name.isdecimal():
+                continue
+            try:
+                if proc.stat().st_uid == 0 and (proc / 'exe').resolve() == Path('/usr/bin/opensnitchd'):
+                    record = identity(int(proc.name))
+                    if record:
+                        matches.append(record)
+            except (OSError, RuntimeError):
+                continue
+        if len(matches) != 1:
+            raise RuntimeError('Expected exactly one root OpenSnitch daemon')
+        return matches[0]
+
+    def gate(self):
+        data = json.loads(self.run(['/usr/sbin/nft', '-j', 'list', 'table', 'inet', 'oldbook']).stdout)
+        chains = [item['chain'] for item in data['nftables'] if 'chain' in item]
+        for name in ('input', 'forward', 'output'):
+            if not any(c.get('name') == name and c.get('hook') == name and c.get('policy') == 'drop'
+                       for c in chains):
+                raise RuntimeError('Missing default-deny gate chain: ' + name)
+        queues = [expr['queue'] for item in data['nftables'] for expr in
+                  item.get('rule', {}).get('expr', []) if 'queue' in expr]
+        if len(queues) != 2 or any(q.get('num') != 0 or q.get('flags') for q in queues):
+            raise RuntimeError('Expected two NFQUEUE 0 rules without bypass')
+
+    def boot(self, name):
+        return any(os.path.lexists(level / name) for level in self.runlevels.iterdir()
+                   if level.is_dir())
+
+    def add_boot(self, name):
+        self.run(['/sbin/rc-update', 'add', name, RUNLEVEL])
+
+    def remove_boot(self, name):
+        link = self.runlevels / RUNLEVEL / name
+        if not os.path.lexists(link):
+            return
+        if not link.is_symlink() or link.resolve() != Path('/etc/init.d') / name:
+            raise RuntimeError('Refusing to remove changed boot link: ' + name)
+        self.run(['/sbin/rc-update', 'del', name, RUNLEVEL])
+
+    def start(self, name):
+        self.run(['/sbin/rc-service', name, 'start'])
+
+    def stop_daemon(self):
+        self.run(['/sbin/rc-service', 'opensnitchd', 'stop'])
+
+    def delete_gate(self):
+        if self.table():
+            self.run(['/usr/sbin/nft', 'delete', 'table', 'inet', 'oldbook'])
+        # The service's stop method intentionally retains rules. Mark only this
+        # trial's OpenRC service stopped after explicitly deleting its table.
+        self.run(['/sbin/rc-service', 'oldbook-firewall', 'zap'])
+
+
+class Activation:
+    def __init__(self, backend=None, base=BASE, uid=0, clock=time.monotonic, arm=None):
+        self.backend = backend or Backend()
+        self.base = Path(base)
+        self.uid = uid
+        self.clock = clock
+        self.arm = arm or self.arm_watchdog
+        self.secure_directory(self.base, create=True)
+
+    def secure_directory(self, path, create=False):
+        if create:
+            path.mkdir(mode=0o700, exist_ok=True)
+        info = path.lstat()
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != self.uid or info.st_mode & 0o077:
+            raise RuntimeError('Unsafe activation directory')
+
+    def directory(self, token):
+        if not re.fullmatch(r'[0-9a-f]{32}', token):
+            raise ValueError('Invalid activation token')
+        path = self.base / token
+        self.secure_directory(path)
+        return path
+
+    @contextmanager
+    def lock(self):
+        fd = os.open(self.base / 'lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+        try:
+            info = os.fstat(fd)
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != self.uid or info.st_mode & 0o077:
+                raise RuntimeError('Unsafe activation lock')
+            fcntl.flock(fd, fcntl.LOCK_EX)
+            yield
+        finally:
+            os.close(fd)
+
+    def load(self, token):
+        fd = os.open(self.directory(token) / 'state.json', os.O_RDONLY | os.O_NOFOLLOW)
+        with os.fdopen(fd) as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != self.uid or info.st_mode & 0o077:
+                raise RuntimeError('Unsafe activation record')
+            return json.loads(stream.read(65536))
+
+    def save(self, token, state):
+        path = self.directory(token)
+        temporary = path / ('state-' + secrets.token_hex(8))
+        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(state, stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path / 'state.json')
+
+    def arm_watchdog(self, token):
+        fd = os.open(self.directory(token) / 'watchdog.log', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'w') as log:
+            process = subprocess.Popen(['/usr/bin/python3', str(Path(__file__).resolve()), '_watch', token],
+                stdin=subprocess.DEVNULL, stdout=log, stderr=log, start_new_session=True,
+                env={'PATH': '/usr/sbin:/usr/bin:/sbin:/bin', 'LC_ALL': 'C'})
+        return identity(process.pid)
+
+    def start(self, timeout):
+        with self.lock():
+            b = self.backend
+            if b.table() or b.gate_active() or b.active() or b.queue() or any(b.boot(s) for s in SERVICES):
+                raise RuntimeError('Refusing to take ownership of an existing gate, daemon, queue, or boot link')
+            token = secrets.token_hex(16)
+            (self.base / token).mkdir(mode=0o700)
+            state = {'status': 'arming', 'deadline': self.clock() + timeout,
+                     'gate_requested': False, 'daemon_requested': False, 'boot_requested': [],
+                     'helper_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+            self.save(token, state)
+            try:
+                state['watchdog'] = self.arm(token)
+                self.save(token, state)
+                for _ in range(250):
+                    if (self.directory(token) / 'ready').exists() and alive(state['watchdog']):
+                        break
+                    time.sleep(.02)
+                else:
+                    raise RuntimeError('Rollback watchdog did not arm')
+                self.deadline(state)
+                state['gate_requested'] = True
+                self.save(token, state)
+                b.start('oldbook-firewall')
+                state['daemon_requested'] = True
+                self.save(token, state)
+                b.start('opensnitchd')
+                for _ in range(100):
+                    if b.active() and b.queue():
+                        break
+                    time.sleep(.05)
+                else:
+                    raise RuntimeError('OpenSnitch did not bind NFQUEUE 0')
+                state['daemon'] = b.daemon()
+                b.gate()
+                self.deadline(state)
+                state['status'] = 'active'
+                self.save(token, state)
+                return token
+            except Exception as error:
+                state['failure'] = str(error)
+                self.rollback_locked(token, state)
+                raise
+
+    def deadline(self, state):
+        if self.clock() >= state['deadline'] or not alive(state.get('watchdog')):
+            raise RuntimeError('Trial deadline expired or watchdog identity changed')
+
+    def rollback_locked(self, token, state):
+        if state['status'] in TERMINAL:
+            return state
+        errors = []
+        for name in reversed(state['boot_requested']):
+            try:
+                self.backend.remove_boot(name)
+            except Exception as error:
+                errors.append(str(error))
+        if state['daemon_requested']:
+            try:
+                self.backend.stop_daemon()
+            except Exception as error:
+                errors.append(str(error))
+        if state['gate_requested']:
+            try:
+                self.backend.delete_gate()
+            except Exception as error:
+                errors.append(str(error))
+        state['status'] = 'rollback-pending' if errors else 'rolled-back'
+        state['rollback_errors'] = errors
+        self.save(token, state)
+        return state
+
+    def rollback(self, token):
+        with self.lock():
+            state = self.rollback_locked(token, self.load(token))
+            if state['status'] == 'rollback-pending':
+                raise RuntimeError('Rollback incomplete: ' + '; '.join(state['rollback_errors']))
+            return state
+
+    def confirm(self, token):
+        with self.lock():
+            state = self.load(token)
+            if state['status'] != 'active':
+                raise RuntimeError('Only an active trial can be confirmed')
+            try:
+                self.deadline(state)
+                if not self.backend.active() or not self.backend.queue() or self.backend.daemon() != state['daemon']:
+                    raise RuntimeError('Daemon identity or NFQUEUE 0 changed')
+                self.backend.gate()
+                state['status'] = 'confirming'
+                self.save(token, state)
+                for name in SERVICES:
+                    if self.backend.boot(name):
+                        raise RuntimeError('Boot link appeared outside this trial')
+                    state['boot_requested'].append(name)
+                    self.save(token, state)
+                    self.backend.add_boot(name)
+                self.deadline(state)
+                state['status'] = 'confirmed'
+                self.save(token, state)
+                return state
+            except Exception as error:
+                state['failure'] = str(error)
+                self.rollback_locked(token, state)
+                raise
+
+    def watch(self, token):
+        # Start waits for this handshake before applying any firewall changes.
+        state = self.load(token)
+        if state['helper_sha256'] != hashlib.sha256(Path(__file__).read_bytes()).hexdigest():
+            raise RuntimeError('Watchdog helper changed since the trial was created')
+        fd = os.open(self.directory(token) / 'ready', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        while True:
+            state = self.load(token)
+            if state['status'] in TERMINAL:
+                return
+            if self.clock() >= state['deadline']:
+                try:
+                    self.rollback(token)
+                except Exception as error:
+                    print(str(error), file=sys.stderr, flush=True)
+            time.sleep(.2)
+
+
+def main():
+    if os.geteuid() != 0:
+        raise RuntimeError('Firewall activation requires root')
+    helper = Path(__file__).resolve()
+    for path in (helper, *helper.parents):
+        info = path.stat()
+        if info.st_uid != 0 or info.st_mode & 0o022:
+            raise RuntimeError('Install the reviewed helper in a root-owned, non-writable system directory first')
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest='action', required=True)
+    start = commands.add_parser('start')
+    start.add_argument('--timeout', type=int, default=300)
+    for name in ('confirm', 'status', 'rollback', '_watch'):
+        commands.add_parser(name).add_argument('token')
+    args = parser.parse_args()
+    control = Activation()
+    if args.action == 'start':
+        if not 30 <= args.timeout <= 3600:
+            raise ValueError('Timeout must be between 30 and 3600 seconds')
+        print(control.start(args.timeout), flush=True)
+    elif args.action == '_watch':
+        control.watch(args.token)
+    else:
+        result = control.load(args.token) if args.action == 'status' else getattr(control, args.action)(args.token)
+        print(json.dumps(result, sort_keys=True), flush=True)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as error:
+        print('Firewall activation: ' + str(error), file=sys.stderr)
+        sys.exit(1)

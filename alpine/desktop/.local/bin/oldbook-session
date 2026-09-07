@@ -96,6 +96,9 @@ fi
 if ! has_comm waybar; then
     start_service waybar waybar
 fi
+if command -v oldbook-firewall-ui >/dev/null 2>&1; then
+    start_service firewall-ui oldbook-firewall-ui
+fi
 
 # The wallpaper service uses a flock; starting it after reload is safe.
 art_state="${XDG_STATE_HOME:-$HOME/.local/state}/oldbook"

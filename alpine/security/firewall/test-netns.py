@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Exercise real packet policy in two disposable namespaces; never use host net."""
 import argparse
+import copy
 import http.server
 import json
 import os
 from pathlib import Path
 import socket
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,8 +39,11 @@ def serve():
             self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
             super().server_bind()
 
-    ipv6 = IPv6Server(("::", 18080), Handler)
-    threading.Thread(target=ipv6.serve_forever, daemon=True).start()
+    for port in (18080, 443):
+        ipv6 = IPv6Server(("::", port), Handler)
+        threading.Thread(target=ipv6.serve_forever, daemon=True).start()
+    https_port = http.server.HTTPServer(("0.0.0.0", 443), Handler)
+    threading.Thread(target=https_port.serve_forever, daemon=True).start()
     def udp_server(family, bind):
         with socket.socket(family, socket.SOCK_DGRAM) as sock:
             if family == socket.AF_INET6:
@@ -50,26 +55,30 @@ def serve():
 
     for family, bind in ((socket.AF_INET, "0.0.0.0"), (socket.AF_INET6, "::")):
         threading.Thread(target=udp_server, args=(family, bind), daemon=True).start()
-    http.server.HTTPServer(("0.0.0.0", 18080), Handler).serve_forever()
+    ipv4 = http.server.HTTPServer(("0.0.0.0", 18080), Handler)
+    Path(sys.argv[2] + ".listening").touch()
+    ipv4.serve_forever()
 
 
-def probe(allowed, ipv6=False):
+def probe(allowed, ipv6=False, port=18080, uid=None):
     host = "[2001:db8:1::2]" if ipv6 else "192.0.2.2"
     result = None
     try:
         result = subprocess.run(
-            ["curl", "--noproxy", "*", "--silent", "--fail", "--max-time", "2",
-             f"http://{host}:18080/"], text=True, capture_output=True, timeout=3)
+            ["curl", "--disable", "--noproxy", "*", "--silent", "--fail", "--max-time", "2",
+             f"http://{host}:{port}/"], text=True, capture_output=True, timeout=3,
+            **({"user": uid, "group": uid, "extra_groups": ()} if uid is not None else {}))
         ok = result.returncode == 0 and "oldbook-firewall-test" in result.stdout
     except subprocess.TimeoutExpired:
         ok = False
     assert ok == allowed, f"curl expected {'allow' if allowed else 'deny'}: {result}"
 
 
-def probe_python_denied():
+def probe_python_denied(port=18080, uid=None):
     result = subprocess.run(
-        [sys.executable, "-c", "import socket; socket.create_connection(('192.0.2.2',18080),1)"],
-        capture_output=True, timeout=2)
+        [sys.executable, "-c", f"import socket; socket.create_connection(('192.0.2.2',{port}),1)"],
+        capture_output=True, timeout=2,
+        **({"user": uid, "group": uid, "extra_groups": ()} if uid is not None else {}))
     assert result.returncode != 0, "unapproved Python process was allowed"
 
 
@@ -81,6 +90,54 @@ def probe_udp(allowed, ipv6=False):
             "s.send(b'oldbook-udp'); assert s.recv(32)==b'oldbook-udp'")
     result = subprocess.run([sys.executable, "-c", code, host], capture_output=True, timeout=2)
     assert (result.returncode == 0) == allowed, f"UDP expected allow={allowed}, ipv6={ipv6}: {result.stderr!r}"
+
+
+def generated_rule_probes(base, work, rules, results):
+    """Test generated policy unchanged, using plain HTTP on its real TCP 443 port."""
+    uid = 65534
+    path = str(Path(shutil.which("curl")).resolve())
+    staged = work / "bootstrap"
+    run(sys.executable, str(base / "bootstrap-rules"), "--uid", str(uid),
+        "--executable", path, "--resolver", "192.0.2.2", "--resolver", "2001:db8:1::2",
+        "--output", str(staged))
+    generated = sorted((staged / "rules").glob("*.json"))
+    assert len(generated) == 3
+    for source in generated:
+        shutil.copyfile(source, rules / source.name)
+    time.sleep(1)
+    for ipv6 in (False, True):
+        probe(True, ipv6=ipv6, port=443, uid=uid)
+        probe(False, ipv6=ipv6, port=443, uid=0)
+        probe(False, ipv6=ipv6, port=18080, uid=uid)
+    probe_python_denied(port=443, uid=uid)
+    results.append("generated HTTPS rules allow exact executable and UID on TCP 443 only")
+    results.append("generated HTTPS rules deny wrong UID, different executable and wrong port")
+
+    https = next(source for source in generated if source.name.endswith("-https.json"))
+    original = json.loads(https.read_text())
+    mismatched = copy.deepcopy(original)
+    checksum = next(item for item in mismatched["operator"]["list"]
+                    if item["operand"] == "process.hash.md5")
+    checksum["data"] = "0" * 32
+
+    def replace_rule(value):
+        # OpenSnitch 1.8.0 watches WRITE/REMOVE, not rename-over-existing.
+        # Keep this controlled mutation inside the disposable namespace test.
+        (rules / https.name).write_text(json.dumps(value))
+        time.sleep(1)
+
+    replace_rule(mismatched)
+    for ipv6 in (False, True):
+        probe(False, ipv6=ipv6, port=443, uid=uid)
+    results.append("generated HTTPS rules deny an incorrect populated executable checksum")
+    replace_rule(original)
+    for ipv6 in (False, True):
+        probe(True, ipv6=ipv6, port=443, uid=uid)
+    results.append("generated HTTPS checksum rule restores access after exact hash is restored")
+    for source in generated:
+        (rules / source.name).unlink()
+    time.sleep(1)
+    probe(False, port=443, uid=uid)
 
 
 def main():
@@ -121,11 +178,19 @@ def main():
                         ("ip", "link", "set", "lo", "up")):
                 run("nsenter", f"--net=/proc/{server.pid}/ns/net", *cmd)
             (work / "ready").touch()
-            time.sleep(0.3)
+            for _ in range(200):
+                assert server.poll() is None, "namespace test server exited before readiness"
+                if (work / "ready.listening").exists():
+                    break
+                time.sleep(0.05)
+            else:
+                raise AssertionError("namespace test server did not report bound listeners")
             probe(True)
             probe(True, ipv6=True)
             probe_udp(True)
             probe_udp(True, ipv6=True)
+            probe(True, port=443, uid=65534)
+            probe(True, port=443, uid=65534, ipv6=True)
             results.append("baseline namespace connectivity")
             run("nft", "--check", "--file", str(base / "oldbook.nft"))
             run("nft", "--file", str(base / "oldbook.nft"))
@@ -165,6 +230,7 @@ def main():
             probe(False, ipv6=True)
             probe_python_denied()
             results.append("default-deny without GUI")
+            generated_rule_probes(base, work, rules, results)
             path = str(Path(run("which", "curl").stdout.strip()).resolve())
             allow = {"name": "allow-test-curl", "enabled": True, "precedence": False,
                      "action": "allow", "duration": "always",

@@ -211,3 +211,27 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   A terminal-scoped renderer/compositor design is required. Pending: oldbook
   and watchlist playlist URLs, whether Delete affects YouTube or a local queue,
   and approval of the end-of-video Delete/Rewatch/Keep & Next design.
+
+## Reviewed firewall trial and staged radio safeguards (September 7)
+
+- Installed verified OpenSnitch 1.8.0-r1. Added explicit reproducible application
+  bootstrap rules, a detached rollback watchdog, and quiet GUI session startup.
+  The correct private GUI socket is listening with default Deny.
+- The live trial initially denied new IPv4/IPv6 input and unapproved output;
+  a fresh authenticated Codex request passed. Later broad interactive rules
+  allowed every root program and every application on TCP port 443. A repeated
+  denial check failed, so the trial was rolled back; these rules were preserved.
+  Application firewall is stopped and not enabled at boot, pending rule review.
+- Firewall tests: 28 unit cases and the retained 13-group namespace proof.
+  GUI tests: 8 plus the existing session concurrency check. Full trial and
+  rollback evidence: security/firewall/activation-verification.json.
+- Radio supervisor now enforces Bluetooth blocking during trusted Wi-Fi, safely
+  handles invalid session state and respects concurrent authorized commands.
+  Staged udev policy removes rfkill's seat ACL grant. All 23 isolated tests pass.
+  Radio/udev/WPA/boot settings were not deployed; exact home/hotspot names and
+  physical radio/boot verification remain pending.
+- Package snapshot c0a227c1d5c4ea962d29 archives 984 installed APK identities and
+  signatures. This snapshot was not subjected to another full root restore.
+- Patched SwayFX binary still matches its verified hash; the current full
+  SwayFX configuration validates with the isolated Intel backend. Stock Sway
+  remains active. Bottom captions and effects start at the next normal login.

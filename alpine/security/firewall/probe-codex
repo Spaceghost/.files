@@ -1,0 +1,48 @@
+#!/usr/bin/env python3
+"""Make one minimal authenticated Codex request to verify firewall connectivity."""
+import argparse
+import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, default=Path('/usr/local/bin/codex'))
+    parser.add_argument('--output', type=Path, required=True, help='New private evidence directory')
+    args = parser.parse_args()
+    if os.geteuid() == 0:
+        parser.error('Run as the desktop user whose saved Codex login is being tested')
+    binary = args.binary.resolve(strict=True)
+    args.output.mkdir(mode=0o700, parents=True, exist_ok=False)
+    output = args.output.resolve()
+    env = {key: value for key, value in os.environ.items() if key in {
+        'HOME', 'USER', 'LOGNAME', 'PATH', 'SHELL', 'LANG', 'LC_ALL', 'TERM',
+        'XDG_RUNTIME_DIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_STATE_HOME'}}
+    with tempfile.TemporaryDirectory(prefix='oldbook-codex-probe-') as work:
+        command = [str(binary), '-a', 'never', 'exec', '--ignore-user-config',
+            '--ephemeral', '--skip-git-repo-check', '--sandbox', 'read-only',
+            '--cd', work, '--disable', 'plugins', '--disable', 'apps',
+            '--disable', 'multi_agent', '--disable', 'shell_tool',
+            '--disable', 'hooks', '--disable', 'image_generation',
+            '-c', 'model_reasoning_effort="low"', '-c', 'web_search="disabled"',
+            '-c', 'project_doc_max_bytes=0', '-m', 'gpt-5.6-luna', '--color', 'never',
+            '--output-last-message', str(output / 'response.txt'),
+            'Network connectivity test: reply exactly OLDBOOK_FIREWALL_OK. Do not use tools.']
+        with (output / 'run.log').open('w') as log:
+            result = subprocess.run(command, env=env, stdout=log, stderr=log, timeout=90)
+    response = output / 'response.txt'
+    passed = result.returncode == 0 and response.exists() and response.read_text().strip() == 'OLDBOOK_FIREWALL_OK'
+    (output / 'evidence.json').write_text(json.dumps({
+        'binary': str(binary), 'uid': os.getuid(), 'model': 'gpt-5.6-luna',
+        'exit_code': result.returncode, 'authenticated_response': passed,
+        'tools_enabled': False, 'saved_login_used': True,
+    }, indent=2) + '\n')
+    print(json.dumps({'passed': passed, 'evidence': str(output / 'evidence.json')}))
+    return 0 if passed else 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
