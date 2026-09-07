@@ -1,8 +1,8 @@
 # Persistent DHCP ownership
 
 These components are staged under `root/usr/local/lib/privacyctl_runtime`.
-They are not installed or connected to the legacy `privacyctl` CLI. The live
-WPA and DHCP services still own the current WLAN connection. Exact trusted
+They are connected to the staged persistent service and CLI routing, but are
+not installed. The live WPA and DHCP services still own the WLAN connection. Exact trusted
 network identities and a controlled local-console migration remain prerequisites.
 
 ## Components and boundaries
@@ -49,8 +49,10 @@ IPv6 profile removes only previously owned static values; returning home
 explicitly reapplies its configured addresses and gateways.
 
 DNS uses an exact generation-specific openresolv provider. Cleanup checks its
-contents and the subscriber output, preserving other providers. Apply and
-remove each share a three-second budget across their operations. Partial errors
+contents and the subscriber output, preserving other providers. Application
+shares four seconds across its operations, including IPv6 duplicate-address
+detection; removal shares three seconds. The five-second hook deadline and
+actual lease expiry remain independent limits and may reject earlier. Partial errors
 carry `NetworkError.owned`; `applier.current` remains available after an
 interruption. The owner must block first and then remove that recorded state.
 
@@ -94,10 +96,14 @@ widen grants to make those checks pass.
 
 ## Remaining integration
 
-Connect the manager and owned network application to a persistent radio owner
-that drains both control and DHCP sockets. Off and cancelled CLI requests must
-invalidate pending generations; successful sessions outlive their CLI. A
-restart starts blocked and rejects stale authorization. Bootstrap off must
-remain usable before the owner starts. Add explicit per-profile IPv6 policy,
-resolver takeover, verified legacy-owner termination, recovery and reboot tests
-before replacing the live services. See [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md).
+The staged persistent owner now drains control and DHCP sockets, invalidates
+pending generations on cancellation, and keeps successful sessions after CLI
+exit. Startup blocks and rejects stale authorization; emergency off remains
+usable without the owner. See [OWNER-SERVICE.md](OWNER-SERVICE.md).
+
+The combined fixture now passes seven native owner cases; its source-hashed
+evidence and repeatable command are in [OWNER-SERVICE.md](OWNER-SERVICE.md).
+Complete combined blocked-hook cancellation, daemon-death and packet-policy
+proofs, per-profile RA/SLAAC decisions, resolver takeover, verified legacy-owner
+termination, orphan state recovery and reboot tests before replacing live services. See
+[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md).

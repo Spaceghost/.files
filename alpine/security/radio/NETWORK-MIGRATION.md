@@ -1,8 +1,8 @@
 # Network ownership migration
 
 This migration is not activated. The persistent DHCP transport, lease parser,
-owned network applier and isolated harnesses are implemented separately from
-the existing CLI; see [LEASE-OWNER.md](LEASE-OWNER.md) for their current
+owned network applier and persistent service now have staged CLI routing;
+see [LEASE-OWNER.md](LEASE-OWNER.md) for their current
 integration and proof scope.
 No live client was signalled, no service was started, and no scan was requested.
 Exact home and iPhone SSIDs still require
@@ -48,10 +48,11 @@ time, pidfd and namespace identity during a readiness handshake. Do not add a
 The launcher inherits parent-death protection; killing namespace init removes
 its descendants, including hooks that create separate process sessions.
 
-The hook should send bounded, validated event data to the owning daemon using
-a private Unix socket and per-connection generation token. The daemon applies
-lease changes under its transaction lock. A hook must not acquire `RadioLock`
-while `connect` holds it and waits for DHCP; that creates a deadlock. Reject
+The hook sends bounded, validated event data to the owning daemon using
+a private Unix socket and per-connection generation token. The owner serializes
+lease changes on its persistent thread and drains events at cooperative
+checkpoints. `RadioLock` covers short fence/unblock operations; never hold it
+while waiting for a DHCP hook, or make the hook acquire it. Reject
 stale generations and malformed DHCP values, and never evaluate hook data as
 shell commands. Record PID/start time, lease generation and actual expiry
 privately. Renew the lease indefinitely while the trusted session is healthy;
@@ -71,12 +72,13 @@ retaining unrelated interfaces. Stop only the verified existing DHCP owner and
 wait for it and its hook children to exit before starting the new owner. Never
 use a broad networking restart or rely only on a PID file.
 
-Keep the existing home IPv6 address/gateway in a private profile. Restore them
-only after verified home association. Before hotspot association, flush global
-IPv6 addresses and routes from `wlan0`; retain link-local state. Returning home
-must explicitly reapply its static settings: merely preserving whatever is
-left after the hotspot flush cannot restore them. Decide and test per-profile
-RA/autoconfiguration behavior as part of this transition.
+Keep the existing home IPv6 address/gateway in a private profile. While blocked
+during migration, identify and remove only the verified legacy provisioning
+being transferred; preserve unrelated and link-local state. Normal profile
+transitions remove only the applier's recorded resources, never broadly flush
+the interface. Restore home static settings only after verified home association;
+returning from an empty hotspot profile must explicitly reapply them. Decide
+and test per-profile RA/autoconfiguration behavior during this transition.
 
 ## WPA control socket requires a disruptive migration
 
@@ -108,11 +110,15 @@ the existing association without interruption.
   configuration must create its socket without starting discovery. Preserve
   logs of both successful migration and exact-backup recovery.
 
-The persistent client manager and event hook are implemented as staged library
-components. The radio owner service, compatible CLI routing and migration
-installer are **not integrated**. Keep the existing live DHCP/WPA owners until
+The persistent client manager, event hook, native applier and radio owner have
+staged compatible CLI routing. The migration installer and full activation
+proof are **not complete**. Keep the existing live DHCP/WPA owners until
 the remaining proofs and trusted-profile confirmation are complete. Permission
 and Bluetooth-only preparation do not resolve this network ownership work.
+
+The staged owner requires explicit private IPv6 policy and refuses an orphaned
+lease marker after a crash. See [OWNER-SERVICE.md](OWNER-SERVICE.md) for the
+command fence, reciprocal process guardian and remaining recovery boundary.
 
 ## Resolver handoff
 

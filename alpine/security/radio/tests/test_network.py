@@ -45,6 +45,9 @@ class FakeNetwork:
         self.operation('snapshot')
         return Snapshot(self.ifindex, frozenset(self.addresses), frozenset(self.routes))
 
+    def drain_pending(self, **options):
+        self.operation('drain_pending')
+
     def resolver(self, **options):
         self.operation('resolver')
         if not self.managed:
@@ -89,6 +92,65 @@ class FakeNetwork:
             self.providers.pop(key, None)
             self._merge()
         self.operation('delete_provider', update)
+
+
+class VirtualClock:
+    def __init__(self):
+        self.now = 100.0
+        self.sleeps = []
+
+    def monotonic(self):
+        return self.now
+
+    def advance(self, duration):
+        self.now = round(self.now + duration, 9)
+
+    def sleep(self, duration):
+        self.sleeps.append(duration)
+        self.advance(duration)
+
+
+class DADNetwork(FakeNetwork):
+    """Timed native-operation outcomes without real sleeps or network writes."""
+    def __init__(self, clock, outcome='complete'):
+        super().__init__()
+        self.clock, self.outcome = clock, outcome
+        self.probed = False
+        self.dad_started = None
+        self.publications = []
+
+    def resolver(self, **options):
+        if not self.probed:
+            self.clock.advance(2.2)
+            self.probed = True
+        return super().resolver(**options)
+
+    def add_address(self, interface, value, lease_seconds, **options):
+        super().add_address(interface, value, lease_seconds, **options)
+        if value.family == 6:
+            self.dad_started = self.clock.now
+
+    def snapshot(self, interface, **options):
+        snapshot = super().snapshot(interface, **options)
+        tentative = failed = frozenset()
+        if self.dad_started is not None:
+            ipv6 = frozenset(value for value in snapshot.addresses if value.family == 6)
+            elapsed = self.clock.now - self.dad_started
+            if self.outcome == 'duplicate' and elapsed >= .2:
+                failed = ipv6
+            elif self.outcome != 'complete' or elapsed < 1:
+                tentative = ipv6
+        return Snapshot(snapshot.ifindex, snapshot.addresses, snapshot.routes,
+                        tentative=tentative, failed=failed)
+
+    def add_route(self, *args, **options):
+        self.publications.append(('route', self.clock.now))
+        return super().add_route(*args, **options)
+
+    def set_provider(self, *args, **options):
+        self.publications.append(('dns', self.clock.now))
+        self.clock.advance(.2)
+        return super().set_provider(*args, **options)
 
 
 class NetworkTests(unittest.TestCase):
@@ -292,6 +354,71 @@ class NetworkTests(unittest.TestCase):
             self.applier.remove(caught.exception.owned)
         self.assertNotIn('set_provider', self.backend.calls)
 
+    def dad_fixture(self, outcome='complete', check=lambda: None):
+        clock = VirtualClock()
+        backend = DADNetwork(clock, outcome)
+        applier = LeaseApplier(GENERATION, 'test0', backend=backend, check=check)
+        profile = IPv6Profile((IPv6Interface('2001:db8:1::17/64'),),
+                              (IPv6Address('fe80::1'),))
+        return clock, backend, applier, profile
+
+    def test_delayed_dad_completes_before_routes_and_dns_within_apply_budget(self):
+        clock, backend, applier, profile = self.dad_fixture()
+        with patch('privacyctl_runtime.network.time.monotonic', clock.monotonic), \
+             patch('privacyctl_runtime.network.time.sleep', clock.sleep):
+            owned = applier.apply(self.lease(), ipv6=profile)
+            # Literal scenario: 2.2s setup, 1s DAD, then 0.2s DNS publication.
+            self.assertGreaterEqual(clock.now, 103.4)
+            self.assertLess(clock.now, 103.45)
+            self.assertTrue(clock.sleeps, 'tentative IPv6 must wait before publication')
+            self.assertTrue(backend.publications)
+            self.assertTrue(all(when >= 103.2 for _, when in backend.publications))
+            self.assertIn(Address(6, '2001:db8:1::17/64'), owned.addresses)
+            self.assertEqual(backend.output, ('192.0.2.53',))
+            applier.remove(owned)
+        self.assertFalse(backend.addresses | backend.routes)
+
+    def test_duplicate_dad_fails_without_publishing_routes_or_dns(self):
+        clock, backend, applier, profile = self.dad_fixture('duplicate')
+        with patch('privacyctl_runtime.network.time.monotonic', clock.monotonic), \
+             patch('privacyctl_runtime.network.time.sleep', clock.sleep):
+            with self.assertRaisesRegex(NetworkError, 'duplicate-address') as caught:
+                applier.apply(self.lease(), ipv6=profile)
+            self.assertLess(clock.now, 102.45)
+            self.assertIn(Address(6, '2001:db8:1::17/64'), caught.exception.owned.addresses)
+            self.assertEqual(backend.publications, [])
+            applier.remove(caught.exception.owned)
+        self.assertFalse(backend.addresses | backend.routes)
+
+    def test_stuck_dad_hits_shared_deadline_and_preserves_cleanup_ownership(self):
+        clock, backend, applier, profile = self.dad_fixture('stuck')
+        with patch('privacyctl_runtime.network.time.monotonic', clock.monotonic), \
+             patch('privacyctl_runtime.network.time.sleep', clock.sleep):
+            with self.assertRaisesRegex(NetworkError, 'deadline') as caught:
+                applier.apply(self.lease(), ipv6=profile)
+            self.assertLessEqual(clock.now, 104.025)
+            self.assertEqual(backend.publications, [])
+            self.assertIn(Address(6, '2001:db8:1::17/64'), caught.exception.owned.addresses)
+            applier.remove(caught.exception.owned)
+        self.assertFalse(backend.addresses | backend.routes)
+
+    def test_cancellation_during_dad_remains_responsive_and_cleanup_is_independent(self):
+        clock, backend, applier, profile = self.dad_fixture('stuck')
+        def cancel():
+            if backend.dad_started is not None and clock.now >= backend.dad_started + .125:
+                raise RuntimeError('cancelled while waiting for DAD')
+        applier.check = cancel
+        with patch('privacyctl_runtime.network.time.monotonic', clock.monotonic), \
+             patch('privacyctl_runtime.network.time.sleep', clock.sleep):
+            with self.assertRaisesRegex(NetworkError, 'cancelled while waiting') as caught:
+                applier.apply(self.lease(), ipv6=profile)
+            self.assertLessEqual(clock.now - backend.dad_started, .15)
+            self.assertTrue(all(duration <= .025 for duration in clock.sleeps))
+            self.assertEqual(backend.publications, [])
+            self.assertIsNotNone(caught.exception.owned)
+            applier.remove(caught.exception.owned)
+        self.assertFalse(backend.addresses | backend.routes)
+
     def test_removal_refuses_primary_ipv4_with_unowned_secondary_in_same_prefix(self):
         owned = self.applier.apply(self.lease())
         secondary = Address(4, '192.0.2.18/24', 99)
@@ -394,6 +521,49 @@ else:
             self.backend._run(self.command, deadline=started + 3, check=lambda: None)
         self.assertLess(time.monotonic() - started, 1.4)
         self.assert_namespace_gone(self.wait_marker())
+
+    def test_remove_without_owned_state_retries_retained_command_cleanup(self):
+        applier = LeaseApplier(GENERATION, 'test0', backend=self.backend)
+        lease = Lease.from_event({'interface': 'test0', 'ip': '192.0.2.17',
+                                  'mask': '24', 'lease': '60', 'serverid': '192.0.2.2'},
+                                 expected_interface='test0')
+        stop = self.backend._stop_command
+        def resolver(**options):
+            return self.backend._run(self.command, **options)
+        def fail_capture(*args, **options):
+            self.wait_marker()
+            raise RuntimeError('synthetic resolver timeout')
+        try:
+            with patch.object(self.backend, 'resolver', resolver), \
+                 patch.object(self.backend, '_capture', fail_capture), \
+                 patch.object(self.backend, '_stop_command',
+                              side_effect=RuntimeError('synthetic teardown timeout')):
+                with self.assertRaises(NetworkError) as caught:
+                    applier.apply(lease)
+                self.assertIsNone(caught.exception.owned)
+                process, descriptors = self.backend._pending_cleanup
+                self.assertIsNone(process.poll())
+                with self.assertRaisesRegex(NetworkError, 'teardown timeout'):
+                    applier.remove(None)
+                self.assertEqual(self.backend._pending_cleanup, (process, descriptors))
+                for descriptor in descriptors:
+                    os.fstat(descriptor)
+            self.assertIsNone(applier.remove(None))
+            self.assertIsNone(self.backend._pending_cleanup)
+            self.assertIsNotNone(process.returncode)
+            for descriptor in descriptors:
+                with self.assertRaises(OSError):
+                    os.fstat(descriptor)
+            self.assert_namespace_gone(self.wait_marker())
+        finally:
+            # A red test still kills/reaps only this recorded private namespace.
+            if self.backend._pending_cleanup is not None:
+                process, descriptors = self.backend._pending_cleanup
+                stop(process, descriptors)
+                for descriptor in descriptors:
+                    if descriptor is not None:
+                        os.close(descriptor)
+                self.backend._pending_cleanup = None
 
     def test_native_stderr_capture_is_bounded_before_command_completion(self):
         command = [sys.executable, '-I', '-S', '-c', 'import os;os.write(2,b"x"*300000)']

@@ -14,5 +14,9 @@ root/usr/local/lib/privacyctl_runtime/dhcp.py	/usr/local/lib/privacyctl_runtime/
 root/usr/local/lib/privacyctl_runtime/launch.py	/usr/local/lib/privacyctl_runtime/launch.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
 root/usr/local/lib/privacyctl_runtime/hook.py	/usr/local/lib/privacyctl_runtime/hook.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
 root/usr/local/lib/privacyctl_runtime/network.py	/usr/local/lib/privacyctl_runtime/network.py	root:root	0644	staged lease ownership library; install only with reviewed persistent owner integration
+root/usr/local/lib/privacyctl_runtime/ipc.py	/usr/local/lib/privacyctl_runtime/ipc.py	root:root	0644	root-only bounded command transport and cancellation fences
+root/usr/local/lib/privacyctl_runtime/service.py	/usr/local/lib/privacyctl_runtime/service.py	root:root	0644	persistent radio owner and cooperative DHCP state machine
+root/usr/local/lib/privacyctl_runtime/adapter.py	/usr/local/lib/privacyctl_runtime/adapter.py	root:root	0644	native policy, emergency off and crash marker integration
+root/usr/local/lib/privacyctl_runtime/runner.py	/usr/local/lib/privacyctl_runtime/runner.py	root:root	0644	OpenRC owner entrypoint and reciprocal process guardian
 root/usr/local/libexec/privacyctl-dhcp-launch	/usr/local/libexec/privacyctl-dhcp-launch	root:root	0750	private persistent DHCP implementation; not a user command
 root/usr/local/libexec/privacyctl-dhcp-event	/usr/local/libexec/privacyctl-dhcp-event	root:root	0750	private persistent DHCP implementation; not a user command

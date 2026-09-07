@@ -1,6 +1,6 @@
 #!/sbin/openrc-run
 # shellcheck shell=sh disable=SC2034
-description='Fail off radio when the trusted wpa_supplicant session is lost'
+description='Guard persistent radio and DHCP ownership; block on authorization loss'
 supervisor=supervise-daemon
 command=/usr/local/sbin/privacyctl
 command_args=supervise

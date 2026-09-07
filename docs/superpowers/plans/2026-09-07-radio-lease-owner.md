@@ -135,16 +135,21 @@ between bounded kernel/resolver operations.
 **Files:** Runtime `service.py`, staged `root/usr/local/sbin/privacyctl`, OpenRC
 supervisor definition, and `tests/test_service.py`.
 
-- [ ] Keep acquisition/scan as pending states while servicing hook and control
+- [x] Keep acquisition/scan as pending states while servicing hook and control
   sockets. Do not call the old blocking connection method on the only event
   ingestion thread. ACK a lease only after verified application and WPA identity.
-- [ ] Make off invalidate pending generations and block before child cleanup;
+- [x] Make off invalidate pending generations and block before child cleanup;
   a disconnected requesting CLI cancels an unfinished request. Established
   sessions persist after their successful CLI exits.
-- [ ] Every owner restart blocks and rejects stale authorization before readiness.
+- [x] Every owner restart blocks and rejects stale authorization before readiness.
   Preserve root-only emergency/boot off when the service socket is absent.
+- [x] Prove component cancellation, no overlapping client, stale request
+  rejection and bounded IPC failures; exercise both guardian/owner deaths with
+  real private processes and marker callbacks.
 - [ ] Prove cancellation during blocked hooks, daemon death, no overlapping
-  client, stale request rejection and bounded CLI failures with synthetic WPA.
+  client, stale request rejection and bounded CLI failures with the combined
+  synthetic WPA / real DHCP / native application fixture. Component tests do
+  not establish this integrated behavior or the complete radio policy.
 
 ## Task 5: Real isolated network proof
 
@@ -158,8 +163,11 @@ verification JSON under `alpine/security/radio/`.
   Exercise NAK/deconfig, server silence through expiry and initial no-offer.
 - [x] Integrate the production event helper and manager after unit tests;
   record host-state equality and exact owned-process cleanup.
-- [ ] Integrate production lease application and the radio owner with those
-  events; component proofs do not establish end-to-end owner behavior.
+- [x] Integrate production lease application and the radio owner with those
+  events: seven combined cases pass with real veth IPv6 DAD, same-client
+  renewal, off/stale-fence/scan behavior, profile restoration, NAK and silence.
+  Host state matches and no private processes survive. The WPA/radio substitutes
+  and remaining combined fault cases are explicitly recorded.
 - [ ] Include packet-gate/OpenSnitch renewal behavior in the final activation
   proof; do not silently widen existing grants for DHCP or DNS.
 
@@ -171,9 +179,12 @@ verification JSON under `alpine/security/radio/`.
   and remaining trusted-profile, live migration and reboot requirements.
 - [x] Archive the openresolv compatibility source, recipe and identical signed
   builds; verify the current 1,080-package lock against the installed world.
-- [ ] After owner integration, update the activation plan and commit its scoped
-  paths with Fossil; preserve other threads' PROGRESS edits. Refresh the APK
-  lock if dependencies changed and create a consistent complete Fossil backup.
+- [ ] Update the activation plan and installer for persistent ownership and
+  orphan recovery after the remaining combined fault/packet-policy proofs.
+
+Record scoped owner check-ins, the unchanged package-lock comparison and the
+consistent Fossil backup in `alpine/PROGRESS.md`. Preserve other contributors'
+uncommitted progress while updating that record.
 
 Live activation is a subsequent verified transition after these requirements
 and the exact trusted identities are satisfied. A successful isolated component

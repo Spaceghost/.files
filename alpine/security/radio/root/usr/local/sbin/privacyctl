@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3 -I
 """Fail-closed root radio controller; it never reads credential material."""
 import fcntl
 from collections import deque
@@ -133,7 +133,10 @@ class RadioLock:
 
 class WpaControl:
     """Minimal wpa_ctrl client: unsolicited events never count as replies."""
-    def __init__(self, endpoint=CONTROL_SOCKET, directory=CONTROL_DIR):
+    check = staticmethod(lambda: None)
+
+    def __init__(self, endpoint=CONTROL_SOCKET, directory=CONTROL_DIR, *, check=lambda: None):
+        self.check = check
         self.events = deque()
         self.scan_id = None
         self.local = os.path.join(directory, ".privacyctl-" + secrets.token_hex(12))
@@ -165,20 +168,32 @@ class WpaControl:
 
     def request(self, command, deadline=3):
         end = time.monotonic() + deadline
-        self.sock.settimeout(max(.001, deadline))
-        try:
-            self.sock.send(command.encode("ascii"))
-        except OSError as error:
-            raise PrivacyError("wpa control send failed or timed out") from error
         while True:
+            self.check()
+            remaining = end - time.monotonic()
+            if remaining <= 0:
+                raise PrivacyError("wpa control send failed or timed out")
+            self.sock.settimeout(min(.025, remaining))
+            try:
+                self.sock.send(command.encode("ascii"))
+                break
+            except TimeoutError:
+                continue
+            except OSError as error:
+                raise PrivacyError("wpa control send failed or timed out") from error
+        while True:
+            self.check()
             remaining = end - time.monotonic()
             if remaining <= 0:
                 raise PrivacyError("wpa command timed out")
-            self.sock.settimeout(remaining)
+            self.sock.settimeout(min(.025, remaining))
             try:
                 message = self.sock.recv(65535).decode("utf-8", "strict").strip()
+            except TimeoutError:
+                continue
             except (OSError, UnicodeError) as error:
                 raise PrivacyError("wpa control protocol failed") from error
+            self.check()
             if not message.startswith("<"):
                 return message
             if len(self.events) >= 128:
@@ -193,11 +208,16 @@ class WpaControl:
         """Consume one attached event, including events received before an OK."""
         if timeout < 0:
             raise ValueError("event timeout must be nonnegative")
+        self.check()
         if self.events:
             return self.events.popleft()
+        end = time.monotonic() + timeout
         try:
-            if not select.select([self.sock], [], [], timeout)[0]:
-                return None
+            while not select.select([self.sock], [], [], min(.025, max(0, end - time.monotonic())))[0]:
+                self.check()
+                if time.monotonic() >= end:
+                    return None
+            self.check()
             self.sock.setblocking(False)
             message = self.sock.recv(65535).decode("utf-8", "strict").strip()
         except (OSError, UnicodeError) as error:
@@ -553,6 +573,35 @@ def run_locked(controller, action, *args):
                 controller.off()
 
 
+def owner_library():
+    # Installed beside this root-owned executable; isolated Python ignores
+    # caller PYTHONPATH and the working directory for privileged execution.
+    library = str(Path(__file__).resolve().parents[1] / 'lib')
+    if library not in sys.path:
+        sys.path.insert(0, library)
+
+
+def request_owner(command, profile=None, *, timeout=50):
+    owner_library()
+    from privacyctl_runtime.ipc import IPCError, request
+    try:
+        return request(command, profile, timeout=timeout)
+    except IPCError as error:
+        raise PrivacyError(str(error)) from error
+
+
+def emergency_off():
+    owner_library()
+    from privacyctl_runtime.adapter import NativeAdapter
+    NativeAdapter(sys.modules[__name__]).emergency_off()
+
+
+def serve_owner():
+    owner_library()
+    from privacyctl_runtime.runner import run
+    run(sys.modules[__name__])
+
+
 def main(argv):
     try:
         if not argv:
@@ -562,18 +611,23 @@ def main(argv):
         if command == "status" and args in ([], ["--json"]):
             result = controller.status()
             print(json.dumps(result, separators=(",", ":") if args else None, indent=None if args else 2))
+        elif os.geteuid() != 0:
+            raise PrivacyError("radio changes require the privileged controller")
         elif command == "off" and not args:
-            run_locked(controller, "off")
+            try:
+                request_owner("off", timeout=5)
+            except PrivacyError:
+                emergency_off()
         elif command == "scan" and not args:
-            print(run_locked(controller, "scan"))
+            print(request_owner("scan"))
         elif command == "connect" and len(args) == 1:
-            run_locked(controller, "connect", args[0])
+            request_owner("connect", args[0])
         elif command == "supervise" and not args and os.geteuid() == 0:
-            controller.supervise()
+            serve_owner()
         else:
             raise PrivacyError("usage: privacyctl {status [--json]|off|scan|connect PROFILE|supervise}")
         return 0
-    except PrivacyError as error:
+    except (RuntimeError, OSError, ValueError) as error:
         print("privacyctl: " + str(error), file=sys.stderr)
         return 1
 

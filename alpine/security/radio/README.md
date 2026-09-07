@@ -30,105 +30,61 @@ The exact private recovery journal is
 `/var/lib/oldbook/radio-permissions/attempt-0huvvd1q`; keep its association data
 out of Fossil. Reboot and seat-change persistence remain unverified.
 
-## Staged controller behavior
+## Staged persistent controller
 
-`privacyctl` uses the wpa_supplicant Unix datagram control protocol directly;
-ordinary mutating commands require the literal `OK` reply. `off` blocks and then
-verifies both radio classes through `/sys/class/rfkill`. `scan` disables saved
-networks while blocked, requests a numeric ID with `SCAN use_id=1`, requires an
-exactly matching `CTRL-EVENT-SCAN-RESULTS id=...`, and
-re-blocks both radios on every error. `connect` selects the permitted saved ID
-while blocked, verifies its exact SSID, requires the completed ID and SSID,
-clears stale routes, runs DHCP, and then records a supervised session. It is
-the only command that leaves Wi-Fi unblocked, and
-it accepts only `shmecklebucket` or the separately enabled `iphone-hotspot`
-profile.  It does not read, print, save, or edit a PSK.
+`privacyctl supervise` now runs the persistent owner and its process guardian.
+`connect PROFILE` and `scan` use its root-only command socket; they cannot
+fall back to one-shot DHCP. The existing `status [--json]` output remains
+read-only and available without that socket. `off` requests cancellation and
+retains a direct emergency blocking path when the service is unavailable.
 
-The OpenRC supervisor polls the control socket against the saved trusted
-identity. A disconnect, wrong identity, or wpa_supplicant control failure
-removes the session and blocks both radios. Successful association deliberately
-leaves Wi-Fi enabled while the trusted association stays healthy, or until an
-explicit `privacyctl off`; there is no session TTL.
+A scan disables saved networks while blocked, requests a native scan ID, and
+requires the matching completion event before reading results. It re-blocks
+when finished or on failure. A connection verifies the selected saved ID and
+exact SSID before unblocking, then retains one DHCP client through renewal.
+The native lease applier verifies generation-owned addresses, routes and DNS;
+healthy connections persist until off, disconnection or an authorization failure.
 
-Each supervisor check takes the radio lock without waiting. It skips an active
-scan/connect command, whose lock covers the complete authorized transition.
-Missing, malformed, or unreadable session state fails off once that command
-finishes. Session cleanup errors still trigger radio blocking. The controller
-creates its runtime directory privately and refuses symlinked, shared, or
-wrong-owner directories; these behaviors are covered by isolated tests.
-During a healthy trusted Wi-Fi session it also checks Bluetooth and re-blocks
-that radio without disconnecting Wi-Fi. If the Bluetooth block cannot be
-verified, the controller fails the session off and attempts to block both.
+Off invalidates older queued requests as well as current work. Cancellation
+blocks before child teardown and owned-state cleanup. An unresolved cleanup
+prevents another connection. Startup rejects stale authorization, and a crash
+marker prevents silently adopting orphaned lease state. See
+[OWNER-SERVICE.md](OWNER-SERVICE.md) for commands, deadlines, process death,
+private IPv6 settings and recovery boundaries.
 
-The installed `72-privacy-rfkill.rules` removes direct user write access to
-`/dev/rfkill` while preserving read access for Waybar and other status displays.
-Its ordering is deliberate: installed `70-uaccess.rules` adds the `uaccess`
-tag, then `73-seat-late.rules` queues elogind's ACL grant. Removing the tag
-between those files prevents that grant; placing the override after `73`
-would be too late. eudev 3.2.14 supports this tag-removal operation in its
-[rule evaluator](https://github.com/eudev-project/eudev/blob/v3.2.14/src/udev/udev-rules.c).
-Existing ACLs need separate revocation during activation; the installed helper
-completed that step on this host. Rebuild instructions retain the same checks.
+## Trusted policy and display contract
 
-The root policy file maps a controller profile to an existing numeric
-wpa_supplicant network ID and its exact SSID.  Before connecting, the
-controller queries the control protocol `LIST_NETWORKS` command and rejects an ID whose configured
-SSID differs from the root policy.  `shmecklebucket` must be exactly spelled
-that way.  The local iPhone hotspot has deliberately not been named or enabled:
-the owner must add its exact spelling and separately uncomment its exact doas
-rule.
+The root policy maps `shmecklebucket` and an explicitly enabled
+`iphone-hotspot` profile to existing numeric WPA network IDs and exact SSIDs.
+The controller never reads or changes a PSK. Neither profile is activated:
+the saved home spelling differs from the requested name, and the exact hotspot
+name is unresolved. Do not substitute a guessed name or hostname.
 
-The `status --json` contract is suitable for a small GUI:
+The status contract remains suitable for Waybar and a small GUI:
 
 ```json
 {"wifi":{"interface":"wlan0","soft_blocked":true,"hard_blocked":false,"wpa_state":"UNAVAILABLE"},"bluetooth":{"soft_blocked":true,"hard_blocked":false}}
 ```
 
-`soft_blocked` and `hard_blocked` are independent JSON booleans, or `null` when
-the corresponding state cannot be determined. This example shows software
-blocks without hardware blocks; it is not a claim about the live host.
-`status` does not query WPA, so `wpa_state` is always `UNAVAILABLE`. It
-intentionally omits the associated SSID and all credential material.
+Software and hardware blocks are independent booleans, or `null` when their
+state cannot be read. Status does not query WPA and omits SSIDs and credentials.
+This example describes the schema, not the current host's state.
 
-One active transaction has a 45-second timer. Failure cleanup runs afterward
-with that timer disarmed and each command still bounded; 45 seconds is not a
-total wall-clock limit. Waiting for the radio lock has a separate 60-second
-limit. WPA requests, including ATTACH, allow 3 seconds beginning before send;
-ordinary commands allow 5 seconds and DHCP allows 20 seconds. Timed-out command
-groups, including ordinary DHCP hook children, are terminated before fail-off.
+## Activation boundary
 
-WPA events received before their command reply are retained in a bounded queue.
-Before scanning, already buffered events are drained; native scan-ID matching
-also rejects older completions still in flight. Real datagram tests cover both
-orders, mismatched IDs, malformed replies and event-flood limits. Protocol
-semantics were checked against the official FreeBSD vendor import of WPA 2.11
-and the installed Alpine binary's version and scan-ID strings. This verifies
-the protocol path without requesting a live radio scan.
+The WPA fragment uses `passive_scan=1`, `p2p_disabled=1` and per-network
+`scan_ssid=0`; it remains merge-only. The active WPA instance has no control
+socket, and creating one requires a controlled disruptive migration. Keep the
+live WPA and DHCP owners until that migration and the isolated integration,
+packet-gate/OpenSnitch renewal and exact-profile checks are complete.
 
-Full activation still needs the persistent radio owner and CLI integration. The live
-`udhcpc` daemon remains running; the staged controller's one-shot `udhcpc -q`
-cannot renew leases after it exits. Resolve ownership and test renewal before
-enabling controller-managed networking. Exact trusted profile identities and a
-working root-only WPA control socket also remain activation prerequisites.
-The staged controller's isolated deadline, protocol and soft/hard state checks
-are recorded in [controller-verification.json](controller-verification.json).
-The staged lease parser, persistent client manager, bounded event hook and
-owned network applier now have isolated tests, including real DHCP acquisition,
-renewal and native address/route/DNS cleanup. They remain
-separate from this legacy CLI, whose one-shot path must not be activated.
-See [LEASE-OWNER.md](LEASE-OWNER.md) for the component contracts and
-[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining WLAN migration and
-recovery work. The installed, reproducibly patched openresolv dependency adds
-PID-namespace lock compatibility; it has not taken ownership of the live
-resolver file or changed its subscriber configuration. See
-[RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) for the compatibility contract.
+The installed, reproducibly patched openresolv dependency adds PID-namespace
+lock compatibility. It has not taken ownership of live DNS or changed subscriber
+configuration. See [RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) and
+[LEASE-OWNER.md](LEASE-OWNER.md) for the validated component contracts.
 
-`root/etc/wpa_supplicant/privacy-policy.conf` is a merge-only policy fragment.
-It uses the documented `passive_scan=1` and `p2p_disabled=1` global options;
-each permitted network should use `scan_ssid=0`.  It is not included
-automatically because the active root-only wpa_supplicant configuration and
-its include behavior were intentionally left untouched.
-
-Follow [INSTALL-PLAN.md](INSTALL-PLAN.md) only from a local console with the
-recovery path checked.  The plan deliberately leaves the pending boot-off vs
-automatic-connect decision at boot-off.
+The historical one-shot Controller helpers remain only for their regression
+checks; production CLI routing no longer calls them. Earlier component evidence
+retains the exact source hashes exercised then. Follow
+[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining work and adapt
+[INSTALL-PLAN.md](INSTALL-PLAN.md) before activation; it predates owner integration.
