@@ -11,7 +11,7 @@ include ~/.config/sway/theme.conf
 gaps inner 3
 gaps outer 4
 smart_gaps off
-focus_follows_mouse no
+focus_follows_mouse yes
 mouse_warping output
 focus_on_window_activation smart
 
