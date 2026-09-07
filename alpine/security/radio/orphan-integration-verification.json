@@ -1,0 +1,1149 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-09-07T19:26:34.101389+00:00",
+  "project_path": "alpine/security/radio",
+  "scope": "Staged same-boot orphan recovery integration, selected synthetic tests and guarded native fixture evidence.",
+  "status": "247 selected tests passed; native07 nine-case fixed50ms fixture passed; staged and undeployed; failures01-06 retained",
+  "fossil_checkout_at_recording": "823c162fb2dd0f0981c26db9d76563862f5a733b",
+  "branch": "alpine-oldbook",
+  "staging": {
+    "runtime_integrated": true,
+    "controller_deployed": false,
+    "live_migration_performed": false,
+    "physical_radio_verified": false,
+    "openrc_activation_verified": false,
+    "commit_created_by_this_evidence_task": false
+  },
+  "selected_tests": {
+    "passed": 247,
+    "failed": 0,
+    "skipped": 0,
+    "selections": [
+      {
+        "command": [
+          "doas",
+          "-n",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_startup_recovery",
+          "test_dhcp_journal",
+          "test_journal",
+          "-v"
+        ],
+        "cwd": "/home/jack/.files/alpine/security/radio/tests",
+        "passed": 54,
+        "failed": 0,
+        "skipped": 0,
+        "exit_status": 0,
+        "elapsed_seconds": 0.855202710001322,
+        "log": {
+          "name": "budget-unit-1.log",
+          "sha256": "eef992bc641f2a5d280760edcfbcbf1a11cc756d95920f67c08092f9482d9bae",
+          "artifact": "sha256/eef992bc641f2a5d280760edcfbcbf1a11cc756d95920f67c08092f9482d9bae/radio-orphan-budget-unit-1.log"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_recovery",
+          "test_link",
+          "test_writers",
+          "test_service",
+          "-v"
+        ],
+        "cwd": "/home/jack/.files/alpine/security/radio/tests",
+        "passed": 103,
+        "failed": 0,
+        "skipped": 0,
+        "exit_status": 0,
+        "elapsed_seconds": 0.30386235100013437,
+        "log": {
+          "name": "budget-unit-2.log",
+          "sha256": "40b10663c81338fabaf4e61566b78ebbc983d329396ab5bc87f6e6f58f4b4de7",
+          "artifact": "sha256/40b10663c81338fabaf4e61566b78ebbc983d329396ab5bc87f6e6f58f4b4de7/radio-orphan-budget-unit-2.log"
+        }
+      },
+      {
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_network.NetworkTests",
+          "test_network_journal",
+          "-v"
+        ],
+        "cwd": "/home/jack/.files/alpine/security/radio/tests",
+        "passed": 53,
+        "failed": 0,
+        "skipped": 0,
+        "exit_status": 0,
+        "elapsed_seconds": 0.19280474499828415,
+        "log": {
+          "name": "budget-unit-3.log",
+          "sha256": "aee8b82433f339cc698bb160e6db69457e5a082d8430fb00bee0377dd6fbc2ab",
+          "artifact": "sha256/aee8b82433f339cc698bb160e6db69457e5a082d8430fb00bee0377dd6fbc2ab/radio-orphan-budget-unit-3.log"
+        }
+      },
+      {
+        "command": [
+          "doas",
+          "-n",
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_ipc",
+          "test_owner_adapter",
+          "-v"
+        ],
+        "cwd": "/home/jack/.files/alpine/security/radio/tests",
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0,
+        "exit_status": 0,
+        "elapsed_seconds": 4.633756261006056,
+        "log": {
+          "name": "budget-unit-4.log",
+          "sha256": "7bec27d67283773665638f5b5c6fa0ae1306046abb06dc26146a4abb363c375b",
+          "artifact": "sha256/7bec27d67283773665638f5b5c6fa0ae1306046abb06dc26146a4abb363c375b/radio-orphan-budget-unit-4.log"
+        }
+      }
+    ],
+    "results": {
+      "name": "budget-unit-results.json",
+      "sha256": "1e34ae065d862d3d1c7e197387529d609a5def9e583cca53ed58ff0139a76954",
+      "artifact": "sha256/1e34ae065d862d3d1c7e197387529d609a5def9e583cca53ed58ff0139a76954/radio-orphan-budget-unit-results.json"
+    },
+    "source_manifest": {
+      "name": "budget-unit-source-manifest.json",
+      "sha256": "d38a0733cc4b85e21bee61d288ba079ba5101e3da00922a89d3f483147047d25",
+      "artifact": "sha256/d38a0733cc4b85e21bee61d288ba079ba5101e3da00922a89d3f483147047d25/radio-orphan-budget-unit-source-manifest.json"
+    },
+    "sources": {
+      "name": "budget-unit-sources.tar.gz",
+      "sha256": "8aef6285c88aab25ec0291a362e36aafecbce453502487bf0b35720a305f2acf",
+      "artifact": "sha256/8aef6285c88aab25ec0291a362e36aafecbce453502487bf0b35720a305f2acf/radio-orphan-budget-unit-sources.tar.gz"
+    },
+    "source_count": 26,
+    "archive_payload_hashes_verified": true,
+    "current_sources_match": true,
+    "source_sha256": {
+      "root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+      "root/usr/local/lib/privacyctl_runtime/adapter.py": "48f30eb4f26627fb1b8751e776cded0bf754427dd92deedff27a081a03d8204e",
+      "root/usr/local/lib/privacyctl_runtime/dhcp.py": "0848a26a21d303d82e819896a12098e710ce59965eeac80acd2b05aa29494a34",
+      "root/usr/local/lib/privacyctl_runtime/hook.py": "b27ef3a44460dd65b16e179bc62c38a10feff1225c06eb5d9f1da08cc713840c",
+      "root/usr/local/lib/privacyctl_runtime/ipc.py": "f9b318cf3c2bfb2974e5d61ee7f2c0a807cc83ddd91961ee9dc6b38ab0b18af4",
+      "root/usr/local/lib/privacyctl_runtime/journal.py": "582f6ea16911bcc89dc3f7eaac86c83a1adf39e15342db06ccd0e8f37eddbbb7",
+      "root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+      "root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+      "root/usr/local/lib/privacyctl_runtime/link.py": "835d48c26bce4913541f1153d582136bb162f76bea08d44be6da540e18af05f5",
+      "root/usr/local/lib/privacyctl_runtime/network.py": "3ecd3bc425a1453b2a94eda844d33b68be4dd5397ce15f194e14161db3f993ae",
+      "root/usr/local/lib/privacyctl_runtime/recovery.py": "0580e8fe6e9b5b1c3fcca278ffb0782b8be14663800ee984493a1a94816130bb",
+      "root/usr/local/lib/privacyctl_runtime/runner.py": "26f6d908d69e3db4905e174f1e047cecab483d4c7cf40e61c048e78591709a2c",
+      "root/usr/local/lib/privacyctl_runtime/service.py": "9f10c784979515c9625247a1a29764df0617049abb980a100199d1450f10c810",
+      "root/usr/local/lib/privacyctl_runtime/writers.py": "cb4cb9d9190934ea8fb4ffab2622aefb293596942ad941dade2d87d3e331e4b1",
+      "root/usr/local/sbin/privacyctl": "6c79a6dc2d0e653375204fbb89611e862125223accc2e77f925d696d053dec57",
+      "tests/test_dhcp_journal.py": "115ccb8dcc1b9e8049330f5944ad6a91d8bcfa20b14c64a0bcfa42f2cac3d67b",
+      "tests/test_ipc.py": "c589cc04930f629c838c653931ad3db1342af08561f97b19530b45ca45f49788",
+      "tests/test_journal.py": "18ea2cbc93494dc0e7e236602e385969613172027a8f1110381f753faecf06a0",
+      "tests/test_link.py": "626e9303430ce58b432622517a06daf090825461c146c47b2d62a7b4cd62d8ef",
+      "tests/test_network.py": "17de95f6b931b2f6552e53bb92e3f6d3e8d1fb791094e98e5928af96f5dd9754",
+      "tests/test_network_journal.py": "009387180839ff38b9e5c326a2baec1b1ba82debf10d4f077c1ca1ba42277c1c",
+      "tests/test_owner_adapter.py": "fd79ed999ea28132c68c36575eed6edd50bc32916c6032ace3333d086861e3b6",
+      "tests/test_recovery.py": "c791038793369599224b7bfc5aeb87c905ef6750493a354d2f94dc86af55a2b3",
+      "tests/test_service.py": "acd418479f382a5554752eeb4e5e70b097dd59b7331a729f12e325352deb2cf4",
+      "tests/test_startup_recovery.py": "e485beccf00c14e831e5915985a05a61a65544f2318ee6dd375d152e1bbebb1a",
+      "tests/test_writers.py": "36abfa74e2d81ac67796ad7487be633292049450199f9eec15021ec7796b1c3b"
+    },
+    "scope_note": "Selected temporary-file/mocked process/backend and isolated IPC suites; no native fixture is included in247. Do not add this to overlapping earlier suite counts."
+  },
+  "native_runs": [
+    {
+      "run": 1,
+      "status": "failed",
+      "completed_case_count": 0,
+      "elapsed_seconds": 1.959382547000132,
+      "journal_delay_ms": 0,
+      "delay_option_present": false,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Fixture detailed-link JSON decoding failed on preserved raw ff alias before startup; corrected with surrogateescape.",
+      "evidence": {
+        "name": "native-integration-01/evidence.json",
+        "sha256": "319f722994d8b574ea63c253bbf696f8076b83fb83747422114eb43b968bd024",
+        "artifact": "sha256/319f722994d8b574ea63c253bbf696f8076b83fb83747422114eb43b968bd024/radio-orphan-native-integration-01-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-01/worker-result.json",
+        "sha256": "e82a607db70278101af020f8582b360515a8ee4de94c0bcc6969af8079e989ba",
+        "artifact": "sha256/e82a607db70278101af020f8582b360515a8ee4de94c0bcc6969af8079e989ba/radio-orphan-native-integration-01-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-01/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-01-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-01/sources.tar.gz",
+        "sha256": "b1da903bbbd8758e49de05018641132ca4b9de755cb31b0b90ea913080d13bda",
+        "artifact": "sha256/b1da903bbbd8758e49de05018641132ca4b9de755cb31b0b90ea913080d13bda/radio-orphan-native-integration-01-sources.tar.gz"
+      }
+    },
+    {
+      "run": 2,
+      "status": "failed",
+      "completed_case_count": 6,
+      "elapsed_seconds": 33.24054809199879,
+      "journal_delay_ms": 0,
+      "delay_option_present": false,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": false,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": false,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Fresh connect after recovery hit old apply deadline; six-second fixture CLI observation expired. DHCP process inventory changed and remains unattributed.",
+      "evidence": {
+        "name": "native-integration-02/evidence.json",
+        "sha256": "ad86e40af1361e64074608d283625e0c63befa6436a477e9646ac8350b975fd0",
+        "artifact": "sha256/ad86e40af1361e64074608d283625e0c63befa6436a477e9646ac8350b975fd0/radio-orphan-native-integration-02-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-02/worker-result.json",
+        "sha256": "26f0091be0103c7b5865e6cc714cb58d2b0a967d1400cd491972304f74754116",
+        "artifact": "sha256/26f0091be0103c7b5865e6cc714cb58d2b0a967d1400cd491972304f74754116/radio-orphan-native-integration-02-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-02/snapshot-comparison.json",
+        "sha256": "1293e0e0a2815d599a822390560dacfd2a27c5b29df7d7d572434e0045ce116d",
+        "artifact": "sha256/1293e0e0a2815d599a822390560dacfd2a27c5b29df7d7d572434e0045ce116d/radio-orphan-native-integration-02-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-02/sources.tar.gz",
+        "sha256": "0ef2a1b67a104589e6ece3e3f834632d8783319ff41284ff9977cd6a87198c9a",
+        "artifact": "sha256/0ef2a1b67a104589e6ece3e3f834632d8783319ff41284ff9977cd6a87198c9a/radio-orphan-native-integration-02-sources.tar.gz"
+      }
+    },
+    {
+      "run": 3,
+      "status": "failed",
+      "completed_case_count": 2,
+      "elapsed_seconds": 7.936952607000421,
+      "journal_delay_ms": 0,
+      "delay_option_present": true,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Zero-delay diagnostic hit old four-second shared apply deadline before the pause.",
+      "evidence": {
+        "name": "native-integration-03/evidence.json",
+        "sha256": "a8770c539b0556b732179d07fab516b01899e46bcbb367c4378f2906008867bb",
+        "artifact": "sha256/a8770c539b0556b732179d07fab516b01899e46bcbb367c4378f2906008867bb/radio-orphan-native-integration-03-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-03/worker-result.json",
+        "sha256": "dd98f8cbf4185a1dc41baad158f7e3e195689cb980d2c699890b067922350c7d",
+        "artifact": "sha256/dd98f8cbf4185a1dc41baad158f7e3e195689cb980d2c699890b067922350c7d/radio-orphan-native-integration-03-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-03/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-03-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-03/sources.tar.gz",
+        "sha256": "0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a",
+        "artifact": "sha256/0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a/radio-orphan-native-integration-03-sources.tar.gz"
+      }
+    },
+    {
+      "run": 4,
+      "status": "failed",
+      "completed_case_count": 2,
+      "elapsed_seconds": 10.16441635999945,
+      "journal_delay_ms": 50,
+      "delay_option_present": true,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Fixed50ms journal-pressure diagnostic hit old four-second apply deadline before the pause.",
+      "evidence": {
+        "name": "native-integration-04/evidence.json",
+        "sha256": "3c6583953e655b0b89698fe3fdbdc1e73d94ae1648aba57585e23bd6db960ebe",
+        "artifact": "sha256/3c6583953e655b0b89698fe3fdbdc1e73d94ae1648aba57585e23bd6db960ebe/radio-orphan-native-integration-04-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-04/worker-result.json",
+        "sha256": "c693c3a90c6508f7ba017b58fca780e78878250b5745a2f520a9112cdcf7256c",
+        "artifact": "sha256/c693c3a90c6508f7ba017b58fca780e78878250b5745a2f520a9112cdcf7256c/radio-orphan-native-integration-04-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-04/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-04-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-04/sources.tar.gz",
+        "sha256": "0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a",
+        "artifact": "sha256/0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a/radio-orphan-native-integration-04-sources.tar.gz"
+      }
+    },
+    {
+      "run": 5,
+      "status": "failed",
+      "completed_case_count": 2,
+      "elapsed_seconds": 18.26900597000349,
+      "journal_delay_ms": 50,
+      "delay_option_present": true,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Cancellation reached the pause, but cleanup exceeded real CLI off5; physical rfkill fallback failed inside private device masks. Corrected the fixture System substitution, retaining off5.",
+      "evidence": {
+        "name": "native-integration-05/evidence.json",
+        "sha256": "e87a798d2fd9737d5e6b91f4cbd4ccd603d00375d509ce1045d0330fd53b3605",
+        "artifact": "sha256/e87a798d2fd9737d5e6b91f4cbd4ccd603d00375d509ce1045d0330fd53b3605/radio-orphan-native-integration-05-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-05/worker-result.json",
+        "sha256": "e11306a00b9ee100b3c98609b748f94c15bc254d08430923acbcaf2b0a7a1f2c",
+        "artifact": "sha256/e11306a00b9ee100b3c98609b748f94c15bc254d08430923acbcaf2b0a7a1f2c/radio-orphan-native-integration-05-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-05/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-05-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-05/sources.tar.gz",
+        "sha256": "97a5965f755aa2eb51c266f83ce2003d780b3487a4027b2aa1ab95255bd10c63",
+        "artifact": "sha256/97a5965f755aa2eb51c266f83ce2003d780b3487a4027b2aa1ab95255bd10c63/radio-orphan-native-integration-05-sources.tar.gz"
+      }
+    },
+    {
+      "run": 6,
+      "status": "failed",
+      "completed_case_count": 1,
+      "elapsed_seconds": 12.777184396996745,
+      "journal_delay_ms": 50,
+      "delay_option_present": true,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "Low-level command/link deadline expired during generation preparation before apply. Same final sources passed07 later; load causation remains unproved.",
+      "evidence": {
+        "name": "native-integration-06/evidence.json",
+        "sha256": "06d1aa36fe7ff1ba18fc86f952f1bdfc1fc456f9a3c17887d30fe1ea12a0210b",
+        "artifact": "sha256/06d1aa36fe7ff1ba18fc86f952f1bdfc1fc456f9a3c17887d30fe1ea12a0210b/radio-orphan-native-integration-06-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-06/worker-result.json",
+        "sha256": "aa051d22950ef15b74721a8f9b498cc27f56c12155be94d49a56bee7a8507374",
+        "artifact": "sha256/aa051d22950ef15b74721a8f9b498cc27f56c12155be94d49a56bee7a8507374/radio-orphan-native-integration-06-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-06/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-06-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-06/sources.tar.gz",
+        "sha256": "98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852",
+        "artifact": "sha256/98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852/radio-orphan-native-integration-06-sources.tar.gz"
+      }
+    },
+    {
+      "run": 7,
+      "status": "passed",
+      "completed_case_count": 9,
+      "elapsed_seconds": 118.32456171399826,
+      "journal_delay_ms": 50,
+      "delay_option_present": true,
+      "host_checks": {
+        "addresses_digest": true,
+        "dhcp_clients": true,
+        "dns_digest": true,
+        "ipv6_routes_digest": true,
+        "namespaces": true,
+        "persistent_state": true,
+        "radio_states": true,
+        "routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "source_unchanged_during_run": true,
+      "remaining_namespace_members": [],
+      "archived_source_count": 23,
+      "source_archive_payload_hashes_verified": true,
+      "finding": "All nine guarded cases passed with fixed50ms delay before each actual journal write.",
+      "evidence": {
+        "name": "native-integration-07/evidence.json",
+        "sha256": "2267435f3aff0916014d2a695672c84b8a2433248372dbc862366ab174f05fe6",
+        "artifact": "sha256/2267435f3aff0916014d2a695672c84b8a2433248372dbc862366ab174f05fe6/radio-orphan-native-integration-07-evidence.json"
+      },
+      "worker_raw_output": {
+        "name": "native-integration-07/worker-result.json",
+        "sha256": "620eefe1e7eb13d0cc477b4592d2f65650baf43885ea36113ce7f1498f7c814a",
+        "artifact": "sha256/620eefe1e7eb13d0cc477b4592d2f65650baf43885ea36113ce7f1498f7c814a/radio-orphan-native-integration-07-worker-result.json"
+      },
+      "host_comparison": {
+        "name": "native-integration-07/snapshot-comparison.json",
+        "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+        "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-07-snapshot-comparison.json"
+      },
+      "sources": {
+        "name": "native-integration-07/sources.tar.gz",
+        "sha256": "98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852",
+        "artifact": "sha256/98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852/radio-orphan-native-integration-07-sources.tar.gz"
+      }
+    }
+  ],
+  "successful_native_scope": {
+    "run": 7,
+    "cases": [
+      {
+        "elapsed_seconds": 0.9021184040029766,
+        "name": "off_during_unanswered_wpa",
+        "observed_reason": "radio authorization cancelled"
+      },
+      {
+        "elapsed_seconds": 0.7489566139993258,
+        "name": "requester_death_before_commit",
+        "observed_reason": "requesting client disconnected"
+      },
+      {
+        "blocked_before_command_and_dhcp_teardown": true,
+        "elapsed_seconds": 15.20799601899489,
+        "name": "off_during_native_apply",
+        "native_partial_state_removed": true,
+        "observed_reason": "radio authorization cancelled",
+        "real_command_and_hook_dead": true
+      },
+      {
+        "blocked_before_command_and_dhcp_teardown": true,
+        "elapsed_seconds": 15.387198199001432,
+        "name": "hook_death_during_native_apply",
+        "native_partial_state_removed": true,
+        "observed_reason": "DHCP hook exited or sent extra data before acknowledgment",
+        "real_command_and_hook_dead": true
+      },
+      {
+        "elapsed_seconds": 0.16606469199905405,
+        "name": "second_guardian_cannot_create_overlapping_owner_or_client"
+      },
+      {
+        "dirty_marker_removed": true,
+        "elapsed_seconds": 7.019104816004983,
+        "name": "guardian_sigkill_causes_owner_pdeath_cleanup",
+        "owner_and_dhcp_dead": true
+      },
+      {
+        "elapsed_seconds": 24.228320130998327,
+        "fresh_connect_and_off_succeeded": true,
+        "name": "owner_sigkill_recovers_on_blocked_startup",
+        "no_reconnect_before_fresh_cli": true,
+        "orphan_journal_and_marker_removed": true,
+        "previous_alias_restored": true,
+        "previous_dhcp_dead": true,
+        "unrelated_provider_preserved": true
+      },
+      {
+        "clean_restarts": 2,
+        "elapsed_seconds": 0.917765939993842,
+        "name": "repeated_clean_startup_is_idempotent",
+        "no_automatic_reconnect": true,
+        "previous_alias_and_unrelated_provider_preserved": true
+      },
+      {
+        "elapsed_seconds": 33.83969250699738,
+        "fresh_connect_and_off_succeeded": true,
+        "name": "owner_sigkill_during_live_native_apply_recovers",
+        "native_init_live_at_kill": true,
+        "native_writer_survival_until_replacement_claimed": false,
+        "original_init_pidfd_completed_before_restart": true,
+        "orphan_journal_and_marker_removed": true,
+        "previous_alias_restored": true,
+        "unrelated_provider_preserved": true,
+        "writer_death_proved_at_boottime": 38354.335194946
+      }
+    ],
+    "current_sources_match_run07": true,
+    "source_sha256": {
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/adapter.py": "48f30eb4f26627fb1b8751e776cded0bf754427dd92deedff27a081a03d8204e",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/dhcp.py": "0848a26a21d303d82e819896a12098e710ce59965eeac80acd2b05aa29494a34",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/hook.py": "b27ef3a44460dd65b16e179bc62c38a10feff1225c06eb5d9f1da08cc713840c",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/ipc.py": "f9b318cf3c2bfb2974e5d61ee7f2c0a807cc83ddd91961ee9dc6b38ab0b18af4",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/journal.py": "582f6ea16911bcc89dc3f7eaac86c83a1adf39e15342db06ccd0e8f37eddbbb7",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/link.py": "835d48c26bce4913541f1153d582136bb162f76bea08d44be6da540e18af05f5",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "3ecd3bc425a1453b2a94eda844d33b68be4dd5397ce15f194e14161db3f993ae",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/recovery.py": "0580e8fe6e9b5b1c3fcca278ffb0782b8be14663800ee984493a1a94816130bb",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/runner.py": "26f6d908d69e3db4905e174f1e047cecab483d4c7cf40e61c048e78591709a2c",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/service.py": "9f10c784979515c9625247a1a29764df0617049abb980a100199d1450f10c810",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/writers.py": "cb4cb9d9190934ea8fb4ffab2622aefb293596942ad941dade2d87d3e331e4b1",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-event": "9c242a9ab5bc9a59a02a8081561b3859bc6450a7799ebd7ddca77262bd93500f",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-launch": "ee9857880a292f835baf65ba3417a17ef5fbdf517f72aab07e816d1de54e81de",
+      "/home/jack/.files/alpine/security/radio/root/usr/local/sbin/privacyctl": "6c79a6dc2d0e653375204fbb89611e862125223accc2e77f925d696d053dec57",
+      "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+      "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+      "/home/jack/.files/alpine/security/radio/tests/verify_radio_owner.py": "c953caca12a4fcac9f5fa1c98a6990d734cb11ca38c4c7d64fa28cc7c6a2e83e",
+      "/home/jack/.files/alpine/security/radio/tests/verify_radio_owner_failures.py": "5c9a0341ff42527980e2b38481087b35cc79953d308720e87f317aa78fc58d78",
+      "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f",
+      "/usr/sbin/resolvconf": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3"
+    },
+    "guardian_is_production": true,
+    "cli_main_ipc_emergency_are_production": true,
+    "cli_entrypoint_and_physical_system_substituted": true,
+    "baseline_owner_harness_changed": true,
+    "raw_previous_alias_preserved": true,
+    "unrelated_provider_preserved": true,
+    "no_reconnect_before_new_cli_request": true,
+    "journal_backing": "private tmpfs plus fixed50ms sleep before actual Journal.write",
+    "fixture_resource_count": 6,
+    "cli_emergency_block_events": 3,
+    "native_writer_live_at_owner_kill": true,
+    "original_writer_completion_before_replacement_startup": true,
+    "writer_survival_until_replacement_claimed": false
+  },
+  "observed_completed_maxima_seconds": {
+    "successful_apply": 9.052245496000978,
+    "normal_remove": 6.691136982997705,
+    "recovered_remove": 7.827054464003595,
+    "startup_recovery": 8.131765846002963,
+    "native_command": 0.3332753490030882,
+    "snapshot": 0.5496182569986559,
+    "journal_write_including_artificial_delay": 0.05949252299615182
+  },
+  "timing_caveats": [
+    "Buckets are nested and cumulative; do not add journal, native, snapshot, apply/remove and startup totals.",
+    "First latch is owner-wide and may be an earlier WPA cancellation, not the current apply attempt.",
+    "Owner SIGKILL can prevent timing finally blocks: a call with zero recorded duration/failures is censored, not a successful zero-time operation.",
+    "Fixed50ms on tmpfs does not reproduce real-disk fsync tail latency; measured maxima are not worst-case bounds."
+  ],
+  "budgets_seconds": {
+    "apply": 10,
+    "remove": 12,
+    "hook_client": 12,
+    "hook_manager_peer": 12,
+    "dhcp_readiness": 5,
+    "launcher_readiness": 5,
+    "dhcp_acquire": 20,
+    "dhcp_stop": 3,
+    "generation_prepare": 3,
+    "normal_journal_finish": 3,
+    "uncertain_wrapper_recovery": 16,
+    "startup_recovery": 16,
+    "native_command": 0.75,
+    "native_teardown": 0.4,
+    "guardian_grace": 25,
+    "guardian_post_kill_wait": 3,
+    "openrc_term_grace": 35,
+    "openrc_kill_wait": 5,
+    "cli_off_ipc": 5,
+    "cli_general_request": 50,
+    "fixture_cli_observation": 52,
+    "fixture_outer_worker": 240,
+    "fixture_capture": 248
+  },
+  "openrc_retry": "TERM/35/KILL/5",
+  "openrc_service_sha256": "5bbbda53dfcc408ccc5e6b66854e096151fcd4c96aa2031b31d283590d3b80fe",
+  "preserved_failures": {
+    "runs": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "native02_dhcp_process_delta": {
+      "host_check": false,
+      "attribution": "unknown",
+      "observed_before_worker_launch": true,
+      "review": {
+        "name": "host-client-delta-review.md",
+        "sha256": "af66714b9b44479772fc8a48cbef3e246ea9c2de0fd2d6d1ac51852aff51a3b1",
+        "artifact": "sha256/af66714b9b44479772fc8a48cbef3e246ea9c2de0fd2d6d1ac51852aff51a3b1/radio-orphan-host-client-delta-review.md"
+      }
+    },
+    "native06_busy_run": {
+      "apply_calls": 0,
+      "largest_native_command_seconds": 1.0051742600044236,
+      "error": "link query deadline expired",
+      "command_budget_increased_after_failure": false,
+      "causal_load_attribution_proved": false
+    }
+  },
+  "limits": [
+    "Only the exact guarded K6 IPv4/IPv6 fixture has pressure50 proof; maximum accepted profile cardinality and replacement renewals can exceed these deadlines.",
+    "WPA and physical radio are fixture substitutes. Physical rfkill, real association and hardware block latency are not validated.",
+    "Parent host checks compare snapshots; they are not continuous observation of all transient state. Native02 remains a failed DHCP-list comparison.",
+    "Captured native writer was alive at owner kill, but completion was proved before replacement startup. A surviving-writer/new-observer native teardown proof remains separate.",
+    "Resolver repair requires the intact managed signature and validated libc-only provider policy; missing/truncated signature remains refusal.",
+    "Controller remains staged; live migration, deployed behavior and OpenRC activation/readiness remain separate.",
+    "A quiet native07 success does not erase native06 low-level deadline refusal or establish robustness under arbitrary host load."
+  ],
+  "historical_manifests": [
+    "alpine/security/radio/orphan-primitives-verification.json",
+    "alpine/security/radio/fault-verification.json",
+    "alpine/security/radio/owner-verification.json"
+  ],
+  "reviews": {
+    "outcome": {
+      "name": "integration-outcome-review.md",
+      "sha256": "af328233d25febbb92550e13d0ae4681fbc310eae231112515fb67c6d020169e",
+      "artifact": "sha256/af328233d25febbb92550e13d0ae4681fbc310eae231112515fb67c6d020169e/radio-orphan-integration-outcome-review.md"
+    },
+    "native_guard": {
+      "name": "native-integration-guard-review.md",
+      "sha256": "b3a28baf4db619867720c5d5345adf08983aadb2619014c2e1de5b59a68dca98",
+      "artifact": "sha256/b3a28baf4db619867720c5d5345adf08983aadb2619014c2e1de5b59a68dca98/radio-orphan-native-integration-guard-review.md"
+    },
+    "network_recovery": {
+      "name": "network-recovery-review.md",
+      "sha256": "0aa5de09663d65b4da0662f170a72efb851460942d99dd8e3714eee55ba8d7d8",
+      "artifact": "sha256/0aa5de09663d65b4da0662f170a72efb851460942d99dd8e3714eee55ba8d7d8/radio-orphan-network-recovery-review.md"
+    },
+    "startup": {
+      "name": "startup-integration-review.md",
+      "sha256": "dd6aae92bd278825a62dbec2d26feb2e042daef5534fe9480436a96479bf1fa0",
+      "artifact": "sha256/dd6aae92bd278825a62dbec2d26feb2e042daef5534fe9480436a96479bf1fa0/radio-orphan-startup-integration-review.md"
+    },
+    "timing": {
+      "name": "timing-budget-notes.md",
+      "sha256": "94e89beee1b9073455570036fe103845757bb75d74a9976d21386f498a1c8aa4",
+      "artifact": "sha256/94e89beee1b9073455570036fe103845757bb75d74a9976d21386f498a1c8aa4/radio-orphan-timing-budget-notes.md"
+    },
+    "openrc": {
+      "name": "openrc-owner-notes.md",
+      "sha256": "64c4a04c34c1afb4650c8f85cbf1e1598bcae697f7d86f375a5775eb949ac5cd",
+      "artifact": "sha256/64c4a04c34c1afb4650c8f85cbf1e1598bcae697f7d86f375a5775eb949ac5cd/radio-orphan-openrc-owner-notes.md"
+    }
+  },
+  "journal_filesystem_benchmark": {
+    "name": "journal-fsync-benchmark.json",
+    "sha256": "8d8359b04bd78286fa88c4267afda23261d28346e31931b5e2dfa0c39d6a0a9b",
+    "artifact": "sha256/8d8359b04bd78286fa88c4267afda23261d28346e31931b5e2dfa0c39d6a0a9b/radio-orphan-journal-fsync-benchmark.json"
+  },
+  "archive": {
+    "storage": "local Fossil unversioned",
+    "naming": "sha256/<content-sha256>/<radio-evidence-name>",
+    "overwrite_policy": "Add only absent names; any existing name must export to identical bytes. No existing UV name was replaced.",
+    "added": 48,
+    "reused": 0,
+    "all_exports_verified": true,
+    "remote_sync_performed": false,
+    "unversioned_caveat": "Content-addressed names were append-only for this task; Fossil UV itself permits later updates and does not preserve history."
+  },
+  "evidence_inputs": [
+    {
+      "name": "native-integration-01/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-01/evidence.json",
+      "sha256": "319f722994d8b574ea63c253bbf696f8076b83fb83747422114eb43b968bd024",
+      "bytes": 11305,
+      "artifact": "sha256/319f722994d8b574ea63c253bbf696f8076b83fb83747422114eb43b968bd024/radio-orphan-native-integration-01-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-01/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-01/worker-result.json",
+      "sha256": "e82a607db70278101af020f8582b360515a8ee4de94c0bcc6969af8079e989ba",
+      "bytes": 10767,
+      "artifact": "sha256/e82a607db70278101af020f8582b360515a8ee4de94c0bcc6969af8079e989ba/radio-orphan-native-integration-01-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-01/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-01/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-01-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-01/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-01/sources.tar.gz",
+      "sha256": "b1da903bbbd8758e49de05018641132ca4b9de755cb31b0b90ea913080d13bda",
+      "bytes": 88539,
+      "artifact": "sha256/b1da903bbbd8758e49de05018641132ca4b9de755cb31b0b90ea913080d13bda/radio-orphan-native-integration-01-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-02/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-02/evidence.json",
+      "sha256": "ad86e40af1361e64074608d283625e0c63befa6436a477e9646ac8350b975fd0",
+      "bytes": 50613,
+      "artifact": "sha256/ad86e40af1361e64074608d283625e0c63befa6436a477e9646ac8350b975fd0/radio-orphan-native-integration-02-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-02/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-02/worker-result.json",
+      "sha256": "26f0091be0103c7b5865e6cc714cb58d2b0a967d1400cd491972304f74754116",
+      "bytes": 41939,
+      "artifact": "sha256/26f0091be0103c7b5865e6cc714cb58d2b0a967d1400cd491972304f74754116/radio-orphan-native-integration-02-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-02/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-02/snapshot-comparison.json",
+      "sha256": "1293e0e0a2815d599a822390560dacfd2a27c5b29df7d7d572434e0045ce116d",
+      "bytes": 822,
+      "artifact": "sha256/1293e0e0a2815d599a822390560dacfd2a27c5b29df7d7d572434e0045ce116d/radio-orphan-native-integration-02-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-02/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-02/sources.tar.gz",
+      "sha256": "0ef2a1b67a104589e6ece3e3f834632d8783319ff41284ff9977cd6a87198c9a",
+      "bytes": 88569,
+      "artifact": "sha256/0ef2a1b67a104589e6ece3e3f834632d8783319ff41284ff9977cd6a87198c9a/radio-orphan-native-integration-02-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-03/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-03/evidence.json",
+      "sha256": "a8770c539b0556b732179d07fab516b01899e46bcbb367c4378f2906008867bb",
+      "bytes": 18521,
+      "artifact": "sha256/a8770c539b0556b732179d07fab516b01899e46bcbb367c4378f2906008867bb/radio-orphan-native-integration-03-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-03/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-03/worker-result.json",
+      "sha256": "dd98f8cbf4185a1dc41baad158f7e3e195689cb980d2c699890b067922350c7d",
+      "bytes": 18933,
+      "artifact": "sha256/dd98f8cbf4185a1dc41baad158f7e3e195689cb980d2c699890b067922350c7d/radio-orphan-native-integration-03-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-03/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-03/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-03-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-03/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-03/sources.tar.gz",
+      "sha256": "0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a",
+      "bytes": 89586,
+      "artifact": "sha256/0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a/radio-orphan-native-integration-03-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-04/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-04/evidence.json",
+      "sha256": "3c6583953e655b0b89698fe3fdbdc1e73d94ae1648aba57585e23bd6db960ebe",
+      "bytes": 18657,
+      "artifact": "sha256/3c6583953e655b0b89698fe3fdbdc1e73d94ae1648aba57585e23bd6db960ebe/radio-orphan-native-integration-04-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-04/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-04/worker-result.json",
+      "sha256": "c693c3a90c6508f7ba017b58fca780e78878250b5745a2f520a9112cdcf7256c",
+      "bytes": 19095,
+      "artifact": "sha256/c693c3a90c6508f7ba017b58fca780e78878250b5745a2f520a9112cdcf7256c/radio-orphan-native-integration-04-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-04/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-04/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-04-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-04/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-04/sources.tar.gz",
+      "sha256": "0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a",
+      "bytes": 89586,
+      "artifact": "sha256/0162da3e68efd482ed7d7db47f5ccd4d2983edbc87b72ffeb4e870bc79ae799a/radio-orphan-native-integration-04-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-05/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-05/evidence.json",
+      "sha256": "e87a798d2fd9737d5e6b91f4cbd4ccd603d00375d509ce1045d0330fd53b3605",
+      "bytes": 23131,
+      "artifact": "sha256/e87a798d2fd9737d5e6b91f4cbd4ccd603d00375d509ce1045d0330fd53b3605/radio-orphan-native-integration-05-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-05/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-05/worker-result.json",
+      "sha256": "e11306a00b9ee100b3c98609b748f94c15bc254d08430923acbcaf2b0a7a1f2c",
+      "bytes": 22142,
+      "artifact": "sha256/e11306a00b9ee100b3c98609b748f94c15bc254d08430923acbcaf2b0a7a1f2c/radio-orphan-native-integration-05-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-05/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-05/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-05-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-05/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-05/sources.tar.gz",
+      "sha256": "97a5965f755aa2eb51c266f83ce2003d780b3487a4027b2aa1ab95255bd10c63",
+      "bytes": 89692,
+      "artifact": "sha256/97a5965f755aa2eb51c266f83ce2003d780b3487a4027b2aa1ab95255bd10c63/radio-orphan-native-integration-05-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-06/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-06/evidence.json",
+      "sha256": "06d1aa36fe7ff1ba18fc86f952f1bdfc1fc456f9a3c17887d30fe1ea12a0210b",
+      "bytes": 16971,
+      "artifact": "sha256/06d1aa36fe7ff1ba18fc86f952f1bdfc1fc456f9a3c17887d30fe1ea12a0210b/radio-orphan-native-integration-06-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-06/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-06/worker-result.json",
+      "sha256": "aa051d22950ef15b74721a8f9b498cc27f56c12155be94d49a56bee7a8507374",
+      "bytes": 16971,
+      "artifact": "sha256/aa051d22950ef15b74721a8f9b498cc27f56c12155be94d49a56bee7a8507374/radio-orphan-native-integration-06-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-06/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-06/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-06-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-06/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-06/sources.tar.gz",
+      "sha256": "98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852",
+      "bytes": 90015,
+      "artifact": "sha256/98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852/radio-orphan-native-integration-06-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-07/evidence.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-07/evidence.json",
+      "sha256": "2267435f3aff0916014d2a695672c84b8a2433248372dbc862366ab174f05fe6",
+      "bytes": 89987,
+      "artifact": "sha256/2267435f3aff0916014d2a695672c84b8a2433248372dbc862366ab174f05fe6/radio-orphan-native-integration-07-evidence.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-07/worker-result.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-07/worker-result.json",
+      "sha256": "620eefe1e7eb13d0cc477b4592d2f65650baf43885ea36113ce7f1498f7c814a",
+      "bytes": 72425,
+      "artifact": "sha256/620eefe1e7eb13d0cc477b4592d2f65650baf43885ea36113ce7f1498f7c814a/radio-orphan-native-integration-07-worker-result.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-07/snapshot-comparison.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-07/snapshot-comparison.json",
+      "sha256": "afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24",
+      "bytes": 821,
+      "artifact": "sha256/afa54aa4154f50be0b5aef07a7c5f3391bcb0fd8cbe7a398aa84907d13aaff24/radio-orphan-native-integration-07-snapshot-comparison.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-07/sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-07/sources.tar.gz",
+      "sha256": "98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852",
+      "bytes": 90015,
+      "artifact": "sha256/98a86405752d46c702707e4d469f9f2e20daa2a53953904be250880316bba852/radio-orphan-native-integration-07-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-results.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-results.json",
+      "sha256": "1e34ae065d862d3d1c7e197387529d609a5def9e583cca53ed58ff0139a76954",
+      "bytes": 1724,
+      "artifact": "sha256/1e34ae065d862d3d1c7e197387529d609a5def9e583cca53ed58ff0139a76954/radio-orphan-budget-unit-results.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-source-manifest.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-source-manifest.json",
+      "sha256": "d38a0733cc4b85e21bee61d288ba079ba5101e3da00922a89d3f483147047d25",
+      "bytes": 3112,
+      "artifact": "sha256/d38a0733cc4b85e21bee61d288ba079ba5101e3da00922a89d3f483147047d25/radio-orphan-budget-unit-source-manifest.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-sources.tar.gz",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-sources.tar.gz",
+      "sha256": "8aef6285c88aab25ec0291a362e36aafecbce453502487bf0b35720a305f2acf",
+      "bytes": 85021,
+      "artifact": "sha256/8aef6285c88aab25ec0291a362e36aafecbce453502487bf0b35720a305f2acf/radio-orphan-budget-unit-sources.tar.gz",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-1.log",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-1.log",
+      "sha256": "eef992bc641f2a5d280760edcfbcbf1a11cc756d95920f67c08092f9482d9bae",
+      "bytes": 8551,
+      "artifact": "sha256/eef992bc641f2a5d280760edcfbcbf1a11cc756d95920f67c08092f9482d9bae/radio-orphan-budget-unit-1.log",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-2.log",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-2.log",
+      "sha256": "40b10663c81338fabaf4e61566b78ebbc983d329396ab5bc87f6e6f58f4b4de7",
+      "bytes": 15184,
+      "artifact": "sha256/40b10663c81338fabaf4e61566b78ebbc983d329396ab5bc87f6e6f58f4b4de7/radio-orphan-budget-unit-2.log",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-3.log",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-3.log",
+      "sha256": "aee8b82433f339cc698bb160e6db69457e5a082d8430fb00bee0377dd6fbc2ab",
+      "bytes": 9344,
+      "artifact": "sha256/aee8b82433f339cc698bb160e6db69457e5a082d8430fb00bee0377dd6fbc2ab/radio-orphan-budget-unit-3.log",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "budget-unit-4.log",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/budget-unit-4.log",
+      "sha256": "7bec27d67283773665638f5b5c6fa0ae1306046abb06dc26146a4abb363c375b",
+      "bytes": 5043,
+      "artifact": "sha256/7bec27d67283773665638f5b5c6fa0ae1306046abb06dc26146a4abb363c375b/radio-orphan-budget-unit-4.log",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "integration-outcome-review.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/integration-outcome-review.md",
+      "sha256": "af328233d25febbb92550e13d0ae4681fbc310eae231112515fb67c6d020169e",
+      "bytes": 9390,
+      "artifact": "sha256/af328233d25febbb92550e13d0ae4681fbc310eae231112515fb67c6d020169e/radio-orphan-integration-outcome-review.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-integration-guard-review.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-integration-guard-review.md",
+      "sha256": "b3a28baf4db619867720c5d5345adf08983aadb2619014c2e1de5b59a68dca98",
+      "bytes": 12954,
+      "artifact": "sha256/b3a28baf4db619867720c5d5345adf08983aadb2619014c2e1de5b59a68dca98/radio-orphan-native-integration-guard-review.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "network-recovery-review.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/network-recovery-review.md",
+      "sha256": "0aa5de09663d65b4da0662f170a72efb851460942d99dd8e3714eee55ba8d7d8",
+      "bytes": 26331,
+      "artifact": "sha256/0aa5de09663d65b4da0662f170a72efb851460942d99dd8e3714eee55ba8d7d8/radio-orphan-network-recovery-review.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "startup-integration-review.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/startup-integration-review.md",
+      "sha256": "dd6aae92bd278825a62dbec2d26feb2e042daef5534fe9480436a96479bf1fa0",
+      "bytes": 11531,
+      "artifact": "sha256/dd6aae92bd278825a62dbec2d26feb2e042daef5534fe9480436a96479bf1fa0/radio-orphan-startup-integration-review.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "host-client-delta-review.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/host-client-delta-review.md",
+      "sha256": "af66714b9b44479772fc8a48cbef3e246ea9c2de0fd2d6d1ac51852aff51a3b1",
+      "bytes": 4950,
+      "artifact": "sha256/af66714b9b44479772fc8a48cbef3e246ea9c2de0fd2d6d1ac51852aff51a3b1/radio-orphan-host-client-delta-review.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "openrc-owner-notes.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/openrc-owner-notes.md",
+      "sha256": "64c4a04c34c1afb4650c8f85cbf1e1598bcae697f7d86f375a5775eb949ac5cd",
+      "bytes": 8451,
+      "artifact": "sha256/64c4a04c34c1afb4650c8f85cbf1e1598bcae697f7d86f375a5775eb949ac5cd/radio-orphan-openrc-owner-notes.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "dhcp-budget-task.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/dhcp-budget-task.md",
+      "sha256": "209efecfaf549fd13c45744505ea86a344d41241bdbbc227bfcdde4702bd9a9d",
+      "bytes": 2170,
+      "artifact": "sha256/209efecfaf549fd13c45744505ea86a344d41241bdbbc227bfcdde4702bd9a9d/radio-orphan-dhcp-budget-task.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "timing-budget-notes.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/timing-budget-notes.md",
+      "sha256": "94e89beee1b9073455570036fe103845757bb75d74a9976d21386f498a1c8aa4",
+      "bytes": 12225,
+      "artifact": "sha256/94e89beee1b9073455570036fe103845757bb75d74a9976d21386f498a1c8aa4/radio-orphan-timing-budget-notes.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "native-recovery-fixture-task.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/native-recovery-fixture-task.md",
+      "sha256": "c54021960987e04f7ce06ab874e666c9c1b42dad09cb189694fa4b4fefb2c53b",
+      "bytes": 18692,
+      "artifact": "sha256/c54021960987e04f7ce06ab874e666c9c1b42dad09cb189694fa4b4fefb2c53b/radio-orphan-native-recovery-fixture-task.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "journal-fsync-benchmark.json",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/journal-fsync-benchmark.json",
+      "sha256": "8d8359b04bd78286fa88c4267afda23261d28346e31931b5e2dfa0c39d6a0a9b",
+      "bytes": 505,
+      "artifact": "sha256/8d8359b04bd78286fa88c4267afda23261d28346e31931b5e2dfa0c39d6a0a9b/radio-orphan-journal-fsync-benchmark.json",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "network-integration-task.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/network-integration-task.md",
+      "sha256": "c00e111b9b34eea9657520b1181eda68449513d2886b956a1e14b375e0a1c1ab",
+      "bytes": 5855,
+      "artifact": "sha256/c00e111b9b34eea9657520b1181eda68449513d2886b956a1e14b375e0a1c1ab/radio-orphan-network-integration-task.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "dhcp-integration-task.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/dhcp-integration-task.md",
+      "sha256": "0bf97f234aaa457d1c6835173f9ec3bf8bbdfccd28cf021db45c064f691fd31a",
+      "bytes": 28765,
+      "artifact": "sha256/0bf97f234aaa457d1c6835173f9ec3bf8bbdfccd28cf021db45c064f691fd31a/radio-orphan-dhcp-integration-task.md",
+      "archive_action": "added",
+      "export_verified": true
+    },
+    {
+      "name": "recovery-integration-task.md",
+      "private_path": "/home/jack/.local/state/oldbook/verification/radio-orphan-recovery/recovery-integration-task.md",
+      "sha256": "1e1c34df209bdac7f088cd372aaa6eadbe7c3372ad69e3dc1eb3a7f9b4e76a98",
+      "bytes": 7953,
+      "artifact": "sha256/1e1c34df209bdac7f088cd372aaa6eadbe7c3372ad69e3dc1eb3a7f9b4e76a98/radio-orphan-recovery-integration-task.md",
+      "archive_action": "added",
+      "export_verified": true
+    }
+  ]
+}
