@@ -47,15 +47,38 @@ healthy connections persist until off, disconnection or an authorization failure
 
 Off invalidates older queued requests as well as current work. Cancellation
 blocks before child teardown and owned-state cleanup. An unresolved cleanup
-prevents another connection. Startup rejects stale authorization, and a crash
-marker prevents silently adopting orphaned lease state. See
-[OWNER-SERVICE.md](OWNER-SERVICE.md) for commands, deadlines, process death,
-private IPv6 settings and recovery boundaries. The combined failure checks in
-[fault-verification.json](fault-verification.json) now cover cancellation,
-guardian/owner death and orphan-state rejection. Automatic cleanup after owner
-death remains staged in [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md). Its journal
-store and writer-identity helpers have isolated unit coverage; owner startup
-does not yet use them, and orphan cleanup remains unavailable.
+prevents another connection. Startup now holds guardian, owner and DHCP lifetime
+locks, blocks radios and recovers the durable journal before opening IPC
+readiness. Native commands, lease application and DHCP share one coordinator;
+writer identities are persisted before execution gates open. Same-boot recovery
+checks writer death and the link cookie before exact lease cleanup and prior
+alias restoration. It never reconnects or adopts the orphaned lease.
+
+See [OWNER-SERVICE.md](OWNER-SERVICE.md) for commands, deadlines, process death,
+private IPv6 settings and recovery boundaries. The historical seven fault checks
+in [fault-verification.json](fault-verification.json), recorded on 2026-09-07,
+cover cancellation, guardian/owner death and marker-based orphan rejection
+against their listed source hashes. The historical 57-test
+[primitive record](orphan-primitives-verification.json) predates integration.
+The source-stable non-root discovery recorded in
+[checkpoint-verification.json](checkpoint-verification.json) passed 270 tests
+and skipped 95 root-only cases. Separately, native run 07 passed nine cases in
+118.3246 seconds with 50 ms injected per journal write: recorded host comparisons
+matched, no fixture namespace members survived and sources were unchanged.
+See [orphan-integration-verification.json](orphan-integration-verification.json)
+and [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md) for exact scope. Runs 01–06 remain
+preserved failures, including the old four-second apply cap, a 0.75-second command
+timeout under load and an unexplained pre-existing DHCP-client delta in run 02.
+
+The passing fixture uses a private tmpfs journal with artificial delay. Full
+integrated real-persistent-disk timing, a surviving-writer drain from a new
+observer, OpenRC and live activation remain unproved. Current staged limits
+allow ten-second apply and twelve-second removal/hook acknowledgment, with
+five-second readiness; measured maxima and other limits are in
+[OWNER-SERVICE.md](OWNER-SERVICE.md). The dual-stack fixture uses six
+address/route selectors (K=6); completion for maximum accepted K=22 is not
+guaranteed. Different-boot completion is not implemented. Live activation is
+unchanged.
 
 ## Trusted policy and display contract
 

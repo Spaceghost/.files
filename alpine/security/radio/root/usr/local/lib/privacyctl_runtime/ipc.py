@@ -173,9 +173,10 @@ class Server:
         self._peers = {}
         self._nonces = OrderedDict()
 
-    def open(self):
+    def acquire(self):
+        """Hold owner exclusivity without publishing command readiness."""
         if self._lock is not None:
-            raise IPCError('owner server already open')
+            return
         if os.geteuid() != 0:
             raise IPCError('owner transport requires root')
         path = str(self.runtime / 'owner.sock')
@@ -190,6 +191,18 @@ class Server:
                     or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
                 raise IPCError('unsafe owner lock')
             fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except (OSError, ValueError, IPCError) as error:
+            self.close()
+            raise IPCError('cannot acquire owner transport: ' + str(error)) from error
+
+    def listen(self):
+        """Publish only after the caller completes blocked startup recovery."""
+        if self._lock is None:
+            raise IPCError('owner transport requires acquired ownership')
+        if self._listener is not None:
+            raise IPCError('owner server already listening')
+        path = str(self.runtime / 'owner.sock')
+        try:
             self._remove_stale(path)
             self._listener = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
             self._listener.setblocking(False)
@@ -201,6 +214,11 @@ class Server:
         except (OSError, ValueError, IPCError) as error:
             self.close()
             raise IPCError('cannot open owner transport: ' + str(error)) from error
+
+    def open(self):
+        """Compatibility entrypoint for callers without a recovery phase."""
+        self.acquire()
+        self.listen()
 
     def _remove_stale(self, path):
         try:

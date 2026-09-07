@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).parents[1] / 'root/usr/local/lib'))
 from privacyctl_runtime.lease import Lease
-from privacyctl_runtime.network import (Address, IPv6Profile, LeaseApplier, NetworkError,
+from privacyctl_runtime.network import (APPLY_TIMEOUT, Address, IPv6Profile, LeaseApplier, NetworkError,
                                        NativeNetwork, Route, Snapshot)
 
 
@@ -344,7 +344,7 @@ class NetworkTests(unittest.TestCase):
         class Time:
             value = 100.0
             def monotonic(self):
-                self.value += 0.2
+                self.value += APPLY_TIMEOUT / 20
                 return self.value
         clock = Time()
         with patch('privacyctl_runtime.network.time.monotonic', clock.monotonic):
@@ -396,7 +396,7 @@ class NetworkTests(unittest.TestCase):
              patch('privacyctl_runtime.network.time.sleep', clock.sleep):
             with self.assertRaisesRegex(NetworkError, 'deadline') as caught:
                 applier.apply(self.lease(), ipv6=profile)
-            self.assertLessEqual(clock.now, 104.025)
+            self.assertLessEqual(clock.now, 100 + APPLY_TIMEOUT + .025)
             self.assertEqual(backend.publications, [])
             self.assertIn(Address(6, '2001:db8:1::17/64'), caught.exception.owned.addresses)
             applier.remove(caught.exception.owned)

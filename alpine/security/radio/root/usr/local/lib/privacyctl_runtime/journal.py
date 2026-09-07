@@ -347,3 +347,16 @@ class Journal:
             os.unlink(self.filename, dir_fd=directory)
             os.fsync(directory)
         self._token, self._record = None, None
+
+    def confirm_absent(self):
+        """Durably confirm already-read absence; never remove or recreate a file.
+
+        The recovery coordinator separately proves whether absence may finish a
+        known clean-removal attempt. This method provides only directory fsync.
+        """
+        _require(self._token is None and self._record is None,
+                 'journal absence must be read before confirmation')
+        with self._directory() as directory:
+            self._unchanged(directory)
+            os.fsync(directory)
+            self._unchanged(directory)

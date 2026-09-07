@@ -12,7 +12,8 @@ import time
 FIELDS = frozenset(('interface', 'ip', 'subnet', 'mask', 'router', 'dns', 'lease', 'serverid'))
 EVENTS = frozenset(('bound', 'renew', 'deconfig', 'nak', 'leasefail'))
 MAX_FRAME = 8192
-TIMEOUT = 5
+# Includes the ten-second lease application plus authentication and reply time.
+TIMEOUT = 12
 
 
 def main(argv=None):

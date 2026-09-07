@@ -4,6 +4,7 @@ description='Guard persistent radio and DHCP ownership; block on authorization l
 supervisor=supervise-daemon
 command=/usr/local/sbin/privacyctl
 command_args=supervise
+retry='TERM/35/KILL/5'
 supervise_daemon_args='--respawn-delay 2 --respawn-max 0'
 
 depend() {

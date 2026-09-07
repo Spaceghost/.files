@@ -27,7 +27,8 @@ LAUNCHER = '/usr/local/libexec/privacyctl-dhcp-launch'
 HOOK = '/usr/local/libexec/privacyctl-dhcp-event'
 UDHCPC = '/sbin/udhcpc'
 ACQUIRE_TIMEOUT = 20
-HOOK_TIMEOUT = 5
+HOOK_TIMEOUT = 12
+READY_TIMEOUT = 5
 STOP_TIMEOUT = 3
 MAX_FRAME = 8192
 MAX_PEERS = 8
@@ -85,7 +86,8 @@ def _private_directory(path):
 
 
 class DHCPManager:
-    def __init__(self, runtime, *, launcher=LAUNCHER, hook=HOOK, udhcpc=UDHCPC):
+    def __init__(self, runtime, *, launcher=LAUNCHER, hook=HOOK, udhcpc=UDHCPC,
+                 journal=None):
         """Explicit implementation paths are for trusted Python test harnesses.
 
         Neither service requests nor environment variables supply these values.
@@ -93,6 +95,10 @@ class DHCPManager:
         """
         self.runtime = Path(runtime)
         self.launcher, self.hook, self.udhcpc = launcher, hook, udhcpc
+        self.journal = journal
+        self._journal_writer = False
+        self._lifetime = False
+        self._closed = False
         self.phase = 'idle'
         self.socket_path = ''
         self._identity = {}
@@ -128,12 +134,69 @@ class DHCPManager:
         return self._expiry
 
     def _same_thread(self):
+        if self._closed:
+            raise DHCPError('DHCP manager is closed')
         if self._thread is not None and self._thread != threading.get_ident():
             raise DHCPError('DHCP manager must remain on its persistent owner thread')
 
+    def _acquire(self):
+        self._same_thread()
+        if os.geteuid() != 0:
+            raise DHCPError('DHCP ownership requires root')
+        if self._lock is not None:
+            return
+        directory = lock = None
+        try:
+            directory = _private_directory(self.runtime)
+            lock = os.open('dhcp.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW |
+                           os.O_NONBLOCK | os.O_CLOEXEC,
+                           0o600, dir_fd=directory)
+            info = os.fstat(lock)
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != 0
+                    or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
+                raise DHCPError('unsafe DHCP owner lock')
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self._directory, self._lock = directory, lock
+            directory = lock = None
+            self._thread = threading.get_ident()
+        except OSError as error:
+            raise DHCPError('DHCP ownership acquisition failed: ' + str(error)) from error
+        finally:
+            if lock is not None:
+                os.close(lock)
+            if directory is not None:
+                os.close(directory)
+
+    def acquire(self):
+        """Idempotently hold ownership until close(), without exposing readiness.
+
+        Production acquires guardian, owner, then DHCP ownership before orphan
+        recovery. stop() retains this explicit lifetime lock across generations.
+        """
+        self._acquire()
+        self._lifetime = True
+
+    def _release_ownership(self):
+        for name in ('_lock', '_directory'):
+            descriptor = getattr(self, name)
+            if descriptor is not None:
+                os.close(descriptor)
+                setattr(self, name, None)
+
+    def close(self):
+        """Terminal, idempotent close; failed stop retains handles and ownership."""
+        if self._closed:
+            return
+        self.stop()
+        self._selector.close()
+        self._release_ownership()
+        self._lifetime = False
+        self._closed = True
+
     def start(self, generation, interface):
         self._same_thread()
-        if self.active or self._lock is not None:
+        if (self.active or self._listener is not None or self._client_fd is not None
+                or self._launcher_fd is not None or self._journal_writer):
             raise DHCPError('a DHCP generation is already active')
         if os.geteuid() != 0:
             raise DHCPError('DHCP ownership requires root')
@@ -152,14 +215,7 @@ class DHCPManager:
         try:
             for path in (self.launcher, self.hook, self.udhcpc):
                 executable(path)
-            self._directory = _private_directory(self.runtime)
-            self._lock = os.open('dhcp.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC,
-                                 0o600, dir_fd=self._directory)
-            info = os.fstat(self._lock)
-            if (not stat.S_ISREG(info.st_mode) or info.st_uid != 0
-                    or stat.S_IMODE(info.st_mode) != 0o600 or info.st_nlink != 1):
-                raise DHCPError('unsafe DHCP owner lock')
-            fcntl.flock(self._lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self._acquire()
             self._listener = socket.socket(socket.AF_UNIX, socket.SOCK_SEQPACKET)
             self._listener.bind(self.socket_path)  # Exclusive; never unlink another owner.
             os.chmod(self.socket_path, 0o600)
@@ -170,7 +226,7 @@ class DHCPManager:
             self._selector.register(self._listener, selectors.EVENT_READ, 'listener')
             now = boottime()
             self._acquire_deadline = now + ACQUIRE_TIMEOUT
-            self._ready_deadline = now + HOOK_TIMEOUT
+            self._ready_deadline = now + READY_TIMEOUT
             self.phase = 'starting'
             context = context_fd({'version': 1, 'generation': generation, 'interface': interface,
                                   'owner_pid': os.getpid(), 'owner_start': process_start(os.getpid()),
@@ -180,7 +236,7 @@ class DHCPManager:
                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                 pass_fds=(context,), start_new_session=True, cwd='/',
                 env={'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'LANG': 'C'})
-            self._launcher_fd = os.pidfd_open(self._process.pid)
+            self._launcher_fd = os.pidfd_open(self._process.pid, 0)
             self._identity = {'launcher_pid': self._process.pid,
                               'launcher_start': process_start(self._process.pid),
                               'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip()}
@@ -243,7 +299,7 @@ class DHCPManager:
     def _ready(self, peer, fields):
         if fields != {'interface': self._interface} or self._client_fd is not None:
             raise ValueError('invalid client readiness fields')
-        descriptor = os.pidfd_open(peer.pid)
+        descriptor = os.pidfd_open(peer.pid, 0)
         try:
             status = Path('/proc/' + str(peer.pid) + '/status').read_text()
             nspid = next(line for line in status.splitlines() if line.startswith('NSpid:')).split()[1:]
@@ -258,6 +314,14 @@ class DHCPManager:
             descriptor = None
             self._selector.register(self._client_fd, selectors.EVENT_READ, 'client')
             # Capture all identity handles before allowing PID1 to exec udhcpc.
+            if self.journal is not None:
+                # A failed fsync may follow a successful rename. Keep the handle
+                # and attempted slot until death and durable completion reconcile it.
+                self._journal_writer = True
+                try:
+                    self.journal.writer_started('dhcp', peer.pid, self._client_fd, 'dhcp-client')
+                except Exception as error:
+                    raise DHCPError('DHCP writer registration failed: ' + str(error)) from error
             if peer.socket.send(YES) != len(YES):
                 raise OSError('short readiness acknowledgment')
             self.phase = 'acquiring'
@@ -312,7 +376,8 @@ class DHCPManager:
             peer.event = event
             self._pending[event.event_id] = peer
             self._output.append(event)
-        except (OSError, ValueError, UnicodeError, KeyError, TypeError, StopIteration, RecursionError) as error:
+        except (OSError, ValueError, UnicodeError, KeyError, TypeError, StopIteration,
+                RecursionError, DHCPError) as error:
             self._fail('invalid DHCP event: ' + str(error))
 
     def _deadlines(self):
@@ -411,6 +476,16 @@ class DHCPManager:
             except subprocess.TimeoutExpired as error:
                 self.phase = 'failed'
                 raise DHCPError('DHCP launcher reaping deadline exceeded') from error
+        if self._journal_writer:
+            if self._client_fd is None:
+                self.phase = 'failed'
+                raise DHCPError('DHCP writer has no retained init completion handle')
+            try:
+                self.journal.writer_finished('dhcp')
+            except Exception as error:
+                self.phase = 'failed'
+                raise DHCPError('DHCP writer completion failed: ' + str(error)) from error
+            self._journal_writer = False
         for peer in list(self._peers.values()):
             self._drop(peer)
         self._selector.close()
@@ -425,11 +500,13 @@ class DHCPManager:
                     os.unlink(self.socket_path)
             except FileNotFoundError:
                 pass
-        for name in ('_launcher_fd', '_client_fd', '_lock', '_directory'):
+        for name in ('_launcher_fd', '_client_fd'):
             descriptor = getattr(self, name)
             if descriptor is not None:
                 os.close(descriptor)
                 setattr(self, name, None)
+        if not self._lifetime:
+            self._release_ownership()
         self._socket_identity = None
         self._process = None
         self._output.clear()

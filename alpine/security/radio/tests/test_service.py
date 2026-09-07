@@ -377,8 +377,10 @@ class OwnerTests(unittest.TestCase):
 
     def test_failed_child_teardown_prevents_replacement(self):
         self.bound()
+        self.log.clear()
         self.manager.fail_stop = True
         self.request('off')
+        self.assertNotIn('remove', self.log, 'live DHCP writer must drain before lease removal')
         request = self.request()
         self.assertFalse(request.sent[0][0])
         self.assertEqual(len(self.manager.starts), 1)

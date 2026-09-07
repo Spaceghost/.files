@@ -183,7 +183,7 @@ class Owner:
                 self._dhcp_started = False
             except Exception as error:
                 errors.append(str(error))
-        if self.applier is not None:
+        if self.applier is not None and not self._dhcp_started:
             try:
                 # The wrapper may own a crash marker even before first apply.
                 self.owned = self.applier.current
@@ -245,6 +245,11 @@ class Owner:
         if request.command == 'connect':
             self.network_id, self.ssid, self.ipv6 = self.adapter.read_profile(self.profile)
             self.applier = self.applier_factory(self.generation, self.checkpoint)
+            prepare = getattr(self.applier, 'prepare', None)
+            if prepare is not None:
+                # Retain the wrapper first so a partial alias/journal prepare
+                # remains reachable by blocked cleanup if preparation fails.
+                prepare()
         self.wpa = self.adapter.open_wpa(self.checkpoint)
         self.wpa.expect_ok('DISCONNECT')
         self.wpa.expect_ok('DISABLE_NETWORK all')

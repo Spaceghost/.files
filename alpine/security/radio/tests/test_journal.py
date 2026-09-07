@@ -421,6 +421,25 @@ class JournalTests(unittest.TestCase):
                 self.store.remove()
         self.assertEqual(self.store.read(), record('clean'))
 
+    def test_confirm_absent_requires_loaded_absence_and_durable_recheck(self):
+        with self.assertRaises(journal.JournalError): self.store.confirm_absent()
+        self.assertIsNone(self.store.read())
+        real_fsync = os.fsync
+        with patch.object(journal.os, 'fsync', wraps=real_fsync) as synced:
+            self.store.confirm_absent()
+        self.assertEqual(synced.call_count, 1)
+        self.store.write(record('clean'))
+        with self.assertRaises(journal.JournalError): self.store.confirm_absent()
+        self.store.remove(); self.assertIsNone(self.store.read())
+        with patch.object(journal.os, 'fsync', side_effect=OSError('directory fsync failed')):
+            with self.assertRaises(OSError): self.store.confirm_absent()
+        def appearance(fd):
+            real_fsync(fd)
+            self.put_bytes(json.dumps(record('clean')).encode())
+        with patch.object(journal.os, 'fsync', side_effect=appearance):
+            with self.assertRaises(journal.JournalError): self.store.confirm_absent()
+        self.assertTrue(self.path.exists())
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -109,7 +109,8 @@ class FakeSystem:
     def _set(self, blocked):
         state = self.state()
         if state['wifi_blocked'] != blocked:
-            rows = json.loads(guards.checked([IP, '-j', '-d', 'link', 'show', 'dev', 'wlan0']).stdout)
+            rows = json.loads(guards.checked([IP, '-j', '-d', 'link', 'show', 'dev', 'wlan0'],
+                                             errors='surrogateescape').stdout)
             if len(rows) != 1 or rows[0].get('linkinfo', {}).get('info_kind') != 'veth':
                 raise RuntimeError('simulated radio is not the private veth')
             fixture_guard(self.host, self.expected)

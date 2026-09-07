@@ -77,7 +77,9 @@ def guarded(child_main, block, runtime=RUNTIME):
                     finally:
                         signal.pidfd_send_signal(child_fd, signal.SIGTERM)
                     stop_sent = True
-                    deadline = time.monotonic() + 12
+                    # DHCP drain, durable lease removal and alias completion
+                    # run sequentially after blocking. Retain time for each.
+                    deadline = time.monotonic() + 25
                 if select.select([child_fd], [], [], .025)[0]:
                     break
                 if deadline is not None and time.monotonic() >= deadline:
@@ -117,7 +119,8 @@ def run(legacy):
     adapter = NativeAdapter(legacy)
     def child(stop_requested):
         server = Server()
-        server.open()
+        dhcp = DHCPManager(RUNTIME)
+        owner = None
         original_check = adapter.check_generation
         def check_generation(generation):
             if stop_requested():
@@ -125,18 +128,30 @@ def run(legacy):
                 raise RuntimeError('radio owner is stopping')
             original_check(generation)
         adapter.check_generation = check_generation
-        owner = Owner(server=server, adapter=adapter, dhcp=DHCPManager(RUNTIME),
-                      applier_factory=adapter.applier)
+        def startup_check():
+            if stop_requested():
+                raise RuntimeError('radio owner startup cancelled')
         try:
+            server.acquire()
+            dhcp.acquire()
+            adapter.prepare_recovery(check=startup_check)
+            dhcp.journal = adapter.journal
+            owner = Owner(server=server, adapter=adapter, dhcp=dhcp,
+                          applier_factory=adapter.applier)
             owner.start()
+            server.listen()
             while not stop_requested():
                 owner.step()
                 time.sleep(.025)
         finally:
             try:
-                owner.shutdown()
+                if owner is not None:
+                    owner.shutdown()
             finally:
-                server.close()
+                try:
+                    dhcp.close()
+                finally:
+                    server.close()
     result = guarded(child, adapter.emergency_off)
     if result:
         raise RuntimeError('radio owner exited unexpectedly; radios blocked')

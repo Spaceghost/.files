@@ -10,12 +10,14 @@ from pathlib import Path
 import re
 import secrets
 import stat
+import time
 
 from .dhcp import _private_directory
-from .network import IPv6Profile, LeaseApplier
+from .network import IPv6Profile, LeaseApplier, NativeNetwork
 
 RUNTIME = Path('/run/privacyctl')
 IPV6_FILE = Path('/etc/privacyctl/ipv6.json')
+STATE = Path('/var/lib/privacyctl')
 
 
 class Fence:
@@ -78,38 +80,89 @@ class Fence:
 
 
 class JournaledApplier:
-    """A crash marker forbids automatic reuse of orphaned network state.
+    """Retain failed preparation and durable lease ownership through cleanup.
 
-It is deliberately not a deserializer for process-local ownership capabilities.
-After an abrupt owner death, explicit recovery must inspect/remove that state.
-"""
-    def __init__(self, applier, runtime, generation):
+    Production supplies its shared recovery journal. The marker-only path is
+    retained for existing isolated component fixtures, never owner startup.
+    """
+    def __init__(self, applier, runtime, generation, *, journal=None, check=lambda: None):
         self.applier, self.generation = applier, generation
         self.marker = Fence(runtime, 'lease-dirty')
+        self.journal, self.check = journal, check
+        self._prepared = False
+        self._cleanup_failed = self._cleaned = False
 
     @property
     def current(self):
-        return self.applier.current
+        return None if self._cleaned else self.applier.current
+
+    def prepare(self):
+        if self._cleaned:
+            raise RuntimeError('lease wrapper has already been cleaned')
+        if self.journal is not None and not self._prepared:
+            self.journal.begin(self.generation, deadline=time.monotonic() + 3,
+                               check=self.check)
+            self._prepared = True
 
     def apply(self, *args, **kwargs):
+        if self.journal is not None:
+            self.prepare()
+            return self.applier.apply(*args, **kwargs)
         if self.marker.read() not in (None, self.generation):
             raise RuntimeError('orphaned lease state requires recovery')
         self.marker.write(self.generation)
         return self.applier.apply(*args, **kwargs)
 
     def remove(self, owned):
+        if self.journal is not None:
+            # Owner has blocked and stopped DHCP. Authorization cancellation
+            # must not cancel the cleanup that removes its own old resources.
+            if owned is not self.current:
+                raise RuntimeError('stale or foreign lease ownership record')
+            if self._cleaned:
+                return
+            try:
+                if not self._prepared or self._cleanup_failed or self.journal.needs_recovery:
+                    self.journal.recover(deadline=time.monotonic() + 16, check=lambda: None)
+                else:
+                    self.applier.remove(owned)
+                    self.journal.finish(deadline=time.monotonic() + 3, check=lambda: None)
+            except BaseException:
+                self._cleanup_failed = True
+                raise
+            self._cleaned = True
+            return
         self.applier.remove(owned)
         if self.marker.read() is not None:
             self.marker.clear(self.generation)
 
 
 class NativeAdapter:
-    def __init__(self, legacy, *, runtime=RUNTIME, system=None, ipv6_file=IPV6_FILE):
+    def __init__(self, legacy, *, runtime=RUNTIME, system=None, ipv6_file=IPV6_FILE,
+                 state=STATE, backend=None):
         self.legacy, self.runtime = legacy, Path(runtime)
         self.system = legacy.System() if system is None else system
         self.ipv6_file = Path(ipv6_file)
         self.fence = Fence(runtime)
         self.generation = self.baseline = None
+        self.state = Path(state)
+        self.journal, self.backend = None, backend
+
+    def prepare_recovery(self, *, check):
+        """Called under guardian, owner and DHCP lifetime locks, before listen."""
+        from .journal import Journal
+        from .recovery import RecoveryJournal
+        self.emergency_off()
+        check()
+        if self.journal is None:
+            directory = _private_directory(self.state)
+            os.close(directory)
+            if self.backend is None:
+                self.backend = NativeNetwork()
+            self.journal = RecoveryJournal(Journal(self.state), self.backend,
+                                           marker=Fence(self.runtime, 'lease-dirty'))
+            self.backend.journal = self.journal
+        self.journal.recover(deadline=time.monotonic() + 16, check=check)
 
     def begin_generation(self, generation, *, expected_fence=None):
         if not isinstance(generation, str) or not re.fullmatch(r'[0-9a-f]{32}', generation):
@@ -175,7 +228,11 @@ class NativeAdapter:
         return self.legacy.WpaControl(check=check)
 
     def applier(self, generation, check):
-        return JournaledApplier(LeaseApplier(generation, check=check), self.runtime, generation)
+        if self.journal is None:
+            raise RuntimeError('owner startup recovery has not completed')
+        return JournaledApplier(LeaseApplier(generation, backend=self.backend,
+                                           journal=self.journal, check=check),
+                                self.runtime, generation, journal=self.journal, check=check)
 
     def read_profile(self, profile):
         network_id, ssid = self.legacy.read_profile(profile, self.legacy.PROFILE_FILE)
