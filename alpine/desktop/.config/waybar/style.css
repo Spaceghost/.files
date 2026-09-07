@@ -11,7 +11,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
 .modules-left, .modules-center, .modules-right {
     background: linear-gradient(180deg, rgba(60, 56, 54, 0.98), rgba(29, 32, 33, 0.98));
     border: none;
-    border-radius: 0 0 7px 7px;
+    border-radius: 0;
     box-shadow: none;
     margin-bottom: 0;
 }
@@ -22,13 +22,13 @@ window#waybar { background: transparent; color: #ebdbb2; }
     color: #fbf1c7;
     background: linear-gradient(135deg, #d79921, #af7414 60%, #d65d0e);
     text-shadow: 0 0 5px #fabd2f;
-    border-radius: 10px;
+    border-radius: 0;
     margin: 3px 5px 3px 3px;
     padding: 0 11px;
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #fabd2f, #d79921 65%, #fe8019); }
 #workspaces { margin: 3px 5px 3px 0; }
-#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 8px; color: #a89984; transition: all 180ms ease-in-out; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 0; color: #a89984; transition: all 180ms ease-in-out; }
 #workspaces button.empty { color: #7c6f64; }
 #workspaces button:hover { background: #504945; color: #fbf1c7; box-shadow: none; }
 #workspaces button.focused {
@@ -38,7 +38,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
     box-shadow: none;
 }
 #workspaces button.urgent { background: #cc241d; color: #fbf1c7; }
-#custom-ai { color: #fabd2f; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 8px; }
+#custom-ai { color: #fabd2f; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 0; }
 #custom-ai:hover { background: #504945; color: #fbf1c7; }
 #custom-ai.idle { color: #928374; }
 #custom-ai.complete { color: #b8bb26; background: #32361a; }
@@ -52,7 +52,7 @@ window#waybar.empty #window { color: #928374; }
 #pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
     padding: 0 8px;
     margin: 4px 0;
-    border-radius: 8px;
+    border-radius: 0;
 }
 #cpu { color: #d3869b; }
 #memory, #disk { color: #a89984; }
@@ -79,7 +79,7 @@ window#waybar.empty #window { color: #928374; }
 #pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
     background: rgba(146, 131, 116, 0.22);
 }
-tooltip { background: rgba(29, 32, 33, 0.99); border: none; border-radius: 12px; }
+tooltip { background: rgba(29, 32, 33, 0.99); border: none; border-radius: 0; }
 tooltip label { color: #ebdbb2; padding: 12px; font-size: 11px; }
 @keyframes distress { to { background: #cc241d; } }
 #custom-art { color: #a89984; font-size: 15px; padding: 0 7px 0 4px; }
