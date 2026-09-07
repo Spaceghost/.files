@@ -358,3 +358,42 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Evidence and rebuild instructions: `security/radio/LEASE-OWNER.md`,
   `security/radio/{dhcp,network,resolver-bridge-install}-verification.json`,
   `security/radio/RESOLVER-LOCKING.md` and `packages/openresolv/README.md`.
+
+## 2026-09-07: persistent radio owner and combined native verification
+
+- Check-in `8fde0cfd32639b74` stages the persistent owner, root-only bounded
+  IPC, compatible CLI routing, cancellation fences and reciprocal process
+  guardian. Connect/scan cannot use the historical one-shot DHCP path; status
+  remains read-only, and off retains its emergency blocking fallback.
+- Ordinary off invalidates delayed requests. The guardian preserves child
+  identity when inheriting ignored SIGCHLD. Cleanup retains and drains native
+  process handles even when the first operation failed before owning an address;
+  an unresolved crash marker prevents replacement connections.
+- All 213 radio tests pass. Both current native fixtures pass seven cases each.
+  The combined fixture uses the real CLI, owner, DHCP client and lease applier
+  with synthetic WPA and virtual radio state. It verifies same-client renewal,
+  off and stale requests, exact scan completion, home/hotspot IPv6 restoration,
+  NAK and server silence. Host-state comparisons match; no private processes
+  survive either fixture.
+- Real veth IPv6 duplicate-address detection exposed the old three-second
+  application cap: a successful combined apply took 3.312 seconds. The cap is
+  now four seconds, with DAD retained, removal still three seconds, and the
+  five-second hook deadline and actual lease expiry unchanged. Four new tests
+  cover slow, failed, stuck and cancelled DAD.
+- Failed fixture runs remain archived with their source hashes. The combined
+  fixture now offers 32 seconds to allow BusyBox renewal and native application;
+  the separate 16-second manager fixture still proves independent expiry.
+  Server silence caused authenticated deconfiguration before expiry in the
+  combined run; it sent no new lease or ACK and complete cleanup followed.
+- `security/radio/owner-verification.json` records current source hashes and
+  Fossil artifact names. `security/radio/OWNER-SERVICE.md` explains reproduction
+  and limitations. No radio service was installed or live WLAN owner changed.
+- The unchanged `packages/locks/929661069218e44178e3.json` still matches all
+  1,080 installed package identities, world, repositories and public keys.
+  Portable snapshot target:
+  `~/.local/share/oldbook/backups/files-2026-09-07-radio-owner-service.fossil`;
+  its adjacent JSON records completion, check-in, SHA256 and archived input count.
+- Remaining: combined blocked-hook cancellation and guardian-death tests,
+  OpenRC startup, packet-gate/OpenSnitch renewal policy, exact trusted SSIDs,
+  profile RA/SLAAC decisions, orphan-state recovery, controlled legacy-owner
+  migration and reboot/suspend acceptance. The live WPA/DHCP owners remain.
