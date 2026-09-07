@@ -61,6 +61,38 @@ class WallpaperCheckpointTests(unittest.TestCase):
         committed = subprocess.check_output(['fossil', 'cat', str(self.image.relative_to(self.repo)), '-r', checkin], cwd=self.repo)
         self.assertEqual(committed, self.image.read_bytes())
 
+    def test_checkpoint_accepts_themed_and_general_pairs_without_other_changes(self):
+        for folder in ('general', 'themes/gruvbox-dark'):
+            with self.subTest(folder=folder):
+                directory = self.gallery / folder
+                directory.mkdir(parents=True)
+                image = directory / 'new.png'
+                image.write_bytes(self.image.read_bytes())
+                sidecar = image.with_suffix('.json')
+                sidecar.write_text(json.dumps({'file': str(image.relative_to(self.repo)),
+                                               'sha256': hashlib.sha256(image.read_bytes()).hexdigest()}))
+                checkin = generator.checkpoint_generated(image, sidecar, self.repo)
+                committed = subprocess.check_output(['fossil', 'cat', str(image.relative_to(self.repo)),
+                                                     '-r', checkin], cwd=self.repo)
+                self.assertEqual(committed, image.read_bytes())
+                self.assertIn('unrelated.txt', self.fossil('changes', '--rel-paths'))
+
+    def test_checkpoint_rejects_arbitrary_subdirectories_and_symlinked_theme_directory(self):
+        for folder in ('elsewhere', 'themes/Bad Name', 'themes/gruvbox-dark/deeper'):
+            directory = self.gallery / folder
+            directory.mkdir(parents=True, exist_ok=True)
+            image = directory / 'bad.png'
+            image.write_bytes(self.image.read_bytes())
+            sidecar = image.with_suffix('.json')
+            sidecar.write_text('{}')
+            with self.subTest(folder=folder), self.assertRaisesRegex(RuntimeError, 'gallery'):
+                generator.checkpoint_generated(image, sidecar, self.repo)
+        linked = self.gallery / 'themes/linked'
+        linked.symlink_to(self.gallery, target_is_directory=True)
+        with self.assertRaises(RuntimeError):
+            generator.checkpoint_generated(linked / self.image.name, linked / self.sidecar.name, self.repo)
+        self.assertNotIn(self.image.name, self.fossil('ls'))
+
     def test_checkpoint_failure_keeps_files_and_daily_reservation(self):
         self.fossil('settings', 'autosync', 'on')
         state = self.base / 'state'

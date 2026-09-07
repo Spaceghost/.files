@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate at most one daily gallery image using the existing ChatGPT login."""
+"""Generate daily or explicitly requested artwork using the existing ChatGPT login."""
 import argparse
 import binascii
 import datetime as dt
@@ -18,6 +18,9 @@ import tempfile
 import time
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+from theme_catalog import has_symlink, load_theme, safe_theme_id
+
 STATE = Path.home() / '.local/state/oldbook/wallpaper-generation'
 SCHEMA = {'type': 'object', 'properties': {'image_path': {'type': 'string'}},
           'required': ['image_path'], 'additionalProperties': False}
@@ -98,9 +101,16 @@ def checkpoint_generated(image, sidecar, repository=REPO):
     repository = repository.resolve()
     gallery = repository / 'alpine/assets/gallery'
     image, sidecar = Path(image), Path(sidecar)
-    if (image.parent.resolve() != gallery.resolve() or sidecar != image.with_suffix('.json')
-            or image.suffix != '.png'):
-        raise RuntimeError('Checkpoint must be one PNG/JSON pair in the gallery')
+    try:
+        parts = image.relative_to(gallery).parts
+    except ValueError:
+        parts = ()
+    allowed = (len(parts) == 1
+               or (len(parts) == 2 and parts[0] == 'general')
+               or (len(parts) == 3 and parts[0] == 'themes' and safe_theme_id(parts[1])))
+    if (not allowed or sidecar != image.with_suffix('.json') or image.suffix != '.png'
+            or has_symlink(image, repository) or has_symlink(sidecar, repository)):
+        raise RuntimeError('Checkpoint must be one regular PNG/JSON pair in a supported gallery folder')
     for path in (image, sidecar):
         if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(repository):
             raise RuntimeError('Checkpoint paths must be regular files inside the checkout')
@@ -159,114 +169,210 @@ def checkpoint_record(record, metadata, repository=REPO):
     return 0
 
 
-def run_once(scene_override=None):
+def notify(title, message):
+    env = os.environ.copy()
+    runtime = Path('/run/user') / str(os.getuid())
+    if 'DBUS_SESSION_BUS_ADDRESS' not in env and (runtime / 'bus').exists():
+        env['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=' + str(runtime / 'bus')
+    try:
+        subprocess.run(['notify-send', '--app-name=Ghost Gallery', '--icon=image-x-generic',
+                        title, message], env=env, capture_output=True, timeout=5)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+def records():
+    return sorted([*STATE.glob('????-??-??.json'), *(STATE / 'manual').glob('*.json')])
+
+
+def manual_scene(config, day):
+    previous = []
+    for record in records():
+        try:
+            previous.append(json.loads(record.read_text()))
+        except (OSError, ValueError):
+            continue
+    scenes = config['scenes']
+    for entry in sorted(previous, key=lambda e: e.get('started_utc', ''), reverse=True):
+        for index, scene in enumerate(scenes):
+            if scene['id'] == entry.get('scene'):
+                return scenes[(index + 1) % len(scenes)]
+    return choose_scene(config, day)
+
+
+def generate_native(config, prompt, env, log):
+    request = (
+        'This is an unattended, already-authorized wallpaper generation. '
+        'Use the built-in native image generation tool exactly once for the request below. '
+        'Do not use an API key, external image API, web search, shell commands or file editing. '
+        'Do not ask questions and do not make additional images or refinements. '
+        'After generation, return JSON with image_path set to the actual absolute local PNG '
+        'path returned by that tool under ~/.codex/generated_images. If native image generation '
+        'is unavailable, return an empty image_path without attempting any substitute.\n\n' + prompt
+    )
+    with tempfile.TemporaryDirectory(prefix='oldbook-art-') as directory:
+        work = Path(directory)
+        (work / 'schema.json').write_text(json.dumps(SCHEMA))
+        with log.open('w') as output:
+            process = subprocess.Popen(codex_command(work, config['model']), env=env,
+                                       stdin=subprocess.PIPE, stdout=output,
+                                       stderr=subprocess.STDOUT, text=True,
+                                       start_new_session=True)
+            try:
+                process.communicate(request, timeout=min(900, max(60, int(config.get('timeout_seconds', 900)))))
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
+                raise RuntimeError('Generation exceeded its 15-minute deadline') from None
+        if process.returncode:
+            raise RuntimeError(f'Codex exited with status {process.returncode}; see private generation log')
+        answer = json.loads((work / 'result.json').read_text())
+        if not answer.get('image_path'):
+            raise RuntimeError('Codex did not produce a native generated image')
+        return answer['image_path']
+
+
+def activate_artwork(record, metadata, entry):
+    try:
+        response = subprocess.run(['/usr/bin/python3',
+                                   str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'),
+                                   'select', entry['id']], capture_output=True, text=True, timeout=20)
+        if response.returncode:
+            raise RuntimeError(response.stderr.strip()[:1500] or 'Sway could not select the new artwork')
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        metadata.update({'activated': False, 'activation_error': str(error)})
+        atomic_json(record, metadata)
+        notify('Artwork saved to the gallery', 'Could not switch the desktop. Select ' + entry['title'] + ' from the gallery when Sway is available.')
+        return 1
+    metadata.update({'activated': True})
+    metadata.pop('activation_error', None)
+    atomic_json(record, metadata)
+    message = entry['title'] + ' is now on your desktop.'
+    if metadata['status'] == 'checkpoint-pending':
+        message += ' The image is saved; its local Fossil checkpoint is pending.'
+    notify('Space Ghost has finished painting', message)
+    return 0
+
+
+def run_once(scene_override=None, *, manual=False, activate=False, theme='active'):
     STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(STATE, 0o700)
-    with (STATE / 'generation.lock').open('a') as lock:
+    with (STATE / 'generation.lock').open('a+') as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             print('A wallpaper generation is already running.')
+            if manual:
+                notify('Space Ghost is already painting', 'The current request will finish first. No extra image was requested.')
             return 0
-        # Finish older local checkpoints before requesting another billed image.
-        for pending in sorted(STATE.glob('????-??-??.json')):
-            previous = json.loads(pending.read_text())
-            if previous.get('status') == 'checkpoint-pending':
-                return checkpoint_record(pending, previous, REPO)
+        # Cron repairs pending local commits, including manual ones, without
+        # generating or unexpectedly changing the desktop during that retry.
+        if not manual:
+            for pending in records():
+                previous = json.loads(pending.read_text())
+                if previous.get('status') == 'checkpoint-pending':
+                    return checkpoint_record(pending, previous, REPO)
         day = dt.date.today().isoformat()
-        record = STATE / f'{day}.json'
-        if record.exists():
-            print(f'{day}: daily attempt already reserved; no retry.')
-            return 0
+        if manual:
+            (STATE / 'manual').mkdir(exist_ok=True, mode=0o700)
+            record = STATE / 'manual' / f'{time.time_ns()}-{os.getpid()}.json'
+        else:
+            record = STATE / f'{day}.json'
+            if record.exists():
+                print(f'{day}: daily attempt already reserved; no retry.')
+                return 0
         config = json.loads((REPO / 'alpine/wallpapers/prompts.json').read_text())
-        scene = (next(s for s in config['scenes'] if s['id'] == scene_override)
-                 if scene_override else choose_scene(config, day))
-        env = clean_environment()
-        login = subprocess.run(['codex', 'login', 'status'], env=env, capture_output=True,
-                               text=True, timeout=20)
-        if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
-            raise RuntimeError('This job requires existing Codex ChatGPT login; no API fallback.')
+        selected_theme = load_theme(REPO, theme)
+        gallery = REPO / 'alpine/assets/gallery'
+        gallery /= 'general' if selected_theme['id'] == 'none' else 'themes/' + selected_theme['id']
+        if has_symlink(gallery, REPO):
+            raise RuntimeError('Artwork destination must be a regular directory in the gallery')
+        if scene_override:
+            scene = next((s for s in config['scenes'] if s['id'] == scene_override), None)
+            if scene is None:
+                raise RuntimeError('Unknown scene: ' + scene_override)
+        else:
+            scene = manual_scene(config, day) if manual else choose_scene(config, day)
         started = time.time()
-        metadata = {'day': day, 'status': 'reserved', 'scene': scene['id'],
-                    'model': config['model'], 'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
-        # Reserve before making a model request. Failures cannot create a retry loop.
+        metadata = {'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
+                    'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
+                    'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
+        # Reserve before making a model request. Daily failures cannot retry.
         atomic_json(record, metadata)
-        log = STATE / f'{day}.jsonl'
-        prompt = config['style'] + '\n\nScene: ' + scene['description']
-        request = (
-            'This is an unattended, already-authorized wallpaper generation. '
-            'Use the built-in native image generation tool exactly once for the request below. '
-            'Do not use an API key, external image API, web search, shell commands or file editing. '
-            'Do not ask questions and do not make additional images or refinements. '
-            'After generation, return JSON with image_path set to the actual absolute local PNG '
-            'path returned by that tool under ~/.codex/generated_images. If native image generation '
-            'is unavailable, return an empty image_path without attempting any substitute.\n\n' + prompt
-        )
+        lock.seek(0)
+        lock.truncate()
+        json.dump({'title': scene['title'], 'started_utc': metadata['started_utc']}, lock)
+        lock.flush()
         try:
-            with tempfile.TemporaryDirectory(prefix='oldbook-art-') as directory:
-                work = Path(directory)
-                (work / 'schema.json').write_text(json.dumps(SCHEMA))
-                with log.open('w') as output:
-                    process = subprocess.Popen(codex_command(work, config['model']), env=env,
-                                               stdin=subprocess.PIPE, stdout=output,
-                                               stderr=subprocess.STDOUT, text=True,
-                                               start_new_session=True)
-                    try:
-                        process.communicate(request, timeout=min(900, max(60, int(config.get('timeout_seconds', 900)))))
-                    except subprocess.TimeoutExpired:
-                        os.killpg(process.pid, signal.SIGTERM)
-                        try:
-                            process.wait(timeout=10)
-                        except subprocess.TimeoutExpired:
-                            os.killpg(process.pid, signal.SIGKILL)
-                            process.wait()
-                        raise RuntimeError('Generation exceeded its 15-minute deadline') from None
-                if process.returncode:
-                    raise RuntimeError(f'Codex exited with status {process.returncode}; see private daily log')
-                answer = json.loads((work / 'result.json').read_text())
-                if not answer.get('image_path'):
-                    raise RuntimeError('Codex did not produce a native generated image')
-                source, width, height = validate_image(answer['image_path'],
-                                                       Path(env['CODEX_HOME']) / 'generated_images', started)
-                digest = hashlib.sha256(source.read_bytes()).hexdigest()
-                gallery = REPO / 'alpine/assets/gallery'
-                gallery.mkdir(parents=True, exist_ok=True)
-                stem = f'{day}-{scene["id"]}-{digest[:12]}'
-                destination = gallery / f'{stem}.png'
-                if destination.exists():
-                    raise RuntimeError('Refusing to replace an existing gallery artifact')
-                temporary = destination.with_suffix('.png.tmp')
-                shutil.copyfile(source, temporary)
-                temporary.replace(destination)
-                entry = {'id': stem, 'title': scene['title'], 'description': scene['description'],
-                         'file': str(destination.relative_to(REPO)), 'sha256': digest,
-                         'width': width, 'height': height, 'prompt': prompt,
-                         'generator': 'Codex CLI native image_generation',
-                         'orchestrator_model': config['model'], 'image_model': 'gpt-image-2',
-                         'generated_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
-                         'rebuild': 'Restore this exact hashed bitmap; new generations are not deterministic.'}
-                atomic_json(gallery / f'{stem}.json', entry)
-                metadata.update({'status': 'checkpoint-pending', 'file': entry['file'], 'sha256': digest})
-                atomic_json(record, metadata)
-                return checkpoint_record(record, metadata, REPO)
+            env = clean_environment()
+            login = subprocess.run(['codex', 'login', 'status'], env=env, capture_output=True,
+                                   text=True, timeout=20)
+            if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
+                raise RuntimeError('This job requires existing Codex ChatGPT login; no API fallback.')
+            if manual:
+                destination_notice = 'appear on your desktop' if activate else 'be saved in the gallery'
+                notify('Space Ghost is painting…', scene['title'] + '. Your new artwork will ' + destination_notice + ' when ready.')
+            prompt = config['style']
+            if selected_theme['image_style']:
+                prompt += '\n\nTheme: ' + selected_theme['name'] + '. ' + selected_theme['image_style']
+            prompt += '\n\nScene: ' + scene['description']
+            source_path = generate_native(config, prompt, env, record.with_suffix('.jsonl'))
+            source, width, height = validate_image(source_path,
+                                                   Path(env['CODEX_HOME']) / 'generated_images', started)
+            digest = hashlib.sha256(source.read_bytes()).hexdigest()
+            if has_symlink(gallery, REPO):
+                raise RuntimeError('Artwork destination must remain a regular directory in the gallery')
+            gallery.mkdir(parents=True, exist_ok=True)
+            stem = f'{day}-{selected_theme["id"]}-{scene["id"]}-{digest[:12]}'
+            destination = gallery / f'{stem}.png'
+            if destination.exists():
+                raise RuntimeError('Refusing to replace an existing gallery artifact')
+            temporary = destination.with_suffix('.png.tmp')
+            shutil.copyfile(source, temporary)
+            temporary.replace(destination)
+            entry = {'id': stem, 'title': scene['title'], 'description': scene['description'],
+                     'file': str(destination.relative_to(REPO)), 'sha256': digest,
+                     'width': width, 'height': height, 'prompt': prompt,
+                     'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
+                     'theme_style': selected_theme['image_style'],
+                     'theme_palette': selected_theme.get('palette', {}),
+                     'generator': 'Codex CLI native image_generation',
+                     'orchestrator_model': config['model'], 'image_model': 'gpt-image-2',
+                     'generated_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
+                     'rebuild': 'Restore this exact hashed bitmap; new generations are not deterministic.'}
+            atomic_json(gallery / f'{stem}.json', entry)
+            metadata.update({'status': 'checkpoint-pending', 'file': entry['file'], 'sha256': digest})
+            atomic_json(record, metadata)
+            checkpoint_result = checkpoint_record(record, metadata, REPO)
+            activation_result = activate_artwork(record, metadata, entry) if activate else 0
+            return max(checkpoint_result, activation_result)
         except Exception as error:
-            if metadata.get('status') != 'checkpoint-pending':
+            if metadata.get('status') not in ('checkpoint-pending', 'complete'):
                 metadata['status'] = 'failed'
             metadata['error'] = str(error)
             atomic_json(record, metadata)
+            if manual:
+                notify('Space Ghost hit a snag', 'Your current wallpaper is unchanged. ' + str(error)[:300])
             raise
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--scene', help='Select a named scene for today; still limited to one attempt.')
+    parser.add_argument('--scene', help='Select a named scene from prompts.json.')
+    parser.add_argument('--theme', default='active', help='active (default), none, or a theme ID from alpine/themes/.')
+    parser.add_argument('--manual', action='store_true', help='One explicit request, independent of the daily schedule.')
+    parser.add_argument('--activate', action='store_true', help='Switch to the newly saved artwork when ready.')
     parser.add_argument('--print-command', action='store_true', help='Show the cron-safe command without generating.')
     args = parser.parse_args()
     if args.print_command:
         import shlex
         print(shlex.join(['/usr/bin/python3', str(Path(__file__).resolve())]))
         return
-    sys.exit(run_once(args.scene))
+    sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme))
 
 
 if __name__ == '__main__':

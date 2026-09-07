@@ -5,7 +5,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 export XDG_CURRENT_DESKTOP=sway
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORMTHEME=qt6ct
-export XCURSOR_THEME=simp1e-cursors-rose-pine
+export XCURSOR_THEME=simp1e-cursors-gruvbox-dark
 export XCURSOR_SIZE=24
 if [ -x /usr/bin/swayfx ] && [ -r "$HOME/.config/swayfx/config" ] && [ "${OLDBOOK_STOCK_SWAY:-0}" != 1 ]; then
     set -- /usr/bin/swayfx --config "$HOME/.config/swayfx/config" "$@"

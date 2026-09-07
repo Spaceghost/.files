@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Apply Foot's configured palette to existing terminals without closing their apps."""
+import argparse
+import configparser
+import math
+import os
+from pathlib import Path
+import re
+import select
+import stat
+import sys
+import time
+
+
+def palette_bytes(path):
+    """Only emit color setters, never input-producing queries or screen resets."""
+    config = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=('#',))
+    with Path(path).open() as stream:
+        config.read_file(stream)
+    if not config.has_section('colors-dark'):
+        raise ValueError('Foot configuration needs a [colors-dark] palette')
+    colors = config['colors-dark']
+
+    def color(value):
+        if not re.fullmatch(r'[0-9A-Fa-f]{6}', value):
+            raise ValueError('Foot palette colors must have exactly six hexadecimal digits')
+        return value.lower()
+
+    palette = [color(colors.get(f'{prefix}{index}', ''))
+               for prefix in ('regular', 'bright') for index in range(8)]
+    foreground = color(colors.get('foreground', ''))
+    background = color(colors.get('background', ''))
+    cursor = colors.get('cursor', '').split()
+    if len(cursor) != 2:
+        raise ValueError('Foot cursor needs text and cursor colors')
+    color(cursor[0])
+    cursor_color = color(cursor[1])
+    selection_bg = color(colors.get('selection-background', ''))
+    selection_fg = color(colors.get('selection-foreground', ''))
+    alpha = float(colors.get('alpha', '1'))
+    if not math.isfinite(alpha) or not 0 <= alpha <= 1:
+        raise ValueError('Foot alpha must be between zero and one')
+    changes = [f'4;{index};#{value}' for index, value in enumerate(palette)]
+    changes.extend([f'10;#{foreground}', f'11;[{alpha * 100:g}]#{background}',
+                    f'12;#{cursor_color}', f'17;#{selection_bg}', f'19;#{selection_fg}'])
+    return ''.join(f'\033]{change}\033\\' for change in changes).encode('ascii')
+
+
+def process_identity(process, uid):
+    """Require a current same-user Foot process and record its kernel start time."""
+    if process.stat().st_uid != uid or (process / 'exe').resolve(strict=True) != Path('/usr/bin/foot'):
+        return None
+    fields = (process / 'stat').read_text().rsplit(') ', 1)[1].split()
+    if fields[0] == 'Z':
+        return None
+    return fields[19]
+
+
+def terminal_index(process, descriptor):
+    # tty-index is emitted by Linux for a PTY master. Never write to that master:
+    # the slave is the display/output side; master writes would become app input.
+    info = (process / 'fdinfo' / descriptor).read_text()
+    match = re.search(r'^tty-index:\s*([0-9]+)$', info, re.MULTILINE)
+    return int(match.group(1)) if match else None
+
+
+def foot_terminals(proc_root, uid):
+    for process in sorted(Path(proc_root).iterdir()):
+        if not process.name.isdigit():
+            continue
+        try:
+            identity = process_identity(process, uid)
+            if identity is None:
+                continue
+            for info in sorted((process / 'fdinfo').iterdir()):
+                if not info.name.isdigit():
+                    continue
+                index = terminal_index(process, info.name)
+                if index is not None:
+                    yield process, identity, info.name, index
+        except (OSError, ValueError, IndexError):
+            # Processes and descriptors may disappear while walking /proc.
+            continue
+
+
+def write_all(descriptor, packet):
+    remaining = memoryview(packet)
+    deadline = time.monotonic() + 0.5
+    while remaining:
+        timeout = deadline - time.monotonic()
+        if timeout <= 0 or not select.select([], [descriptor], [], timeout)[1]:
+            raise TimeoutError('Foot terminal output is busy')
+        try:
+            written = os.write(descriptor, remaining)
+        except BlockingIOError:
+            continue
+        if written == 0:
+            raise OSError('Foot terminal accepted no output')
+        remaining = remaining[written:]
+
+
+def refresh_terminals(packet, proc_root=Path('/proc'), pts_root=Path('/dev/pts'), dry_run=False):
+    uid = os.getuid()
+    updated = []
+    seen = set()
+    directory = os.open(pts_root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        for process, identity, master_fd, index in foot_terminals(proc_root, uid):
+            if index in seen:
+                continue
+            descriptor = None
+            try:
+                descriptor = os.open(str(index), os.O_WRONLY | os.O_NOCTTY |
+                                     os.O_NONBLOCK | os.O_NOFOLLOW, dir_fd=directory)
+                device = os.fstat(descriptor)
+                if not stat.S_ISCHR(device.st_mode) or device.st_uid != uid:
+                    continue
+                if (os.major(device.st_rdev), os.minor(device.st_rdev)) != (136 + index // 256, index % 256):
+                    continue
+                # Recheck after opening: closing/reusing a process or PTY must not
+                # redirect this packet into a different terminal.
+                if process_identity(process, uid) != identity or terminal_index(process, master_fd) != index:
+                    continue
+                if not dry_run:
+                    write_all(descriptor, packet)
+                seen.add(index)
+                updated.append(str(Path(pts_root) / str(index)))
+            except (OSError, ValueError, IndexError):
+                continue
+            finally:
+                if descriptor is not None:
+                    os.close(descriptor)
+    finally:
+        os.close(directory)
+    return updated
+
+
+def main(argv=None):
+    config_root = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--config', type=Path, default=config_root / 'foot/foot.ini')
+    parser.add_argument('--dry-run', action='store_true', help='List eligible terminals without recoloring')
+    args = parser.parse_args(argv)
+    try:
+        packet = palette_bytes(args.config)
+        updated = refresh_terminals(packet, dry_run=args.dry_run)
+    except (OSError, ValueError, configparser.Error) as error:
+        print(f'Terminal palette: {error}', file=sys.stderr)
+        return 1
+    action = 'Eligible' if args.dry_run else 'Refreshed'
+    print(f'{action} {len(updated)} Foot terminal(s)' + (': ' + ', '.join(updated) if updated else ''))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

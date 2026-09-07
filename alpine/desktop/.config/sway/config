@@ -6,11 +6,8 @@ set $menu ~/.local/bin/oldbook-menu
 set $lock ~/.local/bin/oldbook-lock
 set $wallpaper ~/.local/share/oldbook/wallpaper.png
 
-seat * xcursor_theme simp1e-cursors-rose-pine 24
-
-font pango:JetBrainsMono Nerd Font 11
-default_border pixel 2
-default_floating_border normal 2
+# Palette and window chrome are switchable without changing shortcuts.
+include ~/.config/sway/theme.conf
 gaps inner 10
 gaps outer 14
 smart_gaps off
@@ -38,13 +35,6 @@ input type:keyboard {
     xkb_capslock disabled
     xkb_numlock enabled
 }
-
-# Purple glass: narrow borders make the high-density display feel intentional.
-client.focused          #dca7ff #3a185d #fff7ff #dca7ff #dca7ff
-client.focused_inactive #241237 #170b26 #bca9cf #241237 #241237
-client.unfocused        #1a1027 #100817 #8f7ea1 #1a1027 #1a1027
-client.urgent           #ff5cbb #57153e #fff7ff #ff5cbb #ff5cbb
-client.placeholder      #241237 #170b26 #bca9cf #241237 #241237
 
 bindsym $mod+Return exec $term
 bindsym $mod+d exec $menu

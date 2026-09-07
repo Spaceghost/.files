@@ -1,12 +1,13 @@
 # Space Ghost / Oldbook
 
-A deep-purple Alpine edge desktop, maintained in Fossil. SwayFX adds soft blur,
-rounded windows and shadows; Waybar is a contextual control deck. The gallery
+A Gruvbox Dark Alpine edge desktop, maintained in Fossil. Warm charcoal and
+cream surfaces use amber accents with no window outlines. SwayFX adds soft blur,
+restrained corners and shadows; Waybar is a contextual control deck. The gallery
 puts Space Ghost and Zorak into cosmic landscapes and suspiciously familiar
-paintings. Five shipped scenes rotate every 20 minutes, with one new painting
-attempt per day through the existing Codex login.
+paintings. Saved scenes rotate every 20 minutes, with one new painting
+attempt per day through the existing Codex login and extra paintings on request.
 
-![Live Space Ghost desktop](verification/desktop.png)
+![Gruvbox Space Ghost artwork](assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png)
 
 ## Edit the desktop
 
@@ -30,6 +31,8 @@ swaymsg reload
 | Terminals, prompt, editor | `desktop/.config/foot/`, `starship.toml`, `nvim/` |
 | GTK and Qt colours | `desktop/.config/gtk-{3,4}.0/gtk.css`, `theme/spaceghost.conf` |
 | Rotation and generated painting prompts | `wallpapers/gallery.json`, `wallpapers/prompts.json` |
+| Active artwork theme and palette | `themes/current`, `themes/gruvbox-dark.json` |
+| Window titles and borders | `desktop/.config/sway/theme.conf` |
 
 Waybar reloads CSS automatically; `pkill -USR2 -u "$(id -u)" -x waybar` reloads
 its JSON. Restart an application to load its changed theme. Re-running the
@@ -48,8 +51,14 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
 - **Super+Shift+P:** pause/resume rotation. **Super+Shift+N:** notifications.
 - **Super+Escape:** lock. **Super+F:** fullscreen toggle; leave fullscreen to see the panel.
 - Hover the CPU, network, sound and battery modules to reveal their controls.
+- **Super/Command+click the artwork icon:** generate a painting and switch to it.
+  The gallery includes the same command, browsing, pause, help, and the full command deck.
 
 [Panel actions](desktop/.config/waybar/README.md) · [Gallery and cron](wallpapers/README.md)
+
+[Gruvbox theme guide](themes/README.md) explains live terminal recoloring,
+application settings, preserved theme profiles, and themed/general artwork
+collections. Folder icons rebuild locally with `alpine/bin/build-icon-theme`.
 
 ## Reinstall and rebuild
 

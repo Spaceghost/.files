@@ -10,7 +10,7 @@
   "reload_style_on_change": true,
   "modules-left": [
     "custom/ghost",
-    "custom/art",
+    "cffi/art",
     "sway/workspaces",
     "custom/ai",
     "sway/mode"
@@ -281,17 +281,8 @@
     "icon-size": 15,
     "spacing": 8
   },
-  "custom/art": {
-    "exec": "~/.local/bin/oldbook-wallpaper status",
-    "return-type": "json",
-    "interval": 5,
-    "format": "\udb83\ude09",
-    "on-click": "~/.local/bin/oldbook-wallpaper next",
-    "on-click-right": "~/.local/bin/oldbook-wallpaper pick",
-    "on-click-middle": "~/.local/bin/oldbook-wallpaper pause",
-    "on-scroll-up": "~/.local/bin/oldbook-wallpaper prev",
-    "on-scroll-down": "~/.local/bin/oldbook-wallpaper next",
-    "tooltip": true
+  "cffi/art": {
+    "module_path": "/usr/lib/waybar/oldbook-art.so"
   },
   "custom/ai": {
     "exec": "~/.local/bin/oldbook-workspaces status",

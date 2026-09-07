@@ -5,7 +5,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 export XDG_CURRENT_DESKTOP=sway
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORMTHEME=qt6ct
-export XCURSOR_THEME=simp1e-cursors-rose-pine
+export XCURSOR_THEME=simp1e-cursors-gruvbox-dark
 export XCURSOR_SIZE=24
 
 uid=$(id -u)
@@ -60,7 +60,10 @@ if ! ensure_session_bus; then
     printf '%s\n' 'oldbook-session: no usable D-Bus session bus' >&2
 fi
 if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
-    dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway >/dev/null 2>&1 || true
+    dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway QT_QPA_PLATFORMTHEME XCURSOR_THEME XCURSOR_SIZE >/dev/null 2>&1 || true
+    if command -v oldbook-gtk-settings >/dev/null 2>&1; then
+        oldbook-gtk-settings >/dev/null 2>&1 || true
+    fi
 fi
 
 if ! has_polkit_agent && [ -x /usr/libexec/polkit-gnome-authentication-agent-1 ]; then

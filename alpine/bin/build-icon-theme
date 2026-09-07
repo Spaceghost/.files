@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Build the Oldbook folder icon overlay from the locked local Papirus package."""
+import argparse
+import configparser
+import hashlib
+import json
+from pathlib import Path
+import re
+import xml.etree.ElementTree as ET
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_SOURCE = Path('/usr/share/icons/Papirus')
+DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/icons/Oldbook-Gruvbox'
+SOURCE_VERSION = '20250201-r0'
+RECOLORS = {
+    '#f9bd30': '#fabd2f', '#e19d00': '#d79921', '#594411': '#665c54',
+    '#e4e4e4': '#ebdbb2', '#444444': '#fabd2f', '#4285f4': '#fabd2f',
+}
+
+
+def installed_version():
+    for record in Path('/lib/apk/db/installed').read_text().split('\n\n'):
+        fields = dict(line.split(':', 1) for line in record.splitlines() if ':' in line)
+        if fields.get('P') == 'papirus-icon-theme':
+            return fields.get('V')
+    return None
+
+
+def build(source, output):
+    source = source.resolve()
+    if source == DEFAULT_SOURCE and installed_version() != SOURCE_VERSION:
+        raise RuntimeError(f'Restore papirus-icon-theme {SOURCE_VERSION} from the package lock first.')
+    theme = configparser.ConfigParser(interpolation=None)
+    theme.read(source / 'index.theme')
+    license_text = (REPO / 'alpine/theme/LICENSE.Papirus').read_bytes()
+    documents, manifest, sections = {}, {}, []
+    for places in sorted(source.glob('*/places')):
+        if not re.fullmatch(r'[0-9]+x[0-9]+', places.parent.name):
+            continue
+        relative_dir = places.relative_to(source).as_posix()
+        sections.append(relative_dir)
+        # Explicit color names remain inherited; override the standard folder aliases.
+        colors = {p.stem.removeprefix('folder-') for p in places.glob('folder-*.svg')
+                  if (places / ('user-' + p.stem.removeprefix('folder-') + '-home.svg')).exists()}
+        for icon in sorted(places.glob('*.svg')):
+            name = icon.name
+            if not (name.startswith('folder') or name in
+                    ('user-home.svg', 'user-home-open.svg', 'user-desktop.svg')):
+                continue
+            if name.startswith('folder-') and name.split('-')[1].split('.')[0] in colors:
+                continue
+            resolved = icon.resolve()
+            yellow = places / resolved.name.replace('folder-blue', 'folder-yellow').replace('user-blue', 'user-yellow')
+            chosen = yellow if yellow.is_file() else icon
+            if name == 'folder.svg' and (places / 'folder-yellow.svg').is_file():
+                chosen = places / 'folder-yellow.svg'
+            resolved = chosen.resolve()
+            if not resolved.is_relative_to(source):
+                raise RuntimeError(f'Icon source escapes Papirus: {chosen}')
+            original = resolved.read_bytes()
+            result = original.decode()
+            for old, new in RECOLORS.items():
+                result = result.replace(old, new)
+            ET.fromstring(result)
+            relative = f'{relative_dir}/{name}'
+            documents[relative] = result.encode()
+            manifest[relative] = {
+                'source': chosen.relative_to(source).as_posix(),
+                'source_sha256': hashlib.sha256(original).hexdigest(),
+                'sha256': hashlib.sha256(documents[relative]).hexdigest(),
+            }
+        folder = f'{relative_dir}/folder.svg'
+        documents[f'{relative_dir}/inode-directory.svg'] = documents[folder]
+        manifest[f'{relative_dir}/inode-directory.svg'] = dict(manifest[folder])
+    if not sections:
+        raise RuntimeError('No Papirus folder icons found.')
+    index = '[Icon Theme]\nName=Oldbook Gruvbox\nComment=Warm Gruvbox folders with Papirus Dark application icons\nInherits=Papirus-Dark,hicolor\nExample=folder\nDirectories=' + ','.join(sections) + '\n'
+    for section in sections:
+        index += f'\n[{section}]\nContext=Places\nSize={theme[section]["Size"]}\nType=Fixed\n'
+    documents['index.theme'] = index.encode()
+    documents['LICENSE'] = license_text
+    documents['README.md'] = (
+        '# Oldbook Gruvbox folder icons\n\n'
+        'Derived from PapirusDevelopmentTeam/papirus-icon-theme, release 20250201, GPL-3.0.\n'
+        'Upstream: https://github.com/PapirusDevelopmentTeam/papirus-icon-theme\n\n'
+        'Modified 2026-09-07: select yellow folder variants for standard aliases;\n'
+        'map folder gold, shadow, paper, and monochrome colors to Gruvbox.\n'
+        'Other application icons inherit Papirus-Dark. SVGs are editable source files.\n\n'
+        'Rebuild offline from the locked papirus-icon-theme APK with\n'
+        '`alpine/bin/build-icon-theme`. Source and output hashes are in sources.json.\n'
+    ).encode()
+    documents['sources.json'] = (json.dumps({'package': f'papirus-icon-theme-{SOURCE_VERSION}',
+                                           'recolors': RECOLORS, 'icons': manifest},
+                                          indent=2, sort_keys=True) + '\n').encode()
+    # Validate every input before replacing any output. Never follow output links.
+    for name in documents:
+        destination = output / name
+        if any(p.is_symlink() for p in [destination, *destination.parents]):
+            raise RuntimeError(f'Refusing a symlink output: {destination}')
+    for name, data in documents.items():
+        destination = output / name
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+    print(f'Built {len(manifest)} folder icons in {output}')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
+    args = parser.parse_args()
+    build(args.source, args.output)
+
+
+if __name__ == '__main__':
+    main()

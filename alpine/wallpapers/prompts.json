@@ -1,15 +1,47 @@
 {
   "model": "gpt-5.6-luna",
   "timeout_seconds": 900,
-  "style": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail: deep aubergine shadows, violet and lilac atmosphere, subtle magenta, moon-white cape highlights, warm antique gold accents. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. Preserve a spacious, quieter upper edge for a desktop panel. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
+  "style": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail, rich atmospheric depth, luminous highlights and beautiful canvas texture. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. Preserve a spacious, quieter upper edge for a desktop panel. If a theme is supplied, follow its palette throughout; otherwise choose colors that suit the scene naturally. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
   "scenes": [
-    {"id":"american-gothic","title":"American Ghostic","description":"An affectionate parody of the famous American Gothic farmhouse portrait: a deadpan Space Ghost holds the pitchfork like a late-night interview microphone, while Zorak dressed in a prim Victorian collar looks intensely unimpressed beside him. The familiar steep farmhouse window contains one tiny glowing purple planet. Exquisite weathered wood, canvas brushwork and theatrical violet dusk."},
-    {"id":"declaration","title":"The Declaration of Interplanetary Independence","description":"An affectionate parody of the grand historical painting of the signing of the Declaration of Independence in Independence Hall: dignified eighteenth-century delegates debate the parchment while a perfectly serious Space Ghost arrives late carrying a giant souvenir fountain pen, and tiny Zorak sneaks a biscuit from the ceremonial table. Golden candlelight melts into violet shadows."},
-    {"id":"nighthawks","title":"Coast to Coast, Last Orders","description":"A loving parody of the luminous midnight diner painting Nighthawks: Space Ghost sits solemnly at the curved diner counter with a comically tiny espresso cup held between two giant gloved fingers. Zorak is the waiter, and Moltar patiently reads an upside-down menu. An empty rain-slick street glows deep purple outside. Luminous glass and beautifully restrained brushwork."},
-    {"id":"delaware","title":"The Delaware Has No Green Room","description":"A grand Romantic American history painting of Washington crossing a freezing river at night, except Space Ghost is precariously at the stern holding a tiny cocktail umbrella over the entire heroic scene, sincerely convinced he is helping. Zorak in a tricorn hat rows in the wrong direction. Noble faces, icy spray, lilac moonlight and rich antique canvas texture."},
-    {"id":"yosemite","title":"The Sublime, Sponsored by Ghost Planet","description":"A monumental nineteenth-century American landscape painting: Yosemite cliffs rise into a vast violet storm and golden sunset, with an absurdly tiny Space Ghost giving a solemn guided tour to three unimpressed woodland animals on the foreground overlook. A little folding director's chair has been set down next to a majestic waterfall. Beautiful painterly detail and epic atmospheric depth."},
-    {"id":"moon-landing","title":"One Small Step, One Extremely Long Interview","description":"An alternate-history space-age oil painting of the first Moon landing: the astronaut proudly descends the ladder while Space Ghost stands next to him with an oversized old-fashioned broadcast microphone, already conducting a terribly formal interview. Zorak is asleep in a small folding chair. Violet Earthrise over the lunar horizon, luminous silver dust, vintage brushwork."},
-    {"id":"victorian-seance","title":"The Medium Has Technical Difficulties","description":"A lavishly painted fictional Victorian séance in a dark library: a room of elegantly dressed, astonished guests has accidentally summoned Space Ghost, who is earnestly checking the cables of an enormous 1960s television on the table. Zorak peeks out of a teapot. Deep purple velvet, molten candlelight, supernatural lilac highlights and rich polished mahogany."},
-    {"id":"cosmic-coronation","title":"His Mildly Confused Majesty","description":"A fictional galactic coronation painted as an immense baroque ceremony: Space Ghost kneels with solemn dignity while a tiny exasperated Zorak on a very tall stepladder attempts to place a comically small crown on his black hood. Alien courtiers maintain perfect poker faces. Cathedral-like nebula vaults, sumptuous violet robes, luminous cape, antique gold."}
+    {
+      "id": "american-gothic",
+      "title": "American Ghostic",
+      "description": "An affectionate parody of the famous American Gothic farmhouse portrait: a deadpan Space Ghost holds the pitchfork like a late-night interview microphone, while Zorak dressed in a prim Victorian collar looks intensely unimpressed beside him. The familiar steep farmhouse window contains one tiny glowing planet. Exquisite weathered wood, canvas brushwork and theatrical evening light."
+    },
+    {
+      "id": "declaration",
+      "title": "The Declaration of Interplanetary Independence",
+      "description": "An affectionate parody of the grand historical painting of the signing of the Declaration of Independence in Independence Hall: dignified eighteenth-century delegates debate the parchment while a perfectly serious Space Ghost arrives late carrying a giant souvenir fountain pen, and tiny Zorak sneaks a biscuit from the ceremonial table. Golden candlelight melts into deep shadows."
+    },
+    {
+      "id": "nighthawks",
+      "title": "Coast to Coast, Last Orders",
+      "description": "A loving parody of the luminous midnight diner painting Nighthawks: Space Ghost sits solemnly at the curved diner counter with a comically tiny espresso cup held between two giant gloved fingers. Zorak is the waiter, and Moltar patiently reads an upside-down menu. An empty rain-slick street glows softly outside. Luminous glass and beautifully restrained brushwork."
+    },
+    {
+      "id": "delaware",
+      "title": "The Delaware Has No Green Room",
+      "description": "A grand Romantic American history painting of Washington crossing a freezing river at night, except Space Ghost is precariously at the stern holding a tiny cocktail umbrella over the entire heroic scene, sincerely convinced he is helping. Zorak in a tricorn hat rows in the wrong direction. Noble faces, icy spray, pale moonlight and rich antique canvas texture."
+    },
+    {
+      "id": "yosemite",
+      "title": "The Sublime, Sponsored by Ghost Planet",
+      "description": "A monumental nineteenth-century American landscape painting: Yosemite cliffs rise into a vast dramatic storm and golden sunset, with an absurdly tiny Space Ghost giving a solemn guided tour to three unimpressed woodland animals on the foreground overlook. A little folding director's chair has been set down next to a majestic waterfall. Beautiful painterly detail and epic atmospheric depth."
+    },
+    {
+      "id": "moon-landing",
+      "title": "One Small Step, One Extremely Long Interview",
+      "description": "An alternate-history space-age oil painting of the first Moon landing: the astronaut proudly descends the ladder while Space Ghost stands next to him with an oversized old-fashioned broadcast microphone, already conducting a terribly formal interview. Zorak is asleep in a small folding chair. A luminous Earthrise over the lunar horizon, luminous silver dust, vintage brushwork."
+    },
+    {
+      "id": "victorian-seance",
+      "title": "The Medium Has Technical Difficulties",
+      "description": "A lavishly painted fictional Victorian s\u00e9ance in a dark library: a room of elegantly dressed, astonished guests has accidentally summoned Space Ghost, who is earnestly checking the cables of an enormous 1960s television on the table. Zorak peeks out of a teapot. Rich dark velvet, molten candlelight, supernatural highlights and rich polished mahogany."
+    },
+    {
+      "id": "cosmic-coronation",
+      "title": "His Mildly Confused Majesty",
+      "description": "A fictional galactic coronation painted as an immense baroque ceremony: Space Ghost kneels with solemn dignity while a tiny exasperated Zorak on a very tall stepladder attempts to place a comically small crown on his black hood. Alien courtiers maintain perfect poker faces. Cathedral-like nebula vaults, sumptuous velvet robes, luminous cape, antique gold."
+    }
   ]
 }

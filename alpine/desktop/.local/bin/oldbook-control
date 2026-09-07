@@ -123,6 +123,7 @@ def menu(section="main"):
             "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
             "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),
             "󰌾  Session · lock, suspend, logout": power,
+            "?  Help · desktop commands and shortcuts": lambda: launch(["foot", "--title=Ghost Planet Help", "-e", "less", HOME / ".files/alpine/desktop/README.md"]),
         },
         "network": {
             "󰤨  Connection report · no scanning": lambda: launch(["foot", "--title=Transmission Status", "-e", BIN / "oldbook-control", "network-report"]),

@@ -14,8 +14,12 @@ import sys
 import time
 
 REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
+
 STATE = Path.home() / '.local/state/oldbook/wallpaper'
 CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
+GENERATION = Path.home() / '.local/state/oldbook/wallpaper-generation'
 
 
 def atomic_json(path, value):
@@ -32,11 +36,24 @@ def read_state():
         return {}
 
 
-def load_gallery(repo=REPO):
+def load_gallery(repo=None):
+    repo = (repo or REPO).resolve()
     config = json.loads((repo / 'alpine/wallpapers/gallery.json').read_text())
+    themes = {theme['id']: theme['name'] for theme in available_themes(repo)}
+    themes['none'] = 'Unthemed'
+    rotation = set(config.get('rotation_themes', ['all']))
+    if 'active' in rotation:
+        rotation.remove('active')
+        rotation.add(load_theme(repo)['id'])
     candidates = list(config['entries'])
-    for sidecar in sorted((repo / 'alpine/assets/gallery').glob('*.json')):
+    gallery = repo / 'alpine/assets/gallery'
+    # Preserve the order of old flat artwork before appending new collections.
+    sidecars = sorted(gallery.glob('*.json'))
+    sidecars += sorted(path for path in gallery.rglob('*.json') if path.parent != gallery)
+    for sidecar in sidecars:
         try:
+            if has_symlink(sidecar, repo):
+                continue
             entry = json.loads(sidecar.read_text())
             if isinstance(entry, dict) and entry.get('title'):
                 entry.setdefault('id', sidecar.stem)
@@ -47,8 +64,13 @@ def load_gallery(repo=REPO):
             continue
     entries, seen = [], set()
     for candidate in candidates:
+        if not isinstance(candidate, dict) or not isinstance(candidate.get('file'), str) or not candidate.get('id'):
+            continue
         entry = dict(candidate)
-        source = (repo / entry['file']).resolve()
+        source = repo / entry['file']
+        if has_symlink(source, repo):
+            continue
+        source = source.resolve()
         if not source.is_relative_to((repo / 'alpine/assets').resolve()):
             continue
         if not source.is_file() or entry['id'] in seen:
@@ -56,7 +78,19 @@ def load_gallery(repo=REPO):
         if entry.get('sha256') and hashlib.sha256(source.read_bytes()).hexdigest() != entry['sha256']:
             print(f"Skipping changed artwork: {entry['file']}", file=sys.stderr)
             continue
-        entry['path'] = str(source)
+        default_theme = config.get('legacy_theme', 'none')
+        if source.is_relative_to(gallery):
+            parts = source.relative_to(gallery).parts
+            if len(parts) >= 2 and parts[0] == 'general':
+                default_theme = 'none'
+            elif len(parts) >= 3 and parts[0] == 'themes':
+                default_theme = parts[1]
+        theme = entry.get('theme', default_theme)
+        if not safe_theme_id(theme):
+            continue
+        entry.update({'path': str(source), 'theme': theme,
+                      'theme_name': themes.get(theme, entry.get('theme_name', theme)),
+                      'rotate': 'all' in rotation or theme in rotation})
         entries.append(entry)
         seen.add(entry['id'])
     if not entries:
@@ -119,9 +153,15 @@ def update(action, selected=None):
             state['paused'] = not state.get('paused', False)
             state['next_at'] = time.time() + interval
         else:
+            # Manual browsing, explicit picks and refreshes retain every image.
+            # Only the timer uses the configured theme collections.
+            if selected is None and action == 'tick':
+                entries = [entry for entry in entries if entry.get('rotate', True)] or entries
             index = next((i for i, entry in enumerate(entries) if entry['id'] == state.get('id')), -1)
             if selected is not None:
-                index = next(i for i, entry in enumerate(entries) if entry['id'] == selected)
+                index = next((i for i, entry in enumerate(entries) if entry['id'] == selected), None)
+                if index is None:
+                    raise RuntimeError('Selected artwork is unavailable or failed validation')
             elif action == 'prev':
                 index = (index - 1) % len(entries)
             elif action == 'refresh' and index >= 0:
@@ -130,10 +170,35 @@ def update(action, selected=None):
                 index = (index + 1) % len(entries)
             entry = entries[index]
             socket = apply(entry)
-            state.update({k: entry.get(k, '') for k in ('id', 'title', 'description', 'file')})
+            state.update({k: entry.get(k, '') for k in ('id', 'title', 'description', 'file', 'theme', 'theme_name')})
             state.update({'next_at': time.time() + interval, 'socket': socket})
         state['interval_seconds'] = interval
         atomic_json(STATE / 'state.json', state)
+
+
+def generation_status():
+    """Only a held lock means busy; stale state after a killed process does not."""
+    try:
+        with (GENERATION / 'generation.lock').open() as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                return None
+            except BlockingIOError:
+                try:
+                    return json.load(lock)
+                except ValueError:
+                    return {'title': 'New artwork'}
+    except FileNotFoundError:
+        return None
+
+
+def start_generation(theme='active'):
+    GENERATION.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(GENERATION, 0o700)
+    with (GENERATION / 'manual.log').open('a') as log:
+        subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/wallpapers/generate.py'),
+                          '--manual', '--activate', '--theme', theme], stdin=subprocess.DEVNULL,
+                         stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
 
 
 def status():
@@ -143,17 +208,50 @@ def status():
     mode = 'Paused' if state.get('paused') else f'Changes every {minutes} minutes'
     tooltip = '<b>' + html.escape(title) + '</b>\n' + html.escape(state.get('description', ''))
     tooltip += '\n\n' + mode + '\nClick: next · scroll: browse\nMiddle: pause · right: gallery'
-    print(json.dumps({'text': '󰸉', 'alt': title,
-                      'class': 'paused' if state.get('paused') else 'rotating', 'tooltip': tooltip}))
+    tooltip += '\nCommand/Super+click: generate & switch'
+    if state.get('theme_name'):
+        tooltip += '\nCollection: ' + html.escape(state['theme_name'])
+    busy = generation_status()
+    if busy is not None:
+        tooltip = '<b>Space Ghost is painting…</b>\n' + html.escape(busy.get('title', 'New artwork')) + '\n\n' + tooltip
+    print(json.dumps({'text': '󰔟' if busy is not None else '󰸉', 'alt': title,
+                      'class': 'generating' if busy is not None else ('paused' if state.get('paused') else 'rotating'),
+                      'tooltip': tooltip}))
 
 
 def pick():
     entries, _ = load_gallery()
-    labels = [f'{i + 1:02d}  {e["title"]}' for i, e in enumerate(entries)]
-    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ '],
-                            input='\n'.join(labels) + '\n', capture_output=True, text=True)
-    if result.returncode == 0 and result.stdout.rstrip('\n') in labels:
-        update('pick', entries[labels.index(result.stdout.rstrip('\n'))]['id'])
+    labels = [f'{i + 1:02d}  {e["title"]}'
+              + (' · ' + e['theme_name'] if e.get('theme_name') else '')
+              for i, e in enumerate(entries)]
+    generate_label = '✦  Generate new artwork & switch to it'
+    controls = {'→  Next artwork': 'next', '←  Previous artwork': 'prev',
+                '⏯  Pause / resume rotation': 'pause'}
+    help_label = '?  Help & gallery controls'
+    deck_label = '󰊠  Open command deck · all desktop commands'
+    themed_commands = {'✦  Generate unthemed artwork & switch to it': 'none'}
+    themed_commands.update({'✦  Generate ' + theme['name'] + ' artwork & switch to it': theme['id']
+                            for theme in available_themes(REPO)})
+    options = [*labels, *controls, help_label, deck_label, generate_label, *themed_commands]
+    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ ',
+                             '--lines', str(min(16, len(options))), '--width', '62'],
+                            input='\n'.join(options) + '\n', capture_output=True, text=True)
+    selected = result.stdout.rstrip('\n')
+    if result.returncode == 0:
+        if selected == generate_label:
+            start_generation()
+        elif selected in themed_commands:
+            start_generation(themed_commands[selected])
+        elif selected in labels:
+            update('pick', entries[labels.index(selected)]['id'])
+        elif selected in controls:
+            update(controls[selected])
+        elif selected == help_label:
+            subprocess.Popen(['foot', '--title=Ghost Gallery Help', '-e', 'less',
+                              str(REPO / 'alpine/wallpapers/README.md')], start_new_session=True)
+        elif selected == deck_label:
+            subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-control')],
+                             start_new_session=True)
 
 
 def daemon():
@@ -183,16 +281,24 @@ def daemon():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='status',
-                        choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh'])
+                        choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'select'])
+    parser.add_argument('artwork_id', nargs='?', help='Exact gallery ID for select')
+    parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
     args = parser.parse_args()
+    if (args.action == 'select') != (args.artwork_id is not None):
+        parser.error('select requires an artwork ID; other actions take no ID')
+    if args.theme != 'active' and args.action != 'generate':
+        parser.error('--theme only applies to generate')
     if args.action == 'status':
         status()
     elif args.action == 'pick':
         pick()
     elif args.action == 'daemon':
         daemon()
+    elif args.action == 'generate':
+        start_generation(args.theme)
     else:
-        update(args.action)
+        update(args.action, args.artwork_id)
 
 
 if __name__ == '__main__':

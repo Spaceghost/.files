@@ -102,3 +102,27 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   passed. All 949 APKs in snapshot 8ca6ff2e0e60e4427ae7 verified.
 - Pandora sign-in/playback and reboot/unlock remain unverified. No PAM changes.
   Details: `docs/superpowers/specs/2026-09-07-pithos-keyring.md`.
+
+## Gruvbox Dark and additive artwork controls
+
+- Applied Gruvbox across window chrome, Foot, Waybar, GTK 3/4, Qt 6, launcher,
+  notifications, lock screen, tmux, shell, Neovim, btop and Cava. Removed window,
+  panel and popup outlines following feedback. Existing Foot terminals received
+  all 21 palette updates without closing applications. Both Sway parsers and
+  app-specific parser/render checks passed; the shared suite passed 123 tests.
+- Preserved click, right-click, middle-click, scroll and tooltip help. Added
+  Command/Super+left-click and gallery generation commands. Nine real isolated
+  pointer/keyboard checks passed. The native musl artwork widget rebuilt twice
+  offline into byte-identical signed APKs.
+- Generation retains daily limits and shared locking, saves a PNG/provenance
+  pair in Fossil, and selects the exact finished image. Added safe themed and
+  general collections; manual browsing still reaches all legacy artwork while
+  timer rotation mixes the active theme with general images. Real Gruvbox
+  Yosemite generation, checkpoint and activation succeeded.
+- The matching cursor is installed. Warm gold folder icons rebuilt offline
+  from locked Papirus input into 885 byte-identical output files; GTK icon
+  lookup/rendering passed. Previous Spaceghost application configurations are
+  preserved under `themes/profiles/spaceghost/`.
+- Physical SwayFX takeover remains for the next normal login; the running
+  stock Sway session cannot acquire blur/shadows through a reload. Current
+  active window outlines are zero-width, including existing windows.

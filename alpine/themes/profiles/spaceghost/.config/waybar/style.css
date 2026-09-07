@@ -1,0 +1,88 @@
+/* Space Ghost control deck. GTK CSS, intentionally built for stock Waybar. */
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    min-height: 0;
+}
+window#waybar { background: transparent; color: #ede1ff; }
+.modules-left, .modules-center, .modules-right {
+    background: linear-gradient(180deg, rgba(40, 19, 62, 0.97), rgba(19, 10, 32, 0.97));
+    border: 1px solid rgba(180, 133, 220, 0.36);
+    border-radius: 13px;
+    box-shadow: 0 3px 5px rgba(6, 1, 16, 0.42);
+    margin-bottom: 5px;
+}
+.modules-center { border-color: rgba(128, 98, 158, 0.26); padding: 0 12px; }
+.modules-right { padding: 0 5px; }
+#custom-ghost {
+    font-size: 21px;
+    color: #fff6ff;
+    background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
+    text-shadow: 0 0 5px #e3baff;
+    border-radius: 10px;
+    margin: 3px 5px 3px 3px;
+    padding: 0 11px;
+}
+#custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
+#workspaces { margin: 3px 5px 3px 0; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 8px; color: #a08aaf; transition: all 180ms ease-in-out; }
+#workspaces button.empty { color: #8d799d; }
+#workspaces button:hover { background: #372049; color: #ffe9ff; box-shadow: none; }
+#workspaces button.focused {
+    background: linear-gradient(110deg, #e5bcff, #bfa2f2);
+    color: #241331;
+    font-weight: 800;
+    box-shadow: inset 0 -2px #f594d1;
+}
+#workspaces button.urgent { background: #bf447b; color: #fff3fa; }
+#custom-ai { color: #dca7ff; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 8px; }
+#custom-ai:hover { background: #372049; color: #ffe9ff; }
+#custom-ai.idle { color: #89709f; }
+#custom-ai.complete { color: #b9e6cf; background: #25372f; }
+#custom-ai.attention { color: #fff3fa; background: #8d345e; }
+#mode { color: #ffc3e6; padding: 0 9px; }
+#window { color: #c5acd9; font-size: 10px; }
+window#waybar.empty #window { color: #9c81b4; }
+#mpris { color: #f1b6dc; padding-left: 12px; font-size: 10px; }
+#mpris.paused { color: #a48ba7; }
+#cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
+#pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
+    padding: 0 8px;
+    margin: 4px 0;
+    border-radius: 8px;
+}
+#cpu { color: #bca0e5; }
+#memory, #disk { color: #b9a5cb; }
+#temperature { color: #ffc9a0; }
+#temperature.critical { color: #ff729e; background: #4a1939; }
+#custom-link { color: #a5dce6; }
+#custom-link.offline, #custom-radio.blocked { color: #ad99bd; }
+#custom-radio { color: #d1b2eb; }
+#custom-firewall.staged { color: #d8b876; }
+#custom-firewall.running { color: #a4d8bc; }
+#pulseaudio { color: #ddbbea; }
+#pulseaudio.muted { color: #846e97; }
+#battery { color: #dfc7a5; }
+#battery.charging, #battery.plugged { color: #bad8b7; }
+#battery.warning { color: #ffca87; }
+#battery.critical { color: #fff1f6; background: #a02c63; animation: distress 1s ease-in-out infinite alternate; }
+#backlight { color: #e6ca9d; }
+#idle_inhibitor { color: #89709f; }
+#idle_inhibitor.activated { color: #f2caff; background: #57376e; }
+#custom-notifications { color: #f0b0db; padding: 0 9px; }
+#clock { background: rgba(108, 60, 142, 0.40); color: #f1deff; padding: 0 11px; margin-left: 3px; }
+#tray { margin-right: 2px; padding: 0 5px; }
+#cpu:hover, #memory:hover, #custom-link:hover, #custom-radio:hover, #custom-firewall:hover,
+#pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
+    background: rgba(130, 76, 161, 0.32);
+}
+tooltip { background: rgba(28, 14, 44, 0.99); border: 1px solid #77518e; border-radius: 12px; }
+tooltip label { color: #e8d9f3; padding: 12px; font-size: 11px; }
+@keyframes distress { to { background: #6c284e; } }
+#custom-art { color: #b89ace; font-size: 15px; padding: 0 7px 0 4px; }
+#custom-art:hover { color: #fff1ff; }
+#custom-art.paused { color: #917d9f; }
+#custom-art.generating { color: #ffcb8f; text-shadow: 0 0 7px #bf77e7; }

@@ -35,7 +35,13 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Brightness keys | Kernel backlight steps, with a clear notification if the seat lacks write permission |
 | Click the panel audio icon | Open pavucontrol |
 | Click the notification glyph | Toggle the Spaceghost notification center |
+| Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
 | `Caps Lock` | Escape (including with Shift); the original Escape key still works |
+
+The artwork icon keeps its original controls and tooltip: left click next,
+right click gallery, middle click pause, and scroll previous/next. Its small
+`oldbook-waybar-art` package supplies native modifier handling; see the
+[build and verification guide](../packages/waybar-art/README.md).
 
 The Caps Lock indicator stays on while SwayNC holds notifications and turns off
 when they are cleared. This includes notifications retained in the center after

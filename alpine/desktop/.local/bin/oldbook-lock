@@ -60,17 +60,17 @@ def lock_arguments(ready_fd):
     if not wallpaper.is_file():
         wallpaper = Path.home() / '.local/share/oldbook/wallpaper.png'
     args = ['-R', str(ready_fd), '--indicator-idle-visible', '--indicator-radius', '105',
-            '--indicator-thickness', '9', '--inside-color', '160a27dd',
-            '--inside-clear-color', '3a185ddd', '--inside-ver-color', '281043ee',
-            '--inside-wrong-color', '7e1d56ee', '--ring-color', 'dca7ffff',
-            '--ring-clear-color', 'ff9ed7ff', '--ring-ver-color', 'a5edffff',
-            '--ring-wrong-color', 'ff5faeff', '--line-color', '00000000',
-            '--key-hl-color', 'fff0abff', '--text-color', 'fff7ffff',
-            '--text-ver-color', 'a5edffff', '--text-wrong-color', 'ffa2d7ff',
+            '--indicator-thickness', '9', '--inside-color', '282828ee',
+            '--inside-clear-color', '504945ee', '--inside-ver-color', '3c3836ee',
+            '--inside-wrong-color', '9d2420ee', '--ring-color', 'fabd2fff',
+            '--ring-clear-color', 'fe8019ff', '--ring-ver-color', '83a598ff',
+            '--ring-wrong-color', 'fb4934ff', '--line-color', '00000000',
+            '--key-hl-color', 'b8bb26ff', '--text-color', 'ebdbb2ff',
+            '--text-ver-color', '83a598ff', '--text-wrong-color', 'fb4934ff',
             '--separator-color', '00000000', '--font', 'JetBrainsMono Nerd Font',
             '--font-size', '18']
     return args + (['-i', str(wallpaper), '-s', 'fill'] if wallpaper.is_file()
-                   else ['-c', '160a27'])
+                   else ['-c', '282828'])
 
 
 def acquire_lock(runtime, command='swaylockd', timeout=10):

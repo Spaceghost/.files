@@ -1,0 +1,26 @@
+/* Spaceghost: shared GTK 3/4 palette. Edit here, restart the application. */
+@define-color accent_bg_color #ae72df;
+@define-color accent_fg_color #170c24;
+@define-color accent_color #d4a1ff;
+@define-color window_bg_color #170d22;
+@define-color window_fg_color #f3e9fa;
+@define-color view_bg_color #11091a;
+@define-color view_fg_color #f3e9fa;
+@define-color headerbar_bg_color #281336;
+@define-color headerbar_fg_color #f3e9fa;
+@define-color headerbar_backdrop_color #1c1028;
+@define-color card_bg_color #2c193d;
+@define-color card_fg_color #f3e9fa;
+@define-color popover_bg_color #261433;
+@define-color popover_fg_color #f3e9fa;
+@define-color dialog_bg_color #261433;
+@define-color dialog_fg_color #f3e9fa;
+@define-color sidebar_bg_color #1d102b;
+@define-color sidebar_fg_color #e3ceeF;
+@define-color sidebar_backdrop_color #180e23;
+@define-color destructive_bg_color #c84e91;
+@define-color destructive_fg_color #ffffff;
+@define-color success_bg_color #76b393;
+@define-color warning_bg_color #ddb777;
+@define-color warning_fg_color #201221;
+selection { background-color: #754299; color: #ffffff; }
