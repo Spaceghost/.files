@@ -2,6 +2,34 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Radio preparation and desktop repairs — 2026-09-07
+
+- Bluetooth is now software-blocked by a Bluetooth-only eudev rule. Independent
+  checks preserved the live WLAN association, addresses and routes. Status
+  reads still work; direct `/dev/rfkill` writes are restricted to root with no
+  user ACL. Existing wheel `nopass` doas authority remains unchanged.
+- All 63 radio tests passed, including real process/socket timeout cases,
+  hardware/software block combinations, adapter replacement and stale recovery
+  records. The eudev parser was exercised in private mount/network namespaces
+  with read-only sysfs and an inert positive-match rule. Actual deployment then
+  verified Bluetooth soft=1 and WLAN soft=0 without changing Wi-Fi owners.
+- Root-private permission/Bluetooth journals preserve recovery data. Source,
+  installed hashes, state checks and recovery instructions are in
+  `security/radio/permissions-verification.json`, `bluetooth-verification.json`
+  and `BLUETOOTH.md`. No live rollback or reboot/suspend test was performed.
+- The full WLAN controller remains staged. Its command, WPA, transaction and
+  lock waits are bounded, but persistent DHCP ownership/renewal and home/hotspot
+  IPv6 transitions still need implementation and isolated verification. WPA
+  reload can disconnect and scan; the proposed blocked migration is documented
+  in `security/radio/NETWORK-MIGRATION.md`. Exact trusted SSIDs remain pending.
+- Restored the video-background launcher and two missing library links. The
+  calendar now uses Gruvbox colors; existing gestures and help controls remain.
+  Only Waybar was reloaded. Evidence: `verification/desktop-integration.json`;
+  desktop check-in `73582991425`. Unproven test-compositor cleanup was deferred.
+- The existing lock still matches all 1,079 installed package identities,
+  `/etc/apk/world` and repository configuration. This pass adds no packages and
+  makes no new bootable-image or physical radio-silence claim.
+
 ## Hold to Help and interactive firewall — 2026-09-07
 
 - **Hold to Help 0.1.0** is installed as signed main/doc APKs and runs locally
