@@ -55,6 +55,17 @@ class WorkspaceTests(unittest.TestCase):
         ws = workspace(view(1, 500, 500), view(2, 500, 500), focus=[2, 1])
         self.assertEqual(self.model['largest_view'](ws)['id'], 2)
 
+    def test_claude_window_is_named_and_available_in_ai_switcher(self):
+        service = runpy.run_path(str(SERVICE))
+        resolver = mock.Mock()
+        resolver.resolve_all.return_value = {7: {'name': 'Claude', 'kind': 'claude'}}
+        tree = {'nodes': [workspace(view(7, 700, 700), name='3')], 'floating_nodes': []}
+        with tempfile.TemporaryDirectory() as temporary:
+            plans, sessions = service['collect'](
+                tree, resolver, Path(temporary), self.model['WorkspaceNames']())
+        self.assertEqual(plans[0]['new'], '3: LAB · ✦ Claude')
+        self.assertEqual([(item['id'], item['kind']) for item in sessions], [(7, 'claude')])
+
     def test_names_keep_numbers_and_do_not_accumulate_suffixes(self):
         names = self.model['WorkspaceNames']()
         ws = workspace(view(1, 100, 100))

@@ -1,4 +1,6 @@
+[
 {
+  "name": "top",
   "layer": "top",
   "position": "top",
   "height": 32,
@@ -16,19 +18,30 @@
     "custom/ai",
     "sway/mode"
   ],
-  "modules-center": [
-    "sway/window",
-    "mpris"
-  ],
+  "modules-center": [],
   "modules-right": [
-    "group/telemetry",
-    "group/transmission",
-    "group/sound",
-    "group/power",
-    "custom/notifications",
-    "clock",
-    "tray"
+    "group/context",
+    "group/status"
   ],
+  "group/context": {
+    "orientation": "horizontal",
+    "modules": [
+      "sway/window",
+      "mpris"
+    ]
+  },
+  "group/status": {
+    "orientation": "horizontal",
+    "modules": [
+      "group/telemetry",
+      "group/transmission",
+      "group/sound",
+      "group/power",
+      "custom/notifications",
+      "clock",
+      "tray"
+    ]
+  },
   "custom/ghost": {
     "format": "\udb80\udea0",
     "tooltip-format": "<b>SPACE GHOST \u00b7 COAST TO COAST</b>\nYour local control room. Zorak is not the administrator.\n\nLeft: command deck \u00b7 Right: applications",
@@ -292,4 +305,123 @@
     "on-click": "~/.local/bin/oldbook-workspaces ai-next",
     "on-click-right": "~/.local/bin/oldbook-workspaces ai-menu"
   }
+},
+{
+  "name": "monitor",
+  "layer": "bottom",
+  "position": "right",
+  "width": 208,
+  "spacing": 0,
+  "margin-top": 48,
+  "margin-right": 10,
+  "margin-bottom": 12,
+  "exclusive": false,
+  "passthrough": true,
+  "reload_style_on_change": true,
+  "modules-left": [
+    "custom/conky-title",
+    "cpu#monitor",
+    "memory#monitor",
+    "temperature#monitor",
+    "network#monitor",
+    "disk#monitor",
+    "custom/uptime",
+    "custom/conky-footer"
+  ],
+  "custom/conky-title": {
+    "format": "╭─ SYSTEM // OLD BOOK ─╮",
+    "tooltip": false
+  },
+  "cpu#monitor": {
+    "interval": 2,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "format": "{icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}  CPU {usage:>3}%",
+    "format-icons": [
+      "▁",
+      "▂",
+      "▃",
+      "▄",
+      "▅",
+      "▆",
+      "▇",
+      "█"
+    ],
+    "tooltip": false
+  },
+  "memory#monitor": {
+    "interval": 5,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "format": "{icon}  RAM {percentage:>3}%",
+    "format-icons": [
+      "▱▱▱▱▱▱▱▱",
+      "▰▱▱▱▱▱▱▱",
+      "▰▰▱▱▱▱▱▱",
+      "▰▰▰▱▱▱▱▱",
+      "▰▰▰▰▱▱▱▱",
+      "▰▰▰▰▰▱▱▱",
+      "▰▰▰▰▰▰▱▱",
+      "▰▰▰▰▰▰▰▱",
+      "▰▰▰▰▰▰▰▰"
+    ],
+    "tooltip": false
+  },
+  "temperature#monitor": {
+    "interval": 5,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "critical-threshold": 82,
+    "format": "{icon}         TEMP {temperatureC:>2}°C",
+    "format-critical": "█         TEMP {temperatureC:>2}°C",
+    "format-icons": [
+      "▁",
+      "▂",
+      "▃",
+      "▄",
+      "▅",
+      "▆",
+      "▇",
+      "█"
+    ],
+    "tooltip": false
+  },
+  "network#monitor": {
+    "interval": 2,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "format": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
+    "format-wifi": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
+    "format-ethernet": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
+    "format-linked": "◇──────────────  NET LINK",
+    "format-disconnected": "◇───────────  NET OFFLINE",
+    "tooltip": false
+  },
+  "disk#monitor": {
+    "interval": 60,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "path": "/",
+    "format": "◈────────────  DISK {percentage_used:>3}%",
+    "tooltip": false
+  },
+  "custom/uptime": {
+    "exec": "awk '{d=int($1/86400); h=int(($1%86400)/3600); m=int(($1%3600)/60); if (d > 0) printf \"%dd %02dh\", d, h; else printf \"%dh %02dm\", h, m}' /proc/uptime",
+    "format": "⌁─────────────  UP {text}",
+    "interval": 60,
+    "min-length": 24,
+    "align": 0.0,
+    "justify": "left",
+    "tooltip": false
+  },
+  "custom/conky-footer": {
+    "format": "╰──────────────────────╯",
+    "tooltip": false
+  }
 }
+]

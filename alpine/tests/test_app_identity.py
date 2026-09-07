@@ -200,6 +200,31 @@ class ApplicationResolverTests(unittest.TestCase):
         self.assertEqual(result[7], {
             'name': 'Codex', 'kind': 'codex', 'state': None, 'tty': '/dev/pts/5'})
 
+    def test_ghostty_resolves_foreground_codex_and_claude(self):
+        self.process(300, 'ghostty')
+        self.process(301, 'codex', ppid=300, pgrp=301, tty=34822, tpgid=301)
+        self.process(400, 'ghostty')
+        self.process(401, 'claude', ppid=400, pgrp=401, tty=34823, tpgid=401)
+
+        result = self.resolver().resolve_all([
+            {'id': 8, 'pid': 300, 'app_id': 'com.mitchellh.ghostty', 'name': 'Codex'},
+            {'id': 9, 'pid': 400, 'app_id': 'com.mitchellh.ghostty', 'name': 'Claude'},
+        ])
+
+        self.assertEqual(result[8], {
+            'name': 'Codex', 'kind': 'codex', 'state': None, 'tty': '/dev/pts/6'})
+        self.assertEqual(result[9], {
+            'name': 'Claude', 'kind': 'claude', 'state': None, 'tty': '/dev/pts/7'})
+
+    def test_browser_claude_requires_a_clear_title_signal(self):
+        result = self.resolver().resolve_all([
+            {'id': 10, 'pid': 10, 'app_id': 'firefox', 'name': 'Claude — Mozilla Firefox'},
+            {'id': 11, 'pid': 11, 'app_id': 'firefox', 'name': 'Private project — Firefox'},
+        ])
+
+        self.assertEqual(result[10], {'name': 'Claude', 'kind': 'claude', 'state': None})
+        self.assertEqual(result[11], {'name': 'Firefox', 'kind': 'app', 'state': None})
+
     def test_control_characters_are_removed_and_missing_pids_are_harmless(self):
         result = self.resolver().resolve_all([
             {'id': 1, 'pid': 999999, 'app_id': 'foot', 'name': 'secret prompt\npassword'},

@@ -4,6 +4,24 @@ This is the deployable HOME overlay for the Oldbook Alpine desktop. It is design
 
 `~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway and swaylock use it when present; the lock screen falls back to solid violet if it is temporarily absent.
 
+All workspaces now share the same painting and gallery timer. Foot uses 78%
+opacity with 4-pixel padding; Sway keeps a small 4-pixel outer gap. Ghostty is
+also installed with matching colors and opacity: launch `ghostty` or select it
+in the command deck. To play a muted, looping video behind transparent windows,
+run `oldbook-video-background ~/Videos/example.webm`, or choose **Video background**
+in the command deck. `oldbook-video-background stop` reveals the shared painting.
+The video picker accepts local files and explicit HTTPS URLs. No video starts
+automatically. See the [video guide](../packages/mpvpaper/README.md) and
+[Ghostty notes](../packages/ghostty/README.md).
+
+Waybar keeps the current-window/media capsule against the right-hand status
+group. The far left and right ends are square; the inner corners are rounded.
+A second, click-through Waybar surface sits behind windows at the right edge.
+Its Unicode bars show per-core CPU use and memory, followed by temperature,
+network throughput, root-disk usage and uptime. It reserves no window space.
+To remove this monitor, remove the object named `monitor` from the Waybar config
+array and reload Waybar with SIGUSR2. The top bar remains the first object.
+
 ## Runtime dependencies
 
 The package snapshot must include `sway`, `swayidle`, `swaylock`, `waybar`, `fuzzel`, `swaync`, `foot`, `zsh`, `starship`, `eza`, `zoxide`, `neovim`, `btop`, `cava`, `grim`, `slurp`, `swappy`, `jq`, `libnotify`, `playerctl`, `pavucontrol`, `pipewire`, `pipewire-pulse`, `wireplumber`, `wlsunset`, `polkit-gnome`, `qt6ct`, `adw-gtk3`, and `papirus-icon-theme`. JetBrains Mono and a Nerd Font symbols font provide the intended metrics and icons.
@@ -43,24 +61,32 @@ right click gallery, middle click pause, and scroll previous/next. Its small
 `oldbook-waybar-art` package supplies native modifier handling; see the
 [build and verification guide](../packages/waybar-art/README.md).
 
-The Caps Lock indicator stays on while SwayNC holds notifications and turns off
-when they are cleared. This includes notifications retained in the center after
-their popups disappear, including during Do Not Disturb. Opening the center alone
-does not clear them. `oldbook-notification-led` follows SwayNC's notification count,
-discovers Caps Lock LEDs when keyboards are connected, and recovers their state if
-the compositor resets it. Reloading Sway reuses one helper; exiting the session
-turns the light off.
+Caps Lock still sends Escape. Its indicator is off normally and keeps flashing
+while an attributable Codex, Claude, or ChatGPT window has not been visited
+since its alert. Focusing or closing one target clears only that window; other
+pending windows keep the flash active. Ordinary desktop notifications and old
+retained messages do not light it.
+`oldbook-notification-led` discovers Caps Lock LEDs when keyboards are connected
+and recovers their state if the compositor resets it. Reloading Sway reuses one
+helper; exiting the session turns the light off.
 
-The helper uses Python's standard library and the installed `swaync-client`.
+The notification stream uses `py3-dbus` and `py3-gobject3`, already present in the
+locked package snapshot. It watches new desktop notification calls without
+intercepting delivery or recording notification contents. Browser alerts need
+site attribution; the current SwayNC path provides none, so generic
+Firefox/Chromium notices are ignored. The browser and website must actually emit
+a desktop notification with a validated origin hint. CLI setup and supported
+signals are described in the AI attention notes under `docs/superpowers/specs/`.
 `brightnessctl` supplies the udev rule granting group `input` write access to LED
 brightness, and the desktop user must belong to that group (Jack already does).
 It never changes key state to control the light. Diagnostics go to
 `~/.local/state/oldbook/notification-led.log`.
 
-To undo this feature, remove `xkb_options caps:escape` and the notification helper
-launch from `oldbook-session`, terminate the helper with the PID in
-`$XDG_RUNTIME_DIR/oldbook-notification-led.lock`, and reload Sway. A reboot or
-keyboard reconnect restores the kernel's default Caps Lock LED trigger.
+To disable the light integration, remove the notification helper launch from
+`oldbook-session` and terminate the PID in
+`$XDG_RUNTIME_DIR/oldbook-notification-led.lock`. Leave `caps:escape` configured
+to retain the Escape mapping. A reboot or keyboard reconnect restores the
+kernel's default LED trigger; the helper detaches it again when it starts.
 
 Screenshots are stored in `~/Pictures/Screenshots` and offered to Swappy for annotation. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
 

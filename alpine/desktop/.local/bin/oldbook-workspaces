@@ -157,7 +157,7 @@ def collect(tree, resolver, runtime, names, placement=None):
         plans.append(plan)
         for view in all_views(ws):
             identity = apps.get(view['id'], {})
-            if identity.get('kind') in ('codex', 'chatgpt'):
+            if identity.get('kind') in ('codex', 'chatgpt', 'claude'):
                 ai.append({'id': view['id'], 'workspace': plan['base'],
                            'name': safe_label(identity['name'], 28), 'kind': identity['kind'],
                            'event': identity.get('event'), 'focused': bool(view.get('focused'))})
@@ -275,7 +275,7 @@ def status(directory):
         suffix = {'turn-complete': ' · recent completion', 'approval-requested': ' · needs attention'}.get(window.get('event'), '')
         lines.append(html.escape(window['workspace'] + ' · ' + window['name'] + suffix))
     if not windows:
-        lines.append('No open Codex or ChatGPT windows')
+        lines.append('No open Codex, ChatGPT or Claude windows')
     lines.append('\nLeft: next AI window · Right: sessions and launchers')
     css_class = ('attention' if any(w.get('event') == 'approval-requested' for w in windows)
                  else 'complete' if any(w.get('event') == 'turn-complete' for w in windows)

@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import signal
+import socket
 import stat
 import subprocess
 import sys
@@ -113,6 +114,7 @@ def stop_owned(state_path):
             while time.monotonic() < deadline and is_owned_process(state):
                 time.sleep(0.025)
     state_path.unlink(missing_ok=True)
+    state_path.with_name("mpv.sock").unlink(missing_ok=True)
 
 
 def resolve_program(environment_name, default):
@@ -148,16 +150,111 @@ def normalize_source(source):
     return str(path)
 
 
+def mpv_property(socket_path, name):
+    request_id = 1
+    request = json.dumps(
+        {"command": ["get_property", name], "request_id": request_id},
+        separators=(",", ":"),
+    ).encode() + b"\n"
+    connection = socket.socket(socket.AF_UNIX)
+    connection.settimeout(0.25)
+    try:
+        connection.connect(str(socket_path))
+        connection.sendall(request)
+        with connection.makefile("rb") as stream:
+            while True:
+                line = stream.readline()
+                if not line:
+                    return None
+                response = json.loads(line)
+                if response.get("request_id") == request_id:
+                    if response.get("error") != "success":
+                        return None
+                    return response.get("data")
+    except (FileNotFoundError, ConnectionError, OSError, json.JSONDecodeError):
+        return None
+    finally:
+        connection.close()
+
+
+def wait_for_video(socket_path, process):
+    deadline = time.monotonic() + 20
+    while time.monotonic() < deadline:
+        if process.poll() is not None:
+            raise UserError("mpvpaper could not start this video")
+        configured = mpv_property(socket_path, "vo-configured")
+        position = mpv_property(socket_path, "time-pos") if configured else None
+        if configured is True and isinstance(position, (int, float)) and not isinstance(position, bool):
+            return
+        time.sleep(0.05)
+    raise UserError("the video did not produce a frame within 20 seconds")
+
+
+def reload_waybar(proc_root=Path("/proc"), send_signal=os.kill, settle_seconds=0.25):
+    sway_socket = os.environ.get("SWAYSOCK")
+    wayland_display = os.environ.get("WAYLAND_DISPLAY")
+    executable = shutil.which("waybar")
+    if not sway_socket or not wayland_display or not executable:
+        return 0
+    try:
+        executable = Path(executable).resolve(strict=True)
+    except OSError:
+        return 0
+    count = 0
+    for proc in proc_root.iterdir():
+        if not proc.name.isdigit():
+            continue
+        try:
+            if proc.stat().st_uid != os.getuid():
+                continue
+            if (proc / "exe").resolve(strict=True) != executable:
+                continue
+            environment = {}
+            for item in (proc / "environ").read_bytes().split(b"\0"):
+                if b"=" in item:
+                    key, value = item.split(b"=", 1)
+                    environment[key] = value
+            if environment.get(b"SWAYSOCK") != os.fsencode(sway_socket):
+                continue
+            if environment.get(b"WAYLAND_DISPLAY") != os.fsencode(wayland_display):
+                continue
+            send_signal(int(proc.name), signal.SIGUSR2)
+            count += 1
+        except (FileNotFoundError, PermissionError, ProcessLookupError, OSError):
+            continue
+    if count and settle_seconds:
+        time.sleep(settle_seconds)
+    return count
+
+
+def terminate_started_process(process):
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return
+    try:
+        process.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=2)
+
+
 def start_video(state_path, source):
     source = normalize_source(source)
     mpvpaper = resolve_program("OLDBOOK_VIDEO_MPV_PAPER", "mpvpaper")
     stop_owned(state_path)
+    ipc_path = state_path.with_name("mpv.sock")
+    ipc_path.unlink(missing_ok=True)
+    mpv_options = f"{MPV_OPTIONS} input-ipc-server={ipc_path}"
     command = [
         mpvpaper,
         "--layer",
         "bottom",
         "--mpv-options",
-        MPV_OPTIONS,
+        mpv_options,
         "ALL",
         source,
     ]
@@ -168,17 +265,14 @@ def start_video(state_path, source):
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
-    time.sleep(0.25)
-    if process.poll() is not None:
-        raise UserError("mpvpaper could not start this video")
     try:
         write_state(state_path, process)
+        wait_for_video(ipc_path, process)
+        reload_waybar()
     except Exception:
-        process.terminate()
-        try:
-            process.wait(timeout=2)
-        except subprocess.TimeoutExpired:
-            process.kill()
+        terminate_started_process(process)
+        state_path.unlink(missing_ok=True)
+        ipc_path.unlink(missing_ok=True)
         raise
 
 

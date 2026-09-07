@@ -17,7 +17,11 @@
     "hardware_decode": "auto-safe",
     "layer": "bottom",
     "looping": true,
-    "muted": true
+    "muted": true,
+    "readiness_properties": [
+      "vo-configured",
+      "time-pos"
+    ]
   },
   "renderer": "pixman",
   "schema_version": 1

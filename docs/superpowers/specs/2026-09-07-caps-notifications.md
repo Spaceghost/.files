@@ -1,5 +1,12 @@
 # Caps Lock Escape and notification indicator
 
+Historical verification below describes the original count-based behavior.
+The later [AI attention change](2026-09-07-ai-attention-led.md) replaces that
+behavior with an off-by-default indicator that flashes while attributable AI
+windows remain unvisited. Known windows clear individually on focus or close;
+only an unresolved provider fallback can be acknowledged in the notification
+center.
+
 The user requested this after resuming the OpenSnitch package patch. The existing
 Sway keyboard/session configuration is extended with `caps:escape`; Caps Lock
 starts disabled. The original Escape key remains Escape.

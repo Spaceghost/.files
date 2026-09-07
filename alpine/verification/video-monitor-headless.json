@@ -1,0 +1,40 @@
+{
+  "backend": "headless",
+  "checks": {
+    "monitor_unchanged_after_stop": true,
+    "monitor_visible_after_later_video_mapping": true,
+    "monitor_visible_through_normal_transparent_foot": true,
+    "replacement_left_one_new_owned_video_group": true,
+    "static_background_restored_after_stop": true,
+    "video_frame_visible": true,
+    "waybar_reload_preserved_terminal_focus": true
+  },
+  "fixture": {
+    "contains_user_content": false,
+    "terminal_content": "fixed",
+    "video": "generated Y4M"
+  },
+  "layers": {
+    "monitor": "bottom",
+    "terminal": "normal",
+    "video": "bottom"
+  },
+  "mapping_order": [
+    "Waybar monitor",
+    "mpvpaper video",
+    "normal transparent Foot",
+    "replacement mpvpaper video"
+  ],
+  "measurements": {
+    "focused_container_after_reload": 5,
+    "focused_container_before_reload": 5,
+    "left_blank_region_variance_under_foot": 0,
+    "monitor_amber_pixels_after_stop": 170,
+    "monitor_amber_pixels_after_video": 185,
+    "monitor_amber_pixels_before_video": 170,
+    "right_monitor_region_variance_under_foot": 177
+  },
+  "renderer": "pixman",
+  "schema_version": 1,
+  "screenshot": "alpine/verification/video-monitor-headless.png"
+}

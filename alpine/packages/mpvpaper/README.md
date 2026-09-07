@@ -22,6 +22,13 @@ reconfigure the static wallpaper process. `stop` terminates only the exact
 process group recorded in the user's private runtime directory, so other mpv
 processes are unaffected.
 
+The system monitor and video intentionally share Sway's `bottom` layer so both
+remain behind normal windows. The helper waits for mpv's `vo-configured` and
+`time-pos` properties over a private runtime IPC socket before it reloads the
+Waybar process for the current Sway socket and Wayland display. This maps the
+monitor above the newly rendered video without changing keyboard focus or
+restarting an unrelated Waybar session.
+
 The picker lists up to 500 local videos below `~/Videos` and `~/Downloads`.
 Typing an HTTPS URL into the picker is also explicit selection. HTTP URLs,
 URLs containing credentials, and missing local files are rejected.

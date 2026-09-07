@@ -19,8 +19,10 @@ body. The helper does not copy prompts, assistant output, commands, approval
 reasons, paths, model names, transcript locations, authentication data, or API
 data. It never writes to standard output, so the `PermissionRequest` hook does
 not allow, deny, answer, or otherwise influence the approval. The callbacks use
-the existing `notify-send` and SwayNC path; retained notifications therefore use
-the existing Caps Lock LED behavior.
+the existing `notify-send` and SwayNC path. A new Codex notice adds its mapped
+terminal window to the Caps Lock attention set. Focusing or closing that window
+clears it; other unseen AI windows keep flashing. See
+[AI attention behavior](2026-09-07-ai-attention-led.md).
 
 ## Transient routing contract
 

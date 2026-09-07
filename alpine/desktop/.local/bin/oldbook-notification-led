@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
-"""Keep Caps Lock LEDs lit while SwayNC holds notifications."""
+"""Flash Caps Lock LEDs while attributable AI windows await a visit."""
 import fcntl
 import json
 import os
 from pathlib import Path
+import re
 import selectors
 import signal
 import socket
+import stat
+import struct
 import subprocess
 import sys
 import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+from oldbook.app_identity import ApplicationResolver
+from oldbook.workspace_model import all_views
+
+
+HEADER = struct.Struct('=6sII')
+SWAY_GET_TREE = 4
+SWAY_SUBSCRIBE = 2
+SWAY_WINDOW_EVENT = (1 << 31) | 3
+PANE_PATTERN = re.compile(r'%[0-9]+')
+TTY_PATTERN = re.compile(r'/dev/(?:pts/[0-9]+|tty[0-9]+)')
 
 
 class CapsLeds:
@@ -26,13 +41,9 @@ class CapsLeds:
             try:
                 brightness = node / 'brightness'
                 if node not in self.ready:
-                    # A zero write also detaches the kernel's kbd-capslock
-                    # trigger, without requiring write access to trigger.
                     brightness.write_text('0\n')
                     self.ready.add(node)
                 desired = (node / 'max_brightness').read_text().strip() if enabled else '0'
-                # Read actual input LED state: Sway can reset it on resume or
-                # modifier changes. Reconcile without needless device writes.
                 if brightness.read_text().strip() != desired:
                     brightness.write_text(desired + '\n')
                 self.warned.discard(node)
@@ -42,12 +53,202 @@ class CapsLeds:
                     self.warned.add(node)
 
 
-def notification_pending(line):
+def attention_event(line):
     event = json.loads(line)
-    count = event.get('count') if isinstance(event, dict) else None
-    if type(count) is not int or count < 0:
-        raise ValueError('invalid notification count')
-    return count > 0
+    if (not isinstance(event, dict) or event.get('attention') is not True
+            or event.get('source') not in ('codex', 'claude', 'chatgpt')):
+        return None
+    return event['source']
+
+
+def control_center_state(line):
+    event = json.loads(line)
+    visible = event.get('visible') if isinstance(event, dict) else None
+    return visible if type(visible) is bool else None
+
+
+class AttentionFlash:
+    """Alternate at one hertz without resetting while any alert is pending."""
+    def __init__(self):
+        self.started = None
+
+    def reconcile(self, pending, now):
+        if pending and self.started is None:
+            self.started = now
+        elif not pending:
+            self.started = None
+
+    def enabled(self, now):
+        return (self.started is not None
+                and int((now - self.started) / 0.5) % 2 == 0)
+
+
+class PendingWindows:
+    """Track exact target windows and provider-level fallback alerts."""
+    def __init__(self):
+        self.windows = {}
+        self.fallback = {}
+
+    @property
+    def pending(self):
+        return bool(self.windows or self.fallback)
+
+    @staticmethod
+    def _candidates(source, applications):
+        return {identifier: app for identifier, app in applications.items()
+                if app.get('kind') == source}
+
+    @staticmethod
+    def _route_target(candidates, route):
+        if not isinstance(route, dict):
+            return None
+        tty = route.get('tty')
+        pane = route.get('tmux_pane')
+        if tty:
+            return next((identifier for identifier, app in candidates.items()
+                         if app.get('tty') == tty), None)
+        if pane:
+            return next((identifier for identifier, app in candidates.items()
+                         if app.get('tmux_pane') == pane), None)
+        return None
+
+    def add(self, source, applications, route=None):
+        candidates = self._candidates(source, applications)
+        target = self._route_target(candidates, route) if source == 'codex' else None
+        if target is not None:
+            if applications[target].get('focused'):
+                self.windows.pop(target, None)
+            else:
+                self.windows[target] = source
+            return
+        if candidates:
+            self.fallback.pop(source, None)
+            for identifier, app in candidates.items():
+                if app.get('focused'):
+                    self.windows.pop(identifier, None)
+                else:
+                    self.windows[identifier] = source
+            return
+        self.fallback[source] = False
+
+    def reconcile(self, applications):
+        live = set(applications)
+        self.windows = {identifier: source for identifier, source in self.windows.items()
+                        if identifier in live}
+        for source in list(self.fallback):
+            candidates = self._candidates(source, applications)
+            if candidates:
+                self.fallback.pop(source, None)
+                for identifier, app in candidates.items():
+                    if not app.get('focused'):
+                        self.windows[identifier] = source
+        for identifier, app in applications.items():
+            if not app.get('focused'):
+                continue
+            self.windows.pop(identifier, None)
+            self.fallback.pop(app.get('kind'), None)
+
+    def acknowledge_fallback(self):
+        self.fallback.clear()
+
+    def clear(self):
+        self.windows.clear()
+        self.fallback.clear()
+
+
+def _read_exact(connection, size):
+    chunks = bytearray()
+    while len(chunks) < size:
+        chunk = connection.recv(size - len(chunks))
+        if not chunk:
+            raise ConnectionError('Sway disconnected')
+        chunks.extend(chunk)
+    return bytes(chunks)
+
+
+def receive_sway(connection):
+    magic, length, kind = HEADER.unpack(_read_exact(connection, HEADER.size))
+    if magic != b'i3-ipc' or length > 32 * 1024 * 1024:
+        raise ValueError('invalid Sway IPC frame')
+    return kind, json.loads(_read_exact(connection, length))
+
+
+def send_sway(connection, kind, payload=''):
+    body = payload.encode()
+    connection.sendall(HEADER.pack(b'i3-ipc', len(body), kind) + body)
+
+
+def request_tree(path):
+    with socket.socket(socket.AF_UNIX) as connection:
+        connection.settimeout(3)
+        connection.connect(str(path))
+        send_sway(connection, SWAY_GET_TREE)
+        kind, tree = receive_sway(connection)
+        if kind != SWAY_GET_TREE or not isinstance(tree, dict):
+            raise ValueError('unexpected Sway tree response')
+        return tree
+
+
+def subscribe_sway(path):
+    connection = socket.socket(socket.AF_UNIX)
+    connection.settimeout(3)
+    try:
+        connection.connect(str(path))
+        send_sway(connection, SWAY_SUBSCRIBE, '["window"]')
+        kind, result = receive_sway(connection)
+        if (kind != SWAY_SUBSCRIBE or not isinstance(result, dict)
+                or result.get('success') is not True):
+            raise ValueError('Sway rejected window subscription')
+        connection.settimeout(None)
+        return connection
+    except Exception:
+        connection.close()
+        raise
+
+
+def application_snapshot(tree, resolver):
+    windows = all_views(tree)
+    applications = resolver.resolve_all(windows)
+    for window in windows:
+        identity = applications.get(window.get('id'))
+        if identity is not None:
+            identity['focused'] = window.get('focused') is True
+    return applications
+
+
+def relevant_window_event(event):
+    return (isinstance(event, dict)
+            and event.get('change') in ('focus', 'close', 'new'))
+
+
+def latest_codex_route(runtime, now=None):
+    now = time.time() if now is None else now
+    candidates = []
+    for path in (runtime / 'oldbook/codex-events').glob('*.json'):
+        try:
+            info = path.stat(follow_symlinks=False)
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid():
+                continue
+            event = json.loads(path.read_text())
+            observed = event.get('observed_at')
+            expires = event.get('valid_until')
+            tty = event.get('tty')
+            pane = event.get('tmux_pane')
+            if (event.get('version') != 1
+                    or event.get('event') not in ('turn-complete', 'approval-requested')
+                    or type(observed) is not int or type(expires) is not int
+                    or not now - 5 <= observed <= now + 2 or not now < expires
+                    or (tty is not None
+                        and (not isinstance(tty, str) or not TTY_PATTERN.fullmatch(tty)))
+                    or (pane is not None
+                        and (not isinstance(pane, str) or not PANE_PATTERN.fullmatch(pane)))):
+                continue
+            candidates.append((observed, info.st_mtime_ns,
+                               {'tty': tty, 'tmux_pane': pane}))
+        except (OSError, ValueError, AttributeError):
+            continue
+    return max(candidates, key=lambda item: item[:2],
+               default=(None, None, None))[2]
 
 
 def stop_subscriber(proc):
@@ -60,7 +261,8 @@ def stop_subscriber(proc):
     proc.stdout.close()
 
 
-def run(runtime, led_root, command, session_socket):
+def run(runtime, led_root, command, session_socket, sway_socket=None,
+        control_command=None, resolver=None):
     info = runtime.stat()
     if not runtime.is_dir() or info.st_uid != os.getuid() or info.st_mode & 0o077:
         raise RuntimeError('XDG_RUNTIME_DIR must be an owned private directory')
@@ -77,59 +279,127 @@ def run(runtime, led_root, command, session_socket):
         lights = CapsLeds(led_root)
         running = True
 
-        def stop(signum, frame):
+        def stop(_signum, _frame):
             nonlocal running
             running = False
 
         previous = {sig: signal.signal(sig, stop) for sig in (signal.SIGINT, signal.SIGTERM)}
-        proc = None
-        pending = False
-        retry_at = 0
-        buffer = b''
+        state = PendingWindows()
+        flash = AttentionFlash()
+        commands = {'attention': command}
+        if control_command is not None:
+            commands['control'] = control_command
+        processes = {name: None for name in commands}
+        buffers = {name: b'' for name in commands}
+        retries = {name: 0 for name in commands}
+        sway = None
+        resolver = resolver or ApplicationResolver()
+        center_visible = False
+
+        def snapshot():
+            if sway_socket is None:
+                return {}
+            applications = application_snapshot(request_tree(sway_socket), resolver)
+            state.reconcile(applications)
+            return applications
+
         try:
+            lights.sync(False)
             with selectors.DefaultSelector() as selector, socket.socket(socket.AF_UNIX) as session:
-                # An idle connection needs no Wayland requests. EOF also detects
-                # a compositor crash that leaves a stale socket path behind.
                 session.connect(str(session_socket))
                 selector.register(session, selectors.EVENT_READ, 'session')
+                if sway_socket is not None:
+                    sway = subscribe_sway(sway_socket)
+                    selector.register(sway, selectors.EVENT_READ, 'sway')
+                    snapshot()
                 while running and session_socket.exists():
-                    if proc is None and time.monotonic() >= retry_at:
+                    now = time.monotonic()
+                    for name, subscriber_command in commands.items():
+                        if processes[name] is not None or now < retries[name]:
+                            continue
                         try:
-                            proc = subprocess.Popen(command, stdin=subprocess.DEVNULL,
-                                                    stdout=subprocess.PIPE, bufsize=0)
-                            selector.register(proc.stdout, selectors.EVENT_READ)
+                            process = subprocess.Popen(
+                                subscriber_command, stdin=subprocess.DEVNULL,
+                                stdout=subprocess.PIPE, bufsize=0)
+                            processes[name] = process
+                            selector.register(process.stdout, selectors.EVENT_READ, name)
                         except OSError as error:
-                            print(f'oldbook-notification-led: subscriber: {error.strerror}', file=sys.stderr)
-                            retry_at = time.monotonic() + 2
-                    for key, _ in selector.select(timeout=1):
-                        if key.data == 'session':
+                            print(f'oldbook-notification-led: {name}: {error.strerror}',
+                                  file=sys.stderr)
+                            retries[name] = now + 2
+                    for key, _ in selector.select(timeout=0.1):
+                        name = key.data
+                        if name == 'session':
                             running = False
                             break
+                        if name == 'sway':
+                            kind, event = receive_sway(sway)
+                            if kind == SWAY_WINDOW_EVENT and relevant_window_event(event):
+                                snapshot()
+                            continue
+                        process = processes[name]
                         data = os.read(key.fd, 65536)
                         if not data:
-                            selector.unregister(proc.stdout)
-                            stop_subscriber(proc)
-                            proc = None
-                            pending = False
-                            buffer = b''
-                            retry_at = time.monotonic() + 2
+                            selector.unregister(process.stdout)
+                            stop_subscriber(process)
+                            processes[name] = None
+                            buffers[name] = b''
+                            retries[name] = time.monotonic() + 2
+                            if name == 'attention':
+                                state.clear()
+                            elif name == 'control':
+                                center_visible = False
                             continue
-                        buffer += data
-                        while b'\n' in buffer:
-                            line, buffer = buffer.split(b'\n', 1)
+                        buffers[name] += data
+                        while b'\n' in buffers[name]:
+                            line, buffers[name] = buffers[name].split(b'\n', 1)
                             try:
-                                pending = notification_pending(line)
+                                if name == 'attention':
+                                    source = attention_event(line)
+                                    if source:
+                                        state.add(source, snapshot(),
+                                                  latest_codex_route(runtime)
+                                                  if source == 'codex' else None)
+                                        if center_visible:
+                                            state.acknowledge_fallback()
+                                else:
+                                    visible = control_center_state(line)
+                                    if visible is not None:
+                                        center_visible = visible
+                                        if center_visible:
+                                            state.acknowledge_fallback()
                             except (ValueError, UnicodeError):
                                 pass
-                        if len(buffer) > 65536:
-                            buffer = b''
-                    lights.sync(pending)
+                        if len(buffers[name]) > 65536:
+                            buffers[name] = b''
+                    flash.reconcile(state.pending, time.monotonic())
+                    lights.sync(flash.enabled(time.monotonic()) if running else False)
         finally:
-            if proc is not None:
-                stop_subscriber(proc)
+            if sway is not None:
+                sway.close()
+            for process in processes.values():
+                if process is not None:
+                    stop_subscriber(process)
             lights.sync(False)
             for sig, handler in previous.items():
                 signal.signal(sig, handler)
+
+
+def find_sway_socket(runtime):
+    configured = os.environ.get('SWAYSOCK')
+    candidates = [Path(configured)] if configured else sorted(
+        runtime.glob(f'sway-ipc.{os.getuid()}.*.sock'),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for path in candidates:
+        try:
+            info = path.stat()
+            if path.is_socket() and info.st_uid == os.getuid():
+                return path
+        except OSError:
+            continue
+    raise RuntimeError('Sway IPC socket is unavailable')
 
 
 def main():
@@ -140,11 +410,13 @@ def main():
     session_socket = runtime / display
     if not session_socket.is_socket():
         raise RuntimeError('Wayland session socket is unavailable')
-    run(runtime, Path('/sys/class/leds'), ['swaync-client', '--subscribe'], session_socket)
+    stream = Path(__file__).resolve().with_name('oldbook-ai-notification-stream')
+    run(runtime, Path('/sys/class/leds'), [str(stream)], session_socket,
+        find_sway_socket(runtime), ['swaync-client', '--subscribe'])
 
 
 if __name__ == '__main__':
     try:
         main()
-    except (KeyError, OSError, RuntimeError) as error:
+    except (KeyError, OSError, RuntimeError, ValueError) as error:
         sys.exit(f'oldbook-notification-led: {error}')

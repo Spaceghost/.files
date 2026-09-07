@@ -64,8 +64,9 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   package-level evidence is in `packages/opensnitch/verification.json`.
   Live host firewall activation remains pending.
 - Caps Lock now sends Escape in the active Sway session and saved configuration.
-  The notification helper is deployed and running; the LED follows retained
-  SwayNC notifications. Five helper tests, Sway validation, ShellCheck and
+  The original notification helper followed retained SwayNC messages; the
+  subsequent AI attention changes are recorded below. Five original helper tests,
+  Sway validation, ShellCheck and
   disposable HOME deployment passed. Live keymap and LED readback, duplicate
   startup and SIGTERM cleanup were verified without clearing existing messages.
 - Evidence and decisions: `docs/superpowers/specs/2026-09-07-caps-notifications.md`.
@@ -90,9 +91,9 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   screenshots and results are saved under `verification/workspace-apps*`.
   Design and recovery details:
   `docs/superpowers/specs/2026-09-07-workspace-apps.md` and the linked Codex notes.
-- Existing Codex processes must restart to load callbacks. Approval alerts and
-  next-prompt badge cleanup require reviewing/trusting the hooks via `/hooks`;
-  that interactive trust remains pending. ChatGPT browser response completion
+- The user confirmed the requested Codex hook setup. New Codex processes load
+  the callbacks; the established hook definitions and trust are preserved.
+  ChatGPT browser response completion
   cannot be inferred from window titles. Reboot persistence remains unverified.
 
 ## Pithos keyring
@@ -131,13 +132,74 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 
 - Super+6 opens/focuses the local Fossil review browser. First recognized app
   instances receive default placement once; existing/manual placements and
-  extra instances remain free. Workspaces 1–6 have independent artwork state.
+  extra instances remain free. The initial independent artwork arrangement was
+  superseded by the user's request for one shared desktop image.
 - Compact bar/window spacing, title decorations and live Foot transparency
   applied. Six distinct wallpapers and concurrent-launch reuse verified.
 - Sway/Foot parsers, disposable deployment and focused tests passed. The full
   197-test run had one session-startup timeout; isolated rerun passed. Reboot
   persistence remains unverified. Details and recovery: 
   `docs/superpowers/specs/2026-09-07-strata-workspaces.md`.
+
+## Shared painting, video backgrounds and Ghostty
+
+- All workspaces now use the global painting, pause setting and timer. The
+  previous individual artwork selections remain saved but inactive. The shared
+  Space Ghost Yosemite painting and current symlink were verified; switching
+  workspaces no longer selects a different image.
+- Sway uses inner gaps 3 and outer gaps 4; Foot uses padding 4×4 and opacity 0.78.
+  Existing Foot colors/opacity were refreshed safely. Padding takes effect in
+  newly opened Foot windows; existing terminals were not restarted.
+- Added `oldbook-video-background` and its command-deck picker. Playback loops
+  without audio on the bottom layer, visible through transparent terminals.
+  Stop targets the recorded process group and reveals the existing painting.
+  Four focused tests and actual isolated mpvpaper playback/stop passed using a
+  generated throwaway clip. No user video was supplied or started live.
+- Installed Ghostty from explicitly tagged testing, with matching colors and
+  opacity. The command deck and application launcher expose it; Foot remains
+  the normal terminal binding. Ghostty's parser and disposable HOME deployment
+  passed. Isolated native Wayland Unicode rendering and measured transparency
+  passed with a fixed, content-free screenshot.
+- Exact video/Ghostty APKs, identities and hashes are archived. Snapshot
+  `0e1e8733a3ab9504808a` covers all 955 installed packages. Its earlier 952
+  identities were unchanged; the three Ghostty additions passed signed APK,
+  installed identity and Fossil export/hash checks. Full restore and reboot
+  were not exercised for this incremental snapshot.
+- Runtime evidence: `verification/shared-wallpaper.json`,
+  `verification/terminal-video-layout.json`, `verification/video-background-headless.json`
+  and `verification/ghostty*`. Usage/recovery: `packages/mpvpaper/README.md` and
+  `packages/ghostty/README.md`.
+
+## AI attention and transparent desktop monitor
+
+- Caps Lock remains Escape. The active LED helper stays off without pending
+  AI attention and flashes until each target window is focused or closed.
+  Multiple provider windows remain independently pending. Opening the
+  notification center acknowledges only alerts with no known target window.
+  A reconnect regression prevents stale visibility from clearing later alerts.
+- Codex callbacks are preserved and Claude notification hooks are installed
+  with private backup/rollback. Ghostty and Claude are recognized; Claude now
+  appears in workspace AI labels and the AI switcher. The LED and workspace
+  services restarted successfully, the keymap still reports `CAPS=Escape`, and
+  LEDs read zero. Focus changed during concurrent activity, so focus preservation
+  is not claimed for that restart.
+- Generic browser ChatGPT/Claude notices remain unsupported here because
+  SwayNC supplies no validated site origin. Native provider notifications work;
+  page titles never create attention. Browser response completion is unverified.
+- Waybar puts the current-window/media capsule against the right status group.
+  Outer ends stay square, while inner corners are rounded. A bottom-layer
+  Unicode monitor shows CPU, memory, temperature, network, disk and uptime.
+  It passes clicks through and reserves no desktop column.
+- After mpv configures video output and starts playback, the video helper reloads
+  only matching Waybar processes in the same Wayland session. Real isolated
+  playback, monitor-through-Foot rendering, replacement, focus and stop/restore
+  checks pass. Thirty focused attention tests, five video tests, independent
+  reviews, native parsers, the 235-test shared suite and the 228-test isolated
+  patch suite pass. Physical LED
+  observation and reboot remain unverified.
+- Evidence: `verification/ai-attention-led.json`, `verification/waybar-monitor*`,
+  `verification/waybar-top.png` and `verification/video-monitor-headless*`.
+  Indicator recovery: `docs/superpowers/specs/2026-09-07-ai-attention-led.md`.
 
 ## Square bar and terminal playlist player
 

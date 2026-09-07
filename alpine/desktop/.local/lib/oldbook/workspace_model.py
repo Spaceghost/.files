@@ -121,7 +121,7 @@ class WorkspaceNames:
             return {'id': workspace['id'], 'old': current, 'new': current,
                     'original': original, 'base': base}
         label = safe_label(app.get('name', ''), 28) if app else ''
-        if label and app.get('kind') in ('codex', 'chatgpt'):
+        if label and app.get('kind') in ('codex', 'chatgpt', 'claude'):
             label = '✦ ' + label
         if label and app.get('event') == 'turn-complete':
             label += ' ✓'

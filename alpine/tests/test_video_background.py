@@ -1,4 +1,6 @@
 import json
+import importlib.machinery
+import importlib.util
 import os
 from pathlib import Path
 import signal
@@ -6,10 +8,17 @@ import subprocess
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "alpine/desktop/.local/bin/oldbook-video-background"
+
+
+LOADER = importlib.machinery.SourceFileLoader("oldbook_video_background", str(SCRIPT))
+SPEC = importlib.util.spec_from_loader(LOADER.name, LOADER)
+VIDEO_BACKGROUND = importlib.util.module_from_spec(SPEC)
+LOADER.exec_module(VIDEO_BACKGROUND)
 
 
 class VideoBackgroundTests(unittest.TestCase):
@@ -20,18 +29,38 @@ class VideoBackgroundTests(unittest.TestCase):
         self.runtime = self.base / "runtime"
         self.runtime.mkdir(mode=0o700)
         self.record = self.base / "mpvpaper-argv.json"
+        self.queries = self.base / "mpvpaper-queries.jsonl"
         self.mpvpaper = self._executable(
             "mpvpaper",
             """#!/usr/bin/env python3
 import json
 import os
 from pathlib import Path
+import socket
 import sys
-import time
 
 Path(os.environ['FAKE_MVPAPER_RECORD']).write_text(json.dumps(sys.argv[1:]))
+options = sys.argv[sys.argv.index('--mpv-options') + 1].split()
+ipc = next((item.split('=', 1)[1] for item in options
+            if item.startswith('input-ipc-server=')), None)
+if ipc is None:
+    import time
+    while True:
+        time.sleep(1)
+server = socket.socket(socket.AF_UNIX)
+server.bind(ipc)
+server.listen()
 while True:
-    time.sleep(1)
+    connection, _ = server.accept()
+    with connection:
+        request = json.loads(connection.makefile().readline())
+        with Path(os.environ['FAKE_MVPAPER_QUERIES']).open('a') as stream:
+            stream.write(json.dumps(request) + '\\n')
+        prop = request['command'][1]
+        data = True if prop == 'vo-configured' else 0.25
+        response = {'request_id': request.get('request_id'),
+                    'error': 'success', 'data': data}
+        connection.sendall((json.dumps(response) + '\\n').encode())
 """,
         )
         self.env = os.environ.copy()
@@ -40,6 +69,7 @@ while True:
                 "HOME": str(self.base / "home"),
                 "XDG_RUNTIME_DIR": str(self.runtime),
                 "FAKE_MVPAPER_RECORD": str(self.record),
+                "FAKE_MVPAPER_QUERIES": str(self.queries),
                 "OLDBOOK_VIDEO_MPV_PAPER": str(self.mpvpaper),
             }
         )
@@ -96,12 +126,17 @@ while True:
                 "--mpv-options",
                 (
                     "config=no no-audio loop-file=inf hwdec=auto-safe "
-                    "input-default-bindings=no input-cursor=no osc=no terminal=no"
+                    "input-default-bindings=no input-cursor=no osc=no terminal=no "
+                    f"input-ipc-server={self.runtime}/oldbook/video-background/mpv.sock"
                 ),
                 "ALL",
                 str(video.resolve()),
             ],
         )
+        queried = [json.loads(line)["command"][1]
+                   for line in self.queries.read_text().splitlines()]
+        self.assertIn("vo-configured", queried)
+        self.assertIn("time-pos", queried)
 
         unrelated = subprocess.Popen(["sleep", "30"], start_new_session=True)
         self.addCleanup(lambda: self._terminate(unrelated))
@@ -183,6 +218,40 @@ print(os.environ['FAKE_FUZZEL_SELECTION'])
         self.assertIn(str(selected), fuzzel_input.read_text().splitlines())
         self.assertEqual(json.loads(self.record.read_text())[-1], str(selected.resolve()))
         self.addCleanup(lambda: self._run("stop"))
+
+    def test_waybar_reload_targets_only_same_executable_and_compositor(self):
+        proc = self.base / "proc"
+        proc.mkdir()
+        waybar = self._executable("waybar-bin", "#!/bin/sh\nexit 0\n")
+        other = self._executable("other-bin", "#!/bin/sh\nexit 0\n")
+
+        def candidate(pid, executable, sway_socket, wayland_display):
+            directory = proc / str(pid)
+            directory.mkdir()
+            (directory / "exe").symlink_to(executable)
+            (directory / "environ").write_bytes(
+                f"SWAYSOCK={sway_socket}\0WAYLAND_DISPLAY={wayland_display}\0".encode()
+            )
+
+        candidate(101, waybar, "/tmp/right-sway.sock", "wayland-right")
+        candidate(102, waybar, "/tmp/other-sway.sock", "wayland-right")
+        candidate(103, other, "/tmp/right-sway.sock", "wayland-right")
+        signals = []
+        environment = {
+            "PATH": str(self.base),
+            "SWAYSOCK": "/tmp/right-sway.sock",
+            "WAYLAND_DISPLAY": "wayland-right",
+        }
+        (self.base / "waybar").symlink_to(waybar)
+        with mock.patch.dict(os.environ, environment, clear=True):
+            count = VIDEO_BACKGROUND.reload_waybar(
+                proc_root=proc,
+                send_signal=lambda pid, sig: signals.append((pid, sig)),
+                settle_seconds=0,
+            )
+
+        self.assertEqual(count, 1)
+        self.assertEqual(signals, [(101, signal.SIGUSR2)])
 
     @staticmethod
     def _terminate(process):

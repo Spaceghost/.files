@@ -18,6 +18,7 @@ _APP_NAMES = {
     'codium': 'VSCodium',
     'firefox': 'Firefox',
     'foot': 'Foot',
+    'ghostty': 'Ghostty',
     'google-chrome': 'Google Chrome',
     'htop': 'htop',
     'kitty': 'Kitty',
@@ -92,6 +93,8 @@ def _known_app(value):
         return {'name': 'ChatGPT', 'kind': 'chatgpt', 'state': None}
     if key == 'codex' or key.startswith('codex-'):
         return {'name': 'Codex', 'kind': 'codex', 'state': None}
+    if key in {'claude', 'com.anthropic.claude'}:
+        return {'name': 'Claude', 'kind': 'claude', 'state': None}
     for token, name in _APP_NAMES.items():
         if key == token or key.endswith('.' + token):
             return {'name': name, 'kind': 'app', 'state': None}
@@ -104,7 +107,8 @@ def _known_app(value):
 
 def _is_terminal(value):
     key = _app_key(value)
-    return any(token in key for token in ('foot', 'kitty', 'alacritty', 'wezterm', 'xterm'))
+    return any(token in key for token in (
+        'foot', 'ghostty', 'kitty', 'alacritty', 'wezterm', 'xterm'))
 
 
 def _is_browser(value):
@@ -278,6 +282,8 @@ class ApplicationResolver:
         browser = next((source for source in sources if _is_browser(source)), None)
         if browser and re.search(r'(?<![A-Za-z0-9])(?:chatgpt|chat\.openai\.com)(?![A-Za-z0-9])', title, re.I):
             return {'name': 'ChatGPT', 'kind': 'chatgpt', 'state': None}
+        if browser and re.search(r'(?<![A-Za-z0-9])(?:claude|claude\.ai)(?![A-Za-z0-9])', title, re.I):
+            return {'name': 'Claude', 'kind': 'claude', 'state': None}
 
         terminal = self._terminal_source(window)
         if terminal:
@@ -286,8 +292,9 @@ class ApplicationResolver:
         for source in sources:
             identity = _known_app(source)
             if identity:
-                if identity['kind'] == 'codex':
-                    identity['state'] = _codex_state(title)
+                if identity['kind'] in ('codex', 'claude'):
+                    if identity['kind'] == 'codex':
+                        identity['state'] = _codex_state(title)
                     tty = self._foreground_tty(window.get('pid'), processes)
                     if tty:
                         identity['tty'] = tty
@@ -343,7 +350,7 @@ class ApplicationResolver:
             key=lambda item: (item[0], _app_key(item[1]['comm']) not in _SHELLS, item[1]['pid']),
         )
         identity = self._command_identity(foreground['comm'], base, title)
-        if identity['kind'] == 'codex' and foreground.get('tty_path'):
+        if identity['kind'] in ('codex', 'claude') and foreground.get('tty_path'):
             identity['tty'] = foreground['tty_path']
         return identity
 
