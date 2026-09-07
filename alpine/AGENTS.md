@@ -14,3 +14,13 @@ integration in `conky_layout.load_panels`. Run
 repository root for changes touching these templates, layout or refresh logic.
 Explicit new user preferences may change this policy; incidental artwork or
 layout work must not.
+
+Rotating desktop text lives in the user's SQLite journal at
+`~/.local/share/oldbook/journal/entries.sqlite3`, accessed through `oldbook-journal`.
+Do not restore JSON/random-line rotation. Preserve the original Coast to Coast
+voice: three quips for each journal note.
+Preserve all eight original lines and the four-minute interval,
+one-time legacy import, full stored entries and backup support. Dated journal
+notes must describe observed events; do not invent personal experiences or
+collect private activity automatically. The live database is personal data and
+must not be committed; only the reviewed seed collection is versioned.

@@ -90,3 +90,32 @@ whole set in turn.
 The search bar rests on the desktop layer and takes the keyboard only when
 clicked or summoned. Typing searches the reflections by figure and the verse
 text by words; Enter or a click sets what the desktop panel shows.
+
+## Coast to Coast notebook
+
+The rotating card reads SQLite, not an in-memory random list. The database is
+`~/.local/share/oldbook/journal/entries.sqlite3` (or beneath `XDG_DATA_HOME`),
+with private file permissions. Initial setup imports eight original Coast to
+Coast lines and eight dated assistant-written notes about observed desktop work.
+Existing custom `ghost_lines` are imported once before removal from the template.
+After initialization, changing seed files or templates does not overwrite the
+database. Three original-style quips alternate with one dated journal note, one
+entry every four minutes; rotation state survives restarts. There is no automatic activity collection or network request.
+
+The panel shows up to four body lines, with dates on journal notes; the database retains
+the full text, source, creation time, enabled flag and last display time.
+
+```sh
+oldbook-journal show
+oldbook-journal list
+oldbook-journal add --text 'Today I finished arranging the desktop.'
+oldbook-journal add --kind quip --text 'Moltar, bring the notebook.'
+oldbook-journal disable 3
+oldbook-journal backup ~/desktop-journal-backup.sqlite3
+```
+
+`list` prints complete records as JSON. New notes default to today's local date;
+`--date YYYY-MM-DD` sets a date explicitly. Backup uses SQLite's consistent
+backup API and refuses to overwrite an existing file. Restore a saved database
+to the journal path while Conky is stopped, then start Conky. The personal live
+database stays outside Fossil; the initial seed and code are versioned.

@@ -14,6 +14,16 @@
       "text": "${font JetBrainsMono Nerd Font:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet · Coast to Coast"
     },
     {
+      "id": "scripture",
+      "title": "Scripture",
+      "enabled": true,
+      "priority": 98,
+      "prefer": "right",
+      "width": 420,
+      "height": 204,
+      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 120 ~/.local/bin/oldbook-scripture panel --width 52}"
+    },
+    {
       "id": "power",
       "title": "Power",
       "enabled": true,
@@ -40,18 +50,8 @@
       "priority": 58,
       "prefer": "bottom",
       "width": 360,
-      "height": 84,
-      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 {{bin}} ghost-line}"
+      "height": 140,
+      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
     }
-  ],
-  "ghost_lines": [
-    "Zorak is not the administrator. Zorak has never been the administrator.",
-    "Moltar, roll the telemetry. Moltar, that is the wrong telemetry.",
-    "This desktop is broadcasting live from the Ghost Planet.",
-    "Brak asked what a kernel is. We are not taking further questions.",
-    "The interview will continue after these system metrics.",
-    "Everything is nominal. That is the most suspicious reading of all.",
-    "Space Ghost does not read logs. Space Ghost is read by logs.",
-    "Tonight on Coast to Coast: this laptop, and its feelings."
   ]
 }
