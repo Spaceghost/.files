@@ -1,0 +1,19 @@
+test_existing_output_is_rejected_and_preserved (test_bootstrap_rules.BootstrapRulesTests.test_existing_output_is_rejected_and_preserved) ... ok
+test_invalid_executable_paths_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_invalid_executable_paths_are_rejected_without_writes) ... ok
+test_invalid_uids_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_invalid_uids_are_rejected_without_writes) ... ok
+test_malformed_and_wildcard_resolvers_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_malformed_and_wildcard_resolvers_are_rejected_without_writes) ... ok
+test_manifest_records_audit_hashes_outside_loadable_rule_directory (test_bootstrap_rules.BootstrapRulesTests.test_manifest_records_audit_hashes_outside_loadable_rule_directory) ... ok
+test_missing_required_arguments_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_missing_required_arguments_are_rejected_without_writes) ... ok
+test_output_is_private_even_with_permissive_umask (test_bootstrap_rules.BootstrapRulesTests.test_output_is_private_even_with_permissive_umask) ... ok
+test_output_symlinks_and_symlink_ancestors_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_output_symlinks_and_symlink_ancestors_are_rejected_without_writes) ... ok
+test_policy_accepts_https_and_dns_but_rejects_near_matches (test_bootstrap_rules.BootstrapRulesTests.test_policy_accepts_https_and_dns_but_rejects_near_matches) ... ok
+test_relative_output_is_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_relative_output_is_rejected_without_writes) ... ok
+test_repeated_generation_is_byte_for_byte_deterministic (test_bootstrap_rules.BootstrapRulesTests.test_repeated_generation_is_byte_for_byte_deterministic) ... ok
+test_rules_only_allow_requested_executables_https_and_exact_resolver_dns (test_bootstrap_rules.BootstrapRulesTests.test_rules_only_allow_requested_executables_https_and_exact_resolver_dns) ... ok
+test_symlink_executable_paths_are_rejected_without_writes (test_bootstrap_rules.BootstrapRulesTests.test_symlink_executable_paths_are_rejected_without_writes) ... ok
+test_uid_boundary_values_are_supported (test_bootstrap_rules.BootstrapRulesTests.test_uid_boundary_values_are_supported) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 3.851s
+
+OK

@@ -1,0 +1,36 @@
+[Application]
+name=com.onepassword.OnePassword
+runtime=org.freedesktop.Platform/x86_64/25.08
+sdk=org.freedesktop.Sdk/x86_64/25.08
+base=app/org.electronjs.Electron2.BaseApp/x86_64/25.08
+command=1password
+
+[Context]
+shared=network;ipc;
+sockets=x11;wayland;fallback-x11;
+devices=all;
+filesystems=xdg-download;
+
+[Session Bus Policy]
+com.canonical.AppMenu.Registrar=talk
+org.kde.StatusNotifierWatcher=talk
+org.freedesktop.secrets=talk
+
+[Extra Data]
+name=1password.tar.gz
+checksum=b5d86e0497825db7a90cde99f58aacea013994c521ef6b0e26e412bf84288f53
+size=198731835
+uri=https://downloads.1password.com/linux/tar/stable/x86_64/1password-8.12.12.x64.tar.gz
+
+[Extension com.onepassword.OnePassword.Locale]
+directory=share/runtime/locale
+autodelete=true
+locale-subset=true
+
+[Extension com.onepassword.OnePassword.Debug]
+directory=lib/debug
+autodelete=true
+no-autodownload=true
+
+[Build]
+built-extensions=com.onepassword.OnePassword.Locale;com.onepassword.OnePassword.Debug;com.onepassword.OnePassword.Sources;

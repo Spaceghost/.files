@@ -1,0 +1,26 @@
+{
+  "passed": [
+    "baseline namespace connectivity",
+    "new egress denied before daemon starts",
+    "default-deny without GUI",
+    "generated HTTPS rules allow exact executable and UID on TCP 443 only",
+    "generated HTTPS rules deny wrong UID, different executable and wrong port",
+    "generated HTTPS rules deny an incorrect populated executable checksum",
+    "generated HTTPS checksum rule restores access after exact hash is restored",
+    "approved curl allowed; different Python executable denied",
+    "UDP allow rule is constrained by executable, protocol and port",
+    "rule changes hot-reload to deny",
+    "persistent gate denies new egress after graceful SIGTERM",
+    "persistent gate denies new egress after SIGKILL",
+    "independent queue remains installed without bypass"
+  ],
+  "ip_versions_tested": [
+    4,
+    6
+  ],
+  "transports_tested": [
+    "TCP",
+    "UDP"
+  ],
+  "host_network_unchanged": true
+}
