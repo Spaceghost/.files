@@ -19,7 +19,11 @@
       "subtitle": "OpenAI Codex CLI, here",
       "enabled": true,
       "command": [
-        "codex"
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "-s",
+        "danger-full-access"
       ]
     },
     {
@@ -28,7 +32,10 @@
       "subtitle": "Anthropic Claude Code, here",
       "enabled": true,
       "command": [
-        "claude"
+        "claude",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
       ]
     },
     {
@@ -47,7 +54,11 @@
       "enabled": true,
       "host": "alienware",
       "command": [
-        "codex"
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "-s",
+        "danger-full-access"
       ],
       "transport": "tailscale-ssh"
     },
@@ -58,7 +69,10 @@
       "enabled": true,
       "host": "alienware",
       "command": [
-        "claude"
+        "claude",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
       ],
       "transport": "tailscale-ssh"
     },
