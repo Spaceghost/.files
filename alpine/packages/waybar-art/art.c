@@ -29,29 +29,51 @@ static void release(Artwork *art) {
     }
 }
 
+typedef struct {
+    gboolean shift;
+    gboolean super;
+} Modifiers;
+
+static gboolean key_pressed(const unsigned char *keys, unsigned int key) {
+    return keys[key / 8] & (1u << (key % 8));
+}
+
+static gboolean is_keyboard(int fd) {
+    unsigned char keys[(KEY_MAX + 8) / 8] = {0};
+    return ioctl(fd, EVIOCGBIT(EV_KEY, sizeof keys), keys) >= 0 &&
+           key_pressed(keys, KEY_A) && key_pressed(keys, KEY_ENTER) &&
+           key_pressed(keys, KEY_SPACE);
+}
+
 /* Layer-shell panels usually have no keyboard focus, and therefore receive
- * GDK modifier state zero. Query the kernel at the button callback. Never read
- * input events, retain key history, or ask for privileged input access here. */
-static gboolean super_pressed(guint state) {
-    if (state & (GDK_MOD4_MASK | GDK_SUPER_MASK)) return TRUE;
+ * GDK modifier state zero. Query one kernel key snapshot per device at the
+ * button callback. Never read input events, retain key history, or ask for
+ * privileged input access here. */
+static Modifiers modifiers_pressed(guint state) {
+    Modifiers result = {
+        .shift = (state & GDK_SHIFT_MASK) != 0,
+        .super = (state & (GDK_MOD4_MASK | GDK_SUPER_MASK)) != 0,
+    };
+    if (result.shift && result.super) return result;
     glob_t devices = {0};
-    gboolean pressed = FALSE;
     if (glob("/dev/input/event*", 0, NULL, &devices) == 0) {
-        for (size_t i = 0; i < devices.gl_pathc && !pressed; ++i) {
+        for (size_t i = 0; i < devices.gl_pathc && !(result.shift && result.super); ++i) {
             int fd = open(devices.gl_pathv[i], O_RDONLY | O_NONBLOCK | O_CLOEXEC | O_NOFOLLOW);
             if (fd < 0) continue;
             struct stat info;
             unsigned char keys[(KEY_MAX + 8) / 8] = {0};
-            if (fstat(fd, &info) == 0 && S_ISCHR(info.st_mode) &&
+            if (fstat(fd, &info) == 0 && S_ISCHR(info.st_mode) && is_keyboard(fd) &&
                     ioctl(fd, EVIOCGKEY(sizeof keys), keys) >= 0) {
-                pressed = (keys[KEY_LEFTMETA / 8] & (1u << (KEY_LEFTMETA % 8))) ||
-                          (keys[KEY_RIGHTMETA / 8] & (1u << (KEY_RIGHTMETA % 8)));
+                result.shift = result.shift || key_pressed(keys, KEY_LEFTSHIFT) ||
+                               key_pressed(keys, KEY_RIGHTSHIFT);
+                result.super = result.super || key_pressed(keys, KEY_LEFTMETA) ||
+                               key_pressed(keys, KEY_RIGHTMETA);
             }
             close(fd);
         }
     }
     globfree(&devices);
-    return pressed;
+    return result;
 }
 
 static const char *string_member(JsonObject *object, const char *name) {
@@ -127,7 +149,10 @@ static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer data)
     /* GTK emits an additional double/triple event after a regular press. */
     if (event->type != GDK_BUTTON_PRESS) return TRUE;
     Artwork *art = data;
-    if (event->button == 1) action(art, super_pressed(event->state) ? "generate" : "next");
+    if (event->button == 1) {
+        Modifiers modifiers = modifiers_pressed(event->state);
+        action(art, modifiers.shift ? "edit-prompts" : modifiers.super ? "generate" : "next");
+    }
     else if (event->button == 2) action(art, "pause");
     else if (event->button == 3) action(art, "pick");
     return TRUE;

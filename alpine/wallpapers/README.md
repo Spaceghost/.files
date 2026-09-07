@@ -5,6 +5,9 @@ changes artwork every 20 minutes. The Waybar art icon shows the
 current painting and its story: click for the next image, scroll to browse,
 right-click for a gallery picker, and middle-click to pause. **Super/Command +
 left-click** generates a new painting and switches directly to it when ready.
+**Shift + left-click** opens the prompt editor. Both Shift and Super keys work;
+holding Shift and Super together opens the editor. Right/middle clicks and
+scrolling keep their usual actions even when a modifier is held.
 The gallery also offers **Generate new artwork & switch to it**. The same controls
 work from a terminal:
 
@@ -16,10 +19,26 @@ oldbook-wallpaper pause
 oldbook-wallpaper generate
 oldbook-wallpaper generate --theme none
 oldbook-wallpaper generate --theme gruvbox-dark
+oldbook-wallpaper edit-prompts
 ```
 
 The gallery preserves the painting list and appends next/previous, pause/resume,
 **Help & gallery controls**, and **Open command deck** alongside generation.
+The picker shows up to 28 rows so the current gallery and its controls fit on
+the laptop display. Scroll or type part of an action/title to find further entries.
+**Edit artwork prompts** is available there too. Its shared guidance and scene
+editor offers **Save** and **Cancel**. Saving affects future paintings and new
+theme designs; it preserves scene IDs, generation settings and existing artwork.
+The previous prompt file is backed up under
+`~/.local/state/oldbook/prompt-backups/`. An editor opened before another change
+asks you to reopen the file instead of overwriting that newer version.
+
+The shared guidance reflects strong Christian faith, admiration for the
+historical medieval Crusades and a love of history. All existing Space Ghost
+scenes remain, with additional cathedral pilgrimage, Crusader procession and
+monastery chronicle scenes. Sacred subjects are treated reverently, with humor
+coming from Space Ghost and his companions.
+
 The command deck retains its desktop tools and adds a **Help** entry. Guides
 open in a terminal pager; press `q` to close them.
 

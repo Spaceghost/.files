@@ -247,6 +247,11 @@ def start_generation(theme='active', *, new_theme=None):
                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
 
 
+def edit_prompts():
+    subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts')],
+                     start_new_session=True)
+
+
 def status():
     state = read_state()
     title = state.get('title', 'Space Ghost gallery')
@@ -255,6 +260,7 @@ def status():
     tooltip = '<b>' + html.escape(title) + '</b>\n' + html.escape(state.get('description', ''))
     tooltip += '\n\n' + mode + '\nClick: next · scroll: browse\nMiddle: pause · right: gallery'
     tooltip += '\nCommand/Super+click: generate & switch'
+    tooltip += '\nShift+click: edit prompts'
     if state.get('theme_name'):
         tooltip += '\nCollection: ' + html.escape(state['theme_name'])
     busy = generation_status()
@@ -275,15 +281,16 @@ def pick():
                 '⏯  Pause / resume rotation': 'pause'}
     help_label = '?  Help & gallery controls'
     deck_label = '󰊠  Open command deck · all desktop commands'
+    edit_label = '✎  Edit artwork prompts · Shift+click'
     themed_commands = {'✦  Generate unthemed artwork & switch to it': 'none'}
     themed_commands.update({'✦  Generate ' + theme['name'] + ' artwork & switch to it': theme['id']
                             for theme in available_themes(REPO)})
     random_label = '✦  Random new theme'
     phrase_label = '✦  New theme from a phrase/title'
-    options = [*labels, *controls, help_label, deck_label, generate_label,
+    options = [*labels, *controls, help_label, deck_label, edit_label, generate_label,
                random_label, phrase_label, *themed_commands]
     result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ ',
-                             '--lines', str(min(16, len(options))), '--width', '62'],
+                             '--lines', str(min(28, len(options))), '--width', '62'],
                             input='\n'.join(options) + '\n', capture_output=True, text=True)
     selected = result.stdout.rstrip('\n')
     if result.returncode == 0:
@@ -309,6 +316,8 @@ def pick():
         elif selected == deck_label:
             subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-control')],
                              start_new_session=True)
+        elif selected == edit_label:
+            edit_prompts()
 
 
 def daemon():
@@ -354,7 +363,8 @@ def daemon():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='status',
-                        choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'select'])
+                        choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh',
+                                 'generate', 'select', 'edit-prompts'])
     parser.add_argument('artwork_id', nargs='?', help='Exact gallery ID for select')
     parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
     args = parser.parse_args()
@@ -370,6 +380,8 @@ def main():
         daemon()
     elif args.action == 'generate':
         start_generation(args.theme)
+    elif args.action == 'edit-prompts':
+        edit_prompts()
     else:
         update(args.action, args.artwork_id)
 

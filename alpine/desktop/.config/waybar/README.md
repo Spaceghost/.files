@@ -9,7 +9,7 @@ Glib dispatcher warning during in-process reload).
 | Control | Actions |
 | --- | --- |
 | Ghost badge | Left: command deck. Right: application launcher. |
-| Artwork | Left: next image. Right: gallery picker. Middle: pause/resume rotation. Scroll: previous/next. Hover: artwork provenance, rotation state, and all controls. Command/Super+left: generate a new image and switch to it. |
+| Artwork | Left: next image. Right: gallery picker. Middle: pause/resume rotation. Scroll: previous/next. Hover: artwork provenance, rotation state, and all controls. Command/Super+left: generate a new image and switch to it. Shift+left: edit shared guidance and scene prompts. |
 | Workspaces | Click a named workspace; scroll to cycle. GHOST, ORBIT, LAB, SIGNAL, and LOUNGE are visual labels for 1–5, without forced application assignments. Workspaces 6–10 appear when used. |
 | Focused window | Click to choose any open window. Window title is shortened on the panel. |
 | Media | Appears with an MPRIS player. Left: play/pause. Right: next track. Middle: previous. |

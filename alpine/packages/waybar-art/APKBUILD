@@ -1,8 +1,8 @@
 # Maintainer: Oldbook local package <oldbook@localhost.invalid>
 pkgname=oldbook-waybar-art
 pkgver=1.0.0
-pkgrel=0
-pkgdesc="Space Ghost artwork controls for Waybar with Command-click generation"
+pkgrel=1
+pkgdesc="Space Ghost artwork controls for Waybar with additive modifier actions"
 url="https://github.com/Alexays/Waybar"
 arch="all"
 license="MIT"
@@ -26,7 +26,7 @@ package() {
 }
 
 sha512sums="
-4ba684bc1da5538dc8cae1b4a0c2c42126232481b8f27813b283a54656d7e1b60df9b1add18c95afa7e4ce463ae701c8cf8e756febc912f09806595c003b5c98  art.c
+1b0a8f4649518115eb7d1490912dff62c947db0b2b3d032ea30af6077f3dafb7ad2e24cd2d5e9b0724355099b7f1f7d5973e0265c5829797e110a1b90ef1e815  art.c
 b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd  waybar_cffi_module.h
 fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2  LICENSE.Waybar
 "

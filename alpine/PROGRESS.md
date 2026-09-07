@@ -235,3 +235,33 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Patched SwayFX binary still matches its verified hash; the current full
   SwayFX configuration validates with the isolated Intel backend. Stock Sway
   remains active. Bottom captions and effects start at the next normal login.
+
+## Additive gallery gestures and editable prompts
+
+- Kept left next, right gallery, middle pause/resume and scroll previous/next.
+  Super/Command+left generates; either Shift+left opens the prompt editor.
+  Shift wins when both are held. The native widget ignores non-keyboard Meta
+  state, and original gestures work after modifier release.
+- The gallery's 18 paintings had hidden all controls below a 16-row viewport.
+  A 28-row picker preserves order and fits 1440×900 with 76px vertical clearance.
+  Shared guidance now reflects strong Christian faith, admiration for historical
+  medieval Crusades and a love of history. Eight original scenes remain and
+  three historical scenes are appended. New theme design uses this guidance too.
+- Added a GTK prompt editor with shared style and scene title/description fields,
+  Save/Cancel, private exact-byte backups and external-change detection. Its
+  runtime dependency and helper link are installed. Existing paintings remain.
+- Native editor Save/Cancel, scene switching, backup bytes/modes and unchanged
+  existing settings pass in private Sway. Screenshot and evidence are in
+  `verification/gallery-prompts.{png,json}`.
+- All 251 shared and isolated-checkout tests pass. Sixteen real native gesture checks pass
+  inside isolated Sway, including both modifier keys, combined modifiers,
+  non-keyboard Meta noise and original gestures. No test requested generation.
+- Signed oldbook-waybar-art 1.0.0-r1 builds twice identically with networking
+  disabled. The exact APK archive export, installed binary and live loaded
+  library match. Waybar required a process restart to load the new library.
+  Snapshot 7f91e56a66dca04fb8bb records 1007 installed APK identities; only the
+  artwork package changed from the previous snapshot. No full restore rerun.
+- Physical pointer/keyboard observation and reboot remain unverified. Evidence
+  and recovery: `verification/gallery-controls.{png,json}`,
+  `packages/waybar-art/verification.json`, and
+  `docs/superpowers/specs/2026-09-07-gallery-additive-controls.md`.

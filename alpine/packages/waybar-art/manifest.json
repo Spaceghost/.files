@@ -1,0 +1,25 @@
+{
+  "alpine_release": "3.25.0_alpha20260805",
+  "arch": "x86_64",
+  "packages": [
+    {
+      "apk_identity": "Q1GeRZY/1SEcBCetwuiTNcijfXS8U=",
+      "arch": "x86_64",
+      "artifact": "sha256/d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050/oldbook-waybar-art-1.0.0-r1.apk",
+      "artifact_arch": "x86_64",
+      "binary_sha256": "3b2356a2fae1bf00dc2298c6ea2d1fc3588239fab4334e6e4b84c6a7d5135826",
+      "filename": "oldbook-waybar-art-1.0.0-r1.apk",
+      "name": "oldbook-waybar-art",
+      "sha256": "d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050",
+      "version": "1.0.0-r1"
+    }
+  ],
+  "schema": 1,
+  "verification": [
+    "two byte-identical network-isolated builds",
+    "apk verify",
+    "Fossil unversioned archive readback",
+    "installed binary hash comparison",
+    "isolated headless Sway interaction test"
+  ]
+}

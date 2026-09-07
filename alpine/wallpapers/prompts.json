@@ -1,7 +1,7 @@
 {
   "model": "gpt-5.6-luna",
   "timeout_seconds": 900,
-  "style": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail, rich atmospheric depth, luminous highlights and beautiful canvas texture. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. Preserve a spacious, quieter upper edge for a desktop panel. If a theme is supplied, follow its palette throughout; otherwise choose colors that suit the scene naturally. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
+  "style": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail, rich atmospheric depth, luminous highlights and beautiful canvas texture. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. The viewer is very Christian, pro-Crusade, and loves history. Reflect strong Christian faith and an admiring interest in the historical medieval Crusades, Christian civilization, chivalry and historical scholarship. Draw on reverent sacred art, monasteries, cathedrals, illuminated manuscripts, pilgrimages, heraldry and carefully observed period details when they suit the scene. Keep the existing American painting and Space Ghost parody character. Treat Christian sacred subjects reverently; let the humor come from Space Ghost and his companions. Preserve a spacious, quieter upper edge for a desktop panel. If a theme is supplied, follow its palette throughout; otherwise choose colors that suit the scene naturally. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.",
   "scenes": [
     {
       "id": "american-gothic",
@@ -36,12 +36,27 @@
     {
       "id": "victorian-seance",
       "title": "The Medium Has Technical Difficulties",
-      "description": "A lavishly painted fictional Victorian s\u00e9ance in a dark library: a room of elegantly dressed, astonished guests has accidentally summoned Space Ghost, who is earnestly checking the cables of an enormous 1960s television on the table. Zorak peeks out of a teapot. Rich dark velvet, molten candlelight, supernatural highlights and rich polished mahogany."
+      "description": "A lavishly painted fictional Victorian séance in a dark library: a room of elegantly dressed, astonished guests has accidentally summoned Space Ghost, who is earnestly checking the cables of an enormous 1960s television on the table. Zorak peeks out of a teapot. Rich dark velvet, molten candlelight, supernatural highlights and rich polished mahogany."
     },
     {
       "id": "cosmic-coronation",
       "title": "His Mildly Confused Majesty",
       "description": "A fictional galactic coronation painted as an immense baroque ceremony: Space Ghost kneels with solemn dignity while a tiny exasperated Zorak on a very tall stepladder attempts to place a comically small crown on his black hood. Alien courtiers maintain perfect poker faces. Cathedral-like nebula vaults, sumptuous velvet robes, luminous cape, antique gold."
+    },
+    {
+      "id": "pilgrims-at-dawn",
+      "title": "The Pilgrim Has Packed for Every Century",
+      "description": "A luminous American Romantic history painting of medieval Christian pilgrims approaching a great cathedral at dawn. A reverent procession carries beautifully embroidered crosses and candles; intricate stone tracery rises into golden mist. Space Ghost respectfully joins the pilgrims, carrying a ludicrously overpacked canvas knapsack with a tiny satellite dish protruding from it. Zorak studies an enormous upside-down medieval map. Historically observed wool, leather, pilgrim badges and carved stone; the joke belongs to the visitors, while the sacred setting is dignified."
+    },
+    {
+      "id": "crusader-procession",
+      "title": "The Knight Has a Scheduling Conflict",
+      "description": "An admiring, grand nineteenth-century American history painting of a twelfth-century Crusader procession departing a European abbey for the Holy Land. Mail-clad knights, cross-bearing banners, pilgrims and packhorses gather in luminous morning haze. Noble chivalric dignity, historically grounded heraldry, reverent Christian imagery and beautifully painted Romanesque architecture. Space Ghost, solemnly wearing a borrowed surcoat over his unmistakable costume, attempts to fit his enormous yellow cape onto a tiny patient pony; Zorak holds a rolled itinerary longer than the abbey steps."
+    },
+    {
+      "id": "monastery-chronicle",
+      "title": "A Footnote from Ghost Planet",
+      "description": "A richly detailed American realist historical painting inside a medieval Christian monastery scriptorium. Monks carefully illuminate a chronicle with gold leaf, deep blue pigments and reverent Christian art. Space Ghost respectfully consults a vast historical manuscript while Zorak struggles to cut an absurdly oversized quill. Quiet afternoon light through Romanesque windows, oak desks, vellum and exquisite brushwork; the atmosphere celebrates Christian learning and the preservation of history."
     }
   ]
 }

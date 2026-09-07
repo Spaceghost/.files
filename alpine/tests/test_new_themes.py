@@ -47,6 +47,22 @@ class NewThemeTests(unittest.TestCase):
         self.assertIn('moon books', new_themes.theme_prompt('moon books'))
         self.assertNotEqual(new_themes.theme_prompt(''), new_themes.theme_prompt(''))
 
+    def test_theme_design_receives_saved_artwork_guidance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            repo = Path(directory)
+            guidance = 'Strong Christian faith, medieval Crusades and a love of history.'
+            process = mock.Mock(returncode=0)
+            def command(work, model):
+                (work / 'result.json').write_text(json.dumps(self.definition()))
+                return ['codex', '--sandbox', 'workspace-write', '--enable', 'image_generation']
+            with mock.patch.object(new_themes.subprocess, 'Popen', return_value=process):
+                theme = new_themes.design_theme(repo, {'model': 'fixture', 'style': guidance},
+                                               {}, repo / 'log', 'illuminated chronicles', command)
+            sent = process.communicate.call_args.args[0]
+            self.assertIn(guidance, sent)
+            self.assertIn('illuminated chronicles', sent)
+            self.assertEqual(theme['source_phrase'], 'illuminated chronicles')
+
     def test_cancelled_phrase_menu_does_not_launch(self):
         from subprocess import CompletedProcess
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \

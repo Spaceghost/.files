@@ -30,13 +30,16 @@ for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'
 # BEFORE it exists. The compositor used below has no libinput backend.
 name = f'oldbook-art-test-{os.getpid()}'
 identifier = f'65261:49374:{name}'
+noise_name = f'oldbook-art-noise-test-{os.getpid()}'
+noise_identifier = f'65261:49374:{noise_name}'
 existing = list((Path('/run/user') / str(os.getuid())).glob('sway-ipc*.sock'))
 for socket in existing:
-    response = subprocess.run(['swaymsg', '-s', str(socket), '-r',
-                               f'input "{identifier}" events disabled'],
-                              capture_output=True, text=True, check=True)
-    if not all(entry.get('success') for entry in json.loads(response.stdout)):
-        raise RuntimeError('Could not disable synthetic input in existing compositor')
+    for device_identifier in (identifier, noise_identifier):
+        response = subprocess.run(['swaymsg', '-s', str(socket), '-r',
+                                   f'input "{device_identifier}" events disabled'],
+                                  capture_output=True, text=True, check=True)
+        if not all(entry.get('success') for entry in json.loads(response.stdout)):
+            raise RuntimeError('Could not disable synthetic input in existing compositor')
 subprocess.run(['doas', '-n', 'modprobe', 'uinput'], check=True)
 
 for mode in ('client-header', 'private-code'):
@@ -49,7 +52,7 @@ subprocess.run(['cc', '-I'+str(out), '-o', str(out/'pointer-input'),
 (out/'stub').write_text('#!/usr/bin/env python3\nimport json, pathlib, sys\n'
     f'p = pathlib.Path({str(out)!r})\n'
     'if sys.argv[1] == "status":\n'
-    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: next · scroll: browse\\nMiddle: pause · right: gallery\\nSuper + click: generate and switch"}))\n'
+    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: next · scroll: browse\\nMiddle: pause · right: gallery\\nSuper + click: generate and switch\\nShift + click: edit prompts"}))\n'
     'else:\n'
     '    with (p/"actions").open("a") as stream: stream.write(sys.argv[1]+"\\n")\n')
 (out/'stub').chmod(0o755)
@@ -69,11 +72,18 @@ with (out/'runtime.log').open('w') as log:
         processes.append(keyboard)
         if keyboard.stdout.readline().strip() != 'ready':
             raise RuntimeError('Synthetic keyboard failed to start')
+        noise = subprocess.Popen(['doas','-n','python3',str(base/'tests/uinput-keyboard.py'),
+                                  noise_name, 'modifier-only'], stdin=subprocess.PIPE,
+                                 stdout=subprocess.PIPE, stderr=log, text=True)
+        processes.append(noise)
+        if noise.stdout.readline().strip() != 'ready':
+            raise RuntimeError('Synthetic non-keyboard modifier device failed to start')
         for socket in existing:
             inputs = json.loads(subprocess.check_output(['swaymsg','-s',str(socket),'-r','-t','get_inputs'],text=True))
-            own = [item for item in inputs if item['identifier'] == identifier]
-            if own and own[0].get('libinput',{}).get('send_events') != 'disabled':
-                raise RuntimeError('Test keyboard was not disabled in existing compositor')
+            for device_identifier in (identifier, noise_identifier):
+                own = [item for item in inputs if item['identifier'] == device_identifier]
+                if own and own[0].get('libinput',{}).get('send_events') != 'disabled':
+                    raise RuntimeError('Test input was not disabled in existing compositor')
         sway = subprocess.Popen([args.sway,'--debug','-c',str(out/'sway.conf')],env=env,stdout=log,stderr=log)
         processes.append(sway)
         for _ in range(100):
@@ -109,12 +119,12 @@ with (out/'runtime.log').open('w') as log:
             if process.stdout.readline().strip() != 'ok':
                 raise RuntimeError('Input device stopped')
 
-        def check(label, expected, button=272, meta=None, x=50, scroll=None):
+        def check(label, expected, button=272, modifiers=(), x=50, scroll=None):
             before = (out/'actions').read_text().splitlines() if (out/'actions').exists() else []
             send(pointer, f'move {x} 24')
             time.sleep(.1)
-            if meta:
-                send(keyboard, f'press {meta}')
+            for modifier in modifiers:
+                send(keyboard, f'press {modifier}')
             try:
                 if scroll:
                     send(pointer, f'scroll {scroll}')
@@ -130,29 +140,37 @@ with (out/'runtime.log').open('w') as log:
                     raise AssertionError(f'{label}: expected {[expected]}, got {after[len(before):]}')
                 checks.append(label)
             finally:
-                if meta:
-                    send(keyboard, f'release {meta}')
+                for modifier in reversed(modifiers):
+                    send(keyboard, f'release {modifier}')
             time.sleep(.5)  # Keep independent clicks outside GTK double-click interval.
 
         check('normal left click', 'next')
-        check('left Command plus left click', 'generate', meta=125)
-        check('right Command plus left click', 'generate', meta=126)
+        check('left Command plus left click', 'generate', modifiers=(125,))
+        check('right Command plus left click', 'generate', modifiers=(126,))
+        check('left Shift plus left click', 'edit-prompts', modifiers=(42,))
+        check('right Shift plus left click', 'edit-prompts', modifiers=(54,))
+        check('Shift wins over Command plus left click', 'edit-prompts', modifiers=(125, 42))
         check('right click gallery', 'pick', button=273)
         check('middle click pause', 'pause', button=274)
         check('scroll up previous', 'prev', scroll='up')
         check('scroll down next', 'next', scroll='down')
-        check('modifier stays scoped to artwork', 'control', meta=125, x=240)
+        check('right click with Shift remains gallery', 'pick', button=273, modifiers=(42,))
+        check('middle click with Command remains pause', 'pause', button=274, modifiers=(125,))
+        check('scroll up with Shift remains previous', 'prev', scroll='up', modifiers=(54,))
+        check('scroll down with Command remains next', 'next', scroll='down', modifiers=(126,))
+        check('modifiers stay scoped to artwork', 'control', modifiers=(125, 42), x=240)
         check('normal click after modifier release', 'next')
         time.sleep(1)
         subprocess.run(['grim',str(out/'screenshot.png')],env=env,check=True)
-        evidence = {'checks':checks,'paid_generation_calls':0,'input_device':identifier,
+        evidence = {'checks':checks,'paid_generation_calls':0,
+                    'input_devices':[identifier, noise_identifier],
                     'live_compositors_protected':len(existing), 'module':str(module)}
         (out/'evidence.json').write_text(json.dumps(evidence,indent=2)+'\n')
         print(json.dumps(evidence,indent=2))
     finally:
         for process in reversed(processes):
             if process.poll() is None:
-                if process in (keyboard, locals().get('pointer')):
+                if process in (keyboard, locals().get('noise'), locals().get('pointer')):
                     process.stdin.close()
                 else:
                     process.terminate()

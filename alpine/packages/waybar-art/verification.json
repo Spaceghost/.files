@@ -1,40 +1,50 @@
 {
-  "schema": 1,
-  "date": "2026-09-07",
-  "package": "oldbook-waybar-art-1.0.0-r0.apk",
-  "package_sha256": "c6ae1c9a34b688cb608f475355264be32791484fbbb29a91f1d3080d1ecd1956",
-  "binary_sha256": "b220ad2d9c368245fd181603d54e66bd57f2e718c76ca3a5197ee4ad33a08d64",
-  "source_date_epoch": 1788739200,
+  "apk_identity": "Q1GeRZY/1SEcBCetwuiTNcijfXS8U=",
+  "apk_signature": "apk verify: OK",
+  "binary_sha256": "3b2356a2fae1bf00dc2298c6ea2d1fc3588239fab4334e6e4b84c6a7d5135826",
   "builds": [
     {
-      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-v1",
+      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r1-a",
       "network": "disabled with unshare --net",
-      "sha256": "c6ae1c9a34b688cb608f475355264be32791484fbbb29a91f1d3080d1ecd1956"
+      "sha256": "d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050"
     },
     {
-      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-v2",
+      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r1-b",
       "network": "disabled with unshare --net",
-      "sha256": "c6ae1c9a34b688cb608f475355264be32791484fbbb29a91f1d3080d1ecd1956"
+      "sha256": "d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050"
     }
   ],
   "byte_identical_signed_apks": true,
-  "apk_signature": "apk verify: OK",
+  "date": "2026-09-07",
+  "headless_output": "/home/jack/.local/state/alpine-rice/verify/waybar-art-r1",
+  "installed_binary_matches_package": true,
   "interaction_checks": [
     "normal left click",
     "left Command plus left click",
     "right Command plus left click",
+    "left Shift plus left click",
+    "right Shift plus left click",
+    "Shift wins over Command plus left click",
     "right click gallery",
     "middle click pause",
     "scroll up previous",
     "scroll down next",
-    "modifier stays scoped to artwork",
+    "right click with Shift remains gallery",
+    "middle click with Command remains pause",
+    "scroll up with Shift remains previous",
+    "scroll down with Command remains next",
+    "modifiers stay scoped to artwork",
     "normal click after modifier release"
   ],
+  "package": "oldbook-waybar-art-1.0.0-r1.apk",
+  "package_sha256": "d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050",
   "paid_generation_calls": 0,
-  "red_test": "Before kernel Meta-state support, real Command+leftclick dispatched next; expected generate.",
-  "limits": [
-    "Requires readable evdev nodes (existing input group).",
-    "Physical Linux Left/Right Meta keys; remapping those keys is not inferred.",
-    "Headless integration dispatches to a stub; generation and wallpaper switching tested by the parent task."
-  ]
+  "red_tests": [
+    "Before Shift routing, real left Shift plus left click dispatched next instead of edit-prompts.",
+    "Before keyboard capability filtering, a modifier-only input with Meta held changed a normal left click into generate."
+  ],
+  "schema": 2,
+  "screenshot_sha256": "052709749c5e5353e6fd550bd2fafba3bd3738b4a37d9009686639c24464a828",
+  "source_date_epoch": 1788739200,
+  "source_sha512": "1b0a8f4649518115eb7d1490912dff62c947db0b2b3d032ea30af6077f3dafb7ad2e24cd2d5e9b0724355099b7f1f7d5973e0265c5829797e110a1b90ef1e815"
 }

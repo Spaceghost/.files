@@ -159,6 +159,46 @@ class ManualArtworkTests(unittest.TestCase):
                 update.assert_called_once_with(action)
                 generate.assert_not_called()
 
+    def test_gallery_controls_remain_visible_with_eighteen_paintings(self):
+        entries = [{'id': str(i), 'title': f'Painting {i}'} for i in range(18)]
+        def cancel(command, **kwargs):
+            visible_count = int(command[command.index('--lines') + 1])
+            visible = '\n'.join(kwargs['input'].splitlines()[:visible_count])
+            for label in ('Next artwork', 'Previous artwork', 'Pause / resume rotation',
+                          'Help & gallery controls', 'Open command deck', 'Edit artwork prompts',
+                          'Generate new artwork'):
+                self.assertIn(label, visible)
+            return subprocess.CompletedProcess(command, 1, '', '')
+        with mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
+                mock.patch.object(art.subprocess, 'run', side_effect=cancel), \
+                mock.patch.object(art, 'start_generation') as generate, \
+                mock.patch.object(art, 'update') as update:
+            art.pick()
+        generate.assert_not_called()
+        update.assert_not_called()
+
+    def test_gallery_opens_prompt_editor_without_changing_or_generating_art(self):
+        def choose(command, **kwargs):
+            selected = next(line for line in kwargs['input'].splitlines() if 'Edit artwork prompts' in line)
+            return subprocess.CompletedProcess(command, 0, selected + '\n', '')
+        with mock.patch.object(art, 'load_gallery', return_value=([], 1200)), \
+                mock.patch.object(art.subprocess, 'run', side_effect=choose), \
+                mock.patch.object(art.subprocess, 'Popen') as launch, \
+                mock.patch.object(art, 'start_generation') as generate, \
+                mock.patch.object(art, 'update') as update:
+            art.pick()
+        self.assertEqual(launch.call_args.args[0], ['/usr/bin/python3',
+                         str(art.REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts')])
+        generate.assert_not_called()
+        update.assert_not_called()
+
+    def test_edit_prompts_command_opens_editor(self):
+        with mock.patch('sys.argv', ['oldbook-wallpaper', 'edit-prompts']), \
+                mock.patch.object(art.subprocess, 'Popen') as launch:
+            art.main()
+        self.assertEqual(launch.call_args.args[0][-1],
+                         str(art.REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts'))
+
     def test_select_resets_rotation_deadline_and_preserves_pause(self):
         state = self.root / 'wallpaper'
         state.mkdir()
@@ -185,7 +225,8 @@ class ManualArtworkTests(unittest.TestCase):
             state = json.loads(output.getvalue())
             self.assertEqual(state['class'], 'paused' if busy is None else 'generating')
             for instruction in ('Click: next', 'scroll: browse', 'Middle: pause',
-                                'right: gallery', 'Super+click: generate & switch', 'Paused'):
+                                'right: gallery', 'Super+click: generate & switch',
+                                'Shift+click: edit prompts', 'Paused'):
                 self.assertIn(instruction, state['tooltip'])
             self.assertIn('A &lt;painting&gt;', state['tooltip'])
 

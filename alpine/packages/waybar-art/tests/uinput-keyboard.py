@@ -8,13 +8,16 @@ import sys
 import time
 
 name = sys.argv[1]
-if not name.startswith('oldbook-art-test-') or len(name) > 60:
+mode = sys.argv[2] if len(sys.argv) > 2 else 'keyboard'
+if (not name.startswith(('oldbook-art-test-', 'oldbook-art-noise-test-')) or
+        len(name) > 60 or mode not in ('keyboard', 'modifier-only')):
     raise SystemExit('Invalid test device name')
 fd = os.open('/dev/uinput', os.O_WRONLY | os.O_NONBLOCK)
 try:
     fcntl.ioctl(fd, 0x40045564, 1)  # UI_SET_EVBIT / EV_KEY
-    for key in (30, 125, 126):
-        fcntl.ioctl(fd, 0x40045565, key)  # A, Left/Right Meta
+    keys = (28, 30, 42, 54, 57, 125, 126) if mode == 'keyboard' else (125,)
+    for key in keys:
+        fcntl.ioctl(fd, 0x40045565, key)  # Enter, A, Space, Shift and Meta
     setup = struct.pack('80sHHHHI', name.encode(), 3, 0xfeed, 0xc0de, 1, 0)
     os.write(fd, setup + bytes(64 * 4 * 4))
     fcntl.ioctl(fd, 0x5501)  # UI_DEV_CREATE
@@ -26,12 +29,17 @@ try:
         time.sleep(.05)
     else:
         raise RuntimeError('No evdev node appeared')
+    if mode == 'modifier-only':
+        os.write(fd, struct.pack('llHHi', 0, 0, 1, 125, 1))
+        os.write(fd, struct.pack('llHHi', 0, 0, 0, 0, 0))
     print('ready', flush=True)
     for line in sys.stdin:
+        if mode != 'keyboard':
+            raise ValueError('Modifier-only test device accepts no commands')
         command, key_text = line.split()
         key = int(key_text)
-        if command not in ('press', 'release') or key not in (125, 126):
-            raise ValueError('Only test Meta keys are permitted')
+        if command not in ('press', 'release') or key not in (42, 54, 125, 126):
+            raise ValueError('Only test Shift and Meta keys are permitted')
         os.write(fd, struct.pack('llHHi', 0, 0, 1, key, int(command == 'press')))
         os.write(fd, struct.pack('llHHi', 0, 0, 0, 0, 0))
         print('ok', flush=True)
