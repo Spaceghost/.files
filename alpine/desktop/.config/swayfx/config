@@ -1,3 +1,8 @@
 # Shared desktop plus the effects supported by SwayFX.
 include ~/.config/sway/config
 include ~/.config/swayfx/effects.conf
+
+# Local reproducible SwayFX patch: captions sit beneath normal windows.
+titlebar_position bottom
+default_border normal 0
+default_floating_border normal 0

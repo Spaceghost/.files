@@ -21,16 +21,20 @@ tmux source-file ~/.tmux.conf
 swaync-client --reload-css
 ```
 
-Waybar watches CSS changes. Its artwork widget preserves left/right/middle
+Waybar centers the focused-app title and media controls in the space between
+the left and right sections (`"fixed-center": false` in its configuration).
+It watches CSS changes. Its artwork widget preserves left/right/middle
 click and scroll, and adds Command/Super+left-click generation. New terminal
 windows read all Foot settings; the refresh command recolors existing Foot
 sessions without sending input or closing applications. Other applications
 that load their theme only at startup use it when next opened.
 
 `sway/theme.conf` contains decorations separately from keybindings. Foot has
-a matching fallback decoration for other compositors. SwayFX uses soft shadows
-and restrained corners; an existing stock Sway session gains those effects at
-the next normal desktop login.
+a matching fallback decoration for other compositors. The local SwayFX package
+puts normal window captions below their content; grouped tab and stack headers
+retain their controls. Its soft shadows, rounded corners and bottom captions
+take effect at the next normal desktop login when stock Sway is still running.
+See the [offline compositor recipe](../packages/swayfx/README.md).
 
 ## Artwork collections
 

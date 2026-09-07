@@ -5,6 +5,18 @@ It installs as `/usr/bin/swayfx` alongside stock `/usr/bin/sway`; the existing
 compositor and its tools remain available. The release is based on Sway 1.12.0
 and uses Alpine's sceneFX 0.5 and wlroots 0.20 libraries.
 
+## Bottom window titles
+
+The local `bottom-titlebar.patch` adds `titlebar_position top|bottom` for normal
+per-window decorations. The desktop selects `bottom` in
+`desktop/.config/swayfx/config`, with zero-width window borders. The focused-app
+title and media controls remain in Waybar, centered between its other sections.
+Tabbed and stacked group headers keep their existing placement and controls.
+
+Only this patched SwayFX accepts the new command. Keep it out of the shared
+stock Sway configuration. `titlebar_position top` restores upstream placement;
+`OLDBOOK_STOCK_SWAY=1 sway` selects the retained stock compositor at login.
+
 ## Edit and enable
 
 `oldbook-effects.conf` is the violet-glass example, also packaged under
@@ -37,15 +49,19 @@ under `WORK/apks/oldbook/x86_64/`. Installation is a separate `apk add` operatio
 
 Sources are pinned to upstream commit `fd71a6bdc061bd633b488ae7b83e8a6981d22f86`;
 `manifest.json` records source/package hashes and Fossil artifact names. When
-changing recipe inputs, regenerate APKBUILD checksums before building.
+changing recipe inputs, regenerate APKBUILD checksums before building. The
+offline helper copies the versioned patch into the recipe, and abuild checks
+its checksum before applying it to the archived source.
 
 ## Verification
 
 Two builds in separate directories, both without networking, produced the same
 signed APK and executable byte for byte. `apk verify` passed. The native musl
 binary parsed every example effect and rendered on both AMD and Intel GLES2
-backends with a headless output. This does not prove physical display takeover,
-suspend/resume or battery performance.
+backends with a headless output. The rebuilt package also passed 22 bottom-title
+checks: tiled/floating geometry, pointer drag/resize, fullscreen edge pixels,
+border modes, grouped headers and multiple floating windows on stacked layouts.
+This does not prove physical display takeover, suspend/resume or battery performance.
 
 After installing the package, run a contained rendering check:
 
@@ -57,7 +73,17 @@ Choose an available DRM render node on another machine. The script creates its
 own runtime directory, synthetic terminal and screenshot; it leaves the active
 Sway session alone. `verification.json` records evidence and remaining limits.
 
-![Synthetic headless rendering proof](renderer-preview.png)
+Verify bottom-caption geometry and real pointer interactions too:
+
+```sh
+alpine/packages/swayfx/verify-bottom-titlebar --binary /usr/bin/swayfx --output /tmp/swayfx-bottom-test --render-device /dev/dri/renderD129
+```
+
+This uses a private Wayland virtual pointer and synthetic Foot clients. It does
+not inject input into the live desktop. The compiler, Wayland development tools,
+Foot, grim and Python GdkPixbuf dependencies are retained in the package lock.
+
+![Actual bottom captions and rounded corners](bottom-titlebar-preview.png)
 
 Upstream: [SwayFX 0.6](https://github.com/wlrfx/swayfx/releases/tag/0.6),
 [configuration and build instructions](https://github.com/wlrfx/swayfx/tree/fd71a6bdc061bd633b488ae7b83e8a6981d22f86).

@@ -1,0 +1,402 @@
+#!/usr/bin/env python3
+"""Exercise bottom titlebar geometry and pointer input in an isolated SwayFX session."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import select
+import shlex
+import subprocess
+import sys
+import tempfile
+import time
+
+WIDTH, HEIGHT = 1440, 900
+BASE = Path(__file__).resolve().parent
+REPO = BASE.parents[2]
+
+
+def walk(node):
+    yield node
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        yield from walk(child)
+
+
+def outer(node):
+    body, deco = node['rect'], node['deco_rect']
+    if not deco['height']:
+        return dict(body)
+    # These clients are direct workspace children; their decoration coordinates
+    # are relative to an origin-zero workspace, as specified by Sway's IPC.
+    return {'x': body['x'], 'y': min(body['y'], deco['y']),
+            'width': body['width'], 'height': body['height'] + deco['height']}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
+    parser.add_argument('--render-device', default='/dev/dri/renderD128')
+    args = parser.parse_args(argv)
+    binary = args.binary.resolve(strict=True)
+    out = args.output.absolute()
+    out.mkdir(parents=True, exist_ok=False)
+    evidence = {'binary': str(binary), 'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
+                'checks': [], 'status': 'running', 'live_session_changes': 0}
+    processes = []
+    current_stage = 'startup'
+
+    def checked(label, **details):
+        evidence['checks'].append({'check': label, **details})
+
+    def require(condition, message):
+        if not condition:
+            raise AssertionError(message)
+
+    theme = REPO / 'alpine/desktop/.config/sway/theme.conf'
+    foot_config = REPO / 'alpine/desktop/.config/foot/foot.ini'
+    (out / 'sway.conf').write_text(f'''xwayland disable
+output HEADLESS-1 mode {WIDTH}x{HEIGHT}
+output * bg #1d2021 solid_color
+seat seat0 fallback true
+focus_follows_mouse no
+mouse_warping none
+include {theme}
+default_border normal 2
+default_floating_border normal 2
+gaps inner 0
+gaps outer 0
+corner_radius 0
+shadows disable
+blur disable
+animation_duration_ms 0
+''')
+    (out / 'client.py').write_text('''import sys,time
+print("\\033[1;33mGHOST\\033[0m  /  \\033[1mOLDBOOK\\033[0m\\n")
+print("  Gruvbox Dark / bottom titlebar preview\\n")
+print("\\033[32m  ●  Native Alpine + musl\\033[0m")
+print("\\033[34m  ●  Rebuildable SwayFX\\033[0m")
+print("\\033[35m  ●  Everything kept in Fossil\\033[0m\\n")
+print("  Space Ghost: My title goes at the bottom now.")
+print("  Zorak: Finally, a demotion I can support.\\n")
+print("  \\033[33m~/workspace\\033[0m \\033[32m❯\\033[0m")
+time.sleep(180)
+''')
+    protocol = BASE.parent / 'waybar-art/tests/pointer.xml'
+    for mode, name in [('client-header', 'pointer.h'), ('private-code', 'pointer.c')]:
+        subprocess.run(['wayland-scanner', mode, str(protocol), str(out / name)], check=True)
+    flags = shlex.split(subprocess.check_output(
+        ['pkg-config', '--cflags', '--libs', 'wayland-client'], text=True))
+    subprocess.run(['cc', '-Wall', '-Wextra', '-Werror', '-I' + str(out), '-o', str(out / 'pointer'),
+                    str(BASE / 'tests/titlebar-pointer.c'), str(out / 'pointer.c'), *flags], check=True)
+
+    with tempfile.TemporaryDirectory(prefix='bottom-titlebar-runtime-') as runtime:
+        env = os.environ.copy()
+        env.update(XDG_RUNTIME_DIR=runtime, WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
+                   WLR_RENDERER='gles2', WLR_RENDERER_ALLOW_SOFTWARE='1',
+                   WLR_RENDER_DRM_DEVICE=args.render_device, NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
+        for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+            env.pop(key, None)
+        with (out / 'runtime.log').open('w') as log:
+            try:
+                subprocess.run([str(binary), '--validate', '-c', str(out / 'sway.conf')],
+                               env=env, stdout=log, stderr=log, check=True)
+                compositor = subprocess.Popen([str(binary), '--debug', '-c', str(out / 'sway.conf')],
+                                              env=env, stdout=log, stderr=log)
+                processes.append(compositor)
+                for _ in range(100):
+                    sockets = list(Path(runtime).glob('sway-ipc*.sock'))
+                    displays = [p for p in Path(runtime).glob('wayland-*') if p.suffix != '.lock']
+                    if sockets and displays:
+                        env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                        break
+                    require(compositor.poll() is None, 'Headless compositor exited before IPC startup')
+                    time.sleep(.05)
+                else:
+                    raise RuntimeError('No private compositor socket')
+
+                def request(command, message_type=None, success=True):
+                    arguments = ['swaymsg', '-r']
+                    if message_type:
+                        arguments.extend(['-t', message_type])
+                    if command:
+                        arguments.append(command)
+                    response = subprocess.run(arguments, env=env, capture_output=True, text=True)
+                    data = json.loads(response.stdout)
+                    if success:
+                        require(response.returncode == 0, f'{command}: {data}')
+                        if not message_type:
+                            require(data and all(item.get('success') for item in data), f'{command}: {data}')
+                    return data
+
+                def tree():
+                    return request(None, 'get_tree')
+
+                def client(name):
+                    matches = [node for node in walk(tree()) if node.get('app_id') == name]
+                    require(len(matches) == 1, f'Expected one client {name}, got {len(matches)}')
+                    return matches[0]
+
+                def settle():
+                    time.sleep(.2)
+
+                def command(text):
+                    result = request(text)
+                    settle()
+                    return result
+
+                def spawn(name, title):
+                    process = subprocess.Popen(['foot', '-c', str(foot_config),
+                        '--override=resize-by-cells=no', '--app-id=' + name, '--title=' + title,
+                        'python3', str(out / 'client.py')], env=env, stdout=log, stderr=log)
+                    processes.append(process)
+                    for _ in range(100):
+                        require(process.poll() is None, f'{name} exited before mapping')
+                        if any(node.get('app_id') == name for node in walk(tree())):
+                            settle()
+                            return client(name)
+                        time.sleep(.05)
+                    raise RuntimeError(f'{name} did not map')
+
+                def normal(name, position):
+                    node = client(name)
+                    body, deco = node['rect'], node['deco_rect']
+                    require(node['border'] == 'normal' and deco['height'] > 0,
+                            f'{name} has no normal titlebar: {node}')
+                    if position == 'bottom':
+                        require(body['y'] + body['height'] == deco['y'],
+                                f'{name}: bottom title overlaps or sits above body: {body}, {deco}')
+                    else:
+                        require(deco['y'] + deco['height'] == body['y'],
+                                f'{name}: top title is misplaced: {body}, {deco}')
+                    return node
+
+                pointer = subprocess.Popen([str(out / 'pointer'), str(WIDTH), str(HEIGHT)], env=env,
+                    stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log, text=True)
+                processes.append(pointer)
+
+                def reply(expected):
+                    require(bool(select.select([pointer.stdout], [], [], 5)[0]), 'Virtual pointer timed out')
+                    require(pointer.stdout.readline().strip() == expected, 'Virtual pointer failed')
+
+                reply('ready')
+
+                def point(text):
+                    pointer.stdin.write(text + '\n')
+                    pointer.stdin.flush()
+                    reply('ok')
+
+                def click(x, y):
+                    point(f'move {int(x)} {int(y)}')
+                    point('press 272')
+                    point('release 272')
+                    time.sleep(.35)
+
+                def drag(x, y, dx, dy):
+                    point(f'move {int(x)} {int(y)}')
+                    point('press 272')
+                    point(f'move {int(x + dx)} {int(y + dy)}')
+                    point('release 272')
+                    settle()
+
+                evidence['version'] = request(None, 'get_version')
+                current_stage = 'default top titlebar'
+                spawn('titlebar-a', 'Terminal / shared workspace')
+                initial = normal('titlebar-a', 'top')
+                checked(current_stage, rect=initial['rect'], decoration=initial['deco_rect'])
+                current_stage = 'enable bottom titlebar'
+                command('titlebar_position bottom')
+                bottom = normal('titlebar-a', 'bottom')
+                require(outer(initial) == outer(bottom), 'Changing titlebar position changed tiled outer bounds')
+                require(initial['window_rect']['height'] == bottom['window_rect']['height'],
+                        'Changing titlebar position changed client height')
+                checked('normal tiled bottom geometry', rect=bottom['rect'], decoration=bottom['deco_rect'])
+                command('titlebar_position top')
+                require(normal('titlebar-a', 'top')['rect'] == initial['rect'], 'Top toggle did not restore geometry')
+                command('titlebar_position bottom')
+                checked('dynamic top/bottom preserves client and outer geometry')
+                for invalid in ('titlebar_position sideways', 'titlebar_position', 'titlebar_position top bottom'):
+                    result = request(invalid, success=False)
+                    require(result and not all(item.get('success') for item in result), f'Invalid command accepted: {invalid}')
+                    normal('titlebar-a', 'bottom')
+                checked('invalid position and argument counts leave state unchanged')
+
+                current_stage = 'tiled pointer input'
+                spawn('titlebar-b', 'Terminal / signals from the Ghost Planet')
+                command('layout splith')
+                first, second = normal('titlebar-a', 'bottom'), normal('titlebar-b', 'bottom')
+                command('[app_id="titlebar-a"] focus')
+                deco = second['deco_rect']
+                click(deco['x'] + deco['width'] / 2, deco['y'] + deco['height'] / 2)
+                require(client('titlebar-b')['focused'], 'Bottom tiled title click did not focus its client')
+                checked('bottom tiled title click focuses correct client')
+                first = client('titlebar-a')
+                rect = first['rect']
+                drag(rect['x'] + rect['width'] - 1, rect['y'] + 60, 60, 0)
+                require(client('titlebar-a')['rect']['width'] >= rect['width'] + 50,
+                        'Tiled divider resize stopped working')
+                checked('tiled divider pointer resize')
+
+                for layout in ('tabbed', 'stacking'):
+                    current_stage = f'{layout} group title input'
+                    command('layout ' + layout)
+                    before = [client(name) for name in ('titlebar-a', 'titlebar-b')]
+                    for node in before:
+                        body, deco = node['rect'], node['deco_rect']
+                        require(deco['height'] > 0 and deco['y'] + deco['height'] <= body['y'],
+                                f'{layout}: grouped header moved below its body')
+                        click(deco['x'] + deco['width'] / 2, deco['y'] + deco['height'] / 2)
+                        require(client(node['app_id'])['focused'], f'{layout}: header selected wrong client')
+                    command('titlebar_position top')
+                    after = [client(name) for name in ('titlebar-a', 'titlebar-b')]
+                    for old, new in zip(before, after):
+                        require(old['rect'] == new['rect'] and old['deco_rect'] == new['deco_rect'],
+                                f'{layout}: title position changed grouped geometry')
+                    command('titlebar_position bottom')
+                    checked(f'{layout} headers remain above clients and select correct tabs')
+
+                current_stage = 'lone grouped headers'
+                command('[app_id="titlebar-b"] move container to workspace holding-proof')
+                command('[app_id="titlebar-a"] focus')
+                command('hide_edge_borders --i3 none')
+                for layout in ('tabbed', 'stacking'):
+                    command('layout ' + layout)
+                    normal('titlebar-a', 'top')
+                    for border in ('pixel 2', 'none'):
+                        command('[app_id="titlebar-a"] border ' + border)
+                        require(client('titlebar-a')['deco_rect']['height'] == 0,
+                                f'{layout}: lone {border} header was not hidden')
+                    command('[app_id="titlebar-a"] border normal 2')
+                    normal('titlebar-a', 'top')
+                    checked(f'lone {layout} normal header stays top; pixel/none hide it')
+                command('hide_edge_borders none')
+
+                current_stage = 'floating titlebar'
+                command('workspace floating-proof')
+                spawn('titlebar-float', 'Space Ghost / mission control')
+                command('[app_id="titlebar-float"] floating enable, resize set width 640 px height 380 px, move position 160 px 180 px')
+                floating = normal('titlebar-float', 'bottom')
+                original_outer = outer(floating)
+                command('titlebar_position top')
+                top = normal('titlebar-float', 'top')
+                require(outer(top) == original_outer, 'Floating top/bottom toggle changed outer bounds')
+                command('titlebar_position bottom')
+                checked('normal floating bottom geometry and dynamic toggle')
+                floating = normal('titlebar-float', 'bottom')
+                deco = floating['deco_rect']
+                drag(deco['x'] + deco['width'] / 2, deco['y'] + deco['height'] / 2, 70, 45)
+                moved = normal('titlebar-float', 'bottom')
+                require(moved['rect']['x'] == floating['rect']['x'] + 70 and
+                        moved['rect']['y'] == floating['rect']['y'] + 45,
+                        'Dragging bottom title did not move floating client')
+                checked('bottom floating title drag moves client')
+                bounds = outer(moved)
+                drag(bounds['x'] + bounds['width'] - 1, bounds['y'] + 60, 55, 0)
+                resized = normal('titlebar-float', 'bottom')
+                require(resized['rect']['width'] >= moved['rect']['width'] + 45,
+                        'Floating side border stopped resizing')
+                checked('floating side border pointer resize')
+                # Bottom title area must move, while its outer edge must resize.
+                bounds = outer(resized)
+                drag(bounds['x'] + bounds['width'] / 2, bounds['y'] + bounds['height'] - 1, 0, 40)
+                resized_bottom = normal('titlebar-float', 'bottom')
+                require(outer(resized_bottom)['height'] >= bounds['height'] + 30,
+                        'Floating bottom edge did not resize below bottom titlebar')
+                checked('floating bottom edge pointer resize')
+
+                current_stage = 'fullscreen and border modes'
+                command('[app_id="titlebar-float"] fullscreen enable')
+                full = client('titlebar-float')
+                require(full['deco_rect']['height'] == 0 and full['rect'] ==
+                        {'x': 0, 'y': 0, 'width': WIDTH, 'height': HEIGHT}, 'Fullscreen retained titlebar or lost output area')
+                subprocess.run(['grim', str(out / 'fullscreen.png')], env=env, check=True)
+                import gi
+                gi.require_version('GdkPixbuf', '2.0')
+                from gi.repository import GdkPixbuf
+                picture = GdkPixbuf.Pixbuf.new_from_file(str(out / 'fullscreen.png'))
+                pixels = picture.get_pixels()
+                samples = []
+                for x, y in ((WIDTH - 30, HEIGHT - 30), (WIDTH - 30, HEIGHT // 2),
+                             (WIDTH // 2, HEIGHT - 30)):
+                    offset = y * picture.get_rowstride() + x * picture.get_n_channels()
+                    rgb = list(pixels[offset:offset + 3])
+                    require(all(abs(channel - 40) <= 3 for channel in rgb),
+                            f'Fullscreen content clipped at ({x}, {y}): {rgb}')
+                    samples.append({'x': x, 'y': y, 'rgb': rgb})
+                checked('fullscreen actual client pixels reach bottom and right edges', samples=samples)
+                command('[app_id="titlebar-float"] fullscreen disable')
+                normal('titlebar-float', 'bottom')
+                checked('fullscreen hides title and restores bottom decoration')
+                for border in ('pixel 2', 'pixel 0', 'none'):
+                    command('[app_id="titlebar-float"] border ' + border)
+                    require(client('titlebar-float')['deco_rect']['height'] == 0,
+                            f'{border} unexpectedly shows a titlebar')
+                    checked(f'{border} keeps titlebar absent')
+                command('[app_id="titlebar-float"] border normal 0')
+                normal('titlebar-float', 'bottom')
+                checked('normal zero-border style restores bottom titlebar')
+
+                current_stage = 'two floating clients on a stacked workspace'
+                command('[app_id="titlebar-a"] move container to workspace floating-proof')
+                command('[app_id="titlebar-a"] focus')
+                command('layout stacking')
+                command('[app_id="titlebar-b"] move container to workspace floating-proof')
+                command('[app_id="titlebar-b"] floating enable, border normal 2')
+                before = {}
+                for name in ('titlebar-float', 'titlebar-b'):
+                    node = normal(name, 'bottom')
+                    require(node['rect']['height'] == node['window_rect']['height'] + node['current_border_width'],
+                            'Floating IPC height subtracted multiple stacked titlebars')
+                    before[name] = outer(node)
+                command('titlebar_position top')
+                for name in before:
+                    node = normal(name, 'top')
+                    require(outer(node) == before[name], 'Stacked-workspace floating geometry changed on top toggle')
+                command('titlebar_position bottom')
+                checked('stacked workspace with two floaters counts one titlebar each')
+
+                current_stage = 'Gruvbox preview'
+                with (out / 'sway.conf').open('a') as config:
+                    config.write(f'\ninclude {REPO}/alpine/desktop/.config/swayfx/effects.conf\n'
+                                 'titlebar_position bottom\ndefault_border normal 0\n'
+                                 'default_floating_border normal 0\n')
+                command('reload')
+                command('titlebar_position bottom')
+                command('[app_id="titlebar-a"] move container to workspace holding-proof')
+                command('[app_id="titlebar-float"] border normal 0, resize set width 890 px height 450 px, move position 80 px 130 px')
+                command('[app_id="titlebar-b"] move container to workspace floating-proof')
+                command('[app_id="titlebar-b"] floating enable, border normal 0, resize set width 740 px height 390 px, move position 600 px 420 px')
+                command('[app_id="titlebar-float"] focus')
+                normal('titlebar-float', 'bottom')
+                normal('titlebar-b', 'bottom')
+                time.sleep(.5)
+                subprocess.run(['grim', str(out / 'gruvbox-bottom-titlebars.png')], env=env, check=True)
+                (out / 'final-tree.json').write_text(json.dumps(tree(), indent=2) + '\n')
+                checked('actual Gruvbox Foot palette with SwayFX effects and bottom titlebars')
+                evidence['status'] = 'passed'
+            except Exception as error:
+                evidence.update(status='failed', failed_stage=current_stage, error=str(error))
+                raise
+            finally:
+                (out / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+                for process in reversed(processes):
+                    if process.poll() is None:
+                        process.terminate()
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            process.kill()
+                            process.wait(timeout=5)
+    print(json.dumps({'status': evidence['status'], 'checks': len(evidence['checks']),
+                      'evidence': str(out / 'evidence.json'),
+                      'screenshot': str(out / 'gruvbox-bottom-titlebars.png')}))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (OSError, ValueError, RuntimeError, AssertionError, subprocess.SubprocessError) as error:
+        print(f'Bottom titlebar verification failed: {error}', file=sys.stderr)
+        raise SystemExit(1)

@@ -12,14 +12,21 @@
   "upstream_release": "https://github.com/wlrfx/swayfx/releases/tag/0.6",
   "source_date_epoch": 1785905137,
   "package": {
-    "filename": "swayfx-0.6-r0.apk",
-    "sha256": "cb5ce0b33f3f9c9f5a4f3469a051fa3ad25aa2fb03b164b07f142c4331839aad",
-    "artifact": "sha256/cb5ce0b33f3f9c9f5a4f3469a051fa3ad25aa2fb03b164b07f142c4331839aad/swayfx-0.6-r0.apk"
+    "filename": "swayfx-0.6-r1.apk",
+    "sha256": "a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4",
+    "artifact": "sha256/a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4/swayfx-0.6-r1.apk"
   },
-  "binary_sha256": "11b793b841603ed41bdfbb4782627dce39b95795ba7ecaccad3fd9c0e25aac92",
+  "binary_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
   "shared_dependencies": {
     "scenefx": "0.5-r0",
     "wlroots0.20": "0.20.2-r1",
     "source": "Exact official APK inputs captured by the repository package lock."
-  }
+  },
+  "patches": [
+    {
+      "filename": "bottom-titlebar.patch",
+      "sha256": "9e551c75e11247312e294b1cd749fb731a54e86eb65e86b00e6dd6491b176deb",
+      "purpose": "Optional bottom normal window titles; grouped tab and stack headers retain upstream placement."
+    }
+  ]
 }

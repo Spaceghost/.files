@@ -1,0 +1,136 @@
+{
+  "binary": "/home/jack/.local/state/alpine-rice/build/swayfx-bottom-r1-a/extract/swayfx",
+  "binary_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
+  "checks": [
+    {
+      "check": "default top titlebar",
+      "rect": {
+        "x": 0,
+        "y": 17,
+        "width": 1440,
+        "height": 883
+      },
+      "decoration": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 17
+      }
+    },
+    {
+      "check": "normal tiled bottom geometry",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 883
+      },
+      "decoration": {
+        "x": 0,
+        "y": 883,
+        "width": 1440,
+        "height": 17
+      }
+    },
+    {
+      "check": "dynamic top/bottom preserves client and outer geometry"
+    },
+    {
+      "check": "invalid position and argument counts leave state unchanged"
+    },
+    {
+      "check": "bottom tiled title click focuses correct client"
+    },
+    {
+      "check": "tiled divider pointer resize"
+    },
+    {
+      "check": "tabbed headers remain above clients and select correct tabs"
+    },
+    {
+      "check": "stacking headers remain above clients and select correct tabs"
+    },
+    {
+      "check": "lone tabbed normal header stays top; pixel/none hide it"
+    },
+    {
+      "check": "lone stacking normal header stays top; pixel/none hide it"
+    },
+    {
+      "check": "normal floating bottom geometry and dynamic toggle"
+    },
+    {
+      "check": "bottom floating title drag moves client"
+    },
+    {
+      "check": "floating side border pointer resize"
+    },
+    {
+      "check": "floating bottom edge pointer resize"
+    },
+    {
+      "check": "fullscreen actual client pixels reach bottom and right edges",
+      "samples": [
+        {
+          "x": 1410,
+          "y": 870,
+          "rgb": [
+            40,
+            40,
+            40
+          ]
+        },
+        {
+          "x": 1410,
+          "y": 450,
+          "rgb": [
+            40,
+            40,
+            40
+          ]
+        },
+        {
+          "x": 720,
+          "y": 870,
+          "rgb": [
+            40,
+            40,
+            40
+          ]
+        }
+      ]
+    },
+    {
+      "check": "fullscreen hides title and restores bottom decoration"
+    },
+    {
+      "check": "pixel 2 keeps titlebar absent"
+    },
+    {
+      "check": "pixel 0 keeps titlebar absent"
+    },
+    {
+      "check": "none keeps titlebar absent"
+    },
+    {
+      "check": "normal zero-border style restores bottom titlebar"
+    },
+    {
+      "check": "stacked workspace with two floaters counts one titlebar each"
+    },
+    {
+      "check": "actual Gruvbox Foot palette with SwayFX effects and bottom titlebars"
+    }
+  ],
+  "status": "passed",
+  "live_session_changes": 0,
+  "version": {
+    "human_readable": "0.6",
+    "sway_original_version": "1.12.0",
+    "variant": "sway",
+    "major": 0,
+    "minor": 6,
+    "patch": 0,
+    "loaded_config_file_name": "/home/jack/.local/state/oldbook/verification/bottom-titlebar-packaged-r1/sway.conf"
+  }
+}
