@@ -53,7 +53,9 @@ marker prevents silently adopting orphaned lease state. See
 private IPv6 settings and recovery boundaries. The combined failure checks in
 [fault-verification.json](fault-verification.json) now cover cancellation,
 guardian/owner death and orphan-state rejection. Automatic cleanup after owner
-death remains the staged design in [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md).
+death remains staged in [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md). Its journal
+store and writer-identity helpers have isolated unit coverage; owner startup
+does not yet use them, and orphan cleanup remains unavailable.
 
 ## Trusted policy and display contract
 

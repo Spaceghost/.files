@@ -1,13 +1,34 @@
 # Same-boot orphan lease recovery
 
-**Status: staged design, unimplemented.** This document specifies the next recovery
-work; it does not authorize installation or activation. The current
+**Status: journal and writer primitives implemented; recovery integration remains
+staged.** This document specifies the remaining recovery work; it does not
+authorize installation or activation. The current
 `adapter.JournaledApplier` records only `lease-dirty`, and
 `network.LeaseApplier` holds its `OwnedState` capability in process memory. A
 marker left by an owner crash therefore prevents replacement; it does not yet
 authorize cleanup or reconnect. Keep activation gated by
 [INSTALL-PLAN.md](INSTALL-PLAN.md) and the ownership handoff in
 [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md).
+
+## Implemented primitives
+
+`privacyctl_runtime.journal` implements the bounded schema and durable file
+store: `Journal(directory).read()`, `write(record)`, and `remove()`. It requires
+an existing root-private directory and the caller's ownership locks. Its return
+value is validated evidence, never permission to delete a network resource.
+
+`privacyctl_runtime.writers` implements `current_context()`, `capture_writer()`
+and `drain_writer()`. Capture borrows an already-open process pidfd while the
+caller holds the execution gate closed. Drain validates the same boot and
+namespace view, opens its own pidfd before reading process identity, and never
+signals by numeric PID. Journal and writer validators share the same schema.
+
+The two modules have 57 focused tests using disposable files and mocked process
+operations; see [orphan-primitives-verification.json](orphan-primitives-verification.json).
+They are not connected to `NativeNetwork`, `DHCPManager` or owner startup yet.
+These tests do not establish the deployed-kernel descendant-death proof or
+working orphan cleanup. Existing runtime modules and activation state are
+unchanged. The APIs below describe the future coordinator over these primitives.
 
 ## Decision and scope
 
@@ -100,7 +121,7 @@ Only after verification, writer drain, and alias restoration may the durable mar
 
 ## Next bounded implementation and fault tests
 
-The next implementation needs the journal schema and atomic writer, gated writer registration, ifalias lifecycle, and recovery core with synthetic backends. Review these together because a persisted resource set without authenticated writer death is insufficient. Keep activation disabled until the following fault cases also pass in isolated PID, mount, and network namespaces. The implementation does not include UI, unrelated networking migration, or a general cgroup manager.
+The next implementation must connect the journal store and writer helpers to gated writer registration, the ifalias lifecycle, and the recovery core with synthetic backends. Review these together because a persisted resource set without authenticated writer death is insufficient. Keep activation disabled until the following fault cases also pass in isolated PID, mount, and network namespaces. The implementation does not include UI, unrelated networking migration, or a general cgroup manager.
 
 1. Kill owner before/after alias intent, alias mutation, alias verification, each resource intent/mutation, DNS update, writer-slot completion, and final alias restoration. Re-run recovery twice; preserve unrelated state and prior alias.
 2. Keep a matching old init alive with detached and nested-namespace descendants, kill owner and guardian, then recover from a new process. Verify pidfd-based kill and completed namespace teardown precede every resource deletion.
