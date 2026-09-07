@@ -19,6 +19,18 @@ the configured branch:
 alpine/bin/publish-git-mirror
 ```
 
+For GitHub CLI authentication on this host, run:
+
+```sh
+GH_BROWSER=true gh auth login --hostname github.com --git-protocol https --web
+gh auth setup-git --hostname github.com
+alpine/bin/publish-git-mirror
+```
+
+Open the URL and enter the device code printed by `gh`. `GH_BROWSER=true`
+keeps the CLI polling while you open the browser yourself. Authentication in
+an editor's GitHub connector does not supply credentials to native Git.
+
 The helper defaults to the current checkout, the Git mirror at
 `${XDG_DATA_HOME:-$HOME/.local/share}/fossil/files-git-mirror`, and branch
 `alpine-oldbook`. It runs Fossil's incremental export with `base` as the Git
@@ -38,7 +50,9 @@ then publish.
 ## Recover from GitHub
 
 On a host that has Git, Fossil and Python 3, run the helper from any temporary
-copy of the GitHub branch. If the helper is not already available:
+copy of the GitHub branch. The first publication above must succeed before
+the `alpine-oldbook` branch and helper are available there. If the helper is
+not already available:
 
 ```sh
 temporary="$(mktemp -d)"
