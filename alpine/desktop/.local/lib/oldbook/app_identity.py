@@ -11,6 +11,7 @@ _TTY_PATH = re.compile(r'/dev/(?:pts/[0-9]+|tty[0-9]+)')
 _CODEX_STATE = re.compile(r'[A-Za-z][A-Za-z -]{0,31}')
 
 _APP_NAMES = {
+    'oldbook-strata': 'Fossil',
     'btop': 'btop',
     'chromium': 'Chromium',
     'code': 'Visual Studio Code',

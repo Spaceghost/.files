@@ -1,0 +1,126 @@
+#!/usr/bin/env python3
+"""Open or focus STRATA, the local Fossil review workspace."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import runpy
+import subprocess
+import sys
+import time
+import urllib.request
+
+BIN = Path(__file__).resolve().parent
+IPC = runpy.run_path(str(BIN / 'oldbook-workspaces'))
+APP = 'oldbook-strata'
+PORT = 8766
+URL = f'http://127.0.0.1:{PORT}/timeline?r=alpine-oldbook&y=ci'
+
+
+def review_window(tree):
+    for workspace in IPC['workspace_nodes'](tree):
+        for view in IPC['all_views'](workspace):
+            if view.get('app_id') == APP:
+                return view['id']
+    return None
+
+
+def serve(directory, sway_socket):
+    with (directory / 'server.lock').open('w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        ready = directory / 'ready'
+        ready.unlink(missing_ok=True)
+        repository = Path.home() / '.local/share/fossil/files.fossil'
+        process = subprocess.Popen(['fossil', 'ui', '--nobrowser', '--port',
+                                    f'127.0.0.1:{PORT}', str(repository)])
+        try:
+            # Confirm this child is alive and serving before advertising readiness.
+            for _ in range(50):
+                if process.poll() is not None:
+                    raise RuntimeError('Fossil server exited; check strata.log')
+                try:
+                    with urllib.request.urlopen(URL, timeout=1) as response:
+                        if response.status == 200 and b'alpine-oldbook' in response.read():
+                            if process.poll() is None:
+                                ready.write_text(str(process.pid))
+                                break
+                except OSError:
+                    pass
+                time.sleep(.1)
+            else:
+                raise RuntimeError('Fossil did not become ready')
+            while Path(sway_socket).exists():
+                try:
+                    process.wait(timeout=5)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
+        finally:
+            ready.unlink(missing_ok=True)
+            if process.poll() is None:
+                process.terminate()
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    process.wait()
+
+
+def main():
+    os.umask(0o077)
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    sway_socket = IPC['find_socket'](runtime)
+    directory = IPC['prepare_directory'](runtime).parent / 'strata'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    if sys.argv[1:] == ['--serve']:
+        serve(directory, sway_socket)
+        return
+    with (directory / 'launch.lock').open('w') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        logs = Path.home() / '.local/state/oldbook'
+        logs.mkdir(parents=True, exist_ok=True)
+        with (logs / 'strata.log').open('a') as log:
+            subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--serve'],
+                             stdout=log, stderr=log, start_new_session=True)
+            for _ in range(100):
+                if (directory / 'ready').exists():
+                    break
+                time.sleep(.1)
+            else:
+                raise RuntimeError('Fossil server unavailable; see ~/.local/state/oldbook/strata.log')
+            existing = review_window(IPC['request'](sway_socket, 4))
+            if existing is not None:
+                IPC['command'](sway_socket, f'[con_id={existing}] focus')
+                return
+            IPC['command'](sway_socket, 'workspace number 6')
+            profile = Path.home() / '.local/share/oldbook/strata-firefox'
+            profile.mkdir(parents=True, exist_ok=True)
+            (profile / 'user.js').write_text(
+                'user_pref("browser.shell.checkDefaultBrowser", false);\n'
+                'user_pref("browser.aboutwelcome.enabled", false);\n'
+                'user_pref("browser.startup.homepage", ' + json.dumps(URL) + ');\n')
+            env = dict(os.environ, MOZ_APP_REMOTINGNAME=APP, MOZ_ENABLE_WAYLAND='1')
+            if not env.get('DBUS_SESSION_BUS_ADDRESS') and (runtime / 'bus').is_socket():
+                env['DBUS_SESSION_BUS_ADDRESS'] = f'unix:path={runtime}/bus'
+            subprocess.Popen(['firefox', '--no-remote', '--profile', str(profile), URL],
+                             env=env, stdout=log, stderr=log, start_new_session=True)
+            for _ in range(150):
+                window = review_window(IPC['request'](sway_socket, 4))
+                if window is not None:
+                    IPC['command'](sway_socket,
+                                   f'[con_id={window}] move container to workspace number 6')
+                    IPC['command'](sway_socket, f'[con_id={window}] focus')
+                    return
+                time.sleep(.1)
+            raise RuntimeError('The STRATA browser did not open within 15 seconds')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, ValueError, KeyError) as error:
+        print(f'oldbook-strata: {error}', file=sys.stderr)
+        sys.exit(1)

@@ -8,8 +8,8 @@ set $wallpaper ~/.local/share/oldbook/wallpaper.png
 
 # Palette and window chrome are switchable without changing shortcuts.
 include ~/.config/sway/theme.conf
-gaps inner 10
-gaps outer 14
+gaps inner 3
+gaps outer 4
 smart_gaps off
 focus_follows_mouse no
 mouse_warping output
@@ -71,7 +71,7 @@ bindsym $mod+2 workspace number 2
 bindsym $mod+3 workspace number 3
 bindsym $mod+4 workspace number 4
 bindsym $mod+5 workspace number 5
-bindsym $mod+6 workspace number 6
+bindsym $mod+6 exec ~/.local/bin/oldbook-strata
 bindsym $mod+7 workspace number 7
 bindsym $mod+8 workspace number 8
 bindsym $mod+9 workspace number 9

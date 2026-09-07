@@ -3,7 +3,7 @@
     border: none;
     border-radius: 0;
     font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     min-height: 0;
 }
@@ -11,14 +11,14 @@ window#waybar { background: transparent; color: #ebdbb2; }
 .modules-left, .modules-center, .modules-right {
     background: linear-gradient(180deg, rgba(60, 56, 54, 0.98), rgba(29, 32, 33, 0.98));
     border: none;
-    border-radius: 13px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.40);
-    margin-bottom: 5px;
+    border-radius: 0 0 7px 7px;
+    box-shadow: none;
+    margin-bottom: 0;
 }
 .modules-center { padding: 0 12px; }
 .modules-right { padding: 0 5px; }
 #custom-ghost {
-    font-size: 21px;
+    font-size: 18px;
     color: #fbf1c7;
     background: linear-gradient(135deg, #d79921, #af7414 60%, #d65d0e);
     text-shadow: 0 0 5px #fabd2f;

@@ -141,10 +141,12 @@ def events_for_apps(runtime, apps):
             app['event'] = max(matches, key=lambda record: record['observed_at'])['event']
 
 
-def collect(tree, resolver, runtime, names):
+def collect(tree, resolver, runtime, names, placement=None):
     workspaces = workspace_nodes(tree)
     windows = [view for ws in workspaces for view in all_views(ws)]
     apps = resolver.resolve_all(windows)
+    if placement is not None:
+        placement(windows, apps)
     events_for_apps(runtime, apps)
     plans, ai = [], []
     for ws in workspaces:
@@ -174,6 +176,7 @@ def restore(path, records):
 
 def daemon(runtime, directory, path):
     from app_identity import ApplicationResolver
+    from workspace_defaults import Placement
 
     fd = os.open(directory / 'service.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(fd, 'w') as lock:
@@ -187,6 +190,20 @@ def daemon(runtime, directory, path):
         state_path = directory / 'state.json'
         previous = read_json(state_path, {})
         names = WorkspaceNames(records_for_socket(previous, path))
+        same_session = previous.get('socket') == str(path)
+        placement = Placement(previous.get('placement') if same_session else None)
+        adopt = not (same_session and 'placement' in previous)
+
+        def place(windows, apps):
+            nonlocal adopt
+            candidates = [(view['id'], apps.get(view['id'], {}).get('name')) for view in windows]
+            for identifier, number in placement.plan(candidates, adopt=adopt):
+                try:
+                    command(path, f'[con_id={identifier}] move container to workspace number {number}')
+                except RuntimeError:
+                    # A window may close between inspection and placement.
+                    pass
+            adopt = False
         resolver = ApplicationResolver()
         running = True
 
@@ -205,7 +222,7 @@ def daemon(runtime, directory, path):
                 if not accepted.get('success'):
                     raise RuntimeError('Sway rejected workspace subscription')
                 while running:
-                    plans, ai = collect(request(path, 4), resolver, runtime, names)
+                    plans, ai = collect(request(path, 4), resolver, runtime, names, place)
                     for plan in plans:
                         if plan['old'] != plan['new']:
                             try:
@@ -218,7 +235,8 @@ def daemon(runtime, directory, path):
                     live_ids = {str(plan['id']) for plan in plans}
                     names.records = {key: value for key, value in names.records.items() if key in live_ids}
                     write_json(state_path, {'socket': str(path), 'updated_at': time.time(),
-                                           'records': names.records, 'workspaces': plans, 'ai': ai})
+                                           'records': names.records, 'workspaces': plans, 'ai': ai,
+                                           'placement': placement.state()})
                     # Sway events detect logout immediately; a one-second refresh
                     # also follows tmux foreground changes with an unchanged title.
                     deadline = time.monotonic() + 1
@@ -235,7 +253,8 @@ def daemon(runtime, directory, path):
             except (OSError, ValueError, RuntimeError):
                 pass
             write_json(state_path, {'socket': str(path), 'updated_at': 0,
-                                   'records': names.records, 'workspaces': [], 'ai': []})
+                                   'records': names.records, 'workspaces': [], 'ai': [],
+                                   'placement': placement.state()})
 
 
 def status(directory):

@@ -70,6 +70,15 @@ class WorkspaceTests(unittest.TestCase):
         empty = names.plan(ws, None)
         self.assertEqual(empty['new'], '1: GHOST')
 
+    def test_review_workspace_keeps_strata_when_browser_changes(self):
+        names = self.model['WorkspaceNames']()
+        ws = workspace(name='6')
+        first = names.plan(ws, {'name': 'Fossil'})
+        self.assertEqual(first['new'], '6: STRATA · Fossil')
+        names.accept(first)
+        ws['name'] = first['new']
+        self.assertEqual(names.plan(ws, None)['new'], '6: STRATA')
+
     def test_manual_workspace_rename_becomes_the_new_base(self):
         names = self.model['WorkspaceNames']()
         first = names.plan(workspace(), {'name': 'Firefox'})

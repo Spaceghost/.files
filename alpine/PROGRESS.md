@@ -126,3 +126,15 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Physical SwayFX takeover remains for the next normal login; the running
   stock Sway session cannot acquire blur/shadows through a reload. Current
   active window outlines are zero-width, including existing windows.
+
+## STRATA and workspace defaults
+
+- Super+6 opens/focuses the local Fossil review browser. First recognized app
+  instances receive default placement once; existing/manual placements and
+  extra instances remain free. Workspaces 1–6 have independent artwork state.
+- Compact bar/window spacing, title decorations and live Foot transparency
+  applied. Six distinct wallpapers and concurrent-launch reuse verified.
+- Sway/Foot parsers, disposable deployment and focused tests passed. The full
+  197-test run had one session-startup timeout; isolated rerun passed. Reboot
+  persistence remains unverified. Details and recovery: 
+  `docs/superpowers/specs/2026-09-07-strata-workspaces.md`.

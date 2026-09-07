@@ -165,6 +165,7 @@ class ManualArtworkTests(unittest.TestCase):
         (state / 'state.json').write_text('{"id":"a","paused":true,"next_at":1}')
         entries = [{'id': 'a', 'title': 'Old'}, {'id': 'new', 'title': 'New'}, {'id': 'b', 'title': 'Other'}]
         with mock.patch.object(art, 'STATE', state), \
+                mock.patch.object(art, 'current_scope', return_value='global'), \
                 mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
                 mock.patch.object(art, 'apply', return_value='/owned/socket'), \
                 mock.patch.object(art.time, 'time', return_value=5000):

@@ -1,12 +1,13 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 42,
+  "height": 32,
   "spacing": 2,
-  "margin-top": 10,
-  "margin-left": 18,
-  "margin-right": 18,
+  "margin-top": 0,
+  "margin-left": 4,
+  "margin-right": 4,
   "exclusive": true,
+  "fixed-center": false,
   "reload_style_on_change": true,
   "modules-left": [
     "custom/ghost",

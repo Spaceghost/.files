@@ -111,7 +111,7 @@ class WallpaperTests(unittest.TestCase):
             state = Path(directory)
             entries = [{'id': 'a', 'title': 'First'}, {'id': 'b', 'title': 'Next'}]
             (state / 'state.json').write_text(json.dumps({'id': 'a', 'title': 'First'}))
-            with mock.patch.object(art, 'STATE', state), mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)):
+            with mock.patch.object(art, 'STATE', state), mock.patch.object(art, 'current_scope', return_value='global'), mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)):
                 art.update('pause')
                 self.assertTrue(art.read_state()['paused'])
                 self.assertEqual(art.read_state()['id'], 'a')
@@ -123,6 +123,41 @@ class WallpaperTests(unittest.TestCase):
                     art.update('next')
                 self.assertEqual(art.read_state()['id'], 'b')
                 self.assertTrue(art.read_state()['paused'])
+
+    def test_workspace_rotation_restores_image_pause_and_timer_independently(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory)
+            current = state / 'current.png'
+            current.touch()
+            entries = [{'id': 'a', 'title': 'First', 'rotate': False},
+                       {'id': 'b', 'title': 'Second', 'rotate': False},
+                       {'id': 'c', 'title': 'Third', 'rotate': True}]
+            with mock.patch.object(art, 'STATE', state), mock.patch.object(art, 'CURRENT', current), \
+                    mock.patch.object(art, 'current_scope', return_value='1') as scope, \
+                    mock.patch.object(art, 'load_gallery', return_value=(entries, 1200)), \
+                    mock.patch.object(art, 'sway_socket', return_value='/owned/socket'), \
+                    mock.patch.object(art, 'apply', return_value='/owned/socket'):
+                art.update('refresh')
+                self.assertEqual(art.read_state()['id'], 'a')
+                art.update('pause')
+                deadline = art.read_state()['next_at']
+                scope.return_value = '2'
+                art.update('tick')
+                self.assertEqual(art.read_state()['id'], 'b')
+                art.update('next')
+                self.assertEqual(art.read_state()['id'], 'c')
+                scope.return_value = '1'
+                art.update('tick')
+                self.assertEqual(art.read_state()['id'], 'a')
+                self.assertTrue(art.read_state()['paused'])
+                self.assertEqual(art.read_state()['next_at'], deadline)
+                scope.return_value = '2'
+                self.assertFalse(art.read_state().get('paused', False))
+                self.assertEqual(art.read_state()['id'], 'c')
+                art.update('tick')
+                with mock.patch.object(art.time, 'time', return_value=art.read_state()['next_at'] + 1):
+                    art.update('tick')
+                self.assertEqual(art.read_state()['id'], 'b')
 
     def test_native_request_is_sandboxed_and_has_no_dangerous_flags(self):
         cmd = generator.codex_command(Path('/tmp/example'), 'gpt-5.6-luna')

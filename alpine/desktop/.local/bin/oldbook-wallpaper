@@ -6,6 +6,7 @@ import hashlib
 import html
 import json
 import os
+import runpy
 from pathlib import Path
 import signal
 import stat
@@ -16,6 +17,8 @@ import time
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+from workspace_defaults import choose_artwork
 
 STATE = Path.home() / '.local/state/oldbook/wallpaper'
 CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
@@ -29,9 +32,25 @@ def atomic_json(path, value):
     temporary.replace(path)
 
 
-def read_state():
+def current_scope():
+    config = json.loads((REPO / 'alpine/wallpapers/gallery.json').read_text())
+    configured = config.get('workspace_rotations', [])
+    if not configured:
+        return 'global'
+    response = subprocess.run(['swaymsg', '-s', sway_socket(), '-r', '-t', 'get_workspaces'],
+                              capture_output=True, text=True, timeout=3, check=True)
+    focused = next((ws for ws in json.loads(response.stdout) if ws.get('focused')), {})
+    number = focused.get('num')
+    return str(number) if number in configured else 'shared'
+
+
+def state_path(scope):
+    return STATE / 'state.json' if scope in ('global', 'shared') else STATE / 'workspaces' / f'{scope}.json'
+
+
+def read_state(scope=None):
     try:
-        return json.loads((STATE / 'state.json').read_text())
+        return json.loads(state_path(scope or current_scope()).read_text())
     except (FileNotFoundError, ValueError):
         return {}
 
@@ -142,7 +161,16 @@ def update(action, selected=None):
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'state.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
-        state = read_state()
+        scope = current_scope()
+        state = read_state(scope)
+        try:
+            changed_scope = (STATE / 'active-scope').read_text() != scope
+        except FileNotFoundError:
+            changed_scope = scope != 'global'
+        if action == 'tick' and (changed_scope or scope == 'shared'):
+            if not changed_scope and scope == 'shared':
+                return
+            action = 'refresh'
         if action == 'tick' and state.get('id') and CURRENT.exists():
             if state.get('paused') or time.time() < state.get('next_at', 0):
                 if sway_socket() == state.get('socket'):
@@ -154,8 +182,10 @@ def update(action, selected=None):
             state['next_at'] = time.time() + interval
         else:
             # Manual browsing, explicit picks and refreshes retain every image.
-            # Only the timer uses the configured theme collections.
-            if selected is None and action == 'tick':
+            # Workspace rotations use the full gallery so a small active-theme
+            # collection cannot collapse all six workspaces onto one picture.
+            # The legacy global timer retains its theme filter.
+            if selected is None and action == 'tick' and scope == 'global':
                 entries = [entry for entry in entries if entry.get('rotate', True)] or entries
             index = next((i for i, entry in enumerate(entries) if entry['id'] == state.get('id')), -1)
             if selected is not None:
@@ -167,13 +197,26 @@ def update(action, selected=None):
             elif action == 'refresh' and index >= 0:
                 pass
             else:
-                index = (index + 1) % len(entries)
+                occupied = set()
+                if scope not in ('global', 'shared'):
+                    for path in (STATE / 'workspaces').glob('*.json'):
+                        if path != state_path(scope):
+                            try:
+                                occupied.add(json.loads(path.read_text()).get('id'))
+                            except (OSError, ValueError):
+                                pass
+                chosen = choose_artwork([entry['id'] for entry in entries],
+                                        state.get('id'), 1, occupied)
+                index = next(i for i, entry in enumerate(entries) if entry['id'] == chosen)
             entry = entries[index]
             socket = apply(entry)
             state.update({k: entry.get(k, '') for k in ('id', 'title', 'description', 'file', 'theme', 'theme_name')})
-            state.update({'next_at': time.time() + interval, 'socket': socket})
+            deadline = state.get('next_at') if action == 'refresh' else None
+            state.update({'next_at': deadline or time.time() + interval, 'socket': socket})
         state['interval_seconds'] = interval
-        atomic_json(STATE / 'state.json', state)
+        atomic_json(state_path(scope), state)
+        if action != 'pause':
+            (STATE / 'active-scope').write_text(scope)
 
 
 def generation_status():
@@ -264,18 +307,34 @@ def daemon():
         signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
         # Restore after compositor restart even when rotation is paused.
         refresh = True
+        ipc = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-workspaces'))
+        import socket
+        import select
+        subscription = None
         last_error = None
         while True:
             try:
+                if subscription is None:
+                    subscription = socket.socket(socket.AF_UNIX)
+                    subscription.settimeout(3)
+                    subscription.connect(sway_socket())
+                    ipc['send'](subscription, 2, '["workspace","output","shutdown"]')
+                    ipc['receive'](subscription)
                 update('refresh' if refresh else 'tick')
                 refresh, last_error = False, None
+                ready, _, _ = select.select([subscription], [], [], 30)
+                if ready:
+                    ipc['receive'](subscription)
             except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
                 message = str(error)
                 if message != last_error:
                     print(message, file=sys.stderr, flush=True)
                     last_error = message
                 refresh = True
-            time.sleep(30)
+                if subscription is not None:
+                    subscription.close()
+                    subscription = None
+                time.sleep(1)
 
 
 def main():
