@@ -1,4 +1,5 @@
 /* Space Ghost × Gruvbox Dark control deck. GTK CSS, intentionally built for stock Waybar. */
+@import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
 * {
     border: none;
     border-radius: 0;
@@ -135,3 +136,19 @@ window#waybar.monitor #network { color: #83a598; }
 window#waybar.monitor #network.disconnected { color: #928374; }
 window#waybar.monitor #disk { color: #bdae93; }
 window#waybar.monitor #custom-uptime { color: #d5c4a1; }
+
+/* While a window is fullscreen the bar fades back so it stops competing with
+   the content; oldbook-waybar-dim writes the opacity into waybar-state.css.
+   GTK only sets the hover state on the module boxes, never on the window or
+   the row that holds them, so each chrome block answers the pointer itself. */
+window#waybar.top .modules-left,
+window#waybar #context,
+window#waybar #status {
+    transition: opacity 130ms ease-out;
+}
+window#waybar.top .modules-left:hover,
+window#waybar #context:hover,
+window#waybar #status:hover {
+    opacity: 1;
+    transition: opacity 90ms ease-out;
+}

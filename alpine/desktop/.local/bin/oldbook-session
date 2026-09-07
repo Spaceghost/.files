@@ -93,6 +93,10 @@ fi
 if ! has_comm swayidle; then
     start_service swayidle swayidle -w timeout 300 'oldbook-lock' timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' before-sleep 'oldbook-lock'
 fi
+# The bar imports this stylesheet, so it must exist before Waybar reads style.css.
+# oldbook-waybar-dim owns its contents from then on.
+waybar_state="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/waybar-state.css"
+[ -f "$waybar_state" ] || printf '%s\n' '/* Written by oldbook-waybar-dim; edit style.css instead. */' > "$waybar_state"
 if ! has_comm waybar; then
     start_service waybar waybar
 fi
@@ -105,6 +109,11 @@ art_state="${XDG_STATE_HOME:-$HOME/.local/state}/oldbook"
 mkdir -p "$art_state"
 if command -v oldbook-workspaces >/dev/null 2>&1; then
     oldbook-workspaces daemon 9>&- >>"$art_state/workspaces.log" 2>&1 &
+fi
+# Fades the bar back while a window is fullscreen; it only rewrites the imported
+# stylesheet when that state actually changes.
+if command -v oldbook-waybar-dim >/dev/null 2>&1; then
+    oldbook-waybar-dim 9>&- >>"$art_state/waybar-dim.log" 2>&1 &
 fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
