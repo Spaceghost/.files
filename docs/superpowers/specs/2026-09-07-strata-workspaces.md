@@ -19,6 +19,12 @@ Placement state survives service restart within the same compositor session.
 
 ## Artwork and spacing
 
+Superseded by the user's request for one desktop image across all workspaces:
+`workspace_rotations` is now empty. Selection, pause and rotation use the shared
+global state; existing per-workspace files remain inactive for recovery. The
+initial shared painting is the Space Ghost Yosemite landscape. Default app
+placement above remains active. The following records the earlier arrangement.
+
 Workspaces 1–6 retain independent artwork, pause flags, and rotation deadlines
 under ~/.local/state/oldbook/wallpaper/workspaces/. Workspace events restore
 the selected image immediately. Automatic rotation avoids other workspaces'

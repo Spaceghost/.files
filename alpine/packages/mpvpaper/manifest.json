@@ -1,0 +1,32 @@
+{
+  "alpine_release": "3.25.0_alpha20260805",
+  "arch": "x86_64",
+  "packages": [
+    {
+      "apk_identity": "Q1MJNqa7jCYJ15796woNBdP4hP9d4=",
+      "arch": "x86_64",
+      "artifact": "sha256/a883c5f8b611a2211d134dca5a994001dc515b9f660993fb78b11822a885d437/mpv-libs-0.41.0-r5.apk",
+      "artifact_arch": "x86_64",
+      "filename": "mpv-libs-0.41.0-r5.apk",
+      "name": "mpv-libs",
+      "sha256": "a883c5f8b611a2211d134dca5a994001dc515b9f660993fb78b11822a885d437",
+      "version": "0.41.0-r5"
+    },
+    {
+      "apk_identity": "Q1VczqBWcpMP1hpNMUzSHql6JWqKs=",
+      "arch": "x86_64",
+      "artifact": "sha256/ea25e7b748a02a0e20e4d653ac410a169af8422d022c3f7ea8f9f1c23c7162f2/mpvpaper-1.8-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "mpvpaper-1.8-r0.apk",
+      "name": "mpvpaper",
+      "sha256": "ea25e7b748a02a0e20e4d653ac410a169af8422d022c3f7ea8f9f1c23c7162f2",
+      "version": "1.8-r0"
+    }
+  ],
+  "repository": "https://dl-cdn.alpinelinux.org/alpine/edge/community",
+  "schema": 1,
+  "verification": [
+    "apk verify",
+    "installed APK identity comparison"
+  ]
+}

@@ -1,6 +1,7 @@
 # Ghost Gallery
 
-The desktop changes artwork every 20 minutes. The Waybar art icon shows the
+All workspaces share one desktop image and one rotation timer. The desktop
+changes artwork every 20 minutes. The Waybar art icon shows the
 current painting and its story: click for the next image, scroll to browse,
 right-click for a gallery picker, and middle-click to pause. **Super/Command +
 left-click** generates a new painting and switches directly to it when ready.
@@ -31,6 +32,9 @@ The active link is `~/.local/share/oldbook/current-wallpaper.png`; deployment's
 baseline `wallpaper.png` is separate. `oldbook-session` starts the rotation daemon
 and refreshes the current artwork after Sway reload. A file lock prevents
 multiple daemons, including when no graphical session is available yet.
+`workspace_rotations: []` keeps selection, pause and the timer global; switching
+workspaces does not change the painting. Previous per-workspace selections remain
+saved but inactive under `~/.local/state/oldbook/wallpaper/workspaces/`.
 
 ## Theme collections
 

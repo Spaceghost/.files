@@ -1,0 +1,26 @@
+{
+  "observed_at": "2026-09-07T04:39:00-07:00",
+  "saved_settings": {
+    "sway_inner_gap_px": 3,
+    "sway_outer_gap_px": 4,
+    "foot_padding_px": "4x4",
+    "foot_alpha": 0.78,
+    "foot_background": "282828"
+  },
+  "validation": {
+    "sway_config": "passed with Sway 1.12",
+    "foot_config": "passed with Foot 1.28.0"
+  },
+  "live_application": {
+    "sway_command": "gaps outer all set 4",
+    "sway_result": "success",
+    "focus_preserved": true,
+    "foot_command": "oldbook-refresh-terminal-theme --config ~/.files/alpine/desktop/.config/foot/foot.ini",
+    "foot_terminals_refreshed": 4,
+    "foot_osc_background": "11;[78]#282828"
+  },
+  "limitations": {
+    "foot_padding": "takes effect in newly opened Foot windows",
+    "video_background": "not activated by this layout change"
+  }
+}

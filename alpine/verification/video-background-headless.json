@@ -1,0 +1,24 @@
+{
+  "backend": "headless",
+  "checks": {
+    "generated_video_visible_above_static_background": true,
+    "headless_output_active": true,
+    "owned_process_stopped": true,
+    "runtime_state_removed": true,
+    "static_background_unchanged_after_stop": true
+  },
+  "fixture": {
+    "audio": false,
+    "format": "y4m",
+    "generated_locally": true
+  },
+  "output": "HEADLESS-1",
+  "playback": {
+    "hardware_decode": "auto-safe",
+    "layer": "bottom",
+    "looping": true,
+    "muted": true
+  },
+  "renderer": "pixman",
+  "schema_version": 1
+}
