@@ -37,14 +37,26 @@ Tailscale is installed, enabled at boot and authenticated; this machine is
 because it needs no key on either side and authenticates with the tailnet
 identity instead.
 
-That still requires the far side to accept it. Run this once **on alienware**:
+That still requires two things. On the far side, `sudo tailscale up --ssh`,
+which alienware now has. And in the tailnet policy, an `ssh` rule permitting
+it: both machines are **tagged** rather than user-owned, so the rule must be
+tag to tag, and it must be `accept` rather than `check`, because a tagged
+source has no user identity to re-authenticate.
 
-```sh
-sudo tailscale up --ssh
+```json
+"ssh": [
+  {
+    "action": "accept",
+    "src":    ["tag:apple"],
+    "dst":    ["tag:desktop"],
+    "users":  ["autogroup:nonroot", "root"]
+  }
+]
 ```
 
-Until then the launcher refuses immediately with that instruction rather than
-hanging, because alienware currently answers nothing on port 22. Plain ssh
+The launcher checks both before creating a session: an unreachable host and a
+policy refusal produce different messages, because a listening port is not the
+same as permission to use it. Plain ssh
 remains available for hosts that run sshd: set `"transport": "ssh"` on the
 agent, and put a key in `~/.ssh` (this machine has none).
 

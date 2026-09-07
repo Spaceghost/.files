@@ -1,10 +1,13 @@
 """Agent sessions must be tmux-contained and safe to build from configuration."""
 import json
 from pathlib import Path
+import runpy
 import shlex
+import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
@@ -184,6 +187,45 @@ class SessionListingTests(unittest.TestCase):
 
     def test_ignores_malformed_rows(self):
         self.assertEqual(launcher.parse_sessions('broken\nalso broken\t1\n'), [])
+
+
+class PreflightTests(unittest.TestCase):
+    """A remote agent explains itself instead of leaving a session that dies."""
+
+    def module(self):
+        return runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-agents'))
+
+    def agent(self, **extra):
+        return dict({'id': 'far', 'title': 'Far', 'host': 'alienware',
+                     'transport': 'tailscale-ssh', 'command': ['ollama']}, **extra)
+
+    def test_an_unreachable_host_reports_before_any_session_is_made(self):
+        module = self.module()
+        with mock.patch.object(module['socket'], 'create_connection',
+                               side_effect=OSError('refused')):
+            with self.assertRaisesRegex(RuntimeError, 'tailscale up --ssh'):
+                module['preflight'](self.agent())
+
+    def test_a_policy_refusal_is_reported_rather_than_the_open_port(self):
+        module = self.module()
+        denial = subprocess.CompletedProcess(
+            [], 1, '', 'tailscale: tailnet policy does not permit you to SSH to this node')
+        # runpy hands back a namespace dict, so the name is replaced in place.
+        with mock.patch.dict(module, {'reachable': lambda *a, **k: True}), \
+                mock.patch.object(module['subprocess'], 'run', return_value=denial):
+            with self.assertRaisesRegex(RuntimeError, 'tailnet policy'):
+                module['preflight'](self.agent())
+
+    def test_a_permitted_host_passes_preflight(self):
+        module = self.module()
+        allowed = subprocess.CompletedProcess([], 0, '', '')
+        with mock.patch.dict(module, {'reachable': lambda *a, **k: True}), \
+                mock.patch.object(module['subprocess'], 'run', return_value=allowed):
+            self.assertIsNone(module['preflight'](self.agent()))
+
+    def test_a_local_agent_needs_no_preflight(self):
+        module = self.module()
+        self.assertIsNone(module['preflight']({'id': 'codex', 'command': ['codex']}))
 
 
 if __name__ == '__main__':

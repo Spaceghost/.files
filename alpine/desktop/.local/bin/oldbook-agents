@@ -51,9 +51,34 @@ def reachable(host, port=22, timeout=4.0):
         return False
 
 
-def start(document, agent, workdir):
-    if agent.get('host') and not reachable(agent['host']):
+def preflight(agent):
+    """Say why a remote agent will not start, before starting a session for it.
+
+    A listening port is not enough for Tailscale SSH: the tailnet policy decides
+    separately whether this node may reach that one, and its refusal is the more
+    useful message to show.
+    """
+    host = agent.get('host')
+    if not host:
+        return
+    if not reachable(host):
         raise RuntimeError(launcher.reachability_hint(agent))
+    if agent.get('transport') != 'tailscale-ssh':
+        return
+    try:
+        probe = subprocess.run(['tailscale', 'ssh', host, 'true'],
+                               capture_output=True, text=True, timeout=20)
+    except (OSError, subprocess.SubprocessError):
+        return
+    message = (probe.stderr or probe.stdout).strip()
+    if probe.returncode and 'policy does not permit' in message:
+        raise RuntimeError(
+            f'The tailnet policy does not allow {host} to be reached over Tailscale SSH. '
+            'Add an ssh rule for this node in the Tailscale admin console.')
+
+
+def start(document, agent, workdir):
+    preflight(agent)
     existing = {session['name'] for session in sessions()}
     name = launcher.session_name(document, agent['id'], existing)
     command = launcher.new_session_command(document, agent, name, workdir)
