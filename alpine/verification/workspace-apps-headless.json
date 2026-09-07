@@ -1,0 +1,24 @@
+{
+  "all_headless_processes_stopped": true,
+  "backend": "headless",
+  "checks": {
+    "direct_codex_tty_routing": true,
+    "duplicate_daemon_exits": true,
+    "fullscreen_visibility": true,
+    "headless_backend": true,
+    "hostile_text_inert": true,
+    "isolated_runtime": true,
+    "largest_by_area_over_focus": true,
+    "manual_rename_preserved": true,
+    "numeric_selection_after_rename": true,
+    "resize_updates_label": true,
+    "sigterm_restores_names": true,
+    "tab_visibility": true
+  },
+  "compositor": "swayfx version 0.6 (based on sway 1.12.0)",
+  "host_session_changed": false,
+  "observed_at": "2026-09-07T10:54:43.306106+00:00",
+  "private_runtime": true,
+  "renderer": "pixman",
+  "version": 1
+}

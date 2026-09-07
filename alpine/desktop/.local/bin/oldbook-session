@@ -97,6 +97,9 @@ fi
 # The wallpaper service uses a flock; starting it after reload is safe.
 art_state="${XDG_STATE_HOME:-$HOME/.local/state}/oldbook"
 mkdir -p "$art_state"
+if command -v oldbook-workspaces >/dev/null 2>&1; then
+    oldbook-workspaces daemon 9>&- >>"$art_state/workspaces.log" 2>&1 &
+fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
 fi

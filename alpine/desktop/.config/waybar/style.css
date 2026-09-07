@@ -38,6 +38,11 @@ window#waybar { background: transparent; color: #ede1ff; }
     box-shadow: inset 0 -2px #f594d1;
 }
 #workspaces button.urgent { background: #bf447b; color: #fff3fa; }
+#custom-ai { color: #dca7ff; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 8px; }
+#custom-ai:hover { background: #372049; color: #ffe9ff; }
+#custom-ai.idle { color: #89709f; }
+#custom-ai.complete { color: #b9e6cf; background: #25372f; }
+#custom-ai.attention { color: #fff3fa; background: #8d345e; }
 #mode { color: #ffc3e6; padding: 0 9px; }
 #window { color: #c5acd9; font-size: 10px; }
 window#waybar.empty #window { color: #9c81b4; }

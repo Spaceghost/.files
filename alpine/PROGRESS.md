@@ -70,3 +70,35 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   startup and SIGTERM cleanup were verified without clearing existing messages.
 - Evidence and decisions: `docs/superpowers/specs/2026-09-07-caps-notifications.md`.
   Reboot persistence and physical LED/hotplug observation remain unverified.
+
+## Workspace application names and AI integration
+
+- Added largest-displayed-app workspace labels, preserving numeric navigation,
+  the five original themed names and custom workspace bases. Codex in displayed
+  tmux panes and recognized ChatGPT windows receive a star; the AI button and
+  Super+i / Super+Shift+i provide switching and launchers.
+- Added supported Codex completion and approval callbacks through SwayNC and the
+  existing Caps Lock light, with private expiring pane/TTY routing records.
+  The selective installer was applied with an exact private backup; Codex
+  0.153.4 successfully loaded the resulting configuration.
+- Configuration validation, ShellCheck and disposable HOME deployment passed.
+  Isolated real-Sway area, resize, tabs, fullscreen, numeric navigation, manual
+  rename, singleton, hostile label and graceful restore checks passed.
+- Live labels, singleton startup, notification routing, event cleanup and LED
+  readback passed. All 116 shared-checkout tests and 97 isolated-patch tests passed. Both test notifications
+  were closed by their exact IDs; existing notifications remained present. Panel
+  screenshots and results are saved under `verification/workspace-apps*`.
+  Design and recovery details:
+  `docs/superpowers/specs/2026-09-07-workspace-apps.md` and the linked Codex notes.
+- Existing Codex processes must restart to load callbacks. Approval alerts and
+  next-prompt badge cleanup require reviewing/trusting the hooks via `/hooks`;
+  that interactive trust remains pending. ChatGPT browser response completion
+  cannot be inferred from window titles. Reboot persistence remains unverified.
+
+## Pithos keyring
+
+- GNOME Keyring installed; default encrypted collection created via desktop
+  prompt. Live secret store/read/delete and Pithos default-collection connection
+  passed. All 949 APKs in snapshot 8ca6ff2e0e60e4427ae7 verified.
+- Pandora sign-in/playback and reboot/unlock remain unverified. No PAM changes.
+  Details: `docs/superpowers/specs/2026-09-07-pithos-keyring.md`.

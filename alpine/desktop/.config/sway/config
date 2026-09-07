@@ -54,6 +54,8 @@ bindsym $mod+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
 bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
 bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
 bindsym $mod+Shift+n exec swaync-client -t
+bindsym $mod+i exec ~/.local/bin/oldbook-workspaces ai-next
+bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
