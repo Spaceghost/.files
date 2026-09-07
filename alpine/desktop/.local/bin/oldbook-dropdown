@@ -11,6 +11,18 @@ import time
 APP_ID = 'oldbook-dropdown'
 
 
+def geometry(output, workspace):
+    """Dock below the bar using Sway's actual reserved workspace area."""
+    rect = output['rect']
+    usable = workspace['rect']
+    # The workspace inset also includes gaps; retain that small breathing room.
+    y = max(rect['y'], usable['y'])
+    width = round(rect['width'] * .94)
+    height = min(round(rect['height'] * .52), rect['y'] + rect['height'] - y)
+    x = rect['x'] + (rect['width'] - width) // 2
+    return x, y, width, height
+
+
 def ipc(kind, command=None):
     args = ['swaymsg', '-r', '-t', kind]
     if command:
@@ -42,7 +54,9 @@ def toggle():
         found = terminal(ipc('get_tree'))
         if not found:
             subprocess.Popen(['foot', '--app-id=' + APP_ID, '--title=Drop-down terminal',
-                              '--override=colors-dark.alpha=1.0'],
+                              '--override=colors-dark.alpha=0.84',
+                              '--override=pad=20x16 center',
+                              '--override=cursor.style=beam'],
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
             deadline = time.monotonic() + 5
@@ -61,11 +75,10 @@ def toggle():
             ipc('command', criteria + ' move scratchpad')
             return
         output = next(output for output in ipc('get_outputs') if output.get('focused'))
-        rect = output['rect']
-        width, height = round(rect['width'] * .9), round(rect['height'] * .5)
-        x, y = rect['x'] + round(rect['width'] * .05), rect['y'] + 44
-        ipc('command', criteria + ' scratchpad show')
-        ipc('command', criteria + f' resize set {width} px {height} px, '
+        workspace = next(item for item in ipc('get_workspaces') if item.get('focused'))
+        x, y, width, height = geometry(output, workspace)
+        # One transaction avoids displaying the old centered geometry for a frame.
+        ipc('command', criteria + f' scratchpad show, resize set {width} px {height} px, '
             f'move absolute position {x} px {y} px, focus')
 
 

@@ -1,11 +1,16 @@
 # Drop-down terminal and quiet desktop panels
 
 Super+grave (the physical backtick/tilde key) and Super+asciitilde toggle a
-persistent Foot scratchpad. The terminal occupies 90% of the focused output's
-width and half its height, beginning 44 logical pixels below its top edge.
+persistent Foot scratchpad. The terminal occupies 94% of the focused output's
+width and 52% of its height, anchored to the workspace's usable top edge below
+the bar. Show, resize and placement use one IPC transaction.
 Hiding preserves the shell; exiting the shell lets the next invocation create
-another. A per-session lock serializes startup. Its opaque background keeps
-underlying windows from interfering with reading.
+another. A per-session lock serializes startup. Its warm charcoal background
+is 84% opaque, retaining fully opaque text. New shells get 20x16 padding and
+a beam cursor. Waybar uses the overlay layer so fullscreen scratchpad windows
+cannot cover it. The existing shell received background alpha through Foot's
+OSC 11 extension without restarting; its old padding/cursor remain until it
+is closed normally and reopened.
 
 The Conky panel templates now contain date, battery charge/status, artwork notes
 and rotating Coast to Coast text. CPU, RAM, process lists, storage I/O, network
@@ -32,3 +37,16 @@ the bindings/rule; close the drop-down shell when no longer needed. Use
 oldbook-conky stop to stop panels, or oldbook-conky toggle to disable persistence.
 Edit ~/.config/conky/panels.json and run oldbook-conky restart to adjust cards.
 The HOME files link to the versioned overlay.
+
+## Glass appearance follow-up
+
+Sway and Foot parser checks pass for the final settings. Live hide/show on a
+fullscreen workspace preserves container 259, and its top matches the reserved
+workspace boundary. Geometry also passes on an offset output. Waybar restarted
+and reports the expected 32-pixel height. Screenshot: glass.png; runtime checks:
+glass-runtime.json under alpine/verification/dropdown-conky. No slide animation
+or SwayFX-only effect is required by the running stock Sway session.
+
+The shared Waybar config already contains unrelated pending changes; its one-line
+layer change is applied and saved there but deliberately left out of this focused
+commit. Preserve `"layer": "overlay"` when committing the other Waybar edits.
