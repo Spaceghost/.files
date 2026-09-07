@@ -1,0 +1,46 @@
+{
+  "source": "Spaceghost/.files",
+  "fossil_checkin": "4fcdfda1f5caf45ef834688ab13225c7ed2345671bae94ca8010e4e3721ac4ae",
+  "files": [
+    {
+      "source": "alpine/desktop/.local/lib/oldbook/shortcut_hold.py",
+      "export": "src/superhold/shortcut_hold.py",
+      "sha256": "c646f4667707ee8c625f1d071544511f3b0edb923564f135f0001b413a6e1392"
+    },
+    {
+      "source": "alpine/desktop/.local/lib/oldbook/shortcut_overlay.py",
+      "export": "src/superhold/shortcut_overlay.py",
+      "sha256": "f57ea79f16e24930543d1981a6be8a2c4c3474d07e0f1a7466cf5a5d01132218"
+    },
+    {
+      "source": "alpine/desktop/.local/lib/oldbook/shortcut_profiles.py",
+      "export": "src/superhold/shortcut_profiles.py",
+      "sha256": "0ef1e15065fcf7d05a9301d2696147fd122c11c0ee50705a58279fcb1cfd56ae"
+    },
+    {
+      "source": "alpine/desktop/.local/lib/oldbook/shortcut_sources.py",
+      "export": "src/superhold/shortcut_sources.py",
+      "sha256": "49907140cdc372b5edfd4355753f926e33abf983d26bdf6d3d12c7953d0efaf3"
+    },
+    {
+      "source": "alpine/tests/test_shortcut_hold.py",
+      "export": "tests/test_shortcut_hold.py",
+      "sha256": "f7784b713b41e179a3d879bc7caf95d9fe0265d159715403af2c68cec9967855"
+    },
+    {
+      "source": "alpine/tests/test_shortcut_service.py",
+      "export": "tests/test_shortcut_service.py",
+      "sha256": "ffc2d1425d22bcbff68baf6a828d626bdbeeec901733067580771567d68b1b08"
+    },
+    {
+      "source": "alpine/tests/test_shortcut_sources.py",
+      "export": "tests/test_shortcut_sources.py",
+      "sha256": "9625050d7dc1a459ff5683bdab450a9bab77ab77edced61925ad37e9d943b459"
+    },
+    {
+      "source": "alpine/verification/contextual-shortcuts.png",
+      "export": "docs/screenshot.png",
+      "sha256": "31043463fd1b6b983468e4a19540524de7e03295f2f0489634b6c73e2751e6ad"
+    }
+  ]
+}

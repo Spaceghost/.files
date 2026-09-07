@@ -1,0 +1,805 @@
+{
+  "date": "2026-09-07",
+  "scope": "Private headless Sway session with disposable GTK targets; installed desktop untouched.",
+  "compositor": "swayfx version 0.6 (based on sway 1.12.0)",
+  "method": {
+    "keyboard": "Virtual keyboard held alive without typing into applications.",
+    "pointer": "Private Wayland virtual pointer; click tests used the disposable output only.",
+    "settings": "Temporary JSON file and GTK settings window; no installed configuration changed."
+  },
+  "findings": {
+    "normal_window": {
+      "gtk_settings": [
+        "set_resizable(False)",
+        "set_type_hint(DIALOG)",
+        "set_decorated(False)",
+        "set_size_request(960,650)"
+      ],
+      "initial_focus": true,
+      "automatically_floating": true,
+      "outer_size": [
+        964,
+        652
+      ],
+      "focused_tree_is_panel": true,
+      "hide_restores_original_target": true,
+      "centers_on_current_output_after_remap": true,
+      "focus_follows_mouse": "yes"
+    },
+    "on_demand_layer": {
+      "initial_focus_stable": false,
+      "click_inside_acquires_focus": true,
+      "click_target_loses_focus": true,
+      "initial_focus_failure_also_with_separate_target_process": true,
+      "initial_focus_failure_with_focus_follows_mouse_no": true
+    },
+    "exclusive_then_on_demand": {
+      "initial_exclusive_focus": true,
+      "focus_survives_change_to_on_demand": false,
+      "same_failure_with_pointer_inside": true
+    },
+    "fullscreen": {
+      "normal_window_visible_on_map": false,
+      "explicit_panel_focus_disables_target_fullscreen": true,
+      "recommendation": "Do not silently change application fullscreen state. Persistent normal-window fullscreen behavior remains unimplemented at this validation point."
+    },
+    "search_immediate_enter": [
+      {
+        "query": "Save",
+        "selected_before_enter": "Ctrl+S",
+        "sent": [
+          "Ctrl+S"
+        ]
+      }
+    ],
+    "settings": {
+      "cancel": {
+        "cancel_preserved": true,
+        "callback_count": 0,
+        "exit_status": 0
+      },
+      "reset": {
+        "reset_only_form": true,
+        "reset_cancel_preserved": true,
+        "callback_count": 0,
+        "exit_status": 0
+      },
+      "save": {
+        "save_values": true,
+        "callback_count": 1,
+        "exit_status": 0
+      },
+      "malformed": {
+        "malformed_save_disabled": true,
+        "malformed_preserved": true,
+        "callback_count": 0,
+        "exit_status": 0
+      }
+    }
+  },
+  "recommendation": "Use a normal fixed-size floating GTK toplevel for persistent focus-loss dismissal, and a nonfocusable layer for release mode. Capture target before mapping and hide before native shortcut dispatch.",
+  "primary_source": {
+    "url": "https://raw.githubusercontent.com/swaywm/sway/1.12/sway/desktop/layer_shell.c",
+    "explanation": "handle_map initially focuses interactive layers; arrange_layers clears a focused layer when it is not exclusive. A mode change also arranges layers."
+  },
+  "focus_events": {
+    "on_demand": [
+      [
+        0.005,
+        "base",
+        "focus-in"
+      ],
+      [
+        0.006,
+        "base",
+        "active",
+        true
+      ],
+      [
+        0.504,
+        "map_panel"
+      ],
+      [
+        0.512,
+        "base",
+        "focus-out"
+      ],
+      [
+        0.512,
+        "base",
+        "active",
+        false
+      ],
+      [
+        0.512,
+        "panel",
+        "focus-in"
+      ],
+      [
+        0.512,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        0.512,
+        "panel",
+        "focus-out"
+      ],
+      [
+        0.512,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        0.512,
+        "base",
+        "focus-in"
+      ],
+      [
+        0.512,
+        "base",
+        "active",
+        true
+      ],
+      [
+        0.9,
+        "after_map",
+        "panel",
+        false,
+        "base",
+        true
+      ],
+      [
+        1.401,
+        "click_panel"
+      ],
+      [
+        1.402,
+        "base",
+        "focus-out"
+      ],
+      [
+        1.402,
+        "base",
+        "active",
+        false
+      ],
+      [
+        1.402,
+        "panel",
+        "focus-in"
+      ],
+      [
+        1.402,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        1.7,
+        "after_click_panel",
+        "panel",
+        true,
+        "base",
+        false
+      ],
+      [
+        2.204,
+        "click_base"
+      ],
+      [
+        2.204,
+        "panel",
+        "focus-out"
+      ],
+      [
+        2.204,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        2.204,
+        "base",
+        "focus-in"
+      ],
+      [
+        2.204,
+        "base",
+        "active",
+        true
+      ],
+      [
+        2.5,
+        "after_click_base",
+        "panel",
+        false,
+        "base",
+        true
+      ],
+      [
+        3.001,
+        "click_panel"
+      ],
+      [
+        3.002,
+        "base",
+        "focus-out"
+      ],
+      [
+        3.002,
+        "base",
+        "active",
+        false
+      ],
+      [
+        3.002,
+        "panel",
+        "focus-in"
+      ],
+      [
+        3.002,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        3.302,
+        "ipc_focus_base"
+      ],
+      [
+        3.302,
+        "panel",
+        "focus-out"
+      ],
+      [
+        3.303,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        3.303,
+        "base",
+        "focus-in"
+      ],
+      [
+        3.303,
+        "base",
+        "active",
+        true
+      ],
+      [
+        3.801,
+        "end",
+        "panel",
+        false,
+        "base",
+        true
+      ]
+    ],
+    "normal_window": [
+      [
+        0.024,
+        "base",
+        "focus-in"
+      ],
+      [
+        0.402,
+        "original",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-1",
+            "floating": false
+          }
+        ]
+      ],
+      [
+        0.623,
+        "base",
+        "focus-out"
+      ],
+      [
+        0.623,
+        "panel",
+        "focus-in"
+      ],
+      [
+        1.102,
+        "normal_map",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": false,
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-1",
+            "floating": false
+          },
+          {
+            "id": 9,
+            "name": "Panel fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 158,
+              "y": 75,
+              "width": 964,
+              "height": 652
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-1",
+            "floating": true
+          }
+        ]
+      ],
+      [
+        1.202,
+        "panel",
+        "focus-out"
+      ],
+      [
+        1.202,
+        "base",
+        "focus-in"
+      ],
+      [
+        1.503,
+        "normal_hide",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-1",
+            "floating": false
+          }
+        ]
+      ],
+      [
+        1.613,
+        "base",
+        "focus-out"
+      ],
+      [
+        1.613,
+        "base",
+        "focus-in"
+      ],
+      [
+        2.005,
+        "base",
+        "focus-out"
+      ],
+      [
+        2.006,
+        "panel",
+        "focus-in"
+      ],
+      [
+        2.503,
+        "second_output_map",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": false,
+            "visible": true,
+            "rect": {
+              "x": 1280,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": false
+          },
+          {
+            "id": 12,
+            "name": "Panel fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 1438,
+              "y": 75,
+              "width": 964,
+              "height": 652
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": true
+          }
+        ]
+      ],
+      [
+        2.602,
+        "panel",
+        "focus-out"
+      ],
+      [
+        2.602,
+        "base",
+        "focus-in"
+      ],
+      [
+        3.704,
+        "fullscreen_map",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 1280,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 1,
+            "output": "HEADLESS-2",
+            "floating": false
+          },
+          {
+            "id": 13,
+            "name": "Panel fixture",
+            "focused": false,
+            "visible": false,
+            "rect": {
+              "x": 1438,
+              "y": 75,
+              "width": 964,
+              "height": 652
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": true
+          }
+        ]
+      ],
+      [
+        3.902,
+        "explicit_focus_result",
+        "[\n  {\n    \"success\": true\n  }\n]"
+      ],
+      [
+        3.903,
+        "base",
+        "focus-out"
+      ],
+      [
+        3.903,
+        "panel",
+        "focus-in"
+      ],
+      [
+        4.305,
+        "fullscreen_explicit_focus",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": false,
+            "visible": true,
+            "rect": {
+              "x": 1280,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": false
+          },
+          {
+            "id": 13,
+            "name": "Panel fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 1438,
+              "y": 75,
+              "width": 964,
+              "height": 652
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": true
+          }
+        ]
+      ],
+      [
+        4.503,
+        "panel",
+        "focus-out"
+      ],
+      [
+        4.503,
+        "base",
+        "focus-in"
+      ],
+      [
+        4.804,
+        "finished",
+        [
+          {
+            "id": 8,
+            "name": "Target fixture",
+            "focused": true,
+            "visible": true,
+            "rect": {
+              "x": 1280,
+              "y": 0,
+              "width": 1280,
+              "height": 800
+            },
+            "fullscreen_mode": 0,
+            "output": "HEADLESS-2",
+            "floating": false
+          }
+        ]
+      ]
+    ],
+    "exclusive_transition_fullscreen": [
+      [
+        0.507,
+        "map_panel"
+      ],
+      [
+        0.514,
+        "panel",
+        "focus-in"
+      ],
+      [
+        0.514,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        0.65,
+        "switch_to_on_demand"
+      ],
+      [
+        0.654,
+        "panel",
+        "focus-out"
+      ],
+      [
+        0.654,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        0.901,
+        "after_map",
+        "panel",
+        false
+      ],
+      [
+        1.403,
+        "click_panel"
+      ],
+      [
+        1.403,
+        "panel",
+        "focus-in"
+      ],
+      [
+        1.404,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        1.7,
+        "after_click_panel",
+        "panel",
+        true
+      ],
+      [
+        2.202,
+        "click_base"
+      ],
+      [
+        2.202,
+        "panel",
+        "focus-out"
+      ],
+      [
+        2.202,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        2.5,
+        "after_click_base",
+        "panel",
+        false
+      ],
+      [
+        3.002,
+        "click_panel"
+      ],
+      [
+        3.002,
+        "panel",
+        "focus-in"
+      ],
+      [
+        3.002,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        3.304,
+        "ipc_focus_base"
+      ],
+      [
+        3.304,
+        "panel",
+        "focus-out"
+      ],
+      [
+        3.304,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        3.801,
+        "end",
+        "panel",
+        false
+      ]
+    ],
+    "exclusive_transition_pointer_inside": [
+      [
+        0.504,
+        "map_panel"
+      ],
+      [
+        0.511,
+        "panel",
+        "focus-in"
+      ],
+      [
+        0.511,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        0.65,
+        "switch_to_on_demand"
+      ],
+      [
+        0.652,
+        "panel",
+        "focus-out"
+      ],
+      [
+        0.652,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        0.9,
+        "after_map",
+        "panel",
+        false
+      ],
+      [
+        1.402,
+        "click_panel"
+      ],
+      [
+        1.402,
+        "panel",
+        "focus-in"
+      ],
+      [
+        1.402,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        1.701,
+        "after_click_panel",
+        "panel",
+        true
+      ],
+      [
+        2.202,
+        "click_base"
+      ],
+      [
+        2.202,
+        "panel",
+        "focus-out"
+      ],
+      [
+        2.202,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        2.5,
+        "after_click_base",
+        "panel",
+        false
+      ],
+      [
+        3.001,
+        "click_panel"
+      ],
+      [
+        3.002,
+        "panel",
+        "focus-in"
+      ],
+      [
+        3.002,
+        "panel",
+        "active",
+        true
+      ],
+      [
+        3.302,
+        "ipc_focus_base"
+      ],
+      [
+        3.302,
+        "panel",
+        "focus-out"
+      ],
+      [
+        3.303,
+        "panel",
+        "active",
+        false
+      ],
+      [
+        3.801,
+        "end",
+        "panel",
+        false
+      ]
+    ]
+  }
+}
