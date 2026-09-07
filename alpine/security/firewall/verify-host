@@ -38,12 +38,12 @@ def run(*args, **kw):
     return subprocess.run(args, check=True, capture_output=True, text=True, timeout=10, **kw)
 
 
-def curl(host, port, prefix=(), uid=None, executable='/usr/bin/curl'):
+def curl(host, port, prefix=(), uid=None, executable='/usr/bin/curl', max_time=3):
     url_host = f'[{host}]' if ':' in host else host
     result = subprocess.run([*prefix, executable, '--disable', '--noproxy', '*',
-        '--silent', '--fail', '--max-time', '3', '--write-out',
+        '--silent', '--fail', '--max-time', str(max_time), '--write-out',
         '\nOLDBOOK_CONNECTS:%{num_connects}', f'http://{url_host}:{port}/'],
-        capture_output=True, text=True, timeout=5,
+        capture_output=True, text=True, timeout=max_time + 2,
         **({'user': uid, 'group': uid, 'extra_groups': ()} if uid is not None else {}))
     if result.returncode not in (0, 28):
         raise RuntimeError(f'Probe failed unexpectedly: curl exit {result.returncode}')
@@ -59,10 +59,10 @@ def curl(host, port, prefix=(), uid=None, executable='/usr/bin/curl'):
     return False
 
 
-def serve(ready):
+def serve(ready, port):
     while not ready.exists():
         time.sleep(.02)
-    servers = [http.server.HTTPServer(('0.0.0.0', 443), Handler), IPv6Server(('::', 443), Handler)]
+    servers = [http.server.HTTPServer(('0.0.0.0', port), Handler), IPv6Server(('::', port), Handler)]
     for server in servers:
         threading.Thread(target=server.serve_forever, daemon=True).start()
     ready.with_suffix('.listening').touch()
@@ -72,11 +72,19 @@ def serve(ready):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--expect', required=True, choices=('allow', 'deny'))
+    parser.add_argument('--expect-output', choices=('allow', 'deny', 'either'),
+                        help='Override output expectation; either records a real interactive choice')
+    parser.add_argument('--port', type=int, default=443,
+                        help='Peer destination port; use a non-443 port to test retained HTTPS exceptions')
+    parser.add_argument('--timeout', type=int, default=3,
+                        help='Output wait in seconds; allow time for the real GUI prompt')
     parser.add_argument('--uid', required=True, type=int)
     parser.add_argument('--output', required=True, type=Path, help='New private evidence directory')
     args = parser.parse_args()
     if os.geteuid() != 0 or args.uid <= 0:
         parser.error('Run as root with the non-root desktop UID')
+    if not 1 <= args.port <= 65535 or not 1 <= args.timeout <= 90:
+        parser.error('Port must be 1–65535 and timeout 1–90 seconds')
     args.output.mkdir(mode=0o700, exist_ok=False)
     # Reject overlap with any existing non-default route before adding a peer.
     routes = json.loads(run('ip', '-j', 'route', 'show', 'table', 'all').stdout)
@@ -108,7 +116,7 @@ def main():
         ready = Path(work) / 'ready'
         try:
             process = subprocess.Popen(['unshare', '--net', sys.executable, str(Path(__file__).resolve()),
-                                        '_serve', str(ready)], stdin=subprocess.DEVNULL,
+                                        '_serve', str(ready), str(args.port)], stdin=subprocess.DEVNULL,
                                        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
             for _ in range(250):
                 if process.poll() is not None:
@@ -137,14 +145,17 @@ def main():
             else:
                 raise RuntimeError('Peer server was not ready')
             expected = args.expect == 'allow'
+            output_expected = args.expect_output or args.expect
             for family, addresses, server_class in ((4, ipv4, http.server.HTTPServer),
                                                      (6, ipv6, IPv6Server)):
-                if not curl(addresses[1], 443, ns, executable=str(client)):
+                if not curl(addresses[1], args.port, ns, executable=str(client)):
                     raise RuntimeError('Peer-local server control failed')
-                allowed = curl(addresses[1], 443, uid=args.uid, executable=str(client))
-                if allowed != expected:
+                allowed = curl(addresses[1], args.port, uid=args.uid, executable=str(client),
+                               max_time=args.timeout)
+                if output_expected != 'either' and allowed != (output_expected == 'allow'):
                     raise RuntimeError(f'Unexpected IPv{family} output verdict: allowed={allowed}')
-                results.append(f'IPv{family} new output {args.expect}, fresh executable path UID {args.uid}')
+                verdict = 'allow' if allowed else 'deny'
+                results.append(f'IPv{family} new output {verdict}, fresh executable path UID {args.uid}, port {args.port}')
                 server = server_class((addresses[0], 0), Handler)
                 servers.append(server)
                 threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -169,6 +180,8 @@ def main():
             if created:
                 subprocess.run(['ip', 'link', 'del', link], capture_output=True, timeout=5)
     evidence = {'results': results, 'local_server_controls_passed': True,
+                'output_expectation': output_expected, 'output_port': args.port,
+                'output_timeout_seconds': args.timeout, 'probe_executable': str(client),
                 'firewall_rules_modified': False, 'external_network_used': False,
                 'temporary_link_removed': subprocess.run(['ip', 'link', 'show', link],
                     capture_output=True).returncode != 0}
@@ -177,7 +190,7 @@ def main():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) == 3 and sys.argv[1] == '_serve':
-        serve(Path(sys.argv[2]))
+    if len(sys.argv) == 4 and sys.argv[1] == '_serve':
+        serve(Path(sys.argv[2]), int(sys.argv[3]))
     else:
         main()

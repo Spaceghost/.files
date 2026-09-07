@@ -4,18 +4,23 @@ The Oldbook policy combines a permanent nftables table with OpenSnitch process
 decisions. Installation alone does not start either service. The root controller
 must finish local recovery and bootstrap application rules before activation.
 
-The September 7 host trial was rolled back after additional broad Allow rules
-appeared during validation. The daemon is stopped and startup is not enabled;
-those interactive rules were preserved for review. See
-[`activation-verification.json`](activation-verification.json) for actual results.
+The September 7 interactive activation is running and both services are enabled
+in the boot runlevel. All 28 existing rule files and popup defaults were
+preserved. New non-443 connections produced a real Qt popup and Deny verdict;
+IPv4/IPv6 incoming checks, fresh authenticated Codex and curl checks passed.
+The desktop was locked, so an unlocked human click remains untested. See
+[`interactive-verification.json`](interactive-verification.json). The earlier
+rolled-back trial remains recorded in
+[`activation-verification.json`](activation-verification.json).
 
 ## Behavior
 
 - Unsolicited incoming connections and forwarded traffic are denied for IPv4
   and IPv6. Loopback, reply traffic, DHCP and necessary ICMP/IPv6 neighbor
   discovery are allowed.
-- New outgoing application connections enter NFQUEUE 0 without bypass. The
-  daemon or GUI must explicitly permit an executable; no GUI means default-deny.
+- New outgoing application connections enter NFQUEUE 0 without bypass. Matching
+  rules decide access; unmatched connections prompt in the GUI. Without a GUI,
+  unmatched connections receive the daemon's default Deny.
 - The queue belongs to `inet oldbook`, independently of OpenSnitch's tables.
   The gate remains after a crash or graceful daemon shutdown. Established
   approved connections continue; this is a gate for new connections, not a
@@ -28,6 +33,25 @@ OpenSnitch's GUI cannot remove the independent gate using its pause control.
 Change application rules in the GUI; edit the repository nftables policy for
 system packet filtering. Changing the GUI default action to Allow makes unknown
 applications allowed while that GUI is connected; retain Deny.
+
+## Interactive decisions
+
+Normal operation asks Allow or Deny for connections without a matching rule,
+then remembers the selected scope and duration. Existing permissions remain in
+effect: a port-only allowance covers every application using that port, and a
+user-only allowance covers that user's programs. Restarting the daemon does not
+require deleting these choices. [Upstream popup guide](https://github.com/evilsocket/opensnitch/wiki/Pop-ups-dialogs).
+
+Current defaults are Deny after 20 seconds, popups enabled, executable target,
+and 12-hour duration. In version 1.8.0, duration index `6` means `12h`; `0` means
+Once, `7` means until restart, and `8` means Forever. Keep the existing defaults
+unless changing them is requested. Future application-specific decisions can
+combine the executable with UserID and optional destination conditions.
+
+Upstream's optional learning workflow uses default Allow and temporary rules;
+ordinary interactive prompting does not require enabling it. Do not select
+Ignore rules to force relearning: that preference can delete temporary rules.
+[Upstream getting-started guide](https://github.com/evilsocket/opensnitch/wiki/Getting-started).
 
 ## Integration
 
@@ -124,6 +148,16 @@ a fresh executable path so an existing curl permission cannot mask the result.
 Only a timeout with zero completed TCP connections counts as denial; local HTTP
 controls must succeed. `probe-codex --output NEW-DIRECTORY`, run as the desktop
 user, makes one minimal authenticated request using the saved CLI login.
+
+With a retained port-443 exception, use `--port 18443` to exercise a connection
+outside it. For a real interactive check, add `--timeout 30 --expect-output either`
+while retaining `--expect deny` for incoming traffic. Observe the real GUI popup
+and resulting rule separately: `either` records the actual outgoing verdict and
+does not by itself prove prompting. A user's Allow is valid test behavior.
+Screen locking can obscure an otherwise mapped popup; do not bypass the lock.
+Remove only the unique canary's rule after the check; keep every existing rule.
+The verification record includes the exact canary name, cleanup events and the
+private root-owned backup under `/var/lib/oldbook/firewall-backups/`.
 
 After every check passes, `doas /usr/local/sbin/oldbook-firewall-activate confirm "$firewall_trial"`
 enables both services in the **boot** runlevel, before networking. To abandon the

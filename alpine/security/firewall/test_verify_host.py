@@ -37,3 +37,14 @@ class ProbeVerdictTests(unittest.TestCase):
     def test_connection_refusal_is_a_fixture_error(self):
         with self.assertRaisesRegex(RuntimeError, 'unexpectedly'):
             self.result(7)
+
+    def test_prompt_wait_keeps_nonroot_identity_and_requested_port(self):
+        result = subprocess.CompletedProcess([], 28, '\nOLDBOOK_CONNECTS:0', '')
+        with patch.object(probe.subprocess, 'run', return_value=result) as run:
+            self.assertFalse(probe.curl('192.0.2.2', 18443, uid=1000, max_time=30))
+        command = run.call_args.args[0]
+        self.assertEqual(command[command.index('--max-time') + 1], '30')
+        self.assertEqual(command[-1], 'http://192.0.2.2:18443/')
+        self.assertEqual(run.call_args.kwargs['timeout'], 32)
+        self.assertEqual(run.call_args.kwargs['user'], 1000)
+        self.assertEqual(run.call_args.kwargs['extra_groups'], ())
