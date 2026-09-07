@@ -114,6 +114,7 @@ def menu(section="main"):
     items = {
         "main": {
             "󰊠  Applications                              Super+D": lambda: launch([BIN / "oldbook-menu"]),
+            "▦  Expo · all workspaces                  Super+E": lambda: launch([BIN / "oldbook-expo"]),
             "󰖯  Switch window": windows,
             "󰸉  Artwork gallery": lambda: launch([BIN / "oldbook-wallpaper", "pick"]),
             "▶  YouTube · desktop player & PiP": lambda: launch([BIN / "oldbook-youtube", "menu"]),

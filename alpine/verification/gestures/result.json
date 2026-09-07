@@ -1,0 +1,22 @@
+{
+  "search_focuses_window": true,
+  "gtk_down_swipe_closes": true,
+  "overview_rendered": true,
+  "keyboard_workspace_selection": true,
+  "close_command": true,
+  "gesture_config_loaded": true,
+  "trackpad": "Apple bcm5974",
+  "libinput_gesture_capability": true,
+  "live_settings_applied": 18,
+  "sway_config_validation": true,
+  "disposable_home_deployment": true,
+  "focused_tests_passed": 3,
+  "full_suite_passed": 263,
+  "full_suite_total": 265,
+  "unrelated_failures": [
+    "test_status_command_uses_package_imports_without_loading_gtk",
+    "test_status_marks_a_crashed_process_record_stale"
+  ],
+  "physical_gesture_confirmation": "Awaiting user observation; GTK gesture events and libinput capabilities verified",
+  "overview_content": "Workspace/window geometry and titles; not live screenshots"
+}
