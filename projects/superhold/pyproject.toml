@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "superhold"
+version = "0.1.0.dev0"
+description = "Contextual shortcut overlay for Sway and LXQt with Sway"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "Johnneylee Jack Rollins"}]
+keywords = ["wayland", "sway", "lxqt", "shortcuts", "desktop"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: X11 Applications :: GTK",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+superhold = "superhold.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.data-files]
+"share/applications" = ["share/applications/superhold.desktop"]
+"share/superhold/integrations/lxqt" = ["integrations/lxqt/superhold.desktop"]
+"share/superhold/integrations/sway" = ["integrations/sway/superhold.conf"]

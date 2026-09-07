@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Superhold
+Comment=Show contextual shortcuts when holding Super (Sway sessions)
+Exec=superhold daemon
+TryExec=superhold
+Icon=input-keyboard
+Terminal=false
+OnlyShowIn=LXQt;
+X-LXQt-Module=true
