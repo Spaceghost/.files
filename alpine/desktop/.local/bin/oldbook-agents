@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Search, launch and reattach tmux-contained agent sessions."""
+import argparse
+import json
+from pathlib import Path
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import agent_launcher as launcher
+
+CONFIG = Path.home() / '.config/oldbook/agents.json'
+FUZZEL = Path(__file__).resolve().parent / 'oldbook-fuzzel'
+
+
+def menu(prompt, options, lines=14, width=72):
+    result = subprocess.run([str(FUZZEL), '--dmenu', '--no-sort', '--prompt', prompt,
+                             '--lines', str(min(lines, max(1, len(options)))),
+                             '--width', str(width)],
+                            input='\n'.join(options) + '\n', capture_output=True, text=True)
+    return result.stdout.rstrip('\n') if result.returncode == 0 else None
+
+
+def ask(prompt, width=72):
+    result = subprocess.run([str(FUZZEL), '--dmenu', '--prompt', prompt,
+                             '--lines', '0', '--width', str(width)],
+                            input='', capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else ''
+
+
+def sessions():
+    result = subprocess.run(launcher.list_sessions_command(),
+                            capture_output=True, text=True, timeout=10)
+    return launcher.parse_sessions(result.stdout) if result.returncode == 0 else []
+
+
+def attach(document, name, title=None):
+    subprocess.Popen(launcher.attach_command(document, name, title),
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+def start(document, agent, workdir):
+    existing = {session['name'] for session in sessions()}
+    name = launcher.session_name(document, agent['id'], existing)
+    command = launcher.new_session_command(document, agent, name, workdir)
+    result = subprocess.run(command, capture_output=True, text=True, timeout=20)
+    if result.returncode:
+        raise RuntimeError('tmux could not start the session: '
+                           + (result.stderr.strip() or 'unknown error')[:400])
+    check = subprocess.run(['tmux', 'has-session', '-t', name],
+                           capture_output=True, text=True, timeout=10)
+    if check.returncode:
+        raise RuntimeError(f'{agent["title"]} exited immediately; is it installed'
+                           + (f' on {agent["host"]}?' if agent.get('host') else ' here?'))
+    attach(document, name, agent['title'])
+    return name
+
+
+def choose_workdir(document, agent):
+    if agent.get('host'):
+        # The far side owns its own paths, so offer a free-form remote directory.
+        typed = ask(f'Directory on {agent["host"]} (blank for home) ❯ ')
+        return typed or None
+    options = [launcher.short_path(path) for path in launcher.expand_workdirs(document)]
+    other = '…  Another directory'
+    selected = menu(f'{agent["title"]} in ❯ ', [*options, other])
+    if selected is None:
+        return False
+    if selected == other:
+        typed = ask('Directory ❯ ')
+        if not typed:
+            return False
+        selected = typed
+    path = Path(selected.replace('~', str(Path.home()), 1)
+                if selected.startswith('~') else selected).expanduser()
+    if not path.is_dir():
+        raise RuntimeError('Not a directory: ' + str(path))
+    return path
+
+
+def pick(document):
+    live = sessions()
+    labels, actions = [], {}
+    for session in live:
+        mark = ' · attached' if session['attached'] else ''
+        label = (f"󰆍  {session['name']} — {launcher.short_path(session['path'])}"
+                 f" · {session['windows']}w{mark}")
+        labels.append(label)
+        actions[label] = ('attach', session['name'])
+    for agent in launcher.enabled_agents(document):
+        label = '✦  ' + launcher.describe(agent)
+        labels.append(label)
+        actions[label] = ('new', agent['id'])
+    close_label = '󰅖  Close a session…'
+    labels.append(close_label)
+    actions[close_label] = ('close', None)
+
+    selected = menu('Agents ❯ ', labels)
+    if selected is None or selected not in actions:
+        return 0
+    kind, target = actions[selected]
+    if kind == 'attach':
+        attach(document, target)
+        return 0
+    if kind == 'close':
+        if not live:
+            return 0
+        names = [session['name'] for session in live]
+        chosen = menu('Close which session? ❯ ', names)
+        if chosen in names:
+            subprocess.run(['tmux', 'kill-session', '-t', chosen], timeout=10)
+        return 0
+    agent = next(item for item in document['agents'] if item['id'] == target)
+    workdir = choose_workdir(document, agent)
+    if workdir is False:
+        return 0
+    print(start(document, agent, workdir))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='menu',
+                        choices=['menu', 'list', 'new', 'attach', 'kill', 'agents'])
+    parser.add_argument('target', nargs='?', help='Agent id, or session name.')
+    parser.add_argument('--cwd', help='Working directory for a new session.')
+    arguments = parser.parse_args()
+    document = launcher.load_config(CONFIG)
+
+    if arguments.action == 'agents':
+        for agent in launcher.enabled_agents(document):
+            print(f"{agent['id']}\t{launcher.describe(agent)}")
+        return 0
+    if arguments.action == 'list':
+        for session in sessions():
+            print(f"{session['name']}\t{session['path']}\t"
+                  f"{'attached' if session['attached'] else 'detached'}")
+        return 0
+    if arguments.action == 'menu':
+        return pick(document)
+    if not arguments.target:
+        parser.error(f'{arguments.action} needs a name')
+    if arguments.action == 'attach':
+        attach(document, arguments.target)
+        return 0
+    if arguments.action == 'kill':
+        subprocess.run(['tmux', 'kill-session', '-t', arguments.target], timeout=10)
+        return 0
+    agent = next((item for item in document['agents'] if item['id'] == arguments.target), None)
+    if agent is None:
+        raise RuntimeError('Unknown agent: ' + arguments.target)
+    workdir = arguments.cwd
+    if workdir is None and not agent.get('host'):
+        workdir = Path.cwd()
+    print(start(document, agent, workdir))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f'oldbook-agents: {error}', file=sys.stderr)
+        sys.exit(1)

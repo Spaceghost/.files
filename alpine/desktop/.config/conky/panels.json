@@ -21,7 +21,7 @@
       "prefer": "right",
       "width": 420,
       "height": 204,
-      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 120 ~/.local/bin/oldbook-scripture panel --width 52}"
+      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 60 ~/.local/bin/oldbook-scripture panel --width 52}"
     },
     {
       "id": "power",
@@ -52,6 +52,16 @@
       "width": 360,
       "height": 140,
       "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
+    },
+    {
+      "id": "witness",
+      "title": "Witnesses from outside",
+      "enabled": true,
+      "priority": 60,
+      "prefer": "left",
+      "width": 400,
+      "height": 152,
+      "text": "${color1}󰉾 WITNESS${color2} ${hr 1}\n${execpi 300 {{scripture}} witness --width 50}"
     }
   ]
 }

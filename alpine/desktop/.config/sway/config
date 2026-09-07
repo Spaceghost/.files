@@ -49,6 +49,7 @@ bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
 bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
 bindsym $mod+Shift+n exec swaync-client -t
 bindsym $mod+i exec ~/.local/bin/oldbook-workspaces ai-next
+bindsym $mod+n exec ~/.local/bin/oldbook-agents
 bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Shift+c reload
@@ -123,6 +124,7 @@ mode "resize" {
     bindsym Escape mode "default"
 }
 
+for_window [app_id="oldbook-agent"] floating enable, resize set width 1100 px height 700 px, move position center
 for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
 for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt

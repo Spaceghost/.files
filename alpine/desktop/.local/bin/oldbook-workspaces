@@ -292,12 +292,18 @@ def switch_ai(path, runtime, menu=False):
     _, windows = collect(request(path, 4), ApplicationResolver(), runtime, WorkspaceNames(records))
     if menu or not windows:
         choices = {f'{window["workspace"]} · {window["name"]} [{window["id"]}]': window['id'] for window in windows}
-        choices.update({'✦ Open Codex in a terminal': 'codex', '✦ Open ChatGPT': 'chatgpt'})
+        choices.update({'✦ Launch a new agent…': 'agents',
+                        '✦ Open Codex in a terminal': 'codex', '✦ Open ChatGPT': 'chatgpt'})
         selected = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'AI sessions › '],
                                   input='\n'.join(choices) + '\n', text=True, capture_output=True)
         if selected.returncode:
             return
         target = choices.get(selected.stdout.strip())
+        if target == 'agents':
+            subprocess.Popen([str(Path(__file__).resolve().parent / 'oldbook-agents')],
+                             start_new_session=True, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+            return
         if target == 'codex':
             subprocess.Popen(['foot', '--app-id=codex', '--title=Codex', '-e', 'codex'],
                              start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

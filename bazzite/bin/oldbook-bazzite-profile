@@ -43,6 +43,8 @@ SOURCE_FILES = (
     '.config/sway/theme.conf',
     '.config/waybar/config.jsonc',
     '.config/waybar/style.css',
+    '.config/oldbook/agents.json',
+    '.local/bin/oldbook-agents',
     '.local/bin/oldbook-ai-notification-stream',
     '.local/bin/oldbook-audio',
     '.local/bin/oldbook-brightness',
@@ -61,6 +63,7 @@ SOURCE_FILES = (
     '.local/bin/oldbook-screenshot',
     '.local/bin/oldbook-scripture',
     '.local/bin/oldbook-scripture-bar',
+    '.local/bin/oldbook-scripture-library',
     '.local/bin/oldbook-strata',
     '.local/bin/oldbook-video-background',
     '.local/bin/oldbook-wallpaper',
@@ -71,11 +74,11 @@ SOURCE_FILES = (
 )
 RUNTIME_COMMANDS = (
     'brightnessctl', 'btop', 'conky', 'dbus-update-activation-environment',
-    'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'ip', 'jq',
+    'curl', 'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'ip', 'jq',
     'less', 'loginctl', 'mpv',
     'mpvpaper', 'nmcli', 'notify-send', 'pavucontrol', 'playerctl', 'python3',
-    'slurp', 'sway', 'swayidle', 'swaylock', 'swaymsg', 'swaync', 'swaync-client',
-    'superhold', 'systemctl', 'thunar', 'waybar', 'wl-copy', 'wpctl', 'yt-dlp',
+    'slurp', 'ssh', 'sway', 'swayidle', 'swaylock', 'swaymsg', 'swaync', 'swaync-client',
+    'superhold', 'systemctl', 'thunar', 'tmux', 'waybar', 'wl-copy', 'wpctl', 'yt-dlp',
 )
 
 

@@ -14,6 +14,10 @@ import unicodedata
 
 VERSE_FILE = 'kjv.tsv.gz'
 REFLECTION_FILE = 'reflections.json'
+WITNESS_FILE = 'witnesses.json'
+BUNDLED = 'kjv'
+# Downloaded translations and Jewish texts live outside the checkout.
+INSTALL_ROOT = Path.home() / '.local/share/oldbook/scripture'
 
 # Ordinals are spelled many ways; everything collapses to a compact key.
 ORDINALS = {'first': '1', 'second': '2', 'third': '3', 'i': '1', 'ii': '2', 'iii': '3'}
@@ -46,10 +50,26 @@ class Bible:
                 self.books.append(record['book'])
             self._by_book[record['book']].append(record)
         self._names = {normalise(name): name for name in self.books}
+        self._names.update({normalise(name.removeprefix('Talmud ')): name
+                            for name in self.books if name.startswith('Talmud ')})
+
+    @staticmethod
+    def resolve(directory, translation=BUNDLED):
+        """The bundled King James text, or an installed one by identifier."""
+        if translation in (None, '', BUNDLED):
+            return Path(directory) / VERSE_FILE
+        if not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,63}', str(translation)):
+            raise ValueError('Unusable translation identifier: ' + str(translation))
+        for candidate in (INSTALL_ROOT / f'{translation}.tsv.gz',
+                          Path(directory) / f'{translation}.tsv.gz'):
+            if candidate.is_file():
+                return candidate
+        raise ValueError(f'{translation} is not installed; run '
+                         'oldbook-scripture-library install ' + str(translation))
 
     @classmethod
-    def load(cls, directory):
-        path = Path(directory) / VERSE_FILE
+    def load(cls, directory, include_extra=True, translation=BUNDLED):
+        path = cls.resolve(directory, translation)
         verses = []
         with gzip.open(path, 'rt', encoding='utf-8') as handle:
             for line in handle:
@@ -58,6 +78,12 @@ class Bible:
                                'verse': int(verse), 'text': text})
         if not verses:
             raise ValueError('Verse file is empty')
+        extra = Path(directory) / 'jewish-texts.jsonl.gz'
+        # The bundled extras belong to the default view; asking for a specific
+        # translation should return that translation and nothing else.
+        if include_extra and translation in (None, '', BUNDLED) and extra.exists():
+            with gzip.open(extra, 'rt', encoding='utf-8') as handle:
+                verses.extend(json.loads(line) for line in handle)
         return cls(verses)
 
     def resolve_book(self, token):
@@ -66,7 +92,7 @@ class Bible:
         The spelling as written is always tried first, so a book beginning with
         an ordinal-looking letter such as Isaiah is never read as "I Saiah".
         """
-        key = normalise(token)
+        key = normalise(re.sub(r'^Bible\s+', '', token, flags=re.IGNORECASE))
         if not key:
             return None
         for candidate in self._candidates(key):
@@ -112,7 +138,7 @@ class Bible:
         if book is None:
             return []
         if chapter is None:
-            return self.chapter(book, 1)
+            return self.chapter(book, self._by_book[book][0]['chapter'])
         records = self.chapter(book, chapter)
         if first is None:
             # Obadiah, Philemon, 2-3 John and Jude are cited by verse, not chapter.
@@ -147,14 +173,14 @@ def parse_reference(text):
         return None
     match = re.fullmatch(
         r"\s*((?:[1-3]|first|second|third|i{1,3})?\s*[A-Za-z][A-Za-z'.\s]*?)"
-        r"(?:\s+(\d+))?(?:\s*[:.]\s*(\d+)(?:\s*[-–]\s*(\d+))?)?\s*",
+        r"(?:\s+(\d+[ab]?))?(?:\s*[:.]\s*(\d+)(?:\s*[-–]\s*(\d+))?)?\s*",
         text, re.IGNORECASE)
     if not match:
         return None
     name, chapter, first, last = match.groups()
     if not normalise(name):
         return None
-    return (name.strip(), int(chapter) if chapter else None,
+    return (name.strip(), (int(chapter) if chapter.isdigit() else chapter.lower()) if chapter else None,
             int(first) if first else None, int(last) if last else None)
 
 
@@ -171,6 +197,48 @@ def format_reference(records):
 
 def passage_text(records):
     return ' '.join(record['text'] for record in records)
+
+
+def available_translations(directory, root=None):
+    """Every text this machine can open, bundled first."""
+    root = Path(root or INSTALL_ROOT)
+    found = [{'id': BUNDLED, 'title': 'King James Version', 'collection': 'Christian Bible',
+              'license': 'Public domain'}]
+    if not root.is_dir():
+        return found
+    for meta in sorted(root.glob('*.json')):
+        if not (root / f'{meta.stem}.tsv.gz').is_file():
+            continue
+        try:
+            record = json.loads(meta.read_text())
+        except (OSError, ValueError):
+            continue
+        found.append({'id': meta.stem, 'title': record.get('title', meta.stem),
+                      'collection': record.get('collection', ''),
+                      'license': record.get('license', '')})
+    return found
+
+
+def load_witnesses(directory):
+    """Remarks about the faith from people who did not hold it."""
+    document = json.loads((Path(directory) / WITNESS_FILE).read_text())
+    quotes = document.get('quotes')
+    if not isinstance(quotes, list) or not quotes:
+        raise ValueError('Witness file must contain a non-empty list')
+    seen = set()
+    for entry in quotes:
+        for key in ('id', 'quote', 'author', 'source', 'note', 'stance'):
+            if not isinstance(entry.get(key), str) or not entry[key].strip():
+                raise ValueError(f'Witness quote is missing {key}')
+        if entry['id'] in seen:
+            raise ValueError('Duplicate witness id: ' + entry['id'])
+        seen.add(entry['id'])
+    return quotes
+
+
+def daily_witness(quotes, today=None):
+    today = today or dt.date.today()
+    return quotes[today.toordinal() % len(quotes)]
 
 
 def load_reflections(directory):

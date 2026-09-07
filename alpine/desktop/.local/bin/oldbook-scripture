@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import signal
+import select
 import sys
 import textwrap
 import time
@@ -18,18 +19,49 @@ import scripture
 ASSETS = REPO / 'alpine/assets/scripture'
 STATE = Path.home() / '.local/state/oldbook/scripture'
 SELECTION = STATE / 'selection.json'
+TRANSLATION = STATE / 'translation'
 PANEL_WIDTH = 52
+
+
+def current_translation():
+    try:
+        name = TRANSLATION.read_text().strip()
+    except OSError:
+        return scripture.BUNDLED
+    return name or scripture.BUNDLED
+
+
+def set_translation(name):
+    available = {item['id'] for item in scripture.available_translations(ASSETS)}
+    if name not in available:
+        raise RuntimeError(f'{name} is not installed; run '
+                           f'oldbook-scripture-library install {name}')
+    state_directory()
+    TRANSLATION.write_text(name + '\n')
+    return name
+
+
+def witness(width=PANEL_WIDTH):
+    """A remark about the faith from someone who did not share it."""
+    quotes = scripture.load_witnesses(ASSETS)
+    entry = scripture.daily_witness(quotes)
+    lines = ['${color1}' + entry['author'] + '${color2} · ' + entry['stance']]
+    lines += ['${color}' + line for line in wrap('“' + entry['quote'] + '”', width, 6)]
+    lines += ['${color2}' + line for line in wrap(entry['note'], width, 2)]
+    print('\n'.join(lines))
+    return 0
 
 
 class _LazyBible:
     """Open the verse file only when a lookup actually needs it."""
 
-    def __init__(self):
+    def __init__(self, include_extra=True):
         self._bible = None
+        self._include_extra = include_extra
 
     def _load(self):
         if self._bible is None:
-            self._bible = scripture.Bible.load(ASSETS)
+            self._bible = scripture.Bible.load(ASSETS, include_extra=self._include_extra)
         return self._bible
 
     def __getattr__(self, name):
@@ -51,7 +83,7 @@ def write_selection(document):
 
 
 def refresh_panel():
-    """Reload only the owned Scripture Conky after an explicit selection."""
+    """Replace only the owned Scripture Conky, bypassing its cached execpi text."""
     directory = Path.home() / '.local/state/oldbook/conky'
     if not directory.is_dir() or (directory / 'disabled').exists():
         return
@@ -66,7 +98,8 @@ def refresh_panel():
                     raise RuntimeError('Passage saved; desktop layout is busy. Please select again.')
                 time.sleep(.05)
         try:
-            pid = int(json.loads((directory / 'pids.json').read_text())['scripture'])
+            pids = json.loads((directory / 'pids.json').read_text())
+            pid = int(pids['scripture'])
             descriptor = os.pidfd_open(pid)
         except (OSError, ValueError, KeyError):
             return
@@ -76,7 +109,20 @@ def refresh_panel():
             if (proc.stat().st_uid == os.getuid()
                     and (proc / 'exe').resolve().name == 'conky'
                     and os.fsencode(directory / 'scripture.conf') in arguments):
-                signal.pidfd_send_signal(descriptor, signal.SIGUSR1)
+                config = directory / 'scripture.conf'
+                if not config.is_file():
+                    return
+                with (directory / 'scripture.log').open('ab') as log:
+                    replacement = subprocess.Popen(['conky', '-c', str(config)],
+                        stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                        start_new_session=True)
+                pids['scripture'] = replacement.pid
+                temporary = directory / f'pids.json.{os.getpid()}.tmp'
+                temporary.write_text(json.dumps(pids, indent=2) + '\n')
+                temporary.replace(directory / 'pids.json')
+                signal.pidfd_send_signal(descriptor, signal.SIGTERM)
+                if not select.select([descriptor], [], [], 1)[0]:
+                    signal.pidfd_send_signal(descriptor, signal.SIGKILL)
         except OSError:
             return
         finally:
@@ -95,7 +141,10 @@ def select_reference(bible, reference):
     if not records:
         raise RuntimeError('No passage matches: ' + reference)
     write_selection({'kind': 'passage', 'reference': scripture.format_reference(records),
-                     'text': scripture.passage_text(records)})
+                     'text': scripture.passage_text(records),
+                     'edition': records[0].get('edition', 'King James Version'),
+                     'source_url': records[0].get('source_url', ''),
+                     'license': records[0].get('license', 'Public domain in the United States')})
     return scripture.format_reference(records)
 
 
@@ -144,6 +193,8 @@ def panel(bible, width=PANEL_WIDTH):
     """The desktop block: the passage, then who lived it and what to do about it."""
     entry = current(bible)
     lines = ['${color1}' + entry.get('reference', '')]
+    if entry.get('edition'):
+        lines.append('${color2}' + entry['edition'])
     lines += ['${color}' + line for line in wrap(entry.get('text', ''), width, 4)]
     if entry.get('kind') == 'reflection':
         lines.append('${color2}' + entry['figure'] + ' · ' + entry['title'])
@@ -161,6 +212,7 @@ def show(bible, reference, width=78):
     if not records:
         raise RuntimeError('No passage matches: ' + reference)
     print(scripture.format_reference(records))
+    print(records[0].get('edition', 'King James Version'))
     print()
     for record in records:
         for index, line in enumerate(textwrap.wrap(record['text'], width - 5)):
@@ -179,16 +231,23 @@ def search(bible, query, limit):
     return 0
 
 
-def find(bible):
-    """Type-to-filter the whole Bible and the reflections in one picker."""
-    entries = scripture.load_reflections(ASSETS)
+def find(bible, include_all=False):
+    """Bible-only by default; the expanded picker puts Bible matches last."""
+    entries = scripture.load_reflections(ASSETS) if include_all else []
     lines = [f"✦  {entry['figure']} · {entry['title']}  — {entry['reference']}"
              for entry in entries]
     reflection_ids = {line: entry['id'] for line, entry in zip(lines, entries)}
+    bible_rows, torah_rows, talmud_rows = [], [], []
     for record in bible.verses:
-        lines.append(f"{record['book']} {record['chapter']}:{record['verse']}  {record['text']}")
+        row = f"{record['book']} {record['chapter']}:{record['verse']}  {record['text']}"
+        target = (torah_rows if record['book'].startswith('Torah ') else
+                  talmud_rows if record['book'].startswith('Talmud ') else bible_rows)
+        target.append(row)
+    lines = (torah_rows + talmud_rows + lines + bible_rows) if include_all else bible_rows
     launcher = Path(__file__).resolve().parent / 'oldbook-fuzzel'
-    result = subprocess.run([str(launcher), '--dmenu', '--prompt', 'Scripture ❯ ',
+    result = subprocess.run([str(launcher), '--dmenu', '--prompt',
+                             'All texts ❯ ' if include_all else 'Bible ❯ ',
+                             '--match-mode=exact', '--no-sort', '--delayed-filter-ms=0',
                              '--lines', '14', '--width', '96'],
                             input='\n'.join(lines) + '\n', capture_output=True, text=True)
     chosen = result.stdout.rstrip('\n')
@@ -212,23 +271,36 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='panel',
                         choices=['panel', 'show', 'search', 'find', 'select',
-                                 'select-reflection', 'figures', 'daily', 'bar'])
+                                 'select-reflection', 'figures', 'daily', 'bar',
+                                 'witness', 'translations', 'use'])
     parser.add_argument('query', nargs='*', help='A reference, reflection ID or search words.')
     parser.add_argument('--limit', type=int, default=25)
     parser.add_argument('--width', type=int, default=PANEL_WIDTH)
+    parser.add_argument('--translation', help='Read from an installed text.')
+    parser.add_argument('--all', action='store_true', help='include Torah, Talmud and reflections in the picker')
     arguments = parser.parse_args()
     query = ' '.join(arguments.query).strip()
 
     if arguments.action == 'figures':
         return figures()
+    if arguments.action == 'witness':
+        return witness(arguments.width)
+    if arguments.action == 'translations':
+        for item in scripture.available_translations(ASSETS):
+            mark = '*' if item['id'] == current_translation() else ' '
+            print(f"{mark} {item['id']:16s} {item['collection']:18s} {item['title']}")
+        return 0
+    if arguments.action == 'use':
+        print(set_translation(' '.join(arguments.query).strip()))
+        return 0
     if arguments.action == 'bar':
         helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
         os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
-    bible = _LazyBible()
+    bible = _LazyBible(include_extra=arguments.action != 'find' or arguments.all)
     if arguments.action == 'panel':
         return panel(bible, arguments.width)
     if arguments.action == 'find':
-        return find(bible)
+        return find(bible, arguments.all)
     if arguments.action == 'daily':
         entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
         return select_reflection(bible, entry['id']) and 0

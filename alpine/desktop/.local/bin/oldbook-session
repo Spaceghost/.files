@@ -127,3 +127,8 @@ fi
 if command -v oldbook-scripture-bar >/dev/null 2>&1; then
     start_service scripture-bar oldbook-scripture-bar
 fi
+
+# A fresh install pulls the offline scripture library once, in the background.
+if command -v oldbook-scripture-library >/dev/null 2>&1; then
+    start_service scripture-library oldbook-scripture-library bootstrap
+fi

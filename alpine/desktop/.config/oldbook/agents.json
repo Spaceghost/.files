@@ -1,0 +1,60 @@
+{
+  "session_prefix": "agent",
+  "terminal": ["foot", "--app-id=oldbook-agent", "--title={title}", "-e"],
+  "workdirs": ["~/.files", "~/src/*", "~/go", "~"],
+  "agents": [
+    {
+      "id": "codex",
+      "title": "Codex",
+      "subtitle": "OpenAI Codex CLI, here",
+      "enabled": true,
+      "command": ["codex"]
+    },
+    {
+      "id": "claude",
+      "title": "Claude Code",
+      "subtitle": "Anthropic Claude Code, here",
+      "enabled": true,
+      "command": ["claude"]
+    },
+    {
+      "id": "shell",
+      "title": "Shell",
+      "subtitle": "A plain tmux shell, here",
+      "enabled": true,
+      "command": ["zsh"]
+    },
+    {
+      "id": "alienware-codex",
+      "title": "Codex on alienware",
+      "subtitle": "Codex CLI over the tailnet",
+      "enabled": true,
+      "host": "alienware",
+      "command": ["codex"]
+    },
+    {
+      "id": "alienware-claude",
+      "title": "Claude Code on alienware",
+      "subtitle": "Claude Code over the tailnet",
+      "enabled": true,
+      "host": "alienware",
+      "command": ["claude"]
+    },
+    {
+      "id": "alienware-ollama",
+      "title": "Local model on alienware",
+      "subtitle": "Ollama on the box with the GPU",
+      "enabled": true,
+      "host": "alienware",
+      "command": ["ollama", "run", "llama3.3"]
+    },
+    {
+      "id": "alienware-shell",
+      "title": "Shell on alienware",
+      "subtitle": "A plain login shell over the tailnet",
+      "enabled": true,
+      "host": "alienware",
+      "command": ["$SHELL", "-l"]
+    }
+  ]
+}

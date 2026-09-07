@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""Install the offline scripture library: translations and Jewish texts."""
+import argparse
+import json
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import scripture_library as lib
+
+MANIFEST = REPO / 'alpine/assets/scripture/library.json'
+# The desktop firewall permits curl rather than Python's own HTTP client.
+CURL = ['curl', '-sS', '--fail', '--location', '--retry', '3', '--max-time', '180']
+
+
+def fetch(url, params=None):
+    command = list(CURL)
+    for key, value in (params or {}).items():
+        command += ['--data-urlencode', f'{key}={value}']
+    if params:
+        command.append('-G')
+    command.append(url)
+    result = subprocess.run(command, capture_output=True, text=True, timeout=300)
+    if result.returncode:
+        raise RuntimeError(f'download failed: {result.stderr.strip()[:200]}')
+    try:
+        return json.loads(result.stdout)
+    except ValueError as error:
+        raise RuntimeError(f'unreadable response: {error}') from error
+
+
+def install_getbible(text, document, root):
+    source = document['sources']['getbible']['url'].format(translation=text['translation'])
+    payload = fetch(source)
+    rows = lib.getbible_rows(payload)
+    return lib.write_text(rows, root / f"{text['id']}.tsv.gz") + (None,)
+
+
+def install_sefaria(text, document, root, progress=True):
+    template = document['sources']['sefaria']['url']
+    rows, licence = [], None
+    total = len(text['books'])
+    for index, book in enumerate(text['books'], start=1):
+        if progress:
+            print(f"  [{index:>3}/{total}] {book}", flush=True)
+        try:
+            payload = fetch(template.format(book=book.replace(' ', '%20')),
+                            {'version': text['version']})
+            book_rows, version = lib.sefaria_rows(book, payload)
+        except (RuntimeError, ValueError) as error:
+            print(f'      skipped: {error}', file=sys.stderr)
+            continue
+        licence = licence or version.get('license')
+        rows.extend(book_rows)
+        time.sleep(0.2)
+    if not rows:
+        raise RuntimeError('no text was retrieved')
+    return lib.write_text(rows, root / f"{text['id']}.tsv.gz") + (licence,)
+
+
+def install(text, document, root):
+    if text['source'] == 'bundled':
+        print(f"{text['id']}: bundled in the checkout; nothing to download")
+        return None
+    print(f"{text['id']}: {text['title']}  [{text['license']}]", flush=True)
+    if text['source'] == 'getbible':
+        digest, verses, licence = install_getbible(text, document, root)
+    else:
+        digest, verses, licence = install_sefaria(text, document, root)
+    record = lib.record_installation(text, digest, verses, root)
+    if licence and licence.lower() not in text['license'].lower():
+        record['upstream_license'] = licence
+        (root / f"{text['id']}.json").write_text(json.dumps(record, indent=2) + '\n')
+    print(f"  installed {verses} records  sha256 {digest[:16]}")
+    return record
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='list',
+                        choices=['list', 'install', 'installed', 'remove', 'bootstrap'])
+    parser.add_argument('ids', nargs='*', help='Text identifiers.')
+    parser.add_argument('--all', action='store_true', help='Every text, including large ones.')
+    parser.add_argument('--core', action='store_true',
+                        help='Public-domain Bibles and the Tanakh; skips the large study texts.')
+    arguments = parser.parse_args()
+
+    document = lib.load_manifest(MANIFEST)
+    root = Path(document.get('install_root', str(lib.INSTALL_ROOT)).replace('~', str(Path.home()), 1))
+    root.mkdir(parents=True, exist_ok=True)
+    present = lib.installed_texts(root)
+    by_id = {text['id']: text for text in document['texts']}
+
+    if arguments.action == 'bootstrap':
+        # Runs once per machine, on the first desktop login after an install.
+        marker = root / '.bootstrapped'
+        if marker.exists():
+            return 0
+        wanted = [text for text in document['texts']
+                  if text['source'] != 'bundled' and not text.get('large')
+                  and text['id'] not in present]
+        failures = 0
+        for text in wanted:
+            try:
+                install(text, document, root)
+            except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+                failures += 1
+                print(f"{text['id']}: FAILED — {error}", file=sys.stderr)
+        if not failures:
+            marker.write_text('installed\n')
+        return 1 if failures else 0
+    if arguments.action == 'installed':
+        for identifier, record in sorted(present.items()):
+            print(f"{identifier}\t{record.get('verses')}\t{record.get('license')}")
+        return 0
+    if arguments.action == 'list':
+        print(document['note'] + '\n')
+        for text in document['texts']:
+            state = ('bundled' if text['source'] == 'bundled'
+                     else 'installed' if text['id'] in present else '-')
+            print(f"{text['id']:16s} {state:10s} {text['collection']:18s} "
+                  f"{text['license'][:30]:32s} {text['title']}")
+        return 0
+    if arguments.action == 'remove':
+        for identifier in arguments.ids:
+            for suffix in ('.tsv.gz', '.json'):
+                (root / f'{identifier}{suffix}').unlink(missing_ok=True)
+            print('removed ' + identifier)
+        return 0
+
+    if arguments.all:
+        wanted = [text for text in document['texts'] if text['source'] != 'bundled']
+    elif arguments.core:
+        wanted = [text for text in document['texts']
+                  if text['source'] != 'bundled' and not text.get('large')]
+    else:
+        wanted = []
+        for identifier in arguments.ids:
+            if identifier not in by_id:
+                raise RuntimeError('Unknown text: ' + identifier)
+            wanted.append(by_id[identifier])
+    if not wanted:
+        parser.error('name a text, or pass --core or --all')
+
+    failures = 0
+    for text in wanted:
+        if text['id'] in present and not arguments.all:
+            print(f"{text['id']}: already installed")
+            continue
+        try:
+            install(text, document, root)
+        except (RuntimeError, ValueError, OSError, subprocess.SubprocessError) as error:
+            failures += 1
+            print(f"{text['id']}: FAILED — {error}", file=sys.stderr)
+    return 1 if failures else 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-scripture-library: {error}', file=sys.stderr)
+        sys.exit(1)
