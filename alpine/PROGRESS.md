@@ -686,3 +686,26 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Email still needs a mailbox source. Arbitrary external command behavior is not
   inspected by the policy; new helpers must honor the documented slow-data rule.
   The broader unrelated desktop suite was not rerun for this focused change.
+
+## 2026-09-07 — Superhold rename, native verification and offline restore
+
+The portable contextual guide is now **Superhold**, installed and running as
+`superhold` 0.1.0. Old commands, per-file config fallbacks and native ABI remain
+compatible. Both local config names link to the versioned
+`alpine/desktop/.config/superhold/config.toml`; Super alone for 0.5 seconds and
+existing profiles, scrolling, help and desktop theming are preserved.
+
+Verification: 114 source tests, 18 deployment/current-wrapper tests, two explicit
+legacy GTK tests, and four private native Sway/X11/Qt6ct/LXQt checks passed. Two
+network-isolated builds produced identical signed APKs. The exact 1,090-package
+lock `c89b6eacc0617add1da5` restored offline into a separate root; both command
+names and native-library paths loaded there. Evidence and reproducible artifacts
+are linked from `alpine/verification/superhold.json`. Only the guide restarted;
+public project hosting and maintainer contact remain required before submission.
+
+Staged radio recovery evidence is separately archived in
+`alpine/security/radio/orphan-integration-verification.json`: 247 selected tests
+and nine isolated cases with 50 ms added to each journal write passed. Earlier
+failed runs and limits are retained. This does not activate the staged controller
+or establish physical-radio, OpenRC, surviving-writer or reboot acceptance.
+
