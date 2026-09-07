@@ -81,6 +81,26 @@ class WorkspaceTests(unittest.TestCase):
         empty = names.plan(ws, None)
         self.assertEqual(empty['new'], '1: GHOST')
 
+    def test_missing_state_recovers_generated_workspace_name(self):
+        names = self.model['WorkspaceNames']()
+        plan = names.plan(workspace(name='1: GHOST · ✦ Claude · ✦ Claude'), {'name': 'Firefox'})
+        self.assertEqual(plan['new'], '1: GHOST · Firefox')
+        self.assertEqual(plan['original'], '1: GHOST')
+
+    def test_polluted_saved_base_is_repaired(self):
+        polluted = '1: GHOST · ✦ Claude · ✦ Claude'
+        names = self.model['WorkspaceNames']({'100': dict(original=polluted, base=polluted,
+                                                         rendered=polluted + ' · Firefox')})
+        plan = names.plan(workspace(name=polluted + ' · Firefox'), {'name': 'Codex', 'kind': 'codex'})
+        self.assertEqual(plan['new'], '1: GHOST · ✦ Codex')
+        self.assertEqual(plan['original'], '1: GHOST')
+
+    def test_graceful_restart_retains_custom_base(self):
+        names = self.model['WorkspaceNames']({'100': dict(original='1: My notes', base='1: My notes',
+                                                         rendered='1: My notes · Firefox')})
+        plan = names.plan(workspace(name='1: My notes'), {'name': 'Foot'})
+        self.assertEqual(plan['new'], '1: My notes · Foot')
+
     def test_review_workspace_keeps_strata_when_browser_changes(self):
         names = self.model['WorkspaceNames']()
         ws = workspace(name='6')

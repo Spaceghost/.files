@@ -104,6 +104,16 @@ def valid_record(record):
                     for key in ('original', 'base', 'rendered')))
 
 
+def generated_base(value):
+    # These named desktop prefixes belong to the service. App suffixes must
+    # never become their base when a rename outlives its saved state.
+    for number, title in THEMES.items():
+        base = f'{number}: {title}'
+        if value.startswith(base + ' · '):
+            return base
+    return value
+
+
 class WorkspaceNames:
     def __init__(self, records=None):
         self.records = records or {}
@@ -120,6 +130,7 @@ class WorkspaceNames:
         if not addressable_name(current) or not addressable_name(original):
             return {'id': workspace['id'], 'old': current, 'new': current,
                     'original': original, 'base': base}
+        original, base = generated_base(original), generated_base(base)
         label = safe_label(app.get('name', ''), 28) if app else ''
         if label and app.get('kind') in ('codex', 'chatgpt', 'claude'):
             label = '✦ ' + label
