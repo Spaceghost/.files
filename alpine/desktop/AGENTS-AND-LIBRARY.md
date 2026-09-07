@@ -30,10 +30,26 @@ Directories and model names are shell-quoted before they cross the ssh hop, so
 a path containing quotes cannot become remote shell syntax; `$SHELL` is the one
 value deliberately left to expand on the far side.
 
-**Tailscale** is installed but not yet authenticated on this machine. Run
-`doas tailscale up` once and the `alienware` agents start working; until then
-they fail with an ordinary ssh error. Adjust the Ollama model name in the
-config to whatever that box actually serves.
+### Reaching the tailnet box
+
+Tailscale is installed, enabled at boot and authenticated; this machine is
+`oldbook`. The `alienware` agents use **Tailscale SSH** rather than plain ssh,
+because it needs no key on either side and authenticates with the tailnet
+identity instead.
+
+That still requires the far side to accept it. Run this once **on alienware**:
+
+```sh
+sudo tailscale up --ssh
+```
+
+Until then the launcher refuses immediately with that instruction rather than
+hanging, because alienware currently answers nothing on port 22. Plain ssh
+remains available for hosts that run sshd: set `"transport": "ssh"` on the
+agent, and put a key in `~/.ssh` (this machine has none).
+
+Adjust the Ollama model name in the config to whatever that box actually
+serves; `llama3.3` is a placeholder.
 
 ## The offline library
 

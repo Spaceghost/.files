@@ -13,6 +13,9 @@ import shlex
 
 SAFE_ID = re.compile(r'[a-z0-9][a-z0-9-]{0,63}')
 SAFE_HOST = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,253}')
+# Plain ssh needs keys and a listening sshd; Tailscale SSH needs neither and
+# authenticates with the tailnet identity instead.
+TRANSPORTS = ('ssh', 'tailscale-ssh')
 
 
 def load_config(path):
@@ -36,6 +39,11 @@ def load_config(path):
         host = agent.get('host')
         if host is not None and not SAFE_HOST.fullmatch(str(host)):
             raise ValueError(f'Agent {agent["id"]} has an unusable host')
+        transport = agent.get('transport', 'ssh')
+        if transport not in TRANSPORTS:
+            raise ValueError(f'Agent {agent["id"]} has an unknown transport: {transport}')
+        if transport != 'ssh' and not host:
+            raise ValueError(f'Agent {agent["id"]} sets a transport but no host')
         if 'enabled' in agent and not isinstance(agent['enabled'], bool):
             raise ValueError(f'Agent {agent["id"]} enabled must be true or false')
     return document
@@ -99,14 +107,31 @@ def _quote_preserving_variables(part):
     return shlex.quote(part)
 
 
+def remote_hop(agent):
+    """How to reach the far side, before the command it should run."""
+    if agent.get('transport', 'ssh') == 'tailscale-ssh':
+        return ['tailscale', 'ssh', agent['host']]
+    return ['ssh', '-t', agent['host']]
+
+
 def new_session_command(document, agent, name, workdir):
     """The tmux invocation that creates the detached session."""
     base = ['tmux', 'new-session', '-d', '-s', name]
     if agent.get('host'):
-        # The ssh hop runs locally inside tmux, so the session survives the link.
-        return base + ['--', 'ssh', '-t', agent['host'],
-                       remote_script(agent['command'], workdir)]
+        # The hop runs locally inside tmux, so the session survives the link.
+        return base + ['--'] + remote_hop(agent) + [remote_script(agent['command'], workdir)]
     return base + ['-c', str(workdir)] + ['--'] + list(agent['command'])
+
+
+def reachability_hint(agent):
+    """What to do when a remote agent cannot be reached, in plain terms."""
+    host = agent.get('host', 'the host')
+    if agent.get('transport', 'ssh') == 'tailscale-ssh':
+        return (f'{host} is not accepting Tailscale SSH. On {host} run: '
+                'sudo tailscale up --ssh')
+    return (f'{host} is not accepting ssh on port 22. Either start sshd there, or '
+            f'enable Tailscale SSH on {host} with "sudo tailscale up --ssh" and set '
+            f'"transport": "tailscale-ssh" for this agent.')
 
 
 def attach_command(document, name, title=None):

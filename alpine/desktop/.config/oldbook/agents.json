@@ -1,44 +1,66 @@
 {
   "session_prefix": "agent",
-  "terminal": ["foot", "--app-id=oldbook-agent", "--title={title}", "-e"],
-  "workdirs": ["~/.files", "~/src/*", "~/go", "~"],
+  "terminal": [
+    "foot",
+    "--app-id=oldbook-agent",
+    "--title={title}",
+    "-e"
+  ],
+  "workdirs": [
+    "~/.files",
+    "~/src/*",
+    "~/go",
+    "~"
+  ],
   "agents": [
     {
       "id": "codex",
       "title": "Codex",
       "subtitle": "OpenAI Codex CLI, here",
       "enabled": true,
-      "command": ["codex"]
+      "command": [
+        "codex"
+      ]
     },
     {
       "id": "claude",
       "title": "Claude Code",
       "subtitle": "Anthropic Claude Code, here",
       "enabled": true,
-      "command": ["claude"]
+      "command": [
+        "claude"
+      ]
     },
     {
       "id": "shell",
       "title": "Shell",
       "subtitle": "A plain tmux shell, here",
       "enabled": true,
-      "command": ["zsh"]
+      "command": [
+        "zsh"
+      ]
     },
     {
       "id": "alienware-codex",
       "title": "Codex on alienware",
-      "subtitle": "Codex CLI over the tailnet",
+      "subtitle": "Codex CLI over Tailscale SSH",
       "enabled": true,
       "host": "alienware",
-      "command": ["codex"]
+      "command": [
+        "codex"
+      ],
+      "transport": "tailscale-ssh"
     },
     {
       "id": "alienware-claude",
       "title": "Claude Code on alienware",
-      "subtitle": "Claude Code over the tailnet",
+      "subtitle": "Claude Code over Tailscale SSH",
       "enabled": true,
       "host": "alienware",
-      "command": ["claude"]
+      "command": [
+        "claude"
+      ],
+      "transport": "tailscale-ssh"
     },
     {
       "id": "alienware-ollama",
@@ -46,15 +68,24 @@
       "subtitle": "Ollama on the box with the GPU",
       "enabled": true,
       "host": "alienware",
-      "command": ["ollama", "run", "llama3.3"]
+      "command": [
+        "ollama",
+        "run",
+        "llama3.3"
+      ],
+      "transport": "tailscale-ssh"
     },
     {
       "id": "alienware-shell",
       "title": "Shell on alienware",
-      "subtitle": "A plain login shell over the tailnet",
+      "subtitle": "A plain login shell over Tailscale SSH",
       "enabled": true,
       "host": "alienware",
-      "command": ["$SHELL", "-l"]
+      "command": [
+        "$SHELL",
+        "-l"
+      ],
+      "transport": "tailscale-ssh"
     }
   ]
 }

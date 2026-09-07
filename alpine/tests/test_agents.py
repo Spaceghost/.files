@@ -63,6 +63,25 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             launcher.load_config(self.write(document))
 
+    def test_rejects_an_unknown_transport(self):
+        document = config()
+        document['agents'][1]['transport'] = 'carrier-pigeon'
+        with self.assertRaises(ValueError):
+            launcher.load_config(self.write(document))
+
+    def test_a_transport_without_a_host_is_refused(self):
+        document = config()
+        document['agents'][0]['transport'] = 'tailscale-ssh'
+        with self.assertRaises(ValueError):
+            launcher.load_config(self.write(document))
+
+    def test_the_tailnet_agents_need_no_ssh_keys(self):
+        document = launcher.load_config(LIVE)
+        remote = [agent for agent in launcher.enabled_agents(document) if agent.get('host')]
+        self.assertTrue(remote)
+        for agent in remote:
+            self.assertEqual(agent.get('transport'), 'tailscale-ssh', agent['id'])
+
     def test_disabled_agents_are_hidden(self):
         document = config()
         document['agents'][0]['enabled'] = False
@@ -129,6 +148,24 @@ class CommandTests(unittest.TestCase):
 
     def test_a_shell_variable_still_expands_on_the_far_side(self):
         self.assertEqual(launcher.remote_script(['$SHELL', '-l'], None), 'exec $SHELL -l')
+
+    def test_tailscale_ssh_replaces_the_plain_ssh_hop(self):
+        document = config()
+        document['agents'][1]['transport'] = 'tailscale-ssh'
+        command = launcher.new_session_command(
+            document, document['agents'][1], 'agent-far', '/srv/data')
+        self.assertEqual(command[6:9], ['tailscale', 'ssh', 'alienware'])
+        self.assertNotIn('-t', command)
+        self.assertIn('cd /srv/data && exec ollama run x', command[-1])
+
+    def test_an_unreachable_host_is_explained_rather_than_retried(self):
+        document = config()
+        plain = launcher.reachability_hint(document['agents'][1])
+        self.assertIn('alienware', plain)
+        self.assertIn('port 22', plain)
+        document['agents'][1]['transport'] = 'tailscale-ssh'
+        tailnet = launcher.reachability_hint(document['agents'][1])
+        self.assertIn('tailscale up --ssh', tailnet)
 
     def test_attach_command_opens_the_terminal_on_the_session(self):
         document = config()

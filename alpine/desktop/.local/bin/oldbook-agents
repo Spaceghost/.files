@@ -3,6 +3,7 @@
 import argparse
 import json
 from pathlib import Path
+import socket
 import subprocess
 import sys
 
@@ -41,7 +42,18 @@ def attach(document, name, title=None):
                      stderr=subprocess.DEVNULL, start_new_session=True)
 
 
+def reachable(host, port=22, timeout=4.0):
+    """A quick connect, so an unreachable box reports rather than hangs."""
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except (OSError, ValueError):
+        return False
+
+
 def start(document, agent, workdir):
+    if agent.get('host') and not reachable(agent['host']):
+        raise RuntimeError(launcher.reachability_hint(agent))
     existing = {session['name'] for session in sessions()}
     name = launcher.session_name(document, agent['id'], existing)
     command = launcher.new_session_command(document, agent, name, workdir)
