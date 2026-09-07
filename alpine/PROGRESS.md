@@ -428,3 +428,22 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - The current 1,080-package lock still exactly matches installed identities,
   world, repository configuration and public keys. Existing Hold to Help,
   Gruvbox theme settings, desktop controls and OpenSnitch choices are preserved.
+
+## Orphan recovery primitives and desktop audit — 2026-09-07
+
+- Added the durable root-private journal and namespace-init writer helpers,
+  with 57 focused tests and independent module/cross-module review. Faulted
+  file writes retain evidence; writer completion distinguishes PID reuse and
+  missing metadata and signals only through a held pidfd. Nine immutable proof
+  inputs are archived in Fossil; `security/radio/orphan-primitives-verification.json`
+  records their hashes, scope and limitations. Check-in: `ef3ead5d42b6`.
+- These helpers are staged and not wired into owner startup or command gates.
+  Existing orphan handling still refuses replacement. Link-cookie lifecycle,
+  lease/resolver recovery, native crash proofs and OpenRC handoff remain pending.
+  No live service, radio, packet policy or installed package changed in this pass.
+- Rechecked Hold to Help's 36-file release against source and installed files;
+  signed main/doc packages, native bridge and local Gruvbox settings still match.
+  OpenSnitch daemon, GUI and independent gate remain active with prompts enabled
+  and existing grants preserved. Super remains selected pending trigger preference;
+  physical Caps support is available. Public source location and maintainer contact
+  are still required before distro submission; no publication was performed.
