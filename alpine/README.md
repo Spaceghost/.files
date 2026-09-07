@@ -114,7 +114,9 @@ passed. Existing saved rules remain in place, so matching connections skip
 prompts. See [interactive verification](security/firewall/interactive-verification.json).
 
 Radio-device permissions now preserve status reads while restricting direct
-writes to root. The full Wi-Fi controller remains staged: exact trusted network
+writes to root. Bluetooth is soft-blocked by a verified Bluetooth-only eudev
+rule; the existing Wi-Fi connection was preserved. The full Wi-Fi controller
+remains staged: exact trusted network
 identities and WPA/DHCP integration still need resolution before activation.
 Existing unrestricted wheel `doas` authority remains unchanged. Follow the
 [radio activation record](security/radio/README.md) for the current scope;

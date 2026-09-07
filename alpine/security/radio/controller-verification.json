@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "verified_at_utc": "2026-09-07T13:56:36.805083+00:00",
+  "scope": "Offline staged-controller verification only. Real temporary Unix datagram sockets, synthetic child processes, fake radio adapters and temporary session state; no live rfkill, WPA, network, service or package mutation.",
+  "source_sha256": {
+    "alpine/security/radio/root/usr/local/sbin/privacyctl": "72b6fc96968c322ae1f1d8e3c60c4757d3e2e1c6a2ad50d28fe48113433a8859",
+    "alpine/security/radio/tests/test_privacyctl.py": "24ef305e46b1aeeccb039325933feadd3611f750066b8e3b0bf2ef8ced43f25d"
+  },
+  "controller_tests": {
+    "command": "python3 -m unittest discover -s alpine/security/radio/tests -p 'test_privacyctl.py' -v",
+    "passed": 35
+  },
+  "complete_radio_suite": {
+    "command": "python3 -m unittest discover -s alpine/security/radio/tests -v",
+    "passed": 44,
+    "scope": "35 controller tests plus 9 independent installer tests at verification time"
+  },
+  "test_first": {
+    "existing_controller_baseline": 23,
+    "demonstrated_old_failures": [
+      "A full Unix datagram send queue blocked the initial WPA request before its receive deadline began.",
+      "A rejected ATTACH left the private Unix client socket path behind.",
+      "Deprecated rfkill state=2 rejected a valid simultaneous soft and hard block and misreported soft_blocked.",
+      "An unreadable adapter soft attribute could not be distinguished by the old state-only verification."
+    ]
+  },
+  "reproductions": [
+    {
+      "name": "full_wpa_send_queue",
+      "test": "DeadlineAndCleanupTests.test_full_wpa_send_queue_is_covered_by_the_request_deadline",
+      "result": "A real full Unix datagram queue times out without the fake peer draining it."
+    },
+    {
+      "name": "rejected_attach_cleanup",
+      "test": "DeadlineAndCleanupTests.test_rejected_attach_removes_its_private_socket",
+      "result": "The temporary client socket is closed and unlinked after an actual FAIL reply."
+    },
+    {
+      "name": "dhcp_style_hook_group",
+      "test": "DeadlineAndCleanupTests.test_command_timeout_kills_dhcp_style_hook_process_group",
+      "result": "A real sleeping command and its hook child are killed as one process group; the leader is reaped."
+    },
+    {
+      "name": "exited_leader_with_open_stdout",
+      "test": "DeadlineAndCleanupTests.test_timeout_kills_stdout_holding_hook_after_its_leader_exits",
+      "result": "The leader exits 0 while a hook holds stdout open. communicate retains returncode=None until the pipe timeout; cleanup kills the group, then reaps leader status 0. The existing early-return cleanup needed no further change."
+    },
+    {
+      "name": "bounded_lock",
+      "test": "DeadlineAndCleanupTests.test_contended_lock_has_a_finite_wait",
+      "result": "A real contended advisory lock reaches its acquisition deadline."
+    },
+    {
+      "name": "absolute_deadline",
+      "test": "DeadlineAndCleanupTests.test_absolute_transaction_deadline_interrupts_and_restores_alarm",
+      "result": "An actual SIGALRM interrupts the transaction and restores the previous alarm handler/timer."
+    },
+    {
+      "name": "expired_connect_fail_off",
+      "test": "DeadlineAndCleanupTests.test_expired_connect_reblocks_both_radios_before_releasing_lock",
+      "result": "An actual deadline interrupt during a fake connection reblocks both fake radio classes, removes session state and only then releases the lock."
+    },
+    {
+      "name": "soft_and_hard_matrix",
+      "tests": [
+        "RfkillStateTests.test_status_reports_soft_and_hard_independently_for_all_combinations",
+        "RfkillStateTests.test_persistent_soft_block_verification_accepts_either_hard_state",
+        "RfkillStateTests.test_hard_block_alone_cannot_pass_persistent_soft_block_verification",
+        "RfkillStateTests.test_unreadable_adapter_soft_state_cannot_be_silently_ignored",
+        "RfkillStateTests.test_invalid_soft_value_is_not_a_verified_block"
+      ],
+      "result": "Fake sysfs adapters cover all four soft/hard combinations, reject hard-only blocking as a persistent software block, and reject missing/invalid soft state."
+    }
+  ],
+  "deadlines_seconds": {
+    "external_command": 5,
+    "dhcp_and_ordinary_hook_group": 20,
+    "active_transaction": 45,
+    "lock_acquisition": 60
+  },
+  "deadline_scope": "45 seconds bounds the active transaction. Lock acquisition has a separate 60-second budget; bounded process cleanup and fail-off attempts occur after transaction expiry and can add wall-clock time. Descendants that deliberately create a separate process session are outside the command group.",
+  "soft_block_verification": {
+    "soft0_hard0": false,
+    "soft0_hard1": false,
+    "soft1_hard0": true,
+    "soft1_hard1": true
+  },
+  "primary_linux_abi_sources": [
+    "https://raw.githubusercontent.com/torvalds/linux/master/Documentation/ABI/stable/sysfs-class-rfkill",
+    "https://raw.githubusercontent.com/torvalds/linux/master/include/uapi/linux/rfkill.h",
+    "https://raw.githubusercontent.com/torvalds/linux/master/net/rfkill/core.c"
+  ],
+  "unchanged": [
+    "Exact trusted-network identity allowlist.",
+    "Healthy trusted associations remain valid until off or disconnect."
+  ],
+  "not_verified": [
+    "Live wireless association, scan, sleep/resume or reboot; these require deployment verification."
+  ]
+}

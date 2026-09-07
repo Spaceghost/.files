@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 """Fail-closed root radio controller; it never reads credential material."""
 import fcntl
+from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
 import secrets
+import signal
 import socket
 import stat
 import subprocess
@@ -23,29 +25,100 @@ SESSION_FILE = Path("/run/privacyctl/session.json")
 ALLOWED = {"shmecklebucket", "iphone-hotspot"}
 CONNECT_DEADLINE = 20
 SCAN_DEADLINE = 15
+COMMAND_DEADLINE = 5
+DHCP_DEADLINE = 20
+OPERATION_DEADLINE = 45
+LOCK_DEADLINE = 60
 
 
 class PrivacyError(RuntimeError):
     pass
 
 
-def run_checked(args):
-    result = subprocess.run(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, text=True, check=False)
-    if result.returncode:
+def stop_process_group(process):
+    """Stop a command and its ordinary hook children, then reap the leader."""
+    if process.returncode is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    try:
+        process.communicate(timeout=1)
+    except subprocess.TimeoutExpired:
+        # A child which deliberately starts another session is outside this
+        # group. Do not wait forever on descriptors it might have inherited.
+        for stream in (process.stdout, process.stderr):
+            if stream is not None:
+                stream.close()
+        process.wait(timeout=1)
+
+
+def run_checked(args, timeout=COMMAND_DEADLINE):
+    try:
+        process = subprocess.Popen(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, start_new_session=True)
+    except OSError as error:
+        raise PrivacyError("command unavailable: " + args[0]) from error
+    try:
+        output, _errors = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired as error:
+        stop_process_group(process)
+        raise PrivacyError("command deadline exceeded: " + args[0]) from error
+    except BaseException:
+        stop_process_group(process)
+        raise
+    if process.returncode:
         raise PrivacyError("command failed: " + args[0])
-    return result.stdout
+    return output
+
+
+@contextmanager
+def operation_deadline(seconds=OPERATION_DEADLINE):
+    """Bound one main-thread transaction; cleanup runs after this timer ends."""
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    previous_timer = signal.getitimer(signal.ITIMER_REAL)
+    started = time.monotonic()
+
+    def expired(_signum, _frame):
+        raise PrivacyError("radio operation deadline exceeded")
+
+    signal.signal(signal.SIGALRM, expired)
+    signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        signal.signal(signal.SIGALRM, previous_handler)
+        if previous_timer[0]:
+            remaining = max(.001, previous_timer[0] - (time.monotonic() - started))
+            signal.setitimer(signal.ITIMER_REAL, remaining, previous_timer[1])
 
 
 class RadioLock:
-    def __init__(self, blocking=True):
+    def __init__(self, blocking=True, timeout=LOCK_DEADLINE):
         self.blocking = blocking
+        self.timeout = timeout
 
     def __enter__(self):
         self.fd = os.open(LOCK_FILE, os.O_CREAT | os.O_RDWR | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
         try:
-            fcntl.flock(self.fd, fcntl.LOCK_EX | (0 if self.blocking else fcntl.LOCK_NB))
-        except OSError:
+            info = os.fstat(self.fd)
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                    or info.st_mode & 0o077):
+                raise PrivacyError("radio lock must be owned by the controller and private")
+            deadline = time.monotonic() + self.timeout
+            while True:
+                try:
+                    fcntl.flock(self.fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if not self.blocking:
+                        raise
+                    if time.monotonic() >= deadline:
+                        raise PrivacyError("radio lock deadline exceeded") from None
+                    time.sleep(min(.05, max(0, deadline - time.monotonic())))
+        except BaseException:
             os.close(self.fd)
             raise
         return self
@@ -64,9 +137,11 @@ class WpaControl:
             self.sock.bind(self.local)
             self.sock.connect(endpoint)
             self.expect_ok("ATTACH")
-        except OSError as error:
+        except BaseException as error:
             self.close()
-            raise PrivacyError("wpa control socket unavailable") from error
+            if isinstance(error, OSError):
+                raise PrivacyError("wpa control socket unavailable") from error
+            raise
 
     def close(self):
         try:
@@ -84,8 +159,12 @@ class WpaControl:
         self.close()
 
     def request(self, command, deadline=3):
-        self.sock.send(command.encode("ascii"))
         end = time.monotonic() + deadline
+        self.sock.settimeout(max(.001, deadline))
+        try:
+            self.sock.send(command.encode("ascii"))
+        except OSError as error:
+            raise PrivacyError("wpa control send failed or timed out") from error
         while True:
             remaining = end - time.monotonic()
             if remaining <= 0:
@@ -136,17 +215,33 @@ class WpaControl:
 
 
 class System:
-    def states(self, kind):
+    def _block_values(self, kind, attribute):
         states = []
         for entry in Path("/sys/class/rfkill").glob("rfkill*"):
             try:
                 if (entry / "type").read_text().strip() == kind:
-                    states.append((entry / "state").read_text().strip())
-            except OSError:
-                continue
+                    value = (entry / attribute).read_text().strip()
+                    if value not in {"0", "1"}:
+                        raise PrivacyError("invalid rfkill " + attribute + " state: " + kind)
+                    states.append(value)
+            except OSError as error:
+                # Skipping one unreadable adapter could make the remaining
+                # blocked adapters appear to prove a block of the whole class.
+                raise PrivacyError("rfkill " + attribute + " state unavailable: " + kind) from error
         if not states:
             raise PrivacyError("rfkill device missing: " + kind)
         return states
+
+    def states(self, kind):
+        """Return the controller's 0=blocked/1=clear view of software blocks."""
+        # Linux's deprecated /state reports 2 whenever hard-blocked and cannot
+        # distinguish soft=0/hard=1 from soft=1/hard=1. Read /soft directly.
+        # ABI: Documentation/ABI/stable/sysfs-class-rfkill in the Linux tree.
+        return ["0" if value == "1" else "1" for value in self._block_values(kind, "soft")]
+
+    def hard_states(self, kind):
+        """Return kernel hard-block bits independently of software policy."""
+        return self._block_values(kind, "hard")
 
     def block_all(self):
         errors = []
@@ -158,7 +253,7 @@ class System:
         for kind in ("wlan", "bluetooth"):
             try:
                 if any(value != "0" for value in self.states(kind)):
-                    errors.append("rfkill state remains unblocked: " + kind)
+                    errors.append("rfkill soft block is not set: " + kind)
             except PrivacyError as error:
                 errors.append(str(error))
         if errors:
@@ -167,14 +262,14 @@ class System:
     def unblock_wifi(self):
         run_checked([RFKILL, "unblock", "wlan"])
         if any(value != "1" for value in self.states("wlan")):
-            raise PrivacyError("rfkill state remains blocked: wlan")
+            raise PrivacyError("rfkill soft block remains set: wlan")
         if any(value != "0" for value in self.states("bluetooth")):
-            raise PrivacyError("bluetooth is not blocked")
+            raise PrivacyError("bluetooth software block is not set")
 
     def block_bluetooth(self):
         run_checked([RFKILL, "block", "bluetooth"])
         if any(value != "0" for value in self.states("bluetooth")):
-            raise PrivacyError("rfkill state remains unblocked: bluetooth")
+            raise PrivacyError("rfkill soft block is not set: bluetooth")
 
     def prepare_addresses(self, profile):
         run_checked([IP, "-4", "route", "flush", "dev", INTERFACE])
@@ -182,7 +277,7 @@ class System:
         if profile == "iphone-hotspot":
             run_checked([IP, "-6", "route", "flush", "dev", INTERFACE])
             run_checked([IP, "-6", "addr", "flush", "dev", INTERFACE, "scope", "global"])
-        run_checked([UDHCPC, "-i", INTERFACE, "-n", "-q", "-t", "5", "-T", "3"])
+        run_checked([UDHCPC, "-i", INTERFACE, "-n", "-q", "-t", "5", "-T", "3"], timeout=DHCP_DEADLINE)
 
 
 def read_profile(profile, path=PROFILE_FILE):
@@ -352,6 +447,10 @@ class Controller:
                 output["soft_blocked"] = all(value == "0" for value in self.system.states(kind))
             except PrivacyError:
                 output["soft_blocked"] = None
+            try:
+                output["hard_blocked"] = all(value == "1" for value in self.system.hard_states(kind))
+            except PrivacyError:
+                output["hard_blocked"] = None
         data["wifi"]["wpa_state"] = "UNAVAILABLE"
         return data
 
@@ -382,6 +481,21 @@ class Controller:
             time.sleep(1)
 
 
+def run_locked(controller, action, *args):
+    with RadioLock():
+        succeeded = False
+        try:
+            with operation_deadline():
+                result = getattr(controller, action)(*args)
+            succeeded = True
+            return result
+        finally:
+            if not succeeded:
+                # If the transaction deadline interrupted an inner cleanup,
+                # retry both blocks with the timer disarmed before unlocking.
+                controller.off()
+
+
 def main(argv):
     try:
         if not argv:
@@ -392,11 +506,11 @@ def main(argv):
             result = controller.status()
             print(json.dumps(result, separators=(",", ":") if args else None, indent=None if args else 2))
         elif command == "off" and not args:
-            with RadioLock(): controller.off()
+            run_locked(controller, "off")
         elif command == "scan" and not args:
-            with RadioLock(): print(controller.scan())
+            print(run_locked(controller, "scan"))
         elif command == "connect" and len(args) == 1:
-            with RadioLock(): controller.connect(args[0])
+            run_locked(controller, "connect", args[0])
         elif command == "supervise" and not args and os.geteuid() == 0:
             controller.supervise()
         else:

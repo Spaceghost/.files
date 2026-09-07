@@ -1,8 +1,39 @@
-# Activation plan — do not run remotely
+# Radio activation plan
 
-This plan is for the owner to review and perform from a local console.  The
-currently staged default is **boot-off with explicit scan/connect**.  It does
-not enable automatic discovery or reconnection.
+## Current activation state
+
+Permission preparation and Bluetooth-only soft blocking are installed on this
+host. The reviewed permission helper is
+installed at `/usr/local/libexec/oldbook-radio/install` (`root:root`, `0750`),
+with its matching `72-privacy-rfkill.rules` beside it and in `/etc/udev/rules.d/`
+(`0644`). The private journal is
+`/var/lib/oldbook/radio-permissions/attempt-0huvvd1q`.
+
+Independent verification confirmed `/dev/rfkill` mode `0644`, no ACL or
+`uaccess` tag, Jack read access with write-open denied, and root write access.
+During the initial permission step, both radio states, Wi-Fi association and
+addresses were preserved; route
+comparison excluded only `expires` fields. Waybar's existing status handle and
+both wpa_supplicant handles were read-only. See
+[permissions-verification.json](permissions-verification.json) for hashes and
+sanitized evidence. No controller, radio OpenRC service, sleep hook, profile,
+WPA or DHCP change has been activated.
+
+The subsequent `71-privacy-bluetooth-off.rules` preparation software-blocked
+Bluetooth while preserving WLAN radio state, association, addresses and routes.
+The helper and its recovery journal were independently checked; see
+[bluetooth-verification.json](bluetooth-verification.json) and the separate
+[Bluetooth installation/recovery instructions](BLUETOOTH.md). No live unblock
+or rollback was used to verify persistence; reboot and suspend remain untested.
+
+## Remaining controller activation
+
+Perform network-changing activation from a local console with recovery ready.
+The staged default is **boot-off with explicit scan/connect**. It does not
+enable automatic discovery or reconnection. The installed permissions and
+Bluetooth policy do not make the full controller ready for unattended networking.
+The controller remains staged; its isolated checks are recorded in
+[controller-verification.json](controller-verification.json).
 
 Before changing anything, keep a known working wired or local-console recovery
 path.  Record the current files and OpenRC membership, then use a temporary
@@ -47,6 +78,13 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    also flushes global IPv6 routes/addresses before DHCP, preventing inherited
    static IPv6 from the home profile. Confirm the local DHCP lease succeeds.
 
+   Establish exactly one DHCP owner before activating that path. The existing
+   `udhcpc` daemon is still running; do not leave it racing the controller's
+   route/address changes or a second DHCP client. The staged `udhcpc -q`
+   invocation exits after obtaining a lease and supplies no continuing renewal.
+   Choose and test a renewal owner and failure recovery before enabling this
+   controller for sustained connections. This integration remains unfinished.
+
    At staging time, `/run/wpa_supplicant` existed but was empty and the
    read-only `doas wpa_cli -i wlan0 status` check exited 255.  Treat a zero-exit
    control-socket status check as a prerequisite; do not activate the
@@ -63,9 +101,10 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    the first adds the tag and the second queues elogind's user-access grant.
    A rule loaded after `73` cannot undo that already queued grant.
 
-   Run these commands only during activation; they have not been run by this
-   staging work. Python is already a controller dependency, so no extra ACL
-   package is needed:
+   The installed helper has already completed this step on this host. These
+   manual equivalents are retained for rebuilding elsewhere; no repeat is
+   needed for the verified installation. Python is already a controller
+   dependency, so no extra ACL package is needed:
 
    ```sh
    doas python3 - <<'PY'
@@ -75,21 +114,44 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    except OSError as error:
        if error.errno not in (errno.ENODATA, errno.ENOTSUP):
            raise
-   os.chmod('/dev/rfkill', 0o600)
+   os.chmod('/dev/rfkill', 0o644)
    PY
    doas udevadm control --reload-rules
    doas udevadm trigger --action=change --subsystem-match=misc --sysname-match=rfkill
    doas udevadm settle
    ```
 
-   As `jack`, verify `test ! -w /dev/rfkill` succeeds. Inspect
+   As `jack`, verify both `test -r /dev/rfkill` and `test ! -w /dev/rfkill`
+   succeed. Read access preserves Waybar's radio status after restart. Inspect
    `udevadm info --query=property --name=/dev/rfkill` and confirm its tags no
-   longer include `uaccess`; confirm root can still run `privacyctl status`.
+   longer include `uaccess`; confirm root retains write access. Once the staged
+   controller is installed, also run its `privacyctl status` check.
    Repeat the access check after a seat/session change and reboot. ACL changes
    do not revoke already-open file descriptors, so inspect existing rfkill
    handles before claiming exclusive controller access. This permissions step
    does not itself block, unblock, scan, or disconnect either radio. Root and
-   separately granted doas privileges retain their existing authority.
+   separately granted doas privileges retain their existing authority. This
+   host still has unrestricted wheel `nopass` doas access, so this step does
+   not prevent a wheel user from regaining root authority.
+
+   The `install` helper automates only this permission step with exact private
+   backups and automatic rollback on failure. Copy the reviewed helper as
+   `/usr/local/libexec/oldbook-radio/install` (root:root, `0750`) and the reviewed
+   `72-privacy-rfkill.rules` beside it (`0644`); every ancestor must be root-owned
+   and not writable by other users. Then run:
+
+   ```sh
+   doas /usr/local/libexec/oldbook-radio/install --prepare-permissions
+   ```
+
+   It prints its `0700` journal directory under
+   `/var/lib/oldbook/radio-permissions`; `0600` JSON files contain the previous
+   rule/device ACL and the pre/post Wi-Fi identity, without credentials. The
+   helper requires an existing Wi-Fi association and refuses different existing
+   rules. It verifies unchanged rfkill state, SSID/BSSID and IP addresses. It
+   does not install the controller, start services, select networks, or block
+   radios. Run Bluetooth-only preparation separately. A successfully prepared
+   policy remains in place; preserve its journal for an explicit later recovery.
 
 5. Add `radio-off` to the OpenRC `boot` runlevel and
    `privacyctl-supervisor` to the default runlevel. Its dependencies place the

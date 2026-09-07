@@ -50,6 +50,9 @@ class FakeSystem:
         blocked = self.bluetooth_blocked if kind == "bluetooth" else self.blocked
         return ["0" if blocked else "1"]
 
+    def hard_states(self, kind):
+        return ["0"]
+
 
 class FakeWpa:
     def __init__(self, replies=None, identity=("0", "shmecklebucket"), status=None, event=True, timeline=None):
@@ -328,6 +331,247 @@ class BluetoothEnforcementTests(unittest.TestCase):
             with mock.patch.object(system, "states", return_value=["0", "1"]):
                 with self.assertRaises(privacyctl.PrivacyError):
                     system.block_bluetooth()
+
+
+class DeadlineAndCleanupTests(unittest.TestCase):
+    def test_rejected_attach_removes_its_private_socket(self):
+        import socket
+        import threading
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / 'wpa')
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server:
+                server.bind(endpoint)
+                def reject():
+                    _request, peer = server.recvfrom(1024)
+                    server.sendto(b'FAIL\n', peer)
+                worker = threading.Thread(target=reject)
+                worker.start()
+                with self.assertRaises(privacyctl.PrivacyError):
+                    privacyctl.WpaControl(endpoint, directory)
+                worker.join(timeout=1)
+                self.assertFalse(worker.is_alive())
+                self.assertEqual(list(Path(directory).glob('.privacyctl-*')), [])
+
+    def test_full_wpa_send_queue_is_covered_by_the_request_deadline(self):
+        import socket
+        import threading
+        import time
+        with tempfile.TemporaryDirectory() as directory:
+            endpoint = str(Path(directory) / 'wpa')
+            with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as server, \
+                    socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as client:
+                server.bind(endpoint)
+                client.bind(str(Path(directory) / 'client'))
+                client.connect(endpoint)
+                client.setblocking(False)
+                while True:
+                    try:
+                        client.send(b'fill')
+                    except BlockingIOError:
+                        break
+                client.setblocking(True)
+                control = object.__new__(privacyctl.WpaControl)
+                control.sock = client
+                failures = []
+                def request():
+                    try:
+                        control.request('PING', deadline=.05)
+                    except BaseException as error:
+                        failures.append(error)
+                worker = threading.Thread(target=request, daemon=True)
+                started = time.monotonic()
+                worker.start()
+                worker.join(timeout=.3)
+                timed_out_without_draining = not worker.is_alive()
+                # Release old implementations safely before asserting failure.
+                server.settimeout(.01)
+                while True:
+                    try:
+                        server.recv(1024)
+                    except socket.timeout:
+                        break
+                worker.join(timeout=.3)
+                self.assertTrue(timed_out_without_draining, 'first send blocked before its deadline')
+                self.assertLess(time.monotonic() - started, .3)
+                self.assertEqual(len(failures), 1)
+                self.assertIsInstance(failures[0], privacyctl.PrivacyError)
+
+    def test_command_timeout_kills_dhcp_style_hook_process_group(self):
+        import time
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'hook.pid'
+            code = ('import subprocess,sys,time; from pathlib import Path; '
+                    'hook=subprocess.Popen([sys.executable,"-c","import time;time.sleep(30)"]); '
+                    'Path(sys.argv[1]).write_text(str(hook.pid)); time.sleep(30)')
+            started = time.monotonic()
+            with self.assertRaises(privacyctl.PrivacyError):
+                privacyctl.run_checked([sys.executable, '-c', code, str(pid_file)], timeout=.2)
+            self.assertLess(time.monotonic() - started, 1.5)
+            self.assertTrue(pid_file.exists(), 'the synthetic DHCP hook did not start')
+            process = Path('/proc') / pid_file.read_text() / 'stat'
+            deadline = time.monotonic() + 1
+            while process.exists() and time.monotonic() < deadline:
+                try:
+                    if process.read_text().rsplit(')', 1)[1].split()[0] == 'Z':
+                        break
+                except FileNotFoundError:
+                    break
+                time.sleep(.01)
+            if process.exists():
+                self.assertEqual(process.read_text().rsplit(')', 1)[1].split()[0], 'Z',
+                                 'a timed-out hook is still running')
+
+    def test_timeout_kills_stdout_holding_hook_after_its_leader_exits(self):
+        import signal
+        import time
+        with tempfile.TemporaryDirectory() as directory:
+            pid_file = Path(directory) / 'hook.pid'
+            code = ('import subprocess,sys; from pathlib import Path; '
+                    'hook=subprocess.Popen([sys.executable,"-c","import time;time.sleep(30)"]); '
+                    'Path(sys.argv[1]).write_text(str(hook.pid))')
+            original_stop = privacyctl.stop_process_group
+            observations = []
+            groups = []
+            def stop_group(process):
+                groups.append(process.pid)
+                observations.append(process.returncode)
+                original_stop(process)
+                observations.append(process.returncode)
+            try:
+                with mock.patch.object(privacyctl, 'stop_process_group', side_effect=stop_group):
+                    with self.assertRaises(privacyctl.PrivacyError):
+                        privacyctl.run_checked([sys.executable, '-c', code, str(pid_file)], timeout=.2)
+                # communicate waits for the hook-held pipe without reaping the
+                # exited leader. Therefore the cleanup's early return is not
+                # taken; reaping afterwards confirms that the leader exited 0.
+                self.assertEqual(observations, [None, 0])
+                process = Path('/proc') / pid_file.read_text() / 'stat'
+                deadline = time.monotonic() + 1
+                while process.exists() and time.monotonic() < deadline:
+                    try:
+                        if process.read_text().rsplit(')', 1)[1].split()[0] == 'Z':
+                            break
+                    except FileNotFoundError:
+                        break
+                    time.sleep(.01)
+                if process.exists():
+                    self.assertEqual(process.read_text().rsplit(')', 1)[1].split()[0], 'Z')
+            finally:
+                # Only the freshly created synthetic group can still contain
+                # its recorded hook if a regression made cleanup skip it.
+                if pid_file.exists():
+                    pid = int(pid_file.read_text())
+                    try:
+                        if os.getpgid(pid) in groups:
+                            os.kill(pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+
+    def test_contended_lock_has_a_finite_wait(self):
+        import time
+        with tempfile.TemporaryDirectory() as directory, mock.patch.object(
+                privacyctl, 'LOCK_FILE', Path(directory) / 'lock'):
+            with privacyctl.RadioLock():
+                started = time.monotonic()
+                with self.assertRaisesRegex(privacyctl.PrivacyError, 'lock'):
+                    with privacyctl.RadioLock(timeout=.05):
+                        self.fail('contended lock unexpectedly acquired')
+                self.assertLess(time.monotonic() - started, .3)
+
+    def test_absolute_transaction_deadline_interrupts_and_restores_alarm(self):
+        import signal
+        import time
+        previous = signal.getsignal(signal.SIGALRM)
+        started = time.monotonic()
+        with self.assertRaisesRegex(privacyctl.PrivacyError, 'deadline'):
+            with privacyctl.operation_deadline(.05):
+                time.sleep(1)
+        self.assertLess(time.monotonic() - started, .3)
+        self.assertEqual(signal.getsignal(signal.SIGALRM), previous)
+        self.assertEqual(signal.getitimer(signal.ITIMER_REAL), (0.0, 0.0))
+
+    def test_expired_connect_reblocks_both_radios_before_releasing_lock(self):
+        import time
+        case = ControllerTests()
+        case.setUp()
+        self.addCleanup(case.tearDown)
+        original_deadline = privacyctl.operation_deadline
+        with mock.patch.object(case.system, 'prepare_addresses', side_effect=lambda _: time.sleep(1)), \
+                mock.patch.object(privacyctl, 'operation_deadline', side_effect=lambda: original_deadline(.05)):
+            with self.assertRaisesRegex(privacyctl.PrivacyError, 'deadline'):
+                privacyctl.run_locked(case.controller, 'connect', 'shmecklebucket')
+        self.assertIn('unblock-wifi', case.system.calls)
+        self.assertTrue(case.system.blocked)
+        self.assertTrue(case.system.bluetooth_blocked)
+        self.assertFalse(privacyctl.SESSION_FILE.exists())
+        with privacyctl.RadioLock(blocking=False):
+            self.assertTrue(case.system.blocked)
+
+
+class RfkillStateTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        actual_path = privacyctl.Path
+        self.paths = mock.patch.object(privacyctl, 'Path', side_effect=lambda path: (
+            self.root if str(path) == '/sys/class/rfkill' else actual_path(path)))
+        self.paths.start()
+        self.addCleanup(self.paths.stop)
+        self.system = privacyctl.System()
+        self.command = mock.patch.object(privacyctl, 'run_checked', return_value='')
+        self.command.start()
+        self.addCleanup(self.command.stop)
+
+    def adapter(self, number, kind, soft, hard):
+        path = self.root / f'rfkill{number}'
+        path.mkdir(exist_ok=True)
+        for name, value in {'type': kind, 'soft': soft, 'hard': hard,
+                            'state': 2 if hard else 0 if soft else 1}.items():
+            (path / name).write_text(str(value) + '\n')
+        return path
+
+    def test_status_reports_soft_and_hard_independently_for_all_combinations(self):
+        for soft in (0, 1):
+            for hard in (0, 1):
+                with self.subTest(soft=soft, hard=hard):
+                    self.adapter(0, 'wlan', soft, hard)
+                    self.adapter(1, 'bluetooth', soft, hard)
+                    status = privacyctl.Controller(self.system).status()
+                    for radio in ('wifi', 'bluetooth'):
+                        self.assertEqual(status[radio]['soft_blocked'], bool(soft))
+                        self.assertEqual(status[radio]['hard_blocked'], bool(hard))
+
+    def test_persistent_soft_block_verification_accepts_either_hard_state(self):
+        for hard in (0, 1):
+            with self.subTest(hard=hard):
+                self.adapter(0, 'wlan', 1, hard)
+                self.adapter(1, 'bluetooth', 1, hard)
+                self.system.block_all()
+                self.system.block_bluetooth()
+
+    def test_hard_block_alone_cannot_pass_persistent_soft_block_verification(self):
+        self.adapter(0, 'wlan', 1, 0)
+        self.adapter(1, 'bluetooth', 0, 1)
+        with self.assertRaises(privacyctl.PrivacyError):
+            self.system.block_all()
+        with self.assertRaises(privacyctl.PrivacyError):
+            self.system.block_bluetooth()
+        status = privacyctl.Controller(self.system).status()
+        self.assertFalse(status['bluetooth']['soft_blocked'])
+        self.assertTrue(status['bluetooth']['hard_blocked'])
+
+    def test_unreadable_adapter_soft_state_cannot_be_silently_ignored(self):
+        self.adapter(0, 'bluetooth', 1, 0)
+        broken = self.adapter(1, 'bluetooth', 1, 0)
+        (broken / 'soft').unlink()
+        with self.assertRaises(privacyctl.PrivacyError):
+            self.system.block_bluetooth()
+
+    def test_invalid_soft_value_is_not_a_verified_block(self):
+        self.adapter(0, 'bluetooth', 3, 1)
+        with self.assertRaises(privacyctl.PrivacyError):
+            self.system.block_bluetooth()
 
 
 if __name__ == "__main__":

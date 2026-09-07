@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-09-07T14:13:57.594020+00:00",
+  "scope": "Independent read-only verification after root performed Bluetooth-only preparation; WLAN controller remains staged.",
+  "installed": {
+    "bluetooth_helper": {
+      "path": "/usr/local/libexec/oldbook-radio/install-bluetooth",
+      "source": "alpine/security/radio/install-bluetooth",
+      "sha256": "023821a459fce6824867157b16f184c3015c0e110f1990f5b1010a72b170b683",
+      "matches_source": true,
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o750",
+      "regular": true
+    },
+    "permissions_helper": {
+      "path": "/usr/local/libexec/oldbook-radio/install",
+      "source": "alpine/security/radio/install",
+      "sha256": "43e6edb11577727a140f52783ec2d8bb1bcca1fc4292fa1e0b6e753463f01749",
+      "matches_source": true,
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o750",
+      "regular": true
+    },
+    "bluetooth_rule": {
+      "path": "/etc/udev/rules.d/71-privacy-bluetooth-off.rules",
+      "source": "alpine/security/radio/root/etc/udev/rules.d/71-privacy-bluetooth-off.rules",
+      "sha256": "b1352ec1bfe61a8ffa8efed0e4016112b33d27369cc7e3e26a8f9d6e7135d1af",
+      "matches_source": true,
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "regular": true
+    },
+    "adjacent_bluetooth_rule": {
+      "path": "/usr/local/libexec/oldbook-radio/71-privacy-bluetooth-off.rules",
+      "source": "alpine/security/radio/root/etc/udev/rules.d/71-privacy-bluetooth-off.rules",
+      "sha256": "b1352ec1bfe61a8ffa8efed0e4016112b33d27369cc7e3e26a8f9d6e7135d1af",
+      "matches_source": true,
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o644",
+      "regular": true
+    }
+  },
+  "runtime": {
+    "prepared_status_verified": true,
+    "same_boot_as_preparation": true,
+    "same_bluetooth_registrations": true,
+    "exact_installed_rule_instance": true,
+    "bluetooth_soft_block_verified": true,
+    "bluetooth_hard_blocks_unchanged": true,
+    "wlan_radio_unchanged": true,
+    "wifi_association_and_addresses_unchanged": true,
+    "wlan_routes_unchanged": true,
+    "route_normalization": "Remove only expires fields; preserve remaining route identity/attributes.",
+    "current_matches_prepared_snapshot": true,
+    "services_started_by_preparation": false,
+    "radios": {
+      "rfkill0": {
+        "type": "bluetooth",
+        "soft": "1",
+        "hard": "0"
+      },
+      "rfkill1": {
+        "type": "wlan",
+        "soft": "0",
+        "hard": "0"
+      }
+    }
+  },
+  "rfkill_permissions": {
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o644",
+    "acl_absent": true,
+    "uaccess_tag_absent": true,
+    "jack_can_read": true,
+    "jack_cannot_write": true,
+    "root_can_write": true,
+    "observed_handles": [
+      {
+        "process": "wpa_supplicant",
+        "access": "read-only"
+      },
+      {
+        "process": "wpa_supplicant",
+        "access": "read-only"
+      },
+      {
+        "process": "waybar",
+        "access": "read-only"
+      }
+    ]
+  },
+  "panel": {
+    "waybar_running": true,
+    "radio_module_command_succeeded": true,
+    "radio_class": "enabled",
+    "tooltip_reports_bluetooth_blocked": true,
+    "tooltip_reports_wlan_enabled": true,
+    "physical_hover_observed": false,
+    "module_reports_kernel_state_not_physical_rf_silence": true
+  },
+  "private_journal": {
+    "path": "/var/lib/oldbook/bluetooth-preparation/16bcbeeda28aaafe89ed04c6e5952cc6",
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o700",
+    "files": {
+      "activation-output.json": {
+        "uid": 0,
+        "gid": 0,
+        "mode": "0o600",
+        "regular": true
+      },
+      "installed-rule.json": {
+        "uid": 0,
+        "gid": 0,
+        "mode": "0o600",
+        "regular": true
+      },
+      "prepared.json": {
+        "uid": 0,
+        "gid": 0,
+        "mode": "0o600",
+        "regular": true
+      },
+      "before.json": {
+        "uid": 0,
+        "gid": 0,
+        "mode": "0o600",
+        "regular": true
+      }
+    },
+    "network_identifiers_and_snapshot_contents_omitted": true
+  },
+  "controller_targets_present": {
+    "/usr/local/sbin/privacyctl": false,
+    "/etc/privacyctl/profiles": false,
+    "/etc/init.d/radio-off": false,
+    "/etc/init.d/privacyctl-supervisor": false,
+    "/etc/elogind/system-sleep/95-radio-off": false
+  },
+  "controller_boot_links_present": false,
+  "source_sha256": {
+    "alpine/security/radio/install-bluetooth": "023821a459fce6824867157b16f184c3015c0e110f1990f5b1010a72b170b683",
+    "alpine/security/radio/install": "43e6edb11577727a140f52783ec2d8bb1bcca1fc4292fa1e0b6e753463f01749",
+    "alpine/security/radio/verify-bluetooth-rule": "a5ddf0b020ef3452ba12df26630db94ffec0deaafb69a37403c71f0f5c476c22",
+    "alpine/security/radio/root/etc/udev/rules.d/71-privacy-bluetooth-off.rules": "b1352ec1bfe61a8ffa8efed0e4016112b33d27369cc7e3e26a8f9d6e7135d1af",
+    "alpine/security/radio/tests/test_bluetooth_install.py": "7d992623121a8dc739a0c1d909bf1a6c47b9384aac84b419bc7fd544d31d8e95",
+    "alpine/security/radio/tests/test_install.py": "ada89435c90cddf0df198c22b08591be16d346017ca9d4774ad75db02ea2b003",
+    "alpine/security/radio/tests/test_privacyctl.py": "24ef305e46b1aeeccb039325933feadd3611f750066b8e3b0bf2ef8ced43f25d"
+  },
+  "verification_scanned_reloaded_or_changed_radio_state": false,
+  "secrets_or_network_identifiers_in_artifact": false,
+  "tests": {
+    "command": "python3 -m unittest discover -s alpine/security/radio/tests -v",
+    "passed": 63,
+    "bluetooth_and_parser_subset": 19,
+    "test_scope": "Isolated fake radios and actual temporary-filesystem rollback race checks; suite passed before deployment and recorded source hashes still match.",
+    "regressions": [
+      "Replacement WLAN path rejected by fd-bound restore child.",
+      "State and metadata saved from one held registration; observed replacement rejected.",
+      "Changed Bluetooth inventory rejected before rollback removes a rule.",
+      "Stale rollback tokens cannot remove a newer identical rule instance.",
+      "Concurrent transactions rejected by a private nonblocking lock.",
+      "Direct or partly isolated parser invocation rejected before any mount."
+    ]
+  },
+  "parser_verification": {
+    "path": "/home/jack/.local/state/oldbook/verification/bluetooth-rule-parser-final/evidence.json",
+    "sha256": "8d441fb3e6045318313b7139658e37452c4a911fc020def0a2ce78b5914ff636",
+    "evidence": {
+      "status": "passed",
+      "sysfs_read_only": true,
+      "private_rules_and_database": true,
+      "live_rule_assignment_executed": false,
+      "namespaces": {
+        "mnt": {
+          "self": "mnt:[4026533256]",
+          "init": "mnt:[4026531832]"
+        },
+        "net": {
+          "self": "net:[4026533257]",
+          "init": "net:[4026531833]"
+        }
+      },
+      "checks": [
+        {
+          "variant": "exact",
+          "action": "remove",
+          "type": "bluetooth",
+          "matched": false
+        },
+        {
+          "variant": "inert",
+          "action": "add",
+          "type": "bluetooth",
+          "matched": true
+        },
+        {
+          "variant": "inert",
+          "action": "change",
+          "type": "bluetooth",
+          "matched": true
+        },
+        {
+          "variant": "inert",
+          "action": "remove",
+          "type": "bluetooth",
+          "matched": false
+        },
+        {
+          "variant": "inert",
+          "action": "add",
+          "type": "wlan",
+          "matched": false
+        },
+        {
+          "variant": "inert",
+          "action": "change",
+          "type": "wlan",
+          "matched": false
+        }
+      ]
+    }
+  },
+  "related_evidence": [
+    "permissions-verification.json",
+    "controller-verification.json"
+  ],
+  "limits": {
+    "controller_wpa_dhcp_and_sleep_policy_still_staged": true,
+    "physical_radio_silence_not_established": true,
+    "pre_linux_or_firmware_rf_state_not_established": true,
+    "reboot_suspend_and_new_adapter_persistence_not_live_tested": true,
+    "deliberate_live_unblock_reblock_test_not_performed": true,
+    "live_rollback_not_exercised": true,
+    "existing_unrestricted_wheel_nopass_authority_unchanged": true
+  }
+}
