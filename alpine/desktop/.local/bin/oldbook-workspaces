@@ -293,7 +293,7 @@ def switch_ai(path, runtime, menu=False):
     if menu or not windows:
         choices = {f'{window["workspace"]} · {window["name"]} [{window["id"]}]': window['id'] for window in windows}
         choices.update({'✦ Open Codex in a terminal': 'codex', '✦ Open ChatGPT': 'chatgpt'})
-        selected = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'AI sessions › '],
+        selected = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'AI sessions › '],
                                   input='\n'.join(choices) + '\n', text=True, capture_output=True)
         if selected.returncode:
             return

@@ -86,17 +86,10 @@ def main(action='toggle'):
 
 
 def show(ipc, sway, control):
-    from overlay_theme import read_palette
-    palette = read_palette()
     entries = menu_entries(ipc['request'](sway, 4))
-    command = ['fuzzel', '--dmenu', '--index', '--namespace', 'oldbook-expo',
+    command = [str(Path(__file__).resolve().parents[2] / 'bin/oldbook-fuzzel'), '--dmenu', '--index', '--namespace', 'oldbook-expo',
                '--prompt', 'Workspaces & windows ❯ ', '--width', '72',
                '--lines', str(min(14, len(entries)))]
-    colors = {'background': 'background', 'text': 'foreground', 'prompt': 'muted',
-              'input': 'foreground', 'match': 'accent', 'selection': 'border',
-              'selection-text': 'foreground', 'selection-match': 'accent', 'border': 'accent'}
-    for option, role in colors.items():
-        command += ['--' + option + '-color=' + palette[role][1:] + ('fa' if option == 'background' else 'ff')]
     child = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
     try:
         child.stdin.write('\n'.join(label for label, _ in entries) + '\n')

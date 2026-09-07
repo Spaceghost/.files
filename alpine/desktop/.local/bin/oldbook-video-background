@@ -298,7 +298,7 @@ def picker_selection():
     menu = STOP_PICKER_LABEL + "\n" + "\n".join(sorted(candidates))
     if not menu.endswith("\n"):
         menu += "\n"
-    fuzzel = resolve_program("OLDBOOK_VIDEO_FUZZEL", "fuzzel")
+    fuzzel = resolve_program("OLDBOOK_VIDEO_FUZZEL", str(Path(__file__).resolve().parent / "oldbook-fuzzel"))
     result = subprocess.run(
         [fuzzel, "--dmenu", "--prompt", "Video background> "],
         input=menu,

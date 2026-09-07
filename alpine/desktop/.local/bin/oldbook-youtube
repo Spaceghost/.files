@@ -258,7 +258,7 @@ def extract(source):
 
 
 def choose(prompt, options):
-    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', prompt, '--width', '64'],
+    result = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', prompt, '--width', '64'],
                             input='\n'.join(options) + '\n', text=True, capture_output=True)
     return result.stdout.strip() if result.returncode == 0 else None
 

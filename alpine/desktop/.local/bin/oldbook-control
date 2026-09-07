@@ -20,7 +20,7 @@ def notify(title, body):
 
 
 def choose(title, options):
-    answer = run(["fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(12, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
+    answer = run([BIN / "oldbook-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(12, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
     return answer.stdout.strip() if answer.returncode == 0 else ""
 
 
