@@ -2,6 +2,7 @@
 """Place transparent Conky panels around the current wallpaper and keep them running."""
 import argparse
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -25,6 +26,8 @@ WALLPAPER = Path.home() / '.local/share/oldbook/current-wallpaper.png'
 FALLBACK_WALLPAPER = Path.home() / '.local/share/oldbook/wallpaper.png'
 GALLERY_STATE = Path.home() / '.local/state/oldbook/wallpaper/state.json'
 GRID_COLUMNS, GRID_ROWS = 72, 45
+# The scripture search bar rests here, so panels must leave the space free.
+SEARCH_BAR = {'width': 760, 'height': 64, 'bottom_margin': 26}
 # Waybar's top bar plus a margin, and a breathing gap at the other three edges.
 INSETS = {'top': 44, 'bottom': 16, 'left': 16, 'right': 16}
 
@@ -96,8 +99,9 @@ def wallpaper_path():
 
 def hardware():
     """Values the panel templates need but cannot discover for themselves."""
-    values = {'bin': str(Path(__file__).resolve()), 'iface': 'wlan0',
-              'battery': 'BAT0', 'hwmon': '0'}
+    here = Path(__file__).resolve()
+    values = {'bin': str(here), 'scripture': str(here.parent / 'oldbook-scripture'),
+              'iface': 'wlan0', 'battery': 'BAT0', 'hwmon': '0'}
     try:
         route = subprocess.run(['ip', 'route', 'show', 'default'],
                                capture_output=True, text=True, timeout=3)
@@ -178,8 +182,32 @@ def launch(directory, identifiers):
     return pids
 
 
+def pairing_key(image, screen, theme, panels):
+    """Identity of a layout: this wallpaper, on this screen, with these panels."""
+    digest = hashlib.sha256()
+    digest.update(Path(image).read_bytes())
+    signature = json.dumps({'screen': [screen['width'], screen['height'], screen['name']],
+                            'theme': theme,
+                            'panels': [[panel['id'], panel['width'], panel['height'],
+                                        panel.get('prefer'), panel.get('priority', 0)]
+                                       for panel in panels]}, sort_keys=True)
+    digest.update(signature.encode())
+    return digest.hexdigest()
+
+
+def search_bar_rectangle(screen):
+    return {'x': max(0, (screen['width'] - SEARCH_BAR['width']) // 2),
+            'y': max(0, screen['height'] - SEARCH_BAR['bottom_margin'] - SEARCH_BAR['height']),
+            'width': SEARCH_BAR['width'], 'height': SEARCH_BAR['height']}
+
+
 def build(directory):
-    """Analyse the wallpaper and write one Conky config per placed panel."""
+    """Analyse the wallpaper and write one Conky config per placed panel.
+
+    Each wallpaper keeps its own layout: the placement is cached against the
+    image, screen and panel set, so the same painting is always dressed the
+    same way and is only re-analysed when something it depends on changes.
+    """
     document = conky_layout.load_panels(PANELS)
     panels = enabled_panels(document)
     if not panels:
@@ -188,24 +216,48 @@ def build(directory):
     panels = [dict(panel, text=expand(panel['text'], values)) for panel in panels]
     image = wallpaper_path()
     screen = screen_rectangle()
-    grid = conky_layout.analyze_image(image, GRID_COLUMNS, GRID_ROWS)
-    area = dict(screen, **INSETS)
-    palette = conky_layout.resolve_palette(load_theme(REPO))
+    theme = load_theme(REPO)
+    palette = conky_layout.resolve_palette(theme)
     options = {'font': document.get('font', 'JetBrainsMono Nerd Font:size=9'),
                'update_interval': document.get('update_interval', 60.0),
                'gap': document.get('gap', 1)}
-    plans = conky_layout.plan(panels, grid, area, palette, options)
+    key = pairing_key(image, screen, theme['id'], panels)
+    cache = directory / 'layouts' / f'{key}.json'
+    placements = None
+    if cache.is_file():
+        try:
+            placements = json.loads(cache.read_text())['placements']
+        except (OSError, ValueError, KeyError):
+            placements = None
+    if placements is None:
+        grid = conky_layout.analyze_image(image, GRID_COLUMNS, GRID_ROWS)
+        area = dict(screen, **INSETS)
+        placements = conky_layout.place_panels(panels, grid, area, gap=options['gap'],
+                                               reserved=[search_bar_rectangle(screen)])
+    by_id = {panel['id']: panel for panel in panels}
+    plans = []
+    for placement in placements:
+        panel = by_id.get(placement['id'])
+        if panel is None:
+            continue
+        colours = conky_layout.panel_colours(placement, palette)
+        plans.append({'panel': panel, 'placement': placement,
+                      'config': conky_layout.render_config(panel, placement, colours, options)})
     for stale in directory.glob('*.conf'):
         stale.unlink()
     for entry in plans:
         (directory / f'{entry["panel"]["id"]}.conf').write_text(entry['config'])
-    summary = {'wallpaper': str(image), 'output': screen['name'],
-               'theme': load_theme(REPO)['id'],
+    summary = {'wallpaper': str(image), 'pairing': key, 'output': screen['name'],
+               'theme': theme['id'],
                'generated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
-               'placements': [{'id': entry['panel']['id'], **entry['placement']}
-                              for entry in plans]}
+               'placements': [entry['placement'] for entry in plans]}
     (directory / 'layout.json').write_text(json.dumps(summary, indent=2) + '\n')
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps({'wallpaper': str(image), 'placements': placements},
+                                indent=2) + '\n')
     return [entry['panel']['id'] for entry in plans]
+
+
 
 
 def layout(restart=True):
