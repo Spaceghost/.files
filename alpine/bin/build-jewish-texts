@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+"""Build the offline English Torah/Talmud archive from pinned Sefaria exports."""
+import argparse
+import gzip
+import hashlib
+from html.parser import HTMLParser
+import json
+from pathlib import Path
+import re
+
+
+class PlainText(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts = []
+
+    def handle_data(self, data):
+        self.parts.append(data)
+
+    def handle_starttag(self, tag, attributes):
+        if tag in ('br', 'p', 'div'):
+            self.parts.append(' ')
+
+    def handle_endtag(self, tag):
+        if tag in ('p', 'div'):
+            self.parts.append(' ')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--inputs', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--sources', type=Path, required=True)
+    args = parser.parse_args()
+    sources = json.loads(args.sources.read_text())
+    args.output.mkdir(parents=True, exist_ok=True)
+    records, manifest = [], []
+    for source in sources:
+        raw = (args.inputs / source['filename']).read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        if digest != source['sha256']:
+            raise ValueError('Source hash mismatch: ' + source['filename'])
+        doc = json.loads(raw)
+        if doc['language'] != 'en' or doc['license'] not in ('Public Domain', 'CC-BY-NC'):
+            raise ValueError('Unexpected language/license: ' + source['filename'])
+        torah = doc['categories'][:2] == ['Tanakh', 'Torah']
+        if doc['sectionNames'] != (['Chapter', 'Verse'] if torah else ['Daf', 'Line']):
+            raise ValueError('Unexpected reference schema: ' + doc['title'])
+        count = 0
+        for index, section in enumerate(doc['text']):
+            chapter = index + 1 if torah else f'{index // 2 + 1}{"a" if index % 2 == 0 else "b"}'
+            for verse, markup in enumerate(section, 1):
+                if not isinstance(markup, str):
+                    raise ValueError('Unexpected nested text: ' + doc['title'])
+                clean = PlainText()
+                clean.feed(markup)
+                text = re.sub(r'\s+', ' ', ''.join(clean.parts)).strip()
+                if not text:
+                    continue
+                records.append({'book': ('Torah ' if torah else 'Talmud ') + doc['title'],
+                                'chapter': chapter, 'verse': verse, 'text': text,
+                                'edition': 'JPS 1917' if torah else 'William Davidson',
+                                'license': doc['license'],
+                                'source_url': 'https://www.sefaria.org/' + doc['title'].replace(' ', '_') + f'.{chapter}.{verse}'})
+                count += 1
+        manifest.append(dict(source, title=doc['title'], version=doc['versionTitle'],
+                             license=doc['license'], segments=count,
+                             collection='Torah' if torah else 'Babylonian Talmud'))
+    output = args.output / 'jewish-texts.jsonl.gz'
+    with output.open('wb') as stream:
+        with gzip.GzipFile(filename='', mode='wb', fileobj=stream, mtime=0) as compressed:
+            for record in records:
+                compressed.write((json.dumps(record, ensure_ascii=False, separators=(',', ':')) + '\n').encode())
+    report = {'schema': 1, 'segments': len(records),
+              'sha256': hashlib.sha256(output.read_bytes()).hexdigest(), 'sources': manifest}
+    (args.output / 'jewish-texts-manifest.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(f'Built {len(records)} segments from {len(manifest)} works')
+
+
+if __name__ == '__main__':
+    main()

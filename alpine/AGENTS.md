@@ -24,3 +24,11 @@ one-time legacy import, full stored entries and backup support. Dated journal
 notes must describe observed events; do not invent personal experiences or
 collect private activity automatically. The live database is personal data and
 must not be committed; only the reviewed seed collection is versioned.
+
+Scripture shortcuts: Super+/ searches only Bible verses. Super+Shift+/ searches
+all collections, with Bible results after Torah, Talmud and reflections. Do not
+add non-Bible results or collection-switch commands to the Bible-only picker.
+Enter must save the choice and refresh only the Scripture card immediately;
+keep background refresh intervals at 60–300 seconds. Preserve the offline
+English Torah (JPS 1917) and Babylonian Talmud (William Davidson) collection,
+source manifests and attribution alongside the Bible and curated reflections.

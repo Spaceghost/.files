@@ -41,7 +41,8 @@ also follow this policy. Email still needs a configured mailbox source.
 ## Controls
 
 - **Super+Shift+G** switches the panels off and on.
-- **Super+/** summons the scripture search bar and gives it the keyboard.
+- **Super+/** opens Bible-only search.
+- **Super+Shift+/** searches Torah, Talmud and reflections, with Bible matches last.
 - The gallery picker (**Super+G**) also offers *Desktop panels · switch on/off*
   and *Refit desktop panels to this painting*.
 
@@ -87,15 +88,20 @@ so `Jude 4` and `3 John 4` resolve the way they are normally written. With
 nothing selected the desktop shows the reflection for the day, which walks the
 whole set in turn.
 
-**Super+/** opens the scripture picker: every reflection and all 31,102 verses
-in one type-to-filter list, which takes focus properly over any window. The bar
-resting on the desktop opens the same picker when clicked.
+**Super+/** searches only Bible verses. **Super+Shift+/** searches all bundled
+collections: Torah, Babylonian Talmud, reflections, then Bible verses. Matching
+preserves this order, making Bible results least prioritized. The desktop button
+opens the Bible-only picker. Enter saves the selected passage and immediately
+replaces only the Scripture Conky process, bypassing its cached command output.
+The other panels keep running; background intervals remain 60/120 seconds.
+SIGUSR1 alone does not reliably clear that cache in the installed Conky.
 
-A layer-shell surface only holds the keyboard while the compositor grants it,
-which made an in-place text entry unreliable, so the bar is a button rather than
-a field. Selecting a passage writes it to a small state file; the panel picks it
-up on its own two-second poll. Nothing signals Conky, because Conky treats
-SIGUSR1 as *reload configuration* and that visibly restarts every panel.
+The English supplemental library includes all five Torah books (JPS 1917) and
+37 Babylonian Talmud tractates (William Davidson), 87,327 segments. References
+include `Torah Genesis 1:1` and `Talmud Berakhot 2a:1-2`; `Berakhot 2a` also
+works. The selected passage retains its edition and source metadata. See
+[`../assets/scripture/README.md`](../assets/scripture/README.md) for credits,
+licenses and offline reproduction. The 33 curated reflections remain intact.
 
 ## Coast to Coast notebook
 
