@@ -1,7 +1,7 @@
 # Persistent radio owner service
 
 This implementation is staged. The live WPA, DHCP and resolver owners have not
-been replaced. Exact trusted SSIDs, controlled migration, packet-policy proof
+been replaced. Exact trusted SSIDs, controlled migration, live policy decisions
 and reboot/suspend checks remain activation requirements.
 
 ## Commands and lifetime
@@ -116,6 +116,11 @@ hashes and the preserved earlier reporting failure.
 Owner death still retains an orphan marker and refuses replacement. The
 [same-boot recovery design](ORPHAN-RECOVERY.md) is unimplemented. OpenRC startup,
 physical radios and live network migration remain separate acceptance work.
+
+The separate [packet-policy fixture](../firewall/radio-policy-verification.json)
+now verifies DHCP renewal, exact IPv4 DNS rules, IPv6 neighbor discovery and
+fresh DNS denial after daemon death. It preserves existing live rules and does
+not replace the owner or OpenRC integration proof.
 
 The veth interface exercises actual IPv6 duplicate-address detection. The
 earlier dummy-interface applier checks bypassed DAD because Linux treats

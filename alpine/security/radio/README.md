@@ -78,8 +78,10 @@ This example describes the schema, not the current host's state.
 The WPA fragment uses `passive_scan=1`, `p2p_disabled=1` and per-network
 `scan_ssid=0`; it remains merge-only. The active WPA instance has no control
 socket, and creating one requires a controlled disruptive migration. Keep the
-live WPA and DHCP owners until that migration and the isolated integration,
-packet-gate/OpenSnitch renewal and exact-profile checks are complete.
+live WPA and DHCP owners until the remaining migration and exact-profile
+checks are complete. The [isolated packet-policy checks](../firewall/radio-policy-verification.json)
+now verify renewal and controlled OpenSnitch DNS permissions; existing live
+grants and OpenRC startup still require the documented handoff.
 
 The installed, reproducibly patched openresolv dependency adds PID-namespace
 lock compatibility. It has not taken ownership of live DNS or changed subscriber

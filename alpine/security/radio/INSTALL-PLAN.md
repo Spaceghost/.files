@@ -36,9 +36,10 @@ The persistent controller remains staged. Current source-hashed component and
 combined checks are recorded in [owner-verification.json](owner-verification.json);
 the older controller report covers historical helpers only. Combined failure
 tests now pass; see [fault-verification.json](fault-verification.json).
-Packet-policy proof, [orphan recovery](ORPHAN-RECOVERY.md) and the migration
-installer remain unfinished. This is the activation sequence to implement and verify, not a
-completed unattended installer.
+The [isolated packet-policy proof](../firewall/radio-policy-verification.json)
+also passes. Live policy decisions, [orphan recovery](ORPHAN-RECOVERY.md), OpenRC
+startup and the migration installer remain unfinished. This is the activation
+sequence to implement and verify, not a completed unattended installer.
 
 Before changing anything, keep a known working wired or local-console recovery
 path.  Record the current files and OpenRC membership, then use a temporary

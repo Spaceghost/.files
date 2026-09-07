@@ -23,8 +23,9 @@ rolled-back trial remains recorded in
   unmatched connections receive the daemon's default Deny.
 - The queue belongs to `inet oldbook`, independently of OpenSnitch's tables.
   The gate remains after a crash or graceful daemon shutdown. Established
-  approved connections continue; this is a gate for new connections, not a
-  promise to terminate every already-open socket when the daemon stops.
+  output flows remain allowed by this table. OpenSnitch's separate DNS input
+  queue can still drop UDP DNS replies after daemon death; the gate does not
+  terminate every already-open socket.
 - Process inspection currently uses `/proc`. DNS mapping uses intercepted
   plaintext DNS replies; encrypted DNS does not provide equivalent domain
   visibility. eBPF byte accounting is not enabled in this package.
@@ -53,7 +54,38 @@ ordinary interactive prompting does not require enabling it. Do not select
 Ignore rules to force relearning: that preference can delete temporary rules.
 [Upstream getting-started guide](https://github.com/evilsocket/opensnitch/wiki/Getting-started).
 
-## Integration
+## Radio packet verification
+
+The radio networking checks are recorded in
+[radio-policy-verification.json](radio-policy-verification.json). Six isolated
+cases passed with the installed BusyBox, nftables and OpenSnitch binaries:
+
+- Raw DHCP acquisition bypassed inet output; actual same-client unicast renewal
+  used the existing UDP 68→67 exception and received an accepted acknowledgment.
+- IPv4 UDP/TCP DNS was denied without a queue consumer or an application rule.
+  One exact rule allowed the selected executable, UID and resolver, including
+  processes in a nested PID namespace; different values were denied.
+- Real IPv6 duplicate-address detection and hoplimit-255 neighbor solicitation
+  passed. The hoplimit-254 control reached the filter and was blocked.
+- Killing the private daemon removed its queue consumer and denied fresh DNS.
+
+These tests use synthetic servers and controlled rules. They preserve the
+installed broad root/443 grants, which still affect live prompts. They do not
+activate the staged radio owner or prove a trusted physical association.
+
+Re-run from the repository with a new evidence directory:
+
+```sh
+python3 -B alpine/security/firewall/verify-radio-policy.py --output /tmp/radio-policy-proof
+```
+
+The fixture uses private PID, mount and network namespaces and an explicitly
+empty eBPF module directory. OpenSnitch 1.8.0 starts its DNS BPF listener even
+with process monitoring set to `proc`; the empty module path prevents loading
+before any tracing can attach. The proof records this boundary and retains all
+four failed fixture runs with their diagnostics.
+
+## Package and session integration
 
 Install the signed `opensnitch`, `opensnitch-ui` and `opensnitch-openrc` APKs after
 installing the accompanying public signing key. Packages supply:
