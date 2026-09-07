@@ -60,8 +60,21 @@ same as permission to use it. Plain ssh
 remains available for hosts that run sshd: set `"transport": "ssh"` on the
 agent, and put a key in `~/.ssh` (this machine has none).
 
-Adjust the Ollama model name in the config to whatever that box actually
-serves; `llama3.3` is a placeholder.
+Verified end to end: the session opens on alienware, and closing the terminal
+leaves it running there to be reattached. The Ollama agents use the models that
+box actually serves, `qwen3.5:27b-text` and `qwen3.5:9b`.
+
+### What this laptop accepts
+
+Nothing that is not asked for. There is no sshd, Tailscale SSH is off here, and
+`table inet oldbook` drops unsolicited inbound on every interface including
+`tailscale0`, permitting only loopback, established or related traffic, DHCP
+replies and the ICMP and NDP types IPv6 needs. Tailscale still reaches peers
+directly because it initiates outbound and conntrack lets the replies home.
+`--shields-up` would add nothing over that rule and would break Taildrop, and
+extra nftables rules risk the NAT traversal that keeps the path direct rather
+than relayed, so neither is used. Subnet routes are deliberately not accepted,
+so no peer can quietly become a route for this machine's traffic.
 
 ## The offline library
 

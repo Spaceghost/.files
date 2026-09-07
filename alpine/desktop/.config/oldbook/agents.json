@@ -65,15 +65,28 @@
     {
       "id": "alienware-ollama",
       "title": "Local model on alienware",
-      "subtitle": "Ollama on the box with the GPU",
+      "subtitle": "Qwen3.5 27B on the box with the GPU",
       "enabled": true,
       "host": "alienware",
       "command": [
         "ollama",
         "run",
-        "llama3.3"
+        "qwen3.5:27b-text"
       ],
       "transport": "tailscale-ssh"
+    },
+    {
+      "id": "alienware-ollama-small",
+      "title": "Local model on alienware (9B)",
+      "subtitle": "Qwen3.5 9B, quicker to load",
+      "enabled": true,
+      "host": "alienware",
+      "transport": "tailscale-ssh",
+      "command": [
+        "ollama",
+        "run",
+        "qwen3.5:9b"
+      ]
     },
     {
       "id": "alienware-shell",
