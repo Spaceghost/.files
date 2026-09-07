@@ -96,18 +96,21 @@ def show(ipc, sway, control):
         if focused and geometry.x == focused['x'] and geometry.y == focused['y']:
             GtkLayerShell.set_monitor(window, monitor)
             break
+    from overlay_theme import read_palette, gtk_css
     css = Gtk.CssProvider()
-    css.load_from_data(b'''
-#ghost-expo { background: rgba(24, 23, 29, 0.97); color: #ebdbb2; }
-#expo-title { font: bold 28px sans-serif; color: #d8b879; }
-#expo-hint { color: #b7a9c6; }
-#ghost-expo entry { background: #302b36; color: #ebdbb2; border: 1px solid #645373; border-radius: 8px; padding: 10px; }
-#ghost-expo .workspace { background: #26232c; border: 1px solid #51435e; border-radius: 10px; padding: 10px; }
-#ghost-expo .active { border-color: #d8b879; }
-#ghost-expo button { background: #342e3d; color: #ebdbb2; border: 1px solid #635370; border-radius: 6px; padding: 5px; }
-#ghost-expo button:hover, #ghost-expo button:focus { background: #52405f; border-color: #d8b879; }
+    template = '''
+#ghost-expo { background: alpha(@theme_background_hard, 0.97); color: @theme_foreground; }
+#expo-title { font: bold 28px sans-serif; color: @theme_accent; }
+#expo-hint { color: @theme_muted; }
+#ghost-expo entry { background: @theme_surface; color: @theme_foreground; border: 1px solid @theme_border; border-radius: 8px; padding: 10px; }
+#ghost-expo .workspace { background: @theme_background; border: 1px solid @theme_border; border-radius: 10px; padding: 10px; }
+#ghost-expo .active { border-color: @theme_accent; }
+#ghost-expo button { background: @theme_surface; color: @theme_foreground; border: 1px solid @theme_border; border-radius: 6px; padding: 5px; }
+#ghost-expo button:hover, #ghost-expo button:focus { background: @theme_border; border-color: @theme_accent; }
 #ghost-expo .workspace-title { font-weight: bold; background: transparent; border: 0; }
-''')
+'''
+    theme = read_palette()
+    css.load_from_data(gtk_css(template, theme))
     Gtk.StyleContext.add_provider_for_screen(window.get_screen(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
     root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
     root.set_border_width(28)
@@ -154,7 +157,11 @@ def show(ipc, sway, control):
         return item
 
     def refresh(force=False):
-        nonlocal fingerprint
+        nonlocal fingerprint, theme
+        current_theme = read_palette()
+        if current_theme != theme:
+            css.load_from_data(gtk_css(template, current_theme))
+            theme = current_theme
         try:
             tree = ipc['request'](sway, 4)
         except (OSError, RuntimeError):

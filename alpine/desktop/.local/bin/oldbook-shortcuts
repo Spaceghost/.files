@@ -37,6 +37,11 @@ def main():
         arguments = ['--socket', str(socket), *arguments]
     if os.environ.get('SWAYSOCK') or any(value == '--socket' or value.startswith('--socket=') for value in arguments):
         os.environ.setdefault('QT_QPA_PLATFORMTHEME', 'qt6ct')
+    if not any(value in ('status', 'dump', '--dump', '--help', '-h') for value in arguments):
+        sys.path.insert(0, str(launcher.parents[1] / 'lib/oldbook'))
+        from overlay_theme import follow_qt_theme
+        from hold_to_help.qt_overlay import create_application
+        follow_qt_theme(create_application([]))
     return portable_main(arguments)
 
 

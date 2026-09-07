@@ -69,3 +69,16 @@ widget has its own offline build recipe and verified identical package builds.
 Papirus SVGs; the generated overlay, licenses and hashes are versioned too.
 Copy a complete Fossil database backup, including its unversioned artifacts,
 using [the restore instructions](../packages/RESTORE.md).
+
+## Expo and Super-hold palettes
+
+Ghost Expo and the Oldbook Super-hold launcher read the palette selected by
+`alpine/themes/current`. Both refresh their colors while running, within about
+one second of a descriptor or selection change. Gruvbox Dark supplies charcoal
+surfaces, cream text, muted brown labels, and amber highlights. Other descriptors
+use the same semantic roles; compact generated palettes receive matching defaults.
+
+The shared adapter is `desktop/.local/lib/oldbook/overlay_theme.py`. Expo consumes
+GTK named colors; the Oldbook launcher applies Qt palette roles locally to Hold
+to Help. The standalone Hold to Help project retains native platform theming.
+Fonts, window behavior, and shortcut/gesture handling are unchanged.
