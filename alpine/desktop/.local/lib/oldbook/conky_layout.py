@@ -171,7 +171,21 @@ def _score(grid, left, top, width, height, prefer, columns, rows):
     return score
 
 
-def place_panels(panels, grid, area, *, gap=1):
+def reserved_cells(rectangles, grid, area):
+    """Convert pixel rectangles, such as the search bar, into occupied cells."""
+    cell_width = area['width'] / grid['columns']
+    cell_height = area['height'] / grid['rows']
+    cells = []
+    for rectangle in rectangles or ():
+        left = int(rectangle['x'] / cell_width)
+        top = int(rectangle['y'] / cell_height)
+        width = max(1, math.ceil(rectangle['width'] / cell_width))
+        height = max(1, math.ceil(rectangle['height'] / cell_height))
+        cells.append((left, top, width, height))
+    return cells
+
+
+def place_panels(panels, grid, area, *, gap=1, reserved=()):
     """Greedily seat each panel in the calmest free rectangle it fits.
 
     ``area`` carries the screen size plus insets for the panel bar and the
@@ -185,7 +199,8 @@ def place_panels(panels, grid, area, *, gap=1):
     last_row = rows - math.ceil(area.get('bottom', 0) / cell_height)
     first_column = math.ceil(area.get('left', 0) / cell_width)
     last_column = columns - math.ceil(area.get('right', 0) / cell_width)
-    taken, placements = [], []
+    taken = list(reserved_cells(reserved, grid, area))
+    placements = []
     for panel in sorted(panels, key=lambda item: -item.get('priority', 0)):
         width = max(1, min(columns, round(panel['width'] / cell_width)))
         height = max(1, min(rows, round(panel['height'] / cell_height)))
@@ -278,8 +293,8 @@ def render_config(panel, placement, colours, options):
     return '\n'.join(lines) + '\n'
 
 
-def plan(panels, grid, area, palette, options):
-    placements = place_panels(panels, grid, area, gap=options.get('gap', 1))
+def plan(panels, grid, area, palette, options, reserved=()):
+    placements = place_panels(panels, grid, area, gap=options.get('gap', 1), reserved=reserved)
     by_id = {panel['id']: panel for panel in panels}
     plans = []
     for placement in placements:

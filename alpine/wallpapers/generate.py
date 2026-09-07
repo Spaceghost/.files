@@ -20,6 +20,7 @@ import time
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import has_symlink, load_theme, safe_theme_id
+import prompt_catalog
 
 STATE = Path.home() / '.local/state/oldbook/wallpaper-generation'
 SCHEMA = {'type': 'object', 'properties': {'image_path': {'type': 'string'}},
@@ -43,10 +44,22 @@ def clean_environment():
     return env
 
 
-def choose_scene(config, day):
-    # Daily permutation visits every scene before repeating, independent of RNG.
-    scenes = config['scenes']
-    return scenes[dt.date.fromisoformat(day).toordinal() % len(scenes)]
+def bootstrap_history():
+    """Seed the never-repeat history from records written before it existed."""
+    seeded = []
+    for record in records():
+        try:
+            previous = json.loads(record.read_text())
+        except (OSError, ValueError):
+            continue
+        if previous.get('scene'):
+            seeded.append({'scene': previous['scene'], 'insertion': previous.get('insertion'),
+                           'painted_utc': previous.get('started_utc', '')})
+    return seeded
+
+
+def load_history():
+    return prompt_catalog.PaintHistory.load(STATE / 'history.json', bootstrap_history())
 
 
 def validate_image(path, generated_root, started):
@@ -197,21 +210,6 @@ def records():
     return sorted([*STATE.glob('????-??-??.json'), *(STATE / 'manual').glob('*.json')])
 
 
-def manual_scene(config, day):
-    previous = []
-    for record in records():
-        try:
-            previous.append(json.loads(record.read_text()))
-        except (OSError, ValueError):
-            continue
-    scenes = config['scenes']
-    for entry in sorted(previous, key=lambda e: e.get('started_utc', ''), reverse=True):
-        for index, scene in enumerate(scenes):
-            if scene['id'] == entry.get('scene'):
-                return scenes[(index + 1) % len(scenes)]
-    return choose_scene(config, day)
-
-
 def generate_native(config, prompt, env, log):
     request = (
         'This is an unattended, already-authorized wallpaper generation. '
@@ -270,7 +268,8 @@ def activate_artwork(record, metadata, entry):
     return 0
 
 
-def run_once(scene_override=None, *, manual=False, activate=False, theme='active', new_theme=None):
+def run_once(scene_override=None, *, manual=False, activate=False, theme='active',
+             new_theme=None, insertion_override=None):
     STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(STATE, 0o700)
     with (STATE / 'generation.lock').open('a+') as lock:
@@ -297,7 +296,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if record.exists():
                 print(f'{day}: daily attempt already reserved; no retry.')
                 return 0
-        config = json.loads((REPO / 'alpine/wallpapers/prompts.json').read_text())
+        config = prompt_catalog.load_catalog(REPO / 'alpine/wallpapers/prompts.json')
         if new_theme is not None:
             from new_themes import design_theme
             lock.seek(0)
@@ -323,16 +322,17 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
         gallery /= 'general' if selected_theme['id'] == 'none' else 'themes/' + selected_theme['id']
         if has_symlink(gallery, REPO):
             raise RuntimeError('Artwork destination must be a regular directory in the gallery')
-        if scene_override:
-            scene = next((s for s in config['scenes'] if s['id'] == scene_override), None)
-            if scene is None:
-                raise RuntimeError('Unknown scene: ' + scene_override)
-        elif new_theme is not None:
+        history = load_history()
+        if new_theme is not None:
             scene = {'id': 'debut', 'title': selected_theme['name'], 'description': selected_theme['scene']}
+            insertion = None
         else:
-            scene = manual_scene(config, day) if manual else choose_scene(config, day)
+            scene, insertion = prompt_catalog.choose(
+                config, history, scene_id=scene_override, insertion_id=insertion_override)
+        seed = prompt_catalog.variation_seed()
         started = time.time()
         metadata = {'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
+                    'insertion': insertion['id'] if insertion else None, 'variation_seed': seed,
                     'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
                     'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
         # Reserve before making a model request. Daily failures cannot retry.
@@ -350,10 +350,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if manual:
                 destination_notice = 'appear on your desktop' if activate else 'be saved in the gallery'
                 notify('Space Ghost is painting…', scene['title'] + '. Your new artwork will ' + destination_notice + ' when ready.')
-            prompt = config['style']
-            if selected_theme['image_style']:
-                prompt += '\n\nTheme: ' + selected_theme['name'] + '. ' + selected_theme['image_style']
-            prompt += '\n\nScene: ' + scene['description']
+            prompt = prompt_catalog.compose_prompt(config, selected_theme, scene, insertion, seed)
             source_path = generate_native(config, prompt, env, record.with_suffix('.jsonl'))
             source, width, height = validate_image(source_path,
                                                    Path(env['CODEX_HOME']) / 'generated_images', started)
@@ -361,6 +358,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if has_symlink(gallery, REPO):
                 raise RuntimeError('Artwork destination must remain a regular directory in the gallery')
             gallery.mkdir(parents=True, exist_ok=True)
+            history.record(scene['id'], insertion['id'] if insertion else None, seed)
+            history.save()
             stem = f'{day}-{selected_theme["id"]}-{scene["id"]}-{digest[:12]}'
             destination = gallery / f'{stem}.png'
             if destination.exists():
@@ -369,6 +368,9 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             shutil.copyfile(source, temporary)
             temporary.replace(destination)
             entry = {'id': stem, 'title': scene['title'], 'description': scene['description'],
+                     'insertion': insertion['id'] if insertion else None,
+                     'insertion_title': insertion['title'] if insertion else '',
+                     'variation_seed': seed,
                      'file': str(destination.relative_to(REPO)), 'sha256': digest,
                      'width': width, 'height': height, 'prompt': prompt,
                      'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
@@ -400,19 +402,23 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scene', help='Select a named scene from prompts.json.')
+    parser.add_argument('--insertion', help='Select a named Space Ghost insertion style.')
     parser.add_argument('--theme', default='active', help='active (default), none, or a theme ID from alpine/themes/.')
     parser.add_argument('--new-theme', nargs='?', const='', help='Create a collection from a phrase, or random if empty.')
     parser.add_argument('--manual', action='store_true', help='One explicit request, independent of the daily schedule.')
     parser.add_argument('--activate', action='store_true', help='Switch to the newly saved artwork when ready.')
     parser.add_argument('--print-command', action='store_true', help='Show the cron-safe command without generating.')
     args = parser.parse_args()
-    if args.new_theme is not None and (not args.manual or args.scene or args.theme != 'active'):
-        parser.error('--new-theme requires --manual and cannot combine with --scene or --theme')
+    if args.new_theme is not None and (not args.manual or args.scene or args.insertion
+                                       or args.theme != 'active'):
+        parser.error('--new-theme requires --manual and cannot combine with --scene, '
+                     '--insertion or --theme')
     if args.print_command:
         import shlex
         print(shlex.join(['/usr/bin/python3', str(Path(__file__).resolve())]))
         return
-    sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme, new_theme=args.new_theme))
+    sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme,
+                      new_theme=args.new_theme, insertion_override=args.insertion))
 
 
 if __name__ == '__main__':

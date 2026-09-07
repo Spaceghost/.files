@@ -11,6 +11,9 @@ import time
 
 
 REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+import prompt_catalog
+
 DEFAULT_PROMPTS = REPO / 'alpine/wallpapers/prompts.json'
 DEFAULT_BACKUPS = Path.home() / '.local/state/oldbook/prompt-backups'
 
@@ -113,21 +116,7 @@ class PromptDocument:
 
     @staticmethod
     def _validate(data):
-        if not isinstance(data, dict) or not isinstance(data.get('style'), str):
-            raise ValueError('Prompt file must contain a string style.')
-        scenes = data.get('scenes')
-        if not isinstance(scenes, list) or not scenes:
-            raise ValueError('Prompt file must contain at least one scene.')
-        identifiers = set()
-        for scene in scenes:
-            if (not isinstance(scene, dict)
-                    or not isinstance(scene.get('id'), str) or not scene['id']
-                    or not isinstance(scene.get('title'), str)
-                    or not isinstance(scene.get('description'), str)):
-                raise ValueError('Every scene needs a string ID, title, and description.')
-            if scene['id'] in identifiers:
-                raise ValueError(f'Duplicate scene ID: {scene["id"]}')
-            identifiers.add(scene['id'])
+        prompt_catalog.validate(data)
 
     @property
     def style(self):
@@ -135,24 +124,51 @@ class PromptDocument:
 
     @property
     def scenes(self):
-        return tuple({'id': scene['id'], 'title': scene['title'],
-                      'description': scene['description']}
-                     for scene in self.data['scenes'])
+        return self.entries('scenes')
+
+    @property
+    def insertions(self):
+        return self.entries('insertions')
+
+    def entries(self, bank):
+        return tuple({'id': item['id'], 'title': item['title'],
+                      'description': item['description'],
+                      'enabled': item.get('enabled', True)}
+                     for item in self.data.get(bank) or ())
 
     def set_style(self, value):
         if not isinstance(value, str):
             raise TypeError('style must be text')
         self.data['style'] = value
 
-    def update_scene(self, identifier, title, description):
-        if not isinstance(title, str) or not isinstance(description, str):
-            raise TypeError('scene title and description must be text')
-        scene = next((item for item in self.data['scenes']
-                      if item['id'] == identifier), None)
-        if scene is None:
+    def _entry(self, bank, identifier):
+        item = next((item for item in self.data.get(bank) or ()
+                     if item['id'] == identifier), None)
+        if item is None:
             raise KeyError(identifier)
-        scene['title'] = title
-        scene['description'] = description
+        return item
+
+    def update_scene(self, identifier, title, description):
+        self.update_entry('scenes', identifier, title, description)
+
+    def update_entry(self, bank, identifier, title, description):
+        if not isinstance(title, str) or not isinstance(description, str):
+            raise TypeError('entry title and description must be text')
+        item = self._entry(bank, identifier)
+        item['title'] = title
+        item['description'] = description
+
+    def set_enabled(self, bank, identifier, enabled):
+        """Switch one scene or insertion off without discarding its wording."""
+        self._entry(bank, identifier)['enabled'] = bool(enabled)
+
+    def selection_mode(self, bank):
+        return prompt_catalog.selection_mode(self.data, bank)
+
+    def set_selection_mode(self, bank, mode):
+        if mode not in prompt_catalog.SELECTION_MODES:
+            raise ValueError('Unknown selection mode: ' + str(mode))
+        self.data[prompt_catalog.MODE_KEYS[bank]] = mode
 
     def save(self):
         current, signature, _mode = _read_snapshot(self.path)
@@ -171,6 +187,108 @@ class PromptDocument:
         self.original, self.signature, self.mode = _read_snapshot(self.path)
 
 
+class _Bank:
+    """One switchable list of prompts: its mode, its entries and their text."""
+
+    def __init__(self, editor, name, heading, note):
+        Gtk = editor.Gtk
+        self.editor = editor
+        self.name = name
+        self.active = None
+        self.page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        self.page.set_border_width(14)
+
+        caption = Gtk.Label(label=note)
+        caption.set_xalign(0)
+        caption.set_line_wrap(True)
+        self.page.pack_start(caption, False, False, 0)
+
+        mode_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        mode_label = Gtk.Label(label='When painting, pick')
+        mode_label.set_xalign(0)
+        self.mode = Gtk.ComboBoxText()
+        for identifier, description in (
+                ('shuffle', 'shuffle · every one before any repeat'),
+                ('random', 'random · a free draw each time'),
+                ('rotate', 'rotate · straight through the list in order')):
+            self.mode.append(identifier, description)
+        self.mode.set_active_id(editor.document.selection_mode(name))
+        mode_row.pack_start(mode_label, False, False, 0)
+        mode_row.pack_start(self.mode, True, True, 0)
+        self.page.pack_start(mode_row, False, False, 0)
+
+        chooser_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        chooser_label = Gtk.Label(label=heading)
+        chooser_label.set_xalign(0)
+        self.chooser = Gtk.ComboBoxText()
+        self.entries = {entry['id']: dict(entry) for entry in editor.document.entries(name)}
+        for entry in editor.document.entries(name):
+            self.chooser.append(entry['id'], self._label(entry))
+        self.chooser.connect('changed', self.select)
+        chooser_row.pack_start(chooser_label, False, False, 0)
+        chooser_row.pack_start(self.chooser, True, True, 0)
+        self.page.pack_start(chooser_row, False, False, 0)
+
+        self.enabled = Gtk.CheckButton(label='Use this one when painting')
+        self.enabled.connect('toggled', self.toggled)
+        self.page.pack_start(self.enabled, False, False, 0)
+
+        title_label = Gtk.Label(label='Title')
+        title_label.set_xalign(0)
+        self.page.pack_start(title_label, False, False, 0)
+        self.title = Gtk.Entry()
+        self.page.pack_start(self.title, False, False, 0)
+
+        description_label = Gtk.Label(label='Description')
+        description_label.set_xalign(0)
+        self.page.pack_start(description_label, False, False, 0)
+        scroll, self.description = editor._text_editor(190)
+        self.page.pack_start(scroll, True, True, 0)
+
+        if self.entries:
+            self.chooser.set_active(0)
+
+    @staticmethod
+    def _label(entry):
+        mark = '' if entry.get('enabled', True) else '  (off)'
+        return f"{entry['title'] or entry['id']}  ·  {entry['id']}{mark}"
+
+    def store(self):
+        """Copy the visible fields back into the document before moving on."""
+        if self.active is None:
+            return
+        self.editor.document.update_entry(
+            self.name, self.active, self.title.get_text(),
+            self.editor._text(self.description))
+        self.editor.document.set_enabled(self.name, self.active, self.enabled.get_active())
+
+    def select(self, _chooser):
+        selected = self.chooser.get_active_id()
+        if selected is None or selected == self.active:
+            return
+        self.store()
+        self.active = selected
+        entry = next(item for item in self.editor.document.entries(self.name)
+                     if item['id'] == selected)
+        self.title.set_text(entry['title'])
+        self.editor._set_text(self.description, entry['description'])
+        self.enabled.set_active(entry.get('enabled', True))
+
+    def toggled(self, _button):
+        if self.active is None:
+            return
+        self.editor.document.set_enabled(self.name, self.active, self.enabled.get_active())
+        entry = next(item for item in self.editor.document.entries(self.name)
+                     if item['id'] == self.active)
+        index = [item['id'] for item in self.editor.document.entries(self.name)].index(self.active)
+        self.chooser.remove(index)
+        self.chooser.insert(index, entry['id'], self._label(entry))
+        self.chooser.set_active_id(self.active)
+
+    def commit_mode(self):
+        self.editor.document.set_selection_mode(self.name, self.mode.get_active_id())
+
+
 class PromptEditor:
     """Compact GTK editor; persistence stays in PromptDocument."""
     def __init__(self, document):
@@ -180,15 +298,14 @@ class PromptEditor:
 
         self.Gtk = Gtk
         self.document = document
-        self.active_scene = None
         self.window = Gtk.Window(title='Gallery Prompts')
-        self.window.set_default_size(900, 680)
-        self.window.set_size_request(680, 520)
+        self.window.set_default_size(940, 760)
+        self.window.set_size_request(700, 560)
         self.window.set_position(Gtk.WindowPosition.CENTER)
         self.window.set_icon_name('preferences-desktop-wallpaper')
         self.window.connect('delete-event', self.cancel)
 
-        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=14)
+        outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
         outer.set_border_width(18)
         self.window.add(outer)
 
@@ -199,45 +316,38 @@ class PromptEditor:
 
         introduction = Gtk.Label(
             label='Edit the shared look and wording for future generated gallery art. '
-                  'Saving does not generate an image.')
+                  'Switch individual scenes and Space Ghost insertions off without deleting '
+                  'them. Saving does not generate an image.')
         introduction.set_xalign(0)
         introduction.set_line_wrap(True)
         outer.pack_start(introduction, False, False, 0)
 
-        style_frame = Gtk.Frame(label='Shared style')
-        style_scroll, self.style_view = self._text_editor(150)
-        style_frame.add(style_scroll)
-        outer.pack_start(style_frame, False, True, 0)
+        notebook = Gtk.Notebook()
+        outer.pack_start(notebook, True, True, 0)
+
+        style_page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        style_page.set_border_width(14)
+        style_note = Gtk.Label(
+            label='Shared guidance applied to every painting and to new theme designs.')
+        style_note.set_xalign(0)
+        style_note.set_line_wrap(True)
+        style_page.pack_start(style_note, False, False, 0)
+        style_scroll, self.style_view = self._text_editor(260)
+        style_page.pack_start(style_scroll, True, True, 0)
         self._set_text(self.style_view, document.style)
+        notebook.append_page(style_page, Gtk.Label(label='Shared style'))
 
-        scene_frame = Gtk.Frame(label='Individual scene')
-        scene_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-        scene_box.set_border_width(10)
-        scene_frame.add(scene_box)
+        self.scenes = _Bank(
+            self, 'scenes', 'Scene',
+            'Each scene is one painting idea. Turn any of them off to keep it out of the '
+            'rotation without losing the text.')
+        notebook.append_page(self.scenes.page, Gtk.Label(label='Scenes'))
 
-        chooser_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
-        chooser_label = Gtk.Label(label='Scene')
-        chooser_label.set_xalign(0)
-        self.scene_chooser = Gtk.ComboBoxText()
-        for scene in document.scenes:
-            self.scene_chooser.append(scene['id'], f"{scene['title']}  ·  {scene['id']}")
-        self.scene_chooser.connect('changed', self.select_scene)
-        chooser_row.pack_start(chooser_label, False, False, 0)
-        chooser_row.pack_start(self.scene_chooser, True, True, 0)
-        scene_box.pack_start(chooser_row, False, False, 0)
-
-        title_label = Gtk.Label(label='Title')
-        title_label.set_xalign(0)
-        scene_box.pack_start(title_label, False, False, 0)
-        self.title_entry = Gtk.Entry()
-        scene_box.pack_start(self.title_entry, False, False, 0)
-
-        description_label = Gtk.Label(label='Description')
-        description_label.set_xalign(0)
-        scene_box.pack_start(description_label, False, False, 0)
-        description_scroll, self.description_view = self._text_editor(170)
-        scene_box.pack_start(description_scroll, True, True, 0)
-        outer.pack_start(scene_frame, True, True, 0)
+        self.insertions = _Bank(
+            self, 'insertions', 'Insertion',
+            'Each insertion style is a different way Space Ghost enters the painting. One is '
+            'combined with a scene every time, so the same scene never looks the same twice.')
+        notebook.append_page(self.insertions.page, Gtk.Label(label='Space Ghost'))
 
         footer = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         self.status = Gtk.Label(
@@ -253,8 +363,6 @@ class PromptEditor:
         footer.pack_end(self.save_button, False, False, 0)
         footer.pack_end(self.cancel_button, False, False, 0)
         outer.pack_end(footer, False, False, 0)
-
-        self.scene_chooser.set_active(0)
 
     def _text_editor(self, minimum_height):
         editor = self.Gtk.TextView()
@@ -278,24 +386,10 @@ class PromptEditor:
     def _set_text(editor, value):
         editor.get_buffer().set_text(value)
 
-    def _store_active_scene(self):
-        if self.active_scene is not None:
-            self.document.update_scene(
-                self.active_scene, self.title_entry.get_text(),
-                self._text(self.description_view))
-
-    def select_scene(self, _chooser):
-        selected = self.scene_chooser.get_active_id()
-        if selected is None or selected == self.active_scene:
-            return
-        self._store_active_scene()
-        scene = next(scene for scene in self.document.scenes if scene['id'] == selected)
-        self.active_scene = selected
-        self.title_entry.set_text(scene['title'])
-        self._set_text(self.description_view, scene['description'])
-
     def save(self, _button):
-        self._store_active_scene()
+        for bank in (self.scenes, self.insertions):
+            bank.store()
+            bank.commit_mode()
         self.document.set_style(self._text(self.style_view))
         try:
             self.document.save()

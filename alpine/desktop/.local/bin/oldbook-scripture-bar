@@ -1,0 +1,237 @@
+#!/usr/bin/env python3
+"""A search bar pinned to the desktop for choosing what to read.
+
+It sits on the desktop layer so it is visible with the wallpaper and takes the
+keyboard only when clicked, or when Super+slash sends it SIGUSR1 and it raises
+itself to the overlay layer until Escape.
+"""
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkLayerShell', '0.1')
+from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import scripture
+import conky_layout
+
+ASSETS = REPO / 'alpine/assets/scripture'
+STATE = Path.home() / '.local/state/oldbook/scripture'
+THEME_STATE = Path.home() / '.local/state/oldbook/conky/layout.json'
+SELECT = REPO / 'alpine/desktop/.local/bin/oldbook-scripture'
+WIDTH, RESULTS = 760, 8
+
+
+class SearchBar:
+    def __init__(self):
+        self.bible = scripture.Bible.load(ASSETS)
+        self.reflections = scripture.load_reflections(ASSETS)
+        self.rows = []
+        self.focused = False
+
+        self.window = Gtk.Window()
+        self.window.set_name('scripture-bar')
+        GtkLayerShell.init_for_window(self.window)
+        GtkLayerShell.set_namespace(self.window, 'oldbook-scripture')
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, 26)
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.ON_DEMAND)
+        self.window.set_size_request(WIDTH, -1)
+
+        frame = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        frame.get_style_context().add_class('bar')
+        self.window.add(frame)
+
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        row.get_style_context().add_class('entry-row')
+        icon = Gtk.Label(label='')
+        icon.get_style_context().add_class('icon')
+        row.pack_start(icon, False, False, 0)
+        self.entry = Gtk.Entry()
+        self.entry.set_has_frame(False)
+        self.entry.set_placeholder_text(
+            'Search scripture — a reference like Isaiah 53, a name like Paul, or any words')
+        self.entry.connect('changed', self.changed)
+        self.entry.connect('activate', self.activate)
+        self.entry.connect('key-press-event', self.key_pressed)
+        row.pack_start(self.entry, True, True, 0)
+        frame.pack_start(row, False, False, 0)
+
+        self.list = Gtk.ListBox()
+        self.list.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.list.connect('row-activated', self.row_activated)
+        self.scroll = Gtk.ScrolledWindow()
+        self.scroll.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.scroll.set_min_content_height(268)
+        self.scroll.add(self.list)
+        self.scroll.set_no_show_all(True)
+        frame.pack_start(self.scroll, True, True, 0)
+
+        self.apply_theme()
+        self.window.show_all()
+        self.scroll.hide()
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.summon)
+        (STATE).mkdir(parents=True, exist_ok=True, mode=0o700)
+        (STATE / 'bar.pid').write_text(f'{os.getpid()}\n')
+
+    # Colours follow the same theme the desktop panels use.
+    def apply_theme(self):
+        try:
+            sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+            from theme_catalog import load_theme
+            palette = conky_layout.resolve_palette(load_theme(REPO))
+        except Exception:
+            palette = conky_layout.resolve_palette({})
+        css = f'''
+        #scripture-bar {{ background: transparent; }}
+        .bar {{
+            background: alpha({palette['background']}, 0.82);
+            border: 1px solid alpha({palette['accent']}, 0.45);
+            border-radius: 10px;
+        }}
+        .entry-row {{ padding: 10px 14px; }}
+        .icon {{ color: {palette['accent']}; font-size: 13px; }}
+        entry {{
+            background: transparent; color: {palette['foreground']};
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 13px;
+            caret-color: {palette['accent']};
+        }}
+        entry placeholder {{ color: {palette['muted']}; }}
+        list {{ background: transparent; }}
+        row {{ padding: 7px 14px; border-top: 1px solid alpha({palette['muted']}, 0.18); }}
+        row:selected {{ background: alpha({palette['accent']}, 0.22); }}
+        .kind {{ color: {palette['accent']}; font-size: 10px; }}
+        .headline {{ color: {palette['foreground']}; font-size: 12px; }}
+        .detail {{ color: {palette['muted']}; font-size: 11px; }}
+        '''
+        provider = Gtk.CssProvider()
+        provider.load_from_data(css.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def summon(self, *_arguments):
+        """Raise to the overlay and take the keyboard, for the Super+slash binding."""
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.OVERLAY)
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+        self.focused = True
+        self.window.present()
+        self.entry.grab_focus()
+        return GLib.SOURCE_CONTINUE
+
+    def dismiss(self):
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.ON_DEMAND)
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        self.focused = False
+        self.entry.set_text('')
+        self.clear()
+
+    def clear(self):
+        for row in self.list.get_children():
+            self.list.remove(row)
+        self.rows = []
+        self.scroll.hide()
+
+    def changed(self, _entry):
+        query = self.entry.get_text().strip()
+        self.clear()
+        if len(query) < 2:
+            return
+        for entry in scripture.search_reflections(self.reflections, query)[:4]:
+            self.add_row('reflection', f"{entry['figure']} · {entry['title']}",
+                         entry['reference'] + ' — ' + entry['trial'],
+                         ('select-reflection', entry['id']))
+        for record in self.bible.search(query, RESULTS):
+            reference = scripture.format_reference([record])
+            self.add_row('verse', reference, record['text'], ('select', reference))
+        if self.rows:
+            self.scroll.show()
+            self.list.select_row(self.list.get_row_at_index(0))
+
+    def add_row(self, kind, headline, detail, action):
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+        top = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        tag = Gtk.Label(label=kind.upper())
+        tag.get_style_context().add_class('kind')
+        tag.set_xalign(0)
+        title = Gtk.Label(label=headline)
+        title.get_style_context().add_class('headline')
+        title.set_xalign(0)
+        top.pack_start(tag, False, False, 0)
+        top.pack_start(title, True, True, 0)
+        box.pack_start(top, False, False, 0)
+        body = Gtk.Label(label=detail)
+        body.get_style_context().add_class('detail')
+        body.set_xalign(0)
+        body.set_ellipsize(Pango.EllipsizeMode.END)
+        body.set_max_width_chars(96)
+        box.pack_start(body, False, False, 0)
+        row = Gtk.ListBoxRow()
+        row.add(box)
+        self.list.add(row)
+        row.show_all()
+        self.rows.append(action)
+
+    def activate(self, _entry):
+        row = self.list.get_selected_row() or self.list.get_row_at_index(0)
+        if row is not None:
+            self.row_activated(self.list, row)
+
+    def row_activated(self, _list, row):
+        index = row.get_index()
+        if 0 <= index < len(self.rows):
+            action, argument = self.rows[index]
+            subprocess.Popen(['/usr/bin/python3', str(SELECT), action, argument],
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+        self.dismiss()
+
+    def key_pressed(self, _widget, event):
+        if event.keyval == Gdk.KEY_Escape:
+            self.dismiss()
+            return True
+        if event.keyval in (Gdk.KEY_Down, Gdk.KEY_Up) and self.rows:
+            row = self.list.get_selected_row()
+            index = (row.get_index() if row else 0) + (1 if event.keyval == Gdk.KEY_Down else -1)
+            target = self.list.get_row_at_index(max(0, min(len(self.rows) - 1, index)))
+            if target is not None:
+                self.list.select_row(target)
+            return True
+        return False
+
+
+def focus_running():
+    """Signal an existing bar instead of starting a second one."""
+    try:
+        pid = int((STATE / 'bar.pid').read_text().strip())
+        command = Path(f'/proc/{pid}/cmdline').read_bytes().decode(errors='replace')
+    except (OSError, ValueError):
+        return False
+    if 'oldbook-scripture-bar' not in command:
+        return False
+    try:
+        os.kill(pid, signal.SIGUSR1)
+        return True
+    except OSError:
+        return False
+
+
+def main():
+    if '--focus' in sys.argv:
+        if focus_running():
+            return 0
+    bar = SearchBar()
+    if '--focus' in sys.argv:
+        bar.summon()
+    Gtk.main()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

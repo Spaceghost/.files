@@ -90,5 +90,82 @@ class GalleryPromptDocumentTests(unittest.TestCase):
         self.assertFalse(self.backups.exists())
 
 
+class GalleryPromptBankTests(unittest.TestCase):
+    """Scenes and insertions can be switched off and re-ordered without data loss."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-banks-test-')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.path = self.root / 'prompts.json'
+        self.backups = self.root / 'state/prompt-backups'
+        self.path.write_text(json.dumps({
+            'style': 'Shared style',
+            'scene_selection': 'shuffle',
+            'scenes': [
+                {'id': 'first', 'title': 'First', 'description': 'One', 'extra': 1},
+                {'id': 'second', 'title': 'Second', 'description': 'Two'},
+            ],
+            'insertions': [
+                {'id': 'cameo', 'title': 'Cameo', 'description': 'Small'},
+                {'id': 'statue', 'title': 'Statue', 'description': 'Stone'},
+            ],
+        }, indent=2) + '\n')
+
+    def document(self):
+        module = runpy.run_path(str(HELPER))
+        return module, module['PromptDocument'].load(self.path, self.backups)
+
+    def test_switching_a_scene_off_is_saved_and_keeps_its_wording(self):
+        _module, document = self.document()
+        document.set_enabled('scenes', 'first', False)
+        document.save()
+
+        saved = json.loads(self.path.read_text())
+        self.assertFalse(saved['scenes'][0]['enabled'])
+        self.assertEqual(saved['scenes'][0]['description'], 'One')
+        self.assertEqual(saved['scenes'][0]['extra'], 1, 'unknown scene fields must survive')
+        self.assertNotIn('enabled', saved['scenes'][1])
+
+    def test_selection_modes_round_trip(self):
+        _module, document = self.document()
+        document.set_selection_mode('scenes', 'rotate')
+        document.set_selection_mode('insertions', 'random')
+        document.save()
+
+        saved = json.loads(self.path.read_text())
+        self.assertEqual(saved['scene_selection'], 'rotate')
+        self.assertEqual(saved['insertion_selection'], 'random')
+
+    def test_insertions_are_editable_like_scenes(self):
+        _module, document = self.document()
+        self.assertEqual([entry['id'] for entry in document.insertions], ['cameo', 'statue'])
+        document.update_entry('insertions', 'statue', 'Bronze', 'Cast in bronze')
+        document.save()
+
+        saved = json.loads(self.path.read_text())
+        self.assertEqual(saved['insertions'][1],
+                         {'id': 'statue', 'title': 'Bronze', 'description': 'Cast in bronze'})
+
+    def test_refuses_to_save_with_every_scene_switched_off(self):
+        _module, document = self.document()
+        for identifier in ('first', 'second'):
+            document.set_enabled('scenes', identifier, False)
+        with self.assertRaises(ValueError):
+            document.save()
+        self.assertNotIn('enabled', json.loads(self.path.read_text())['scenes'][0])
+
+    def test_rejects_an_unknown_selection_mode(self):
+        _module, document = self.document()
+        with self.assertRaises(ValueError):
+            document.set_selection_mode('scenes', 'occasionally')
+
+    def test_unknown_entry_is_reported(self):
+        _module, document = self.document()
+        with self.assertRaises(KeyError):
+            document.set_enabled('scenes', 'missing', False)
+
+
+
 if __name__ == '__main__':
     unittest.main()

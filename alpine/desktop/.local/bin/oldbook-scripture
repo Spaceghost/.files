@@ -1,0 +1,191 @@
+#!/usr/bin/env python3
+"""Choose and render the scripture shown on the desktop."""
+import argparse
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import textwrap
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import scripture
+
+ASSETS = REPO / 'alpine/assets/scripture'
+STATE = Path.home() / '.local/state/oldbook/scripture'
+SELECTION = STATE / 'selection.json'
+PANEL_WIDTH = 52
+
+
+def state_directory():
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    return STATE
+
+
+def write_selection(document):
+    state_directory()
+    document['chosen_utc'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+    temporary = SELECTION.with_name(f'{SELECTION.name}.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(document, indent=2, ensure_ascii=False) + '\n')
+    temporary.replace(SELECTION)
+    refresh_panels()
+
+
+def read_selection():
+    try:
+        return json.loads(SELECTION.read_text())
+    except (OSError, ValueError):
+        return {}
+
+
+def refresh_panels():
+    """Conky re-reads on its own interval; nudging it keeps the change immediate."""
+    helper = REPO / 'alpine/desktop/.local/bin/oldbook-conky'
+    if not helper.is_file():
+        return
+    try:
+        subprocess.Popen(['/usr/bin/python3', str(helper), 'refresh-text'],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        pass
+
+
+def select_reference(bible, reference):
+    records = bible.lookup(reference)
+    if not records:
+        raise RuntimeError('No passage matches: ' + reference)
+    write_selection({'kind': 'passage', 'reference': scripture.format_reference(records),
+                     'text': scripture.passage_text(records)})
+    return scripture.format_reference(records)
+
+
+def select_reflection(bible, identifier):
+    entries = scripture.load_reflections(ASSETS)
+    entry = next((item for item in entries if item['id'] == identifier), None)
+    if entry is None:
+        raise RuntimeError('No reflection called: ' + identifier)
+    records = bible.lookup(entry['reference'])
+    write_selection({'kind': 'reflection', 'id': entry['id'],
+                     'reference': scripture.format_reference(records) or entry['reference'],
+                     'text': scripture.passage_text(records),
+                     'figure': entry['figure'], 'title': entry['title'],
+                     'trial': entry['trial'], 'reflection': entry['reflection'],
+                     'practice': entry['practice']})
+    return entry['id']
+
+
+def current(bible):
+    """The chosen passage, or the reflection for today when nothing is chosen."""
+    selection = read_selection()
+    if selection.get('kind') == 'passage' and selection.get('text'):
+        return selection
+    if selection.get('kind') == 'reflection' and selection.get('id'):
+        entries = scripture.load_reflections(ASSETS)
+        if any(item['id'] == selection['id'] for item in entries):
+            return selection
+    entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
+    records = bible.lookup(entry['reference'])
+    return {'kind': 'reflection', 'id': entry['id'],
+            'reference': scripture.format_reference(records) or entry['reference'],
+            'text': scripture.passage_text(records), 'figure': entry['figure'],
+            'title': entry['title'], 'trial': entry['trial'],
+            'reflection': entry['reflection'], 'practice': entry['practice']}
+
+
+def wrap(text, width, limit):
+    lines = textwrap.wrap(text, width)
+    if len(lines) > limit:
+        lines = lines[:limit]
+        lines[-1] = lines[-1].rstrip('.,;: ') + '…'
+    return lines
+
+
+def panel(bible, width=PANEL_WIDTH):
+    """The desktop block: the passage, then who lived it and what to do about it."""
+    entry = current(bible)
+    lines = ['${color1}' + entry.get('reference', '')]
+    lines += ['${color}' + line for line in wrap(entry.get('text', ''), width, 4)]
+    if entry.get('kind') == 'reflection':
+        lines.append('${color2}' + entry['figure'] + ' · ' + entry['title'])
+        lines += ['${color2}' + line for line in wrap(entry.get('reflection', ''), width, 3)]
+        lines += ['${color1}Practice: ${color2}' + line
+                  for line in wrap(entry.get('practice', ''), width, 2)[:1]]
+        remainder = wrap(entry.get('practice', ''), width, 2)[1:]
+        lines += ['${color2}' + line for line in remainder]
+    print('\n'.join(lines))
+    return 0
+
+
+def show(bible, reference, width=78):
+    records = bible.lookup(reference)
+    if not records:
+        raise RuntimeError('No passage matches: ' + reference)
+    print(scripture.format_reference(records))
+    print()
+    for record in records:
+        for index, line in enumerate(textwrap.wrap(record['text'], width - 5)):
+            prefix = f'{record["verse"]:>3}  ' if index == 0 else '     '
+            print(prefix + line)
+    return 0
+
+
+def search(bible, query, limit):
+    entries = scripture.search_reflections(scripture.load_reflections(ASSETS), query)
+    for entry in entries[:limit]:
+        print(f'reflection\t{entry["id"]}\t{entry["figure"]} · {entry["title"]}\t{entry["reference"]}')
+    for record in bible.search(query, limit):
+        reference = scripture.format_reference([record])
+        print(f'verse\t{reference}\t{record["text"]}\t{reference}')
+    return 0
+
+
+def figures():
+    for name in scripture.figures(scripture.load_reflections(ASSETS)):
+        print(name)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='panel',
+                        choices=['panel', 'show', 'search', 'select', 'select-reflection',
+                                 'figures', 'daily', 'bar'])
+    parser.add_argument('query', nargs='*', help='A reference, reflection ID or search words.')
+    parser.add_argument('--limit', type=int, default=25)
+    parser.add_argument('--width', type=int, default=PANEL_WIDTH)
+    arguments = parser.parse_args()
+    query = ' '.join(arguments.query).strip()
+
+    if arguments.action == 'figures':
+        return figures()
+    if arguments.action == 'bar':
+        helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
+        os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
+    bible = scripture.Bible.load(ASSETS)
+    if arguments.action == 'panel':
+        return panel(bible, arguments.width)
+    if arguments.action == 'daily':
+        entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
+        return select_reflection(bible, entry['id']) and 0
+    if not query:
+        parser.error(f'{arguments.action} needs a reference, ID or search words')
+    if arguments.action == 'show':
+        return show(bible, query)
+    if arguments.action == 'search':
+        return search(bible, query, arguments.limit)
+    if arguments.action == 'select-reflection':
+        print(select_reflection(bible, query))
+        return 0
+    print(select_reference(bible, query))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-scripture: {error}', file=sys.stderr)
+        sys.exit(1)
