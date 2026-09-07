@@ -25,5 +25,8 @@ sha256sum dist/*.whl dist/*.tar.gz > dist/SHA256SUMS
 ```
 
 The development CI runs tests and builds archives without requiring graphical
-or input access. The preparation workflow stores artifacts on GitHub Actions;
-it does not publish a release or install into a user's active session.
+or input access. The preparation workflow builds the archives and records checksums in its
+logs. It uses plain commands in Python containers to respect the parent
+repository policy allowing only actions owned by Spaceghost. It does not
+upload artifacts, publish a release or install into a user's active session;
+local release candidates are available under `dist/`.

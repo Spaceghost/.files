@@ -10,21 +10,29 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    container: python:${{ matrix.python }}-alpine
     defaults:
       run:
+        shell: sh
         working-directory: projects/superhold
     strategy:
       matrix:
         python: ['3.10', '3.14']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-      - run: python -m unittest discover -s tests -v
-      - run: python -m pip install build
-      - run: python -m build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: superhold-python-${{ matrix.python }}
-          path: projects/superhold/dist/*
+      - name: Check out the public source revision
+        working-directory: .
+        run: |
+          apk add --no-cache git
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git init .
+          git remote add origin "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "$GITHUB_SHA"
+          git checkout --detach FETCH_HEAD
+      - name: Test
+        run: python -m unittest discover -s tests -v
+      - name: Install build frontend
+        run: python -m pip install build
+      - name: Build wheel and source archive
+        run: python -m build
+      - name: Record artifact checksums
+        run: sha256sum dist/*.whl dist/*.tar.gz

@@ -37,5 +37,11 @@
     "button_does_not_take_focus": true,
     "isolated_headless_sway": true,
     "host_input_used": false
+  },
+  "github_ci": {
+    "initial_run": "https://github.com/Spaceghost/.files/actions/runs/34122287971",
+    "initial_result": "startup_failure: repository permits only Spaceghost-owned actions",
+    "correction": "Use direct public Git checkout and test/build commands in Python containers; repository policy unchanged",
+    "corrected_run": "Pending"
   }
 }
