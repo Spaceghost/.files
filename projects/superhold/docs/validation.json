@@ -28,8 +28,7 @@
   },
   "remaining": [
     "License selection",
-    "Full LXQt + Sway session and physical input matrix",
-    "CI execution after GitHub push"
+    "Full LXQt + Sway session and physical input matrix"
   ],
   "preview_review_fix": {
     "timed_preview_hint": true,
@@ -42,6 +41,16 @@
     "initial_run": "https://github.com/Spaceghost/.files/actions/runs/34122287971",
     "initial_result": "startup_failure: repository permits only Spaceghost-owned actions",
     "correction": "Use direct public Git checkout and test/build commands in Python containers; repository policy unchanged",
-    "corrected_run": "Pending"
+    "corrected_run": {
+      "url": "https://github.com/Spaceghost/.files/actions/runs/34122749336",
+      "commit": "bc310f48bca97480f68237a8db1f630f12de646b",
+      "conclusion": "success",
+      "python_versions": [
+        "3.10",
+        "3.14"
+      ],
+      "tests_per_job": 66,
+      "wheel_and_sdist_builds": true
+    }
   }
 }

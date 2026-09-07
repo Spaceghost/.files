@@ -3,7 +3,9 @@
 The standalone extraction carries 62 input, Sway/tmux parsing, and lifecycle
 regression tests. Four portability tests cover independent XDG configuration,
 relative-path fallback, logind lock suppression and the version command.
-All 66 tests passed locally on Alpine with Python 3.14.
+All 66 tests passed locally on Alpine with Python 3.14. The same tests and
+wheel/sdist builds passed in Python 3.10 and 3.14 Alpine containers in
+[GitHub CI](https://github.com/Spaceghost/.files/actions/runs/34122749336).
 
 The original source feature was validated on an isolated Sway compositor for
 hold/release/chord behavior, nonfocusable overlay mapping, mouse scrolling,
