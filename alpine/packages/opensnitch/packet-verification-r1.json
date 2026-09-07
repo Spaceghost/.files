@@ -1,0 +1,22 @@
+{
+  "passed": [
+    "baseline namespace connectivity",
+    "new egress denied before daemon starts",
+    "default-deny without GUI",
+    "approved curl allowed; different Python executable denied",
+    "UDP allow rule is constrained by executable, protocol and port",
+    "rule changes hot-reload to deny",
+    "persistent gate denies new egress after graceful SIGTERM",
+    "persistent gate denies new egress after SIGKILL",
+    "independent queue remains installed without bypass"
+  ],
+  "ip_versions_tested": [
+    4,
+    6
+  ],
+  "transports_tested": [
+    "TCP",
+    "UDP"
+  ],
+  "host_network_unchanged": true
+}

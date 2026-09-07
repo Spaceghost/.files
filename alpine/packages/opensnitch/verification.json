@@ -67,9 +67,20 @@
         "persistent gate denies new egress after SIGKILL",
         "independent queue remains installed without bypass"
       ],
-      "ip_versions_tested": [4, 6],
-      "transports_tested": ["TCP", "UDP"],
-      "host_network_unchanged": true
+      "ip_versions_tested": [
+        4,
+        6
+      ],
+      "transports_tested": [
+        "TCP",
+        "UDP"
+      ],
+      "host_network_unchanged": true,
+      "retained_result": {
+        "file": "packet-verification-r1.json",
+        "sha256": "51040fc4d05f2174a9fedd378dc09f3529e98747ef23d0cbf4393ccf7cbc3ea8",
+        "extracted_daemon_sha256": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142"
+      }
     }
   },
   "historical_r0": {
@@ -123,8 +134,14 @@
         "persistent gate denies new egress after SIGKILL",
         "independent queue remains installed without bypass"
       ],
-      "ip_versions_tested": [4, 6],
-      "transports_tested": ["TCP", "UDP"],
+      "ip_versions_tested": [
+        4,
+        6
+      ],
+      "transports_tested": [
+        "TCP",
+        "UDP"
+      ],
       "host_network_unchanged": true
     },
     "gui_smoke_test": {
@@ -150,6 +167,6 @@
     "py3-setuptools": "84.0.0-r0",
     "python3": "3.14.7-r0"
   },
-  "shellcheck": "passed (OpenRC scripts checked as sh with framework-variable warning SC2034 excluded)",
+  "shellcheck": "passed; OpenRC framework variables excluded with SC2034; APKBUILD checked with abuild errexit context and caller variables excluded with SC2034/SC2154",
   "live_host_firewall_activated": false
 }

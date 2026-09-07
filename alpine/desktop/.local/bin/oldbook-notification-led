@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Keep Caps Lock LEDs lit while SwayNC holds notifications."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import selectors
+import signal
+import socket
+import subprocess
+import sys
+import time
+
+
+class CapsLeds:
+    def __init__(self, root):
+        self.root = root
+        self.ready = set()
+        self.warned = set()
+
+    def sync(self, enabled):
+        nodes = set(self.root.glob('*:capslock'))
+        self.ready.intersection_update(nodes)
+        self.warned.intersection_update(nodes)
+        for node in nodes:
+            try:
+                brightness = node / 'brightness'
+                if node not in self.ready:
+                    # A zero write also detaches the kernel's kbd-capslock
+                    # trigger, without requiring write access to trigger.
+                    brightness.write_text('0\n')
+                    self.ready.add(node)
+                desired = (node / 'max_brightness').read_text().strip() if enabled else '0'
+                # Read actual input LED state: Sway can reset it on resume or
+                # modifier changes. Reconcile without needless device writes.
+                if brightness.read_text().strip() != desired:
+                    brightness.write_text(desired + '\n')
+                self.warned.discard(node)
+            except OSError as error:
+                if node not in self.warned:
+                    print(f'oldbook-notification-led: {node.name}: {error.strerror}', file=sys.stderr)
+                    self.warned.add(node)
+
+
+def notification_pending(line):
+    event = json.loads(line)
+    count = event.get('count') if isinstance(event, dict) else None
+    if type(count) is not int or count < 0:
+        raise ValueError('invalid notification count')
+    return count > 0
+
+
+def stop_subscriber(proc):
+    proc.terminate()
+    try:
+        proc.wait(timeout=2)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
+    proc.stdout.close()
+
+
+def run(runtime, led_root, command, session_socket):
+    info = runtime.stat()
+    if not runtime.is_dir() or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError('XDG_RUNTIME_DIR must be an owned private directory')
+    fd = os.open(runtime / 'oldbook-notification-led.lock',
+                 os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        lock.truncate(0)
+        lock.write(str(os.getpid()) + '\n')
+        lock.flush()
+        lights = CapsLeds(led_root)
+        running = True
+
+        def stop(signum, frame):
+            nonlocal running
+            running = False
+
+        previous = {sig: signal.signal(sig, stop) for sig in (signal.SIGINT, signal.SIGTERM)}
+        proc = None
+        pending = False
+        retry_at = 0
+        buffer = b''
+        try:
+            with selectors.DefaultSelector() as selector, socket.socket(socket.AF_UNIX) as session:
+                # An idle connection needs no Wayland requests. EOF also detects
+                # a compositor crash that leaves a stale socket path behind.
+                session.connect(str(session_socket))
+                selector.register(session, selectors.EVENT_READ, 'session')
+                while running and session_socket.exists():
+                    if proc is None and time.monotonic() >= retry_at:
+                        try:
+                            proc = subprocess.Popen(command, stdin=subprocess.DEVNULL,
+                                                    stdout=subprocess.PIPE, bufsize=0)
+                            selector.register(proc.stdout, selectors.EVENT_READ)
+                        except OSError as error:
+                            print(f'oldbook-notification-led: subscriber: {error.strerror}', file=sys.stderr)
+                            retry_at = time.monotonic() + 2
+                    for key, _ in selector.select(timeout=1):
+                        if key.data == 'session':
+                            running = False
+                            break
+                        data = os.read(key.fd, 65536)
+                        if not data:
+                            selector.unregister(proc.stdout)
+                            stop_subscriber(proc)
+                            proc = None
+                            pending = False
+                            buffer = b''
+                            retry_at = time.monotonic() + 2
+                            continue
+                        buffer += data
+                        while b'\n' in buffer:
+                            line, buffer = buffer.split(b'\n', 1)
+                            try:
+                                pending = notification_pending(line)
+                            except (ValueError, UnicodeError):
+                                pass
+                        if len(buffer) > 65536:
+                            buffer = b''
+                    lights.sync(pending)
+        finally:
+            if proc is not None:
+                stop_subscriber(proc)
+            lights.sync(False)
+            for sig, handler in previous.items():
+                signal.signal(sig, handler)
+
+
+def main():
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    display = os.environ.get('WAYLAND_DISPLAY')
+    if not display:
+        raise RuntimeError('start from a Wayland session')
+    session_socket = runtime / display
+    if not session_socket.is_socket():
+        raise RuntimeError('Wayland session socket is unavailable')
+    run(runtime, Path('/sys/class/leds'), ['swaync-client', '--subscribe'], session_socket)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (KeyError, OSError, RuntimeError) as error:
+        sys.exit(f'oldbook-notification-led: {error}')
