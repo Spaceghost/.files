@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Recover a new Fossil repository and checkout from a GitHub Git mirror."""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+DEFAULT_SOURCE = 'https://github.com/Spaceghost/.files.git'
+DEFAULT_BRANCH = 'alpine-oldbook'
+
+
+class BootstrapError(RuntimeError):
+    pass
+
+
+def display_command_error(label, result):
+    detail = (result.stderr or result.stdout or '').strip()
+    raise BootstrapError(label + (': ' + detail if detail else ''))
+
+
+def run(arguments, **kwargs):
+    try:
+        result = subprocess.run(arguments, text=True, capture_output=True, **kwargs)
+    except FileNotFoundError as error:
+        raise BootstrapError(f'Required command is unavailable: {arguments[0]}') from error
+    if result.returncode:
+        display_command_error('Command failed', result)
+    return result
+
+
+def import_git(mirror, destination):
+    with tempfile.TemporaryFile(mode='w+') as git_error:
+        try:
+            exporter = subprocess.Popen(
+                ['git', '-C', str(mirror), 'fast-export', '--all'],
+                stdout=subprocess.PIPE, stderr=git_error,
+            )
+        except FileNotFoundError as error:
+            raise BootstrapError('Required command is unavailable: git') from error
+        try:
+            try:
+                imported = subprocess.run(
+                    ['fossil', 'import', '--git', str(destination)],
+                    stdin=exporter.stdout, text=True, capture_output=True,
+                )
+            except FileNotFoundError as error:
+                exporter.terminate()
+                exporter.wait()
+                raise BootstrapError('Required command is unavailable: fossil') from error
+            finally:
+                if exporter.stdout is not None:
+                    exporter.stdout.close()
+            export_status = exporter.wait()
+            git_error.seek(0)
+            export_detail = git_error.read().strip()
+            if export_status:
+                raise BootstrapError('Git history export failed' +
+                                     (': ' + export_detail if export_detail else ''))
+            if imported.returncode:
+                display_command_error('Fossil import failed', imported)
+        finally:
+            if exporter.poll() is None:
+                exporter.terminate()
+                exporter.wait()
+
+
+def exists(path):
+    return os.path.lexists(path)
+
+
+def bootstrap(source, repository, checkout, branch):
+    repository = Path(repository).expanduser().absolute()
+    checkout = Path(checkout).expanduser().absolute()
+    if exists(repository):
+        raise BootstrapError(f'Repository target already exists: {repository}')
+    if exists(checkout):
+        raise BootstrapError(f'Checkout target already exists: {checkout}')
+    if not branch or branch.startswith('-') or any(ord(character) < 32 for character in branch):
+        raise BootstrapError('Branch must be a nonempty Fossil branch name')
+    try:
+        repository.relative_to(checkout)
+    except ValueError:
+        pass
+    else:
+        raise BootstrapError('Repository target cannot be inside the checkout target')
+
+    repository_created = False
+    checkout_created = False
+    try:
+        with tempfile.TemporaryDirectory(prefix='oldbook-fossil-bootstrap-') as temporary:
+            temporary = Path(temporary)
+            mirror = temporary / 'source.git'
+            environment = dict(os.environ, GIT_TERMINAL_PROMPT='0')
+            run(['git', 'clone', '--mirror', '--', source, str(mirror)], env=environment)
+            imported = temporary / 'imported.fossil'
+            import_git(mirror, imported)
+            run(['fossil', 'branch', 'info', '-R', str(imported), branch])
+
+            repository.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                descriptor = os.open(repository, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                repository_created = True
+                with imported.open('rb') as source_file, os.fdopen(descriptor, 'wb') as target_file:
+                    shutil.copyfileobj(source_file, target_file)
+            except FileExistsError as error:
+                raise BootstrapError(f'Repository target already exists: {repository}') from error
+
+            checkout.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                checkout.mkdir()
+                checkout_created = True
+            except FileExistsError as error:
+                raise BootstrapError(f'Checkout target already exists: {checkout}') from error
+            run(['fossil', 'open', '--nosync', str(repository), branch], cwd=checkout)
+    except Exception:
+        if checkout_created:
+            shutil.rmtree(checkout, ignore_errors=True)
+        if repository_created:
+            try:
+                repository.unlink()
+            except FileNotFoundError:
+                pass
+        raise
+
+    print(f'Imported Git history into {repository}')
+    print(f'Opened {branch} at {checkout}')
+    print('Recovery created a new Fossil identity; use a native Fossil clone for exact replication.')
+
+
+def parse_args(argv=None):
+    home = Path.home()
+    parser = argparse.ArgumentParser(
+        description=('Import the one-way GitHub mirror into a new Fossil repository and open '
+                     'a checkout. The imported repository has a new Fossil identity.'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument('--source', default=DEFAULT_SOURCE,
+                        help='Git URL or local Git repository to import')
+    parser.add_argument('--branch', default=DEFAULT_BRANCH,
+                        help='imported branch to open')
+    parser.add_argument('--repository', default=home / '.local/share/fossil/files.fossil',
+                        help='new Fossil repository database')
+    parser.add_argument('--checkout', default=home / '.files',
+                        help='new checkout directory')
+    return parser.parse_args(argv)
+
+
+def main(argv=None):
+    arguments = parse_args(argv)
+    bootstrap(arguments.source, arguments.repository, arguments.checkout, arguments.branch)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (BootstrapError, OSError) as error:
+        print(f'bootstrap-fossil-from-github: {error}', file=sys.stderr)
+        sys.exit(1)

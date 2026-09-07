@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""Export Fossil incrementally and publish one branch without rewriting GitHub."""
+import argparse
+import os
+from pathlib import Path
+import subprocess
+from urllib.parse import urlsplit
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_REMOTE = 'https://github.com/Spaceghost/.files.git'
+
+
+def run(args, cwd, capture=False):
+    return subprocess.run([str(arg) for arg in args], cwd=cwd, check=True,
+                          text=True, stdout=subprocess.PIPE if capture else None)
+
+
+def publish(checkout, mirror, remote, branch, export_only=False):
+    checkout = Path(checkout).resolve()
+    mirror = Path(mirror).expanduser().resolve()
+    if mirror == checkout or checkout in mirror.parents or mirror in checkout.parents:
+        raise ValueError('Keep the Git mirror separate from the Fossil checkout and its ancestors.')
+    parsed = urlsplit(remote)
+    if parsed.scheme in ('http', 'https') and (parsed.username or parsed.password):
+        raise ValueError('Use a credential helper, not credentials in an HTTP remote URL.')
+    run(['git', 'check-ref-format', '--branch', branch], checkout, capture=True)
+    # Fossil updates this mirror and its private incremental-export state.
+    run(['fossil', 'git', 'export', mirror, '--autopush', 'off',
+         '--mainbranch', 'base'], checkout)
+    current = run(['git', 'remote'], mirror, capture=True).stdout.splitlines()
+    if 'github' in current:
+        url = run(['git', 'remote', 'get-url', 'github'], mirror, capture=True).stdout.strip()
+        if url != remote:
+            raise ValueError('Existing github remote differs; inspect it before publishing.')
+    else:
+        run(['git', 'remote', 'add', 'github', remote], mirror)
+    # Git allows a separate push URL (and pushInsteadOf rewrites). Verify the
+    # effective destinations, not merely the URL used to fetch/verify the branch.
+    push_urls = run(['git', 'remote', 'get-url', '--all', '--push', 'github'],
+                    mirror, capture=True).stdout.splitlines()
+    if push_urls != [remote]:
+        raise ValueError('Effective Git push destination differs; inspect github push URLs.')
+    ref = 'refs/heads/' + branch
+    # Explicit refspec also avoids touching old branches with translated SHAs.
+    run(['git', 'config', '--replace-all', 'remote.github.push', ref + ':' + ref], mirror)
+    run(['git', 'config', 'push.default', 'nothing'], mirror)
+    local = run(['git', 'rev-parse', ref], mirror, capture=True).stdout.strip()
+    if export_only:
+        print(f'Exported {branch}: {local}; not pushed')
+        return local
+    run(['git', 'push', 'github', ref + ':' + ref], mirror)
+    published = run(['git', 'ls-remote', '--heads', 'github', ref], mirror,
+                    capture=True).stdout.split()
+    if len(published) != 2 or published != [local, ref]:
+        raise RuntimeError('Remote branch changed or could not be verified after push.')
+    print(f'Published {branch}: {local}')
+    return local
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--checkout', type=Path, default=REPO)
+    parser.add_argument('--mirror', type=Path, default=Path(
+        os.environ.get('XDG_DATA_HOME', str(Path.home() / '.local/share'))
+    ) / 'fossil/files-git-mirror')
+    parser.add_argument('--remote', default=DEFAULT_REMOTE)
+    parser.add_argument('--branch', default='alpine-oldbook')
+    parser.add_argument('--export-only', action='store_true',
+                        help='configure/update the local mirror without pushing')
+    args = parser.parse_args()
+    try:
+        publish(args.checkout, args.mirror, args.remote, args.branch, args.export_only)
+    except (ValueError, RuntimeError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f'publish-git-mirror: {error}\n')
+
+
+if __name__ == '__main__':
+    main()

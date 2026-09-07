@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -10,37 +11,51 @@ import subprocess
 REPO = Path(__file__).resolve().parents[2]
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', required=True, type=Path)
-    args = parser.parse_args()
-    info = subprocess.check_output(['fossil', 'info'], cwd=REPO, text=True)
+def backup(checkout, output, public=False):
+    info = subprocess.check_output(['fossil', 'info'], cwd=checkout, text=True)
     repository = next(line.split(':', 1)[1].strip() for line in info.splitlines()
                       if line.startswith('repository:'))
     checkin = next(line.split(':', 1)[1].strip().split()[0] for line in info.splitlines()
                    if line.startswith('checkout:'))
-    output = args.output.absolute()
+    output = Path(output).absolute()
     output.parent.mkdir(parents=True, exist_ok=True)
-    if output.with_suffix(output.suffix + '.json').exists():
+    metadata_path = output.with_suffix(output.suffix + '.json')
+    if os.path.lexists(metadata_path):
         raise SystemExit('A backup metadata file already exists at this destination.')
     # Exclusive creation protects a previous backup from accidental replacement.
-    with output.open('xb'):
-        pass
-    output.chmod(0o600)
+    descriptor = os.open(output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    os.close(descriptor)
     try:
         with sqlite3.connect(Path(repository).as_uri() + '?mode=ro', uri=True) as source:
             with sqlite3.connect(output) as target:
-                source.backup(target)
+                source.backup(target, pages=1024, sleep=0.05)
                 if target.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
                     raise RuntimeError('Backup database failed integrity check')
                 archived = target.execute('SELECT count(*) FROM unversioned').fetchone()[0]
+        if public:
+            # Scrub only the new copy. The live repository is never modified.
+            subprocess.run(['fossil', 'scrub', '--verily', '--force', str(output)],
+                           check=True, stdout=subprocess.DEVNULL)
+            with sqlite3.connect(output) as target:
+                if target.execute("SELECT count(*) FROM user WHERE pw != ''").fetchone()[0]:
+                    raise RuntimeError('Scrubbed copy still contains Fossil passwords')
+                # Compact free pages so removed database fields cannot survive there.
+                target.execute('VACUUM')
+                if target.execute('PRAGMA integrity_check').fetchone()[0] != 'ok':
+                    raise RuntimeError('Scrubbed database failed integrity check')
         with output.open('rb') as stream:
             digest = hashlib.file_digest(stream, 'sha256').hexdigest()
         metadata = {'file': output.name, 'sha256': digest, 'checkin': checkin,
+                    'checkin_scope': 'Checkout observed before backup; the consistent database may also include newer check-ins',
                     'sqlite_integrity': 'ok', 'unversioned_entries': archived,
+                    'public_scrubbed': public,
                     'includes': 'Committed history and all archived APK/source/runtime artifacts',
-                    'excludes': 'Uncommitted working files, machine credentials and private signing keys'}
-        output.with_suffix(output.suffix + '.json').write_text(json.dumps(metadata, indent=2) + '\n')
+                    'excludes': 'Uncommitted working files and files outside the repository',
+                    'credential_notice': ('Fossil scrub --verily applied to this copy; review stored content before publication'
+                                          if public else 'Private backup: includes Fossil account credentials; do not publish')}
+        descriptor = os.open(metadata_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(descriptor, 'w') as stream:
+            stream.write(json.dumps(metadata, indent=2) + '\n')
         print(output)
         print('SHA256', digest)
         print('Archived inputs:', archived)
@@ -48,6 +63,15 @@ def main():
         # Retain a failed copy for inspection; never describe it as verified.
         print('Backup did not complete; inspect the output before using it.')
         raise
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', required=True, type=Path)
+    parser.add_argument('--public', action='store_true',
+                        help='scrub Fossil credentials/private metadata from the new copy')
+    args = parser.parse_args()
+    backup(REPO, args.output, args.public)
 
 
 if __name__ == '__main__':
