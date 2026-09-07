@@ -41,6 +41,14 @@ def set_translation(name):
     return name
 
 
+def translation_title(identifier):
+    """The display name of whichever text is being read."""
+    for item in scripture.available_translations(ASSETS):
+        if item['id'] == (identifier or scripture.BUNDLED):
+            return item['title']
+    return 'King James Version'
+
+
 def witness(width=PANEL_WIDTH):
     """A remark about the faith from someone who did not share it."""
     quotes = scripture.load_witnesses(ASSETS)
@@ -55,13 +63,15 @@ def witness(width=PANEL_WIDTH):
 class _LazyBible:
     """Open the verse file only when a lookup actually needs it."""
 
-    def __init__(self, include_extra=True):
+    def __init__(self, include_extra=True, translation=None):
         self._bible = None
         self._include_extra = include_extra
+        self._translation = translation or current_translation()
 
     def _load(self):
         if self._bible is None:
-            self._bible = scripture.Bible.load(ASSETS, include_extra=self._include_extra)
+            self._bible = scripture.Bible.load(ASSETS, include_extra=self._include_extra,
+                                               translation=self._translation)
         return self._bible
 
     def __getattr__(self, name):
@@ -212,7 +222,7 @@ def show(bible, reference, width=78):
     if not records:
         raise RuntimeError('No passage matches: ' + reference)
     print(scripture.format_reference(records))
-    print(records[0].get('edition', 'King James Version'))
+    print(records[0].get('edition') or translation_title(getattr(bible, '_translation', None)))
     print()
     for record in records:
         for index, line in enumerate(textwrap.wrap(record['text'], width - 5)):
@@ -296,7 +306,8 @@ def main():
     if arguments.action == 'bar':
         helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
         os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
-    bible = _LazyBible(include_extra=arguments.action != 'find' or arguments.all)
+    bible = _LazyBible(include_extra=arguments.action != 'find' or arguments.all,
+                       translation=arguments.translation)
     if arguments.action == 'panel':
         return panel(bible, arguments.width)
     if arguments.action == 'find':

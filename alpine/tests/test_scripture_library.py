@@ -52,6 +52,11 @@ class ConversionTests(unittest.TestCase):
         rows, _version = lib.sefaria_rows('Berakhot', payload)
         self.assertEqual(rows, [('Berakhot', 1, 1, 'a b')])
 
+    def test_talmud_sections_are_numbered_by_daf(self):
+        payload = {'versions': [{'text': ['', '', ['first line of 2a']]}]}
+        rows, _version = lib.sefaria_rows('Berakhot', payload, section_base=0)
+        self.assertEqual(rows, [('Berakhot', 2, 1, 'first line of 2a')])
+
     def test_sefaria_rejects_a_response_with_no_version(self):
         with self.assertRaises(ValueError):
             lib.sefaria_rows('Genesis', {'versions': []})

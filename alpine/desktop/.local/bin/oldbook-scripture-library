@@ -49,7 +49,8 @@ def install_sefaria(text, document, root, progress=True):
         try:
             payload = fetch(template.format(book=book.replace(' ', '%20')),
                             {'version': text['version']})
-            book_rows, version = lib.sefaria_rows(book, payload)
+            book_rows, version = lib.sefaria_rows(
+                book, payload, int(text.get('section_base', 1)))
         except (RuntimeError, ValueError) as error:
             print(f'      skipped: {error}', file=sys.stderr)
             continue

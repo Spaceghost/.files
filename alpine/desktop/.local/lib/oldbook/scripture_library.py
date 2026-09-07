@@ -47,8 +47,13 @@ def getbible_rows(document):
     return rows
 
 
-def sefaria_rows(book, document):
-    """Rows from one Sefaria API v3 text response for a whole book."""
+def sefaria_rows(book, document, section_base=1):
+    """Rows from one Sefaria API v3 text response for a whole book.
+
+    ``section_base`` is 1 for chaptered books. Talmud tractates are cited by
+    daf starting at 2a, and Sefaria indexes them so that the array position is
+    the daf number, so those are numbered from 0.
+    """
     versions = document.get('versions')
     if not isinstance(versions, list) or not versions:
         raise ValueError(f'Sefaria returned no version for {book}')
@@ -57,7 +62,7 @@ def sefaria_rows(book, document):
     if not isinstance(sections, list):
         raise ValueError(f'Sefaria returned no text for {book}')
     rows = []
-    for chapter_index, section in enumerate(sections, start=1):
+    for chapter_index, section in enumerate(sections, start=section_base):
         entries = section if isinstance(section, list) else [section]
         for verse_index, entry in enumerate(entries, start=1):
             if isinstance(entry, list):
