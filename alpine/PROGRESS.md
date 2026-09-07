@@ -327,3 +327,34 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   and recovery: `verification/gallery-controls.{png,json}`,
   `packages/waybar-art/verification.json`, and
   `docs/superpowers/specs/2026-09-07-gallery-additive-controls.md`.
+
+## Persistent lease components and resolver compatibility (September 7)
+
+- Staged a validated lease parser, persistent foreground DHCP manager and
+  bounded authenticated hook. Real private acquisition/renewal keeps one client
+  PID; NAK, silence, expiry, no offers and injected failure clean up owned
+  processes. The manager checks expiry independently of delayed BusyBox events.
+- WPA scan completion now requires the requested numeric scan ID and preserves
+  events received before command replies. No live scan was requested.
+- Staged native address/route/DNS application records generation ownership,
+  retains partial state for cleanup and preserves unrelated state. Private
+  tests verify home → hotspot → home IPv6 restoration and off-prefix gateways.
+- All 131 radio tests pass. Seven native lease cases and six resolver locking
+  groups pass with matching source hashes, unchanged normalized host state and
+  no remaining namespace processes. Full owner/firewall integration is pending.
+- Reproduced stock openresolv's two PID-namespace locking failures and packaged
+  an explicit compatibility bridge. Two offline builds produced identical
+  signed APKs. Source, patches, build inputs, logs and APKs are in Fossil UV.
+  Installed main openresolv 3.17.4-r1 matches the tested script; live addresses,
+  routes, DNS, radio state, resolver configuration and DHCP identities remained
+  unchanged. The documentation APK and stock r0 rollback APK are archived.
+- Snapshot 929661069218e44178e3 archives all 1,080 installed APK identities,
+  verified against the live world, repositories and public keys. This checkpoint
+  does not claim another complete empty-root restore or bootable disk image.
+- Persistent radio-owner service/CLI integration, packet-gate/OpenSnitch renewal,
+  resolver takeover, legacy-owner migration and reboot/suspend checks remain.
+  Exact trusted home/hotspot identities remain unresolved. Live WPA and DHCP
+  retain ownership; do not activate the legacy one-shot controller.
+- Evidence and rebuild instructions: `security/radio/LEASE-OWNER.md`,
+  `security/radio/{dhcp,network,resolver-bridge-install}-verification.json`,
+  `security/radio/RESOLVER-LOCKING.md` and `packages/openresolv/README.md`.
