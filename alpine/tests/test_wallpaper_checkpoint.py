@@ -61,6 +61,24 @@ class WallpaperCheckpointTests(unittest.TestCase):
         committed = subprocess.check_output(['fossil', 'cat', str(self.image.relative_to(self.repo)), '-r', checkin], cwd=self.repo)
         self.assertEqual(committed, self.image.read_bytes())
 
+    def test_new_theme_checkpoint_preserves_descriptor_and_unrelated_work(self):
+        directory = self.gallery / 'themes/moon-books'
+        directory.mkdir(parents=True)
+        image = directory / 'debut.png'
+        image.write_bytes(self.image.read_bytes())
+        theme = self.repo / 'alpine/themes/moon-books.json'
+        theme.parent.mkdir(parents=True)
+        theme.write_text('{"id":"moon-books","name":"Moon Books"}\n')
+        entry = {'file': str(image.relative_to(self.repo)), 'theme': 'moon-books',
+                 'sha256': hashlib.sha256(image.read_bytes()).hexdigest(),
+                 'theme_descriptor_sha256': hashlib.sha256(theme.read_bytes()).hexdigest()}
+        sidecar = image.with_suffix('.json')
+        sidecar.write_text(json.dumps(entry))
+        checkin = generator.checkpoint_generated(image, sidecar, self.repo)
+        self.assertEqual(self.fossil('cat', str(theme.relative_to(self.repo)), '-r', checkin), theme.read_text())
+        self.assertIn('unrelated.txt', self.fossil('changes'))
+        self.assertNotIn('moon-books', self.fossil('changes'))
+
     def test_checkpoint_accepts_themed_and_general_pairs_without_other_changes(self):
         for folder in ('general', 'themes/gruvbox-dark'):
             with self.subTest(folder=folder):

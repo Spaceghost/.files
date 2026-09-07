@@ -235,12 +235,15 @@ def generation_status():
         return None
 
 
-def start_generation(theme='active'):
+def start_generation(theme='active', *, new_theme=None):
     GENERATION.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(GENERATION, 0o700)
     with (GENERATION / 'manual.log').open('a') as log:
-        subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/wallpapers/generate.py'),
-                          '--manual', '--activate', '--theme', theme], stdin=subprocess.DEVNULL,
+        command = ['/usr/bin/python3', str(REPO / 'alpine/wallpapers/generate.py'),
+                   '--manual', '--activate', '--theme', theme]
+        if new_theme is not None:
+            command += ['--new-theme=' + new_theme]
+        subprocess.Popen(command, stdin=subprocess.DEVNULL,
                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
 
 
@@ -275,13 +278,24 @@ def pick():
     themed_commands = {'✦  Generate unthemed artwork & switch to it': 'none'}
     themed_commands.update({'✦  Generate ' + theme['name'] + ' artwork & switch to it': theme['id']
                             for theme in available_themes(REPO)})
-    options = [*labels, *controls, help_label, deck_label, generate_label, *themed_commands]
+    random_label = '✦  Random new theme'
+    phrase_label = '✦  New theme from a phrase/title'
+    options = [*labels, *controls, help_label, deck_label, generate_label,
+               random_label, phrase_label, *themed_commands]
     result = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Ghost Gallery ❯ ',
                              '--lines', str(min(16, len(options))), '--width', '62'],
                             input='\n'.join(options) + '\n', capture_output=True, text=True)
     selected = result.stdout.rstrip('\n')
     if result.returncode == 0:
-        if selected == generate_label:
+        if selected == random_label:
+            start_generation(new_theme='')
+        elif selected == phrase_label:
+            phrase = subprocess.run(['fuzzel', '--dmenu', '--prompt', 'Theme phrase/title ❯ ',
+                                     '--lines', '0', '--width', '62'],
+                                    input='', capture_output=True, text=True)
+            if phrase.returncode == 0 and phrase.stdout.strip():
+                start_generation(new_theme=phrase.stdout.strip())
+        elif selected == generate_label:
             start_generation()
         elif selected in themed_commands:
             start_generation(themed_commands[selected])

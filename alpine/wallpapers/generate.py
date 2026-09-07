@@ -137,6 +137,18 @@ def checkpoint_generated(image, sidecar, repository=REPO):
     if fossil('changes', '--merge', '--no-classify').strip():
         raise RuntimeError('A merge is pending; artwork checkpoint cannot include merge state')
     paths = [str(path.relative_to(repository)) for path in (image, sidecar)]
+    if entry.get('theme_descriptor_sha256'):
+        identity = entry.get('theme')
+        if not safe_theme_id(identity) or len(parts) != 3 or parts[:2] != ('themes', identity):
+            raise RuntimeError('Theme checkpoint identity differs from artwork collection')
+        descriptor = repository / 'alpine/themes' / (identity + '.json')
+        if (has_symlink(descriptor, repository) or not descriptor.is_file()
+                or hashlib.sha256(descriptor.read_bytes()).hexdigest() != entry['theme_descriptor_sha256']):
+            raise RuntimeError('Theme descriptor changed after artwork generation')
+        theme_path = str(descriptor.relative_to(repository))
+        if (not fossil('ls', theme_path).strip()
+                or fossil('changes', '--added', '--no-classify', '--rel-paths', theme_path).strip() == theme_path):
+            paths.append(theme_path)
     for path in paths:
         tracked = fossil('ls', path).strip()
         added = fossil('changes', '--added', '--no-classify', '--rel-paths', path).strip()
@@ -258,7 +270,7 @@ def activate_artwork(record, metadata, entry):
     return 0
 
 
-def run_once(scene_override=None, *, manual=False, activate=False, theme='active'):
+def run_once(scene_override=None, *, manual=False, activate=False, theme='active', new_theme=None):
     STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(STATE, 0o700)
     with (STATE / 'generation.lock').open('a+') as lock:
@@ -286,7 +298,27 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 print(f'{day}: daily attempt already reserved; no retry.')
                 return 0
         config = json.loads((REPO / 'alpine/wallpapers/prompts.json').read_text())
-        selected_theme = load_theme(REPO, theme)
+        if new_theme is not None:
+            from new_themes import design_theme
+            lock.seek(0)
+            lock.truncate()
+            json.dump({'title': 'Designing ' + (new_theme or 'a random new theme')}, lock)
+            lock.flush()
+            notify('Space Ghost is designing a theme…', new_theme or 'A surprise collection and its first painting.')
+            try:
+                env = clean_environment()
+                login = subprocess.run(['codex', 'login', 'status'], env=env, capture_output=True,
+                                       text=True, timeout=20)
+                if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
+                    raise RuntimeError('Theme generation requires existing Codex ChatGPT login.')
+                selected_theme = design_theme(REPO, config, env, record.with_suffix('.theme.jsonl'),
+                                              new_theme, codex_command)
+            except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+                atomic_json(record, {'status': 'failed', 'phase': 'theme', 'error': str(error)})
+                notify('Theme design hit a snag', str(error)[:300])
+                raise
+        else:
+            selected_theme = load_theme(REPO, theme)
         gallery = REPO / 'alpine/assets/gallery'
         gallery /= 'general' if selected_theme['id'] == 'none' else 'themes/' + selected_theme['id']
         if has_symlink(gallery, REPO):
@@ -295,6 +327,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             scene = next((s for s in config['scenes'] if s['id'] == scene_override), None)
             if scene is None:
                 raise RuntimeError('Unknown scene: ' + scene_override)
+        elif new_theme is not None:
+            scene = {'id': 'debut', 'title': selected_theme['name'], 'description': selected_theme['scene']}
         else:
             scene = manual_scene(config, day) if manual else choose_scene(config, day)
         started = time.time()
@@ -344,6 +378,9 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                      'orchestrator_model': config['model'], 'image_model': 'gpt-image-2',
                      'generated_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
                      'rebuild': 'Restore this exact hashed bitmap; new generations are not deterministic.'}
+            if selected_theme.get('generated_by') == 'ghost-gallery':
+                descriptor = REPO / 'alpine/themes' / (selected_theme['id'] + '.json')
+                entry['theme_descriptor_sha256'] = hashlib.sha256(descriptor.read_bytes()).hexdigest()
             atomic_json(gallery / f'{stem}.json', entry)
             metadata.update({'status': 'checkpoint-pending', 'file': entry['file'], 'sha256': digest})
             atomic_json(record, metadata)
@@ -364,15 +401,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--scene', help='Select a named scene from prompts.json.')
     parser.add_argument('--theme', default='active', help='active (default), none, or a theme ID from alpine/themes/.')
+    parser.add_argument('--new-theme', nargs='?', const='', help='Create a collection from a phrase, or random if empty.')
     parser.add_argument('--manual', action='store_true', help='One explicit request, independent of the daily schedule.')
     parser.add_argument('--activate', action='store_true', help='Switch to the newly saved artwork when ready.')
     parser.add_argument('--print-command', action='store_true', help='Show the cron-safe command without generating.')
     args = parser.parse_args()
+    if args.new_theme is not None and (not args.manual or args.scene or args.theme != 'active'):
+        parser.error('--new-theme requires --manual and cannot combine with --scene or --theme')
     if args.print_command:
         import shlex
         print(shlex.join(['/usr/bin/python3', str(Path(__file__).resolve())]))
         return
-    sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme))
+    sys.exit(run_once(args.scene, manual=args.manual, activate=args.activate, theme=args.theme, new_theme=args.new_theme))
 
 
 if __name__ == '__main__':

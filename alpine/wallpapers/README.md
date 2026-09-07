@@ -133,3 +133,31 @@ Those retries do not change the current desktop. A newly generated manual image
 can still become the wallpaper while its local checkpoint is pending.
 Reinstallation from the repository restores the exact image bytes. Generating the
 same prompt again is intentionally creative and is not deterministic.
+
+## Create a new theme
+
+Right-click the artwork widget to open **Ghost Gallery**, then type `new theme`:
+
+- **Random new theme** invents a named collection, palette, and art direction.
+- **New theme from a phrase/title** asks for a short idea, then interprets it as
+  a collection and its first scene. Escape cancels without requesting generation.
+
+Both run in the background through the existing Codex ChatGPT login. A busy
+indicator and desktop notifications cover theme design and painting. Once ready,
+its first wallpaper is selected. The named collection then appears among the
+“Generate … artwork” choices for future paintings. These are gallery themes;
+application colors and the default rotation theme remain independently configured.
+
+Theme definitions live in `alpine/themes/<unique-id>.json`. The first successful
+image checkpoint includes its new descriptor and PNG/JSON pair, with autosync off.
+If painting fails, the saved collection remains available: select its named
+Generate action to try an image again. If a checkpoint fails, files remain saved
+and the existing pending-checkpoint recovery applies. Private request logs are
+under `~/.local/state/oldbook/wallpaper-generation/manual/`.
+
+Command-line equivalents:
+
+```sh
+python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme
+python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme 'Moonlit library'
+```
