@@ -138,3 +138,14 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   197-test run had one session-startup timeout; isolated rerun passed. Reboot
   persistence remains unverified. Details and recovery: 
   `docs/superpowers/specs/2026-09-07-strata-workspaces.md`.
+
+## Square bar and terminal playlist player
+
+- Removed all Waybar CSS corner radii and the SwayFX Waybar layer radius.
+  Stock Sway and SwayFX parsers passed; live cropped screenshot is
+  `verification/square-bar/bar.png`.
+- Foot-only playlist playback is not implemented. Foot has no native video
+  background option; the existing mpvpaper helper targets the whole desktop.
+  A terminal-scoped renderer/compositor design is required. Pending: oldbook
+  and watchlist playlist URLs, whether Delete affects YouTube or a local queue,
+  and approval of the end-of-video Delete/Rewatch/Keep & Next design.
