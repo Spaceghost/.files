@@ -1,0 +1,10 @@
+[Unit]
+Description=Oldbook idle locking
+PartOf=oldbook-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w timeout 300 '%h/.local/bin/oldbook-lock' timeout 600 '/usr/bin/swaymsg "output * power off"' resume '/usr/bin/swaymsg "output * power on"' before-sleep '%h/.local/bin/oldbook-lock'
+Restart=on-failure
+RestartSec=2

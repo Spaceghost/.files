@@ -1,0 +1,4 @@
+#!/bin/sh
+# Bazzite packages Superhold and its native layer-shell bridge for Fedora/glibc.
+set -eu
+exec superhold "$@"

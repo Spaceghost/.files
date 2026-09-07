@@ -1,0 +1,11 @@
+[Unit]
+Description=Oldbook workspace names and AI switcher
+PartOf=oldbook-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/oldbook-workspaces daemon
+Restart=on-failure
+RestartSec=2
+

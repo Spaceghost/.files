@@ -1,0 +1,12 @@
+[Unit]
+Description=Oldbook gallery rotation
+PartOf=oldbook-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStartPre=-%h/.local/bin/oldbook-wallpaper refresh
+ExecStart=%h/.local/bin/oldbook-wallpaper daemon
+Restart=on-failure
+RestartSec=2
+

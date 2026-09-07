@@ -1,0 +1,9 @@
+[Unit]
+Description=Apply Oldbook desktop toolkit settings
+PartOf=oldbook-session.target
+After=sway-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/oldbook-gtk-settings
+
