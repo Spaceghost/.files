@@ -10,6 +10,7 @@ import colorsys
 import json
 import math
 import re
+from conky_policy import quiet_document
 
 DETAIL_WEIGHT = 1.0
 CONTRAST_WEIGHT = 0.6
@@ -326,4 +327,4 @@ def load_panels(path):
             raise ValueError(f'Panel {panel["id"]} needs Conky text')
         if 'enabled' in panel and not isinstance(panel['enabled'], bool):
             raise ValueError(f'Panel {panel["id"]} enabled must be true or false')
-    return document
+    return quiet_document(document)

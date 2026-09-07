@@ -23,6 +23,21 @@ always dressed the same way and is only re-analysed when one of those changes.
 Panels are fully transparent: the window colour is `#00000000` and legibility
 comes from the contrast pass plus a text shadow, never from a filled box.
 
+## Content and refresh policy
+
+Conky is reserved for slow information: date, Scripture, battery charge/status,
+gallery notes, rotating text and future configured email. CPU, memory, processes,
+storage, network and temperature telemetry belong in Waybar. Do not restore the
+historical reactor, memory, storage or transmission cards.
+
+`conky_policy.py` filters telemetry variables when loading the templates, before
+wallpaper-cache lookup, and clamps panel and interval-command refreshes to
+60–300 seconds. The source templates use 60 seconds for the display, 120 for
+Scripture/gallery and 240 for rotating text. An explicitly requested Scripture
+selection or artwork/theme change can redraw immediately. The guard does not
+inspect the behavior of arbitrary external helper programs; new helpers must
+also follow this policy. Email still needs a configured mailbox source.
+
 ## Controls
 
 - **Super+Shift+G** switches the panels off and on.
