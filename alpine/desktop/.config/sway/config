@@ -126,3 +126,7 @@ for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize s
 # oldbook-session is per-UID idempotent: reloads reuse the existing services.
 exec_always --no-startup-id ~/.local/bin/oldbook-session
 include ~/.config/sway/local.d/*
+
+# YouTube PiP is controlled from the launcher; its desktop mode uses a bottom layer.
+for_window [app_id="oldbook-youtube"] floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt
+no_focus [app_id="oldbook-youtube"]

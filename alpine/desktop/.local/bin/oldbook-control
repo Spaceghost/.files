@@ -116,6 +116,7 @@ def menu(section="main"):
             "󰊠  Applications                              Super+D": lambda: launch([BIN / "oldbook-menu"]),
             "󰖯  Switch window": windows,
             "󰸉  Artwork gallery": lambda: launch([BIN / "oldbook-wallpaper", "pick"]),
+            "▶  YouTube · desktop player & PiP": lambda: launch([BIN / "oldbook-youtube", "menu"]),
             "▷  Video background · choose or stop": lambda: launch([BIN / "oldbook-video-background", "picker"]),
             "◈  Ghostty terminal": lambda: launch(["ghostty"]),
             "󰍛  Reactor · CPU, memory, processes": lambda: launch(["foot", "--title=Ghost Reactor", "-e", "btop"]),

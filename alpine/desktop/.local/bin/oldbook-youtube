@@ -1,0 +1,334 @@
+#!/usr/bin/env python3
+"""YouTube review player: workspace-one background, PiP, and launcher controls."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import runpy
+import select
+import shlex
+import signal
+import socket
+import subprocess
+import sys
+import time
+from urllib.parse import urlsplit
+
+BIN = Path(__file__).resolve().parent
+sys.path.insert(0, str(BIN.parent / 'lib/oldbook'))
+from youtube_queue import Queue, output_for_mode
+
+IPC = runpy.run_path(str(BIN / 'oldbook-workspaces'))
+STATE = Path.home() / '.local/state/oldbook/youtube'
+PLAYLISTS = Path.home() / '.config/oldbook/youtube-playlists.json'
+
+
+def paths():
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    directory = IPC['prepare_directory'](runtime).parent / 'youtube'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    return directory, IPC['find_socket'](runtime)
+
+
+def read_message(connection):
+    data = bytearray()
+    while not data.endswith(b'\n'):
+        chunk = connection.recv(65536)
+        if not chunk:
+            raise RuntimeError('player connection closed')
+        data.extend(chunk)
+        if len(data) > 2 * 1024 * 1024:
+            raise RuntimeError('player message too large')
+    return json.loads(data)
+
+
+def send_message(connection, message):
+    connection.sendall(json.dumps(message).encode() + b'\n')
+
+
+def request(command, **values):
+    directory, _ = paths()
+    with socket.socket(socket.AF_UNIX) as connection:
+        connection.settimeout(10)
+        connection.connect(str(directory / 'control.sock'))
+        send_message(connection, dict(command=command, **values))
+        result = read_message(connection)
+    if result.get('error'):
+        raise RuntimeError(result['error'])
+    return result
+
+
+def mpv(directory, command):
+    with socket.socket(socket.AF_UNIX) as connection:
+        connection.settimeout(1)
+        connection.connect(str(directory / 'mpv.sock'))
+        send_message(connection, {'command': command, 'request_id': 1})
+        with connection.makefile('r') as stream:
+            for line in stream:
+                result = json.loads(line)
+                if result.get('request_id') == 1:
+                    if result.get('error') != 'success':
+                        return None
+                    return result.get('data')
+    return None
+
+
+def notify(title, body):
+    subprocess.Popen(['notify-send', '-a', 'Oldbook YouTube', title, body],
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def serve():
+    directory, sway = paths()
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (directory / 'service.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        saved = IPC['read_json'](STATE / 'queue.json', {})
+        queue = Queue(saved)
+        # Saved progress is resumed deliberately from the launcher after login.
+        queue.data['enabled'] = False
+        child = None
+        target = None
+        running = True
+
+        def save():
+            IPC['write_json'](STATE / 'queue.json', queue.data)
+
+        def stop_player():
+            nonlocal child, target
+            if child is not None:
+                try:
+                    position = mpv(directory, ['get_property', 'time-pos'])
+                    if position is not None:
+                        queue.data['position'] = position
+                except (OSError, RuntimeError):
+                    pass
+                if child.poll() is None:
+                    os.killpg(child.pid, signal.SIGTERM)
+                    try:
+                        child.wait(timeout=3)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(child.pid, signal.SIGKILL)
+                        child.wait()
+                child = None
+            target = None
+            (directory / 'mpv.sock').unlink(missing_ok=True)
+
+        def stop(signum, frame):
+            nonlocal running
+            running = False
+
+        signal.signal(signal.SIGTERM, stop)
+        signal.signal(signal.SIGINT, stop)
+        control = directory / 'control.sock'
+        control.unlink(missing_ok=True)
+        with socket.socket(socket.AF_UNIX) as server, socket.socket(socket.AF_UNIX) as events:
+            server.bind(str(control))
+            server.listen(5)
+            events.settimeout(3)
+            events.connect(str(sway))
+            IPC['send'](events, 2, '["workspace","output","shutdown"]')
+            IPC['receive'](events)
+            last_save = 0
+            try:
+                while running and Path(sway).exists():
+                    ready, _, _ = select.select([server, events], [], [], .5)
+                    if events in ready:
+                        kind, _ = IPC['receive'](events)
+                        if kind == (1 << 31) | 6:
+                            break
+                    if server in ready:
+                        connection, _ = server.accept()
+                        with connection:
+                            connection.settimeout(3)
+                            try:
+                                message = read_message(connection)
+                                action = message['command']
+                                if action == 'load':
+                                    stop_player()
+                                    entries = message['entries']
+                                    if not entries or len(entries) > 500:
+                                        raise ValueError('Expected 1–500 videos')
+                                    queue = Queue({'entries': entries, 'enabled': True})
+                                elif action in ('pip', 'desktop'):
+                                    stop_player()
+                                    queue.data.update(mode=action, enabled=True)
+                                elif action == 'pause':
+                                    queue.data['paused'] = not queue.data['paused']
+                                    if child is not None:
+                                        mpv(directory, ['set_property', 'pause', queue.data['paused']])
+                                elif action in ('rewatch', 'keep', 'remove'):
+                                    stop_player()
+                                    queue.decide(action)
+                                    queue.data['enabled'] = True
+                                elif action == 'stop':
+                                    stop_player()
+                                    queue.data['enabled'] = False
+                                elif action == 'resume':
+                                    queue.data['enabled'] = True
+                                elif action != 'status':
+                                    raise ValueError('Unknown player command')
+                                save()
+                                send_message(connection, queue.data)
+                            except (KeyError, ValueError, OSError, RuntimeError) as error:
+                                send_message(connection, {'error': str(error)})
+                    desired = output_for_mode(queue.data['mode'], IPC['request'](sway, 1))
+                    if not queue.data['enabled'] or queue.current() is None:
+                        desired = None
+                    if desired != target:
+                        stop_player()
+                        if desired is not None:
+                            (directory / 'mpv.sock').unlink(missing_ok=True)
+                            options = ['config=no', 'hwdec=auto-safe', 'keep-open=yes', 'force-window=yes',
+                                       'idle=yes', 'terminal=no', 'ytdl=yes',
+                                       'ytdl-format=bestvideo[height<=720]+bestaudio/best[height<=720]/best',
+                                       f'input-ipc-server={directory}/mpv.sock',
+                                       f'start={queue.data["position"]}',
+                                       'pause=' + ('yes' if queue.data['paused'] else 'no')]
+                            source = queue.current()['url']
+                            if desired == 'pip':
+                                command = ['mpv', '--vo=gpu', '--gpu-context=wayland', '--gpu-sw=yes',
+                                           '--wayland-app-id=oldbook-youtube', '--title=Oldbook YouTube',
+                                           *['--' + option for option in options], '--', source]
+                            else:
+                                command = ['mpvpaper', '--layer', 'bottom', '--mpv-options',
+                                           shlex.join(options + ['osc=no', 'input-default-bindings=no']),
+                                           desired, source]
+                            with (STATE / 'playback.log').open('a') as log:
+                                child = subprocess.Popen(command, stdout=log, stderr=log, start_new_session=True)
+                            target = desired
+                    if child is not None:
+                        if child.poll() is not None:
+                            queue.data['enabled'] = False
+                            notify('YouTube playback stopped', 'Open the player menu to resume or choose another video.')
+                            stop_player()
+                            save()
+                        else:
+                            try:
+                                ended = mpv(directory, ['get_property', 'eof-reached'])
+                                position = mpv(directory, ['get_property', 'time-pos'])
+                                if position is not None:
+                                    queue.data['position'] = position
+                                if ended and not queue.data['awaiting']:
+                                    queue.end()
+                                    notify('Video finished', 'Open YouTube in the launcher: Rewatch, Keep & next, or Remove from queue.')
+                                    save()
+                            except (OSError, RuntimeError):
+                                pass  # The decoder socket is not ready during initial load.
+                    if time.monotonic() - last_save > 10:
+                        save()
+                        last_save = time.monotonic()
+            finally:
+                stop_player()
+                save()
+                control.unlink(missing_ok=True)
+
+
+def ensure_service():
+    try:
+        request('status')
+        return
+    except OSError:
+        pass
+    STATE.mkdir(parents=True, exist_ok=True)
+    with (STATE / 'service.log').open('a') as log:
+        subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'serve'],
+                         stdout=log, stderr=log, start_new_session=True)
+    for _ in range(50):
+        try:
+            request('status')
+            return
+        except OSError:
+            time.sleep(.1)
+    raise RuntimeError('Player service did not start; see ~/.local/state/oldbook/youtube/service.log')
+
+
+def extract(source):
+    url = urlsplit(source)
+    if url.scheme != 'https' or not url.netloc or url.username or url.password:
+        raise ValueError('Enter an HTTPS video or playlist URL')
+    result = subprocess.run(['yt-dlp', '--flat-playlist', '--dump-single-json', '--ignore-errors',
+                             '--playlist-end', '500', '--', source],
+                            text=True, capture_output=True, timeout=120)
+    if result.returncode:
+        raise RuntimeError('Could not read that playlist. It may require sign-in; no browser cookies were imported.')
+    data = json.loads(result.stdout)
+    entries = (data.get('entries') or []) if 'entries' in data else [data]
+    normalized = []
+    for entry in entries:
+        if not entry:
+            continue
+        address = entry.get('webpage_url') or entry.get('url')
+        if address and address.startswith('https://'):
+            normalized.append({'url': address, 'title': entry.get('title', 'YouTube video')})
+    if not normalized:
+        raise RuntimeError('No playable videos were found')
+    return normalized
+
+
+def choose(prompt, options):
+    result = subprocess.run(['fuzzel', '--dmenu', '--prompt', prompt, '--width', '64'],
+                            input='\n'.join(options) + '\n', text=True, capture_output=True)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
+def menu():
+    state = request('status')
+    current = Queue(state).current()
+    labels = {'Open a YouTube video or playlist…': 'open', 'Save a named playlist…': 'add',
+              'Resume saved queue': 'resume',
+              'Play / pause': 'pause', 'PiP · floating across desktops': 'pip',
+              'Pin behind apps on desktop 1': 'desktop', 'Rewatch this video': 'rewatch',
+              'Keep & next': 'keep', 'Remove from local queue & next': 'remove', 'Stop player': 'stop'}
+    playlists = IPC['read_json'](PLAYLISTS, {})
+    for name, url in playlists.items():
+        if isinstance(url, str):
+            labels['Playlist · ' + name] = url
+    title = current.get('title', 'YouTube')[:50] if current else 'Oldbook YouTube'
+    choice = choose(title + ' › ', labels)
+    action = labels.get(choice)
+    if action == 'add':
+        name = choose('Playlist name › ', [])
+        if not name:
+            return
+        url = choose('Playlist HTTPS URL › ', [])
+        if not url:
+            return
+        parsed = urlsplit(url)
+        if parsed.scheme != 'https' or not parsed.netloc or parsed.username or parsed.password:
+            raise ValueError('Enter an HTTPS playlist URL without credentials')
+        playlists[name[:80]] = url
+        PLAYLISTS.parent.mkdir(parents=True, exist_ok=True)
+        IPC['write_json'](PLAYLISTS, playlists)
+        notify('Playlist saved', 'Open the YouTube menu to play ' + name[:80])
+        return
+    if action == 'open':
+        action = choose('YouTube URL › ', [])
+    if action and action.startswith('https://'):
+        notify('Loading YouTube queue', 'The player will start on desktop 1 when the list is ready.')
+        request('load', entries=extract(action))
+    elif action:
+        request(action)
+
+
+if __name__ == '__main__':
+    os.umask(0o077)
+    try:
+        action = sys.argv[1] if len(sys.argv) > 1 else 'menu'
+        if action == 'serve':
+            serve()
+        else:
+            ensure_service()
+            if action == 'menu':
+                menu()
+            elif action == 'open' and len(sys.argv) == 3:
+                request('load', entries=extract(sys.argv[2]))
+            else:
+                print(json.dumps(request(action)))
+    except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as error:
+        notify('Oldbook YouTube', str(error))
+        print(f'oldbook-youtube: {error}', file=sys.stderr)
+        sys.exit(1)
