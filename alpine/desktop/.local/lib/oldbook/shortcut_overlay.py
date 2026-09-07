@@ -23,6 +23,44 @@ IPC_SUBSCRIBE = 2
 STATUS_VERSION = 1
 
 
+
+# The overlay is a GTK layer surface, so the Qt platform theme never reaches it.
+# These follow the same Oldbook palette the rest of the desktop is built from.
+DEFAULT_PALETTE = {'background': '#282828', 'background_hard': '#1d2021', 'surface': '#3c3836',
+                   'foreground': '#ebdbb2', 'muted': '#928374', 'border': '#504945',
+                   'accent': '#fabd2f'}
+
+
+def theme_module():
+    """Return the shared Oldbook palette module, or None when installed alone."""
+    try:
+        import overlay_theme
+        return overlay_theme
+    except ImportError:
+        shared = Path.home() / '.local/lib/oldbook'
+        if shared.is_dir() and str(shared) not in sys.path:
+            sys.path.append(str(shared))
+        try:
+            import overlay_theme
+            return overlay_theme
+        except ImportError:
+            return None
+
+
+def active_palette():
+    module = theme_module()
+    if module is None:
+        return dict(DEFAULT_PALETTE)
+    palette = module.read_palette()
+    return {key: palette.get(key, fallback) for key, fallback in DEFAULT_PALETTE.items()}
+
+
+def themed_css(template, palette):
+    definitions = ''.join('@define-color theme_' + key + ' ' + value + ';\n'
+                          for key, value in palette.items())
+    return (definitions + template).encode()
+
+
 class AlreadyRunning(RuntimeError):
     """The service already owns this Sway session."""
 
@@ -585,35 +623,35 @@ class ServiceController:
 class GtkShortcutOverlay:
     """A compact, pointer-interactive layer surface with no keyboard focus."""
 
-    CSS = b'''
+    CSS_TEMPLATE = '''
     #oldbook-shortcuts-window { background-color: transparent; }
     #oldbook-shortcuts-panel {
-        background-color: rgba(36, 27, 47, 0.97);
-        border: 2px solid #b16286;
+        background-color: alpha(@theme_background, 0.97);
+        border: 2px solid @theme_border;
         border-radius: 18px;
-        color: #ebdbb2;
+        color: @theme_foreground;
         padding: 20px;
     }
-    #oldbook-shortcuts-title { color: #f2d5e8; font-size: 22px; font-weight: bold; }
-    #oldbook-shortcuts-hint { color: #a89984; font-size: 11px; }
+    #oldbook-shortcuts-title { color: @theme_foreground; font-size: 22px; font-weight: bold; }
+    #oldbook-shortcuts-hint { color: @theme_muted; font-size: 11px; }
     #oldbook-shortcuts-section {
-        background-color: rgba(60, 42, 77, 0.82);
+        background-color: alpha(@theme_surface, 0.82);
         border-radius: 10px;
         padding: 12px;
     }
-    #oldbook-shortcuts-section-title { color: #d3869b; font-size: 15px; font-weight: bold; }
-    #oldbook-shortcuts-coverage { color: #a89984; font-size: 10px; }
+    #oldbook-shortcuts-section-title { color: @theme_accent; font-size: 15px; font-weight: bold; }
+    #oldbook-shortcuts-coverage { color: @theme_muted; font-size: 10px; }
     #oldbook-shortcuts-key {
-        background-color: #513b63;
-        border: 1px solid #7f5f91;
+        background-color: @theme_surface;
+        border: 1px solid @theme_border;
         border-radius: 5px;
-        color: #fbf1c7;
+        color: @theme_foreground;
         font-family: monospace;
         font-weight: bold;
         padding: 3px 7px;
     }
-    #oldbook-shortcuts-description { color: #ebdbb2; }
-    scrollbar slider { background-color: #b16286; min-width: 8px; min-height: 28px; }
+    #oldbook-shortcuts-description { color: @theme_foreground; }
+    scrollbar slider { background-color: @theme_accent; min-width: 8px; min-height: 28px; }
     '''
 
     def __init__(self):
@@ -643,8 +681,10 @@ class GtkShortcutOverlay:
         GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.TOP, True)
         GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, 46)
 
-        css = Gtk.CssProvider()
-        css.load_from_data(self.CSS)
+        self.css = Gtk.CssProvider()
+        self.palette = active_palette()
+        self.css.load_from_data(themed_css(self.CSS_TEMPLATE, self.palette))
+        css = self.css
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
