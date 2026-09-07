@@ -1,0 +1,25 @@
+/* Overrides the production stylesheet; production modules and actions survive. */
+* { font-size: 11px; }
+.modules-left, .modules-center, .modules-right {
+    background: rgba(29, 32, 33, 0.96);
+    border: none;
+    border-radius: 18px;
+    padding: 0 7px;
+}
+.modules-center { padding: 0 24px; }
+#custom-ghost {
+    background: #fabd2f;
+    color: #282828;
+    font-size: 20px;
+    text-shadow: none;
+    border-radius: 13px;
+    margin: 5px 8px 5px 0;
+    padding: 0 13px;
+}
+#workspaces button { border-radius: 11px; padding: 0 9px; }
+#workspaces button.focused { background: #504945; color: #fabd2f; }
+#window { color: #ebdbb2; font-family: "Inter", sans-serif; font-size: 12px; font-weight: 600; }
+#clock { border-radius: 11px; background: #3c3836; color: #ebdbb2; }
+#custom-art { color: #8ec07c; padding-right: 7px; }
+#cpu, #custom-link, #pulseaudio, #battery { padding: 0 9px; }
+tooltip { background: #1d2021; border: none; border-radius: 16px; }

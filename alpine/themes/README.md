@@ -36,6 +36,13 @@ retain their controls. Its soft shadows, rounded corners and bottom captions
 take effect at the next normal desktop login when stock Sway is still running.
 See the [offline compositor recipe](../packages/swayfx/README.md).
 
+## Ghost Observatory concept
+
+The [native concept preview](concepts/ghost-observatory/README.md) presents windows
+as exhibits: rounded charcoal surfaces, captions underneath, and the contextual
+bar above. Its larger corners and spacing are a visual proposal; the preview
+script renders the real patched compositor without changing the active theme.
+
 ## Artwork collections
 
 `current` selects the default generation/rotation theme. Each `<id>.json`
