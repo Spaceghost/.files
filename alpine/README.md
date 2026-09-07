@@ -77,7 +77,25 @@ alpine/bin/backup-repository --output /path/to/backup/files.fossil
 ```
 
 The command refuses to replace an existing backup, checks SQLite integrity,
-and writes its SHA256 alongside it. Store a copy on another device.
+and writes its SHA256 alongside it. Store a copy on another device. This private
+copy includes Fossil account credentials. Add `--public` to scrub credentials
+and private Fossil metadata from a separate copy before distributing it; review
+the stored source and archive contents as well.
+
+[GitHub mirroring and Fossil bootstrap](../docs/GITHUB-FOSSIL.md) documents the
+`Spaceghost/.files` mirror on branch `alpine-oldbook`, recovery from GitHub on
+another host, and native Fossil replication. After reviewing and committing:
+
+```sh
+alpine/bin/publish-git-mirror
+```
+
+The helper incrementally exports and pushes that branch without rewriting the
+existing GitHub branches. Authenticate once using `gh auth login`, then
+`gh auth setup-git`. Successful publication sends the versioned setup to GitHub;
+keep the full database backup for archived build inputs.
+[Bazzite replay](../bazzite/README.md) describes
+applying the shared desktop with Fedora-specific session overrides.
 
 [Restore instructions](packages/RESTORE.md) explain installation on a fresh
 Alpine base and the isolated root used for verification. The lock preserves
@@ -97,9 +115,9 @@ custom packages. It does not claim a source compilation of every Alpine
 package or of the upstream Codex bundles. Fresh AI generation is deliberately
 nondeterministic: checked-in bitmap hashes preserve the exact existing artwork.
 New daily artwork receives an automatic local Fossil checkpoint scoped to its
-PNG and provenance JSON; unrelated edits remain untouched. Nothing is published
-or synced. A failed checkpoint stays pending and is retried without generating
-another image.
+PNG and provenance JSON; unrelated edits remain untouched. These checkpoints
+stay local until `alpine/bin/publish-git-mirror` runs. A failed checkpoint stays
+pending and is retried without generating another image.
 
 Disk layout, encryption keys, user passwords, Wi-Fi credentials and Codex login
 remain machine-local. On different hardware, adjust output and battery settings before starting Sway.

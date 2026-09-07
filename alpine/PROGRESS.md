@@ -274,6 +274,54 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   and watchlist playlist URLs, whether Delete affects YouTube or a local queue,
   and approval of the end-of-video Delete/Rewatch/Keep & Next design.
 
+## Contextual shortcuts on a Super hold
+
+- Enabled a non-focusable, scrollable overlay after either Super key is held
+  alone for 500 ms. App shortcuts come first, Sway second, then applicable
+  terminal/tmux/system controls. Releasing Super or pressing another key hides
+  it; normal chords continue to work. App profiles explicitly show partial
+  coverage, and Codex provides its `/keymap` browser entry.
+- All 191 tests pass on the fixed committed export plus this feature, including
+  62 shortcut tests. Independent specification/quality reviews, Sway validation,
+  disposable deployment, focus/input/scroll/fullscreen/multiple-output checks
+  and real include handling pass. The shared checkout run hit seven unrelated
+  notification tests while their helper was being removed by another task.
+- Live service is active with two read-only keyboard devices. Six files deployed
+  using journal `~/.local/state/oldbook/backups/1788782412724579771`; duplicate
+  startup preserves the daemon. Existing live Sway config was not reloaded.
+- Abrupt compositor shutdown can make native GTK exit before writing final
+  status; the process exits, resources close, and stale identities are rejected.
+- Physical hold observation, real keyboard hotplug, VT switching and reboot
+  persistence remain unverified. Usage/recovery: `SHORTCUTS.md`; runtime evidence
+  and screenshot: `verification/contextual-shortcuts.{json,png}`.
+
+## YouTube desktop player
+
+- Launcher-controlled workspace-1 background/PiP player implemented. Local
+  queue decisions, EOF hold, pause and position retention passed isolated
+  compositor checks; public YouTube metadata and stream decoding succeeded.
+- Original ghost button restored as requested. User playlist URLs/private
+  sign-in and reboot checks remain pending. No remote playlist deletion.
+  Details: `docs/superpowers/specs/2026-09-07-youtube-desktop-player.md`.
+
+## 1Password installation
+
+- Installed desktop 8.12.12 as the user Flathub app, official signed Alpine CLI
+  2.39.0-r1 (`op`), and Mozilla-signed Firefox extension 8.12.32.33.
+- Desktop native Wayland welcome/sign-in rendering and HTTPS connection passed;
+  desktop launcher validated. CLI version/help and credential-free network
+  update check passed. Firefox isolated-profile check reports active, enabled,
+  and signed; the existing personal browser needs a restart to activate it.
+- Six scoped Flatpak/CLI HTTPS and resolver rules were applied after 14 unit
+  tests and 13 isolated firewall runtime checks passed; live watcher verified.
+- Exact signed APK snapshot `ae4f34e18c202f0b71c0` covers 1007 packages. Firefox
+  XPI is archived in Fossil and its export/hash verified. Flatpak commits and
+  vendor tarball/executable hashes are recorded.
+- Flatpak cannot integrate desktop unlock with Firefox/CLI or provide the SSH
+  agent/system authentication. Account sign-in, vault access, reboot and a full
+  offline Flatpak restore remain untested. Recovery and evidence:
+  `packages/1password/README.md`.
+
 ## Reviewed firewall trial and staged radio safeguards (September 7)
 
 - Installed verified OpenSnitch 1.8.0-r1. Added explicit reproducible application
@@ -466,3 +514,175 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   service tests pass). They remain outside this tooltip fix. Physical hover
   on the active display was not injected; native verification uses a private
   virtual pointer and makes no generation requests.
+
+## YouTube account library in the launcher
+
+- Added browser-session selection, public search, paged YouTube History,
+  Watch Later and playlist browsing, and authenticated playback. Selected
+  the existing Firefox profile by reference only; no credentials versioned.
+- Twelve focused tests, real isolated desktop/PiP playback and disposable-home
+  deployment pass. Full desktop suite: 260/262 passed; two existing shortcut
+  status tests fail with "no shortcut service status for this display".
+- Live account-list/search retrieval remains unverified because host DNS
+  fails for both YouTube and Google. Browser fallback/sign-in and retry are
+  available. No remote watch-history updates or playlist mutations are made.
+  Usage and recovery: `desktop/YOUTUBE.md`; evidence:
+  `verification/youtube/library.json` and `library-menu.png`.
+
+## Apple trackpad gestures and Ghost Expo
+
+- Enabled native 3/4-finger workspace swipes, up/down Expo, four-finger
+  inward pinch for the launcher, and explicit tap/drag/natural-scroll settings.
+  Applied 18 runtime settings and persisted the include without restarting Sway.
+- Added on-demand searchable workspace/window layout cards; Super+E and the
+  launcher also open Expo. No privileged daemon or additional packages.
+- Apple bcm5974 reports libinput gesture capability. Three focused tests,
+  parser validation, disposable deployment, and isolated rendering, keyboard
+  workspace selection, search-to-window, close IPC and GTK down-swipe pass.
+- Full suite: 263/265 passed; the same two unchanged shortcut-service status
+  tests fail. Physical swipes await user observation; gestures over Waybar's
+  exclusive area and application-specific macOS features are not claimed.
+  Usage/recovery: `desktop/GESTURES.md`; evidence: `verification/gestures/`.
+
+## Active-theme Expo and Super-hold
+
+- Replaced Expo's fixed purple CSS with semantic colors from the current theme.
+  Connected the active Qt Super-hold launcher to that same palette, with a
+  one-second refresh. Restarted the live service; standalone Hold to Help's
+  native-platform behavior remains unchanged.
+- Four theme tests, 108 Hold to Help tests, real headless Expo interaction checks,
+  both rendered Gruvbox previews and disposable deployment pass.
+- Broad checkout suite: 276/284 pass; two known shortcut status failures and six
+  Bazzite helper execution errors from concurrent work remain outside this fix.
+  Evidence: `verification/overlay-theme/` and updated `verification/gestures/expo.png`.
+
+## Quiet Conky panels and Foot drop-down — 2026-09-07
+
+- Super+backtick/tilde toggles a persistent Foot terminal at the top of the
+  focused output. Live create/hide/show, shell persistence, opaque rendering,
+  Sway/Foot parsers and disposable HOME deployment passed.
+- Conky now shows date, battery, gallery notes and rotating text at 60–240 second
+  intervals. Removed fast system-stat panels and seconds. All four panels run.
+- Full desktop suite: 327/329 passed; the two previously recorded shortcut status
+  failures remain. Screenshots/runtime evidence: verification/dropdown-conky/.
+  Exact 1,090-package snapshot: f4f8e961fd9563d312a9.
+- Pending: identity of the requested Linux app, an email data source, physical
+  keypress observation and reboot. Details/recovery:
+  docs/superpowers/2026-09-07-dropdown-conky.md (from repository root).
+
+## Fuzzel workspace picker replaces Expo cards
+
+- Replaced the non-preview grid with the existing Fuzzel launcher, as requested.
+  Search open windows or select workspaces, including empty numbered desktops.
+  Existing Super+E and gesture entry points now open/toggle/close this picker.
+- Preserved current-theme colors and Fuzzel typography/shape. Eight focused
+  picker/palette tests, isolated window/workspace selection, cancellation,
+  show/toggle/close behavior and disposable deployment pass. Physical gestures
+  remain as previously documented. Evidence: `verification/gestures/`.
+
+## Translucent drop-down below the bar — 2026-09-07
+
+- Foot background now uses 84% opacity, preserving opaque text and the running
+  shell. New shells get generous padding and a beam cursor. Placement follows
+  the usable workspace top with one show/resize/position IPC transaction.
+- Waybar's top panel now uses the overlay layer, including over fullscreen
+  workspaces. Its saved one-line layer change remains alongside unrelated pending
+  Waybar edits and is excluded from this focused commit.
+- Foot/Sway parsers, offset-output geometry, live fullscreen hide/show and shell
+  preservation pass. Visual evidence: verification/dropdown-conky/glass.png.
+  Padding/cursor changes apply on the next normal shell close and reopen.
+
+## 2026-09-07 — generated-theme launcher styling
+
+- Added a shared Fuzzel palette adapter and routed application, command deck,
+  gallery, YouTube/video, AI-session, and Expo menus through it. Active palettes
+  are reread on each opening; generated three-color palettes get contrast-safe
+  derived roles. Refined border, selection, and row spacing.
+- Fuzzel parser, ShellCheck, theme tests, actual headless application rendering,
+  Expo interaction checks, and disposable HOME deployment passed. Screenshots:
+  `alpine/verification/launcher-themes/`.
+- Full suite: 343 tests, three concurrent Superhold migration failures (one
+  deployment alias and two legacy shortcut status checks). These remain outside
+  this launcher change. Shared oldbook-wallpaper has concurrent panel edits and
+  is excluded from the focused launcher commit; its two launcher calls are updated.
+
+## Drop-down corner request — 2026-09-07
+
+- Live compositor is stock Sway 1.12, which cannot round the Foot surface.
+  Installed SwayFX 0.6 already has soft 6px global corners configured; its
+  configuration validates. Its pinned corner_radius implementation is global,
+  not a per-window or bottom-only control. No ineffective drop-down rule added.
+- A 12px drop-down-only radius was considered but not applied after checking
+  the implementation. Live rounding remains pending a normal SwayFX login;
+  selective bottom-only rounding would require additional compositor support.
+  The running desktop and shell were not terminated.
+
+## 2026-09-07 — compact gallery image picker
+
+- Image browsing now shows six paintings per page, sorted by generated_utc,
+  then legacy created date or file modification time. Older/newer navigation
+  and page counts keep the picker to at most nine rows and 48 characters wide.
+  Generation and desktop controls moved into Gallery actions, with a back entry.
+- Verified 11 gallery tests and nine wallpaper tests; inspected the real compact
+  picker in isolated Sway. Screenshot: verification/launcher-themes/gallery-paged.png.
+- Changes are live through the existing HOME symlink. Left this edit uncommitted
+  because oldbook-wallpaper also contains concurrent desktop-panel changes;
+  no unrelated work was included in a commit.
+
+
+## Fossil GitHub mirror and Bazzite replay checkpoint (2026-09-07)
+
+- Fossil remains authoritative on `alpine-oldbook`. The incremental Git mirror
+  is `~/.local/share/fossil/files-git-mirror`; its `github` remote is
+  `https://github.com/Spaceghost/.files.git`. Use
+  `alpine/bin/publish-git-mirror` to export and publish that branch without force.
+  Fossil autopush is off so existing GitHub branches remain under explicit control.
+- `2ce53e613ad0` commits the mirror publisher, GitHub-to-Fossil bootstrap,
+  scrubbed public-copy support and the exact 1,090-APK snapshot. Six publication
+  tests and five bootstrap tests passed. A real full-history import matched
+  all 1,411 exported files and executable modes at Git `252dd09c219a`.
+- `823c162fb2dd` checkpoints staged radio source with the preserved non-root
+  test log: 270 passes and 95 root-only skips. Native acceptance and activation
+  remain pending; see `security/radio/checkpoint-verification.json`.
+- `5f3d3a059e61` prepares the Bazzite desktop profile. Seventeen profile tests,
+  shell checks and disposable deployment/Sway syntax validation passed on
+  Alpine. Fedora image packaging, native Waybar/Superhold builds, systemd/NVIDIA
+  behavior and LED permission validation still require the Bazzite host/image.
+  A clean checkout of this commit also passes all 17 tests after correcting a
+  test assertion that depended on an uncommitted Conky key binding; every
+  actually retained Sway helper binding remains checked.
+- The private full Fossil backup at
+  `~/.local/share/oldbook/backups/2026-09-07-before-github-publication/` passed
+  SQLite integrity and SHA-256 verification and includes 1,155 archived inputs.
+- The separate scrubbed copy at
+  `~/.local/share/oldbook/backups/github-20260907/files-public.fossil` is verified
+  and includes 1,206 archived inputs. Its SHA-256 is
+  `dc2ea87a802f999af9bc6308daa4995b6683040197ee687aa412c9586f5228ea`.
+  This is a prepared local snapshot; it has not been uploaded.
+- GitHub publishing is unfinished: native Git authentication is absent, and
+  both device login attempts expired. An actual push was rejected for missing
+  credentials. Complete `gh auth login --hostname github.com --git-protocol https`
+  and `gh auth setup-git`, then rerun the publisher. No successful remote push
+  or full-database upload is claimed by this checkpoint.
+- Tailscale is absent on this Alpine host. Setup and identity-preserving Fossil
+  replication commands are in `docs/GITHUB-FOSSIL.md`.
+- The broader desktop suite previously retained two shortcut-status failures;
+  it was not certified green during concurrent desktop/package rename work.
+
+## Persistent quiet-panel policy — 2026-09-07
+
+- A later working-tree edit appended the four historical telemetry panels to
+  panels.json. Wallpaper relayout read those templates without a content guard.
+  Removed them again; preserved Scripture, date, battery, gallery and rotating
+  text. Scripture polling is now 120 seconds instead of 30.
+- The loader now filters system-stat variables before placement/cache lookup and
+  normalizes display/interval-command refreshes to 60–300 seconds. Restoring the
+  old CPU/memory/network/storage templates therefore no longer renders them.
+  New alpine/AGENTS.md records the user's choice for future contributors.
+- All 26 Conky tests pass, including template regression, restored/renamed stats,
+  cached rebuild, stale-config cleanup, permitted mail/battery and interval cases.
+  Targeted disposable deployment passed; all five live processes reference clean
+  generated configs at 60 seconds. Evidence: verification/conky-policy/.
+- Email still needs a mailbox source. Arbitrary external command behavior is not
+  inspected by the policy; new helpers must honor the documented slow-data rule.
+  The broader unrelated desktop suite was not rerun for this focused change.

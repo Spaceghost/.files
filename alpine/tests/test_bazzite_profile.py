@@ -180,7 +180,8 @@ class BazziteProfileTest(unittest.TestCase):
         config = (self.home / '.config/sway/config').read_text()
         helpers = {token for token in config.replace("'", ' ').replace('"', ' ').split()
                    if token.startswith('~/.local/bin/oldbook-')}
-        self.assertIn('~/.local/bin/oldbook-conky', helpers)
+        self.assertTrue(helpers)
+        self.assertTrue((self.home / '.local/bin/oldbook-conky').is_symlink())
         for helper in helpers:
             name = helper.removeprefix('~/.local/bin/')
             self.assertTrue((self.home / '.local/bin' / name).exists(), name)
