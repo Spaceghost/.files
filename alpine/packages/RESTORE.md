@@ -43,7 +43,20 @@ normal user; administrator steps explicitly use `doas`.
    alpine/bin/install-wallpaper-schedule
    doas rc-update add crond default
    doas rc-service crond start
+   doas rc-update add tailscale default
+   doas rc-service tailscale start
    ```
+
+   Then `doas tailscale up` once, and approve the machine in the admin console.
+   The desktop's remote agents reach the tailnet over Tailscale SSH, so no ssh
+   key is needed on this machine and none is kept; the far side must run
+   `sudo tailscale up --ssh` and the tailnet policy must permit the hop.
+
+   The offline scripture library is not carried in the checkout beyond the
+   bundled King James text. The first desktop login fetches the rest in the
+   background through `oldbook-scripture-library bootstrap`, which needs
+   working HTTPS; `oldbook-scripture-library install --all` does it on demand
+   and adds the Talmud.
 
    Start `sway` from a TTY. For a first graphical session on fresh hardware,
    also enable the usual Alpine seat/udev services and required user groups;
