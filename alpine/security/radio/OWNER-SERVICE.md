@@ -104,8 +104,18 @@ ends authorization; the evidence records which occurred first.
 The verified run passed seven cases: same-client renewal, ordinary off, stale
 request rejection, exact scan completion, home/hotspot IPv6 restoration, NAK
 and server silence. Host-state comparisons matched and no test processes
-survived. Combined blocked-hook cancellation, guardian death, OpenRC startup
-and packet-policy checks remain separate work.
+survived. A separate seven-case fault fixture now runs the production guardian
+with the same CLI, owner, DHCP and native applier. It verifies cancellation
+during an unanswered WPA request and a paused native command, requesting-client
+and DHCP-hook death, competing guardian refusal, and reciprocal guardian/owner
+death. Blocking precedes native-command and DHCP teardown. Host-state checks
+matched and no private processes survived. See
+[fault-verification.json](fault-verification.json) for exact reasons, source
+hashes and the preserved earlier reporting failure.
+
+Owner death still retains an orphan marker and refuses replacement. The
+[same-boot recovery design](ORPHAN-RECOVERY.md) is unimplemented. OpenRC startup,
+physical radios and live network migration remain separate acceptance work.
 
 The veth interface exercises actual IPv6 duplicate-address detection. The
 earlier dummy-interface applier checks bypassed DAD because Linux treats

@@ -50,7 +50,10 @@ blocks before child teardown and owned-state cleanup. An unresolved cleanup
 prevents another connection. Startup rejects stale authorization, and a crash
 marker prevents silently adopting orphaned lease state. See
 [OWNER-SERVICE.md](OWNER-SERVICE.md) for commands, deadlines, process death,
-private IPv6 settings and recovery boundaries.
+private IPv6 settings and recovery boundaries. The combined failure checks in
+[fault-verification.json](fault-verification.json) now cover cancellation,
+guardian/owner death and orphan-state rejection. Automatic cleanup after owner
+death remains the staged design in [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md).
 
 ## Trusted policy and display contract
 
@@ -86,5 +89,6 @@ configuration. See [RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) and
 The historical one-shot Controller helpers remain only for their regression
 checks; production CLI routing no longer calls them. Earlier component evidence
 retains the exact source hashes exercised then. Follow
-[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining work and adapt
-[INSTALL-PLAN.md](INSTALL-PLAN.md) before activation; it predates owner integration.
+[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining work and
+[INSTALL-PLAN.md](INSTALL-PLAN.md) for the persistent owner's installation and
+ownership handoff. The migration installer is not yet complete.

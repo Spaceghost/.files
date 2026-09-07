@@ -32,8 +32,13 @@ Perform network-changing activation from a local console with recovery ready.
 The staged default is **boot-off with explicit scan/connect**. It does not
 enable automatic discovery or reconnection. The installed permissions and
 Bluetooth policy do not make the full controller ready for unattended networking.
-The controller remains staged; its isolated checks are recorded in
-[controller-verification.json](controller-verification.json).
+The persistent controller remains staged. Current source-hashed component and
+combined checks are recorded in [owner-verification.json](owner-verification.json);
+the older controller report covers historical helpers only. Combined failure
+tests now pass; see [fault-verification.json](fault-verification.json).
+Packet-policy proof, [orphan recovery](ORPHAN-RECOVERY.md) and the migration
+installer remain unfinished. This is the activation sequence to implement and verify, not a
+completed unattended installer.
 
 Before changing anything, keep a known working wired or local-console recovery
 path.  Record the current files and OpenRC membership, then use a temporary
@@ -45,6 +50,9 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    | Staged source | Target | Mode |
    | --- | --- | --- |
    | `root/usr/local/sbin/privacyctl` | `/usr/local/sbin/privacyctl` | `0750` |
+   | `root/usr/local/lib/privacyctl_runtime/*.py` | `/usr/local/lib/privacyctl_runtime/` | `0644` |
+   | `root/usr/local/libexec/privacyctl-dhcp-launch` | `/usr/local/libexec/privacyctl-dhcp-launch` | `0750` |
+   | `root/usr/local/libexec/privacyctl-dhcp-event` | `/usr/local/libexec/privacyctl-dhcp-event` | `0750` |
    | `root/etc/privacyctl/profiles` | `/etc/privacyctl/profiles` | `0600` |
    | `root/etc/doas.d/privacyctl.conf` | `/etc/doas.d/privacyctl.conf` | `0400` |
    | `root/etc/init.d/radio-off` | `/etc/init.d/radio-off` | `0755` |
@@ -52,38 +60,61 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    | `root/etc/elogind/system-sleep/95-radio-off` | same path | `0755` |
    | `root/etc/udev/rules.d/72-privacy-rfkill.rules` | same path | `0644` |
 
+   Use [STAGED-MANIFEST.tsv](STAGED-MANIFEST.tsv) for the complete source list.
+   Install the CLI, library and both helpers together; their fixed paths are
+   part of the verified contract. Keep implementation directories root-owned,
+   mode `0755`, with no writable ancestors controlled by another user.
    Create `/etc/privacyctl` as `root:root`, `0700`.  Verify every installed
    file has `root:root`; do not make the profile policy writable by `jack`,
    wheel, or a service account.
 
-   The controller creates `/run/privacyctl` as `root:root`, `0700` when it
-   records the first trusted session. A missing session means radios stay
-   blocked; it is not permission for automatic reconnection.
+   Create root-private `/etc/privacyctl/ipv6.json` with explicit entries for
+   each enabled profile, including an empty hotspot profile when appropriate.
+   Its format is in [OWNER-SERVICE.md](OWNER-SERVICE.md). Missing policy is
+   rejected before unblock. Keep actual network addresses out of Fossil.
 
-2. In a root-only editor, find the saved wpa_supplicant network ID for the
-   existing `shmecklebucket` entry.  Put only its ID and the literal SSID in
+   The controller creates `/run/privacyctl` as `root:root`, `0700` before
+   listening on its root-only socket. It blocks and clears stale session
+   authorization at startup. A surviving `lease-dirty` marker refuses new
+   connections until verified recovery; never delete it simply to reconnect.
+
+2. Confirm the exact trusted home SSID before enabling its policy. The profile
+   name `shmecklebucket` is a controller alias, not proof of the saved SSID.
+   In a root-only editor, find the corresponding saved wpa_supplicant network
+   ID. Put only its ID and the confirmed literal SSID in
    `/etc/privacyctl/profiles`, for example
    `profile|shmecklebucket|0|shmecklebucket`.  The numeric ID is illustrative;
-   use the actual local ID.  Merge the three non-secret settings in
+   use the actual local ID and confirmed spelling. Merge the non-secret settings in
    `privacy-policy.conf` into the active root-only wpa_supplicant config and
-   set `scan_ssid=0` inside each allowed network block.  Never copy the
-   network block or PSK into this repository.
+   set `scan_ssid=0` inside each allowed network block. Start every saved
+   network disabled until the controller selects it. Never copy a network
+   block or PSK into this repository.
 
    Ensure the active configuration has a root-accessible control socket for
    the existing service (normally `ctrl_interface=DIR=/run/wpa_supplicant`).
    `privacyctl` opens the fixed root control socket directly; the GUI only
    calls the controller through exact doas rules and must not read that socket.
-   After a verified association, the controller flushes stale IPv4 routes and
-   global addresses then uses the fixed `udhcpc` invocation. For the hotspot it
-   also flushes global IPv6 routes/addresses before DHCP, preventing inherited
-   static IPv6 from the home profile. Confirm the local DHCP lease succeeds.
+   Adding that socket disrupts association; do not send a casual reload or
+   restart networking. Follow the blocked, exact-backup transition in
+   [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md).
 
-   Establish exactly one DHCP owner before activating that path. The existing
-   `udhcpc` daemon is still running; do not leave it racing the controller's
-   route/address changes or a second DHCP client. The staged `udhcpc -q`
-   invocation exits after obtaining a lease and supplies no continuing renewal.
-   Choose and test a renewal owner and failure recovery before enabling this
-   controller for sustained connections. This integration remains unfinished.
+   Establish exactly one DHCP owner during that transition. Disable automatic
+   WLAN DHCP/static provisioning in ifupdown-ng while preserving unrelated
+   interfaces. While blocked, stop only the identity-verified legacy client and
+   its hooks, and remove only verified legacy state being transferred. Its
+   release-on-exit behavior must be covered by the migration/recovery check.
+
+   The persistent owner keeps one foreground `udhcpc -f -n` client through
+   acquisition and renewal. It acknowledges a lease only after verified WPA
+   identity and native address/DNS application. Profile transitions remove only
+   recorded resources; returning home explicitly reapplies its static IPv6.
+   Do not broadly flush interface state or reintroduce a one-shot client.
+   Complete and test orphan recovery before unattended service activation.
+
+   Prepare the reviewed libc-only resolver subscriber policy and deliberate
+   `resolvconf -u` takeover separately. The installed compatibility APK alone
+   has not taken ownership of DNS. Prove renewal and offered-DNS authorization
+   against the packet gate and OpenSnitch without broadening live grants.
 
    At staging time, `/run/wpa_supplicant` existed but was empty and the
    read-only `doas wpa_cli -i wlan0 status` check exited 255.  Treat a zero-exit
@@ -156,7 +187,8 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
 5. Add `radio-off` to the OpenRC `boot` runlevel and
    `privacyctl-supervisor` to the default runlevel. Its dependencies place the
    block before networking/wpa_supplicant and the supervisor after
-   wpa_supplicant. Leave saved credentials root-only and automatic selection
+   wpa_supplicant. Verify this graph and actual `supervise-daemon` startup in
+   isolation before changing runlevels. Leave saved credentials root-only and automatic selection
    disabled until an explicit `privacyctl connect` call selects one permitted
    saved ID.
 
@@ -167,10 +199,11 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    rfkill parameter after reboot. This complements OpenRC; it does not prove
    that firmware or hardware emitted no RF before Linux takes control.
 
-7. Validate first on the local console: `doas privacyctl status --json`,
-   `doas privacyctl off`, then `doas privacyctl scan`.  Confirm Wi-Fi is
-   blocked when the scan command exits, including after a deliberately failed
-   wpa_cli request.  Only then test `doas privacyctl connect shmecklebucket`.
+7. First verify blocked-state recovery after synthetic WPA control failures
+   in the isolated owner fixture. Then validate on the local console:
+   `doas privacyctl status --json`, `doas privacyctl off`, then
+   `doas privacyctl scan`. Confirm Wi-Fi is blocked when the scan command
+   exits. Only then test `doas privacyctl connect shmecklebucket`.
    Restore with `doas privacyctl off` before leaving the console.
 
 8. Install the staged elogind hook at `/etc/elogind/system-sleep/95-radio-off`.
