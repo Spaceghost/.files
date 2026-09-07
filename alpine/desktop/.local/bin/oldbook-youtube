@@ -7,6 +7,7 @@ from pathlib import Path
 import runpy
 import select
 import shlex
+import shutil
 import signal
 import socket
 import subprocess
@@ -17,6 +18,7 @@ from urllib.parse import urlsplit
 BIN = Path(__file__).resolve().parent
 sys.path.insert(0, str(BIN.parent / 'lib/oldbook'))
 from youtube_queue import Queue, output_for_mode
+import youtube_library as library
 
 IPC = runpy.run_path(str(BIN / 'oldbook-workspaces'))
 STATE = Path.home() / '.local/state/oldbook/youtube'
@@ -189,6 +191,7 @@ def serve():
                                        f'start={queue.data["position"]}',
                                        'pause=' + ('yes' if queue.data['paused'] else 'no')]
                             source = queue.current()['url']
+                            options += library.playback_options(source)
                             if desired == 'pip':
                                 command = ['mpv', '--vo=gpu', '--gpu-context=wayland', '--gpu-sw=yes',
                                            '--wayland-app-id=oldbook-youtube', '--title=Oldbook YouTube',
@@ -247,26 +250,11 @@ def ensure_service():
 
 
 def extract(source):
-    url = urlsplit(source)
-    if url.scheme != 'https' or not url.netloc or url.username or url.password:
-        raise ValueError('Enter an HTTPS video or playlist URL')
-    result = subprocess.run(['yt-dlp', '--flat-playlist', '--dump-single-json', '--ignore-errors',
-                             '--playlist-end', '500', '--', source],
-                            text=True, capture_output=True, timeout=120)
-    if result.returncode:
-        raise RuntimeError('Could not read that playlist. It may require sign-in; no browser cookies were imported.')
-    data = json.loads(result.stdout)
-    entries = (data.get('entries') or []) if 'entries' in data else [data]
-    normalized = []
-    for entry in entries:
-        if not entry:
-            continue
-        address = entry.get('webpage_url') or entry.get('url')
-        if address and address.startswith('https://'):
-            normalized.append({'url': address, 'title': entry.get('title', 'YouTube video')})
-    if not normalized:
+    entries = library.fetch(source, limit=500)['entries']
+    videos = [entry for entry in entries if entry['kind'] == 'video']
+    if not videos:
         raise RuntimeError('No playable videos were found')
-    return normalized
+    return videos
 
 
 def choose(prompt, options):
@@ -275,10 +263,101 @@ def choose(prompt, options):
     return result.stdout.strip() if result.returncode == 0 else None
 
 
+def account_menu():
+    profiles = library.firefox_profiles()
+    options = {'Sign in / switch account in browser': 'signin',
+               'Open YouTube History in browser': library.FEEDS['history'],
+               'Open Watch Later in browser': library.FEEDS['watchlist'],
+               'Open playlists in browser': library.FEEDS['playlists'],
+               **profiles, 'Use Firefox default profile': 'firefox',
+               'Use Chromium session': 'chromium', 'Use Chrome session': 'chrome',
+               'Use Brave session': 'brave', 'Use without an account': 'guest'}
+    selected = choose('YouTube account › ', options)
+    action = options.get(selected)
+    if not action:
+        return
+    if action == 'signin' or action.startswith('https://'):
+        browser = library.read_account()
+        if browser is None and profiles:
+            browser = next(iter(profiles.values()))
+            library.save_account(browser)
+        address = 'https://www.youtube.com/' if action == 'signin' else action
+        if browser and browser.startswith('firefox'):
+            command = ['firefox']
+            if ':' in browser:
+                command += ['--profile', browser.split(':', 1)[1]]
+            command += ['--new-tab', address]
+        elif browser:
+            executables = {'chromium': ('chromium', 'chromium-browser'),
+                           'chrome': ('google-chrome', 'google-chrome-stable'),
+                           'brave': ('brave', 'brave-browser')}
+            executable = next((shutil.which(name) for name in executables[browser.split(':', 1)[0]]
+                               if shutil.which(name)), None)
+            if not executable:
+                raise RuntimeError('The selected browser is not installed; choose a browser profile first')
+            command = [executable, address]
+        else:
+            command = ['xdg-open', address]
+        subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return
+    library.save_account(None if action == 'guest' else action)
+    notify('YouTube account updated', 'Your next list or video will use the selected browser session.'
+           if action != 'guest' else 'Public browsing and playback are available.')
+
+
+def browse(source, title, *, private=False):
+    page = 1
+    while True:
+        notify('Loading ' + title, 'Fetching page ' + str(page) + '…')
+        try:
+            result = library.fetch(source, private=private, page=page)
+        except (RuntimeError, subprocess.TimeoutExpired) as error:
+            notify('YouTube library', str(error))
+            action = choose(title + ' · unavailable › ', ['Retry', 'Account / sign in', 'Back'])
+            if action == 'Retry':
+                continue
+            if action == 'Account / sign in':
+                account_menu()
+            return
+        entries = result['entries']
+        labels = {f'{index + 1:02d}  ' + ('▤ ' if entry['kind'] == 'playlist' else '▶ ')
+                  + entry['title'] + (' · ' + entry['channel'] if entry['channel'] else ''): entry
+                  for index, entry in enumerate(entries)}
+        videos = [entry for entry in entries if entry['kind'] == 'video']
+        controls = ['Back']
+        if videos:
+            controls.insert(0, 'Play this page as a review queue')
+        if result['more']:
+            controls.insert(0, 'Next page →')
+        if page > 1:
+            controls.insert(0, '← Previous page')
+        selected = choose(title + f' · page {page}' + (' · empty' if not entries else '') + ' › ',
+                          [*labels, *controls])
+        if selected in (None, 'Back'):
+            return
+        if selected == 'Next page →':
+            page += 1
+        elif selected == '← Previous page':
+            page -= 1
+        elif selected == 'Play this page as a review queue':
+            request('load', entries=videos)
+            return
+        elif selected in labels:
+            entry = labels[selected]
+            if entry['kind'] == 'playlist':
+                return browse(entry['url'], entry['title'], private=private)
+            else:
+                request('load', entries=[entry])
+                return
+
+
 def menu():
     state = request('status')
     current = Queue(state).current()
-    labels = {'Open a YouTube video or playlist…': 'open', 'Save a named playlist…': 'add',
+    labels = {'Search YouTube…': 'search', 'My Watch Later / watchlist': 'watchlist',
+              'My YouTube history': 'history', 'My YouTube playlists': 'playlists',
+              'Account / sign in': 'account',
+              'Open a YouTube video or playlist…': 'open', 'Save a named playlist…': 'add',
               'Resume saved queue': 'resume',
               'Play / pause': 'pause', 'PiP · floating across desktops': 'pip',
               'Pin behind apps on desktop 1': 'desktop', 'Rewatch this video': 'rewatch',
@@ -290,6 +369,18 @@ def menu():
     title = current.get('title', 'YouTube')[:50] if current else 'Oldbook YouTube'
     choice = choose(title + ' › ', labels)
     action = labels.get(choice)
+    if action == 'account':
+        account_menu()
+        return
+    if action == 'search':
+        query = choose('Search YouTube › ', [])
+        if query:
+            browse('ytsearch51:' + query, 'YouTube search')
+        return
+    if action in library.FEEDS:
+        browse(library.FEEDS[action], {'watchlist': 'Watch Later', 'history': 'History',
+                                      'playlists': 'Playlists'}[action], private=True)
+        return
     if action == 'add':
         name = choose('Playlist name › ', [])
         if not name:
