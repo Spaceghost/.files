@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Launch the contextual shortcut overlay service."""
+import sys
+from pathlib import Path
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib'))
+
+from oldbook.shortcut_overlay import main
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (ConnectionError, OSError, RuntimeError, ValueError) as error:
+        sys.exit(f'oldbook-shortcuts: {error}')

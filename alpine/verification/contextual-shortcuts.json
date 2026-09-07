@@ -1,0 +1,162 @@
+{
+  "date": "2026-09-07",
+  "feature": "Hold either Super key alone for 500 ms to show contextual shortcuts",
+  "review": "Independent specification and quality reviews pass; all seven original findings and two include regressions resolved",
+  "tests": {
+    "fixed_export_base": "6d7e6cc6db1d66ca8d8faaac1c9280e3eeab09c9",
+    "fixed_export_scope": "Committed Alpine tree plus exact nine feature code/test files; no unrelated pending edits",
+    "command": "python3 -m unittest discover -s alpine/tests -v",
+    "full_suite_passed": 191,
+    "shortcut_tests_passed": 62,
+    "duration_seconds": 13.724,
+    "shared_checkout_run": {
+      "total": 211,
+      "passed": 204,
+      "failed": 7,
+      "failure": "Concurrent notification tests referenced a removed oldbook-notification-led helper; unrelated to this feature"
+    },
+    "python_compile": "pass",
+    "sway_parser": "pass",
+    "shellcheck": "not applicable: no shell scripts changed"
+  },
+  "runtime": {
+    "input": {
+      "read_only_keyboard_devices_opened": 2,
+      "key_events_recorded": false,
+      "host_keys_injected": false,
+      "devices_after_close": 0
+    },
+    "preview": {
+      "preview_visible": true,
+      "focus_preserved": true,
+      "keys_reach_app": true,
+      "layers": [
+        {
+          "namespace": "oldbook-shortcuts",
+          "layer": "overlay",
+          "extent": {
+            "width": 960,
+            "height": 720,
+            "x": 240,
+            "y": 46
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    "layout": {
+      "real_wayland_scroll_changes_content": true,
+      "scroll_changed_pixels": 82603,
+      "fits_1440x900": true,
+      "visible_above_fullscreen": true,
+      "follows_focused_output": true,
+      "fits_1280x720": true
+    },
+    "controller": {
+      "quick_tap_hidden": true,
+      "chord_before_threshold_hidden": true,
+      "right_super_visible": true,
+      "other_key_hides": true,
+      "chord_stays_hidden": true,
+      "fresh_left_super_visible": true,
+      "release_hides": true
+    },
+    "loading": {
+      "controller_visible": true,
+      "graphical_active": true,
+      "loading_outputs": [
+        [
+          "HEADLESS-2",
+          {
+            "width": 540,
+            "height": 150,
+            "x": 370,
+            "y": 46
+          }
+        ]
+      ],
+      "loading_on_focused_output": true
+    },
+    "include": {
+      "sway_include_addition": true,
+      "sway_include_unbind": true,
+      "sway_nested_include": true,
+      "coverage": "Loaded main config + current included files · active mode; reload after edits"
+    },
+    "daemon": {
+      "daemon_running": true,
+      "graphical_session_active": true,
+      "read_only_device_count": 2,
+      "duplicate_exits_without_replacing_daemon": true,
+      "sigterm_cleanup": true
+    },
+    "lock": {
+      "isolated_real_lock_record_detected": true,
+      "locked_overlay_suppressed": true,
+      "stale_lock_record_ignored": true,
+      "host_session_locked": false
+    },
+    "shutdown": {
+      "isolated_compositor_shutdown_exits_daemon": true,
+      "kernel_releases_process_descriptors_and_locks": true,
+      "last_recorded_state": "running",
+      "stale_process_identity_rejected": true,
+      "exit_status": "nonzero on native GDK display disconnect",
+      "clean_stopped_record_guaranteed_on_display_loss": false,
+      "host_compositor_affected": false
+    },
+    "deployment": {
+      "disposable_home_deployment": true,
+      "new_feature_links": 6,
+      "sway_parser_validation": true
+    },
+    "live": {
+      "deployed_links": [
+        ".config/sway/local.d/shortcuts.conf",
+        ".local/bin/oldbook-shortcuts",
+        ".local/lib/oldbook/shortcut_hold.py",
+        ".local/lib/oldbook/shortcut_overlay.py",
+        ".local/lib/oldbook/shortcut_profiles.py",
+        ".local/lib/oldbook/shortcut_sources.py"
+      ],
+      "deployment_backup": "/home/jack/.local/state/oldbook/backups/1788782412724579771",
+      "service_pid": 28806,
+      "service_live": true,
+      "graphical_session_active": true,
+      "read_only_device_count": 2,
+      "duplicate_preserves_pid": true,
+      "host_keys_injected": false,
+      "live_sway_reloaded": false
+    }
+  },
+  "screenshot": {
+    "path": "contextual-shortcuts.png",
+    "width": 1440,
+    "height": 900,
+    "sha256": "31043463fd1b6b983468e4a19540524de7e03295f2f0489634b6c73e2751e6ad",
+    "context": "Isolated SwayFX desktop with throwaway Foot/zsh text; no host application content"
+  },
+  "files_sha256": {
+    "alpine/desktop/.config/sway/local.d/shortcuts.conf": "cb3e1b99e22b8f6fb9caace57c426b116f9257e299ebbb2a98711b8e2e1472b4",
+    "alpine/desktop/.local/bin/oldbook-shortcuts": "55e78ffe2fa18e6081606ad6f13fc481e53a0c25b9ce549ba6655d986e16a526",
+    "alpine/desktop/.local/lib/oldbook/shortcut_hold.py": "c646f4667707ee8c625f1d071544511f3b0edb923564f135f0001b413a6e1392",
+    "alpine/desktop/.local/lib/oldbook/shortcut_overlay.py": "f57ea79f16e24930543d1981a6be8a2c4c3474d07e0f1a7466cf5a5d01132218",
+    "alpine/desktop/.local/lib/oldbook/shortcut_profiles.py": "0ef1e15065fcf7d05a9301d2696147fd122c11c0ee50705a58279fcb1cfd56ae",
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "49907140cdc372b5edfd4355753f926e33abf983d26bdf6d3d12c7953d0efaf3",
+    "alpine/tests/test_shortcut_hold.py": "f7784b713b41e179a3d879bc7caf95d9fe0265d159715403af2c68cec9967855",
+    "alpine/tests/test_shortcut_service.py": "ffc2d1425d22bcbff68baf6a828d626bdbeeec901733067580771567d68b1b08",
+    "alpine/tests/test_shortcut_sources.py": "9625050d7dc1a459ff5683bdab450a9bab77ab77edced61925ad37e9d943b459"
+  },
+  "limitations": [
+    "App profiles are partial documented baselines; plugins, web pages and remappings need app-specific integration or local profiles.",
+    "Sway IPC retains loaded main text but included files are read from current disk contents; reload Sway after editing includes.",
+    "Abrupt compositor loss can make GDK exit before writing stopped status; process exit releases resources and stale PID identities are rejected.",
+    "Physical hold observation, real keyboard hotplug, VT switching and reboot persistence were not exercised."
+  ]
+}
