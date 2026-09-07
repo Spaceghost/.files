@@ -25,6 +25,86 @@ from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_
 THEMES = REPO / 'alpine/themes'
 
 
+def base_ghostty(repo):
+    """Ghostty's non-colour settings, shared by every theme."""
+    source = repo / 'alpine/desktop/.config/ghostty/config'
+    keep = []
+    for line in source.read_text().splitlines():
+        key = line.split('=', 1)[0].strip()
+        if key in ('palette', 'background', 'foreground', 'selection-background',
+                   'selection-foreground', 'cursor-color', 'cursor-text',
+                   'background-opacity'):
+            continue
+        if line.lstrip().startswith('#'):
+            # The shared file's banner names its own colours; each theme gets one.
+            continue
+        keep.append(line)
+    return keep
+
+
+def ghostty_from_foot(foot_ini, base, name=None):
+    """Derive Ghostty colours from the theme's Foot palette.
+
+    Foot already carries a full sixteen-colour terminal palette for every theme,
+    including generated ones, so deriving from it means a new theme themes both
+    terminals without anyone hand-writing a second palette.
+    """
+    import configparser
+    parser = configparser.ConfigParser(interpolation=None, strict=False,
+                                       inline_comment_prefixes=('#',))
+    with foot_ini.open() as stream:
+        parser.read_file(stream)
+    if not parser.has_section('colors-dark'):
+        return None
+    colors = parser['colors-dark']
+    header = [f'# {name}: generated from this theme\'s Foot palette by oldbook-theme sync.',
+              '# Edit the Foot colours, then rerun sync; this file is derived.'] if name else []
+    lines = header + [line for line in base if line.strip()] + ['']
+    for name, key in (('background', 'background'), ('foreground', 'foreground'),
+                      ('selection-background', 'selection-background'),
+                      ('selection-foreground', 'selection-foreground')):
+        if key in colors:
+            lines.append(f'{name} = {colors[key].strip()}')
+    if 'alpha' in colors:
+        lines.append(f'background-opacity = {colors["alpha"].strip()}')
+    cursor = colors.get('cursor', '').split()
+    if len(cursor) == 2:
+        lines.append(f'cursor-text = {cursor[0]}')
+        lines.append(f'cursor-color = {cursor[1]}')
+    lines.append('')
+    for index in range(16):
+        key = ('regular' if index < 8 else 'bright') + str(index % 8)
+        if key in colors:
+            lines.append(f'palette = {index}=#{colors[key].strip().lstrip("#")}')
+    return '\n'.join(lines).rstrip('\n') + '\n'
+
+
+def sync_profiles(repo):
+    """Materialise the per-theme files that are derived rather than authored."""
+    written = []
+    base = base_ghostty(repo)
+    for profile in sorted((repo / 'alpine/themes/profiles').glob('*')):
+        if not profile.is_dir() or has_symlink(profile, repo):
+            continue
+        foot_ini = profile / '.config/foot/foot.ini'
+        if not foot_ini.is_file():
+            continue
+        try:
+            name = load_theme(repo, profile.name)['name']
+        except (OSError, ValueError, RuntimeError):
+            name = profile.name
+        body = ghostty_from_foot(foot_ini, base, name)
+        if body is None:
+            continue
+        target = profile / '.config/ghostty/config'
+        if target.is_file() and target.read_text() == body:
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body)
+        written.append(str(target.relative_to(repo)))
+    return written
+
+
 def profile_directory(identity):
     """Return the theme's HOME overlay, or None when it only carries a palette."""
     profile = THEMES / 'profiles' / identity
@@ -56,32 +136,105 @@ def record(identity):
     temporary.replace(target)
 
 
-def reload_desktop():
-    """Nudge the running session; anything else picks the theme up when it starts."""
-    notes = []
-    result = subprocess.run(['swaymsg', 'reload'], capture_output=True, text=True)
-    notes.append('sway reloaded' if result.returncode == 0 else 'sway reload failed')
-    signalled = 0
+def owned_processes(*names):
+    """Yield this user's processes whose executable matches one of `names`."""
+    uid = os.getuid()
+    wanted = {name.encode() for name in names}
     for entry in os.listdir('/proc'):
         if not entry.isdigit():
             continue
+        process = Path('/proc') / entry
         try:
-            argv = (Path('/proc') / entry / 'cmdline').read_bytes().split(b'\0')
+            if process.stat().st_uid != uid:
+                continue
+            argv = (process / 'cmdline').read_bytes().split(b'\0')
         except OSError:
             continue
-        if argv and argv[0].split(b'/')[-1] == b'waybar':
-            try:
-                os.kill(int(entry), signal.SIGUSR2)
-                signalled += 1
-            except OSError:
-                continue
-    notes.append(f'waybar reloaded ({signalled})')
-    terminals = Path(__file__).resolve().parent / 'oldbook-refresh-terminal-theme'
+        if argv and argv[0] and argv[0].split(b'/')[-1] in wanted:
+            yield int(entry)
+
+
+def signal_processes(names, number):
+    delivered = 0
+    for pid in owned_processes(*names):
+        try:
+            os.kill(pid, number)
+            delivered += 1
+        except OSError:
+            continue
+    return delivered
+
+
+def run(command, timeout=20):
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=timeout,
+                                stdin=subprocess.DEVNULL)
+        return result.returncode == 0
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
+def tmux_reload():
+    """Every live server rereads the theme's tmux configuration."""
+    reloaded = 0
+    for socket in (Path(os.environ.get('TMUX_TMPDIR', '/tmp')) / f'tmux-{os.getuid()}').glob('*'):
+        if socket.is_socket() and run(['tmux', '-S', str(socket), 'source-file',
+                                       str(Path.home() / '.tmux.conf')], timeout=10):
+            reloaded += 1
+    return reloaded
+
+
+def refresh_session():
+    """Push the active theme into everything already running that can take it.
+
+    Each application is asked in the way it actually supports.  Anything that
+    only reads its configuration at startup is reported rather than restarted,
+    because silently killing a user's windows is worse than a stale colour.
+    """
+    notes = []
+    here = Path(__file__).resolve().parent
+
+    notes.append('sway reloaded' if run(['swaymsg', 'reload']) else 'sway reload FAILED')
+
+    count = signal_processes(('waybar',), signal.SIGUSR2)
+    notes.append(f'waybar reloaded ({count})')
+
+    # Foot repaints in place over its own pty, keeping running programs intact.
+    terminals = here / 'oldbook-refresh-terminal-theme'
     if terminals.is_file():
-        outcome = subprocess.run(['/usr/bin/python3', str(terminals)],
-                                 capture_output=True, text=True)
-        notes.append('terminals repainted' if outcome.returncode == 0
-                     else 'terminals unchanged')
+        notes.append('foot terminals repainted' if run(['/usr/bin/python3', str(terminals)])
+                     else 'foot terminals unchanged')
+
+    # Ghostty rereads its configuration on SIGUSR2 and restyles open surfaces.
+    count = signal_processes(('ghostty',), signal.SIGUSR2)
+    if count:
+        notes.append(f'ghostty reloaded ({count})')
+
+    if signal_processes(('swaync',), 0):
+        ok = run(['swaync-client', '--reload-config']) and run(['swaync-client', '--reload-css'])
+        notes.append('swaync reloaded' if ok else 'swaync reload FAILED')
+
+    conky = here / 'oldbook-conky'
+    if conky.is_file() and signal_processes(('conky',), 0):
+        notes.append('conky panels restarted' if run(['/usr/bin/python3', str(conky), 'restart'], 60)
+                     else 'conky restart FAILED')
+
+    count = tmux_reload()
+    if count:
+        notes.append(f'tmux servers reloaded ({count})')
+
+    # Cava has no reload channel; it is ours and cheap, so it comes back itself
+    # through its supervisor rather than being left in the previous palette.
+    count = signal_processes(('cava',), signal.SIGTERM)
+    if count:
+        notes.append(f'cava restarted ({count})')
+
+    stale = sorted({name for name, procs in (
+        ('Firefox', ('firefox',)), ('btop', ('btop',)), ('Neovim', ('nvim',)))
+        if any(True for _ in owned_processes(*procs))})
+    if stale:
+        notes.append('reads its theme only at startup, so still on the old palette: '
+                     + ', '.join(stale))
     return notes
 
 
@@ -95,13 +248,13 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
-    notes = reload_desktop() if reload else []
+    notes = refresh_session() if reload else []
     return theme, profile, deployed, notes
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('list', 'current', 'use'))
+    parser.add_argument('action', choices=('list', 'current', 'use', 'refresh', 'sync'))
     parser.add_argument('theme', nargs='?')
     parser.add_argument('--no-reload', action='store_true',
                         help='apply the files without touching the running session')
@@ -113,6 +266,14 @@ def main():
     if args.action == 'list':
         for theme in available_themes(REPO):
             print(theme['id'] + '\t' + describe(theme, active))
+        return 0
+    if args.action == 'refresh':
+        for note in refresh_session():
+            print(note)
+        return 0
+    if args.action == 'sync':
+        written = sync_profiles(REPO)
+        print('\n'.join(written) if written else 'Every theme profile is already complete')
         return 0
     if not args.theme:
         parser.error('use requires a theme ID')
