@@ -94,8 +94,8 @@ bindsym $mod+Shift+8 move container to workspace number 8
 bindsym $mod+Shift+9 move container to workspace number 9
 bindsym $mod+Shift+0 move container to workspace number 10
 
-# STRATA starts in the background; its service returns moved windows to 0.
-assign [app_id="^oldbook-strata$"] workspace number 0
+# STRATA uses the 0 key and workspace 10, after workspaces 1 through 9.
+assign [app_id="^oldbook-strata$"] workspace number 10
 no_focus [app_id="^oldbook-strata$"]
 
 bindsym $mod+b splith

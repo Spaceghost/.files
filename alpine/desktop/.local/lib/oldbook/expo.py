@@ -1,12 +1,17 @@
 """Fuzzel workspace/window picker, with session-scoped show/toggle/close control."""
 import fcntl
 import hashlib
+import json
 import os
 from pathlib import Path
 import runpy
 import socket
 import select
 import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from workspace_model import workspace_name
 
 
 def walk(node):
@@ -16,9 +21,10 @@ def walk(node):
 
 
 def workspaces(tree):
-    desktops = {num: {'num': num, 'name': '0: STRATA' if num == 0 else f'Desktop {num}',
+    desktops = {num: {'num': num, 'name': (workspace_name(num) if workspace_name(num) != str(num)
+                                         else f'Desktop {num}'),
                    'windows': []}
-             for num in range(11)}
+             for num in range(1, 11)}
     for node in walk(tree):
         if node.get('type') != 'workspace' or node.get('num', -1) < 0:
             continue
@@ -30,7 +36,7 @@ def workspaces(tree):
 def focus_command(target):
     if 'id' in target:
         return f'[con_id={int(target["id"])}] focus'
-    return f'workspace number {int(target["num"])}'
+    return 'workspace number ' + json.dumps(workspace_name(int(target['num'])))
 
 
 def menu_entries(tree):

@@ -1,5 +1,8 @@
 # Persistent desktop preferences
 
+The 0 key selects workspace 10. Keep STRATA on numeric workspace 10, displayed
+after workspaces 1–9; do not introduce a separate workspace 0 for it.
+
 Every desktop theme must be complete. The user explicitly rejects palette-only
 themes; do not introduce that category or treat recoloring a few overlays as a
 finished theme. Generated themes have the same requirement as built-in themes.

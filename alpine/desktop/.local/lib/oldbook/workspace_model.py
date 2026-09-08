@@ -1,7 +1,12 @@
 """Select workspace applications and retain user-controlled workspace names."""
 import unicodedata
 
-THEMES = {'0': 'STRATA', '1': 'GHOST', '2': 'ORBIT', '3': 'LAB', '4': 'SIGNAL', '5': 'LOUNGE'}
+THEMES = {'1': 'Ghost', '2': 'Orbit', '3': 'Lab', '4': 'Signal', '5': 'Lounge', '10': 'Strata'}
+
+
+def workspace_name(number):
+    value = str(number)
+    return f'{value}: {THEMES[value]}' if value in THEMES else value
 
 
 def children(node):
@@ -107,10 +112,13 @@ def valid_record(record):
 def generated_base(value):
     # These named desktop prefixes belong to the service. App suffixes must
     # never become their base when a rename outlives its saved state.
+    if value in THEMES:
+        return workspace_name(value)
     for number, title in THEMES.items():
-        base = f'{number}: {title}'
-        if value.startswith(base + ' · '):
-            return base
+        base = workspace_name(number)
+        for generated in (base, f'{number}: {title.upper()}'):
+            if value == generated or value.startswith(generated + ' · '):
+                return base
     return value
 
 
@@ -126,7 +134,7 @@ class WorkspaceNames:
             original, base = previous['original'], previous['base']
         else:
             original = current
-            base = f'{current}: {THEMES[current]}' if current in THEMES else safe_label(current)
+            base = safe_label(workspace_name(current))
         if not addressable_name(current) or not addressable_name(original):
             return {'id': workspace['id'], 'old': current, 'new': current,
                     'original': original, 'base': base}

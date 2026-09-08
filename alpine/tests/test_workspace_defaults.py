@@ -30,10 +30,10 @@ class WorkspaceDefaultsTests(unittest.TestCase):
         self.assertEqual(placement.plan([(1, 'Pithos'), (2, 'Pithos')], adopt=True), [])
         self.assertEqual(placement.plan([(1, 'Pithos'), (2, 'Pithos'), (3, 'Pithos')]), [])
 
-    def test_fossil_launches_on_zero_while_firefox_keeps_five(self):
+    def test_fossil_launches_on_ten_while_firefox_keeps_five(self):
         placement = self.model['Placement']()
         self.assertEqual(placement.plan([(10, 'Fossil'), (11, 'Firefox')]),
-                         [(10, 0), (11, 5)])
+                         [(10, 10), (11, 5)])
 
     def test_quick_launch_stays_here_and_does_not_claim_codex_default(self):
         placement = self.model['Placement']()

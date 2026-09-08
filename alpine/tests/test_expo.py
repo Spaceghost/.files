@@ -13,22 +13,29 @@ class ExpoTests(unittest.TestCase):
     def test_overview_keeps_empty_desktops_and_excludes_scratchpad(self):
         tree={'type':'root','nodes':[
             {'type':'workspace','id':99,'num':-1,'name':'__i3_scratch','nodes':[{'id':7,'app_id':'secret'}]},
-            {'type':'workspace','id':5,'num':0,'name':'0: STRATA','rect':{'width':1000,'height':700},
+            {'type':'workspace','id':5,'num':10,'name':'10: STRATA','rect':{'width':1000,'height':700},
              'nodes':[{'id':8,'app_id':'firefox','name':'Review','rect':{'x':0,'y':0,'width':900,'height':600}}]}]}
         cards=self.api['workspaces'](tree)
-        self.assertEqual([c['num'] for c in cards],list(range(11)))
-        self.assertEqual(cards[0]['name'],'0: STRATA')
+        self.assertEqual([c['num'] for c in cards],list(range(1,11)))
+        self.assertEqual(cards[9]['name'],'10: STRATA')
         self.assertEqual([w['id'] for c in cards for w in c['windows']],[8])
 
-    def test_empty_strata_is_available_on_zero_and_six_is_ordinary(self):
+    def test_empty_strata_is_available_on_ten_and_six_is_ordinary(self):
         cards = self.api['workspaces']({'type': 'root', 'nodes': []})
-        self.assertEqual(cards[0]['num'], 0)
-        self.assertEqual(cards[0]['name'], '0: STRATA')
-        self.assertEqual(cards[6]['name'], 'Desktop 6')
+        self.assertEqual(cards[9]['num'], 10)
+        self.assertEqual(cards[9]['name'], '10: Strata')
+        self.assertEqual(cards[5]['name'], 'Desktop 6')
+
+    def test_uncreated_workspaces_already_have_their_names_in_the_picker(self):
+        cards = self.api['workspaces']({'type': 'root', 'nodes': []})
+        self.assertEqual([card['name'] for card in cards[:5]],
+                         ['1: Ghost', '2: Orbit', '3: Lab', '4: Signal', '5: Lounge'])
+        self.assertEqual(self.api['focus_command']({'num': 4, 'name': 'bad; exit'}),
+                         'workspace number "4: Signal"')
 
     def test_focus_command_uses_numeric_identity_not_untrusted_window_title(self):
         self.assertEqual(self.api['focus_command']({'id':37,'name':'bad; exec nope'}),'[con_id=37] focus')
-        self.assertEqual(self.api['focus_command']({'num':0}), 'workspace number 0')
+        self.assertEqual(self.api['focus_command']({'num':10}), 'workspace number "10: Strata"')
         with self.assertRaises(ValueError):self.api['focus_command']({'id':'1; exit'})
 
     def test_picker_keeps_duplicate_titles_distinct_and_removes_line_breaks(self):

@@ -63,37 +63,37 @@ class WorkspaceTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             plans, sessions = service['collect'](
                 tree, resolver, Path(temporary), self.model['WorkspaceNames']())
-        self.assertEqual(plans[0]['new'], '3: LAB · ✦ Claude')
+        self.assertEqual(plans[0]['new'], '3: Lab · ✦ Claude')
         self.assertEqual([(item['id'], item['kind']) for item in sessions], [(7, 'claude')])
 
     def test_names_keep_numbers_and_do_not_accumulate_suffixes(self):
         names = self.model['WorkspaceNames']()
         ws = workspace(view(1, 100, 100))
         first = names.plan(ws, {'name': 'Codex', 'kind': 'codex'})
-        self.assertEqual(first['new'], '1: GHOST · ✦ Codex')
+        self.assertEqual(first['new'], '1: Ghost · ✦ Codex')
         names.accept(first)
         ws['name'] = first['new']
         second = names.plan(ws, {'name': 'Firefox', 'kind': 'app'})
-        self.assertEqual(second['new'], '1: GHOST · Firefox')
-        self.assertEqual(second['original'], '1')
+        self.assertEqual(second['new'], '1: Ghost · Firefox')
+        self.assertEqual(second['original'], '1: Ghost')
         names.accept(second)
         ws['name'] = second['new']
         empty = names.plan(ws, None)
-        self.assertEqual(empty['new'], '1: GHOST')
+        self.assertEqual(empty['new'], '1: Ghost')
 
     def test_missing_state_recovers_generated_workspace_name(self):
         names = self.model['WorkspaceNames']()
         plan = names.plan(workspace(name='1: GHOST · ✦ Claude · ✦ Claude'), {'name': 'Firefox'})
-        self.assertEqual(plan['new'], '1: GHOST · Firefox')
-        self.assertEqual(plan['original'], '1: GHOST')
+        self.assertEqual(plan['new'], '1: Ghost · Firefox')
+        self.assertEqual(plan['original'], '1: Ghost')
 
     def test_polluted_saved_base_is_repaired(self):
         polluted = '1: GHOST · ✦ Claude · ✦ Claude'
         names = self.model['WorkspaceNames']({'100': dict(original=polluted, base=polluted,
                                                          rendered=polluted + ' · Firefox')})
         plan = names.plan(workspace(name=polluted + ' · Firefox'), {'name': 'Codex', 'kind': 'codex'})
-        self.assertEqual(plan['new'], '1: GHOST · ✦ Codex')
-        self.assertEqual(plan['original'], '1: GHOST')
+        self.assertEqual(plan['new'], '1: Ghost · ✦ Codex')
+        self.assertEqual(plan['original'], '1: Ghost')
 
     def test_graceful_restart_retains_custom_base(self):
         names = self.model['WorkspaceNames']({'100': dict(original='1: My notes', base='1: My notes',
@@ -101,15 +101,15 @@ class WorkspaceTests(unittest.TestCase):
         plan = names.plan(workspace(name='1: My notes'), {'name': 'Foot'})
         self.assertEqual(plan['new'], '1: My notes · Foot')
 
-    def test_workspace_zero_keeps_strata_when_browser_changes(self):
+    def test_workspace_ten_keeps_strata_when_browser_changes(self):
         names = self.model['WorkspaceNames']()
-        ws = workspace(name='0')
-        ws['num'] = 0
+        ws = workspace(name='10')
+        ws['num'] = 10
         first = names.plan(ws, {'name': 'Fossil'})
-        self.assertEqual(first['new'], '0: STRATA · Fossil')
+        self.assertEqual(first['new'], '10: Strata · Fossil')
         names.accept(first)
         ws['name'] = first['new']
-        self.assertEqual(names.plan(ws, None)['new'], '0: STRATA')
+        self.assertEqual(names.plan(ws, None)['new'], '10: Strata')
 
     def test_workspace_six_is_available_for_ordinary_applications(self):
         plan = self.model['WorkspaceNames']().plan(workspace(name='6'), {'name': 'Foot'})
@@ -128,8 +128,54 @@ class WorkspaceTests(unittest.TestCase):
             with self.subTest(record=record):
                 names = self.model['WorkspaceNames']({'100': record})
                 plan = names.plan(workspace(), {'name': 'Firefox', 'kind': 'app'})
-                self.assertEqual(plan['new'], '1: GHOST · Firefox')
-                self.assertEqual(plan['original'], '1')
+                self.assertEqual(plan['new'], '1: Ghost · Firefox')
+                self.assertEqual(plan['original'], '1: Ghost')
+
+    def test_shared_workspace_names_are_complete_before_the_first_window(self):
+        expected = {1: '1: Ghost', 2: '2: Orbit', 3: '3: Lab', 4: '4: Signal',
+                    5: '5: Lounge', 10: '10: Strata'}
+        for number, name in expected.items():
+            for value in (number, str(number)):
+                with self.subTest(value=value):
+                    self.assertEqual(self.model['workspace_name'](value), name)
+            plan = self.model['WorkspaceNames']().plan(workspace(name=name), None)
+            self.assertEqual((plan['old'], plan['new'], plan['original']), (name, name, name))
+        for value in (0, 6, 7, 11, '04', 'Writing'):
+            with self.subTest(unknown=value):
+                self.assertEqual(self.model['workspace_name'](value), str(value))
+
+    def test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes(self):
+        defaults = {'1': 'Ghost', '2': 'Orbit', '3': 'Lab', '4': 'Signal',
+                    '5': 'Lounge', '10': 'Strata'}
+        for number, title in defaults.items():
+            canonical = f'{number}: {title}'
+            for suffix in ('', ' · Foot', ' · ✦ Codex · stale app'):
+                original = f'{number}: {title.upper()}' + suffix
+                with self.subTest(original=original):
+                    plan = self.model['WorkspaceNames']().plan(workspace(name=original), None)
+                    self.assertEqual(plan['new'], canonical)
+                    self.assertEqual(plan['original'], canonical)
+
+    def test_saved_uppercase_and_numeric_originals_restore_complete_names(self):
+        for original in ('4', '4: SIGNAL', '4: SIGNAL · stale app'):
+            with self.subTest(original=original):
+                names = self.model['WorkspaceNames']({'100': {
+                    'original': original, 'base': '4: SIGNAL', 'rendered': '4: SIGNAL · Foot'}})
+                plan = names.plan(workspace(name='4: SIGNAL · Foot'), None)
+                self.assertEqual((plan['new'], plan['base'], plan['original']),
+                                 ('4: Signal', '4: Signal', '4: Signal'))
+                names.accept(plan)
+                self.assertEqual(names.records['100']['original'], '4: Signal')
+
+    def test_migration_preserves_custom_names_and_manual_case(self):
+        for original in ('4: signal', '4: sIgNaL', '4: SIGNAL notes', '4: Signal notes',
+                         '4: My RADIO', '0: STRATA', '6: STRATA', 'Writing'):
+            with self.subTest(original=original):
+                plan = self.model['WorkspaceNames']().plan(workspace(name=original), None)
+                self.assertEqual((plan['new'], plan['original']), (original, original))
+                saved = self.model['WorkspaceNames']({'100': {
+                    'original': original, 'base': original, 'rendered': original + ' · Foot'}})
+                self.assertEqual(saved.plan(workspace(name=original + ' · Foot'), None)['new'], original)
 
     def test_unaddressable_manual_workspace_name_is_left_unchanged(self):
         original = 'manual" \\ $term\nname'

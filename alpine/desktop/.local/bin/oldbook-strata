@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep STRATA, the local Fossil review workspace, available in workspace zero."""
+"""Keep STRATA, the local Fossil review workspace, available in workspace ten."""
 import fcntl
 import hashlib
 import json
@@ -135,10 +135,11 @@ class StrataService:
 
         windows = review_windows(tree)
         for window, workspace in windows:
-            if workspace != 0:
+            if workspace != 10:
                 try:
                     IPC['command'](self.sway_socket,
-                                   f'[con_id={window["id"]}] move container to workspace number 0')
+                                   f'[con_id={window["id"]}] move container to workspace number '
+                                   + json.dumps(IPC['workspace_name'](10)))
                 except RuntimeError:
                     # A window can close between GET_TREE and the move.
                     pass
@@ -336,12 +337,17 @@ def launch(directory, sway_socket, log):
                              start_new_session=True)
         deadline = time.monotonic() + 30
         while time.monotonic() < deadline:
-            existing = review_window(IPC['request'](sway_socket, 4))
-            if existing is not None:
-                IPC['command'](sway_socket,
-                               f'[con_id={existing}] move container to workspace number 0')
-                IPC['command'](sway_socket, f'[con_id={existing}] focus')
-                return
+            try:
+                existing = review_window(IPC['request'](sway_socket, 4))
+                if existing is not None:
+                    IPC['command'](sway_socket,
+                                   f'[con_id={existing}] move container to workspace number '
+                                   + json.dumps(IPC['workspace_name'](10)))
+                    IPC['command'](sway_socket, f'[con_id={existing}] focus')
+                    return
+            except (OSError, RuntimeError):
+                # A busy compositor or closing window can invalidate one try.
+                pass
             time.sleep(.1)
         raise RuntimeError('STRATA did not open; see ~/.local/state/oldbook/strata.log')
 

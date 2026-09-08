@@ -1,5 +1,5 @@
 """One-time placement of designated instances and independent artwork choices."""
-DEFAULTS = {'Codex': 1, 'Pithos': 2, 'claude': 3, 'btop': 4, 'Firefox': 5, 'Fossil': 0}
+DEFAULTS = {'Codex': 1, 'Pithos': 2, 'claude': 3, 'btop': 4, 'Firefox': 5, 'Fossil': 10}
 
 
 class Placement:
