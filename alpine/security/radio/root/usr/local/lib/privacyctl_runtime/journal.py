@@ -77,25 +77,53 @@ def _unique(values):
     return result
 
 
+def record_context(record):
+    """Effective writer context; original v2 identity is inert provenance."""
+    return copy.deepcopy(record['recovery_context'] if record['version'] == 2 else
+                         {key: record[key] for key in ('boot_id', 'observer_pidns', 'target_netns')})
+
+
+def _rollover_record(previous, context):
+    _fields(context, 'boot_id observer_pidns target_netns')
+    _require(context['boot_id'] != record_context(previous)['boot_id'], 'boot did not change')
+    value = copy.deepcopy(previous)
+    value.update(version=2, phase='reboot-dns', sequence=previous['sequence'] + 1,
+                 recovery_context=copy.deepcopy(context), writers={'native': None, 'dhcp': None})
+    value['resources']['addresses'] = []
+    value['resources']['routes'] = []
+    return validate_record(value)
+
+
 def validate_record(record):
-    """Validate schema v1 and return an independent, deduplicated JSON record.
+    """Validate v1 leases or v2 DNS retirement, returning independent JSON.
 
     This is structural validation only. Boot, link cookie, and writer identity
     proofs belong to recovery and are deliberately not inferred from this data.
     """
+    _require(type(record) is dict, 'invalid journal object')
+    version = record.get('version')
+    _integer(version, 1, 2)
     _fields(record, 'version sequence generation boot_id observer_pidns target_netns '
-                    'interface ifindex phase cookie previous_alias resources writers')
-    _integer(record['version'], 1, 1)
+                    'interface ifindex phase cookie previous_alias resources writers' +
+                    (' recovery_context' if version == 2 else ''))
     _integer(record['sequence'])
     _text(record['generation'], r'[0-9a-f]{32}')
     _text(record['boot_id'], r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}')
     _require(str(uuid.UUID(record['boot_id'])) == record['boot_id'], 'invalid boot ID')
     _namespace(record['observer_pidns'])
     _namespace(record['target_netns'])
+    if version == 2:
+        context = record['recovery_context']
+        _fields(context, 'boot_id observer_pidns target_netns')
+        _text(context['boot_id'], r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}')
+        _require(context['boot_id'] != record['boot_id'], 'DNS retirement must follow the original boot')
+        _namespace(context['observer_pidns'])
+        _namespace(context['target_netns'])
     _text(record['interface'], r'[A-Za-z0-9][A-Za-z0-9_.-]{0,14}')
     _integer(record['ifindex'])
-    _require(type(record['phase']) is str and record['phase'] in
-             ('alias-intent', 'active', 'alias-restore-intent', 'clean'), 'invalid phase')
+    phases = ('alias-intent', 'active', 'alias-restore-intent', 'clean') if version == 1 else (
+        'reboot-dns', 'reboot-clean')
+    _require(type(record['phase']) is str and record['phase'] in phases, 'invalid phase')
     _require(type(record['cookie']) is str and
              record['cookie'] == 'privacyctl:' + record['generation'], 'invalid link cookie')
     alias = record['previous_alias']
@@ -158,11 +186,14 @@ def validate_record(record):
         _integer(value['nspid'], 1, 1)
         _text(value['operation'], r'[a-z][a-z-]{0,63}')
     empty = not any(resources.values())
-    if record['phase'] != 'active':
+    if version == 2:
+        _require(not resources['addresses'] and not resources['routes'], 'kernel resources in DNS retirement')
+        _require(record['writers']['dhcp'] is None, 'DHCP writer in DNS retirement')
+    if record['phase'] not in ('active', 'reboot-dns'):
         _require(empty, 'resources contradict journal phase')
     if record['phase'] in ('alias-restore-intent', 'clean'):
         _require(record['writers']['dhcp'] is None, 'DHCP writer contradicts phase')
-    if record['phase'] == 'clean':
+    if record['phase'] in ('clean', 'reboot-clean'):
         _require(record['writers']['native'] is None, 'native writer contradicts clean phase')
     result = copy.deepcopy(record)
     for key in ('addresses', 'routes', 'dns_contents'):
@@ -300,6 +331,19 @@ class Journal:
         return value
 
     def write(self, record):
+        return self._write(record)
+
+    def rollover_boot(self, context):
+        """Retire extinct kernel intent; caller authenticates the new kernel context.
+
+        Only this explicit transition may replace effective writer context. DNS
+        intent and original provenance survive; ordinary writes remain immutable.
+        """
+        _require(self._token is not _UNREAD and self._record is not None,
+                 'rollover requires an existing loaded journal')
+        return self._write(_rollover_record(self._record, context), rollover=True)
+
+    def _write(self, record, *, rollover=False):
         value = validate_record(record)
         data = (json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=True)
                 + '\n').encode('ascii')
@@ -312,6 +356,17 @@ class Journal:
                 for key in ('generation', 'boot_id', 'observer_pidns', 'target_netns',
                             'interface', 'ifindex', 'cookie', 'previous_alias'):
                     _require(value[key] == previous[key], 'journal lease identity changed')
+                if rollover:
+                    _require(value == _rollover_record(previous, value['recovery_context']),
+                             'invalid boot rollover')
+                else:
+                    _require(value['version'] == previous['version'] and
+                             record_context(value) == record_context(previous),
+                             'journal recovery context changed without rollover')
+                    if previous['phase'] == 'reboot-clean':
+                        _require(value['phase'] == 'reboot-clean', 'completed DNS retirement cannot reopen')
+            else:
+                _require(not rollover and value['version'] == 1, 'retirement requires an existing journal')
             temporary = '.journal-' + secrets.token_hex(16)
             fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL |
                          os.O_NOFOLLOW | os.O_CLOEXEC, 0o600, dir_fd=directory)
@@ -340,7 +395,7 @@ class Journal:
         return copy.deepcopy(value)
 
     def remove(self):
-        _require(self._record is not None and self._record['phase'] == 'clean',
+        _require(self._record is not None and self._record['phase'] in ('clean', 'reboot-clean'),
                  'only a loaded clean journal may be removed')
         with self._directory() as directory:
             self._unchanged(directory)

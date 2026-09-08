@@ -1,0 +1,36 @@
+{
+  "scenarios": [],
+  "isolation": "private HOME, XDG data, runtime, compositor",
+  "sources": {
+    "alpine/desktop/.local/bin/oldbook-scripture-bar": "3db894e0dddf6835695eb035d81345c591a73a7399e81c0d3c00908bb16e0819",
+    "alpine/desktop/.local/bin/oldbook-scripture": "63c08023ffc8a4412b753391d33351a366e5c647f0566cc7c15ceee522c01442",
+    "alpine/desktop/.local/lib/oldbook/scripture_search.py": "8515dd357149538923368fd23f9cae1311bca702206aa141049d32adcd9907c4",
+    "alpine/desktop/.local/lib/oldbook/scripture_bar_ipc.py": "f921491b10fccc8f6f1e3ac6cf1224121ad8dcc8e2f20b286fcd4ae553a8a9af",
+    "alpine/tests/verify_scripture_inline.py": "35b611d584a13648f38d7abbc5aae8170898603e8646c755b78d02fc4c3fdd14"
+  },
+  "passed": false,
+  "error": "AssertionError('Timed out waiting for inline typed Bible result')",
+  "last_bar": {
+    "editing": false,
+    "focus_received": false,
+    "active": false,
+    "entry_focus": false,
+    "text": "",
+    "scope": "bible",
+    "results": [],
+    "selected": null,
+    "layer": 1,
+    "keyboard": 0,
+    "gtk_windows": 1,
+    "window_identity": 139961900538928,
+    "pid": 26396,
+    "label": "Search Bible \u00b7 right-click for reflections & study",
+    "width": 760,
+    "height": 41
+  },
+  "cleanup": {
+    "private_clients_stopped": 7,
+    "forced_clients": 0
+  },
+  "private_survivors": []
+}

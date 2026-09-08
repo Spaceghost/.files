@@ -10,6 +10,15 @@ without force. Keep Fossil's broad autopush disabled. Failed publication can be
 retried even when there are no new Fossil check-ins. Authenticate Git through
 the local credential helper; never put tokens in remote URLs or source files.
 
+The user subsequently authorized continuous publication. A user cron job
+runs the explicit publisher every minute, sharing its mirror lock with manual
+runs. Push only committed `alpine-oldbook` changes; suppress inherited tag
+following. Record a successful publication only after verifying GitHub's branch
+ID, so failed pushes retry without a new commit. Skip network requests for an
+unchanged verified commit. Bound command execution and diagnostic logs, retain
+an inspectable status file, preserve unrelated cron jobs, and provide removal.
+Cron does not create commits or publish full Fossil database backups.
+
 Other hosts may bootstrap a new Fossil repository from GitHub through Git
 fast-export/import. This is a source recovery path, not native Fossil cloning:
 project/check-in identities change, and Git excludes unversioned artifacts.

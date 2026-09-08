@@ -1,0 +1,23 @@
+{
+  "observed_utc": "2026-09-08T05:01:49.044478+00:00",
+  "method": "Read-only live carousel process descriptors/maps and DRM sysfs identifiers; no window presented",
+  "pid": 2337,
+  "graphics_descriptors": [
+    "/dev/dri/renderD128",
+    "/dev/dri/renderD128",
+    "/dev/dri/renderD128"
+  ],
+  "graphics_libraries": [
+    "/usr/lib/libEGL.so.1.0.0",
+    "/usr/lib/libGL.so.1.2.0",
+    "/usr/lib/libGLESv2.so.2.0.0",
+    "/usr/lib/libgallium-26.1.6.so",
+    "/usr/lib/libvulkan.so.1.4.360"
+  ],
+  "render_node": "/dev/dri/renderD128",
+  "pci_address": "0000:01:00.0",
+  "driver": "radeon",
+  "pci_vendor": "0x1002",
+  "pci_device": "0x6821",
+  "limitation": "Mapped libraries and DRM descriptors do not identify the GSK renderer or prove presented frame pacing."
+}

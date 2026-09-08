@@ -1,0 +1,343 @@
+{
+  "status": "failed",
+  "waybar": "/usr/bin/waybar",
+  "checks": [
+    "closed only acknowledged event subscription sockets"
+  ],
+  "host_changes": 0,
+  "waybar_sha256": "55ed88cb61fe3ba8bf93af291849d76444d7aca5097867dcb10d730e1a93f21f",
+  "verifier_sha256": "3f0bb5d14c269680d46c4b670055a38a719fbb9b2db7d822fd7c04ea3a2ed9fe",
+  "stress_seconds_requested": 0,
+  "isolation": "private HOME, XDG directories, D-Bus, headless Sway and Unix IPC proxy",
+  "initial_buttons": {
+    "1": [
+      "visible",
+      "flat",
+      "text-button",
+      "focused",
+      "current_output"
+    ],
+    "2": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "3": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "4": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "5": [
+      "flat",
+      "text-button",
+      "current_output"
+    ]
+  },
+  "subscription_payloads_before_fault": [
+    [
+      [
+        "workspace"
+      ],
+      [
+        "window"
+      ]
+    ]
+  ],
+  "sway_after_fault": [
+    {
+      "id": 4,
+      "type": "workspace",
+      "orientation": "horizontal",
+      "percent": null,
+      "urgent": false,
+      "marks": [],
+      "layout": "splith",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 800,
+        "height": 568
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "1",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        8,
+        5
+      ],
+      "fullscreen_mode": 1,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "num": 1,
+      "output": "HEADLESS-1",
+      "representation": "H[ipc-one ipc-one-extra]",
+      "focused": false,
+      "visible": false
+    },
+    {
+      "id": 6,
+      "type": "workspace",
+      "orientation": "horizontal",
+      "percent": null,
+      "urgent": false,
+      "marks": [],
+      "layout": "splith",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 800,
+        "height": 568
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "2: Recovered Name",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        9,
+        7
+      ],
+      "fullscreen_mode": 1,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "num": 2,
+      "output": "HEADLESS-1",
+      "representation": "H[ipc-two ipc-two-extra]",
+      "focused": true,
+      "visible": true
+    },
+    {
+      "id": 10,
+      "type": "workspace",
+      "orientation": "horizontal",
+      "percent": null,
+      "urgent": false,
+      "marks": [],
+      "layout": "splith",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 800,
+        "height": 568
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "3",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        12,
+        11
+      ],
+      "fullscreen_mode": 1,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "num": 3,
+      "output": "HEADLESS-1",
+      "representation": "H[ipc-three-title ipc-three-extra]",
+      "focused": false,
+      "visible": false
+    },
+    {
+      "id": 13,
+      "type": "workspace",
+      "orientation": "horizontal",
+      "percent": null,
+      "urgent": false,
+      "marks": [],
+      "layout": "splith",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 800,
+        "height": 568
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "4",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        14
+      ],
+      "fullscreen_mode": 1,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "num": 4,
+      "output": "HEADLESS-1",
+      "representation": "H[ipc-four-title]",
+      "focused": false,
+      "visible": false
+    },
+    {
+      "id": 15,
+      "type": "workspace",
+      "orientation": "horizontal",
+      "percent": null,
+      "urgent": false,
+      "marks": [],
+      "layout": "splith",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 800,
+        "height": 568
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "5",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        16
+      ],
+      "fullscreen_mode": 1,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "num": 5,
+      "output": "HEADLESS-1",
+      "representation": "H[ipc-five-title]",
+      "focused": false,
+      "visible": false
+    }
+  ],
+  "recovery_cpu_percent": 35.37,
+  "buttons_after_fault": {
+    "1": [
+      "visible",
+      "flat",
+      "text-button",
+      "focused",
+      "current_output"
+    ],
+    "2": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "3": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "4": [
+      "flat",
+      "text-button",
+      "current_output"
+    ],
+    "5": [
+      "flat",
+      "text-button",
+      "current_output"
+    ]
+  },
+  "subscriptions_after_fault": 1,
+  "error": "Waybar did not reconnect and refresh renamed workspace 2 without a later event"
+}

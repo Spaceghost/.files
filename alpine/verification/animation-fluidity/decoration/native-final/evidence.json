@@ -1,0 +1,22 @@
+{
+  "status": "failed",
+  "checks": [],
+  "states": {},
+  "screenshots": [],
+  "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
+  "host_config_changes": 0,
+  "prioritize_private_ui": true,
+  "verifier_sha256": "eb0a3500e30a284b247c9c7594e11e70d9218e2dedb99a802c320a288389f665",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "4743f794d571905b0b0c30758dfb8a5066bd1126e01677d9da9190dcf4aba9e3",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230",
+    "alpine/desktop/.local/lib/oldbook/decoration_motion.py": "f67bed21fed21eadf6fc5b40c5da0a1af62a5263acdd5f3718ca3cd94cb5cea3",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "a20217bb856a1abfc28127ef9d480bf98c812c5740dbe278c31d39569d24340f",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "alpine/desktop/.local/lib/oldbook/ui_priority.py": "dc192c23e33fcfb63863c2d8078963355fe14e2cbac68c3f8ce560510adc044b"
+  },
+  "error": "private UI priority was not applied with child reset",
+  "private_survivors": []
+}

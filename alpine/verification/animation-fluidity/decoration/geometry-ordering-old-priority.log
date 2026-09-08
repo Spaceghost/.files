@@ -1,0 +1,28 @@
+test_geometry_update_reaches_main_loop_before_ready_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_ready_redrawing) ... FAIL
+
+======================================================================
+FAIL: test_geometry_update_reaches_main_loop_before_ready_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_ready_redrawing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration.py", line 101, in test_geometry_update_reaches_main_loop_before_ready_redrawing
+    self.assertEqual(events, ['geometry'],
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+                     'redrawing delayed the pending caption geometry')
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['redraw', 'geometry'] != ['geometry']
+
+First differing element 0:
+'redraw'
+'geometry'
+
+First list contains 1 additional elements.
+First extra element 1:
+'geometry'
+
+- ['redraw', 'geometry']
++ ['geometry'] : redrawing delayed the pending caption geometry
+
+----------------------------------------------------------------------
+Ran 1 test in 0.467s
+
+FAILED (failures=1)

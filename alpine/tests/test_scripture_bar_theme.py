@@ -27,6 +27,8 @@ initial = sys.argv[3]
 scope = api['SearchBar'].__init__.__globals__
 scope['REPO'] = root
 scope['STATE'] = root / 'state'
+scope['FINDER'] = root / 'noop-scripture'
+scope['FINDER'].write_text('raise SystemExit(0)\n')
 from overlay_theme import read_palette
 scope['read_palette'] = lambda: read_palette(themes)
 bar = api['SearchBar']()

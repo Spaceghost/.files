@@ -1,77 +1,583 @@
-#!/bin/sh
-# The MacBook's keyboard light is an LED, separate from the display backlight.
-set -eu
+#!/usr/bin/env python3
+"""Whole-keyboard Apple SMC lighting; animation never replaces saved brightness."""
 
-action=${1:-}
-case "$action" in
-    up|down|toggle|restore) ;;
-    *) printf '%s\n' 'usage: mbp-intel-keyboard-backlight {up|down|toggle|restore}' >&2; exit 64 ;;
-esac
-[ "$#" -eq 1 ] || exit 64
+import contextlib
+import errno
+import fcntl
+import json
+import math
+import os
+from collections import deque
+from pathlib import Path
+import select
+import signal
+import socket
+import stat
+import struct
+import subprocess
+import sys
+import tempfile
+import threading
+import time
 
-notify() {
-    command -v notify-send >/dev/null 2>&1 || return 0
-    notify-send "$@" >/dev/null 2>&1 || :
-}
 
-fail() {
-    printf '%s\n' "$1" >&2
-    notify 'Keyboard backlight' "$1"
-    exit 1
-}
+DEVICE = 'smc::kbd_backlight'
+PERIOD = 6.0
+INTERVAL = 1.0 / 60.0
+INPUT_EVENT = struct.Struct('@llHHI')
+INPUT_EVENT_SIZE = INPUT_EVENT.size
+INPUT_KEY = 1
+INPUT_PRESS = {1, 2}
+MAX_KEYS_PER_FRAME = 64
+ACTIONS = ('up', 'down', 'toggle', 'restore', 'breathe', 'steady',
+           'typing', 'typing-dark', 'typing-wpm', 'typing-dark-wpm',
+           'status')
+ACTIVE_MODES = {'breathing', 'typing', 'typing-dark', 'typing-wpm',
+                'typing-dark-wpm'}
+TYPING_RISING_MODES = {'typing', 'typing-wpm'}
+TYPING_DARKING_MODES = {'typing-dark', 'typing-dark-wpm'}
+TYPING_WPM_MODES = {'typing-wpm', 'typing-dark-wpm'}
+TYPING_WPM_THRESHOLD = 22
+TYPING_WPM_WINDOW = 5.0
 
-device=smc::kbd_backlight
-brightness() {
-    brightnessctl --class=leds --device="$device" --min-value=0 "$@"
-}
 
-command -v brightnessctl >/dev/null 2>&1 || fail 'Install brightnessctl to control the keyboard light.'
-if ! current=$(brightness get 2>/dev/null); then
-    # This desktop overlay is also usable on machines without an Apple SMC.
-    [ "$action" != restore ] || exit 0
-    fail 'The kernel did not expose the Apple SMC keyboard backlight.'
-fi
+def notify(message, percent=None):
+    args = ['notify-send', '-h',
+            'string:x-canonical-private-synchronous:mbp-intel-keyboard-backlight']
+    if percent is not None:
+        args += ['-h', f'int:value:{percent}']
+    try:
+        subprocess.run(args + ['Keyboard backlight', message],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=2, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
 
-state_dir=${XDG_STATE_HOME:-$HOME/.local/state}/mbp-intel
-state_file=$state_dir/keyboard-backlight
-umask 077
-mkdir -p "$state_dir"
-# Key repeat may launch overlapping helpers; serialize hardware and saved state.
-exec 9> "$state_file.lock"
-flock -x 9
-current=$(brightness get)
 
-case "$action" in
-    up) value=10%+ ;;
-    down) value=10%- ;;
-    toggle)
-        if [ "$current" -gt 0 ]; then value=0; else value=25%; fi
-        ;;
-    restore)
-        value=$(cat "$state_file" 2>/dev/null || :)
-        case "$value" in
-            ''|*[!0-9]*)
-                # First use preserves an existing level or gently enables it.
-                if [ "$current" -gt 0 ]; then value=$current; else value=25%; fi
-                ;;
-        esac
-        ;;
-esac
+def _mode_peak(maximum, mode, level):
+    if not level and mode in {'typing-dark', 'typing-dark-wpm'}:
+        return maximum
+    if not level:
+        return max(1, round(maximum * 0.25))
+    return level
 
-if ! brightness --quiet set "$value"; then
-    fail 'Cannot write the keyboard light. Check brightnessctl udev rules and input-group membership.'
-fi
-current=$(brightness get)
-maximum=$(brightness max)
-temporary=$(mktemp "$state_file.XXXXXX")
-trap 'rm -f "$temporary"' EXIT HUP INT TERM
-printf '%s\n' "$current" > "$temporary"
-mv -f "$temporary" "$state_file"
 
-# Restoring on login is quiet. Reloading Sway does not run this startup command.
-if [ "$action" != restore ]; then
-    percent=$(((current * 100 + maximum / 2) / maximum))
-    notify -h int:value:"$percent" \
-        -h string:x-canonical-private-synchronous:mbp-intel-keyboard-backlight \
-        'Keyboard backlight' "$percent%"
-fi
+def _typing_step(maximum):
+    return max(1, int(maximum * 0.08))
+
+
+def _typing_decay(maximum):
+    return max(1, int(maximum * 0.06))
+
+
+def _typing_wpm(sample_times, now):
+    if not sample_times:
+        return 0.0
+    elapsed = now - sample_times[0]
+    if not elapsed:
+        return 0.0
+    return (len(sample_times) * 60.0 / elapsed / 5.0)
+
+
+def _clamp(value, minimum, maximum):
+    return max(minimum, min(maximum, value))
+
+
+class KeyboardBacklight:
+    def __init__(self, led_dir, state_dir, runtime_dir, session=None):
+        self.led_dir = Path(led_dir)
+        self.state_dir = Path(state_dir)
+        self.runtime_dir = Path(runtime_dir)
+        self.session = Path(session) if session else None
+        self.level_file = self.state_dir / 'keyboard-backlight'
+        self.mode_file = self.state_dir / 'keyboard-backlight-mode'
+        self.owner_file = self.runtime_dir / 'keyboard-backlight-owner'
+        self.state_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+        self.runtime_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    @contextlib.contextmanager
+    def locked(self):
+        with (self.state_dir / 'keyboard-backlight.lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            yield
+
+    def save(self, path, value):
+        fd, temporary = tempfile.mkstemp(prefix=path.name + '.', dir=path.parent)
+        try:
+            with os.fdopen(fd, 'w') as stream:
+                stream.write(str(value) + '\n')
+            os.replace(temporary, path)
+        finally:
+            with contextlib.suppress(FileNotFoundError):
+                os.unlink(temporary)
+
+    def read(self, name):
+        return int((self.led_dir / name).read_text().strip())
+
+    def saved_level(self, maximum):
+        try:
+            level = int(self.level_file.read_text().strip())
+            if not 0 <= level <= maximum:
+                raise ValueError('out of range')
+        except (FileNotFoundError, ValueError):
+            return None
+        return level
+
+    def settings(self):
+        maximum = self.read('max_brightness')
+        if maximum <= 0:
+            raise ValueError('The keyboard light reports an invalid maximum.')
+        level = self.saved_level(maximum)
+        if level is None:
+            level = max(0, min(maximum, self.read('brightness')))
+        try:
+            mode = self.mode_file.read_text().strip()
+        except FileNotFoundError:
+            mode = 'steady'
+        if mode not in {'steady', 'breathing', 'typing', 'typing-dark',
+                        'typing-wpm', 'typing-dark-wpm'}:
+            mode = 'steady'
+        if mode in ACTIVE_MODES and not level:
+            level = max(1, round(maximum * 0.25))
+            if mode in {'typing-dark', 'typing-dark-wpm'}:
+                level = maximum
+        return maximum, level, mode
+
+    def write(self, value):
+        (self.led_dir / 'brightness').write_text(str(value) + '\n')
+
+    def running(self):
+        with (self.runtime_dir / 'keyboard-backlight.run.lock').open('a') as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return True
+        return False
+
+    def status(self):
+        if not (self.led_dir / 'brightness').exists():
+            return dict(available=False, device=DEVICE, control='whole-keyboard',
+                        per_key=False, running=False)
+        with self.locked():
+            maximum, level, mode = self.settings()
+            return dict(available=True, device=DEVICE, control='whole-keyboard',
+                        per_key=False, maximum=maximum, brightness=self.read('brightness'),
+                        level=level, mode=mode, running=self.running())
+
+    def _open_key_devices(self):
+        handles = {}
+        poller = select.poll()
+        for path in sorted(Path('/dev/input').glob('event*')):
+            try:
+                if not stat.S_ISCHR(path.stat().st_mode):
+                    continue
+            except OSError:
+                continue
+            try:
+                handle = os.open(str(path), os.O_RDONLY | os.O_NONBLOCK)
+                poller.register(handle, select.POLLIN | select.POLLHUP | select.POLLERR | select.POLLNVAL)
+                handles[handle] = path
+            except OSError:
+                continue
+        return poller, handles
+
+    @staticmethod
+    def _consume_key_presses(poller, handles, deadline):
+        presses = 0
+        while handles and presses < MAX_KEYS_PER_FRAME:
+            timeout = int(max(0, deadline - time.monotonic()) * 1000)
+            if timeout <= 0:
+                break
+            for fd, flags in poller.poll(timeout):
+                if flags & (select.POLLHUP | select.POLLERR | select.POLLNVAL):
+                    with contextlib.suppress(OSError):
+                        poller.unregister(fd)
+                        os.close(fd)
+                    handles.pop(fd, None)
+                    continue
+                if not (flags & select.POLLIN):
+                    continue
+                try:
+                    payload = os.read(fd, INPUT_EVENT_SIZE * 16)
+                except OSError:
+                    with contextlib.suppress(OSError):
+                        poller.unregister(fd)
+                        os.close(fd)
+                    handles.pop(fd, None)
+                    continue
+                if not payload:
+                    with contextlib.suppress(OSError):
+                        poller.unregister(fd)
+                        os.close(fd)
+                    handles.pop(fd, None)
+                    continue
+                for offset in range(0, len(payload) - INPUT_EVENT_SIZE + 1, INPUT_EVENT_SIZE):
+                    try:
+                        _, _, event_type, _code, value = INPUT_EVENT.unpack(
+                            payload[offset:offset + INPUT_EVENT_SIZE])
+                    except struct.error:
+                        continue
+                    if event_type == INPUT_KEY and value in INPUT_PRESS:
+                        presses += 1
+                        if presses >= MAX_KEYS_PER_FRAME:
+                            return presses
+        return presses
+
+    def command(self, action, spawn=True):
+        if action == 'status':
+            return self.status()
+        if action not in ACTIONS:
+            raise ValueError(f'Unknown keyboard-light action: {action}')
+        if action == 'restore' and not (self.led_dir / 'brightness').exists():
+            return self.status()
+        with self.locked():
+            maximum, level, mode = self.settings()
+            previous_mode = mode
+            step = max(1, int(maximum * 0.1))
+            if action == 'up':
+                level = min(maximum, level + step)
+            elif action == 'down':
+                level = max(0, level - step)
+            elif action == 'toggle':
+                level = 0 if level else max(1, round(maximum * 0.25))
+            elif action == 'breathe':
+                mode = 'steady' if mode == 'breathing' else 'breathing'
+            elif action == 'steady':
+                mode = 'steady'
+            elif action == 'typing':
+                mode = 'typing'
+            elif action == 'typing-dark':
+                mode = 'typing-dark'
+            elif action == 'typing-wpm':
+                mode = 'typing-wpm'
+            elif action == 'typing-dark-wpm':
+                mode = 'typing-dark-wpm'
+
+            if action in {'typing', 'typing-dark', 'typing-wpm',
+                          'typing-dark-wpm'} or (
+                    action == 'breathe' and mode == 'breathing'):
+                level = _mode_peak(maximum, mode, level)
+
+            if action == 'restore' and not level and self.saved_level(maximum) is None:
+                level = max(1, round(maximum * 0.25))
+            if not level and mode in ACTIVE_MODES:
+                mode = 'steady'
+
+            if mode in ACTIVE_MODES:
+                trigger = self.led_dir / 'trigger'
+                if trigger.exists() and '[none]' not in trigger.read_text():
+                    raise ValueError('Another kernel trigger controls the keyboard light.')
+                if previous_mode not in ACTIVE_MODES or previous_mode != mode or not self.running():
+                    # Reject a stale login before changing its saved preference.
+                    _, peer = self.connect_session()
+                    if peer is not None:
+                        peer.close()
+
+            if mode == 'steady' or not self.running():
+                self.write(level)
+            self.save(self.level_file, level)
+            self.save(self.mode_file, mode)
+        if mode in ACTIVE_MODES and spawn:
+            self.start()
+        return self.status()
+
+    def session_identity(self, session=None):
+        session = self.session if session is None else Path(session)
+        if session is None:
+            return None
+        node = session.stat()
+        if node.st_uid != os.getuid() or not stat.S_ISSOCK(node.st_mode):
+            raise ValueError('The supplied Sway socket is not owned by this user.')
+        return node.st_dev, node.st_ino
+
+    def connect_session(self, session=None):
+        session = self.session if session is None else Path(session)
+        identity = self.session_identity(session)
+        if identity is None:
+            return None, None
+        peer = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        peer.settimeout(2)
+        try:
+            deadline = time.monotonic() + 2
+            while True:
+                try:
+                    peer.connect(str(session))
+                    break
+                except OSError as error:
+                    if error.errno != errno.EAGAIN or time.monotonic() >= deadline:
+                        raise
+                    time.sleep(0.025)
+            _, uid, _ = struct.unpack('3i', peer.getsockopt(
+                socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize('3i')))
+            if uid != os.getuid() or self.session_identity(session) != identity:
+                raise ValueError('The Sway session no longer belongs to this login.')
+            if not self.session_alive(identity, peer, session):
+                raise ValueError('The Sway session has already stopped.')
+            return identity, peer
+        except BaseException:
+            peer.close()
+            raise
+
+    def session_alive(self, identity, peer, session=None):
+        if self.session_identity(session) != identity:
+            return False
+        if peer is None:
+            return True
+        watcher = select.poll()
+        watcher.register(peer, select.POLLHUP | select.POLLERR | select.POLLNVAL |
+                             getattr(select, 'POLLRDHUP', 0))
+        return not watcher.poll(0)
+
+    def owner_session(self, identity):
+        return dict(session=str(self.session) if self.session is not None else None,
+                    identity=list(identity) if identity is not None else None)
+
+    def read_owner(self):
+        try:
+            owner = json.loads(self.owner_file.read_text())
+            if isinstance(owner, dict) and 'session' in owner and 'identity' in owner:
+                return owner
+        except (FileNotFoundError, ValueError):
+            pass
+        raise RuntimeError('Another keyboard breathing worker owns the light without a session record.')
+
+    def owner_alive(self, owner):
+        if owner['session'] is None:
+            return True
+        try:
+            identity, peer = self.connect_session(owner['session'])
+        except (OSError, ValueError):
+            return False
+        try:
+            return list(identity) == owner['identity']
+        finally:
+            peer.close()
+
+    def start(self):
+        deadline = time.monotonic() + 5
+        handoff_deadline = time.monotonic() + 2
+        launched = False
+        while time.monotonic() < deadline:
+            owner = None
+            launch = False
+            with self.locked():
+                if self.settings()[2] not in ACTIVE_MODES:
+                    return
+                expected = self.owner_session(self.session_identity())
+                if self.running():
+                    owner = self.read_owner()
+                    if owner == expected:
+                        return
+                elif not launched:
+                    launch = True
+            if owner is not None:
+                alive = self.owner_alive(owner)
+                with self.locked():
+                    if self.settings()[2] not in ACTIVE_MODES:
+                        return
+                    if not self.running() or self.read_owner() != owner:
+                        continue
+                    if alive:
+                        raise RuntimeError('The keyboard light belongs to another active desktop session.')
+                    if time.monotonic() >= handoff_deadline:
+                        raise RuntimeError('The previous desktop session has not released the keyboard light.')
+            elif launch:
+                with (self.runtime_dir / 'keyboard-backlight.log').open('a') as log:
+                    subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'daemon'],
+                                     stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                                     start_new_session=True, close_fds=True)
+                launched = True
+            time.sleep(0.025)
+        raise RuntimeError('The keyboard breathing worker did not start; inspect keyboard-backlight.log.')
+
+    def serve(self, stop_event=None):
+        stop = stop_event if stop_event is not None else threading.Event()
+        with (self.runtime_dir / 'keyboard-backlight.run.lock').open('a') as owner:
+            if self.running():
+                return False
+            identity, peer = self.connect_session()
+            owned = False
+            poller = None
+            handles = None
+            previous = None
+            mode = None
+            anchor_level = None
+            anchor_time = None
+            observed_level = None
+            wpm_samples = deque()
+            try:
+                with self.locked():
+                    try:
+                        fcntl.flock(owner, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    except BlockingIOError:
+                        return False
+                    owned = True
+                    self.save(self.owner_file, json.dumps(self.owner_session(identity)))
+                started = time.monotonic()
+                next_frame = started
+                next_session_check = started
+                while not stop.is_set():
+                    if time.monotonic() >= next_session_check:
+                        try:
+                            if not self.session_alive(identity, peer):
+                                break
+                        except (OSError, ValueError):
+                            break
+                        next_session_check = time.monotonic() + 1
+
+                    now = time.monotonic()
+                    next_frame = max(next_frame, now)
+                    with self.locked():
+                        maximum, level, current_mode = self.settings()
+                        if current_mode not in ACTIVE_MODES:
+                            try:
+                                self.write(level)
+                            finally:
+                                fcntl.flock(owner, fcntl.LOCK_UN)
+                                owned = False
+                            return True
+
+                        if mode != current_mode:
+                            mode = current_mode
+                            anchor_level = float(level)
+                            anchor_time = now
+                            observed_level = level
+                            wpm_samples.clear()
+                        elif observed_level != level:
+                            anchor_level = float(level)
+                            anchor_time = now
+                            observed_level = level
+
+                        if mode == 'breathing':
+                            wave = (1 + math.cos(2 * math.pi * (now - started) / PERIOD)) / 2
+                            value = max(1, min(maximum, round(level * (0.12 + 0.88 * wave))))
+                        else:
+                            if poller is None:
+                                poller, handles = self._open_key_devices()
+                            if poller is not None and handles:
+                                presses = self._consume_key_presses(poller, handles, next_frame)
+                                if presses:
+                                    step = _typing_step(maximum)
+                                    delta = step * presses
+                                    now = time.monotonic()
+                                    did_bump = False
+                                    if mode in TYPING_WPM_MODES:
+                                        for _ in range(presses):
+                                            wpm_samples.append(now)
+                                        cutoff = now - TYPING_WPM_WINDOW
+                                        while wpm_samples and wpm_samples[0] < cutoff:
+                                            wpm_samples.popleft()
+                                        if _typing_wpm(wpm_samples, now) >= TYPING_WPM_THRESHOLD:
+                                            if mode in TYPING_RISING_MODES:
+                                                anchor_level = min(maximum, anchor_level + delta)
+                                            else:
+                                                anchor_level = max(0, anchor_level - delta)
+                                            did_bump = True
+                                    elif mode in TYPING_RISING_MODES:
+                                        anchor_level = min(maximum, anchor_level + delta)
+                                        did_bump = True
+                                    elif mode in TYPING_DARKING_MODES:
+                                        anchor_level = max(0, anchor_level - delta)
+                                        did_bump = True
+                                    else:
+                                        did_bump = False
+                                    if did_bump:
+                                        anchor_time = now
+                                        observed_level = int(round(anchor_level))
+                                        self.save(self.level_file, observed_level)
+                                elif mode in TYPING_WPM_MODES:
+                                    # Keep the rolling sample window bounded even when no new presses arrive.
+                                    if wpm_samples:
+                                        cutoff = time.monotonic() - TYPING_WPM_WINDOW
+                                        while wpm_samples and wpm_samples[0] < cutoff:
+                                            wpm_samples.popleft()
+
+                            if anchor_level is None:
+                                anchor_level = float(level)
+                                anchor_time = now
+                            decay = _typing_decay(maximum)
+                            age = max(0.0, time.monotonic() - anchor_time)
+                            if mode in TYPING_RISING_MODES:
+                                value = max(0, int(round(anchor_level - (decay * age))))
+                            elif mode in TYPING_DARKING_MODES:
+                                value = min(maximum, int(round(anchor_level + (decay * age))))
+                            else:
+                                raise RuntimeError(f'Unsupported keyboard backlight typing mode: {mode}')
+
+                        value = _clamp(value, 0, maximum)
+                        if value != previous:
+                            self.write(value)
+                            previous = value
+                    next_frame += INTERVAL
+                    stop.wait(max(0, next_frame - time.monotonic()))
+            finally:
+                if poller is not None:
+                    for fd in list(handles):
+                        with contextlib.suppress(OSError):
+                            poller.unregister(fd)
+                            os.close(fd)
+                    handles = None
+                try:
+                    if owned:
+                        with self.locked():
+                            try:
+                                _, level, _ = self.settings()
+                                self.write(level)
+                            finally:
+                                fcntl.flock(owner, fcntl.LOCK_UN)
+                finally:
+                    if peer is not None:
+                        peer.close()
+            return True
+
+
+def main():
+    os.umask(0o077)
+    if len(sys.argv) != 2 or sys.argv[1] not in (*ACTIONS, 'daemon'):
+        print('usage: mbp-intel-keyboard-backlight {' + '|'.join(ACTIONS) + '}', file=sys.stderr)
+        return 64
+    home = Path.home()
+    state = Path(os.environ.get('XDG_STATE_HOME', home / '.local/state')) / 'mbp-intel'
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', state)) / 'mbp-intel'
+    light = KeyboardBacklight(Path('/sys/class/leds') / DEVICE, state, runtime,
+                              os.environ.get('SWAYSOCK'))
+    action = sys.argv[1]
+    try:
+        if action == 'daemon':
+            stop = threading.Event()
+            for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+                signal.signal(sig, lambda *_: stop.set())
+            light.serve(stop)
+            return 0
+        result = light.command(action)
+        if action == 'status':
+            print(json.dumps(result, sort_keys=True))
+        elif result['mode'] == 'breathing':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys are breathing · {percent}% peak · F5/F6 adjust the glow', percent)
+        elif result['mode'] == 'typing':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys pulse with every keypress · {percent}%', percent)
+        elif result['mode'] == 'typing-wpm':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys pulse only when typing is sustained · {percent}%', percent)
+        elif result['mode'] == 'typing-dark':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys start bright, darken on typing · {percent}%', percent)
+        elif result['mode'] == 'typing-dark-wpm':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys only darken when typing is sustained · {percent}%', percent)
+        elif action != 'restore':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Steady keyboard light · {percent}%', percent)
+        return 0
+    except (OSError, ValueError, RuntimeError) as error:
+        message = f'Cannot control the keyboard light: {error}'
+        print(message, file=sys.stderr)
+        if action != 'daemon':
+            notify(message)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

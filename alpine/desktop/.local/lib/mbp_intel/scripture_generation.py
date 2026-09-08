@@ -1,8 +1,12 @@
 """Generate grounded Scripture study entries with a local Ollama server."""
 import datetime as dt
 import hashlib
+import http.client
 import ipaddress
 import json
+import re
+import socket
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -15,6 +19,7 @@ MAX_RESPONSE_BYTES = 256 * 1024
 LOCAL_NETWORKS = tuple(ipaddress.ip_network(value) for value in (
     '127.0.0.0/8', '10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16',
     '100.64.0.0/10', '::1/128', 'fc00::/7'))
+TAILSCALE_HOST = re.compile(r'(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+ts\.net')
 OUTPUT_SCHEMA = {
     'type': 'object',
     'properties': {
@@ -45,7 +50,7 @@ def _is_local(address):
 
 
 def validate_endpoint(endpoint):
-    """Accept only literal local addresses, pinning localhost to loopback."""
+    """Accept local IPs and HTTPS Tailscale names whose connections are pinned."""
     parsed = urllib.parse.urlsplit(str(endpoint))
     if (parsed.scheme not in ('http', 'https') or not parsed.hostname
             or parsed.username or parsed.password or parsed.query or parsed.fragment):
@@ -54,22 +59,86 @@ def validate_endpoint(endpoint):
     if path:
         raise ValueError('Ollama endpoint must not contain a path')
     hostname = parsed.hostname.lower()
+    address = None
     if hostname == 'localhost':
         address = ipaddress.ip_address('127.0.0.1')
     else:
         try:
             address = ipaddress.ip_address(hostname.split('%', 1)[0])
         except ValueError as error:
-            raise ValueError('Ollama endpoint must use a local network IP address') from error
-    if not _is_local(str(address)):
+            if (parsed.scheme != 'https' or len(hostname) > 253
+                    or not TAILSCALE_HOST.fullmatch(hostname)):
+                raise ValueError('Ollama endpoint must use a local network IP address '
+                                 'or an HTTPS Tailscale hostname') from error
+    if address is not None and not _is_local(str(address)):
         raise ValueError('Ollama endpoint must resolve only to the local network')
     try:
         port = parsed.port
     except ValueError as error:
         raise ValueError('Ollama endpoint has an invalid port') from error
-    literal = '[' + address.compressed + ']' if address.version == 6 else address.compressed
+    literal = hostname if address is None else (
+        '[' + address.compressed + ']' if address.version == 6 else address.compressed)
     netloc = literal + (f':{port}' if port is not None else '')
     return urllib.parse.urlunsplit((parsed.scheme, netloc, '', '', ''))
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    """Connect to verified private IPs while retaining DNS identity for TLS."""
+
+    def __init__(self, host, addresses, **kwargs):
+        super().__init__(host, **kwargs)
+        self._addresses = addresses
+        self._create_connection = self._connect_pinned
+
+    def _connect_pinned(self, _address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT,
+                        source_address=None):
+        error = None
+        for address in self._addresses:
+            try:
+                return socket.create_connection((address, self.port), timeout, source_address)
+            except OSError as failure:
+                error = failure
+        raise error or OSError('No pinned Ollama address is available')
+
+
+class _PinnedHTTPSHandler(urllib.request.HTTPSHandler):
+    def __init__(self, hostname, port, addresses):
+        super().__init__(context=ssl.create_default_context())
+        self._hostname = hostname
+        self._port = port
+        self._addresses = addresses
+
+    def https_open(self, request):
+        parsed = urllib.parse.urlsplit(request.full_url)
+        if parsed.hostname != self._hostname or (parsed.port or 443) != self._port:
+            raise ValueError('Pinned Ollama HTTPS endpoint changed')
+
+        def connection(host, **kwargs):
+            return _PinnedHTTPSConnection(host, self._addresses, **kwargs)
+
+        return self.do_open(connection, request, context=self._context)
+
+
+def _opener_for_endpoint(endpoint):
+    endpoint = validate_endpoint(endpoint)
+    parsed = urllib.parse.urlsplit(endpoint)
+    handlers = [urllib.request.ProxyHandler({}), _NoRedirect()]
+    if TAILSCALE_HOST.fullmatch(parsed.hostname):
+        port = parsed.port or 443
+        try:
+            answers = socket.getaddrinfo(parsed.hostname, port, type=socket.SOCK_STREAM)
+        except OSError as error:
+            raise ValueError('Cannot resolve the Tailscale Ollama endpoint') from error
+        addresses = []
+        for _family, _kind, _protocol, _canonical, address in answers:
+            if not _is_local(address[0]):
+                raise ValueError('Tailscale Ollama endpoint must resolve only to the local network')
+            if address[0] not in addresses:
+                addresses.append(address[0])
+        if not addresses:
+            raise ValueError('Tailscale Ollama endpoint returned no local addresses')
+        handlers.append(_PinnedHTTPSHandler(parsed.hostname, port, tuple(addresses)))
+    return urllib.request.build_opener(*handlers)
 
 
 def _request(opener, endpoint, path, document=None, timeout=60, max_bytes=MAX_RESPONSE_BYTES):
@@ -244,7 +313,7 @@ def generate_entry(reference, kind, sources, endpoint=DEFAULT_ENDPOINT, model=DE
     prompt = _prompt(reference, kind, sources)
     if len(prompt.encode()) > max_bytes:
         raise ValueError('Grounding prompt exceeded the size limit')
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
+    opener = _opener_for_endpoint(endpoint)
     digest = _installed_model(opener, endpoint, model, timeout, max_bytes)
     response = _request(opener, endpoint, '/api/generate', {
         'model': model, 'prompt': prompt, 'stream': False, 'format': OUTPUT_SCHEMA,

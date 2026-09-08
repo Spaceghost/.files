@@ -1,0 +1,19 @@
+{
+  "utc": "2026-09-08T06:05:06.953524+00:00",
+  "method": "GET /api/tags on previously configured Alienware IP addresses only",
+  "inference_performed": false,
+  "results": [
+    {
+      "endpoint": "http://100.83.231.2:11434",
+      "reachable": false,
+      "error": "HTTPError: HTTP Error 400: Bad Request",
+      "elapsed_seconds": 0.462
+    },
+    {
+      "endpoint": "http://[fd7a:115c:a1e0::763a:e703]:11434",
+      "reachable": false,
+      "error": "HTTPError: HTTP Error 400: Bad Request",
+      "elapsed_seconds": 0.458
+    }
+  ]
+}

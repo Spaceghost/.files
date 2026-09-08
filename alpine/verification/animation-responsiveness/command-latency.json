@@ -1,0 +1,35 @@
+{
+  "isolation": "private fake compositor and daemon socket; no live gestures",
+  "results": {
+    "previous_cli": {
+      "samples_ms": [
+        660.923,
+        746.235,
+        581.55,
+        596.635,
+        675.91
+      ],
+      "median_ms": 660.923
+    },
+    "new_cli": {
+      "samples_ms": [
+        199.849,
+        248.761,
+        301.886,
+        217.901,
+        228.571
+      ],
+      "median_ms": 228.571
+    },
+    "warm_handoff": {
+      "samples_ms": [
+        0.554,
+        0.534,
+        0.368,
+        0.337,
+        0.352
+      ],
+      "median_ms": 0.368
+    }
+  }
+}

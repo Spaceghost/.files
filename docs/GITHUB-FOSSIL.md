@@ -47,6 +47,91 @@ Changes made on GitHub do not flow back into Fossil. Pull requests and GitHub
 web edits therefore do not belong in this workflow. Commit in Fossil, export,
 then publish.
 
+## Publish the default branch
+
+GitHub's default branch is `base`; there is no `master`. Fossil's `base` branch
+is the same line, and `alpine-oldbook` merges into it when the user asks for the
+work to land on the main branch. Fossil's export gives every commit a different
+ID from GitHub's original history, so an exported `base` cannot fast-forward
+the real branch and must not be force-pushed over it. Publish it with one Git
+merge commit on top of GitHub's current head instead:
+
+```sh
+alpine/bin/publish-git-mirror --export-only
+mirror="${XDG_DATA_HOME:-$HOME/.local/share}/fossil/files-git-mirror"
+git -C "$mirror" fetch github +refs/heads/base:refs/remotes/github/base
+tree="$(git -C "$mirror" rev-parse base^{tree})"
+merge="$(git -C "$mirror" commit-tree "$tree" -p github/base -p base \
+  -m 'base: merge alpine-oldbook (Fossil base <check-in>)')"
+git -C "$mirror" push --no-follow-tags github "$merge:refs/heads/base"
+git -C "$mirror" ls-remote --heads github base
+```
+
+The merge commit's first parent is GitHub's head, its second parent is the
+exported Fossil `base` leaf, and its tree is exactly the exported tree, so the
+push is a fast-forward and the Fossil lineage stays visible. Repeat the same
+steps for later merges; if `git push` reports a non-fast-forward, someone
+pushed to `base` directly, and that commit belongs in Fossil first (see the
+2026-09-08 base-consolidation decision). The scheduled job never touches `base`.
+
+## Continuous publication
+
+Enable the current user's minute-by-minute cron job from `~/.files`:
+
+```sh
+alpine/bin/install-git-mirror-schedule --print
+alpine/bin/install-git-mirror-schedule
+```
+
+The installer preserves unrelated jobs and saves the previous crontab under
+`~/.local/state/mbp-intel/git-mirror-schedule/`. On Alpine, ensure cron runs now
+and after boot:
+
+```sh
+doas rc-update add crond default
+doas rc-service crond start
+```
+
+On another distribution, enable its cron daemon before using this installer.
+Authenticate native Git using the commands above on each publishing host.
+Prefer one publishing host for a given GitHub branch; a GitHub-imported Fossil
+repository has different artifact IDs and is unsuitable as a second publisher
+to the original mirror branch.
+
+Every minute, the job exports committed history and checks the exported
+`alpine-oldbook` commit. It pushes when that commit differs from the last
+successfully verified publication. An unchanged, already-published commit
+does not contact GitHub. Authentication errors and offline periods leave the
+commit pending for the next minute, including after a reboot. Uncommitted
+working-tree edits are never added or committed by this job.
+
+The job and manual publisher share a lock beside the Git mirror. A busy run
+is skipped, and each Git/Fossil command has a three-minute timeout that also
+terminates its child helpers. Logs rotate at 1 MiB with one previous copy.
+Fossil autopush remains disabled; this job performs the explicit branch push.
+It does not upload complete Fossil backups or unversioned artifacts.
+
+Check the schedule and the latest result:
+
+```sh
+crontab -l
+cat ~/.local/state/mbp-intel/git-mirror/status.json
+tail -n 30 ~/.local/state/mbp-intel/git-mirror/sync.log
+```
+
+`status.json` reports `ok`, `busy`, or `error`, the check time, and the verified
+commit when available. The scheduler honors `XDG_STATE_HOME` when set in its
+environment; cron normally uses the paths above. The last verified remote,
+branch and Git commit are recorded locally in the mirror's
+`.git/mbp-intel-published.json`. Manual `publish-git-mirror` always contacts and
+verifies GitHub, even when that receipt matches.
+
+To stop automatic publication while preserving other jobs:
+
+```sh
+alpine/bin/install-git-mirror-schedule --remove
+```
+
 ## Recover from GitHub
 
 On a host that has Git, Fossil and Python 3, run the helper from any temporary

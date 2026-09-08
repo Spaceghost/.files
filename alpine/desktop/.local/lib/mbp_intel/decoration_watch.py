@@ -12,6 +12,7 @@ _HEADER = struct.Struct('=6sII')
 _MAGIC = b'i3-ipc'
 _SUBSCRIBE = 2
 _GET_TREE = 4
+_MODE = (1 << 31) | 2
 _SHUTDOWN = (1 << 31) | 6
 _MAX_PAYLOAD = 32 * 1024 * 1024
 
@@ -37,6 +38,14 @@ def _receive(connection):
     return kind, _receive_exact(connection, size)
 
 
+def _geometry(tree):
+    """Ignore title churn when deciding whether floating geometry is moving."""
+    rect = tree.get('rect', {})
+    return (tree.get('id'), tuple(rect.get(key) for key in ('x', 'y', 'width', 'height')),
+            tuple(_geometry(child) for child in tree.get('nodes', [])),
+            tuple(_geometry(child) for child in tree.get('floating_nodes', [])))
+
+
 class TreeWatch:
     """Deliver changed trees on one worker thread until close() or shutdown.
 
@@ -46,8 +55,12 @@ class TreeWatch:
     unchanged tree is never delivered twice, and only one request is in flight.
     """
 
-    # Keep fresh geometry available to 60 Hz and 120 Hz display frame clocks.
+    # Silent pointer drags still need polling: Sway sends no geometry events.
+    # A quiet float is sampled within one 60 Hz frame; movement then keeps the
+    # full 120 Hz budget until its brief settling tail has finished.
     ATTACHED_INTERVAL = 1 / 120
+    QUIET_ATTACHED_INTERVAL = 1 / 60
+    MOTION_GRACE = 0.250
     IDLE_INTERVAL = 0.750
     RECONNECT_DELAY = 0.250
 
@@ -55,6 +68,7 @@ class TreeWatch:
         self.path = str(path)
         self.deliver = deliver
         self._attached = False
+        self._motion_until = 0
         self._stopped = threading.Event()
         self._lock = threading.Lock()
         self._connections = set()
@@ -79,6 +93,8 @@ class TreeWatch:
             if attached == self._attached:
                 return
             self._attached = attached
+            if attached:
+                self._motion_until = time.monotonic() + self.MOTION_GRACE
             self._wake()
 
     def close(self):
@@ -127,6 +143,7 @@ class TreeWatch:
 
     def _run(self):
         previous = None
+        geometry = None
         try:
             while not self._stopped.is_set():
                 request = subscriber = None
@@ -134,15 +151,16 @@ class TreeWatch:
                     request = self._connect()
                     subscriber = self._connect()
                     _send(subscriber, _SUBSCRIBE,
-                          b'["window","workspace","output","shutdown"]')
+                          b'["window","workspace","output","mode","shutdown"]')
                     kind, body = _receive(subscriber)
                     response = json.loads(body)
                     if (kind != _SUBSCRIBE or not isinstance(response, dict)
                             or not response.get('success')):
                         raise ValueError('Sway rejected decoration subscription')
                     next_refresh = 0
+                    suspended = False
                     while not self._stopped.is_set():
-                        if time.monotonic() >= next_refresh:
+                        if not suspended and time.monotonic() >= next_refresh:
                             started = time.monotonic()
                             _send(request, _GET_TREE)
                             kind, body = _receive(request)
@@ -152,16 +170,29 @@ class TreeWatch:
                                 tree = json.loads(body)
                                 if not isinstance(tree, dict):
                                     raise ValueError('Sway tree is not an object')
+                                latest_geometry = _geometry(tree)
+                                if latest_geometry != geometry:
+                                    geometry = latest_geometry
+                                    with self._lock:
+                                        self._motion_until = time.monotonic() + self.MOTION_GRACE
                                 if not self._stopped.is_set():
                                     self.deliver(tree)
                                     previous = body
                             with self._lock:
-                                interval = (self.ATTACHED_INTERVAL if self._attached
-                                            else self.IDLE_INTERVAL)
+                                interval = (self.ATTACHED_INTERVAL
+                                            if time.monotonic() < self._motion_until
+                                            else self.QUIET_ATTACHED_INTERVAL)
+                                if not self._attached:
+                                    interval = self.IDLE_INTERVAL
                             # Account for IPC/decoding work inside the budget.
                             # Late replies skip the wait, never queue catch-up
                             # requests or pay a second full interval afterward.
                             next_refresh = max(started + interval, time.monotonic())
+                        if suspended:
+                            # The carousel owns pointer and keyboard input; its
+                            # covered captions cannot be dragged. Reserve this
+                            # compositor time for the overlay until mode exit.
+                            next_refresh = time.monotonic() + self.IDLE_INTERVAL
                         ready, _, _ = select.select(
                             [subscriber, self._wake_read], [], [],
                             max(0, next_refresh - time.monotonic()))
@@ -177,12 +208,17 @@ class TreeWatch:
                             # Drain bursts into one refresh, but never let an
                             # event flood starve the request socket.
                             for _ in range(64):
-                                kind, _ = _receive(subscriber)
+                                kind, body = _receive(subscriber)
                                 if kind == _SHUTDOWN:
                                     self._stopped.set()
                                     break
                                 if not kind & (1 << 31):
                                     raise ValueError('unexpected subscription frame')
+                                if kind == _MODE:
+                                    suspended = json.loads(body).get('change') == 'window-switcher'
+                                    if not suspended:
+                                        with self._lock:
+                                            self._motion_until = time.monotonic() + self.MOTION_GRACE
                                 if not select.select([subscriber], [], [], 0)[0]:
                                     break
                             next_refresh = 0

@@ -1,0 +1,13 @@
+{
+  "status": "failed",
+  "host_changes": 0,
+  "isolation": "private HOME/XDG directories, headless Sway, nonexistent session bus",
+  "keyboard": "wtype virtual keyboard with explicit Mod4 and Shift modifiers",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-center": "8e1b531d98f0fa73ab45fc5fa10698eca275df5b4344ab2bf0e81bba8ba783bd",
+    "alpine/desktop/.config/sway/local.d/center.conf": "05d49c93d8835283785d852f14f3777f54a8608930196d7876c9318b98d6ce4c"
+  },
+  "checks": [],
+  "states": [],
+  "error": "pointer did not focus the lower target"
+}

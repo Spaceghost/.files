@@ -1,0 +1,119 @@
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil init /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+project-id: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+server-id:  6d734538f3150ce856b4dd5f6fe68c4130e38ed9
+admin-user: jack (initial remote-access password is "LyPBhzcRA4")
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil open /tmp/scripture-study-integration-bjbug2lp/hub.fossil --workdir /tmp/scripture-study-integration-bjbug2lp/seed --nosync
+project-name: <unnamed>
+repository:   /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+local-root:   /tmp/scripture-study-integration-bjbug2lp/seed/
+config-db:    /tmp/scripture-study-integration-bjbug2lp/fossil-home/.config/fossil.db
+project-code: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+checkout:     5ae2ba6364c6d97cb6b12b6aea02e87bf43f93d7 2026-09-08 03:58:19 UTC
+tags:         trunk
+comment:      initial empty check-in (user: jack)
+check-ins:    1
+$ (/tmp/scripture-study-integration-bjbug2lp/seed) fossil add alpine/assets/scripture/reflections.json
+ADDED  alpine/assets/scripture/reflections.json
+$ (/tmp/scripture-study-integration-bjbug2lp/seed) fossil commit --nosync --no-prompt --no-warnings --nosign --user-override scripture-verifier -m seed 33 preserved reflections alpine/assets/scripture/reflections.json
+New_Version: 187020cba340466b505ee994ea3efe8de5169616061e07c0a8538ff2e6e99e79
+$ (/tmp/scripture-study-integration-bjbug2lp/seed) fossil changes --no-merge --classify
+ADDED      alpine/assets/scripture/study/entries/study-11111111111111111111111111111111.json
+$ (/tmp/scripture-study-integration-bjbug2lp/seed) fossil commit --nosync --no-prompt --no-warnings --nosign --user-override scripture-verifier -m add initial Scripture study fixture alpine/assets/scripture/study/entries/study-11111111111111111111111111111111.json
+New_Version: d93117d634b79e200f9badc6d0ab0a138015a0be5b642efe2f91b9704d9ed76d
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil clone --no-open --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil /tmp/scripture-study-integration-bjbug2lp/clone-a.fossil
+Repository cloned into /tmp/scripture-study-integration-bjbug2lp/clone-a.fossil
+Rebuilding repository meta-data...
+  0.0% complete...
+  20.0% complete...
+  40.0% complete...
+  60.0% complete...
+  80.0% complete...
+  100.0% complete...
+Extra delta compression... none found
+Vacuuming the database... 
+project-id: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+server-id:  6d734538f3150ce856b4dd5f6fe68c4130e38ed9
+admin-user: jack (password is "tvLesVTAjZ")
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil open /tmp/scripture-study-integration-bjbug2lp/clone-a.fossil --workdir /tmp/scripture-study-integration-bjbug2lp/checkout-a --nosync
+alpine/assets/scripture/reflections.json
+alpine/assets/scripture/study/entries/study-11111111111111111111111111111111.json
+project-name: <unnamed>
+repository:   /tmp/scripture-study-integration-bjbug2lp/clone-a.fossil
+local-root:   /tmp/scripture-study-integration-bjbug2lp/checkout-a/
+config-db:    /tmp/scripture-study-integration-bjbug2lp/fossil-home/.config/fossil.db
+project-code: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+checkout:     d93117d634b79e200f9badc6d0ab0a138015a0be 2026-09-08 03:58:19 UTC
+parent:       187020cba340466b505ee994ea3efe8de5169616 2026-09-08 03:58:19 UTC
+tags:         trunk
+comment:      add initial Scripture study fixture (user: scripture-verifier)
+check-ins:    3
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil clone --no-open --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil /tmp/scripture-study-integration-bjbug2lp/clone-b.fossil
+Repository cloned into /tmp/scripture-study-integration-bjbug2lp/clone-b.fossil
+Rebuilding repository meta-data...
+  0.0% complete...
+  20.0% complete...
+  40.0% complete...
+  60.0% complete...
+  80.0% complete...
+  100.0% complete...
+Extra delta compression... none found
+Vacuuming the database... 
+project-id: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+server-id:  6d734538f3150ce856b4dd5f6fe68c4130e38ed9
+admin-user: jack (password is "xXiqgb7anT")
+$ (/tmp/scripture-study-integration-bjbug2lp) fossil open /tmp/scripture-study-integration-bjbug2lp/clone-b.fossil --workdir /tmp/scripture-study-integration-bjbug2lp/checkout-b --nosync
+alpine/assets/scripture/reflections.json
+alpine/assets/scripture/study/entries/study-11111111111111111111111111111111.json
+project-name: <unnamed>
+repository:   /tmp/scripture-study-integration-bjbug2lp/clone-b.fossil
+local-root:   /tmp/scripture-study-integration-bjbug2lp/checkout-b/
+config-db:    /tmp/scripture-study-integration-bjbug2lp/fossil-home/.config/fossil.db
+project-code: 7d47021c9c17ac0cd29d6e0ac3f026a12f966e07
+checkout:     d93117d634b79e200f9badc6d0ab0a138015a0be 2026-09-08 03:58:19 UTC
+parent:       187020cba340466b505ee994ea3efe8de5169616 2026-09-08 03:58:19 UTC
+tags:         trunk
+comment:      add initial Scripture study fixture (user: scripture-verifier)
+check-ins:    3
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil changes --no-merge --classify
+ADDED      alpine/assets/scripture/study/entries/study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil commit --nosync --no-prompt --no-warnings --nosign --user-override scripture-verifier -m add clone A fixture alpine/assets/scripture/study/entries/study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+New_Version: 1a8a920f63a613b236724e906a357edb0d6728381cf2283e2d3428ef20632923
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil info current
+hash:         1a8a920f63a613b236724e906a357edb0d672838 2026-09-08 03:58:19 UTC
+parent:       d93117d634b79e200f9badc6d0ab0a138015a0be 2026-09-08 03:58:19 UTC
+tags:         trunk
+comment:      add clone A fixture (user: scripture-verifier)
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil push --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+Round-trips: 1   Artifacts sent: 2  received: 0
+Push done, wire bytes sent: 1187  received: 301  remote: 
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil changes --no-merge --classify
+ADDED      alpine/assets/scripture/study/entries/study-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil commit --nosync --no-prompt --no-warnings --nosign --user-override scripture-verifier -m add clone B fixture alpine/assets/scripture/study/entries/study-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json
+New_Version: 5e980599d6fcfc4a097024f0c07fd3928a1abb00637da0196bcb5321838e0b88
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil pull --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+Round-trips: 2   Artifacts sent: 0  received: 2
+Pull done, wire bytes sent: 671  received: 1768  remote: 
+***** WARNING: a fork has occurred *****
+use "fossil leaves -multiple" for more details.
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil merge --nosync 1a8a920f63a613b236724e906a357edb0d672838
+ADDED alpine/assets/scripture/study/entries/study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+ "fossil undo" is available to undo changes to the working checkout.
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil changes --no-merge --classify
+ADDED_BY_MERGE alpine/assets/scripture/study/entries/study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil commit --nosync --no-prompt --no-warnings --nosign --user-override scripture-verifier -m merge independent Scripture fixtures
+New_Version: 5e16b2c32a67aae5c19fb0cc1fa8791c2602f48b0eb32914fad6ba8b3926cb0d
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-b) fossil push --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+Round-trips: 1   Artifacts sent: 3  received: 0
+Push done, wire bytes sent: 1441  received: 301  remote: 
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil pull --once /tmp/scripture-study-integration-bjbug2lp/hub.fossil
+Round-trips: 2   Artifacts sent: 0  received: 3
+Pull done, wire bytes sent: 706  received: 2119  remote: 
+$ (/tmp/scripture-study-integration-bjbug2lp/checkout-a) fossil update --nosync
+ADD alpine/assets/scripture/study/entries/study-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json
+-------------------------------------------------------------------------------
+updated-from: 1a8a920f63a613b236724e906a357edb0d672838 2026-09-08 03:58:19 UTC
+updated-to:   5e16b2c32a67aae5c19fb0cc1fa8791c2602f48b 2026-09-08 03:58:19 UTC
+tags:         trunk
+comment:      merge independent Scripture fixtures (user: scripture-verifier)
+changes:      1 file modified.
+ "fossil undo" is available to undo changes to the working checkout.

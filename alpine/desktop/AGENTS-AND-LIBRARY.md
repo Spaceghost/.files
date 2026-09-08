@@ -79,6 +79,20 @@ so no peer can quietly become a route for this machine's traffic.
 
 ## The offline library
 
+Right-click the Scripture search bar for the original reflections and the
+study library. Left-click or **Super+/** searches Bible verses;
+**Super+Shift+/** includes the other collections and study entries. Run
+`mbp-intel-scripture daily` to restore the daily reflection and practice on the
+card. Clicking the card advances the current reading.
+
+`mbp-intel-scripture-study list` lists every reflection and study entry, and
+`mbp-intel-scripture-study show ID` prints the complete entry and its citations.
+SQLite serves this collection; Fossil tracks its canonical records and the
+reader rebuilds SQLite after checkout updates. New notes, inspirations, and
+observations are generated only through a local Ollama model. See the
+[study library guide](../assets/scripture/study/README.md) for sources,
+generation, and synchronization.
+
 The complete King James text ships in the checkout. Everything else installs
 into `~/.local/share/mbp-intel/scripture/`, and the first desktop login after an
 install fetches it automatically in the background.

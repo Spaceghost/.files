@@ -1,0 +1,13 @@
+{
+  "features": [
+    "KEYBOARD-GLOW"
+  ],
+  "tests": [
+    "test_keyboard_backlight.py",
+    "test_shortcut_sources.py"
+  ],
+  "unmapped_paths": [],
+  "contract": "alpine/FEATURES.md",
+  "manual_only": [],
+  "note": "Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification."
+}

@@ -42,7 +42,7 @@ with tempfile.TemporaryDirectory(prefix='scripture-native-') as directory:
             (state/'pids.json').write_text(json.dumps({'scripture':conky.pid}))
             time.sleep(2)
             subprocess.run(['grim',str(OUTPUT/'before.png')],env=env,check=True,timeout=5)
-            finder=subprocess.Popen([str(HELPER),'find','--all'],env=env,stdout=log,stderr=log);children.append(finder)
+            finder=subprocess.Popen([str(HELPER),'find','--all','--picker'],env=env,stdout=log,stderr=log);children.append(finder)
             # Wait for the actual Fuzzel process after corpus construction.
             for _ in range(100):
                 child_ids=Path(f'/proc/{finder.pid}/task/{finder.pid}/children').read_text().split()

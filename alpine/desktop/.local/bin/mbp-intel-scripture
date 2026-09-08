@@ -442,6 +442,18 @@ def find(bible, include_all=False):
     return 0
 
 
+def launch_inline(scope='bible', query='', translation=None):
+    from scripture_bar_ipc import request
+    if not request(scope, query, translation):
+        helper = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-bar'
+        command = ['/usr/bin/python3', str(helper), '--activate', scope, '--query', query]
+        if translation:
+            command.extend(['--translation', translation])
+        subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         start_new_session=True)
+    return 0
+
+
 def reflections(bible):
     entries = study_entries()
     choices = study_choices(entries)
@@ -475,6 +487,7 @@ def main():
     parser.add_argument('--width', type=int, default=PANEL_WIDTH)
     parser.add_argument('--translation', help='Read from an installed text.')
     parser.add_argument('--all', action='store_true', help='include Torah, Talmud, reflections and study in the picker')
+    parser.add_argument('--picker', action='store_true', help='explicitly use the separate recovery picker')
     parser.add_argument('--entry', type=int, help='History entry ID for additional material')
     parser.add_argument('--kind', choices=['note', 'research', 'generated'], default='note')
     parser.add_argument('--input', type=Path, help='UTF-8 text file for additional material')
@@ -549,6 +562,10 @@ def main():
     if arguments.action == 'bar':
         helper = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-bar'
         os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
+    if arguments.action in ('find', 'reflections') and not arguments.picker:
+        scope = ('reflections' if arguments.action == 'reflections' else
+                 'all' if arguments.all else 'bible')
+        return launch_inline(scope, query, arguments.translation)
     include_extra = arguments.action != 'find' or arguments.all
     bible = _LazyBible(include_extra=include_extra,
                        translation=arguments.translation)

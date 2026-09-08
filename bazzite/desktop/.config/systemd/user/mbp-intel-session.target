@@ -2,7 +2,7 @@
 Description=Space Ghost MBP Intel desktop services
 BindsTo=sway-session.target
 After=sway-session.target
-Wants=oldbook-desktop-settings.service
+Wants=mbp-intel-desktop-settings.service
 Wants=mbp-intel-notification-led.service
 Wants=mbp-intel-shortcuts.service
 Wants=mbp-intel-swayidle.service

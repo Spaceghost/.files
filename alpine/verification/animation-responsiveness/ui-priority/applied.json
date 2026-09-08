@@ -1,0 +1,913 @@
+{
+  "check": false,
+  "uid": 1000,
+  "processes": [
+    {
+      "pid": 2337,
+      "name": "oldbook-carousel",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 2337,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2343,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2344,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2345,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2346,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9314,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9315,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9316,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9317,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9328,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9329,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9330,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9333,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9334,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9335,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9341,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9342,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9377,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9386,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9392,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 23344,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23369,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23370,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23371,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 2342,
+      "name": "oldbook-showdesktop",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 2342,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2354,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2355,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2356,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 2357,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8927,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8928,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8929,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8930,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8931,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8932,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8933,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8934,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8935,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8936,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8947,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8948,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8949,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8950,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 3175,
+      "name": "swayfx",
+      "target_nice": -10,
+      "threads": [
+        {
+          "tid": 3175,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3178,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3180,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3181,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3182,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3183,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3184,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3185,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3186,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3187,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3188,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3189,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3190,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3191,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3192,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3193,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3194,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3195,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3196,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3197,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3198,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3199,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3202,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3644,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8802,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9332,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 3291,
+      "name": "swaync",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 3291,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3351,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3352,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3353,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3354,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 3427,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9318,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9319,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9320,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9321,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9322,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9323,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9324,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9325,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9326,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 9327,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 11761,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 12304,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 15825,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 15826,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 21828,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30744,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30745,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30746,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 29645,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 29646,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 8427,
+      "name": "waybar",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 8427,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8438,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8439,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8440,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8441,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8443,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8444,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8557,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8588,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 8589,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 12687,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13147,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13148,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13151,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13160,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13161,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13162,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13164,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13165,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13167,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13169,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13172,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13173,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13174,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13175,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13176,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13177,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13180,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 13182,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 23237,
+      "name": "superhold",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 23237,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23250,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23251,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23253,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23254,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23259,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 23262,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 26484,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 26493,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 26494,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    },
+    {
+      "pid": 28213,
+      "name": "oldbook-decoration",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 28213,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28231,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28232,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28235,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28236,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28252,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28253,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28261,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 28262,
+          "nice": -5,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    }
+  ]
+}

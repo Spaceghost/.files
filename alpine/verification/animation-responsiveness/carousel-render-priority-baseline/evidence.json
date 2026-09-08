@@ -1,0 +1,688 @@
+{
+  "status": "failed",
+  "isolation": "private HOME/XDG/D-Bus/SwayFX and synthetic pixels",
+  "scale": 2,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "f5e822cd0833abacba9a70330bbfcbb3a8f3521f7dce9615188c60878c1e9a24",
+    "/home/jack/.files/alpine/tests/verify_carousel_rendering.py": "83e063958f3fc7259a257bb8956a63fcaa216d9754bee806064d75231b0d7588"
+  },
+  "load_before": [
+    35.40380859375,
+    33.80126953125,
+    24.90283203125
+  ],
+  "compositor_readiness": {
+    "attempts": 2,
+    "version": {
+      "human_readable": "0.6",
+      "sway_original_version": "1.12.0",
+      "variant": "sway",
+      "major": 0,
+      "minor": 6,
+      "patch": 0,
+      "loaded_config_file_name": "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-priority-baseline/sway.conf"
+    },
+    "barrier": "GET_VERSION response"
+  },
+  "private_compositor_priority": {
+    "check": false,
+    "uid": 1000,
+    "processes": [
+      {
+        "pid": 3578,
+        "name": "swayfx",
+        "target_nice": -10,
+        "threads": [
+          {
+            "tid": 3578,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3684,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3685,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3686,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3687,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3688,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3689,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3690,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3691,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3692,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3693,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3701,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3702,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3704,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3721,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 3731,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3737,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3745,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 3793,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          }
+        ]
+      }
+    ]
+  },
+  "private_probe_priority": {
+    "pid": 4081,
+    "threads": [
+      {
+        "tid": 4081,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4227,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4263,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4264,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4266,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4361,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4362,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4364,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4365,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4367,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4368,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4369,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4370,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4371,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4372,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4374,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 4375,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 4377,
+        "nice": -5,
+        "policy": 1073741824
+      }
+    ]
+  },
+  "render": {
+    "construction_ms": 4086.07446,
+    "renderer": "GskGLRenderer",
+    "runs": [
+      {
+        "action": "show",
+        "requested_us": 23280469716,
+        "frames": [
+          {
+            "frame_time_us": 23280512465,
+            "callback_time_us": 23280513607,
+            "position": 0.0,
+            "reveal": 0.6952634852660413,
+            "presentation_time_us": 23288508852,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23288512625,
+            "callback_time_us": 23288511550,
+            "position": 0.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23289547976,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 8041.834,
+        "first_tick_ms": 43.891
+      },
+      {
+        "action": "next",
+        "requested_us": 23289546111,
+        "frames": [
+          {
+            "frame_time_us": 23289548206,
+            "callback_time_us": 23289548395,
+            "position": 0.002322973461843514,
+            "reveal": 1.0,
+            "presentation_time_us": 23289748754,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23289764877,
+            "callback_time_us": 23289749287,
+            "position": 0.9984363118029934,
+            "reveal": 1.0,
+            "presentation_time_us": 23289969575,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23289982553,
+            "callback_time_us": 23289970107,
+            "position": 1.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23290037151,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 423.996,
+        "first_tick_ms": 2.284
+      },
+      {
+        "action": "next",
+        "requested_us": 23290090484,
+        "frames": [
+          {
+            "frame_time_us": 23290090906,
+            "callback_time_us": 23290091081,
+            "position": 1.0000114832022704,
+            "reveal": 1.0,
+            "presentation_time_us": 23290224063,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23290240909,
+            "callback_time_us": 23290224582,
+            "position": 1.982721757720048,
+            "reveal": 1.0,
+            "presentation_time_us": 23290472121,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23290490941,
+            "callback_time_us": 23290475251,
+            "position": 2.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23290525864,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 384.767,
+        "first_tick_ms": 0.597
+      },
+      {
+        "action": "previous",
+        "requested_us": 23290595582,
+        "frames": [
+          {
+            "frame_time_us": 23290595973,
+            "callback_time_us": 23290596142,
+            "position": 1.9999881314672923,
+            "reveal": 1.0,
+            "presentation_time_us": 23290715438,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23290729309,
+            "callback_time_us": 23290715904,
+            "position": 1.030448874404086,
+            "reveal": 1.0,
+            "presentation_time_us": 23290820751,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23290831067,
+            "callback_time_us": 23290821321,
+            "position": 1.0008536376347366,
+            "reveal": 1.0,
+            "presentation_time_us": 23290906917,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23290916888,
+            "callback_time_us": 23290907448,
+            "position": 1.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23290937766,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 311.866,
+        "first_tick_ms": 0.56
+      },
+      {
+        "action": "previous",
+        "requested_us": 23291029172,
+        "frames": [
+          {
+            "frame_time_us": 23291029596,
+            "callback_time_us": 23291029752,
+            "position": 0.9999839297535663,
+            "reveal": 1.0,
+            "presentation_time_us": 23291164660,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291179599,
+            "callback_time_us": 23291165124,
+            "position": 0.017265212801902078,
+            "reveal": 1.0,
+            "presentation_time_us": 23291244379,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291262198,
+            "callback_time_us": 23291244930,
+            "position": 0.000933407228124479,
+            "reveal": 1.0,
+            "presentation_time_us": 23291330157,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291345615,
+            "callback_time_us": 23291332201,
+            "position": 0.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23291363134,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 303.029,
+        "first_tick_ms": 0.58
+      },
+      {
+        "action": "next",
+        "requested_us": 23291452576,
+        "frames": [
+          {
+            "frame_time_us": 23291452951,
+            "callback_time_us": 23291453122,
+            "position": 1.1868532707848267e-05,
+            "reveal": 1.0,
+            "presentation_time_us": 23291546895,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291552953,
+            "callback_time_us": 23291547365,
+            "position": 0.9087845126853693,
+            "reveal": 1.0,
+            "presentation_time_us": 23291633407,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291636896,
+            "callback_time_us": 23291633921,
+            "position": 0.9946939152457736,
+            "reveal": 1.0,
+            "presentation_time_us": 23291712162,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291720231,
+            "callback_time_us": 23291714703,
+            "position": 1.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23291779140,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 262.127,
+        "first_tick_ms": 0.546
+      },
+      {
+        "action": "next",
+        "requested_us": 23291835099,
+        "frames": [
+          {
+            "frame_time_us": 23291835539,
+            "callback_time_us": 23291835700,
+            "position": 1.000016986552938,
+            "reveal": 1.0,
+            "presentation_time_us": 23291923855,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23291935541,
+            "callback_time_us": 23291924522,
+            "position": 1.908854558305144,
+            "reveal": 1.0,
+            "presentation_time_us": 23292008184,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23292018913,
+            "callback_time_us": 23292008653,
+            "position": 1.994590728563487,
+            "reveal": 1.0,
+            "presentation_time_us": 23292124400,
+            "refresh_interval_us": 16667,
+            "complete": true
+          },
+          {
+            "frame_time_us": 23292135591,
+            "callback_time_us": 23292124939,
+            "position": 2.0,
+            "reveal": 1.0,
+            "presentation_time_us": 23292184147,
+            "refresh_interval_us": 16667,
+            "complete": true
+          }
+        ],
+        "settled_ms": 289.84,
+        "first_tick_ms": 0.601
+      }
+    ],
+    "snapshots": [
+      {
+        "elapsed_ms": 247.589,
+        "position": 0.0,
+        "reveal": 0.6952634852660413
+      },
+      {
+        "elapsed_ms": 3.918,
+        "position": 0.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 33.129,
+        "position": 0.002322973461843514,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 19.396,
+        "position": 0.9984363118029934,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 3.09,
+        "position": 1.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 26.191,
+        "position": 1.0000114832022704,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 14.305,
+        "position": 1.982721757720048,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 15.898,
+        "position": 2.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 17.842,
+        "position": 1.9999881314672923,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 21.463,
+        "position": 1.030448874404086,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 3.631,
+        "position": 1.0008536376347366,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 4.876,
+        "position": 1.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 21.228,
+        "position": 0.9999839297535663,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 3.42,
+        "position": 0.017265212801902078,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 4.763,
+        "position": 0.000933407228124479,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 7.725,
+        "position": 0.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 12.186,
+        "position": 1.1868532707848267e-05,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 9.484,
+        "position": 0.9087845126853693,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 7.551,
+        "position": 0.9946939152457736,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 3.874,
+        "position": 1.0,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 10.727,
+        "position": 1.000016986552938,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 6.923,
+        "position": 1.908854558305144,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 3.55,
+        "position": 1.994590728563487,
+        "reveal": 1.0
+      },
+      {
+        "elapsed_ms": 6.78,
+        "position": 2.0,
+        "reveal": 1.0
+      }
+    ],
+    "preview_dimensions": [
+      1536,
+      960
+    ],
+    "candidate_count": 7,
+    "probe_nice": -5,
+    "compose_cards": false,
+    "frame_clock_intervals": {
+      "count": 17,
+      "median_ms": 101.758,
+      "p95_ms": 8000.16,
+      "maximum_ms": 8000.16
+    },
+    "presentation_intervals": {
+      "count": 17,
+      "median_ms": 84.329,
+      "p95_ms": 1039.124,
+      "maximum_ms": 1039.124
+    },
+    "python_snapshot_time": {
+      "count": 24,
+      "median_ms": 8.6045,
+      "p95_ms": 33.129,
+      "maximum_ms": 247.589
+    },
+    "idle_gaps": "excluded by separating each requested animation, not by duration",
+    "all_sequences_settled": true,
+    "errors": [],
+    "status": "passed"
+  },
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel_rendering.py\", line 290, in private_compositor\n    raise RuntimeError('carousel view or rendering verifier changed during verification')\nRuntimeError: carousel view or rendering verifier changed during verification\n",
+  "load_after": [
+    36.8291015625,
+    34.31689453125,
+    25.40478515625
+  ],
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

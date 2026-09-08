@@ -167,7 +167,7 @@ def bottom_corner_pixels(image_path, rect):
             "right_inset": pixel(x + width - 10, y)}
 
 
-def run_verifier(output):
+def run_verifier(output, prioritize_ui=False):
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     checks = []
@@ -180,11 +180,14 @@ def run_verifier(output):
         "screenshots": screenshots,
         "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
         "host_config_changes": 0,
+        "prioritize_private_ui": prioritize_ui,
+        "verifier_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }
     sources = [HELPER, *(REPO / "alpine/desktop/.local/lib/mbp_intel" / name
                         for name in ("decoration.py", "decoration_actions.py",
                                      "decoration_placement.py", "decoration_motion.py",
-                                     "decoration_watch.py", "overlay_theme.py"))]
+                                     "decoration_watch.py", "overlay_theme.py",
+                                     "ui_priority.py"))]
 
     def source_hashes():
         return {str(path.relative_to(REPO)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -226,6 +229,7 @@ def run_verifier(output):
             "output * bg #13091f solid_color\n"
             "seat seat0 fallback true\n"
             "focus_follows_mouse no\n"
+            'mode "window-switcher" {\n    bindsym Escape mode "default"\n}\n'
             "floating_modifier Mod4\n"
             "default_border pixel 0\n"
             "default_floating_border pixel 0\n"
@@ -288,6 +292,29 @@ def run_verifier(output):
                         return result
                     time.sleep(interval)
                 raise AssertionError(message)
+
+            def prioritize(process):
+                if not prioritize_ui:
+                    return
+                result = subprocess.run([
+                    '/usr/bin/doas', '-n', '/usr/local/sbin/mbp-intel-ui-priority',
+                    '--session', env['SWAYSOCK'], str(process.pid)
+                ], env=env, capture_output=True, text=True, check=True, timeout=5)
+                record = json.loads(result.stdout)
+                evidence.setdefault('private_ui_priority_attempts', []).append(record)
+                write_evidence()
+                matches = [item for item in record['processes'] if item['pid'] == process.pid]
+                require(len(matches) == 1 and matches[0]['threads'] and any(
+                    item.get('applied') for item in matches[0]['threads']) and all(
+                    'error' not in item and (
+                        item.get('nice') == matches[0]['target_nice']
+                        and item.get('policy') == (os.SCHED_OTHER | os.SCHED_RESET_ON_FORK)
+                        if item.get('applied') else
+                        item.get('policy', 0) & ~os.SCHED_RESET_ON_FORK != os.SCHED_OTHER)
+                    for item in matches[0]['threads']),
+                    'private UI priority was not applied with child reset')
+                evidence.setdefault('private_ui_priority', []).append(matches[0])
+                write_evidence()
 
             def node(app_id):
                 return next((item for item in walk(ipc())
@@ -403,6 +430,7 @@ def run_verifier(output):
                 env["SWAYSOCK"] = str(sway_socket)
                 env["WAYLAND_DISPLAY"] = wayland_display
                 connection = SwayIPC(sway_socket)
+                prioritize(compositor)
                 spawn("fixture-top", [sys.executable, str(Path(__file__).resolve()),
                                       "--fixture-panel"])
                 wait_for(lambda: any(item["namespace"] == "attachment-fixture-top"
@@ -426,10 +454,30 @@ def run_verifier(output):
                 terminal("attachment-floating", "Floating attachment preview")
                 floating = wait_for(lambda: node("attachment-floating"), "floating client missing")
                 floating_id, tiled_id = floating["id"], tiled["id"]
-                spawn("decoration", [str(HELPER), "daemon"])
+                decoration = spawn("decoration", [str(HELPER), "daemon"])
                 initial = capture("attached-bottom", lambda state: attached(state, "bottom")
                         and state["clients"]["attachment-tiled"]["rect"] == baseline,
                         "bottom caption did not attach flush without reserving workspace space")
+                prioritize(decoration)
+
+                ipc(command='mode "window-switcher"')
+                time.sleep(0.05)
+                ipc(command=f'[con_id={floating_id}] move absolute position 300 220')
+                capture("carousel-pauses-caption-geometry", lambda state:
+                        state["caption_global_rect"] == initial["caption_global_rect"]
+                        and state["clients"]["attachment-floating"]["rect"]["x"] == 300,
+                        "carousel mode did not suspend covered caption geometry")
+                started = time.monotonic()
+                ipc(command='mode "default"')
+                wait_for(lambda: attached(snapshot(), "bottom"),
+                         "caption did not catch up immediately after carousel mode exit",
+                         seconds=0.25, interval=0.004)
+                evidence["carousel_resume_ms"] = round((time.monotonic() - started) * 1000, 1)
+                checks.append("carousel-exit-refreshes-latest-caption-geometry")
+                ipc(command=f'[con_id={floating_id}] move absolute position 200 160')
+                capture("carousel-return-bottom", lambda state: attached(state, "bottom")
+                        and state["caption_global_rect"] == initial["caption_global_rect"],
+                        "caption did not return to its original geometry after carousel check")
 
                 for app_id, label in (("com.mbp-intel.dropdown", "ghostty"),
                                       ("mbp-intel-dropdown", "legacy-foot"),
@@ -688,6 +736,39 @@ def run_verifier(output):
                     for stream in (process.stdin, process.stdout):
                         if stream is not None:
                             stream.close()
+                groups = {process.pid for _name, process in processes}
+
+                def private_survivors():
+                    survivors = []
+                    marker = os.fsencode('XDG_RUNTIME_DIR=' + str(runtime))
+                    for path in Path('/proc').iterdir():
+                        if not path.name.isdecimal():
+                            continue
+                        try:
+                            if path.stat().st_uid != os.getuid():
+                                continue
+                            fields = (path / 'stat').read_text().rsplit(')', 1)[1].split()
+                            if fields[0] == 'Z':
+                                continue
+                            private_group = int(fields[2]) in groups
+                            private_runtime = marker in (path / 'environ').read_bytes().split(b'\0')
+                            if private_group or private_runtime:
+                                survivors.append({'pid': int(path.name), 'state': fields[0]})
+                        except (OSError, ValueError, IndexError):
+                            continue
+                    return survivors
+
+                deadline = time.monotonic() + 1
+                survivors = private_survivors()
+                while survivors and time.monotonic() < deadline:
+                    time.sleep(0.02)
+                    survivors = private_survivors()
+                evidence['private_survivors'] = survivors
+                if survivors:
+                    evidence['status'] = 'failed'
+                    evidence['cleanup_error'] = 'private session processes survived cleanup'
+                write_evidence()
+                require(not survivors, 'private session processes survived cleanup')
     print(output)
 
 
@@ -705,6 +786,8 @@ def enter_private_bus():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--prioritize-ui", action="store_true",
+                        help="verify scheduling through the installed private-session priority helper")
     parser.add_argument("--fixture-panel", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     if args.fixture_panel:
@@ -713,7 +796,7 @@ def main():
     if args.output is None:
         parser.error("--output is required")
     enter_private_bus()
-    run_verifier(args.output)
+    run_verifier(args.output, args.prioritize_ui)
 
 
 if __name__ == "__main__":

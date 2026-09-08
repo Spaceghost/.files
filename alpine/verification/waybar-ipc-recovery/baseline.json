@@ -1,0 +1,48 @@
+{
+  "previous_lock": "alpine/packages/locks/c2e72c6ba1433e9fb513.json",
+  "previous_packages": [
+    {
+      "apk_identity": "Q1DPyRa1+bYsgv8JCwBZ/r6kIcKkE=",
+      "arch": "x86_64",
+      "artifact": "sha256/9388355c07721511445e5e5a817cd882232011c00249bb5d2f63c9f499d41689/waybar-0.15.0-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "waybar-0.15.0-r3.apk",
+      "name": "waybar",
+      "sha256": "9388355c07721511445e5e5a817cd882232011c00249bb5d2f63c9f499d41689",
+      "version": "0.15.0-r3"
+    },
+    {
+      "apk_identity": "Q1nV8MyZK78/dM3R9Bjzc6U1oHBkw=",
+      "arch": "x86_64",
+      "artifact": "sha256/deaa6bc1b83d58c3c28b31fde4a5d0080e3a42f367c4ee8fb3246f44f3614130/waybar-openrc-0.15.0-r3.apk",
+      "artifact_arch": "noarch",
+      "filename": "waybar-openrc-0.15.0-r3.apk",
+      "name": "waybar-openrc",
+      "sha256": "deaa6bc1b83d58c3c28b31fde4a5d0080e3a42f367c4ee8fb3246f44f3614130",
+      "version": "0.15.0-r3"
+    }
+  ],
+  "observations": [
+    {
+      "waybar_pid": 26230,
+      "at": 1788843670.3382318,
+      "workspaces_stale": true,
+      "active_highlight_missing": true,
+      "clock_advancing": true,
+      "workspace_event_peer_disconnected": true
+    },
+    {
+      "waybar_pid": 8427,
+      "at": 1788843701.3070338,
+      "restart_restored_highlight_and_labels": true
+    },
+    {
+      "waybar_pid": 8427,
+      "at": 1788843771.9511013,
+      "orphan_socket_count": 1,
+      "restart_did_not_prevent_recurrence": true
+    }
+  ],
+  "private_runtime_evidence": "/home/jack/.local/state/oldbook/verification/bar-active-recovery",
+  "trigger": "Sway event disconnection confirmed; the precise reason Sway closed the connection was not established."
+}

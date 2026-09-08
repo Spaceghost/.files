@@ -18,8 +18,16 @@ Waybar's radio tooltip data reports Bluetooth blocked and WLAN enabled. See
 [bluetooth-verification.json](bluetooth-verification.json) and
 [BLUETOOTH.md](BLUETOOTH.md) for the separate policy and token-based recovery.
 
-The controller, trusted profiles, OpenRC services, sleep hook, WPA policy and
-DHCP changes remain staged. Waybar still reports radio state correctly; its
+The inert `mbp-intel-radio-runtime=0.1.0-r0` APK is now installed. It owns the
+privileged CLI, fourteen Python runtime modules and two DHCP helpers. The
+transaction added only this package; all nine before/after host-network
+comparison sections matched, including the same WPA/DHCP process identities.
+See the [runtime package instructions](../../packages/privacyctl-runtime/README.md)
+for its file-only installation and recovery boundary.
+
+Trusted profiles, exact doas grants, OpenRC services, the sleep hook, WPA/DHCP
+ownership changes and resolver policy remain unactivated. The supervisor has
+not been started. Waybar still reports radio state correctly; its
 existing rfkill handle and both wpa_supplicant handles are read-only. Permission
 changes do not revoke previously opened handles or remove the existing
 unrestricted wheel `nopass` doas authority. This is a direct-access restriction,
@@ -30,9 +38,9 @@ The exact private recovery journal is
 `/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q`; keep its association data
 out of Fossil. Reboot and seat-change persistence remain unverified.
 
-## Staged persistent controller
+## Installed runtime, pending service activation
 
-`privacyctl supervise` now runs the persistent owner and its process guardian.
+When explicitly activated, `privacyctl supervise` runs the persistent owner and its process guardian.
 `connect PROFILE` and `scan` use its root-only command socket; they cannot
 fall back to one-shot DHCP. The existing `status [--json]` output remains
 read-only and available without that socket. `off` requests cancellation and
@@ -77,14 +85,19 @@ allow ten-second apply and twelve-second removal/hook acknowledgment, with
 five-second readiness; measured maxima and other limits are in
 [OWNER-SERVICE.md](OWNER-SERVICE.md). The dual-stack fixture uses six
 address/route selectors (K=6); completion for maximum accepted K=22 is not
-guaranteed. Different-boot completion is not implemented. Live activation is
-unchanged.
+guaranteed. Different-boot DNS-only retirement is implemented in the installed
+inert runtime; its synthetic tests and separate native/reboot acceptance boundary are
+documented in [DIFFERENT-BOOT-RECOVERY.md](DIFFERENT-BOOT-RECOVERY.md). Live
+activation is unchanged.
 
 ## Trusted policy and display contract
 
 The root policy maps `shmecklebucket` and an explicitly enabled
 `iphone-hotspot` profile to existing numeric WPA network IDs and exact SSIDs.
-The controller never reads or changes a PSK. Neither profile is activated:
+The command names are stable aliases; each exact SSID comes from the private
+allowlist, with no hard-coded home spelling. The parser rejects malformed,
+duplicate, oversized or non-private policy files. The controller never reads
+or changes a PSK. Neither profile is activated:
 the saved home spelling differs from the requested name, and the exact hotspot
 name is unresolved. Do not substitute a guessed name or hostname.
 
@@ -117,5 +130,6 @@ The historical one-shot Controller helpers remain only for their regression
 checks; production CLI routing no longer calls them. Earlier component evidence
 retains the exact source hashes exercised then. Follow
 [NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining work and
-[INSTALL-PLAN.md](INSTALL-PLAN.md) for the persistent owner's installation and
-ownership handoff. The migration installer is not yet complete.
+[INSTALL-PLAN.md](INSTALL-PLAN.md) for the remaining policy/service installation
+and ownership handoff. The migration installer is not yet complete; the inert
+runtime APK performs none of that handoff.

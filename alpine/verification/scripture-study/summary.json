@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "status": "passed",
+  "storage": {
+    "legacy_reflections_byte_preserved": true,
+    "legacy_reflections": 33,
+    "initial_save_staged_exact_path": "alpine/assets/scripture/study/entries/study-11111111111111111111111111111111.json",
+    "clone_fresh_sqlite_rebuild_equal": true,
+    "fresh_rebuild_entries": 34,
+    "fresh_sqlite_application_id": 1329746772,
+    "local_transport": "/tmp/scripture-study-integration-bjbug2lp/hub.fossil",
+    "remote_network_used": false,
+    "clone_a_staged_exact_path": "alpine/assets/scripture/study/entries/study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+    "clone_b_staged_exact_path": "alpine/assets/scripture/study/entries/study-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.json",
+    "push_pull_merge_performed": true,
+    "merged_entries_each_checkout": 36,
+    "independent_ids_retained": [
+      "study-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "study-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ],
+    "catalog_ids_equal_after_merge": true,
+    "all_commits_nosync": true,
+    "private_fossil_home": "/tmp/scripture-study-integration-bjbug2lp/fossil-home"
+  },
+  "native": {
+    "isolated_headless_sway": true,
+    "private_home": "/tmp/scripture-study-integration-bjbug2lp/native-home",
+    "legacy_daily_restored": "isaiah-call",
+    "restored_card_screenshot": "restored-card.png",
+    "restored_card_crop": "20,20 440x240",
+    "actual_conky_card": true,
+    "card_visible_pixels_verified": true,
+    "scripture_rectangle_changed_pixels": 20264,
+    "scripture_rectangle_bright_pixels": 8949,
+    "actual_fuzzel_picker": true,
+    "actual_wtype_enter": true,
+    "picker_preserved_entries": 33,
+    "picker_screenshot": "reflections-picker.png",
+    "entered_selection": "jesus-incarnation",
+    "scripture_pid_replaced": true,
+    "witness_control_pid_unchanged": true,
+    "only_scripture_refreshed": true,
+    "fuzzel_pid_observed": 23286
+  },
+  "search_bar_dispatch": {
+    "callback_subprocess_observed": {
+      "left": "find",
+      "right": "reflections",
+      "signal": "find"
+    },
+    "right_click_routes_reflections": true,
+    "left_click_routes_find": true,
+    "signal_routes_find": true,
+    "native_physical_mouse_simulated": false
+  },
+  "live_activation": {
+    "scope": "read-only observation of root live activation; screenshots are headless only",
+    "preview_deployment_journal": "/tmp/oldbook-scripture-study-preview/.local/state/oldbook/backups/1788838969793306374",
+    "live_deployment_journal": "/home/jack/.local/state/oldbook/backups/1788838970027102079",
+    "archived_application_id_zero_cache": "/home/jack/.local/share/oldbook/scripture/study-before-application-id-1788838969347774079.sqlite3",
+    "archived_cache_entries": 33,
+    "rebuilt_application_id": 1329746772,
+    "rebuilt_cache_entries": 33,
+    "prior_selection_backup": "/home/jack/.local/state/oldbook/scripture/selection-before-study-1788838996144792109.json",
+    "activated_daily_selection": {
+      "kind": "reflection",
+      "id": "isaiah-call",
+      "reference": "Isaiah 6:5",
+      "chosen_utc": "2026-09-08T03:43:16Z"
+    },
+    "current_selection_observed": {
+      "kind": "reflection",
+      "id": "paul-thorn",
+      "reference": "2 Corinthians 12:9",
+      "chosen_utc": "2026-09-08T03:53:57Z"
+    },
+    "same_daily_identity_current": false,
+    "verified_owned_bar_old_pid": 10394,
+    "verified_owned_bar_new_pid": 597,
+    "verified_owned_bar_command": "python3 /home/jack/.local/bin/oldbook-scripture-bar",
+    "only_bar_restarted_by_root_activation": true
+  },
+  "elapsed_seconds": 10.58,
+  "temporary_repositories_removed": true
+}

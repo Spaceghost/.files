@@ -236,7 +236,8 @@
       "tests": [
         "test_expo.py",
         "test_showdesktop.py",
-        "test_showdesktop_lifecycle.py"
+        "test_showdesktop_lifecycle.py",
+        "test_ui_startup.py"
       ],
       "evidence": [
         "verification/showdesktop-recovery/README.md"
@@ -259,6 +260,23 @@
       ],
       "evidence": [
         "verification/carousel-quality/README.md"
+      ]
+    },
+    {
+      "id": "KEYBOARD-GLOW",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-keyboard-backlight",
+        "alpine/desktop/.local/bin/mbp-intel-control",
+        "alpine/desktop/.config/sway/local.d/keyboard-backlight.conf",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
+        "alpine/tests/test_keyboard_backlight.py"
+      ],
+      "tests": [
+        "test_keyboard_backlight.py",
+        "test_shortcut_sources.py"
+      ],
+      "evidence": [
+        "verification/keyboard-breathing/README.md"
       ]
     },
     {
@@ -294,7 +312,8 @@
       "tests": [
         "test_decoration.py",
         "test_decoration_watch.py",
-        "test_overlay_theme.py"
+        "test_overlay_theme.py",
+        "test_decoration_handoff.py"
       ],
       "evidence": [
         "verification/decoration-context/"
@@ -313,7 +332,8 @@
       ],
       "tests": [
         "test_decoration_placement.py",
-        "test_decoration_watch.py"
+        "test_decoration_watch.py",
+        "test_decoration_handoff.py"
       ],
       "evidence": [
         "verification/decoration-transition/README.md",
@@ -330,16 +350,28 @@
         "alpine/desktop/.local/lib/mbp_intel/decoration*",
         "alpine/desktop/.local/lib/mbp_intel/decoration_motion.py",
         "alpine/desktop/.local/lib/mbp_intel/decoration_watch.py",
-        "alpine/themes/profiles/*/.config/swayfx/effects.conf"
+        "alpine/themes/profiles/*/.config/swayfx/effects.conf",
+        "alpine/bin/mbp-intel-ui-priority",
+        "alpine/desktop/.local/lib/mbp_intel/ui_priority.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/desktop/.local/lib/mbp_intel/graphics_warmup.py"
       ],
       "tests": [
         "test_carousel_view.py",
         "test_decoration_motion.py",
-        "test_decoration_watch.py"
+        "test_decoration_watch.py",
+        "test_ui_priority.py",
+        "test_ui_command.py",
+        "test_carousel_responsiveness.py",
+        "test_decoration_handoff.py",
+        "test_ui_priority_request.py",
+        "test_ui_startup.py"
       ],
       "evidence": [
         "verification/decoration-framerate/README.md",
-        "verification/carousel-quality/native-README.md"
+        "verification/carousel-quality/native-README.md",
+        "verification/animation-responsiveness/README.md",
+        "verification/animation-fluidity/decoration/README.md"
       ]
     },
     {
@@ -376,7 +408,11 @@
         "alpine/desktop/.local/bin/mbp-intel-video-background",
         "alpine/desktop/.local/lib/mbp_intel/carousel.py",
         "alpine/desktop/.local/lib/mbp_intel/showdesktop.py",
-        "alpine/desktop/.local/lib/mbp_intel/ui_command.py"
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/bin/mbp-intel-ui-priority",
+        "alpine/bin/install-desktop-system",
+        "alpine/desktop/.local/lib/mbp_intel/ui_priority.py",
+        "alpine/desktop/.local/lib/mbp_intel/graphics_warmup.py"
       ],
       "tests": [
         "test_ai_notification_stream.py",
@@ -384,7 +420,11 @@
         "test_session.py",
         "test_showdesktop_lifecycle.py",
         "test_strata.py",
-        "test_video_background.py"
+        "test_video_background.py",
+        "test_ui_priority.py",
+        "test_ui_command.py",
+        "test_ui_priority_request.py",
+        "test_ui_startup.py"
       ],
       "evidence": []
     },
@@ -483,7 +523,10 @@
         "alpine/tests/test_scripture*.py",
         "alpine/tests/verify_scripture_header.py",
         "alpine/verification/scripture-header/*",
-        "alpine/verification/scripture-local-generation/*"
+        "alpine/verification/scripture-local-generation/*",
+        "alpine/desktop/.config/mbp-intel/ollama.json",
+        "alpine/tests/verify_scripture_inline.py",
+        "alpine/verification/scripture-inline/*"
       ],
       "tests": [
         "test_conky_policy.py",
@@ -494,12 +537,15 @@
         "test_scripture_selection.py",
         "test_scripture_study.py",
         "test_conky_clicks.py",
-        "test_scripture_bar_theme.py"
+        "test_scripture_bar_theme.py",
+        "test_scripture_runtime_policy.py",
+        "test_scripture_search.py"
       ],
       "evidence": [
         "verification/scripture-history/README.md",
         "verification/scripture-header/README.md",
-        "verification/scripture-local-generation/README.md"
+        "verification/scripture-local-generation/README.md",
+        "verification/scripture-inline/README.md"
       ]
     },
     {

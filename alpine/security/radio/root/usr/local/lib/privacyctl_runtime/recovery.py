@@ -10,7 +10,7 @@ import math
 import re
 import time
 
-from .journal import validate_record
+from .journal import record_context, validate_record
 from .link import LinkIdentity, read_link
 from .writers import capture_writer, current_context, drain_writer
 
@@ -46,6 +46,26 @@ def validate_permit(permit, *, generation, interface, deadline, check=lambda: No
     return validate_record(value)
 
 
+class DNSRecoveryPermit:
+    """Ephemeral DNS-only authority; never grants link or kernel ownership."""
+    def __init__(self, coordinator, key):
+        _require(key is _PERMIT_KEY, 'DNS recovery permit cannot be constructed externally')
+        self._coordinator = coordinator
+
+
+def validate_dns_permit(permit, backend, *, deadline, check=lambda: None):
+    _require(type(permit) is DNSRecoveryPermit, 'invalid DNS recovery permit')
+    owner = permit._coordinator
+    _require(owner._dns_permit is permit and owner._recovering and owner.backend is backend,
+             'expired or foreign DNS recovery permit')
+    owner._checkpoint(deadline, check)
+    owner._context()
+    value = owner.record
+    _require(not owner._uncertain and value['version'] == 2 and value['phase'] == 'reboot-dns'
+             and not any(value['writers'].values()), 'DNS recovery writer barrier changed')
+    return validate_record(value)
+
+
 class RecoveryJournal:
     """Trusted coordinator; injectable helpers exist for isolated fixtures only.
 
@@ -68,6 +88,7 @@ class RecoveryJournal:
         self._removal_attempted = self._absent_after_removal = False
         self._attempted, self._failed, self._completed = {}, set(), set()
         self._permit, self._recovering = None, False
+        self._dns_permit = None
         backend.journal = self
 
     @property
@@ -93,13 +114,16 @@ class RecoveryJournal:
 
     def _context(self):
         _require(self._record is not None, 'no loaded recovery record')
-        expected = {key: self._record[key] for key in ('boot_id', 'observer_pidns', 'target_netns')}
+        expected = record_context(self._record)
         _require(self._context_reader() == expected, 'recovery boot or namespace changed')
+        self._provenance()
+
+    def _provenance(self):
         _require(self._record['interface'] == self.interface, 'recovery interface changed')
         if self.marker is not None:
             _require(self.marker.read() in (None, self._record['generation']), 'dirty marker belongs to another generation')
 
-    def _load(self):
+    def _load(self, *, allow_reboot=False):
         value = self.store.read()
         if value is not None:
             value = validate_record(value)
@@ -108,7 +132,7 @@ class RecoveryJournal:
             self._identity = identity
         elif self._identity is not None:
             _require(self._removal_attempted and self._record is not None and
-                     self._record['phase'] == 'clean' and
+                     self._record['phase'] in ('clean', 'reboot-clean') and
                      (self.marker is None or self.marker.read() is None),
                      'loaded journal unexpectedly disappeared')
             self._context()
@@ -117,7 +141,7 @@ class RecoveryJournal:
         self._absent_after_removal = False
         self._record, self._uncertain = value, False
         if value is not None:
-            self._context()
+            self._provenance() if allow_reboot else self._context()
         return value
 
     def _save(self, **changes):
@@ -137,6 +161,7 @@ class RecoveryJournal:
         self._checkpoint(deadline, check)
         _require(not self._uncertain, 'journal completion is uncertain')
         self._context()
+        _require(self._record['version'] == 1, 'DNS retirement has no link authority')
         value = self._link_reader(self.interface, deadline=deadline, check=check)
         self._checkpoint(deadline, check)
         _require(type(value) is LinkIdentity and value.name == self.interface and
@@ -148,6 +173,24 @@ class RecoveryJournal:
         _require(value.alias in allowed, 'link cookie or prior alias changed')
         self._context()
         return value
+
+    def check_command(self, backend, argv, *, content, deadline, check=lambda: None):
+        """Authorize actual argv at both sides of native writer registration."""
+        self._checkpoint(deadline, check)
+        _require(not self._uncertain, 'journal completion is uncertain')
+        self._context()
+        _require(backend is self.backend, 'foreign native backend')
+        if self._record['version'] == 1:
+            self.check_link(deadline=deadline, check=check)
+            return
+        _require(self._recovering and self._dns_permit is not None and
+                 self._record['phase'] == 'reboot-dns', 'DNS retirement is not active')
+        allowed = [(backend.resolvconf, '--host-pid-lock-version'), (backend.resolvconf, '-u')]
+        provider = self._record['resources']['provider']
+        if provider is not None:
+            allowed.append((backend.resolvconf, '-f', '-d', provider))
+        _require(content is None and type(argv) in (list, tuple) and tuple(argv) in allowed,
+                 'command has no DNS retirement authority')
 
     def begin(self, generation, *, deadline, check=lambda: None):
         self._checkpoint(deadline, check)
@@ -187,7 +230,7 @@ class RecoveryJournal:
     def writer_started(self, kind, pid, pidfd, operation):
         _require(kind in ('native', 'dhcp'), 'invalid writer slot')
         _require(self._record is not None and not self._uncertain, 'journal unavailable for writer')
-        _require(self._record['phase'] != 'clean' and self._record['writers'][kind] is None
+        _require(self._record['phase'] not in ('clean', 'reboot-clean') and self._record['writers'][kind] is None
                  and kind not in self._attempted, 'writer slot is already owned')
         _require(kind != 'dhcp' or self._record['phase'] == 'active', 'DHCP requires active link cookie')
         self._completed.discard(kind)
@@ -243,7 +286,7 @@ class RecoveryJournal:
         self._save(resources=resources)
 
     def _clear(self):
-        _require(self._record['phase'] == 'clean', 'journal is not clean')
+        _require(self._record['phase'] in ('clean', 'reboot-clean'), 'journal is not clean')
         generation = self._record['generation']
         if self.marker is not None:
             value = self.marker.read()
@@ -293,16 +336,47 @@ class RecoveryJournal:
         self._clear()
         return 'clean'
 
+    def _finish_reboot(self, deadline, check):
+        self._checkpoint(deadline, check)
+        self._context()
+        _require(not any(self._record['writers'].values()), 'DNS writer completion remains pending')
+        if self._record['phase'] != 'reboot-clean':
+            if self._record['resources']['provider'] is not None:
+                self._dns_permit = DNSRecoveryPermit(self, _PERMIT_KEY)
+                self.backend.retire_dns(self._dns_permit, deadline=deadline, check=check)
+                validate_dns_permit(self._dns_permit, self.backend, deadline=deadline, check=check)
+                self._save(resources={'addresses': [], 'routes': [], 'provider': None, 'dns_contents': []})
+            self._save(phase='reboot-clean')
+        self._checkpoint(deadline, check)
+        self._context()
+        self._clear()
+        return 'clean'
+
     def recover(self, *, deadline, check=lambda: None):
         self._checkpoint(deadline, check)
         self._permit, self._recovering = None, False
+        self._dns_permit = None
         # A failed begin may have created no record; read actual state afresh.
         if self._record is None:
             self._identity = None
-        value = self._load()
+        value = self._load(allow_reboot=True)
         if value is None:
             _require(self.marker is None or self.marker.read() is None, 'unexplained legacy dirty marker')
             return 'clean'
+        context = self._context_reader()
+        if context['boot_id'] != record_context(value)['boot_id']:
+            _require(not self._attempted, 'local writer handles cannot cross a boot boundary')
+            self._checkpoint(deadline, check)
+            _require(self._context_reader() == context, 'context changed during boot rollover')
+            try:
+                self._record = self.store.rollover_boot(context)
+            except BaseException:
+                self._uncertain = True
+                raise
+            self._uncertain = False
+            self._removal_attempted = self._absent_after_removal = False
+            self._failed.clear(); self._completed.clear()
+        self._context()
         self._recovering = True
         try:
             self._drain_local(deadline, check)
@@ -312,12 +386,13 @@ class RecoveryJournal:
                     continue
                 self._checkpoint(deadline, check)
                 self._context()
-                outcome = self._drain(writer, **{key: self._record[key] for key in
-                    ('boot_id', 'observer_pidns', 'target_netns')}, deadline=deadline, check=check)
+                outcome = self._drain(writer, **record_context(self._record), deadline=deadline, check=check)
                 _require(outcome in ('absent', 'reused', 'dead', 'killed'), 'writer death was not proved')
                 self._attempted[kind] = copy.deepcopy(writer)
                 self._failed.discard(kind)
                 self.writer_finished(kind)
+            if self._record['version'] == 2:
+                return self._finish_reboot(deadline, check)
             self.check_link(deadline=deadline, check=check)
             if self._record['phase'] == 'active':
                 self._permit = RecoveryPermit(self, _PERMIT_KEY)
@@ -331,3 +406,4 @@ class RecoveryJournal:
             return self.finish(deadline=deadline, check=check)
         finally:
             self._permit, self._recovering = None, False
+            self._dns_permit = None

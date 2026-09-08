@@ -1,0 +1,86 @@
+{
+  "scenarios": [],
+  "isolation": "private HOME, XDG data, runtime, compositor",
+  "sources": {
+    "alpine/desktop/.local/bin/oldbook-scripture-bar": "d78a13a48fca451476d7c2f846263d84a5add16a90282bbd20b869bbc96cb06b",
+    "alpine/desktop/.local/bin/oldbook-scripture": "63c08023ffc8a4412b753391d33351a366e5c647f0566cc7c15ceee522c01442",
+    "alpine/desktop/.local/lib/oldbook/scripture_search.py": "8515dd357149538923368fd23f9cae1311bca702206aa141049d32adcd9907c4",
+    "alpine/desktop/.local/lib/oldbook/scripture_bar_ipc.py": "f921491b10fccc8f6f1e3ac6cf1224121ad8dcc8e2f20b286fcd4ae553a8a9af",
+    "alpine/tests/verify_scripture_inline.py": "6f3d8e534ec6d1514d164978b4288a25991c2e6f8fdeafd4d38b5aa5dd9fa50f"
+  },
+  "passed": false,
+  "error": "AssertionError('Timed out waiting for Enter keyboard release')",
+  "last_bar": {
+    "editing": true,
+    "focus_received": true,
+    "active": true,
+    "entry_focus": true,
+    "text": "John 3:17",
+    "scope": "bible",
+    "results": [
+      {
+        "action": "select",
+        "query": "John 3:17",
+        "reference": "John 3:17",
+        "title": "John 3:17",
+        "text": "For God sent not his Son into the world to condemn the world; but that the world through him might be saved."
+      }
+    ],
+    "selected": 0,
+    "layer": 2,
+    "keyboard": 1,
+    "gtk_windows": 1,
+    "window_identity": 140205186358320,
+    "pid": 32317,
+    "input_events": [
+      {
+        "key": 74,
+        "state": 0
+      },
+      {
+        "key": 111,
+        "state": 0
+      },
+      {
+        "key": 104,
+        "state": 0
+      },
+      {
+        "key": 110,
+        "state": 0
+      },
+      {
+        "key": 32,
+        "state": 0
+      },
+      {
+        "key": 51,
+        "state": 0
+      },
+      {
+        "key": 58,
+        "state": 0
+      },
+      {
+        "key": 49,
+        "state": 0
+      },
+      {
+        "key": 55,
+        "state": 0
+      },
+      {
+        "key": 65293,
+        "state": 0
+      }
+    ],
+    "label": "Search Bible \u00b7 right-click for reflections & study",
+    "width": 760,
+    "height": 117
+  },
+  "cleanup": {
+    "private_clients_stopped": 7,
+    "forced_clients": 0
+  },
+  "private_survivors": []
+}

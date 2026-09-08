@@ -1,0 +1,3267 @@
+{
+  "schema": 1,
+  "installed_db_sha256": "7353eea9b535231a32d6f13761635405553666943c6e36cb2c043857da17f90d",
+  "packages": [
+    {
+      "name": "abuild",
+      "version": "3.18.0_rc5-r1",
+      "file": "abuild-3.18.0_rc5-r1.c5c2c9cd.apk",
+      "sha256": "52512e6823917a952d86f54f775102e067818ea472c02132ebaf5103fb1df745",
+      "size": 78729,
+      "artifact": "sha256/52512e6823917a952d86f54f775102e067818ea472c02132ebaf5103fb1df745/abuild-3.18.0_rc5-r1.apk",
+      "filename": "abuild-3.18.0_rc5-r1.apk"
+    },
+    {
+      "name": "abuild-meson",
+      "version": "1.12.0-r0",
+      "file": "abuild-meson-1.12.0-r0.7742fe20.apk",
+      "sha256": "7566a3429bec6aebd60cbec470b5238e7ed52ed8447ffa609f82661c033e45ec",
+      "size": 2399,
+      "artifact": "sha256/7566a3429bec6aebd60cbec470b5238e7ed52ed8447ffa609f82661c033e45ec/abuild-meson-1.12.0-r0.apk",
+      "filename": "abuild-meson-1.12.0-r0.apk"
+    },
+    {
+      "name": "abuild-sudo",
+      "version": "3.18.0_rc5-r1",
+      "file": "abuild-sudo-3.18.0_rc5-r1.8c0d42db.apk",
+      "sha256": "bd5f4bd22994a63fd71043c51d343bad9087bb953d82bb61d68cc7c501fcfbe8",
+      "size": 4471,
+      "artifact": "sha256/bd5f4bd22994a63fd71043c51d343bad9087bb953d82bb61d68cc7c501fcfbe8/abuild-sudo-3.18.0_rc5-r1.apk",
+      "filename": "abuild-sudo-3.18.0_rc5-r1.apk"
+    },
+    {
+      "name": "acl-libs",
+      "version": "2.3.2-r1",
+      "file": "acl-libs-2.3.2-r1.1692d707.apk",
+      "sha256": "656c5b548deb4b25380abc94c4cc7804409a3e56b8cc0cf6fd1f29d18fd9e0b8",
+      "size": 14342,
+      "artifact": "sha256/656c5b548deb4b25380abc94c4cc7804409a3e56b8cc0cf6fd1f29d18fd9e0b8/acl-libs-2.3.2-r1.apk",
+      "filename": "acl-libs-2.3.2-r1.apk"
+    },
+    {
+      "name": "alpine-base",
+      "version": "3.25.0_alpha20260805-r0",
+      "file": "alpine-base-3.25.0_alpha20260805-r0.apk",
+      "sha256": "1e154f754e6a6bad9d3d7ecab589c30657a152631ce00e5ab56b8800266e6ca9",
+      "size": 1335,
+      "artifact": "sha256/1e154f754e6a6bad9d3d7ecab589c30657a152631ce00e5ab56b8800266e6ca9/alpine-base-3.25.0_alpha20260805-r0.apk",
+      "filename": "alpine-base-3.25.0_alpha20260805-r0.apk"
+    },
+    {
+      "name": "alpine-baselayout",
+      "version": "3.7.2-r1",
+      "file": "alpine-baselayout-3.7.2-r1.7d537c36.apk",
+      "sha256": "1e818d18aead861bad24ccb25fc88985ed80f8b671e5ae410fc734069ea28c78",
+      "size": 8273,
+      "artifact": "sha256/1e818d18aead861bad24ccb25fc88985ed80f8b671e5ae410fc734069ea28c78/alpine-baselayout-3.7.2-r1.apk",
+      "filename": "alpine-baselayout-3.7.2-r1.apk"
+    },
+    {
+      "name": "alpine-baselayout-data",
+      "version": "3.7.2-r1",
+      "file": "alpine-baselayout-data-3.7.2-r1.9f92c135.apk",
+      "sha256": "b88627a93e3faf7f7ba2e610a480461970a9334fc447fdc301c340d5a0a7ea74",
+      "size": 10789,
+      "artifact": "sha256/b88627a93e3faf7f7ba2e610a480461970a9334fc447fdc301c340d5a0a7ea74/alpine-baselayout-data-3.7.2-r1.apk",
+      "filename": "alpine-baselayout-data-3.7.2-r1.apk"
+    },
+    {
+      "name": "alpine-conf",
+      "version": "3.22.0-r0",
+      "file": "alpine-conf-3.22.0-r0.e8296288.apk",
+      "sha256": "7f803c1073765681ad9abf4336c0510dc4332ac241db3ed761d91f2f019d2b04",
+      "size": 65626,
+      "artifact": "sha256/7f803c1073765681ad9abf4336c0510dc4332ac241db3ed761d91f2f019d2b04/alpine-conf-3.22.0-r0.apk",
+      "filename": "alpine-conf-3.22.0-r0.apk"
+    },
+    {
+      "name": "alpine-keys",
+      "version": "2.6-r0",
+      "file": "alpine-keys-2.6-r0.e2b0ee19.apk",
+      "sha256": "44135f4a719071b7c439f1503ebfbb2216899430f110d5b1579a7e0d6534d3de",
+      "size": 12198,
+      "artifact": "sha256/44135f4a719071b7c439f1503ebfbb2216899430f110d5b1579a7e0d6534d3de/alpine-keys-2.6-r0.apk",
+      "filename": "alpine-keys-2.6-r0.apk"
+    },
+    {
+      "name": "alpine-release",
+      "version": "3.25.0_alpha20260805-r0",
+      "file": "alpine-release-3.25.0_alpha20260805-r0.5d43a35c.apk",
+      "sha256": "d448e6046e163fd4df89303b157dc018a9ea65058ce49f4c73af723e1c7207de",
+      "size": 2119,
+      "artifact": "sha256/d448e6046e163fd4df89303b157dc018a9ea65058ce49f4c73af723e1c7207de/alpine-release-3.25.0_alpha20260805-r0.apk",
+      "filename": "alpine-release-3.25.0_alpha20260805-r0.apk"
+    },
+    {
+      "name": "alsa-lib",
+      "version": "1.2.16.1-r0",
+      "file": "alsa-lib-1.2.16.1-r0.82503260.apk",
+      "sha256": "e9d92102c6537a036cc3f4e27f97fe860f944f3b26565d9991bfdbe21c2a4caa",
+      "size": 489205,
+      "artifact": "sha256/e9d92102c6537a036cc3f4e27f97fe860f944f3b26565d9991bfdbe21c2a4caa/alsa-lib-1.2.16.1-r0.apk",
+      "filename": "alsa-lib-1.2.16.1-r0.apk"
+    },
+    {
+      "name": "apk-tools",
+      "version": "3.0.8-r0",
+      "file": "apk-tools-3.0.8-r0.451ab476.apk",
+      "sha256": "f98b74763b56aa86c320bff32bb6b21b5eb842af66cc8c6b5d1d343dd366001b",
+      "size": 55400,
+      "artifact": "sha256/f98b74763b56aa86c320bff32bb6b21b5eb842af66cc8c6b5d1d343dd366001b/apk-tools-3.0.8-r0.apk",
+      "filename": "apk-tools-3.0.8-r0.apk"
+    },
+    {
+      "name": "at-spi2-core",
+      "version": "2.60.6-r0",
+      "file": "at-spi2-core-2.60.6-r0.d3af8818.apk",
+      "sha256": "1916d21e540b10e8ef8fc2f302185faa41dc80264b558fd2a7705485fd54e36d",
+      "size": 60827,
+      "artifact": "sha256/1916d21e540b10e8ef8fc2f302185faa41dc80264b558fd2a7705485fd54e36d/at-spi2-core-2.60.6-r0.apk",
+      "filename": "at-spi2-core-2.60.6-r0.apk"
+    },
+    {
+      "name": "at-spi2-core-dev",
+      "version": "2.60.6-r0",
+      "file": "at-spi2-core-dev-2.60.6-r0.a5d317aa.apk",
+      "sha256": "d284d26dfa6ea8d6f793a467ba79d983d6848b2add3822c4ba8e3911c90912b0",
+      "size": 257123,
+      "artifact": "sha256/d284d26dfa6ea8d6f793a467ba79d983d6848b2add3822c4ba8e3911c90912b0/at-spi2-core-dev-2.60.6-r0.apk",
+      "filename": "at-spi2-core-dev-2.60.6-r0.apk"
+    },
+    {
+      "name": "at-spi2-core-libs",
+      "version": "2.60.6-r0",
+      "file": "at-spi2-core-libs-2.60.6-r0.70db30af.apk",
+      "sha256": "1cbda641e9436ed187daebc68f25dcf292020aafd57740310d2e0177982a38f6",
+      "size": 83175,
+      "artifact": "sha256/1cbda641e9436ed187daebc68f25dcf292020aafd57740310d2e0177982a38f6/at-spi2-core-libs-2.60.6-r0.apk",
+      "filename": "at-spi2-core-libs-2.60.6-r0.apk"
+    },
+    {
+      "name": "atkmm2.28",
+      "version": "2.28.5-r0",
+      "file": "atkmm2.28-2.28.5-r0.90146dcb.apk",
+      "sha256": "8955b69a2270b551331b09dee533f0be72906138ba19f5c7d9508079440652fa",
+      "size": 80489,
+      "artifact": "sha256/8955b69a2270b551331b09dee533f0be72906138ba19f5c7d9508079440652fa/atkmm2.28-2.28.5-r0.apk",
+      "filename": "atkmm2.28-2.28.5-r0.apk"
+    },
+    {
+      "name": "atkmm2.28-dev",
+      "version": "2.28.5-r0",
+      "file": "atkmm2.28-dev-2.28.5-r0.bf4f5a87.apk",
+      "sha256": "597eaed3cce18bbc06c7604ef289cbda98cc7d81949c97029535fafa1023e680",
+      "size": 43541,
+      "artifact": "sha256/597eaed3cce18bbc06c7604ef289cbda98cc7d81949c97029535fafa1023e680/atkmm2.28-dev-2.28.5-r0.apk",
+      "filename": "atkmm2.28-dev-2.28.5-r0.apk"
+    },
+    {
+      "name": "avahi-libs",
+      "version": "0.9_rc5-r0",
+      "file": "avahi-libs-0.9_rc5-r0.e3c989f6.apk",
+      "sha256": "121d640da747187d7f4a546b9e57353d2b15f5592411b6641caafbb105cc44d0",
+      "size": 42345,
+      "artifact": "sha256/121d640da747187d7f4a546b9e57353d2b15f5592411b6641caafbb105cc44d0/avahi-libs-0.9_rc5-r0.apk",
+      "filename": "avahi-libs-0.9_rc5-r0.apk"
+    },
+    {
+      "name": "binutils",
+      "version": "2.45.1-r1",
+      "file": "binutils-2.45.1-r1.b414d7c2.apk",
+      "sha256": "9bd1cac7acb87fde3a89a75a524e4f2eeb994d9b3e0aa175a091d83e1d97f466",
+      "size": 3229614,
+      "artifact": "sha256/9bd1cac7acb87fde3a89a75a524e4f2eeb994d9b3e0aa175a091d83e1d97f466/binutils-2.45.1-r1.apk",
+      "filename": "binutils-2.45.1-r1.apk"
+    },
+    {
+      "name": "bridge",
+      "version": "1.5-r5",
+      "file": "bridge-1.5-r5.ad4abcc5.apk",
+      "sha256": "48183a2a00b9bc9de2b8b5e54f36a34119c782e80a95b79db3b7769432aa7059",
+      "size": 2872,
+      "artifact": "sha256/48183a2a00b9bc9de2b8b5e54f36a34119c782e80a95b79db3b7769432aa7059/bridge-1.5-r5.apk",
+      "filename": "bridge-1.5-r5.apk"
+    },
+    {
+      "name": "brotli",
+      "version": "1.2.0-r1",
+      "file": "brotli-1.2.0-r1.682ebd4f.apk",
+      "sha256": "c4f01fb5e1f471e9f2600c4fec38e90ff5b66daf72c00542b43dafdad456f7d5",
+      "size": 12839,
+      "artifact": "sha256/c4f01fb5e1f471e9f2600c4fec38e90ff5b66daf72c00542b43dafdad456f7d5/brotli-1.2.0-r1.apk",
+      "filename": "brotli-1.2.0-r1.apk"
+    },
+    {
+      "name": "brotli-dev",
+      "version": "1.2.0-r1",
+      "file": "brotli-dev-1.2.0-r1.a0f40eac.apk",
+      "sha256": "7e163b8270f682b5c11f502478687ddd60ee05c9cf332c8f303d35d81273f88c",
+      "size": 14486,
+      "artifact": "sha256/7e163b8270f682b5c11f502478687ddd60ee05c9cf332c8f303d35d81273f88c/brotli-dev-1.2.0-r1.apk",
+      "filename": "brotli-dev-1.2.0-r1.apk"
+    },
+    {
+      "name": "brotli-libs",
+      "version": "1.2.0-r1",
+      "file": "brotli-libs-1.2.0-r1.19b3f617.apk",
+      "sha256": "5e9327093733a93fdd5187c7cf379d7f95320335809d586d06ce41c65ad8b81c",
+      "size": 429600,
+      "artifact": "sha256/5e9327093733a93fdd5187c7cf379d7f95320335809d586d06ce41c65ad8b81c/brotli-libs-1.2.0-r1.apk",
+      "filename": "brotli-libs-1.2.0-r1.apk"
+    },
+    {
+      "name": "bsd-compat-headers",
+      "version": "0.7.2-r6",
+      "file": "bsd-compat-headers-0.7.2-r6.c510d4ba.apk",
+      "sha256": "5f79c7c00dc847bccfaa45ea58511c9f66a35364d43d5bbbb86b9823bfb726cc",
+      "size": 12133,
+      "artifact": "sha256/5f79c7c00dc847bccfaa45ea58511c9f66a35364d43d5bbbb86b9823bfb726cc/bsd-compat-headers-0.7.2-r6.apk",
+      "filename": "bsd-compat-headers-0.7.2-r6.apk"
+    },
+    {
+      "name": "bubblewrap",
+      "version": "0.12.0-r1",
+      "file": "bubblewrap-0.12.0-r1.2837f153.apk",
+      "sha256": "deb7dd5ef3035bc88005a5c63cc27f46e7c154c2cfd4a7dbb9f1504bb60398a9",
+      "size": 29243,
+      "artifact": "sha256/deb7dd5ef3035bc88005a5c63cc27f46e7c154c2cfd4a7dbb9f1504bb60398a9/bubblewrap-0.12.0-r1.apk",
+      "filename": "bubblewrap-0.12.0-r1.apk"
+    },
+    {
+      "name": "build-base",
+      "version": "0.5-r4",
+      "file": "build-base-0.5-r4.apk",
+      "sha256": "34fe9e95b72f1c4f7b6e1de211ea0bc9dd09f9cf020eec361731819987e64c32",
+      "size": 1335,
+      "artifact": "sha256/34fe9e95b72f1c4f7b6e1de211ea0bc9dd09f9cf020eec361731819987e64c32/build-base-0.5-r4.apk",
+      "filename": "build-base-0.5-r4.apk"
+    },
+    {
+      "name": "busybox",
+      "version": "1.38.0-r4",
+      "file": "busybox-1.38.0-r4.b7086616.apk",
+      "sha256": "a01bc7646b58a1386e052580397ca421aed38885da848e6fbf9bcf79a8f1b000",
+      "size": 509745,
+      "artifact": "sha256/a01bc7646b58a1386e052580397ca421aed38885da848e6fbf9bcf79a8f1b000/busybox-1.38.0-r4.apk",
+      "filename": "busybox-1.38.0-r4.apk"
+    },
+    {
+      "name": "busybox-binsh",
+      "version": "1.38.0-r4",
+      "file": "busybox-binsh-1.38.0-r4.00acc4c4.apk",
+      "sha256": "5bedd8ca1b7e6e51b9ffe787244a9bdea09613d46ab6c8dd47596257db0e5bd7",
+      "size": 1566,
+      "artifact": "sha256/5bedd8ca1b7e6e51b9ffe787244a9bdea09613d46ab6c8dd47596257db0e5bd7/busybox-binsh-1.38.0-r4.apk",
+      "filename": "busybox-binsh-1.38.0-r4.apk"
+    },
+    {
+      "name": "busybox-mdev-openrc",
+      "version": "1.38.0-r4",
+      "file": "busybox-mdev-openrc-1.38.0-r4.437c21d1.apk",
+      "sha256": "f465687fccdccc7ba2d2cb9ce70120d42c266da7071174f670ed9f6c92a6f1f8",
+      "size": 2035,
+      "artifact": "sha256/f465687fccdccc7ba2d2cb9ce70120d42c266da7071174f670ed9f6c92a6f1f8/busybox-mdev-openrc-1.38.0-r4.apk",
+      "filename": "busybox-mdev-openrc-1.38.0-r4.apk"
+    },
+    {
+      "name": "busybox-openrc",
+      "version": "1.38.0-r4",
+      "file": "busybox-openrc-1.38.0-r4.6721ff13.apk",
+      "sha256": "a4af14d7ecb8b7716d6764d677f1b43ce0383aadf36b0e089e6a4f67795bb77f",
+      "size": 3762,
+      "artifact": "sha256/a4af14d7ecb8b7716d6764d677f1b43ce0383aadf36b0e089e6a4f67795bb77f/busybox-openrc-1.38.0-r4.apk",
+      "filename": "busybox-openrc-1.38.0-r4.apk"
+    },
+    {
+      "name": "busybox-suid",
+      "version": "1.38.0-r4",
+      "file": "busybox-suid-1.38.0-r4.6417ffef.apk",
+      "sha256": "446a7c4c43485be4dbb04489970c61cc503a7efb12b2bcd7ebb5477fc675ff74",
+      "size": 3937,
+      "artifact": "sha256/446a7c4c43485be4dbb04489970c61cc503a7efb12b2bcd7ebb5477fc675ff74/busybox-suid-1.38.0-r4.apk",
+      "filename": "busybox-suid-1.38.0-r4.apk"
+    },
+    {
+      "name": "bzip2-dev",
+      "version": "1.0.8-r6",
+      "file": "bzip2-dev-1.0.8-r6.288a325c.apk",
+      "sha256": "eee243a4b3838393792150d7b867cd21223e88a016d92dcff19187544e355b88",
+      "size": 3670,
+      "artifact": "sha256/eee243a4b3838393792150d7b867cd21223e88a016d92dcff19187544e355b88/bzip2-dev-1.0.8-r6.apk",
+      "filename": "bzip2-dev-1.0.8-r6.apk"
+    },
+    {
+      "name": "ca-certificates-bundle",
+      "version": "20260611-r0",
+      "file": "ca-certificates-bundle-20260611-r0.935d8809.apk",
+      "sha256": "c2dfb9b6797f8936dc1f6a841bc2031e06834bb1a5f6e42e9e98f9dd9abd0029",
+      "size": 107333,
+      "artifact": "sha256/c2dfb9b6797f8936dc1f6a841bc2031e06834bb1a5f6e42e9e98f9dd9abd0029/ca-certificates-bundle-20260611-r0.apk",
+      "filename": "ca-certificates-bundle-20260611-r0.apk"
+    },
+    {
+      "name": "cairo",
+      "version": "1.18.4-r1",
+      "file": "cairo-1.18.4-r1.6c037e59.apk",
+      "sha256": "c798d399214ce15ba4c89b35d56e97fb381d18a21587d060978c527d6bde4790",
+      "size": 514689,
+      "artifact": "sha256/c798d399214ce15ba4c89b35d56e97fb381d18a21587d060978c527d6bde4790/cairo-1.18.4-r1.apk",
+      "filename": "cairo-1.18.4-r1.apk"
+    },
+    {
+      "name": "cairo-dev",
+      "version": "1.18.4-r1",
+      "file": "cairo-dev-1.18.4-r1.a9598c94.apk",
+      "sha256": "926722ba22334451441a52207b9a7f5bb89c1a4498a5278d862c850fe536baac",
+      "size": 38383,
+      "artifact": "sha256/926722ba22334451441a52207b9a7f5bb89c1a4498a5278d862c850fe536baac/cairo-dev-1.18.4-r1.apk",
+      "filename": "cairo-dev-1.18.4-r1.apk"
+    },
+    {
+      "name": "cairo-gobject",
+      "version": "1.18.4-r1",
+      "file": "cairo-gobject-1.18.4-r1.82687914.apk",
+      "sha256": "66c37cb86b8686f0b309272d9a5622c63e5425a969e01718715bd07b2dd7aace",
+      "size": 9385,
+      "artifact": "sha256/66c37cb86b8686f0b309272d9a5622c63e5425a969e01718715bd07b2dd7aace/cairo-gobject-1.18.4-r1.apk",
+      "filename": "cairo-gobject-1.18.4-r1.apk"
+    },
+    {
+      "name": "cairo-tools",
+      "version": "1.18.4-r1",
+      "file": "cairo-tools-1.18.4-r1.f7a8d872.apk",
+      "sha256": "4e8da3364132862203be892a1c85c0ea3522c2f705dc742c69fceee74d07a36e",
+      "size": 7078,
+      "artifact": "sha256/4e8da3364132862203be892a1c85c0ea3522c2f705dc742c69fceee74d07a36e/cairo-tools-1.18.4-r1.apk",
+      "filename": "cairo-tools-1.18.4-r1.apk"
+    },
+    {
+      "name": "cairomm1.14",
+      "version": "1.14.6-r0",
+      "file": "cairomm1.14-1.14.6-r0.dd13c133.apk",
+      "sha256": "7b5c9fa38294101f532f94bd02acc9c1b17b0f0b28ab7bb0f616647ec401e8e5",
+      "size": 42490,
+      "artifact": "sha256/7b5c9fa38294101f532f94bd02acc9c1b17b0f0b28ab7bb0f616647ec401e8e5/cairomm1.14-1.14.6-r0.apk",
+      "filename": "cairomm1.14-1.14.6-r0.apk"
+    },
+    {
+      "name": "cairomm1.14-dev",
+      "version": "1.14.6-r0",
+      "file": "cairomm1.14-dev-1.14.6-r0.88ac3cfb.apk",
+      "sha256": "b4cb71727fe037e55a3e2bdfc6d92620a923fb4cd73a26cd94f4a5ad29ac3dbf",
+      "size": 61761,
+      "artifact": "sha256/b4cb71727fe037e55a3e2bdfc6d92620a923fb4cd73a26cd94f4a5ad29ac3dbf/cairomm1.14-dev-1.14.6-r0.apk",
+      "filename": "cairomm1.14-dev-1.14.6-r0.apk"
+    },
+    {
+      "name": "catch2",
+      "version": "2.13.10-r0",
+      "file": "catch2-2.13.10-r0.24671234.apk",
+      "sha256": "571613b7cbf1aa2b4ae90041b9013f88f5ec2470727c8dc1f2375417dbd8f2d0",
+      "size": 144699,
+      "artifact": "sha256/571613b7cbf1aa2b4ae90041b9013f88f5ec2470727c8dc1f2375417dbd8f2d0/catch2-2.13.10-r0.apk",
+      "filename": "catch2-2.13.10-r0.apk"
+    },
+    {
+      "name": "clang22-headers",
+      "version": "22.1.8-r0",
+      "file": "clang22-headers-22.1.8-r0.a33ecd85.apk",
+      "sha256": "5fe1814ec6548850f0e3bbcfa49e2e579b1e0181dd435a2ee437f71977a39400",
+      "size": 1037482,
+      "artifact": "sha256/5fe1814ec6548850f0e3bbcfa49e2e579b1e0181dd435a2ee437f71977a39400/clang22-headers-22.1.8-r0.apk",
+      "filename": "clang22-headers-22.1.8-r0.apk"
+    },
+    {
+      "name": "clang22-libs",
+      "version": "22.1.8-r0",
+      "file": "clang22-libs-22.1.8-r0.58663055.apk",
+      "sha256": "f54f9d903e8bbd2ae496b15e74cb671a4c9ac4242c253d25696359f619309ede",
+      "size": 38048553,
+      "artifact": "sha256/f54f9d903e8bbd2ae496b15e74cb671a4c9ac4242c253d25696359f619309ede/clang22-libs-22.1.8-r0.apk",
+      "filename": "clang22-libs-22.1.8-r0.apk"
+    },
+    {
+      "name": "cups-libs",
+      "version": "2.4.19-r0",
+      "file": "cups-libs-2.4.19-r0.c957167b.apk",
+      "sha256": "729326a6307f53dca0b75b9780dafea196a1001ccb79b0c4ea024ba04675c8a3",
+      "size": 236599,
+      "artifact": "sha256/729326a6307f53dca0b75b9780dafea196a1001ccb79b0c4ea024ba04675c8a3/cups-libs-2.4.19-r0.apk",
+      "filename": "cups-libs-2.4.19-r0.apk"
+    },
+    {
+      "name": "date",
+      "version": "3.0.5-r0",
+      "file": "date-3.0.5-r0.4aae489c.apk",
+      "sha256": "041abdab645035b0e37c3088d4ae2f1660b05a14a171be8d51fe8771c31ed116",
+      "size": 30103,
+      "artifact": "sha256/041abdab645035b0e37c3088d4ae2f1660b05a14a171be8d51fe8771c31ed116/date-3.0.5-r0.apk",
+      "filename": "date-3.0.5-r0.apk"
+    },
+    {
+      "name": "date-dev",
+      "version": "3.0.5-r0",
+      "file": "date-dev-3.0.5-r0.f2bd9252.apk",
+      "sha256": "94ab2c0938ff1c7afb187cccf2055350a12f44de31f363c63bb7265f1203ef24",
+      "size": 78571,
+      "artifact": "sha256/94ab2c0938ff1c7afb187cccf2055350a12f44de31f363c63bb7265f1203ef24/date-dev-3.0.5-r0.apk",
+      "filename": "date-dev-3.0.5-r0.apk"
+    },
+    {
+      "name": "dbus-dev",
+      "version": "1.16.2-r3",
+      "file": "dbus-dev-1.16.2-r3.ab9b5b33.apk",
+      "sha256": "1408970917cb6eb52dbcbea95f2a9568174d211f506f03007dd5ff867c309397",
+      "size": 28143,
+      "artifact": "sha256/1408970917cb6eb52dbcbea95f2a9568174d211f506f03007dd5ff867c309397/dbus-dev-1.16.2-r3.apk",
+      "filename": "dbus-dev-1.16.2-r3.apk"
+    },
+    {
+      "name": "dbus-libs",
+      "version": "1.16.2-r3",
+      "file": "dbus-libs-1.16.2-r3.74b5defb.apk",
+      "sha256": "fb47fea668d2989334752b4ae78dcffbd304af8802a4680e56c2d922e9cb5150",
+      "size": 130196,
+      "artifact": "sha256/fb47fea668d2989334752b4ae78dcffbd304af8802a4680e56c2d922e9cb5150/dbus-libs-1.16.2-r3.apk",
+      "filename": "dbus-libs-1.16.2-r3.apk"
+    },
+    {
+      "name": "docbook-xml",
+      "version": "4.5-r10",
+      "file": "docbook-xml-4.5-r10.f2b9f04e.apk",
+      "sha256": "4a7767eddf4857daed1c1ef5ca8812fbe01bb2438c6b3c165d8ee6d2e469840a",
+      "size": 348003,
+      "artifact": "sha256/4a7767eddf4857daed1c1ef5ca8812fbe01bb2438c6b3c165d8ee6d2e469840a/docbook-xml-4.5-r10.apk",
+      "filename": "docbook-xml-4.5-r10.apk"
+    },
+    {
+      "name": "docbook-xsl",
+      "version": "1.79.2-r13",
+      "file": "docbook-xsl-1.79.2-r13.98fcd2e8.apk",
+      "sha256": "9fb58e90c1732159e906e615c532be9f04b08326b7721b012949f8094a3b6693",
+      "size": 2758,
+      "artifact": "sha256/9fb58e90c1732159e906e615c532be9f04b08326b7721b012949f8094a3b6693/docbook-xsl-1.79.2-r13.apk",
+      "filename": "docbook-xsl-1.79.2-r13.apk"
+    },
+    {
+      "name": "docbook-xsl-nons",
+      "version": "1.79.2-r13",
+      "file": "docbook-xsl-nons-1.79.2-r13.ea04e266.apk",
+      "sha256": "a11d289d9d6f3d5fba2b3b678b9c0d9f4327bcce5d342c1a088048d4d051d793",
+      "size": 1863443,
+      "artifact": "sha256/a11d289d9d6f3d5fba2b3b678b9c0d9f4327bcce5d342c1a088048d4d051d793/docbook-xsl-nons-1.79.2-r13.apk",
+      "filename": "docbook-xsl-nons-1.79.2-r13.apk"
+    },
+    {
+      "name": "docbook-xsl-ns",
+      "version": "1.79.2-r13",
+      "file": "docbook-xsl-ns-1.79.2-r13.e61989db.apk",
+      "sha256": "33e87adb418d5a42ac58a25e4002a9c38da82a03cd0491ff42680a8974b677ca",
+      "size": 1868181,
+      "artifact": "sha256/33e87adb418d5a42ac58a25e4002a9c38da82a03cd0491ff42680a8974b677ca/docbook-xsl-ns-1.79.2-r13.apk",
+      "filename": "docbook-xsl-ns-1.79.2-r13.apk"
+    },
+    {
+      "name": "elogind-dev",
+      "version": "255.24-r0",
+      "file": "elogind-dev-255.24-r0.e11c2712.apk",
+      "sha256": "937cba0beb626f760ff895e436f49ef9fc3d5cbc8cb452868af34acf81b18e0a",
+      "size": 39016,
+      "artifact": "sha256/937cba0beb626f760ff895e436f49ef9fc3d5cbc8cb452868af34acf81b18e0a/elogind-dev-255.24-r0.apk",
+      "filename": "elogind-dev-255.24-r0.apk"
+    },
+    {
+      "name": "eudev-dev",
+      "version": "3.2.14-r7",
+      "file": "eudev-dev-3.2.14-r7.90323b4f.apk",
+      "sha256": "d5bc9d4d8a98a1d9dade16614075a073a5b75f887b724ddddbda3a76196a3036",
+      "size": 889239,
+      "artifact": "sha256/d5bc9d4d8a98a1d9dade16614075a073a5b75f887b724ddddbda3a76196a3036/eudev-dev-3.2.14-r7.apk",
+      "filename": "eudev-dev-3.2.14-r7.apk"
+    },
+    {
+      "name": "eudev-libs",
+      "version": "3.2.14-r7",
+      "file": "eudev-libs-3.2.14-r7.438c47c5.apk",
+      "sha256": "e936fd9ee8b8df0f90105001003709d34b469b45485d3f74d4531f7471ec8742",
+      "size": 26132,
+      "artifact": "sha256/e936fd9ee8b8df0f90105001003709d34b469b45485d3f74d4531f7471ec8742/eudev-libs-3.2.14-r7.apk",
+      "filename": "eudev-libs-3.2.14-r7.apk"
+    },
+    {
+      "name": "expat",
+      "version": "2.8.4-r0",
+      "file": "expat-2.8.4-r0.84c90d37.apk",
+      "sha256": "f642af9f814d53f0ba11f61bce58fc4145b381a77268d7929087530e163936c9",
+      "size": 12728,
+      "artifact": "sha256/f642af9f814d53f0ba11f61bce58fc4145b381a77268d7929087530e163936c9/expat-2.8.4-r0.apk",
+      "filename": "expat-2.8.4-r0.apk"
+    },
+    {
+      "name": "expat-dev",
+      "version": "2.8.4-r0",
+      "file": "expat-dev-2.8.4-r0.dc8f1841.apk",
+      "sha256": "b98d9a40a7a9586146b7768a2fe71ac598ace1f16615c609831ce6dba6cebedd",
+      "size": 21601,
+      "artifact": "sha256/b98d9a40a7a9586146b7768a2fe71ac598ace1f16615c609831ce6dba6cebedd/expat-dev-2.8.4-r0.apk",
+      "filename": "expat-dev-2.8.4-r0.apk"
+    },
+    {
+      "name": "fakeroot",
+      "version": "1.37.2-r0",
+      "file": "fakeroot-1.37.2-r0.fe7fd823.apk",
+      "sha256": "8a7eec45eaba97f356711cfd216629249581123d544e01a250babda1b281603d",
+      "size": 27631,
+      "artifact": "sha256/8a7eec45eaba97f356711cfd216629249581123d544e01a250babda1b281603d/fakeroot-1.37.2-r0.apk",
+      "filename": "fakeroot-1.37.2-r0.apk"
+    },
+    {
+      "name": "file",
+      "version": "5.47-r2",
+      "file": "file-5.47-r2.8adc8b71.apk",
+      "sha256": "4681c153c509aec126e2b9ea2c959730309b24a792d49fc8cc26fa5fa87e8fdd",
+      "size": 9722,
+      "artifact": "sha256/4681c153c509aec126e2b9ea2c959730309b24a792d49fc8cc26fa5fa87e8fdd/file-5.47-r2.apk",
+      "filename": "file-5.47-r2.apk"
+    },
+    {
+      "name": "fmt",
+      "version": "11.2.0-r1",
+      "file": "fmt-11.2.0-r1.3ceab350.apk",
+      "sha256": "60513358b4747e2df0b5eb7c2a8e249a63e31b39198229417589ff1151a9e6a6",
+      "size": 46841,
+      "artifact": "sha256/60513358b4747e2df0b5eb7c2a8e249a63e31b39198229417589ff1151a9e6a6/fmt-11.2.0-r1.apk",
+      "filename": "fmt-11.2.0-r1.apk"
+    },
+    {
+      "name": "fmt-dev",
+      "version": "11.2.0-r1",
+      "file": "fmt-dev-11.2.0-r1.3fb09b19.apk",
+      "sha256": "e66b6eba32acfbf7aabbd5f1119993594c39ff181f2b82cf685ff23596ad4ed6",
+      "size": 147648,
+      "artifact": "sha256/e66b6eba32acfbf7aabbd5f1119993594c39ff181f2b82cf685ff23596ad4ed6/fmt-dev-11.2.0-r1.apk",
+      "filename": "fmt-dev-11.2.0-r1.apk"
+    },
+    {
+      "name": "fontconfig",
+      "version": "2.18.1-r0",
+      "file": "fontconfig-2.18.1-r0.c3a30b22.apk",
+      "sha256": "cfcf5797950a89d75355b1777bd7d1fed1026e2c18c63587fd79ef79fb22969c",
+      "size": 167294,
+      "artifact": "sha256/cfcf5797950a89d75355b1777bd7d1fed1026e2c18c63587fd79ef79fb22969c/fontconfig-2.18.1-r0.apk",
+      "filename": "fontconfig-2.18.1-r0.apk"
+    },
+    {
+      "name": "fontconfig-dev",
+      "version": "2.18.1-r0",
+      "file": "fontconfig-dev-2.18.1-r0.9036756d.apk",
+      "sha256": "f4cc0c3144dc252eb8faf1f4269b77ed1d1cd86dc10cfd8b11748a71d9396633",
+      "size": 12336,
+      "artifact": "sha256/f4cc0c3144dc252eb8faf1f4269b77ed1d1cd86dc10cfd8b11748a71d9396633/fontconfig-dev-2.18.1-r0.apk",
+      "filename": "fontconfig-dev-2.18.1-r0.apk"
+    },
+    {
+      "name": "fortify-headers",
+      "version": "3.0.2-r0",
+      "file": "fortify-headers-3.0.2-r0.52211812.apk",
+      "sha256": "9e6c0f152fe515809f3799f9db80b72323cbfb343c786cd0047b19d762101b8d",
+      "size": 7263,
+      "artifact": "sha256/9e6c0f152fe515809f3799f9db80b72323cbfb343c786cd0047b19d762101b8d/fortify-headers-3.0.2-r0.apk",
+      "filename": "fortify-headers-3.0.2-r0.apk"
+    },
+    {
+      "name": "freetype",
+      "version": "2.14.3-r0",
+      "file": "freetype-2.14.3-r0.8a74de09.apk",
+      "sha256": "09d76fde675a9ca3cfeb83d72fb09cb2e9ccf79b2937daa05a1af9a37a6b7815",
+      "size": 354367,
+      "artifact": "sha256/09d76fde675a9ca3cfeb83d72fb09cb2e9ccf79b2937daa05a1af9a37a6b7815/freetype-2.14.3-r0.apk",
+      "filename": "freetype-2.14.3-r0.apk"
+    },
+    {
+      "name": "freetype-dev",
+      "version": "2.14.3-r0",
+      "file": "freetype-dev-2.14.3-r0.29fb1a3a.apk",
+      "sha256": "423641ce2ebc18338c520ddabd64cd007d3f8a1e83b846d755e86f0a14addf3c",
+      "size": 195897,
+      "artifact": "sha256/423641ce2ebc18338c520ddabd64cd007d3f8a1e83b846d755e86f0a14addf3c/freetype-dev-2.14.3-r0.apk",
+      "filename": "freetype-dev-2.14.3-r0.apk"
+    },
+    {
+      "name": "fribidi",
+      "version": "1.0.16-r3",
+      "file": "fribidi-1.0.16-r3.73a1d8a0.apk",
+      "sha256": "a71965166a3fc8f24e784af0267a4dc62f2e350ff6e4b464c04f97a900e75d33",
+      "size": 31213,
+      "artifact": "sha256/a71965166a3fc8f24e784af0267a4dc62f2e350ff6e4b464c04f97a900e75d33/fribidi-1.0.16-r3.apk",
+      "filename": "fribidi-1.0.16-r3.apk"
+    },
+    {
+      "name": "fribidi-dev",
+      "version": "1.0.16-r3",
+      "file": "fribidi-dev-1.0.16-r3.10535731.apk",
+      "sha256": "1019266e3bdbcbb87f7b2348019604013d0d4e6a832e036034e3623c44343f12",
+      "size": 19526,
+      "artifact": "sha256/1019266e3bdbcbb87f7b2348019604013d0d4e6a832e036034e3623c44343f12/fribidi-dev-1.0.16-r3.apk",
+      "filename": "fribidi-dev-1.0.16-r3.apk"
+    },
+    {
+      "name": "g++",
+      "version": "15.2.0-r9",
+      "file": "g++-15.2.0-r9.fade6f2d.apk",
+      "sha256": "4fa1555366af2ac1e7247db8ee768b648b6bda370c8ee87e9c91be00d4c60e66",
+      "size": 18449634,
+      "artifact": "sha256/4fa1555366af2ac1e7247db8ee768b648b6bda370c8ee87e9c91be00d4c60e66/g++-15.2.0-r9.apk",
+      "filename": "g++-15.2.0-r9.apk"
+    },
+    {
+      "name": "gcc",
+      "version": "15.2.0-r9",
+      "file": "gcc-15.2.0-r9.1e45d651.apk",
+      "sha256": "77ade33a76bdb09c2bd9ab78fd064e551c857c107e469d0e533547c34b8d7cf3",
+      "size": 60498724,
+      "artifact": "sha256/77ade33a76bdb09c2bd9ab78fd064e551c857c107e469d0e533547c34b8d7cf3/gcc-15.2.0-r9.apk",
+      "filename": "gcc-15.2.0-r9.apk"
+    },
+    {
+      "name": "gdk-pixbuf",
+      "version": "2.44.7-r1",
+      "file": "gdk-pixbuf-2.44.7-r1.cc2956b7.apk",
+      "sha256": "f1060b7358a57fc926eaadb918787f0765f9910b734df758c594adecf7a6c61e",
+      "size": 93063,
+      "artifact": "sha256/f1060b7358a57fc926eaadb918787f0765f9910b734df758c594adecf7a6c61e/gdk-pixbuf-2.44.7-r1.apk",
+      "filename": "gdk-pixbuf-2.44.7-r1.apk"
+    },
+    {
+      "name": "gdk-pixbuf-dev",
+      "version": "2.44.7-r1",
+      "file": "gdk-pixbuf-dev-2.44.7-r1.7d555dff.apk",
+      "sha256": "b4f83c01f63d7701d7a99f21f826b2565d57c2e2a4664b8a837cf0c3d15fa201",
+      "size": 61511,
+      "artifact": "sha256/b4f83c01f63d7701d7a99f21f826b2565d57c2e2a4664b8a837cf0c3d15fa201/gdk-pixbuf-dev-2.44.7-r1.apk",
+      "filename": "gdk-pixbuf-dev-2.44.7-r1.apk"
+    },
+    {
+      "name": "gettext",
+      "version": "1.0-r0",
+      "file": "gettext-1.0-r0.954c48ff.apk",
+      "sha256": "3e480da81c00e8b0395a3f9f698affc1633be5f5cc0f3d59c88d7075d724a90e",
+      "size": 1994876,
+      "artifact": "sha256/3e480da81c00e8b0395a3f9f698affc1633be5f5cc0f3d59c88d7075d724a90e/gettext-1.0-r0.apk",
+      "filename": "gettext-1.0-r0.apk"
+    },
+    {
+      "name": "gettext-asprintf",
+      "version": "1.0-r0",
+      "file": "gettext-asprintf-1.0-r0.852a9d20.apk",
+      "sha256": "a33cedb26f3568203d48c4dbf05fc46cfe3f85c800ffeda9888f16e613aa26a5",
+      "size": 20153,
+      "artifact": "sha256/a33cedb26f3568203d48c4dbf05fc46cfe3f85c800ffeda9888f16e613aa26a5/gettext-asprintf-1.0-r0.apk",
+      "filename": "gettext-asprintf-1.0-r0.apk"
+    },
+    {
+      "name": "gettext-dev",
+      "version": "1.0-r0",
+      "file": "gettext-dev-1.0-r0.cf603cae.apk",
+      "sha256": "f97799cb40ec49d13479bf58d0024d23e02117099b279c0d276f8099771c7f00",
+      "size": 712659,
+      "artifact": "sha256/f97799cb40ec49d13479bf58d0024d23e02117099b279c0d276f8099771c7f00/gettext-dev-1.0-r0.apk",
+      "filename": "gettext-dev-1.0-r0.apk"
+    },
+    {
+      "name": "gettext-envsubst",
+      "version": "1.0-r0",
+      "file": "gettext-envsubst-1.0-r0.bf451a69.apk",
+      "sha256": "44466f20534da1a5eb1e2ea0f5d9d1316a6ca4c3fc62b3d255cc28a422e33843",
+      "size": 21702,
+      "artifact": "sha256/44466f20534da1a5eb1e2ea0f5d9d1316a6ca4c3fc62b3d255cc28a422e33843/gettext-envsubst-1.0-r0.apk",
+      "filename": "gettext-envsubst-1.0-r0.apk"
+    },
+    {
+      "name": "gettext-libs",
+      "version": "1.0-r0",
+      "file": "gettext-libs-1.0-r0.ba61370b.apk",
+      "sha256": "6279182935066684d81b91caad38ed426c5556226f48c6b4441944c9ca8c8cc3",
+      "size": 380795,
+      "artifact": "sha256/6279182935066684d81b91caad38ed426c5556226f48c6b4441944c9ca8c8cc3/gettext-libs-1.0-r0.apk",
+      "filename": "gettext-libs-1.0-r0.apk"
+    },
+    {
+      "name": "glib",
+      "version": "2.88.3-r0",
+      "file": "glib-2.88.3-r0.951355c5.apk",
+      "sha256": "20600c53f3bf0a1c9a3c0a8a199816e7aeae543542c391dd06bd7fdefe9df15d",
+      "size": 2055499,
+      "artifact": "sha256/20600c53f3bf0a1c9a3c0a8a199816e7aeae543542c391dd06bd7fdefe9df15d/glib-2.88.3-r0.apk",
+      "filename": "glib-2.88.3-r0.apk"
+    },
+    {
+      "name": "glib-dev",
+      "version": "2.88.3-r0",
+      "file": "glib-dev-2.88.3-r0.43ee24ef.apk",
+      "sha256": "38fef53e1c53f68c31e3cd43818b87f6e45c09063e185e0b1dd6d8248a20326f",
+      "size": 1876147,
+      "artifact": "sha256/38fef53e1c53f68c31e3cd43818b87f6e45c09063e185e0b1dd6d8248a20326f/glib-dev-2.88.3-r0.apk",
+      "filename": "glib-dev-2.88.3-r0.apk"
+    },
+    {
+      "name": "glibmm2.66",
+      "version": "2.66.10-r0",
+      "file": "glibmm2.66-2.66.10-r0.fb0d8935.apk",
+      "sha256": "22c48e22f4f5423cfc37e214c130c783f53d6d287ec38278d06e23adbedb6ea1",
+      "size": 623701,
+      "artifact": "sha256/22c48e22f4f5423cfc37e214c130c783f53d6d287ec38278d06e23adbedb6ea1/glibmm2.66-2.66.10-r0.apk",
+      "filename": "glibmm2.66-2.66.10-r0.apk"
+    },
+    {
+      "name": "glibmm2.66-dev",
+      "version": "2.66.10-r0",
+      "file": "glibmm2.66-dev-2.66.10-r0.9789ab12.apk",
+      "sha256": "c9cfac45a963d9f67071b0b4604baf420e4aac36f435c2b437bc42a6910f9415",
+      "size": 645869,
+      "artifact": "sha256/c9cfac45a963d9f67071b0b4604baf420e4aac36f435c2b437bc42a6910f9415/glibmm2.66-dev-2.66.10-r0.apk",
+      "filename": "glibmm2.66-dev-2.66.10-r0.apk"
+    },
+    {
+      "name": "glycin-image-rs",
+      "version": "2.1.5-r0",
+      "file": "glycin-image-rs-2.1.5-r0.81a2d195.apk",
+      "sha256": "2a1f46356415b00613409ad5c1d8de31af8900521ea88b65e168cfdad94424c8",
+      "size": 1795150,
+      "artifact": "sha256/2a1f46356415b00613409ad5c1d8de31af8900521ea88b65e168cfdad94424c8/glycin-image-rs-2.1.5-r0.apk",
+      "filename": "glycin-image-rs-2.1.5-r0.apk"
+    },
+    {
+      "name": "glycin-svg",
+      "version": "2.1.5-r0",
+      "file": "glycin-svg-2.1.5-r0.b01e6d23.apk",
+      "sha256": "9adc32a1d7625dc3235373d7c8bcd7d3040bd590f72fb466929ca773b81d5b49",
+      "size": 612771,
+      "artifact": "sha256/9adc32a1d7625dc3235373d7c8bcd7d3040bd590f72fb466929ca773b81d5b49/glycin-svg-2.1.5-r0.apk",
+      "filename": "glycin-svg-2.1.5-r0.apk"
+    },
+    {
+      "name": "gmp",
+      "version": "6.3.0-r4",
+      "file": "gmp-6.3.0-r4.48d26acb.apk",
+      "sha256": "216365c2f789f6e0ddd11bc852b0fcb2fd721c3430f2659fc56244650f67ab25",
+      "size": 221428,
+      "artifact": "sha256/216365c2f789f6e0ddd11bc852b0fcb2fd721c3430f2659fc56244650f67ab25/gmp-6.3.0-r4.apk",
+      "filename": "gmp-6.3.0-r4.apk"
+    },
+    {
+      "name": "gnutls",
+      "version": "3.8.13-r0",
+      "file": "gnutls-3.8.13-r0.e27c5b98.apk",
+      "sha256": "8d3f3612145db8cd7feb83607187a60f809f06cfa3c2e74d310d58a6b053d54c",
+      "size": 969352,
+      "artifact": "sha256/8d3f3612145db8cd7feb83607187a60f809f06cfa3c2e74d310d58a6b053d54c/gnutls-3.8.13-r0.apk",
+      "filename": "gnutls-3.8.13-r0.apk"
+    },
+    {
+      "name": "gobject-introspection",
+      "version": "1.86.0-r1",
+      "file": "gobject-introspection-1.86.0-r1.f943c75b.apk",
+      "sha256": "86bd4e675c18436677196ca3f9e2fd3ed05bae902d285a150b5b0e34b0a46168",
+      "size": 94550,
+      "artifact": "sha256/86bd4e675c18436677196ca3f9e2fd3ed05bae902d285a150b5b0e34b0a46168/gobject-introspection-1.86.0-r1.apk",
+      "filename": "gobject-introspection-1.86.0-r1.apk"
+    },
+    {
+      "name": "graphite2",
+      "version": "1.3.15-r0",
+      "file": "graphite2-1.3.15-r0.b718ad74.apk",
+      "sha256": "392cd0f5e331e5777262bc529530b70a3e470f117bd91ec81a658de7a782a7cd",
+      "size": 64380,
+      "artifact": "sha256/392cd0f5e331e5777262bc529530b70a3e470f117bd91ec81a658de7a782a7cd/graphite2-1.3.15-r0.apk",
+      "filename": "graphite2-1.3.15-r0.apk"
+    },
+    {
+      "name": "graphite2-dev",
+      "version": "1.3.15-r0",
+      "file": "graphite2-dev-1.3.15-r0.f8618091.apk",
+      "sha256": "961dc92719a60979ea4324b8a060d6e0aee2b64cc5aa64d0912d7a59d9b57b63",
+      "size": 14245,
+      "artifact": "sha256/961dc92719a60979ea4324b8a060d6e0aee2b64cc5aa64d0912d7a59d9b57b63/graphite2-dev-1.3.15-r0.apk",
+      "filename": "graphite2-dev-1.3.15-r0.apk"
+    },
+    {
+      "name": "gtk+3.0",
+      "version": "3.24.52-r0",
+      "file": "gtk+3.0-3.24.52-r0.f3be3022.apk",
+      "sha256": "afe74c02135d6ea3fab0e84bae9a527dac7a8f744475be10b943c5849e4db1d4",
+      "size": 3989546,
+      "artifact": "sha256/afe74c02135d6ea3fab0e84bae9a527dac7a8f744475be10b943c5849e4db1d4/gtk+3.0-3.24.52-r0.apk",
+      "filename": "gtk+3.0-3.24.52-r0.apk"
+    },
+    {
+      "name": "gtk+3.0-dev",
+      "version": "3.24.52-r0",
+      "file": "gtk+3.0-dev-3.24.52-r0.cc8f1dbb.apk",
+      "sha256": "76fa6f6bf1a2aa71300bff6d590118761af658cd2657e5bee54ad5e496c133f5",
+      "size": 1625559,
+      "artifact": "sha256/76fa6f6bf1a2aa71300bff6d590118761af658cd2657e5bee54ad5e496c133f5/gtk+3.0-dev-3.24.52-r0.apk",
+      "filename": "gtk+3.0-dev-3.24.52-r0.apk"
+    },
+    {
+      "name": "gtk-layer-shell",
+      "version": "0.10.1-r0",
+      "file": "gtk-layer-shell-0.10.1-r0.14e7d149.apk",
+      "sha256": "0de96a636037f92792a4a3d25e1f61173d901224f70dd99dff9da33ee792420b",
+      "size": 63295,
+      "artifact": "sha256/0de96a636037f92792a4a3d25e1f61173d901224f70dd99dff9da33ee792420b/gtk-layer-shell-0.10.1-r0.apk",
+      "filename": "gtk-layer-shell-0.10.1-r0.apk"
+    },
+    {
+      "name": "gtk-layer-shell-dev",
+      "version": "0.10.1-r0",
+      "file": "gtk-layer-shell-dev-0.10.1-r0.08df3222.apk",
+      "sha256": "3b330683d55ac3d46b084a72bbd7ebbf6c2b88d9a50e76912171217efd14a837",
+      "size": 11601,
+      "artifact": "sha256/3b330683d55ac3d46b084a72bbd7ebbf6c2b88d9a50e76912171217efd14a837/gtk-layer-shell-dev-0.10.1-r0.apk",
+      "filename": "gtk-layer-shell-dev-0.10.1-r0.apk"
+    },
+    {
+      "name": "gtkmm3",
+      "version": "3.24.11-r0",
+      "file": "gtkmm3-3.24.11-r0.4e0b82dc.apk",
+      "sha256": "215d1f2d17e2abc9a5366d3d4af94c0e1f1ee917e42339747fae722cf74eb488",
+      "size": 1051592,
+      "artifact": "sha256/215d1f2d17e2abc9a5366d3d4af94c0e1f1ee917e42339747fae722cf74eb488/gtkmm3-3.24.11-r0.apk",
+      "filename": "gtkmm3-3.24.11-r0.apk"
+    },
+    {
+      "name": "gtkmm3-dev",
+      "version": "3.24.11-r0",
+      "file": "gtkmm3-dev-3.24.11-r0.d760cfdc.apk",
+      "sha256": "0981acb7f03c4166ee2c02c5e2c611cc941ee864a7ca29c74ad28be76197d91c",
+      "size": 834418,
+      "artifact": "sha256/0981acb7f03c4166ee2c02c5e2c611cc941ee864a7ca29c74ad28be76197d91c/gtkmm3-dev-3.24.11-r0.apk",
+      "filename": "gtkmm3-dev-3.24.11-r0.apk"
+    },
+    {
+      "name": "harfbuzz",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-14.2.1-r0.5163231b.apk",
+      "sha256": "7bbf48d0b3da90e591a308f78a4510fc56520d5a4f1f4bd3f7620d4df4f618fe",
+      "size": 781803,
+      "artifact": "sha256/7bbf48d0b3da90e591a308f78a4510fc56520d5a4f1f4bd3f7620d4df4f618fe/harfbuzz-14.2.1-r0.apk",
+      "filename": "harfbuzz-14.2.1-r0.apk"
+    },
+    {
+      "name": "harfbuzz-cairo",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-cairo-14.2.1-r0.73ec0b0c.apk",
+      "sha256": "fa599c5de45eaf3e896209269257ad5f19968013c8e141f806fd9ea4cfd341cd",
+      "size": 16502,
+      "artifact": "sha256/fa599c5de45eaf3e896209269257ad5f19968013c8e141f806fd9ea4cfd341cd/harfbuzz-cairo-14.2.1-r0.apk",
+      "filename": "harfbuzz-cairo-14.2.1-r0.apk"
+    },
+    {
+      "name": "harfbuzz-dev",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-dev-14.2.1-r0.25fe9fe1.apk",
+      "sha256": "23aefe9d501fe0552d253f83cd81b0a8a4888ba70108d188be336b8905e85b8f",
+      "size": 215622,
+      "artifact": "sha256/23aefe9d501fe0552d253f83cd81b0a8a4888ba70108d188be336b8905e85b8f/harfbuzz-dev-14.2.1-r0.apk",
+      "filename": "harfbuzz-dev-14.2.1-r0.apk"
+    },
+    {
+      "name": "harfbuzz-gobject",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-gobject-14.2.1-r0.4636c1c7.apk",
+      "sha256": "cce36a19a70b40c589a93ae2dad006e67f97972d5bf1505e6d9c08d6d4357c71",
+      "size": 24298,
+      "artifact": "sha256/cce36a19a70b40c589a93ae2dad006e67f97972d5bf1505e6d9c08d6d4357c71/harfbuzz-gobject-14.2.1-r0.apk",
+      "filename": "harfbuzz-gobject-14.2.1-r0.apk"
+    },
+    {
+      "name": "harfbuzz-icu",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-icu-14.2.1-r0.9231855b.apk",
+      "sha256": "4ea78d45b02debad7bab52786e9515d421e3e11af9fd22ff52e757dcfb80cf97",
+      "size": 4528,
+      "artifact": "sha256/4ea78d45b02debad7bab52786e9515d421e3e11af9fd22ff52e757dcfb80cf97/harfbuzz-icu-14.2.1-r0.apk",
+      "filename": "harfbuzz-icu-14.2.1-r0.apk"
+    },
+    {
+      "name": "harfbuzz-subset",
+      "version": "14.2.1-r0",
+      "file": "harfbuzz-subset-14.2.1-r0.f58ffdbd.apk",
+      "sha256": "98bb3161d96a7e7bdcaa9751bc6feabd0801bf172c80f603ce556512a175dcc4",
+      "size": 598126,
+      "artifact": "sha256/98bb3161d96a7e7bdcaa9751bc6feabd0801bf172c80f603ce556512a175dcc4/harfbuzz-subset-14.2.1-r0.apk",
+      "filename": "harfbuzz-subset-14.2.1-r0.apk"
+    },
+    {
+      "name": "hwdata-pci",
+      "version": "0.410-r0",
+      "file": "hwdata-pci-0.410-r0.5af9a6b7.apk",
+      "sha256": "4394f5d9ded73c67fb206411159ab2a0527be1de71d4e816af5ab8e01fe15b8c",
+      "size": 372431,
+      "artifact": "sha256/4394f5d9ded73c67fb206411159ab2a0527be1de71d4e816af5ab8e01fe15b8c/hwdata-pci-0.410-r0.apk",
+      "filename": "hwdata-pci-0.410-r0.apk"
+    },
+    {
+      "name": "icu",
+      "version": "78.1-r0",
+      "file": "icu-78.1-r0.712ca9a0.apk",
+      "sha256": "a77605fcab4dda2d2e2edec0a46337fcb01387b15f2c0e3ca891d180767f7a0b",
+      "size": 275222,
+      "artifact": "sha256/a77605fcab4dda2d2e2edec0a46337fcb01387b15f2c0e3ca891d180767f7a0b/icu-78.1-r0.apk",
+      "filename": "icu-78.1-r0.apk"
+    },
+    {
+      "name": "icu-data-en",
+      "version": "78.1-r0",
+      "file": "icu-data-en-78.1-r0.6cb60b47.apk",
+      "sha256": "8883b3fe9365f9ac9214868af50c937592464a3832815eb454fc5780ecf5153e",
+      "size": 1025833,
+      "artifact": "sha256/8883b3fe9365f9ac9214868af50c937592464a3832815eb454fc5780ecf5153e/icu-data-en-78.1-r0.apk",
+      "filename": "icu-data-en-78.1-r0.apk"
+    },
+    {
+      "name": "icu-dev",
+      "version": "78.1-r0",
+      "file": "icu-dev-78.1-r0.1887d163.apk",
+      "sha256": "3fb3fe2f8a0b4f820052a719df800a997c981e4046995c83ce163462bf4e3be5",
+      "size": 1070578,
+      "artifact": "sha256/3fb3fe2f8a0b4f820052a719df800a997c981e4046995c83ce163462bf4e3be5/icu-dev-78.1-r0.apk",
+      "filename": "icu-dev-78.1-r0.apk"
+    },
+    {
+      "name": "icu-libs",
+      "version": "78.1-r0",
+      "file": "icu-libs-78.1-r0.be4b3fd7.apk",
+      "sha256": "c49d4b1354e9a714d8e2f682c37d9f7d6f4264b2973f33035a8d68b78fbc7989",
+      "size": 1949846,
+      "artifact": "sha256/c49d4b1354e9a714d8e2f682c37d9f7d6f4264b2973f33035a8d68b78fbc7989/icu-libs-78.1-r0.apk",
+      "filename": "icu-libs-78.1-r0.apk"
+    },
+    {
+      "name": "ifupdown-ng",
+      "version": "0.13.0-r0",
+      "file": "ifupdown-ng-0.13.0-r0.d031f634.apk",
+      "sha256": "21452f75f9e7bb5222ae90cfc00464952ed10fe4c9b99144abeb3537804e434c",
+      "size": 67057,
+      "artifact": "sha256/21452f75f9e7bb5222ae90cfc00464952ed10fe4c9b99144abeb3537804e434c/ifupdown-ng-0.13.0-r0.apk",
+      "filename": "ifupdown-ng-0.13.0-r0.apk"
+    },
+    {
+      "name": "isl26",
+      "version": "0.26-r2",
+      "file": "isl26-0.26-r2.a94388d9.apk",
+      "sha256": "a18442505255843324e7f6086d7879332b281168a2e05d793a6b7a2a0d3f9a0c",
+      "size": 915991,
+      "artifact": "sha256/a18442505255843324e7f6086d7879332b281168a2e05d793a6b7a2a0d3f9a0c/isl26-0.26-r2.apk",
+      "filename": "isl26-0.26-r2.apk"
+    },
+    {
+      "name": "jansson",
+      "version": "2.15.0-r0",
+      "file": "jansson-2.15.0-r0.5eb15ae3.apk",
+      "sha256": "cfe4ec8ea9b2136bb0c61770c36d2b635b606f2ac2039837a4866003a980d397",
+      "size": 48941,
+      "artifact": "sha256/cfe4ec8ea9b2136bb0c61770c36d2b635b606f2ac2039837a4866003a980d397/jansson-2.15.0-r0.apk",
+      "filename": "jansson-2.15.0-r0.apk"
+    },
+    {
+      "name": "json-glib",
+      "version": "1.10.8-r0",
+      "file": "json-glib-1.10.8-r0.b4c5e1d8.apk",
+      "sha256": "f00f1979c075640fc6c03b5b13b2c6c168b1852fc5c94e729f9d7d6c0ab29dd8",
+      "size": 65805,
+      "artifact": "sha256/f00f1979c075640fc6c03b5b13b2c6c168b1852fc5c94e729f9d7d6c0ab29dd8/json-glib-1.10.8-r0.apk",
+      "filename": "json-glib-1.10.8-r0.apk"
+    },
+    {
+      "name": "json-glib-dev",
+      "version": "1.10.8-r0",
+      "file": "json-glib-dev-1.10.8-r0.91e6fb46.apk",
+      "sha256": "77d870d4dbc9ae4bea6e925832897984b99496926de658ab9f65b94562a19b44",
+      "size": 56454,
+      "artifact": "sha256/77d870d4dbc9ae4bea6e925832897984b99496926de658ab9f65b94562a19b44/json-glib-dev-1.10.8-r0.apk",
+      "filename": "json-glib-dev-1.10.8-r0.apk"
+    },
+    {
+      "name": "jsoncpp",
+      "version": "1.9.6-r1",
+      "file": "jsoncpp-1.9.6-r1.0290249d.apk",
+      "sha256": "438a41b063db69edab264aed289d8eacd0730764ac9ba276a5ecb6f796c1b05f",
+      "size": 72980,
+      "artifact": "sha256/438a41b063db69edab264aed289d8eacd0730764ac9ba276a5ecb6f796c1b05f/jsoncpp-1.9.6-r1.apk",
+      "filename": "jsoncpp-1.9.6-r1.apk"
+    },
+    {
+      "name": "jsoncpp-dev",
+      "version": "1.9.6-r1",
+      "file": "jsoncpp-dev-1.9.6-r1.8ecc8533.apk",
+      "sha256": "424a43a630795221513337952b2cb66e90643aa0f77ee9d82163cf48fac64c12",
+      "size": 22827,
+      "artifact": "sha256/424a43a630795221513337952b2cb66e90643aa0f77ee9d82163cf48fac64c12/jsoncpp-dev-1.9.6-r1.apk",
+      "filename": "jsoncpp-dev-1.9.6-r1.apk"
+    },
+    {
+      "name": "lame-libs",
+      "version": "3.100-r5",
+      "file": "lame-libs-3.100-r5.708835a8.apk",
+      "sha256": "17436a81c82341219b35a0b505f851c05fdc35b3a4603501b66cba731a184e20",
+      "size": 125532,
+      "artifact": "sha256/17436a81c82341219b35a0b505f851c05fdc35b3a4603501b66cba731a184e20/lame-libs-3.100-r5.apk",
+      "filename": "lame-libs-3.100-r5.apk"
+    },
+    {
+      "name": "lcms2",
+      "version": "2.19.1-r0",
+      "file": "lcms2-2.19.1-r0.2995536d.apk",
+      "sha256": "f51f2c3c43ac165622a374123267358080e69cf24b3f5efc818e0541b3041f2e",
+      "size": 153303,
+      "artifact": "sha256/f51f2c3c43ac165622a374123267358080e69cf24b3f5efc818e0541b3041f2e/lcms2-2.19.1-r0.apk",
+      "filename": "lcms2-2.19.1-r0.apk"
+    },
+    {
+      "name": "lcms2-dev",
+      "version": "2.19.1-r0",
+      "file": "lcms2-dev-2.19.1-r0.5ea12d35.apk",
+      "sha256": "e6990a0fe9418232f1951d6ce87c5fd11412e803d155cc4d3cec051ab95ca860",
+      "size": 32623,
+      "artifact": "sha256/e6990a0fe9418232f1951d6ce87c5fd11412e803d155cc4d3cec051ab95ca860/lcms2-dev-2.19.1-r0.apk",
+      "filename": "lcms2-dev-2.19.1-r0.apk"
+    },
+    {
+      "name": "lcms2-plugins",
+      "version": "2.19.1-r0",
+      "file": "lcms2-plugins-2.19.1-r0.9f25f810.apk",
+      "sha256": "d789f96eed23a2c355e0147a5b7f0d8b5e59606ed7094740f09ac76e95877916",
+      "size": 26566,
+      "artifact": "sha256/d789f96eed23a2c355e0147a5b7f0d8b5e59606ed7094740f09ac76e95877916/lcms2-plugins-2.19.1-r0.apk",
+      "filename": "lcms2-plugins-2.19.1-r0.apk"
+    },
+    {
+      "name": "libapk",
+      "version": "3.0.8-r0",
+      "file": "libapk-3.0.8-r0.aa18afbc.apk",
+      "sha256": "583336e25cb756860f6e0a378abd89c8ec01374c6efb20971327456481186aa0",
+      "size": 133925,
+      "artifact": "sha256/583336e25cb756860f6e0a378abd89c8ec01374c6efb20971327456481186aa0/libapk-3.0.8-r0.apk",
+      "filename": "libapk-3.0.8-r0.apk"
+    },
+    {
+      "name": "libasyncns",
+      "version": "0.8-r5",
+      "file": "libasyncns-0.8-r5.e135ed0f.apk",
+      "sha256": "38dda1089e3435a13ff0818bf27e675833017a0e9ecb699fefa5b4b2c1a5d599",
+      "size": 9823,
+      "artifact": "sha256/38dda1089e3435a13ff0818bf27e675833017a0e9ecb699fefa5b4b2c1a5d599/libasyncns-0.8-r5.apk",
+      "filename": "libasyncns-0.8-r5.apk"
+    },
+    {
+      "name": "libatk-1.0",
+      "version": "2.60.6-r0",
+      "file": "libatk-1.0-2.60.6-r0.bdaca514.apk",
+      "sha256": "8998c0cd51a2f54b0e0e4bc0226c380c041c256ff4dd84bd828d4b4232d86bd6",
+      "size": 71240,
+      "artifact": "sha256/8998c0cd51a2f54b0e0e4bc0226c380c041c256ff4dd84bd828d4b4232d86bd6/libatk-1.0-2.60.6-r0.apk",
+      "filename": "libatk-1.0-2.60.6-r0.apk"
+    },
+    {
+      "name": "libatk-bridge-2.0",
+      "version": "2.60.6-r0",
+      "file": "libatk-bridge-2.0-2.60.6-r0.c1b857c9.apk",
+      "sha256": "f683fe8b43178eb6a2c3da8dd4444d221df93728946a691b1a59b9fad906f771",
+      "size": 68356,
+      "artifact": "sha256/f683fe8b43178eb6a2c3da8dd4444d221df93728946a691b1a59b9fad906f771/libatk-bridge-2.0-2.60.6-r0.apk",
+      "filename": "libatk-bridge-2.0-2.60.6-r0.apk"
+    },
+    {
+      "name": "libatomic",
+      "version": "15.2.0-r9",
+      "file": "libatomic-15.2.0-r9.4bc4509e.apk",
+      "sha256": "586caa93a54d155518b7e617b3d8200887a48963348ab262d8fafecb2be15367",
+      "size": 10238,
+      "artifact": "sha256/586caa93a54d155518b7e617b3d8200887a48963348ab262d8fafecb2be15367/libatomic-15.2.0-r9.apk",
+      "filename": "libatomic-15.2.0-r9.apk"
+    },
+    {
+      "name": "libblkid",
+      "version": "2.42.3-r1",
+      "file": "libblkid-2.42.3-r1.3e84a178.apk",
+      "sha256": "7bd1e4de14b489712c506823a0bbb0f252486424f7cd2b07f2e7409686515ef3",
+      "size": 98445,
+      "artifact": "sha256/7bd1e4de14b489712c506823a0bbb0f252486424f7cd2b07f2e7409686515ef3/libblkid-2.42.3-r1.apk",
+      "filename": "libblkid-2.42.3-r1.apk"
+    },
+    {
+      "name": "libbsd",
+      "version": "0.12.2-r0",
+      "file": "libbsd-0.12.2-r0.ce87847e.apk",
+      "sha256": "1a5f292088dc2430ae12362333b1e4e1c87143897ba895638469ab67eee3e72a",
+      "size": 30518,
+      "artifact": "sha256/1a5f292088dc2430ae12362333b1e4e1c87143897ba895638469ab67eee3e72a/libbsd-0.12.2-r0.apk",
+      "filename": "libbsd-0.12.2-r0.apk"
+    },
+    {
+      "name": "libbz2",
+      "version": "1.0.8-r6",
+      "file": "libbz2-1.0.8-r6.ab228276.apk",
+      "sha256": "77bf2e1327c0582fb59225c1e0c1bc38aac384473210550ce0f4e5b6d60364bd",
+      "size": 33577,
+      "artifact": "sha256/77bf2e1327c0582fb59225c1e0c1bc38aac384473210550ce0f4e5b6d60364bd/libbz2-1.0.8-r6.apk",
+      "filename": "libbz2-1.0.8-r6.apk"
+    },
+    {
+      "name": "libcap-getcap",
+      "version": "2.78-r0",
+      "file": "libcap-getcap-2.78-r0.7d85701e.apk",
+      "sha256": "3a6c4dcfc30ac4987443557533194732ce9cd90b3b20e472663001d6c1db5adf",
+      "size": 4318,
+      "artifact": "sha256/3a6c4dcfc30ac4987443557533194732ce9cd90b3b20e472663001d6c1db5adf/libcap-getcap-2.78-r0.apk",
+      "filename": "libcap-getcap-2.78-r0.apk"
+    },
+    {
+      "name": "libcap2",
+      "version": "2.78-r0",
+      "file": "libcap2-2.78-r0.89fe76b3.apk",
+      "sha256": "f67812721ccf42fa8840438f3c66f8ca17caf9c46dbc6773a292ef32f4c9b884",
+      "size": 21577,
+      "artifact": "sha256/f67812721ccf42fa8840438f3c66f8ca17caf9c46dbc6773a292ef32f4c9b884/libcap2-2.78-r0.apk",
+      "filename": "libcap2-2.78-r0.apk"
+    },
+    {
+      "name": "libclc",
+      "version": "22.1.8-r0",
+      "file": "libclc-22.1.8-r0.59698e1b.apk",
+      "sha256": "0a8fd309b976bb47b107eb3de1a1b293ab0b8335a93df10dfd8be92d608f4836",
+      "size": 18625475,
+      "artifact": "sha256/0a8fd309b976bb47b107eb3de1a1b293ab0b8335a93df10dfd8be92d608f4836/libclc-22.1.8-r0.apk",
+      "filename": "libclc-22.1.8-r0.apk"
+    },
+    {
+      "name": "libcrypto3",
+      "version": "3.5.8-r0",
+      "file": "libcrypto3-3.5.8-r0.2c4266bd.apk",
+      "sha256": "6df29513698d30c2da1b742b796d404c6d59c246f3ff1d3fcbf36c103c14c0e9",
+      "size": 1978557,
+      "artifact": "sha256/6df29513698d30c2da1b742b796d404c6d59c246f3ff1d3fcbf36c103c14c0e9/libcrypto3-3.5.8-r0.apk",
+      "filename": "libcrypto3-3.5.8-r0.apk"
+    },
+    {
+      "name": "libdav1d",
+      "version": "1.5.4-r0",
+      "file": "libdav1d-1.5.4-r0.936d0e28.apk",
+      "sha256": "4065b4cc90446b68a828fe9080b42eb61033eae819c391dcadc594942c881feb",
+      "size": 756294,
+      "artifact": "sha256/4065b4cc90446b68a828fe9080b42eb61033eae819c391dcadc594942c881feb/libdav1d-1.5.4-r0.apk",
+      "filename": "libdav1d-1.5.4-r0.apk"
+    },
+    {
+      "name": "libdbusmenu-glib",
+      "version": "16.04.0-r6",
+      "file": "libdbusmenu-glib-16.04.0-r6.594f42f9.apk",
+      "sha256": "43f4c34e216c1ed1b7d95d3352c4aa95b857e61ac6fd8eeb10cee62ce5a0fd7d",
+      "size": 52301,
+      "artifact": "sha256/43f4c34e216c1ed1b7d95d3352c4aa95b857e61ac6fd8eeb10cee62ce5a0fd7d/libdbusmenu-glib-16.04.0-r6.apk",
+      "filename": "libdbusmenu-glib-16.04.0-r6.apk"
+    },
+    {
+      "name": "libdbusmenu-glib-dev",
+      "version": "16.04.0-r6",
+      "file": "libdbusmenu-glib-dev-16.04.0-r6.de52f252.apk",
+      "sha256": "811ce061d34ad41f91d5b8375738f723c1ff0d2f43c74c99f53d732f86074f63",
+      "size": 32868,
+      "artifact": "sha256/811ce061d34ad41f91d5b8375738f723c1ff0d2f43c74c99f53d732f86074f63/libdbusmenu-glib-dev-16.04.0-r6.apk",
+      "filename": "libdbusmenu-glib-dev-16.04.0-r6.apk"
+    },
+    {
+      "name": "libdbusmenu-gtk3",
+      "version": "16.04.0-r6",
+      "file": "libdbusmenu-gtk3-16.04.0-r6.5ca6113c.apk",
+      "sha256": "d6b5091fb8d4f5664bc8b6a3bcb319549b7fc1765c3e424551d60122bcee1a04",
+      "size": 27494,
+      "artifact": "sha256/d6b5091fb8d4f5664bc8b6a3bcb319549b7fc1765c3e424551d60122bcee1a04/libdbusmenu-gtk3-16.04.0-r6.apk",
+      "filename": "libdbusmenu-gtk3-16.04.0-r6.apk"
+    },
+    {
+      "name": "libdbusmenu-gtk3-dev",
+      "version": "16.04.0-r6",
+      "file": "libdbusmenu-gtk3-dev-16.04.0-r6.b8d70b0c.apk",
+      "sha256": "08f5676398b16e997730cae2fb0929d9eaf3275d82dcdefa3059db35019d2a49",
+      "size": 11391,
+      "artifact": "sha256/08f5676398b16e997730cae2fb0929d9eaf3275d82dcdefa3059db35019d2a49/libdbusmenu-gtk3-dev-16.04.0-r6.apk",
+      "filename": "libdbusmenu-gtk3-dev-16.04.0-r6.apk"
+    },
+    {
+      "name": "libdrm",
+      "version": "2.4.134-r0",
+      "file": "libdrm-2.4.134-r0.25fc3160.apk",
+      "sha256": "584fd84ad5030040e613fa1816097cd1706ddd542100070852b0eab6e09e12ca",
+      "size": 201551,
+      "artifact": "sha256/584fd84ad5030040e613fa1816097cd1706ddd542100070852b0eab6e09e12ca/libdrm-2.4.134-r0.apk",
+      "filename": "libdrm-2.4.134-r0.apk"
+    },
+    {
+      "name": "libdrm-dev",
+      "version": "2.4.134-r0",
+      "file": "libdrm-dev-2.4.134-r0.928fa107.apk",
+      "sha256": "2fe9dd99034a7394f42af41be6ee239d1f4097b45567115fd24984722bff6322",
+      "size": 209738,
+      "artifact": "sha256/2fe9dd99034a7394f42af41be6ee239d1f4097b45567115fd24984722bff6322/libdrm-dev-2.4.134-r0.apk",
+      "filename": "libdrm-dev-2.4.134-r0.apk"
+    },
+    {
+      "name": "libeconf",
+      "version": "0.8.4-r0",
+      "file": "libeconf-0.8.4-r0.411e1530.apk",
+      "sha256": "285cc8268c2426030be8d5a47bcc6f695e14af22fc94733927fcebf47ce1b838",
+      "size": 26036,
+      "artifact": "sha256/285cc8268c2426030be8d5a47bcc6f695e14af22fc94733927fcebf47ce1b838/libeconf-0.8.4-r0.apk",
+      "filename": "libeconf-0.8.4-r0.apk"
+    },
+    {
+      "name": "libedit",
+      "version": "20260508.3.1-r1",
+      "file": "libedit-20260508.3.1-r1.4084f8ff.apk",
+      "sha256": "dfb62b3fb06346a525ffea788c6a48a0581d61a89014f57885b84b1df5a365c0",
+      "size": 76817,
+      "artifact": "sha256/dfb62b3fb06346a525ffea788c6a48a0581d61a89014f57885b84b1df5a365c0/libedit-20260508.3.1-r1.apk",
+      "filename": "libedit-20260508.3.1-r1.apk"
+    },
+    {
+      "name": "libedit-dev",
+      "version": "20260508.3.1-r1",
+      "file": "libedit-dev-20260508.3.1-r1.4c2f0897.apk",
+      "sha256": "040f3782085c13c299cf4b17d1210805bbc1dad3bb9d5fbe3e640c2af96b1e21",
+      "size": 7779,
+      "artifact": "sha256/040f3782085c13c299cf4b17d1210805bbc1dad3bb9d5fbe3e640c2af96b1e21/libedit-dev-20260508.3.1-r1.apk",
+      "filename": "libedit-dev-20260508.3.1-r1.apk"
+    },
+    {
+      "name": "libelf",
+      "version": "0.195-r0",
+      "file": "libelf-0.195-r0.7db4c522.apk",
+      "sha256": "89b7d57b10325371cd4045571bcc6228bd25588b911a1042616348fba9d3bdac",
+      "size": 43475,
+      "artifact": "sha256/89b7d57b10325371cd4045571bcc6228bd25588b911a1042616348fba9d3bdac/libelf-0.195-r0.apk",
+      "filename": "libelf-0.195-r0.apk"
+    },
+    {
+      "name": "libelogind",
+      "version": "255.24-r0",
+      "file": "libelogind-255.24-r0.f400b047.apk",
+      "sha256": "5f9d90571f5f097cb1067b73e0ae3b58778b974c67b574b257ecbad09f8c32ef",
+      "size": 261121,
+      "artifact": "sha256/5f9d90571f5f097cb1067b73e0ae3b58778b974c67b574b257ecbad09f8c32ef/libelogind-255.24-r0.apk",
+      "filename": "libelogind-255.24-r0.apk"
+    },
+    {
+      "name": "libepoxy",
+      "version": "1.5.10-r1",
+      "file": "libepoxy-1.5.10-r1.cd928f1b.apk",
+      "sha256": "33d0faac7552de2de47e3af9cb75c69637b39a41fdec7ece8b51820fa3147714",
+      "size": 236818,
+      "artifact": "sha256/33d0faac7552de2de47e3af9cb75c69637b39a41fdec7ece8b51820fa3147714/libepoxy-1.5.10-r1.apk",
+      "filename": "libepoxy-1.5.10-r1.apk"
+    },
+    {
+      "name": "libepoxy-dev",
+      "version": "1.5.10-r1",
+      "file": "libepoxy-dev-1.5.10-r1.2c0d2f1f.apk",
+      "sha256": "f58ae51be7678265b0f02a9dd25fdb543155cc40908f138ea69f68f683f53324",
+      "size": 171277,
+      "artifact": "sha256/f58ae51be7678265b0f02a9dd25fdb543155cc40908f138ea69f68f683f53324/libepoxy-dev-1.5.10-r1.apk",
+      "filename": "libepoxy-dev-1.5.10-r1.apk"
+    },
+    {
+      "name": "libevdev",
+      "version": "1.13.6-r0",
+      "file": "libevdev-1.13.6-r0.f900625c.apk",
+      "sha256": "14c33361b177d1bf51389bb8bdf73e577aaa655bf0ab7c61a85effa9130d75d9",
+      "size": 27363,
+      "artifact": "sha256/14c33361b177d1bf51389bb8bdf73e577aaa655bf0ab7c61a85effa9130d75d9/libevdev-1.13.6-r0.apk",
+      "filename": "libevdev-1.13.6-r0.apk"
+    },
+    {
+      "name": "libexpat",
+      "version": "2.8.4-r0",
+      "file": "libexpat-2.8.4-r0.22cd9136.apk",
+      "sha256": "d86d853c94b9776ec8f68cc121f0e7b2d8a1e2fd691b65fe94d8c7d96d202dc0",
+      "size": 61247,
+      "artifact": "sha256/d86d853c94b9776ec8f68cc121f0e7b2d8a1e2fd691b65fe94d8c7d96d202dc0/libexpat-2.8.4-r0.apk",
+      "filename": "libexpat-2.8.4-r0.apk"
+    },
+    {
+      "name": "libfdisk",
+      "version": "2.42.3-r1",
+      "file": "libfdisk-2.42.3-r1.668ca98f.apk",
+      "sha256": "096251ee226bec7b2a0cb68da357173d320b60c53e84b5dfc8ca5ae61d49a424",
+      "size": 125586,
+      "artifact": "sha256/096251ee226bec7b2a0cb68da357173d320b60c53e84b5dfc8ca5ae61d49a424/libfdisk-2.42.3-r1.apk",
+      "filename": "libfdisk-2.42.3-r1.apk"
+    },
+    {
+      "name": "libffi",
+      "version": "3.8.0-r0",
+      "file": "libffi-3.8.0-r0.ba7175e6.apk",
+      "sha256": "d1160fa275d18c06c49a159c76627168f4aa2c0b2776b84db522b7117a61e189",
+      "size": 23028,
+      "artifact": "sha256/d1160fa275d18c06c49a159c76627168f4aa2c0b2776b84db522b7117a61e189/libffi-3.8.0-r0.apk",
+      "filename": "libffi-3.8.0-r0.apk"
+    },
+    {
+      "name": "libffi-dev",
+      "version": "3.8.0-r0",
+      "file": "libffi-dev-3.8.0-r0.0bbcc2a0.apk",
+      "sha256": "e58dc31f9b42cdb19eda934c8b71e4b840f9ce7eac583f0b97cd1d4b730df51e",
+      "size": 112970,
+      "artifact": "sha256/e58dc31f9b42cdb19eda934c8b71e4b840f9ce7eac583f0b97cd1d4b730df51e/libffi-dev-3.8.0-r0.apk",
+      "filename": "libffi-dev-3.8.0-r0.apk"
+    },
+    {
+      "name": "libflac",
+      "version": "1.5.0-r0",
+      "file": "libflac-1.5.0-r0.fda00ed0.apk",
+      "sha256": "1db148c8dd63eb296173443ee63d9909c2433e4120521c49a0a42f305a6569dd",
+      "size": 215498,
+      "artifact": "sha256/1db148c8dd63eb296173443ee63d9909c2433e4120521c49a0a42f305a6569dd/libflac-1.5.0-r0.apk",
+      "filename": "libflac-1.5.0-r0.apk"
+    },
+    {
+      "name": "libformw",
+      "version": "6.6_p20260822-r0",
+      "file": "libformw-6.6_p20260822-r0.f312ad6a.apk",
+      "sha256": "959071616ced4de9899adac0d9021149ce02089f6335b47a2aed245686c843c1",
+      "size": 27460,
+      "artifact": "sha256/959071616ced4de9899adac0d9021149ce02089f6335b47a2aed245686c843c1/libformw-6.6_p20260822-r0.apk",
+      "filename": "libformw-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "libgcc",
+      "version": "15.2.0-r9",
+      "file": "libgcc-15.2.0-r9.dbeacf31.apk",
+      "sha256": "01c9609197de10519ceb204a09d1efa54baad145f65bf00ba0908086692ca3fe",
+      "size": 80348,
+      "artifact": "sha256/01c9609197de10519ceb204a09d1efa54baad145f65bf00ba0908086692ca3fe/libgcc-15.2.0-r9.apk",
+      "filename": "libgcc-15.2.0-r9.apk"
+    },
+    {
+      "name": "libgcc-static",
+      "version": "15.2.0-r9",
+      "file": "libgcc-static-15.2.0-r9.89dd9f76.apk",
+      "sha256": "cedfffac29ac56c71691d683fed63e9fb9ea7fbf52834956ca5156ff85f2b652",
+      "size": 2251037,
+      "artifact": "sha256/cedfffac29ac56c71691d683fed63e9fb9ea7fbf52834956ca5156ff85f2b652/libgcc-static-15.2.0-r9.apk",
+      "filename": "libgcc-static-15.2.0-r9.apk"
+    },
+    {
+      "name": "libglycin",
+      "version": "2.1.5-r0",
+      "file": "libglycin-2.1.5-r0.fd482290.apk",
+      "sha256": "096d9de343ca08472d210883c6f168e87ac402a7697d74e95670f076f64692fa",
+      "size": 1134439,
+      "artifact": "sha256/096d9de343ca08472d210883c6f168e87ac402a7697d74e95670f076f64692fa/libglycin-2.1.5-r0.apk",
+      "filename": "libglycin-2.1.5-r0.apk"
+    },
+    {
+      "name": "libglycin-dev",
+      "version": "2.1.5-r0",
+      "file": "libglycin-dev-2.1.5-r0.39864ef2.apk",
+      "sha256": "0e51328fd412930c67406a8fbbd9237f23a88c4191358e587383674bf9f65a18",
+      "size": 23425,
+      "artifact": "sha256/0e51328fd412930c67406a8fbbd9237f23a88c4191358e587383674bf9f65a18/libglycin-dev-2.1.5-r0.apk",
+      "filename": "libglycin-dev-2.1.5-r0.apk"
+    },
+    {
+      "name": "libgomp",
+      "version": "15.2.0-r9",
+      "file": "libgomp-15.2.0-r9.8048f429.apk",
+      "sha256": "617c9596cdeac10c03aa9c0b1bf14d39d29a1b86d2ba1359389d7da919914f21",
+      "size": 153724,
+      "artifact": "sha256/617c9596cdeac10c03aa9c0b1bf14d39d29a1b86d2ba1359389d7da919914f21/libgomp-15.2.0-r9.apk",
+      "filename": "libgomp-15.2.0-r9.apk"
+    },
+    {
+      "name": "libgudev",
+      "version": "238-r1",
+      "file": "libgudev-238-r1.54313464.apk",
+      "sha256": "bbe0643683ea49c8de4ab23dd1cd475a481e4a2018daffa217da4e9e7fb2c064",
+      "size": 15581,
+      "artifact": "sha256/bbe0643683ea49c8de4ab23dd1cd475a481e4a2018daffa217da4e9e7fb2c064/libgudev-238-r1.apk",
+      "filename": "libgudev-238-r1.apk"
+    },
+    {
+      "name": "libidn2",
+      "version": "2.3.8-r0",
+      "file": "libidn2-2.3.8-r0.ae187b51.apk",
+      "sha256": "21e1971d3690743d64a3d43e070d959058a2d4af8d4fa7d7ac9416376f2c8a8a",
+      "size": 104774,
+      "artifact": "sha256/21e1971d3690743d64a3d43e070d959058a2d4af8d4fa7d7ac9416376f2c8a8a/libidn2-2.3.8-r0.apk",
+      "filename": "libidn2-2.3.8-r0.apk"
+    },
+    {
+      "name": "libinput-dev",
+      "version": "1.31.3-r0",
+      "file": "libinput-dev-1.31.3-r0.570606f2.apk",
+      "sha256": "03e0a2c7f58b0d2223b610f1cc189741046454d6e5dbcc4f4c9fba38fa6c5f17",
+      "size": 41636,
+      "artifact": "sha256/03e0a2c7f58b0d2223b610f1cc189741046454d6e5dbcc4f4c9fba38fa6c5f17/libinput-dev-1.31.3-r0.apk",
+      "filename": "libinput-dev-1.31.3-r0.apk"
+    },
+    {
+      "name": "libinput-libs",
+      "version": "1.31.3-r0",
+      "file": "libinput-libs-1.31.3-r0.0522908a.apk",
+      "sha256": "f3b764d72c1913a8c9d781206fd365ecdfe088e0b09009831e7804627f5bd18d",
+      "size": 147330,
+      "artifact": "sha256/f3b764d72c1913a8c9d781206fd365ecdfe088e0b09009831e7804627f5bd18d/libinput-libs-1.31.3-r0.apk",
+      "filename": "libinput-libs-1.31.3-r0.apk"
+    },
+    {
+      "name": "libintl",
+      "version": "1.0-r0",
+      "file": "libintl-1.0-r0.f62f4aae.apk",
+      "sha256": "7d4b5bf0733f058acf5921a5d0ffff8f425cfa67e09df65614c6f862570d0a89",
+      "size": 39536,
+      "artifact": "sha256/7d4b5bf0733f058acf5921a5d0ffff8f425cfa67e09df65614c6f862570d0a89/libintl-1.0-r0.apk",
+      "filename": "libintl-1.0-r0.apk"
+    },
+    {
+      "name": "libjpeg-turbo",
+      "version": "3.1.3-r0",
+      "file": "libjpeg-turbo-3.1.3-r0.c4016d00.apk",
+      "sha256": "b2f429281d4da27ae5ef5ea417648b69d1049fd782819f2ab1d1bb6d24b4ab1c",
+      "size": 203549,
+      "artifact": "sha256/b2f429281d4da27ae5ef5ea417648b69d1049fd782819f2ab1d1bb6d24b4ab1c/libjpeg-turbo-3.1.3-r0.apk",
+      "filename": "libjpeg-turbo-3.1.3-r0.apk"
+    },
+    {
+      "name": "libjpeg-turbo-dev",
+      "version": "3.1.3-r0",
+      "file": "libjpeg-turbo-dev-3.1.3-r0.e4d76a23.apk",
+      "sha256": "107e7a67d75bc537956947feb09de81c7649cfe8bc37467df2a7f953f47ed520",
+      "size": 50220,
+      "artifact": "sha256/107e7a67d75bc537956947feb09de81c7649cfe8bc37467df2a7f953f47ed520/libjpeg-turbo-dev-3.1.3-r0.apk",
+      "filename": "libjpeg-turbo-dev-3.1.3-r0.apk"
+    },
+    {
+      "name": "liblastlog2",
+      "version": "2.42.3-r1",
+      "file": "liblastlog2-2.42.3-r1.e2f227f6.apk",
+      "sha256": "520a8f876e488bb927a5868b838359ef29f084ec58148e333a3628eec4401b0d",
+      "size": 10001,
+      "artifact": "sha256/520a8f876e488bb927a5868b838359ef29f084ec58148e333a3628eec4401b0d/liblastlog2-2.42.3-r1.apk",
+      "filename": "liblastlog2-2.42.3-r1.apk"
+    },
+    {
+      "name": "libltdl",
+      "version": "2.6.2-r0",
+      "file": "libltdl-2.6.2-r0.dc6068da.apk",
+      "sha256": "01eef67c2d76d2c4b8f18efc89ce5be5e7afcd5d1ef59341f26db4e18cb2d08b",
+      "size": 16503,
+      "artifact": "sha256/01eef67c2d76d2c4b8f18efc89ce5be5e7afcd5d1ef59341f26db4e18cb2d08b/libltdl-2.6.2-r0.apk",
+      "filename": "libltdl-2.6.2-r0.apk"
+    },
+    {
+      "name": "libmagic",
+      "version": "5.47-r2",
+      "file": "libmagic-5.47-r2.96d3eec4.apk",
+      "sha256": "1820acd299025619a848b19ac98c7996fd92c06965255898800b6a790a8b03a2",
+      "size": 526164,
+      "artifact": "sha256/1820acd299025619a848b19ac98c7996fd92c06965255898800b6a790a8b03a2/libmagic-5.47-r2.apk",
+      "filename": "libmagic-5.47-r2.apk"
+    },
+    {
+      "name": "libmd",
+      "version": "1.2.0-r0",
+      "file": "libmd-1.2.0-r0.3478a5f1.apk",
+      "sha256": "f6d68d072fcefc8edd4ffe3afc341ca391f8a9a209130628fb065d98b18a2792",
+      "size": 27352,
+      "artifact": "sha256/f6d68d072fcefc8edd4ffe3afc341ca391f8a9a209130628fb065d98b18a2792/libmd-1.2.0-r0.apk",
+      "filename": "libmd-1.2.0-r0.apk"
+    },
+    {
+      "name": "libmenuw",
+      "version": "6.6_p20260822-r0",
+      "file": "libmenuw-6.6_p20260822-r0.ec41cdc7.apk",
+      "sha256": "e15463ed5fb7749b2d1eda5edcbc31ba42ba1a2b000a519e3d3ee8b40c5086b8",
+      "size": 13854,
+      "artifact": "sha256/e15463ed5fb7749b2d1eda5edcbc31ba42ba1a2b000a519e3d3ee8b40c5086b8/libmenuw-6.6_p20260822-r0.apk",
+      "filename": "libmenuw-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "libmount",
+      "version": "2.42.3-r1",
+      "file": "libmount-2.42.3-r1.6323ac6d.apk",
+      "sha256": "fafdb072676f45203415a79e3e8206f5f81d6844165d538d88853e3cffba0200",
+      "size": 134807,
+      "artifact": "sha256/fafdb072676f45203415a79e3e8206f5f81d6844165d538d88853e3cffba0200/libmount-2.42.3-r1.apk",
+      "filename": "libmount-2.42.3-r1.apk"
+    },
+    {
+      "name": "libmpdclient",
+      "version": "2.27-r0",
+      "file": "libmpdclient-2.27-r0.50e7a565.apk",
+      "sha256": "92b6da778d4b69b5ec8363111cccd2a1b23e041d2b437225f35b2d6be634ef96",
+      "size": 52860,
+      "artifact": "sha256/92b6da778d4b69b5ec8363111cccd2a1b23e041d2b437225f35b2d6be634ef96/libmpdclient-2.27-r0.apk",
+      "filename": "libmpdclient-2.27-r0.apk"
+    },
+    {
+      "name": "libmpdclient-dev",
+      "version": "2.27-r0",
+      "file": "libmpdclient-dev-2.27-r0.5fe15e3b.apk",
+      "sha256": "c87d82fae4a01724291c521da119746fcf23e7471d73d1b602b2eec90e761829",
+      "size": 37973,
+      "artifact": "sha256/c87d82fae4a01724291c521da119746fcf23e7471d73d1b602b2eec90e761829/libmpdclient-dev-2.27-r0.apk",
+      "filename": "libmpdclient-dev-2.27-r0.apk"
+    },
+    {
+      "name": "libncurses++",
+      "version": "6.6_p20260822-r0",
+      "file": "libncurses++-6.6_p20260822-r0.5243de6a.apk",
+      "sha256": "4c5c46a64a772033b8d9b32d79ac973a4add1de305ab0394af9d1329e5dcf1c7",
+      "size": 24358,
+      "artifact": "sha256/4c5c46a64a772033b8d9b32d79ac973a4add1de305ab0394af9d1329e5dcf1c7/libncurses++-6.6_p20260822-r0.apk",
+      "filename": "libncurses++-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "libncursesw",
+      "version": "6.6_p20260822-r0",
+      "file": "libncursesw-6.6_p20260822-r0.5896c987.apk",
+      "sha256": "9a938483f12531f4ae1604e4c22c4d71d6e197f17b03d00bf0093628e2ab0e95",
+      "size": 159749,
+      "artifact": "sha256/9a938483f12531f4ae1604e4c22c4d71d6e197f17b03d00bf0093628e2ab0e95/libncursesw-6.6_p20260822-r0.apk",
+      "filename": "libncursesw-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "libnl3",
+      "version": "3.11.0-r0",
+      "file": "libnl3-3.11.0-r0.86a2ec36.apk",
+      "sha256": "cfc9f19c30571697b21f1765501e4eb4f617f0ae4a43d433b7f4578b04306297",
+      "size": 332945,
+      "artifact": "sha256/cfc9f19c30571697b21f1765501e4eb4f617f0ae4a43d433b7f4578b04306297/libnl3-3.11.0-r0.apk",
+      "filename": "libnl3-3.11.0-r0.apk"
+    },
+    {
+      "name": "libnl3-cli",
+      "version": "3.11.0-r0",
+      "file": "libnl3-cli-3.11.0-r0.cedd481f.apk",
+      "sha256": "c87d1e3bef62c102e8fc9c0726acde612ffc9b8aa2bde240001f513948f71c34",
+      "size": 112314,
+      "artifact": "sha256/c87d1e3bef62c102e8fc9c0726acde612ffc9b8aa2bde240001f513948f71c34/libnl3-cli-3.11.0-r0.apk",
+      "filename": "libnl3-cli-3.11.0-r0.apk"
+    },
+    {
+      "name": "libnl3-dev",
+      "version": "3.11.0-r0",
+      "file": "libnl3-dev-3.11.0-r0.b50c5662.apk",
+      "sha256": "e0942969db82d804a7ed5567f9e57411f767a598980813d6e489be1e36eda01c",
+      "size": 59254,
+      "artifact": "sha256/e0942969db82d804a7ed5567f9e57411f767a598980813d6e489be1e36eda01c/libnl3-dev-3.11.0-r0.apk",
+      "filename": "libnl3-dev-3.11.0-r0.apk"
+    },
+    {
+      "name": "libogg",
+      "version": "1.3.6-r0",
+      "file": "libogg-1.3.6-r0.123394d7.apk",
+      "sha256": "9c0c158b6c5ec4ebfdf182db1d540963abcfacc3a069f8a41763c85b57b5de16",
+      "size": 20621,
+      "artifact": "sha256/9c0c158b6c5ec4ebfdf182db1d540963abcfacc3a069f8a41763c85b57b5de16/libogg-1.3.6-r0.apk",
+      "filename": "libogg-1.3.6-r0.apk"
+    },
+    {
+      "name": "libpanelw",
+      "version": "6.6_p20260822-r0",
+      "file": "libpanelw-6.6_p20260822-r0.7e918764.apk",
+      "sha256": "d671004401904541da72a8d806929554684b4ebedd1af0eea4a5ea487f74c155",
+      "size": 5558,
+      "artifact": "sha256/d671004401904541da72a8d806929554684b4ebedd1af0eea4a5ea487f74c155/libpanelw-6.6_p20260822-r0.apk",
+      "filename": "libpanelw-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "libpciaccess",
+      "version": "0.19-r0",
+      "file": "libpciaccess-0.19-r0.b8bd822b.apk",
+      "sha256": "03fdccd1e2a0825e7f7fabbac67212e05d271d31d2eff44cc92f707e69908ad4",
+      "size": 14743,
+      "artifact": "sha256/03fdccd1e2a0825e7f7fabbac67212e05d271d31d2eff44cc92f707e69908ad4/libpciaccess-0.19-r0.apk",
+      "filename": "libpciaccess-0.19-r0.apk"
+    },
+    {
+      "name": "libpciaccess-dev",
+      "version": "0.19-r0",
+      "file": "libpciaccess-dev-0.19-r0.811366ed.apk",
+      "sha256": "ec262295aff0864033946052f0733b7eddb2b4ac759633dfc5fab6557631d3d6",
+      "size": 6361,
+      "artifact": "sha256/ec262295aff0864033946052f0733b7eddb2b4ac759633dfc5fab6557631d3d6/libpciaccess-dev-0.19-r0.apk",
+      "filename": "libpciaccess-dev-0.19-r0.apk"
+    },
+    {
+      "name": "libpcre2-16",
+      "version": "10.48-r0",
+      "file": "libpcre2-16-10.48-r0.64ca968d.apk",
+      "sha256": "a7833274f2073003ee09f0c7d09a79adc154cf04bffc85cd85c19587f4765b94",
+      "size": 297501,
+      "artifact": "sha256/a7833274f2073003ee09f0c7d09a79adc154cf04bffc85cd85c19587f4765b94/libpcre2-16-10.48-r0.apk",
+      "filename": "libpcre2-16-10.48-r0.apk"
+    },
+    {
+      "name": "libpcre2-32",
+      "version": "10.48-r0",
+      "file": "libpcre2-32-10.48-r0.7ab3ac26.apk",
+      "sha256": "9fa33d9d99e036c8d3a71f5e9b192d67ba374fd30a876710f4461f990885150c",
+      "size": 274394,
+      "artifact": "sha256/9fa33d9d99e036c8d3a71f5e9b192d67ba374fd30a876710f4461f990885150c/libpcre2-32-10.48-r0.apk",
+      "filename": "libpcre2-32-10.48-r0.apk"
+    },
+    {
+      "name": "libpng",
+      "version": "1.6.58-r1",
+      "file": "libpng-1.6.58-r1.c2cc409d.apk",
+      "sha256": "7c1988460b88cbf22f0b7a25eaa1c456b3c9def3523580779d53dd0dd72357d4",
+      "size": 95802,
+      "artifact": "sha256/7c1988460b88cbf22f0b7a25eaa1c456b3c9def3523580779d53dd0dd72357d4/libpng-1.6.58-r1.apk",
+      "filename": "libpng-1.6.58-r1.apk"
+    },
+    {
+      "name": "libpng-dev",
+      "version": "1.6.58-r1",
+      "file": "libpng-dev-1.6.58-r1.69868392.apk",
+      "sha256": "9b8fcef59c1abeb9c7de4b26c5387acc66be8930b3f986221220da5c80092110",
+      "size": 52501,
+      "artifact": "sha256/9b8fcef59c1abeb9c7de4b26c5387acc66be8930b3f986221220da5c80092110/libpng-dev-1.6.58-r1.apk",
+      "filename": "libpng-dev-1.6.58-r1.apk"
+    },
+    {
+      "name": "libpulse",
+      "version": "17.0-r7",
+      "file": "libpulse-17.0-r7.abe5f478.apk",
+      "sha256": "723afb2101f839d5a652b607d197e8756b9d90436c541da78fc2fac1c2435be8",
+      "size": 567605,
+      "artifact": "sha256/723afb2101f839d5a652b607d197e8756b9d90436c541da78fc2fac1c2435be8/libpulse-17.0-r7.apk",
+      "filename": "libpulse-17.0-r7.apk"
+    },
+    {
+      "name": "libpulse-mainloop-glib",
+      "version": "17.0-r7",
+      "file": "libpulse-mainloop-glib-17.0-r7.baf2d5be.apk",
+      "sha256": "eac4b014c776711f0d5c46d2502b53482c2d30a2c58a09d2ea7776684f0ce937",
+      "size": 7162,
+      "artifact": "sha256/eac4b014c776711f0d5c46d2502b53482c2d30a2c58a09d2ea7776684f0ce937/libpulse-mainloop-glib-17.0-r7.apk",
+      "filename": "libpulse-mainloop-glib-17.0-r7.apk"
+    },
+    {
+      "name": "librsvg",
+      "version": "2.62.3-r0",
+      "file": "librsvg-2.62.3-r0.5ea54b90.apk",
+      "sha256": "db0b505ccef76228119e8ffa4ff1afa863d40507fcc1227e3264f4a63bb51707",
+      "size": 1627096,
+      "artifact": "sha256/db0b505ccef76228119e8ffa4ff1afa863d40507fcc1227e3264f4a63bb51707/librsvg-2.62.3-r0.apk",
+      "filename": "librsvg-2.62.3-r0.apk"
+    },
+    {
+      "name": "libseccomp",
+      "version": "2.6.0-r2",
+      "file": "libseccomp-2.6.0-r2.cee9648d.apk",
+      "sha256": "bc574d796120b6e88ad515eb503f78fef246f488ff859b8c1484df097c534bc8",
+      "size": 50289,
+      "artifact": "sha256/bc574d796120b6e88ad515eb503f78fef246f488ff859b8c1484df097c534bc8/libseccomp-2.6.0-r2.apk",
+      "filename": "libseccomp-2.6.0-r2.apk"
+    },
+    {
+      "name": "libseccomp-dev",
+      "version": "2.6.0-r2",
+      "file": "libseccomp-dev-2.6.0-r2.d8a7e853.apk",
+      "sha256": "0a19a384ea2eb888d7beded865d9c40e978075cccec0de8d8ca28be298f039b5",
+      "size": 18284,
+      "artifact": "sha256/0a19a384ea2eb888d7beded865d9c40e978075cccec0de8d8ca28be298f039b5/libseccomp-dev-2.6.0-r2.apk",
+      "filename": "libseccomp-dev-2.6.0-r2.apk"
+    },
+    {
+      "name": "libselinux",
+      "version": "3.11-r0",
+      "file": "libselinux-3.11-r0.f16d871a.apk",
+      "sha256": "b991ba3f15244747d4ba392a37906deb8967558d9197c9794ce506725ce9a95f",
+      "size": 79913,
+      "artifact": "sha256/b991ba3f15244747d4ba392a37906deb8967558d9197c9794ce506725ce9a95f/libselinux-3.11-r0.apk",
+      "filename": "libselinux-3.11-r0.apk"
+    },
+    {
+      "name": "libsharpyuv",
+      "version": "1.6.0-r0",
+      "file": "libsharpyuv-1.6.0-r0.cbc3d83f.apk",
+      "sha256": "8623fb57de9879dc8e498bd21cc19c8b76254c940880f4c880f63b5413d52151",
+      "size": 12377,
+      "artifact": "sha256/8623fb57de9879dc8e498bd21cc19c8b76254c940880f4c880f63b5413d52151/libsharpyuv-1.6.0-r0.apk",
+      "filename": "libsharpyuv-1.6.0-r0.apk"
+    },
+    {
+      "name": "libsigc++",
+      "version": "2.12.2-r0",
+      "file": "libsigc++-2.12.2-r0.8318be96.apk",
+      "sha256": "d9e24a70bf521f21e625dbc031bc1e28a1eaf4078eb87578336138228a216ca2",
+      "size": 9241,
+      "artifact": "sha256/d9e24a70bf521f21e625dbc031bc1e28a1eaf4078eb87578336138228a216ca2/libsigc++-2.12.2-r0.apk",
+      "filename": "libsigc++-2.12.2-r0.apk"
+    },
+    {
+      "name": "libsigc++-dev",
+      "version": "2.12.2-r0",
+      "file": "libsigc++-dev-2.12.2-r0.28022843.apk",
+      "sha256": "6daa84abdf8ef7e1e099e2fc27601daafd679ca3318f207c1eb07e3ec1c77aba",
+      "size": 79280,
+      "artifact": "sha256/6daa84abdf8ef7e1e099e2fc27601daafd679ca3318f207c1eb07e3ec1c77aba/libsigc++-dev-2.12.2-r0.apk",
+      "filename": "libsigc++-dev-2.12.2-r0.apk"
+    },
+    {
+      "name": "libsmartcols",
+      "version": "2.42.3-r1",
+      "file": "libsmartcols-2.42.3-r1.99397c24.apk",
+      "sha256": "32ec2587330ef4974085ef78d50204f87d66da2b4592f6680ffe89217ae75a44",
+      "size": 56249,
+      "artifact": "sha256/32ec2587330ef4974085ef78d50204f87d66da2b4592f6680ffe89217ae75a44/libsmartcols-2.42.3-r1.apk",
+      "filename": "libsmartcols-2.42.3-r1.apk"
+    },
+    {
+      "name": "libsndfile",
+      "version": "1.2.2-r3",
+      "file": "libsndfile-1.2.2-r3.fd222077.apk",
+      "sha256": "6f2901d20abfe729e93b8c58a300240e71e6c9cf0157c1af3f385e2611696d1d",
+      "size": 217715,
+      "artifact": "sha256/6f2901d20abfe729e93b8c58a300240e71e6c9cf0157c1af3f385e2611696d1d/libsndfile-1.2.2-r3.apk",
+      "filename": "libsndfile-1.2.2-r3.apk"
+    },
+    {
+      "name": "libssl3",
+      "version": "3.5.8-r0",
+      "file": "libssl3-3.5.8-r0.d463b24d.apk",
+      "sha256": "c6664105abf6d4701e903437b9e986542e8803bed8bd5c344811c87cd2edb764",
+      "size": 379268,
+      "artifact": "sha256/c6664105abf6d4701e903437b9e986542e8803bed8bd5c344811c87cd2edb764/libssl3-3.5.8-r0.apk",
+      "filename": "libssl3-3.5.8-r0.apk"
+    },
+    {
+      "name": "libstdc++",
+      "version": "15.2.0-r9",
+      "file": "libstdc++-15.2.0-r9.8f816225.apk",
+      "sha256": "adfebfc0c4b80c293be8cc802a7fb73d7f5854f01b47ff1f40282d18f255b357",
+      "size": 961408,
+      "artifact": "sha256/adfebfc0c4b80c293be8cc802a7fb73d7f5854f01b47ff1f40282d18f255b357/libstdc++-15.2.0-r9.apk",
+      "filename": "libstdc++-15.2.0-r9.apk"
+    },
+    {
+      "name": "libstdc++-dev",
+      "version": "15.2.0-r9",
+      "file": "libstdc++-dev-15.2.0-r9.665ba0e3.apk",
+      "sha256": "06e1e7125ac54072232566516f4205796e482461facefc255cda3a03cbbcee15",
+      "size": 4145101,
+      "artifact": "sha256/06e1e7125ac54072232566516f4205796e482461facefc255cda3a03cbbcee15/libstdc++-dev-15.2.0-r9.apk",
+      "filename": "libstdc++-dev-15.2.0-r9.apk"
+    },
+    {
+      "name": "libtasn1",
+      "version": "4.21.0-r0",
+      "file": "libtasn1-4.21.0-r0.28616b5c.apk",
+      "sha256": "4f7772e8eba07a621d59f63a8f4493b17d86e811bbc97be48f7d0a98c88ccbab",
+      "size": 33219,
+      "artifact": "sha256/4f7772e8eba07a621d59f63a8f4493b17d86e811bbc97be48f7d0a98c88ccbab/libtasn1-4.21.0-r0.apk",
+      "filename": "libtasn1-4.21.0-r0.apk"
+    },
+    {
+      "name": "libtiffxx",
+      "version": "4.7.2-r0",
+      "file": "libtiffxx-4.7.2-r0.d14f46cd.apk",
+      "sha256": "58a5301b8d6065314b3293d1a81e152f4871c54f1a0fa3c0945efba0f54ddfdb",
+      "size": 4684,
+      "artifact": "sha256/58a5301b8d6065314b3293d1a81e152f4871c54f1a0fa3c0945efba0f54ddfdb/libtiffxx-4.7.2-r0.apk",
+      "filename": "libtiffxx-4.7.2-r0.apk"
+    },
+    {
+      "name": "libturbojpeg",
+      "version": "3.1.3-r0",
+      "file": "libturbojpeg-3.1.3-r0.41abf11c.apk",
+      "sha256": "16d0c1d74c7320725cfa5cd65228a787d238c7554a45bd30ea53bc8b7d89f7c4",
+      "size": 261849,
+      "artifact": "sha256/16d0c1d74c7320725cfa5cd65228a787d238c7554a45bd30ea53bc8b7d89f7c4/libturbojpeg-3.1.3-r0.apk",
+      "filename": "libturbojpeg-3.1.3-r0.apk"
+    },
+    {
+      "name": "libunistring",
+      "version": "1.4.2-r0",
+      "file": "libunistring-1.4.2-r0.f509c801.apk",
+      "sha256": "3aa6030e603e34d96192742f327c0509f409c6769ce2e7b1463685dede38d714",
+      "size": 743597,
+      "artifact": "sha256/3aa6030e603e34d96192742f327c0509f409c6769ce2e7b1463685dede38d714/libunistring-1.4.2-r0.apk",
+      "filename": "libunistring-1.4.2-r0.apk"
+    },
+    {
+      "name": "libunwind",
+      "version": "1.8.3-r0",
+      "file": "libunwind-1.8.3-r0.d26cdcd1.apk",
+      "sha256": "3009fb2239cfb12f9559e493509c3c4a1e4a4945886c5f67e4fe9a231a1cf20f",
+      "size": 71702,
+      "artifact": "sha256/3009fb2239cfb12f9559e493509c3c4a1e4a4945886c5f67e4fe9a231a1cf20f/libunwind-1.8.3-r0.apk",
+      "filename": "libunwind-1.8.3-r0.apk"
+    },
+    {
+      "name": "libuuid",
+      "version": "2.42.3-r1",
+      "file": "libuuid-2.42.3-r1.da5d42d3.apk",
+      "sha256": "18f3012aa4c0836ef09d38ac63d1d2f0f6dfd53ea06066bb0d599ad63b3baa05",
+      "size": 14265,
+      "artifact": "sha256/18f3012aa4c0836ef09d38ac63d1d2f0f6dfd53ea06066bb0d599ad63b3baa05/libuuid-2.42.3-r1.apk",
+      "filename": "libuuid-2.42.3-r1.apk"
+    },
+    {
+      "name": "libuv",
+      "version": "1.52.1-r0",
+      "file": "libuv-1.52.1-r0.4538648a.apk",
+      "sha256": "adbd5eb3f708e291cfceac96fa80c3b4e45e7554d44e27466383339c1429f19d",
+      "size": 99587,
+      "artifact": "sha256/adbd5eb3f708e291cfceac96fa80c3b4e45e7554d44e27466383339c1429f19d/libuv-1.52.1-r0.apk",
+      "filename": "libuv-1.52.1-r0.apk"
+    },
+    {
+      "name": "libvorbis",
+      "version": "1.3.7-r2",
+      "file": "libvorbis-1.3.7-r2.9858d12b.apk",
+      "sha256": "a7478711ee1dfae6b73a942dbd9eb8ba052b26061c9e4d29ead68117f0d40f6a",
+      "size": 184533,
+      "artifact": "sha256/a7478711ee1dfae6b73a942dbd9eb8ba052b26061c9e4d29ead68117f0d40f6a/libvorbis-1.3.7-r2.apk",
+      "filename": "libvorbis-1.3.7-r2.apk"
+    },
+    {
+      "name": "libwebp",
+      "version": "1.6.0-r0",
+      "file": "libwebp-1.6.0-r0.68157627.apk",
+      "sha256": "7c02a6c76196afb808da6fd26a60fb526b4a962837160ed2877603e31a57cf0d",
+      "size": 246870,
+      "artifact": "sha256/7c02a6c76196afb808da6fd26a60fb526b4a962837160ed2877603e31a57cf0d/libwebp-1.6.0-r0.apk",
+      "filename": "libwebp-1.6.0-r0.apk"
+    },
+    {
+      "name": "libwebp-dev",
+      "version": "1.6.0-r0",
+      "file": "libwebp-dev-1.6.0-r0.812152f8.apk",
+      "sha256": "239ee1134a00e5d89f6c91403eb7ef5f4cf5653d225e0a124b69d37c02e7f478",
+      "size": 30736,
+      "artifact": "sha256/239ee1134a00e5d89f6c91403eb7ef5f4cf5653d225e0a124b69d37c02e7f478/libwebp-dev-1.6.0-r0.apk",
+      "filename": "libwebp-dev-1.6.0-r0.apk"
+    },
+    {
+      "name": "libwebpdecoder",
+      "version": "1.6.0-r0",
+      "file": "libwebpdecoder-1.6.0-r0.1a0f2c07.apk",
+      "sha256": "1242983499eb66de3f1d231a758449422c90dd470579f7861931617f92cba72f",
+      "size": 117547,
+      "artifact": "sha256/1242983499eb66de3f1d231a758449422c90dd470579f7861931617f92cba72f/libwebpdecoder-1.6.0-r0.apk",
+      "filename": "libwebpdecoder-1.6.0-r0.apk"
+    },
+    {
+      "name": "libwebpdemux",
+      "version": "1.6.0-r0",
+      "file": "libwebpdemux-1.6.0-r0.74b4719b.apk",
+      "sha256": "3c8c2bfabead42b9a19b30c01710c0cb6d8599f11125249cd7a9781a38fe1e1f",
+      "size": 9394,
+      "artifact": "sha256/3c8c2bfabead42b9a19b30c01710c0cb6d8599f11125249cd7a9781a38fe1e1f/libwebpdemux-1.6.0-r0.apk",
+      "filename": "libwebpdemux-1.6.0-r0.apk"
+    },
+    {
+      "name": "libwebpmux",
+      "version": "1.6.0-r0",
+      "file": "libwebpmux-1.6.0-r0.d8cf85c3.apk",
+      "sha256": "4035020be0ed1d5ccbf8633db38ea2e565022573089cea97dc902689fd5ce58d",
+      "size": 21007,
+      "artifact": "sha256/4035020be0ed1d5ccbf8633db38ea2e565022573089cea97dc902689fd5ce58d/libwebpmux-1.6.0-r0.apk",
+      "filename": "libwebpmux-1.6.0-r0.apk"
+    },
+    {
+      "name": "libx11",
+      "version": "1.8.13-r0",
+      "file": "libx11-1.8.13-r0.33fea92b.apk",
+      "sha256": "d3b201da7aefe0d98e74d21205fffe8fa116cc2db29c35c9007a6efbe2c2f5dd",
+      "size": 867507,
+      "artifact": "sha256/d3b201da7aefe0d98e74d21205fffe8fa116cc2db29c35c9007a6efbe2c2f5dd/libx11-1.8.13-r0.apk",
+      "filename": "libx11-1.8.13-r0.apk"
+    },
+    {
+      "name": "libx11-dev",
+      "version": "1.8.13-r0",
+      "file": "libx11-dev-1.8.13-r0.5393d45d.apk",
+      "sha256": "f54c3d145e4a47c38b672e4adefc368628cde09a2ac64c306138cecfc44a378a",
+      "size": 53359,
+      "artifact": "sha256/f54c3d145e4a47c38b672e4adefc368628cde09a2ac64c306138cecfc44a378a/libx11-dev-1.8.13-r0.apk",
+      "filename": "libx11-dev-1.8.13-r0.apk"
+    },
+    {
+      "name": "libxau",
+      "version": "1.0.12-r0",
+      "file": "libxau-1.0.12-r0.93368dc2.apk",
+      "sha256": "535d2b50eac7ab5db5f6168382cdade054507feccc77088cc6747aabaa4a22b4",
+      "size": 5558,
+      "artifact": "sha256/535d2b50eac7ab5db5f6168382cdade054507feccc77088cc6747aabaa4a22b4/libxau-1.0.12-r0.apk",
+      "filename": "libxau-1.0.12-r0.apk"
+    },
+    {
+      "name": "libxau-dev",
+      "version": "1.0.12-r0",
+      "file": "libxau-dev-1.0.12-r0.5c0a9684.apk",
+      "sha256": "555d1f5715f689b46f01ba4eb95dbc437b7ab95c8a4e9b53a8f5e473f7e8ed92",
+      "size": 3733,
+      "artifact": "sha256/555d1f5715f689b46f01ba4eb95dbc437b7ab95c8a4e9b53a8f5e473f7e8ed92/libxau-dev-1.0.12-r0.apk",
+      "filename": "libxau-dev-1.0.12-r0.apk"
+    },
+    {
+      "name": "libxcb",
+      "version": "1.17.0-r2",
+      "file": "libxcb-1.17.0-r2.8caa749e.apk",
+      "sha256": "7935d5ad9c7137b7b3f1292d62f55f7e0cc5c919155218c3060ea46503b3f211",
+      "size": 236075,
+      "artifact": "sha256/7935d5ad9c7137b7b3f1292d62f55f7e0cc5c919155218c3060ea46503b3f211/libxcb-1.17.0-r2.apk",
+      "filename": "libxcb-1.17.0-r2.apk"
+    },
+    {
+      "name": "libxcb-dev",
+      "version": "1.17.0-r2",
+      "file": "libxcb-dev-1.17.0-r2.c1cd1e2b.apk",
+      "sha256": "6658de0d8836c0e60744edf4e315bf006cd18d24f0539e58b3f70e2eae0b93c7",
+      "size": 193968,
+      "artifact": "sha256/6658de0d8836c0e60744edf4e315bf006cd18d24f0539e58b3f70e2eae0b93c7/libxcb-dev-1.17.0-r2.apk",
+      "filename": "libxcb-dev-1.17.0-r2.apk"
+    },
+    {
+      "name": "libxcomposite",
+      "version": "0.4.7-r0",
+      "file": "libxcomposite-0.4.7-r0.de62dc7a.apk",
+      "sha256": "1e6a618a82af91d0a7d469600c77e83f9f94137cec083e7514a6cf50c0187853",
+      "size": 4781,
+      "artifact": "sha256/1e6a618a82af91d0a7d469600c77e83f9f94137cec083e7514a6cf50c0187853/libxcomposite-0.4.7-r0.apk",
+      "filename": "libxcomposite-0.4.7-r0.apk"
+    },
+    {
+      "name": "libxcomposite-dev",
+      "version": "0.4.7-r0",
+      "file": "libxcomposite-dev-0.4.7-r0.75009d68.apk",
+      "sha256": "6ec55872d31c9565cf50007e83820e7b77391a33f25e22669cfb61ae9502fd8a",
+      "size": 3682,
+      "artifact": "sha256/6ec55872d31c9565cf50007e83820e7b77391a33f25e22669cfb61ae9502fd8a/libxcomposite-dev-0.4.7-r0.apk",
+      "filename": "libxcomposite-dev-0.4.7-r0.apk"
+    },
+    {
+      "name": "libxcursor",
+      "version": "1.2.3-r0",
+      "file": "libxcursor-1.2.3-r0.1689f6c1.apk",
+      "sha256": "8e0d9df4f6fcee2beb5eedbee99789436f4bd2f2c7621c711a84952f867a682a",
+      "size": 18648,
+      "artifact": "sha256/8e0d9df4f6fcee2beb5eedbee99789436f4bd2f2c7621c711a84952f867a682a/libxcursor-1.2.3-r0.apk",
+      "filename": "libxcursor-1.2.3-r0.apk"
+    },
+    {
+      "name": "libxcursor-dev",
+      "version": "1.2.3-r0",
+      "file": "libxcursor-dev-1.2.3-r0.05607650.apk",
+      "sha256": "5d018f1b4216db0262177b12f1d0c3682503e03fc9118fa2c9659860922fe730",
+      "size": 24213,
+      "artifact": "sha256/5d018f1b4216db0262177b12f1d0c3682503e03fc9118fa2c9659860922fe730/libxcursor-dev-1.2.3-r0.apk",
+      "filename": "libxcursor-dev-1.2.3-r0.apk"
+    },
+    {
+      "name": "libxdamage",
+      "version": "1.1.7-r0",
+      "file": "libxdamage-1.1.7-r0.11e43efd.apk",
+      "sha256": "4c9613fa9f8fd796b97c3ef8c0fbe1ce52fc0c8e5980e973e63dd2a695788aa1",
+      "size": 4892,
+      "artifact": "sha256/4c9613fa9f8fd796b97c3ef8c0fbe1ce52fc0c8e5980e973e63dd2a695788aa1/libxdamage-1.1.7-r0.apk",
+      "filename": "libxdamage-1.1.7-r0.apk"
+    },
+    {
+      "name": "libxdamage-dev",
+      "version": "1.1.7-r0",
+      "file": "libxdamage-dev-1.1.7-r0.8b71d175.apk",
+      "sha256": "0272b647aa5b1938f0b7873cd12fe4ab331d6da6ab577432b47281d1c3ef74de",
+      "size": 3270,
+      "artifact": "sha256/0272b647aa5b1938f0b7873cd12fe4ab331d6da6ab577432b47281d1c3ef74de/libxdamage-dev-1.1.7-r0.apk",
+      "filename": "libxdamage-dev-1.1.7-r0.apk"
+    },
+    {
+      "name": "libxdmcp",
+      "version": "1.1.5-r1",
+      "file": "libxdmcp-1.1.5-r1.ecebb805.apk",
+      "sha256": "b0bf553ea30ed729e333edb655b4eb6260f11a0a228cb790074359c045bd6805",
+      "size": 9444,
+      "artifact": "sha256/b0bf553ea30ed729e333edb655b4eb6260f11a0a228cb790074359c045bd6805/libxdmcp-1.1.5-r1.apk",
+      "filename": "libxdmcp-1.1.5-r1.apk"
+    },
+    {
+      "name": "libxdmcp-dev",
+      "version": "1.1.5-r1",
+      "file": "libxdmcp-dev-1.1.5-r1.68f1722d.apk",
+      "sha256": "641e59708a3bdaa6475178e29b575a5917092cdffd681743b174bf204e97d760",
+      "size": 12137,
+      "artifact": "sha256/641e59708a3bdaa6475178e29b575a5917092cdffd681743b174bf204e97d760/libxdmcp-dev-1.1.5-r1.apk",
+      "filename": "libxdmcp-dev-1.1.5-r1.apk"
+    },
+    {
+      "name": "libxext",
+      "version": "1.3.7-r0",
+      "file": "libxext-1.3.7-r0.9e79cd82.apk",
+      "sha256": "0375d01b85bd8f25c116e918712580057e27bd0b8d4a17c550e70ed02e50120f",
+      "size": 25343,
+      "artifact": "sha256/0375d01b85bd8f25c116e918712580057e27bd0b8d4a17c550e70ed02e50120f/libxext-1.3.7-r0.apk",
+      "filename": "libxext-1.3.7-r0.apk"
+    },
+    {
+      "name": "libxext-dev",
+      "version": "1.3.7-r0",
+      "file": "libxext-dev-1.3.7-r0.6555fe01.apk",
+      "sha256": "5617e220750615a66939682509d79ee8d7f665d9842c075ff09dfbd6bb1d0713",
+      "size": 13733,
+      "artifact": "sha256/5617e220750615a66939682509d79ee8d7f665d9842c075ff09dfbd6bb1d0713/libxext-dev-1.3.7-r0.apk",
+      "filename": "libxext-dev-1.3.7-r0.apk"
+    },
+    {
+      "name": "libxfixes",
+      "version": "6.0.2-r0",
+      "file": "libxfixes-6.0.2-r0.3f8739ef.apk",
+      "sha256": "d3d2b12fc2085e6daba1d74b3ee021177d61f1672fb9f87e026505f94846d354",
+      "size": 8578,
+      "artifact": "sha256/d3d2b12fc2085e6daba1d74b3ee021177d61f1672fb9f87e026505f94846d354/libxfixes-6.0.2-r0.apk",
+      "filename": "libxfixes-6.0.2-r0.apk"
+    },
+    {
+      "name": "libxfixes-dev",
+      "version": "6.0.2-r0",
+      "file": "libxfixes-dev-6.0.2-r0.2822473c.apk",
+      "sha256": "5e27717dab4aa74bd640da3d1438e117d40925e3556b7ab5aae3aed93213e0ff",
+      "size": 11214,
+      "artifact": "sha256/5e27717dab4aa74bd640da3d1438e117d40925e3556b7ab5aae3aed93213e0ff/libxfixes-dev-6.0.2-r0.apk",
+      "filename": "libxfixes-dev-6.0.2-r0.apk"
+    },
+    {
+      "name": "libxft",
+      "version": "2.3.9-r0",
+      "file": "libxft-2.3.9-r0.53ff01b0.apk",
+      "sha256": "28a5fd6a766b408cd5bd30f4283b6881df539a26aea706a0cc916c3f75176794",
+      "size": 38374,
+      "artifact": "sha256/28a5fd6a766b408cd5bd30f4283b6881df539a26aea706a0cc916c3f75176794/libxft-2.3.9-r0.apk",
+      "filename": "libxft-2.3.9-r0.apk"
+    },
+    {
+      "name": "libxft-dev",
+      "version": "2.3.9-r0",
+      "file": "libxft-dev-2.3.9-r0.96bfcd97.apk",
+      "sha256": "8e22ffc65a6f58f7d2ed8722b21d96ae27f54f9cb52103e55cc1ce83cb5814e8",
+      "size": 50021,
+      "artifact": "sha256/8e22ffc65a6f58f7d2ed8722b21d96ae27f54f9cb52103e55cc1ce83cb5814e8/libxft-dev-2.3.9-r0.apk",
+      "filename": "libxft-dev-2.3.9-r0.apk"
+    },
+    {
+      "name": "libxi",
+      "version": "1.8.3-r0",
+      "file": "libxi-1.8.3-r0.da2b4b3e.apk",
+      "sha256": "3fd5ba20d3d5e5b55addd6938d13769c13e8a16118940eefbc9ae424da710ca0",
+      "size": 27411,
+      "artifact": "sha256/3fd5ba20d3d5e5b55addd6938d13769c13e8a16118940eefbc9ae424da710ca0/libxi-1.8.3-r0.apk",
+      "filename": "libxi-1.8.3-r0.apk"
+    },
+    {
+      "name": "libxi-dev",
+      "version": "1.8.3-r0",
+      "file": "libxi-dev-1.8.3-r0.3885fd6d.apk",
+      "sha256": "0d9a321899547cd1af27288219fb5acce91173b3ff62b3959bb2563d3e1d8f08",
+      "size": 11542,
+      "artifact": "sha256/0d9a321899547cd1af27288219fb5acce91173b3ff62b3959bb2563d3e1d8f08/libxi-dev-1.8.3-r0.apk",
+      "filename": "libxi-dev-1.8.3-r0.apk"
+    },
+    {
+      "name": "libxinerama",
+      "version": "1.1.6-r0",
+      "file": "libxinerama-1.1.6-r0.2e02088f.apk",
+      "sha256": "bffbb74ba24e1f07f282ae79d0adeefad6057a012bc2fed1ced2a422a86cda13",
+      "size": 4545,
+      "artifact": "sha256/bffbb74ba24e1f07f282ae79d0adeefad6057a012bc2fed1ced2a422a86cda13/libxinerama-1.1.6-r0.apk",
+      "filename": "libxinerama-1.1.6-r0.apk"
+    },
+    {
+      "name": "libxinerama-dev",
+      "version": "1.1.6-r0",
+      "file": "libxinerama-dev-1.1.6-r0.2b69a84e.apk",
+      "sha256": "55d4dbdeb62a7796b237fe3e2e4ada766fa52c23492fbb2f5ab271ef5a4b03ae",
+      "size": 3916,
+      "artifact": "sha256/55d4dbdeb62a7796b237fe3e2e4ada766fa52c23492fbb2f5ab271ef5a4b03ae/libxinerama-dev-1.1.6-r0.apk",
+      "filename": "libxinerama-dev-1.1.6-r0.apk"
+    },
+    {
+      "name": "libxkbcommon",
+      "version": "1.13.2-r0",
+      "file": "libxkbcommon-1.13.2-r0.0953fee3.apk",
+      "sha256": "909edb7fbedba88b6a9d14b2587e6047f33904ddfecc1826c18cd973288f3c7b",
+      "size": 163296,
+      "artifact": "sha256/909edb7fbedba88b6a9d14b2587e6047f33904ddfecc1826c18cd973288f3c7b/libxkbcommon-1.13.2-r0.apk",
+      "filename": "libxkbcommon-1.13.2-r0.apk"
+    },
+    {
+      "name": "libxkbcommon-dev",
+      "version": "1.13.2-r0",
+      "file": "libxkbcommon-dev-1.13.2-r0.1cb4fb0e.apk",
+      "sha256": "c1252ab63c7e91a7bcc796d7d5cf671840e22c4fedcad237b29e293a2c69b47e",
+      "size": 86057,
+      "artifact": "sha256/c1252ab63c7e91a7bcc796d7d5cf671840e22c4fedcad237b29e293a2c69b47e/libxkbcommon-dev-1.13.2-r0.apk",
+      "filename": "libxkbcommon-dev-1.13.2-r0.apk"
+    },
+    {
+      "name": "libxkbcommon-x11",
+      "version": "1.13.2-r0",
+      "file": "libxkbcommon-x11-1.13.2-r0.917b54cd.apk",
+      "sha256": "e7d412732a67a8fc17a63b52154b5ddfeb19d7311b66f5e40ba5eaea480bee4e",
+      "size": 17817,
+      "artifact": "sha256/e7d412732a67a8fc17a63b52154b5ddfeb19d7311b66f5e40ba5eaea480bee4e/libxkbcommon-x11-1.13.2-r0.apk",
+      "filename": "libxkbcommon-x11-1.13.2-r0.apk"
+    },
+    {
+      "name": "libxml2",
+      "version": "2.13.9-r2",
+      "file": "libxml2-2.13.9-r2.c2c2cb44.apk",
+      "sha256": "4b2f986159c659f014b942fe8a5d70c67af475153ca826c3dd53389eea46a300",
+      "size": 495342,
+      "artifact": "sha256/4b2f986159c659f014b942fe8a5d70c67af475153ca826c3dd53389eea46a300/libxml2-2.13.9-r2.apk",
+      "filename": "libxml2-2.13.9-r2.apk"
+    },
+    {
+      "name": "libxml2-dev",
+      "version": "2.13.9-r2",
+      "file": "libxml2-dev-2.13.9-r2.b71d079e.apk",
+      "sha256": "02137d27a68f7cdc4ae7d25fe8cdff4b4557037cd58c590a962ce4932d4ad91c",
+      "size": 87415,
+      "artifact": "sha256/02137d27a68f7cdc4ae7d25fe8cdff4b4557037cd58c590a962ce4932d4ad91c/libxml2-dev-2.13.9-r2.apk",
+      "filename": "libxml2-dev-2.13.9-r2.apk"
+    },
+    {
+      "name": "libxml2-utils",
+      "version": "2.13.9-r2",
+      "file": "libxml2-utils-2.13.9-r2.361f23a8.apk",
+      "sha256": "4c45089cd1999f300cf244c8f4c2c2673844c0a7e27d05e5484c8ac8cf6ea8df",
+      "size": 28097,
+      "artifact": "sha256/4c45089cd1999f300cf244c8f4c2c2673844c0a7e27d05e5484c8ac8cf6ea8df/libxml2-utils-2.13.9-r2.apk",
+      "filename": "libxml2-utils-2.13.9-r2.apk"
+    },
+    {
+      "name": "libxrandr",
+      "version": "1.5.5-r0",
+      "file": "libxrandr-1.5.5-r0.c367ab19.apk",
+      "sha256": "63fe97e25f99d232beb945fb4c4924a64ce9f004ad9ae8ea211347d0382d371b",
+      "size": 16085,
+      "artifact": "sha256/63fe97e25f99d232beb945fb4c4924a64ce9f004ad9ae8ea211347d0382d371b/libxrandr-1.5.5-r0.apk",
+      "filename": "libxrandr-1.5.5-r0.apk"
+    },
+    {
+      "name": "libxrandr-dev",
+      "version": "1.5.5-r0",
+      "file": "libxrandr-dev-1.5.5-r0.f986f4a1.apk",
+      "sha256": "27de272b6113c074a99a89db2db0f9a4412b400291548504f8358264a2f1167a",
+      "size": 6248,
+      "artifact": "sha256/27de272b6113c074a99a89db2db0f9a4412b400291548504f8358264a2f1167a/libxrandr-dev-1.5.5-r0.apk",
+      "filename": "libxrandr-dev-1.5.5-r0.apk"
+    },
+    {
+      "name": "libxrender",
+      "version": "0.9.12-r0",
+      "file": "libxrender-0.9.12-r0.c3c80234.apk",
+      "sha256": "55aef17285542fb7d1a541c0ed104f2d7eff5107e6ee76b921e4a4cbce42976f",
+      "size": 16211,
+      "artifact": "sha256/55aef17285542fb7d1a541c0ed104f2d7eff5107e6ee76b921e4a4cbce42976f/libxrender-0.9.12-r0.apk",
+      "filename": "libxrender-0.9.12-r0.apk"
+    },
+    {
+      "name": "libxrender-dev",
+      "version": "0.9.12-r0",
+      "file": "libxrender-dev-0.9.12-r0.3a4e6cef.apk",
+      "sha256": "7e1b1dfd79aa75fcd823192f75e8fd5572dfd73a780f83a93806dbd6e845f791",
+      "size": 24708,
+      "artifact": "sha256/7e1b1dfd79aa75fcd823192f75e8fd5572dfd73a780f83a93806dbd6e845f791/libxrender-dev-0.9.12-r0.apk",
+      "filename": "libxrender-dev-0.9.12-r0.apk"
+    },
+    {
+      "name": "libxshmfence",
+      "version": "1.3.3-r0",
+      "file": "libxshmfence-1.3.3-r0.bbcacda4.apk",
+      "sha256": "f7439325d2107758a786ca719f411f064adce6f58945c9e5403aa92ef5302b84",
+      "size": 3842,
+      "artifact": "sha256/f7439325d2107758a786ca719f411f064adce6f58945c9e5403aa92ef5302b84/libxshmfence-1.3.3-r0.apk",
+      "filename": "libxshmfence-1.3.3-r0.apk"
+    },
+    {
+      "name": "libxshmfence-dev",
+      "version": "1.3.3-r0",
+      "file": "libxshmfence-dev-1.3.3-r0.bd03edfd.apk",
+      "sha256": "d031fe78e87b920f6a4196a3ef498582d8e94865cd268a60c44e3341df4bd53f",
+      "size": 2823,
+      "artifact": "sha256/d031fe78e87b920f6a4196a3ef498582d8e94865cd268a60c44e3341df4bd53f/libxshmfence-dev-1.3.3-r0.apk",
+      "filename": "libxshmfence-dev-1.3.3-r0.apk"
+    },
+    {
+      "name": "libxslt",
+      "version": "1.1.43-r3",
+      "file": "libxslt-1.1.43-r3.da53304e.apk",
+      "sha256": "19d89c6c0f6b14f017f8b47394aeecec40843c73daa70eaa4c150002d49b0357",
+      "size": 129527,
+      "artifact": "sha256/19d89c6c0f6b14f017f8b47394aeecec40843c73daa70eaa4c150002d49b0357/libxslt-1.1.43-r3.apk",
+      "filename": "libxslt-1.1.43-r3.apk"
+    },
+    {
+      "name": "libxtst",
+      "version": "1.2.5-r0",
+      "file": "libxtst-1.2.5-r0.48012122.apk",
+      "sha256": "ca9fcbd68c6237241836b211f1102a8fd21251328b2d774d24c5debee8ce18aa",
+      "size": 9849,
+      "artifact": "sha256/ca9fcbd68c6237241836b211f1102a8fd21251328b2d774d24c5debee8ce18aa/libxtst-1.2.5-r0.apk",
+      "filename": "libxtst-1.2.5-r0.apk"
+    },
+    {
+      "name": "libxtst-dev",
+      "version": "1.2.5-r0",
+      "file": "libxtst-dev-1.2.5-r0.b9becfc0.apk",
+      "sha256": "b482608c3772c39e3da8038679ca32756b5bec970d12306026479ea768562cbc",
+      "size": 4508,
+      "artifact": "sha256/b482608c3772c39e3da8038679ca32756b5bec970d12306026479ea768562cbc/libxtst-dev-1.2.5-r0.apk",
+      "filename": "libxtst-dev-1.2.5-r0.apk"
+    },
+    {
+      "name": "libxxf86vm",
+      "version": "1.1.7-r0",
+      "file": "libxxf86vm-1.1.7-r0.b97651b5.apk",
+      "sha256": "da22a6c427bab13d64782715196ff55d8c0c0a522f48e795d7c281935accd0ef",
+      "size": 7651,
+      "artifact": "sha256/da22a6c427bab13d64782715196ff55d8c0c0a522f48e795d7c281935accd0ef/libxxf86vm-1.1.7-r0.apk",
+      "filename": "libxxf86vm-1.1.7-r0.apk"
+    },
+    {
+      "name": "libxxf86vm-dev",
+      "version": "1.1.7-r0",
+      "file": "libxxf86vm-dev-1.1.7-r0.2851f6c7.apk",
+      "sha256": "223dc191e17c55a43aa46c655d9e8288aeba53d93d0d93a4ec774ee7a4af36e4",
+      "size": 4255,
+      "artifact": "sha256/223dc191e17c55a43aa46c655d9e8288aeba53d93d0d93a4ec774ee7a4af36e4/libxxf86vm-dev-1.1.7-r0.apk",
+      "filename": "libxxf86vm-dev-1.1.7-r0.apk"
+    },
+    {
+      "name": "linux-headers",
+      "version": "7.2.1-r0",
+      "file": "linux-headers-7.2.1-r0.9c7cd354.apk",
+      "sha256": "45e0d4df3e4002122c953d0af6e208f1e8369fc6c88c67138400b87f871fd54b",
+      "size": 2017036,
+      "artifact": "sha256/45e0d4df3e4002122c953d0af6e208f1e8369fc6c88c67138400b87f871fd54b/linux-headers-7.2.1-r0.apk",
+      "filename": "linux-headers-7.2.1-r0.apk"
+    },
+    {
+      "name": "linux-pam",
+      "version": "1.7.1-r3",
+      "file": "linux-pam-1.7.1-r3.8298b7db.apk",
+      "sha256": "fa8b1cd14dcf881760b3dbbf01d5d63a0886e37e16680fa6a91cad02434528a0",
+      "size": 224373,
+      "artifact": "sha256/fa8b1cd14dcf881760b3dbbf01d5d63a0886e37e16680fa6a91cad02434528a0/linux-pam-1.7.1-r3.apk",
+      "filename": "linux-pam-1.7.1-r3.apk"
+    },
+    {
+      "name": "llvm22-libs",
+      "version": "22.1.8-r1",
+      "file": "llvm22-libs-22.1.8-r1.1b851c70.apk",
+      "sha256": "68b8aaf30be477d3e315a3c678c4d46be222cdf8f055be462278576dfea184e4",
+      "size": 67288520,
+      "artifact": "sha256/68b8aaf30be477d3e315a3c678c4d46be222cdf8f055be462278576dfea184e4/llvm22-libs-22.1.8-r1.apk",
+      "filename": "llvm22-libs-22.1.8-r1.apk"
+    },
+    {
+      "name": "lua5.4",
+      "version": "5.4.8-r0",
+      "file": "lua5.4-5.4.8-r0.68fef35b.apk",
+      "sha256": "918a9544a516a9093b2862e2357db658604f4fc8801b02cf6c4fbb36ffcba0b5",
+      "size": 79604,
+      "artifact": "sha256/918a9544a516a9093b2862e2357db658604f4fc8801b02cf6c4fbb36ffcba0b5/lua5.4-5.4.8-r0.apk",
+      "filename": "lua5.4-5.4.8-r0.apk"
+    },
+    {
+      "name": "lua5.4-dev",
+      "version": "5.4.8-r0",
+      "file": "lua5.4-dev-5.4.8-r0.88f2b0e0.apk",
+      "sha256": "685fb3e8a02d01155813a132bf7171b26cdcd5196e8b3796775d17d0d0efd2b6",
+      "size": 698489,
+      "artifact": "sha256/685fb3e8a02d01155813a132bf7171b26cdcd5196e8b3796775d17d0d0efd2b6/lua5.4-dev-5.4.8-r0.apk",
+      "filename": "lua5.4-dev-5.4.8-r0.apk"
+    },
+    {
+      "name": "lua5.4-libs",
+      "version": "5.4.8-r0",
+      "file": "lua5.4-libs-5.4.8-r0.b320b0d7.apk",
+      "sha256": "5efa1ee3c67773d3e7ea1739a3043e106a96bf195c9991d5de159818c0bb22c0",
+      "size": 104642,
+      "artifact": "sha256/5efa1ee3c67773d3e7ea1739a3043e106a96bf195c9991d5de159818c0bb22c0/lua5.4-libs-5.4.8-r0.apk",
+      "filename": "lua5.4-libs-5.4.8-r0.apk"
+    },
+    {
+      "name": "lzip",
+      "version": "1.26-r0",
+      "file": "lzip-1.26-r0.246fc86a.apk",
+      "sha256": "7968eb1c5400d0a5e4b1e1e1a459a82dd0e8c49661538df06b4de8952c58a985",
+      "size": 42291,
+      "artifact": "sha256/7968eb1c5400d0a5e4b1e1e1a459a82dd0e8c49661538df06b4de8952c58a985/lzip-1.26-r0.apk",
+      "filename": "lzip-1.26-r0.apk"
+    },
+    {
+      "name": "make",
+      "version": "4.4.1-r4",
+      "file": "make-4.4.1-r4.7443b36f.apk",
+      "sha256": "b3b0b1e03637888031b075c4eccc35c5196045cfa28667b666d1ef35d07e22f3",
+      "size": 116300,
+      "artifact": "sha256/b3b0b1e03637888031b075c4eccc35c5196045cfa28667b666d1ef35d07e22f3/make-4.4.1-r4.apk",
+      "filename": "make-4.4.1-r4.apk"
+    },
+    {
+      "name": "mdev-conf",
+      "version": "4.10-r0",
+      "file": "mdev-conf-4.10-r0.28b999bf.apk",
+      "sha256": "093c7e5e4cbc935f286d0cb2f2e4accfa94798d8bea922fb0a91b5d1eb188304",
+      "size": 5416,
+      "artifact": "sha256/093c7e5e4cbc935f286d0cb2f2e4accfa94798d8bea922fb0a91b5d1eb188304/mdev-conf-4.10-r0.apk",
+      "filename": "mdev-conf-4.10-r0.apk"
+    },
+    {
+      "name": "mesa",
+      "version": "26.1.6-r1",
+      "file": "mesa-26.1.6-r1.3963e2e0.apk",
+      "sha256": "51fdc5762e835354ddd4d5b2642b6252eccdbbb2a90ffdb1b3516dcc5cf0813c",
+      "size": 13831990,
+      "artifact": "sha256/51fdc5762e835354ddd4d5b2642b6252eccdbbb2a90ffdb1b3516dcc5cf0813c/mesa-26.1.6-r1.apk",
+      "filename": "mesa-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-dev",
+      "version": "26.1.6-r1",
+      "file": "mesa-dev-26.1.6-r1.358d0abe.apk",
+      "sha256": "52d57ad4e396b19245129aa792c27a58f730607de78866eada75911e0fa5f632",
+      "size": 345168,
+      "artifact": "sha256/52d57ad4e396b19245129aa792c27a58f730607de78866eada75911e0fa5f632/mesa-dev-26.1.6-r1.apk",
+      "filename": "mesa-dev-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-egl",
+      "version": "26.1.6-r1",
+      "file": "mesa-egl-26.1.6-r1.118a78ff.apk",
+      "sha256": "523f55778cd8b9f5f81ce83f1a8de84f422c11521f903847c4e9e680725e37e1",
+      "size": 139531,
+      "artifact": "sha256/523f55778cd8b9f5f81ce83f1a8de84f422c11521f903847c4e9e680725e37e1/mesa-egl-26.1.6-r1.apk",
+      "filename": "mesa-egl-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-gbm",
+      "version": "26.1.6-r1",
+      "file": "mesa-gbm-26.1.6-r1.84b45f5a.apk",
+      "sha256": "3e227181101f15e1a65f423338104d4a57eee7c35a0869ee3f2af3d66db33056",
+      "size": 7010,
+      "artifact": "sha256/3e227181101f15e1a65f423338104d4a57eee7c35a0869ee3f2af3d66db33056/mesa-gbm-26.1.6-r1.apk",
+      "filename": "mesa-gbm-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-gl",
+      "version": "26.1.6-r1",
+      "file": "mesa-gl-26.1.6-r1.0d3b9d66.apk",
+      "sha256": "f3ef633c5adc1f79c820e9182e03a3a4abc8e94cf717d2529b86134f9d6a730b",
+      "size": 200113,
+      "artifact": "sha256/f3ef633c5adc1f79c820e9182e03a3a4abc8e94cf717d2529b86134f9d6a730b/mesa-gl-26.1.6-r1.apk",
+      "filename": "mesa-gl-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-gles",
+      "version": "26.1.6-r1",
+      "file": "mesa-gles-26.1.6-r1.94519135.apk",
+      "sha256": "1387f35a3b2a4f97c1ad41ebfcfa9a85befcee775f495f672f83515a508bdab7",
+      "size": 21729,
+      "artifact": "sha256/1387f35a3b2a4f97c1ad41ebfcfa9a85befcee775f495f672f83515a508bdab7/mesa-gles-26.1.6-r1.apk",
+      "filename": "mesa-gles-26.1.6-r1.apk"
+    },
+    {
+      "name": "mesa-rusticl",
+      "version": "26.1.6-r1",
+      "file": "mesa-rusticl-26.1.6-r1.3c0b06ab.apk",
+      "sha256": "3d1093865bb349d42a8b1456137d916a874d1bb7a069859a5106d28a144bb4b5",
+      "size": 11165627,
+      "artifact": "sha256/3d1093865bb349d42a8b1456137d916a874d1bb7a069859a5106d28a144bb4b5/mesa-rusticl-26.1.6-r1.apk",
+      "filename": "mesa-rusticl-26.1.6-r1.apk"
+    },
+    {
+      "name": "meson",
+      "version": "1.12.0-r0",
+      "file": "meson-1.12.0-r0.4a9d724a.apk",
+      "sha256": "ada0e9b7f43b91028d060647c0dfe96ce1422d884126df385eba21fa52773ee6",
+      "size": 973304,
+      "artifact": "sha256/ada0e9b7f43b91028d060647c0dfe96ce1422d884126df385eba21fa52773ee6/meson-1.12.0-r0.apk",
+      "filename": "meson-1.12.0-r0.apk"
+    },
+    {
+      "name": "meson-pyc",
+      "version": "1.12.0-r0",
+      "file": "meson-pyc-1.12.0-r0.aa28cc0a.apk",
+      "sha256": "c48dda35fa4ebf534cd7513249dd504f5468b3e9d4419b610275615d251d6ecb",
+      "size": 2327566,
+      "artifact": "sha256/c48dda35fa4ebf534cd7513249dd504f5468b3e9d4419b610275615d251d6ecb/meson-pyc-1.12.0-r0.apk",
+      "filename": "meson-pyc-1.12.0-r0.apk"
+    },
+    {
+      "name": "mpc1",
+      "version": "1.3.1-r1",
+      "file": "mpc1-1.3.1-r1.1c8ea37f.apk",
+      "sha256": "0163b283e0b8d5f8f7101ee37e9d1c30e99f49efdaf16f432a6cf0db1c03453d",
+      "size": 51173,
+      "artifact": "sha256/0163b283e0b8d5f8f7101ee37e9d1c30e99f49efdaf16f432a6cf0db1c03453d/mpc1-1.3.1-r1.apk",
+      "filename": "mpc1-1.3.1-r1.apk"
+    },
+    {
+      "name": "mpdecimal",
+      "version": "4.0.1-r0",
+      "file": "mpdecimal-4.0.1-r0.0da6365c.apk",
+      "sha256": "28f3d868efbc1e9093b95f4a3f6e74393acd4a37292fcb5c0e0e0612fe83fff3",
+      "size": 79004,
+      "artifact": "sha256/28f3d868efbc1e9093b95f4a3f6e74393acd4a37292fcb5c0e0e0612fe83fff3/mpdecimal-4.0.1-r0.apk",
+      "filename": "mpdecimal-4.0.1-r0.apk"
+    },
+    {
+      "name": "mpfr4",
+      "version": "4.2.2-r0",
+      "file": "mpfr4-4.2.2-r0.0773dfc9.apk",
+      "sha256": "04da778a6f006e82360103b0c43d4960787fb9e5ce9f57b73cd812a59b84bc05",
+      "size": 315499,
+      "artifact": "sha256/04da778a6f006e82360103b0c43d4960787fb9e5ce9f57b73cd812a59b84bc05/mpfr4-4.2.2-r0.apk",
+      "filename": "mpfr4-4.2.2-r0.apk"
+    },
+    {
+      "name": "mpg123-libs",
+      "version": "1.33.7-r0",
+      "file": "mpg123-libs-1.33.7-r0.538546a7.apk",
+      "sha256": "185639799bee6fa0b8494660b9189ed952e930f74d10c940e88230e7776e11cb",
+      "size": 172007,
+      "artifact": "sha256/185639799bee6fa0b8494660b9189ed952e930f74d10c940e88230e7776e11cb/mpg123-libs-1.33.7-r0.apk",
+      "filename": "mpg123-libs-1.33.7-r0.apk"
+    },
+    {
+      "name": "mtdev",
+      "version": "1.1.7-r0",
+      "file": "mtdev-1.1.7-r0.61b4d534.apk",
+      "sha256": "b12a0ff2e163227f093c7803111fce6eb3bd1dad2a398c2890239689f617b85e",
+      "size": 9414,
+      "artifact": "sha256/b12a0ff2e163227f093c7803111fce6eb3bd1dad2a398c2890239689f617b85e/mtdev-1.1.7-r0.apk",
+      "filename": "mtdev-1.1.7-r0.apk"
+    },
+    {
+      "name": "musl",
+      "version": "1.2.6-r3",
+      "file": "musl-1.2.6-r3.4dd310c7.apk",
+      "sha256": "aa6385e63418704cc6540ee7a9fc3e24f904fdbbae27c10ddfe7ff8a35877f64",
+      "size": 415463,
+      "artifact": "sha256/aa6385e63418704cc6540ee7a9fc3e24f904fdbbae27c10ddfe7ff8a35877f64/musl-1.2.6-r3.apk",
+      "filename": "musl-1.2.6-r3.apk"
+    },
+    {
+      "name": "musl-dev",
+      "version": "1.2.6-r3",
+      "file": "musl-dev-1.2.6-r3.06846c55.apk",
+      "sha256": "5e3514815a75abd54b455d1a9c3e03da5ad35272b4cfb0cd607a37257467d4e9",
+      "size": 3421073,
+      "artifact": "sha256/5e3514815a75abd54b455d1a9c3e03da5ad35272b4cfb0cd607a37257467d4e9/musl-dev-1.2.6-r3.apk",
+      "filename": "musl-dev-1.2.6-r3.apk"
+    },
+    {
+      "name": "musl-fts",
+      "version": "1.2.7-r7",
+      "file": "musl-fts-1.2.7-r7.3d4e0e31.apk",
+      "sha256": "1537300d1003353e0202ef57eebb2c0ab933d804a4b4f82d0fafb747b4b60586",
+      "size": 7597,
+      "artifact": "sha256/1537300d1003353e0202ef57eebb2c0ab933d804a4b4f82d0fafb747b4b60586/musl-fts-1.2.7-r7.apk",
+      "filename": "musl-fts-1.2.7-r7.apk"
+    },
+    {
+      "name": "musl-utils",
+      "version": "1.2.6-r3",
+      "file": "musl-utils-1.2.6-r3.6789fd33.apk",
+      "sha256": "c4a9286abda10cc70d9042100369f3fc44630c365f0658e50b8aa090ee78376d",
+      "size": 13603,
+      "artifact": "sha256/c4a9286abda10cc70d9042100369f3fc44630c365f0658e50b8aa090ee78376d/musl-utils-1.2.6-r3.apk",
+      "filename": "musl-utils-1.2.6-r3.apk"
+    },
+    {
+      "name": "ncurses-dev",
+      "version": "6.6_p20260822-r0",
+      "file": "ncurses-dev-6.6_p20260822-r0.d4cd69c4.apk",
+      "sha256": "304a5e58f177263efc53fb90c4f1f512ed32c178b17e9499a0650f7bca4ea585",
+      "size": 72034,
+      "artifact": "sha256/304a5e58f177263efc53fb90c4f1f512ed32c178b17e9499a0650f7bca4ea585/ncurses-dev-6.6_p20260822-r0.apk",
+      "filename": "ncurses-dev-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "ncurses-terminfo-base",
+      "version": "6.6_p20260822-r0",
+      "file": "ncurses-terminfo-base-6.6_p20260822-r0.b88f067f.apk",
+      "sha256": "33a94cf057abff31ca199bd472cf72c2b497cf9fde9c81e87cff8c88a0fb33a2",
+      "size": 22178,
+      "artifact": "sha256/33a94cf057abff31ca199bd472cf72c2b497cf9fde9c81e87cff8c88a0fb33a2/ncurses-terminfo-base-6.6_p20260822-r0.apk",
+      "filename": "ncurses-terminfo-base-6.6_p20260822-r0.apk"
+    },
+    {
+      "name": "nettle",
+      "version": "3.10.2-r0",
+      "file": "nettle-3.10.2-r0.9fe3248c.apk",
+      "sha256": "ff2511e2bd08044dce6ada8fb5ca630ed99ab24bb85ab913cbd1216e56895df2",
+      "size": 343285,
+      "artifact": "sha256/ff2511e2bd08044dce6ada8fb5ca630ed99ab24bb85ab913cbd1216e56895df2/nettle-3.10.2-r0.apk",
+      "filename": "nettle-3.10.2-r0.apk"
+    },
+    {
+      "name": "openrc",
+      "version": "0.63.2-r0",
+      "file": "openrc-0.63.2-r0.49291893.apk",
+      "sha256": "69d7473cc0311932c9ca57f1b6999ea3316bfdf1e25179457d596f050830690d",
+      "size": 217942,
+      "artifact": "sha256/69d7473cc0311932c9ca57f1b6999ea3316bfdf1e25179457d596f050830690d/openrc-0.63.2-r0.apk",
+      "filename": "openrc-0.63.2-r0.apk"
+    },
+    {
+      "name": "openrc-user",
+      "version": "0.63.2-r0",
+      "file": "openrc-user-0.63.2-r0.6712f741.apk",
+      "sha256": "50132911055c2c633407f7192c2fd15ededa4d17ccc7a7bb342b93cddefd8fcd",
+      "size": 6114,
+      "artifact": "sha256/50132911055c2c633407f7192c2fd15ededa4d17ccc7a7bb342b93cddefd8fcd/openrc-user-0.63.2-r0.apk",
+      "filename": "openrc-user-0.63.2-r0.apk"
+    },
+    {
+      "name": "openssl",
+      "version": "3.5.8-r0",
+      "file": "openssl-3.5.8-r0.040259e5.apk",
+      "sha256": "1b44e7d6d37aaf462efdc723e0532fcaf0fb456e7a58f19a37acd5ea305f6769",
+      "size": 340174,
+      "artifact": "sha256/1b44e7d6d37aaf462efdc723e0532fcaf0fb456e7a58f19a37acd5ea305f6769/openssl-3.5.8-r0.apk",
+      "filename": "openssl-3.5.8-r0.apk"
+    },
+    {
+      "name": "opus",
+      "version": "1.6.1-r0",
+      "file": "opus-1.6.1-r0.30b17345.apk",
+      "sha256": "8db9255ccf7b66e596870875a889aa22f445aebb002df6acb24c03e6c5ccfbc4",
+      "size": 270017,
+      "artifact": "sha256/8db9255ccf7b66e596870875a889aa22f445aebb002df6acb24c03e6c5ccfbc4/opus-1.6.1-r0.apk",
+      "filename": "opus-1.6.1-r0.apk"
+    },
+    {
+      "name": "orc",
+      "version": "0.4.42-r1",
+      "file": "orc-0.4.42-r1.9970b3dd.apk",
+      "sha256": "ff9f33d1506a9149ebdd58071e2cdcbf9a12a3d2d7a26327e9ffdca944f0b460",
+      "size": 284498,
+      "artifact": "sha256/ff9f33d1506a9149ebdd58071e2cdcbf9a12a3d2d7a26327e9ffdca944f0b460/orc-0.4.42-r1.apk",
+      "filename": "orc-0.4.42-r1.apk"
+    },
+    {
+      "name": "p11-kit",
+      "version": "0.26.2-r1",
+      "file": "p11-kit-0.26.2-r1.ce28d808.apk",
+      "sha256": "f6f5ea1d270b26bb7c893e56287b1d5db98f7f7a702bcac292a915199684774b",
+      "size": 399726,
+      "artifact": "sha256/f6f5ea1d270b26bb7c893e56287b1d5db98f7f7a702bcac292a915199684774b/p11-kit-0.26.2-r1.apk",
+      "filename": "p11-kit-0.26.2-r1.apk"
+    },
+    {
+      "name": "pango",
+      "version": "1.57.1-r0",
+      "file": "pango-1.57.1-r0.297f2b9e.apk",
+      "sha256": "c616b62df908026ef413b338b9043e36706b05b6d035049394e5d14022e64adc",
+      "size": 266052,
+      "artifact": "sha256/c616b62df908026ef413b338b9043e36706b05b6d035049394e5d14022e64adc/pango-1.57.1-r0.apk",
+      "filename": "pango-1.57.1-r0.apk"
+    },
+    {
+      "name": "pango-dev",
+      "version": "1.57.1-r0",
+      "file": "pango-dev-1.57.1-r0.831adee7.apk",
+      "sha256": "2006f9110ebc8984484b5de35e1e8e4864ce41fa271c53faa65f63c56a7bf8c3",
+      "size": 206846,
+      "artifact": "sha256/2006f9110ebc8984484b5de35e1e8e4864ce41fa271c53faa65f63c56a7bf8c3/pango-dev-1.57.1-r0.apk",
+      "filename": "pango-dev-1.57.1-r0.apk"
+    },
+    {
+      "name": "pango-tools",
+      "version": "1.57.1-r0",
+      "file": "pango-tools-1.57.1-r0.174fd2ef.apk",
+      "sha256": "7997c7a2cbac65c19f92d7483d3bf75bf65954f96f17e95fa24b8bd8136801a2",
+      "size": 28131,
+      "artifact": "sha256/7997c7a2cbac65c19f92d7483d3bf75bf65954f96f17e95fa24b8bd8136801a2/pango-tools-1.57.1-r0.apk",
+      "filename": "pango-tools-1.57.1-r0.apk"
+    },
+    {
+      "name": "pangomm2.46",
+      "version": "2.46.5-r0",
+      "file": "pangomm2.46-2.46.5-r0.062b7f17.apk",
+      "sha256": "b67254ee56f6e89557e0a77249c1e528bc38466cffd9a390fdc526907d8051be",
+      "size": 51091,
+      "artifact": "sha256/b67254ee56f6e89557e0a77249c1e528bc38466cffd9a390fdc526907d8051be/pangomm2.46-2.46.5-r0.apk",
+      "filename": "pangomm2.46-2.46.5-r0.apk"
+    },
+    {
+      "name": "pangomm2.46-dev",
+      "version": "2.46.5-r0",
+      "file": "pangomm2.46-dev-2.46.5-r0.f7f36104.apk",
+      "sha256": "c97189857b86381fce09b8f2158ebd409412f6a1fb44db22a39b032e2c00df8a",
+      "size": 69441,
+      "artifact": "sha256/c97189857b86381fce09b8f2158ebd409412f6a1fb44db22a39b032e2c00df8a/pangomm2.46-dev-2.46.5-r0.apk",
+      "filename": "pangomm2.46-dev-2.46.5-r0.apk"
+    },
+    {
+      "name": "patch",
+      "version": "2.8-r0",
+      "file": "patch-2.8-r0.cf89981a.apk",
+      "sha256": "1b949e2b1ca15d233eb2c9e09b004a3546a89e64973cf63064c1c0bb81daedb6",
+      "size": 70567,
+      "artifact": "sha256/1b949e2b1ca15d233eb2c9e09b004a3546a89e64973cf63064c1c0bb81daedb6/patch-2.8-r0.apk",
+      "filename": "patch-2.8-r0.apk"
+    },
+    {
+      "name": "pcre2",
+      "version": "10.48-r0",
+      "file": "pcre2-10.48-r0.01eac3f4.apk",
+      "sha256": "ea3d68de3c85f110c0887b2c0d4490718dfc0e685cb750373f4c0a925966d028",
+      "size": 322473,
+      "artifact": "sha256/ea3d68de3c85f110c0887b2c0d4490718dfc0e685cb750373f4c0a925966d028/pcre2-10.48-r0.apk",
+      "filename": "pcre2-10.48-r0.apk"
+    },
+    {
+      "name": "pcre2-dev",
+      "version": "10.48-r0",
+      "file": "pcre2-dev-10.48-r0.d7e7e9d5.apk",
+      "sha256": "baf4ab708ad28cbfa00116af996ce0daf6e234014b7f632413811ca67d2fb572",
+      "size": 17185,
+      "artifact": "sha256/baf4ab708ad28cbfa00116af996ce0daf6e234014b7f632413811ca67d2fb572/pcre2-dev-10.48-r0.apk",
+      "filename": "pcre2-dev-10.48-r0.apk"
+    },
+    {
+      "name": "pipewire-dev",
+      "version": "1.6.8-r5",
+      "file": "pipewire-dev-1.6.8-r5.68039696.apk",
+      "sha256": "700fd254d259e34fe360fd15020ce8d906b61ad675c30d5c60b8b5081fc04b4c",
+      "size": 224041,
+      "artifact": "sha256/700fd254d259e34fe360fd15020ce8d906b61ad675c30d5c60b8b5081fc04b4c/pipewire-dev-1.6.8-r5.apk",
+      "filename": "pipewire-dev-1.6.8-r5.apk"
+    },
+    {
+      "name": "pipewire-libs",
+      "version": "1.6.8-r5",
+      "file": "pipewire-libs-1.6.8-r5.750e6339.apk",
+      "sha256": "ba9bf731da5db1b769b719b93014f551c7e85a31ae30f02ffa5c6425ac8a195f",
+      "size": 2375957,
+      "artifact": "sha256/ba9bf731da5db1b769b719b93014f551c7e85a31ae30f02ffa5c6425ac8a195f/pipewire-libs-1.6.8-r5.apk",
+      "filename": "pipewire-libs-1.6.8-r5.apk"
+    },
+    {
+      "name": "pixman",
+      "version": "0.46.4-r0",
+      "file": "pixman-0.46.4-r0.e2234a98.apk",
+      "sha256": "5291f4a3e976bf2db67d66d6973cd4360a70242e385d14cb1ce1a5d651477e36",
+      "size": 244834,
+      "artifact": "sha256/5291f4a3e976bf2db67d66d6973cd4360a70242e385d14cb1ce1a5d651477e36/pixman-0.46.4-r0.apk",
+      "filename": "pixman-0.46.4-r0.apk"
+    },
+    {
+      "name": "pixman-dev",
+      "version": "0.46.4-r0",
+      "file": "pixman-dev-0.46.4-r0.183ad372.apk",
+      "sha256": "2817a58d5bbdbb99f094c3b8d1b5fb42072a0541b5f6dd5a0949b15402cdc6e7",
+      "size": 12157,
+      "artifact": "sha256/2817a58d5bbdbb99f094c3b8d1b5fb42072a0541b5f6dd5a0949b15402cdc6e7/pixman-dev-0.46.4-r0.apk",
+      "filename": "pixman-dev-0.46.4-r0.apk"
+    },
+    {
+      "name": "pkgconf",
+      "version": "3.0.7-r0",
+      "file": "pkgconf-3.0.7-r0.56fff8c7.apk",
+      "sha256": "77fcc7c027546a80d4209886f05bba5a5a73b04faee14a11641412d46dff8ec2",
+      "size": 93928,
+      "artifact": "sha256/77fcc7c027546a80d4209886f05bba5a5a73b04faee14a11641412d46dff8ec2/pkgconf-3.0.7-r0.apk",
+      "filename": "pkgconf-3.0.7-r0.apk"
+    },
+    {
+      "name": "playerctl",
+      "version": "2.4.1-r3",
+      "file": "playerctl-2.4.1-r3.969796e2.apk",
+      "sha256": "4e74d46b6d3b3a82b1bc01bd16b2e01993d29f26e3604821e90f456e99fe2332",
+      "size": 82339,
+      "artifact": "sha256/4e74d46b6d3b3a82b1bc01bd16b2e01993d29f26e3604821e90f456e99fe2332/playerctl-2.4.1-r3.apk",
+      "filename": "playerctl-2.4.1-r3.apk"
+    },
+    {
+      "name": "playerctl-dev",
+      "version": "2.4.1-r3",
+      "file": "playerctl-dev-2.4.1-r3.a94e1286.apk",
+      "sha256": "af7a661c334899eac9b0ad97570ba3892bb2b78ff11867b18fd025def931e04d",
+      "size": 14015,
+      "artifact": "sha256/af7a661c334899eac9b0ad97570ba3892bb2b78ff11867b18fd025def931e04d/playerctl-dev-2.4.1-r3.apk",
+      "filename": "playerctl-dev-2.4.1-r3.apk"
+    },
+    {
+      "name": "polkit-common",
+      "version": "127-r2",
+      "file": "polkit-common-127-r2.9b63f406.apk",
+      "sha256": "c50c631d3b8897b8ff2382f22da8f29e4e7ae006608d809865f3ffe52ccba916",
+      "size": 37506,
+      "artifact": "sha256/c50c631d3b8897b8ff2382f22da8f29e4e7ae006608d809865f3ffe52ccba916/polkit-common-127-r2.apk",
+      "filename": "polkit-common-127-r2.apk"
+    },
+    {
+      "name": "polkit-dev",
+      "version": "127-r2",
+      "file": "polkit-dev-127-r2.42c34129.apk",
+      "sha256": "04105b70810134c7107b897403dd581b4b90da97926ca65c9177c2e606aaad3a",
+      "size": 40961,
+      "artifact": "sha256/04105b70810134c7107b897403dd581b4b90da97926ca65c9177c2e606aaad3a/polkit-dev-127-r2.apk",
+      "filename": "polkit-dev-127-r2.apk"
+    },
+    {
+      "name": "polkit-noelogind-libs",
+      "version": "127-r2",
+      "file": "polkit-noelogind-libs-127-r2.9031bad5.apk",
+      "sha256": "c5b3b61a79c50ab819b0417a462bfe00d0739f3fda71adbc033f4906efc03d18",
+      "size": 55815,
+      "artifact": "sha256/c5b3b61a79c50ab819b0417a462bfe00d0739f3fda71adbc033f4906efc03d18/polkit-noelogind-libs-127-r2.apk",
+      "filename": "polkit-noelogind-libs-127-r2.apk"
+    },
+    {
+      "name": "polkit-openrc",
+      "version": "127-r2",
+      "file": "polkit-openrc-127-r2.81cb3ea2.apk",
+      "sha256": "75ba191437e6d3bea84cd6e7b61846cdd42a54ffde69bbba5db351530f90482c",
+      "size": 1790,
+      "artifact": "sha256/75ba191437e6d3bea84cd6e7b61846cdd42a54ffde69bbba5db351530f90482c/polkit-openrc-127-r2.apk",
+      "filename": "polkit-openrc-127-r2.apk"
+    },
+    {
+      "name": "pulseaudio-dev",
+      "version": "17.0-r7",
+      "file": "pulseaudio-dev-17.0-r7.cf27802b.apk",
+      "sha256": "6dafb8366f2185bdaae4decca74e8a7ce8d314b62bfe9593096c416ef1944b28",
+      "size": 87490,
+      "artifact": "sha256/6dafb8366f2185bdaae4decca74e8a7ce8d314b62bfe9593096c416ef1944b28/pulseaudio-dev-17.0-r7.apk",
+      "filename": "pulseaudio-dev-17.0-r7.apk"
+    },
+    {
+      "name": "py3-packaging",
+      "version": "26.2-r0",
+      "file": "py3-packaging-26.2-r0.699e3017.apk",
+      "sha256": "5288199fb9c2ac47cae5c4acc15468664c8e9adea014635d93f49f7e68c9d21c",
+      "size": 94553,
+      "artifact": "sha256/5288199fb9c2ac47cae5c4acc15468664c8e9adea014635d93f49f7e68c9d21c/py3-packaging-26.2-r0.apk",
+      "filename": "py3-packaging-26.2-r0.apk"
+    },
+    {
+      "name": "py3-packaging-pyc",
+      "version": "26.2-r0",
+      "file": "py3-packaging-pyc-26.2-r0.5c3860b4.apk",
+      "sha256": "bd6912dd75f39e0acee1904f8a23dbee42a099ef22e19326fb6f19b5e5afbc56",
+      "size": 169963,
+      "artifact": "sha256/bd6912dd75f39e0acee1904f8a23dbee42a099ef22e19326fb6f19b5e5afbc56/py3-packaging-pyc-26.2-r0.apk",
+      "filename": "py3-packaging-pyc-26.2-r0.apk"
+    },
+    {
+      "name": "py3-parsing",
+      "version": "3.3.2-r1",
+      "file": "py3-parsing-3.3.2-r1.ac27f557.apk",
+      "sha256": "001c4b1073e45c4f230886cdecb68c5a7590982beb76b9e0c7305b83fb4878c5",
+      "size": 117458,
+      "artifact": "sha256/001c4b1073e45c4f230886cdecb68c5a7590982beb76b9e0c7305b83fb4878c5/py3-parsing-3.3.2-r1.apk",
+      "filename": "py3-parsing-3.3.2-r1.apk"
+    },
+    {
+      "name": "py3-parsing-pyc",
+      "version": "3.3.2-r1",
+      "file": "py3-parsing-pyc-3.3.2-r1.3b9e45e4.apk",
+      "sha256": "4990ef5796ae3e9130026dfd0dadd15fe4bbc6fb9320f21f0ff51eae262e52e4",
+      "size": 225611,
+      "artifact": "sha256/4990ef5796ae3e9130026dfd0dadd15fe4bbc6fb9320f21f0ff51eae262e52e4/py3-parsing-pyc-3.3.2-r1.apk",
+      "filename": "py3-parsing-pyc-3.3.2-r1.apk"
+    },
+    {
+      "name": "pyc",
+      "version": "3.14.7-r0",
+      "file": "pyc-3.14.7-r0.apk",
+      "sha256": "d3ed118ce849f5d33ee8404c8da60708e4def3d5ff726a74d5216add410103a5",
+      "size": 1275,
+      "artifact": "sha256/d3ed118ce849f5d33ee8404c8da60708e4def3d5ff726a74d5216add410103a5/pyc-3.14.7-r0.apk",
+      "filename": "pyc-3.14.7-r0.apk"
+    },
+    {
+      "name": "python3",
+      "version": "3.14.7-r0",
+      "file": "python3-3.14.7-r0.cf7a997e.apk",
+      "sha256": "68ab7658b2e6ffa59cc2b83289d6f440f872b48b14a3b7690a94141fa270756f",
+      "size": 8441363,
+      "artifact": "sha256/68ab7658b2e6ffa59cc2b83289d6f440f872b48b14a3b7690a94141fa270756f/python3-3.14.7-r0.apk",
+      "filename": "python3-3.14.7-r0.apk"
+    },
+    {
+      "name": "python3-pyc",
+      "version": "3.14.7-r0",
+      "file": "python3-pyc-3.14.7-r0.apk",
+      "sha256": "c23a14352f47a4614dd97b56c4fabae75e7a82ac40b034682072b70e1315616f",
+      "size": 1331,
+      "artifact": "sha256/c23a14352f47a4614dd97b56c4fabae75e7a82ac40b034682072b70e1315616f/python3-pyc-3.14.7-r0.apk",
+      "filename": "python3-pyc-3.14.7-r0.apk"
+    },
+    {
+      "name": "python3-pycache-pyc0",
+      "version": "3.14.7-r0",
+      "file": "python3-pycache-pyc0-3.14.7-r0.b13ad3d5.apk",
+      "sha256": "3acca84260b12cf3f395656185ca97177209106b49b4c4fac4923b67ad840883",
+      "size": 4624632,
+      "artifact": "sha256/3acca84260b12cf3f395656185ca97177209106b49b4c4fac4923b67ad840883/python3-pycache-pyc0-3.14.7-r0.apk",
+      "filename": "python3-pycache-pyc0-3.14.7-r0.apk"
+    },
+    {
+      "name": "readline",
+      "version": "8.3.3-r1",
+      "file": "readline-8.3.3-r1.be485719.apk",
+      "sha256": "a0facde0de1a476438b099ffd85393aef0a2c1e0966dd6017941d44361803aed",
+      "size": 127189,
+      "artifact": "sha256/a0facde0de1a476438b099ffd85393aef0a2c1e0966dd6017941d44361803aed/readline-8.3.3-r1.apk",
+      "filename": "readline-8.3.3-r1.apk"
+    },
+    {
+      "name": "roc-toolkit-libs",
+      "version": "0.4.0-r1",
+      "file": "roc-toolkit-libs-0.4.0-r1.f94c0514.apk",
+      "sha256": "210f8cd8413f0486498784e582656eb2542ad41ef186a950df256ea67aa48dfb",
+      "size": 457648,
+      "artifact": "sha256/210f8cd8413f0486498784e582656eb2542ad41ef186a950df256ea67aa48dfb/roc-toolkit-libs-0.4.0-r1.apk",
+      "filename": "roc-toolkit-libs-0.4.0-r1.apk"
+    },
+    {
+      "name": "samurai",
+      "version": "1.3-r0",
+      "file": "samurai-1.3-r0.8cd53ee8.apk",
+      "sha256": "8a159cef64503f4566506b76fe987597dc0a2f7c0faece5905be070d82f12f78",
+      "size": 30595,
+      "artifact": "sha256/8a159cef64503f4566506b76fe987597dc0a2f7c0faece5905be070d82f12f78/samurai-1.3-r0.apk",
+      "filename": "samurai-1.3-r0.apk"
+    },
+    {
+      "name": "scanelf",
+      "version": "1.3.9-r1",
+      "file": "scanelf-1.3.9-r1.92f5c6ae.apk",
+      "sha256": "85202bc7d29ca5a6cdd8fa4248c46372aab2076b34cf85b2adfc9ace20504892",
+      "size": 32361,
+      "artifact": "sha256/85202bc7d29ca5a6cdd8fa4248c46372aab2076b34cf85b2adfc9ace20504892/scanelf-1.3.9-r1.apk",
+      "filename": "scanelf-1.3.9-r1.apk"
+    },
+    {
+      "name": "scdoc",
+      "version": "1.11.5-r0",
+      "file": "scdoc-1.11.5-r0.f8fa7638.apk",
+      "sha256": "2f724bee05335a4c8285bd7ede02884d8b5898739de1e3283d51be3977b18481",
+      "size": 9924,
+      "artifact": "sha256/2f724bee05335a4c8285bd7ede02884d8b5898739de1e3283d51be3977b18481/scdoc-1.11.5-r0.apk",
+      "filename": "scdoc-1.11.5-r0.apk"
+    },
+    {
+      "name": "shared-mime-info",
+      "version": "2.4-r7",
+      "file": "shared-mime-info-2.4-r7.454290d0.apk",
+      "sha256": "659052afa1db7e33fff78a6e0c8ecf8883afbebb19d83a1f579cc864a2d0b77a",
+      "size": 370536,
+      "artifact": "sha256/659052afa1db7e33fff78a6e0c8ecf8883afbebb19d83a1f579cc864a2d0b77a/shared-mime-info-2.4-r7.apk",
+      "filename": "shared-mime-info-2.4-r7.apk"
+    },
+    {
+      "name": "skalibs-libs",
+      "version": "2.15.1.0-r0",
+      "file": "skalibs-libs-2.15.1.0-r0.17b237a8.apk",
+      "sha256": "ec0d603af89c8027919f4e6b19370c0db4461a817c09f7cc8a1688cf16a84948",
+      "size": 85059,
+      "artifact": "sha256/ec0d603af89c8027919f4e6b19370c0db4461a817c09f7cc8a1688cf16a84948/skalibs-libs-2.15.1.0-r0.apk",
+      "filename": "skalibs-libs-2.15.1.0-r0.apk"
+    },
+    {
+      "name": "sndio-dev",
+      "version": "1.10.0-r4",
+      "file": "sndio-dev-1.10.0-r4.caf19685.apk",
+      "sha256": "311f281d93025c8d179231b9103f901e0734532d5471843ae9f07249d8f4720c",
+      "size": 4477,
+      "artifact": "sha256/311f281d93025c8d179231b9103f901e0734532d5471843ae9f07249d8f4720c/sndio-dev-1.10.0-r4.apk",
+      "filename": "sndio-dev-1.10.0-r4.apk"
+    },
+    {
+      "name": "sndio-libs",
+      "version": "1.10.0-r4",
+      "file": "sndio-libs-1.10.0-r4.97b9d593.apk",
+      "sha256": "a069b9c40a21d82b7b36e34915380330390a4d84098335bbdf3bbaab64be0ba1",
+      "size": 24659,
+      "artifact": "sha256/a069b9c40a21d82b7b36e34915380330390a4d84098335bbdf3bbaab64be0ba1/sndio-libs-1.10.0-r4.apk",
+      "filename": "sndio-libs-1.10.0-r4.apk"
+    },
+    {
+      "name": "soxr",
+      "version": "0.1.3-r7",
+      "file": "soxr-0.1.3-r7.c0f20b96.apk",
+      "sha256": "d6ff48bc2c87692cc095787edfefff564c2e51cd76b70bc8dc3d47f6c145cb1c",
+      "size": 74064,
+      "artifact": "sha256/d6ff48bc2c87692cc095787edfefff564c2e51cd76b70bc8dc3d47f6c145cb1c/soxr-0.1.3-r7.apk",
+      "filename": "soxr-0.1.3-r7.apk"
+    },
+    {
+      "name": "spdlog",
+      "version": "1.17.0-r0",
+      "file": "spdlog-1.17.0-r0.316f6a0b.apk",
+      "sha256": "eb5864905f8ba11ea20ee12b26722381044b484e620d904986527480100c93d9",
+      "size": 104416,
+      "artifact": "sha256/eb5864905f8ba11ea20ee12b26722381044b484e620d904986527480100c93d9/spdlog-1.17.0-r0.apk",
+      "filename": "spdlog-1.17.0-r0.apk"
+    },
+    {
+      "name": "spdlog-dev",
+      "version": "1.17.0-r0",
+      "file": "spdlog-dev-1.17.0-r0.59a628ca.apk",
+      "sha256": "75cabb6f20d2b5e4202b5db6a02337e445ac1fa96d7b00f34010136b4dfed2a8",
+      "size": 79802,
+      "artifact": "sha256/75cabb6f20d2b5e4202b5db6a02337e445ac1fa96d7b00f34010136b4dfed2a8/spdlog-dev-1.17.0-r0.apk",
+      "filename": "spdlog-dev-1.17.0-r0.apk"
+    },
+    {
+      "name": "speexdsp",
+      "version": "1.2.1-r2",
+      "file": "speexdsp-1.2.1-r2.b50a2dd5.apk",
+      "sha256": "4ca9c08b9b08a0483b2835b21781a891b2f233c642c81179373496586d5f62b4",
+      "size": 35499,
+      "artifact": "sha256/4ca9c08b9b08a0483b2835b21781a891b2f233c642c81179373496586d5f62b4/speexdsp-1.2.1-r2.apk",
+      "filename": "speexdsp-1.2.1-r2.apk"
+    },
+    {
+      "name": "spirv-llvm-translator-libs",
+      "version": "22.1.0-r0",
+      "file": "spirv-llvm-translator-libs-22.1.0-r0.ef767e44.apk",
+      "sha256": "704d99cfad0194dea0755ce6cee4e68b5ad55d4537a80ec36d370e390f0fbb03",
+      "size": 1428221,
+      "artifact": "sha256/704d99cfad0194dea0755ce6cee4e68b5ad55d4537a80ec36d370e390f0fbb03/spirv-llvm-translator-libs-22.1.0-r0.apk",
+      "filename": "spirv-llvm-translator-libs-22.1.0-r0.apk"
+    },
+    {
+      "name": "spirv-tools",
+      "version": "1.4.357.0-r0",
+      "file": "spirv-tools-1.4.357.0-r0.934ae2f6.apk",
+      "sha256": "95e3adbcba4097990a22f44e564d609267173d080dec954c669b0df0a0330f07",
+      "size": 1962111,
+      "artifact": "sha256/95e3adbcba4097990a22f44e564d609267173d080dec954c669b0df0a0330f07/spirv-tools-1.4.357.0-r0.apk",
+      "filename": "spirv-tools-1.4.357.0-r0.apk"
+    },
+    {
+      "name": "sqlite",
+      "version": "3.53.4-r0",
+      "file": "sqlite-3.53.4-r0.f90d374d.apk",
+      "sha256": "e89911649b00763338d1d64c6b7cd7b072f56426dddc38c8e782725f255285f1",
+      "size": 1094289,
+      "artifact": "sha256/e89911649b00763338d1d64c6b7cd7b072f56426dddc38c8e782725f255285f1/sqlite-3.53.4-r0.apk",
+      "filename": "sqlite-3.53.4-r0.apk"
+    },
+    {
+      "name": "sqlite-dev",
+      "version": "3.53.4-r0",
+      "file": "sqlite-dev-3.53.4-r0.d534b992.apk",
+      "sha256": "ef65584af07eb4eb85a6087c58b8fdd618a61ff91d7c2028ea68a8bf72534942",
+      "size": 186461,
+      "artifact": "sha256/ef65584af07eb4eb85a6087c58b8fdd618a61ff91d7c2028ea68a8bf72534942/sqlite-dev-3.53.4-r0.apk",
+      "filename": "sqlite-dev-3.53.4-r0.apk"
+    },
+    {
+      "name": "sqlite-libs",
+      "version": "3.53.4-r0",
+      "file": "sqlite-libs-3.53.4-r0.c281ff09.apk",
+      "sha256": "28fcd89d3387352f00778f5c07bfaa30faa9abb5e6e6959525bc46e0ee178c9a",
+      "size": 877773,
+      "artifact": "sha256/28fcd89d3387352f00778f5c07bfaa30faa9abb5e6e6959525bc46e0ee178c9a/sqlite-libs-3.53.4-r0.apk",
+      "filename": "sqlite-libs-3.53.4-r0.apk"
+    },
+    {
+      "name": "ssl_client",
+      "version": "1.38.0-r4",
+      "file": "ssl_client-1.38.0-r4.9ae33178.apk",
+      "sha256": "a263254aa1a924198d7ee8716001bb6097c518ba9543333decfc00995dc78a9f",
+      "size": 4688,
+      "artifact": "sha256/a263254aa1a924198d7ee8716001bb6097c518ba9543333decfc00995dc78a9f/ssl_client-1.38.0-r4.apk",
+      "filename": "ssl_client-1.38.0-r4.apk"
+    },
+    {
+      "name": "tar",
+      "version": "1.35-r5",
+      "file": "tar-1.35-r5.57ba73f5.apk",
+      "sha256": "d7137210645838526cff2d08eea4c6beecb855ba63d2765af1f97ed2485cbb15",
+      "size": 209605,
+      "artifact": "sha256/d7137210645838526cff2d08eea4c6beecb855ba63d2765af1f97ed2485cbb15/tar-1.35-r5.apk",
+      "filename": "tar-1.35-r5.apk"
+    },
+    {
+      "name": "tdb-libs",
+      "version": "1.4.15-r1",
+      "file": "tdb-libs-1.4.15-r1.a0f12562.apk",
+      "sha256": "127428977b380ed6de4ff5deec9a0f3ac3c9d53327cbaaee45a5adf7ae0ebc15",
+      "size": 41556,
+      "artifact": "sha256/127428977b380ed6de4ff5deec9a0f3ac3c9d53327cbaaee45a5adf7ae0ebc15/tdb-libs-1.4.15-r1.apk",
+      "filename": "tdb-libs-1.4.15-r1.apk"
+    },
+    {
+      "name": "tiff",
+      "version": "4.7.2-r0",
+      "file": "tiff-4.7.2-r0.9a0b7444.apk",
+      "sha256": "23c3fe327f8fa46dd9e34f74696e8870c53ec0d1ba193e5098dea33cf5addb05",
+      "size": 170647,
+      "artifact": "sha256/23c3fe327f8fa46dd9e34f74696e8870c53ec0d1ba193e5098dea33cf5addb05/tiff-4.7.2-r0.apk",
+      "filename": "tiff-4.7.2-r0.apk"
+    },
+    {
+      "name": "tiff-dev",
+      "version": "4.7.2-r0",
+      "file": "tiff-dev-4.7.2-r0.2cadec52.apk",
+      "sha256": "d1f267e745009fa14e70454e87e2c402ea1c3e872d3c08e46d5fc7da298cd5a9",
+      "size": 32379,
+      "artifact": "sha256/d1f267e745009fa14e70454e87e2c402ea1c3e872d3c08e46d5fc7da298cd5a9/tiff-dev-4.7.2-r0.apk",
+      "filename": "tiff-dev-4.7.2-r0.apk"
+    },
+    {
+      "name": "tzdata",
+      "version": "2026c-r0",
+      "file": "tzdata-2026c-r0.0892ce7f.apk",
+      "sha256": "125ea1dd036fb581a2c606363886591c8aadd02988175de1222ca32b00c45c22",
+      "size": 186093,
+      "artifact": "sha256/125ea1dd036fb581a2c606363886591c8aadd02988175de1222ca32b00c45c22/tzdata-2026c-r0.apk",
+      "filename": "tzdata-2026c-r0.apk"
+    },
+    {
+      "name": "upower",
+      "version": "1.91.0-r2",
+      "file": "upower-1.91.0-r2.28cc90dc.apk",
+      "sha256": "3bf368284427ee8ced955f7b5baf754b0986ba98a62bb5d6b9bf06d6e34b5db7",
+      "size": 126222,
+      "artifact": "sha256/3bf368284427ee8ced955f7b5baf754b0986ba98a62bb5d6b9bf06d6e34b5db7/upower-1.91.0-r2.apk",
+      "filename": "upower-1.91.0-r2.apk"
+    },
+    {
+      "name": "upower-dev",
+      "version": "1.91.0-r2",
+      "file": "upower-dev-1.91.0-r2.e4f49103.apk",
+      "sha256": "586cd0e62d066712a29ab42a3243b6125ab1977fc2f50ec8e0b7cd65e9581291",
+      "size": 15709,
+      "artifact": "sha256/586cd0e62d066712a29ab42a3243b6125ab1977fc2f50ec8e0b7cd65e9581291/upower-dev-1.91.0-r2.apk",
+      "filename": "upower-dev-1.91.0-r2.apk"
+    },
+    {
+      "name": "util-linux-dev",
+      "version": "2.42.3-r1",
+      "file": "util-linux-dev-2.42.3-r1.9646f24c.apk",
+      "sha256": "05cf758c6e98253d2cd953eb5b737ec4eff5833221eaa94aad326a5c09d1b984",
+      "size": 28207,
+      "artifact": "sha256/05cf758c6e98253d2cd953eb5b737ec4eff5833221eaa94aad326a5c09d1b984/util-linux-dev-2.42.3-r1.apk",
+      "filename": "util-linux-dev-2.42.3-r1.apk"
+    },
+    {
+      "name": "utmps-libs",
+      "version": "0.1.3.4-r0",
+      "file": "utmps-libs-0.1.3.4-r0.c6c90793.apk",
+      "sha256": "353a12cf0ad7a0faed9977b2ff0389e6c6a5881cf2ce8847a308c0a05bc3a131",
+      "size": 5212,
+      "artifact": "sha256/353a12cf0ad7a0faed9977b2ff0389e6c6a5881cf2ce8847a308c0a05bc3a131/utmps-libs-0.1.3.4-r0.apk",
+      "filename": "utmps-libs-0.1.3.4-r0.apk"
+    },
+    {
+      "name": "wayland-dev",
+      "version": "1.26.0-r0",
+      "file": "wayland-dev-1.26.0-r0.eb0542cb.apk",
+      "sha256": "55279204d13d3a83aaff8a9e13a0139459acfdd59fd6150e53be6319df5df347",
+      "size": 151159,
+      "artifact": "sha256/55279204d13d3a83aaff8a9e13a0139459acfdd59fd6150e53be6319df5df347/wayland-dev-1.26.0-r0.apk",
+      "filename": "wayland-dev-1.26.0-r0.apk"
+    },
+    {
+      "name": "wayland-libs-client",
+      "version": "1.26.0-r0",
+      "file": "wayland-libs-client-1.26.0-r0.51bb41b6.apk",
+      "sha256": "b525c3bf12b50564140ab8db86237f630e084082e1f7bd5c02aa4206d55c75b8",
+      "size": 22954,
+      "artifact": "sha256/b525c3bf12b50564140ab8db86237f630e084082e1f7bd5c02aa4206d55c75b8/wayland-libs-client-1.26.0-r0.apk",
+      "filename": "wayland-libs-client-1.26.0-r0.apk"
+    },
+    {
+      "name": "wayland-libs-cursor",
+      "version": "1.26.0-r0",
+      "file": "wayland-libs-cursor-1.26.0-r0.19942eb3.apk",
+      "sha256": "8acf3d69cbe3b88fd5ff915da815ed9fb03e8e16d74079c2d27a3beca2fb07ad",
+      "size": 9078,
+      "artifact": "sha256/8acf3d69cbe3b88fd5ff915da815ed9fb03e8e16d74079c2d27a3beca2fb07ad/wayland-libs-cursor-1.26.0-r0.apk",
+      "filename": "wayland-libs-cursor-1.26.0-r0.apk"
+    },
+    {
+      "name": "wayland-libs-egl",
+      "version": "1.26.0-r0",
+      "file": "wayland-libs-egl-1.26.0-r0.651c7097.apk",
+      "sha256": "625d6e25278d8f6e29487abaf089820ad818c26fd3c955bba508031b7f9e6fc5",
+      "size": 3335,
+      "artifact": "sha256/625d6e25278d8f6e29487abaf089820ad818c26fd3c955bba508031b7f9e6fc5/wayland-libs-egl-1.26.0-r0.apk",
+      "filename": "wayland-libs-egl-1.26.0-r0.apk"
+    },
+    {
+      "name": "wayland-libs-server",
+      "version": "1.26.0-r0",
+      "file": "wayland-libs-server-1.26.0-r0.952280ce.apk",
+      "sha256": "d88f3abd6bb44885e06be00179174007844d5f8221026cc3c214e5a993d3204a",
+      "size": 31256,
+      "artifact": "sha256/d88f3abd6bb44885e06be00179174007844d5f8221026cc3c214e5a993d3204a/wayland-libs-server-1.26.0-r0.apk",
+      "filename": "wayland-libs-server-1.26.0-r0.apk"
+    },
+    {
+      "name": "wayland-protocols",
+      "version": "1.49-r0",
+      "file": "wayland-protocols-1.49-r0.1ec30a9a.apk",
+      "sha256": "90fc371d863cee16a24a3d9e73d3680399ebb677d16b20dac2287362747608a7",
+      "size": 217901,
+      "artifact": "sha256/90fc371d863cee16a24a3d9e73d3680399ebb677d16b20dac2287362747608a7/wayland-protocols-1.49-r0.apk",
+      "filename": "wayland-protocols-1.49-r0.apk"
+    },
+    {
+      "name": "wireplumber-dev",
+      "version": "0.5.17-r0",
+      "file": "wireplumber-dev-0.5.17-r0.6f83f401.apk",
+      "sha256": "d3fd9eb673cf044f23930ff8a7de715fd09c3af7c0b3c66f351fa3ad3d8f733f",
+      "size": 110892,
+      "artifact": "sha256/d3fd9eb673cf044f23930ff8a7de715fd09c3af7c0b3c66f351fa3ad3d8f733f/wireplumber-dev-0.5.17-r0.apk",
+      "filename": "wireplumber-dev-0.5.17-r0.apk"
+    },
+    {
+      "name": "wireplumber-libs",
+      "version": "0.5.17-r0",
+      "file": "wireplumber-libs-0.5.17-r0.cebc59fc.apk",
+      "sha256": "f8c95142356ce2c0134636eaa43ade2e655d6dbfc96b78efda0a29fd63170f0d",
+      "size": 180323,
+      "artifact": "sha256/f8c95142356ce2c0134636eaa43ade2e655d6dbfc96b78efda0a29fd63170f0d/wireplumber-libs-0.5.17-r0.apk",
+      "filename": "wireplumber-libs-0.5.17-r0.apk"
+    },
+    {
+      "name": "xcb-proto",
+      "version": "1.17.0-r1",
+      "file": "xcb-proto-1.17.0-r1.561ac226.apk",
+      "sha256": "ec745bfe78a1580b2bd2940215b7ede85744dd4af1a1ff7f90dd1f7de64ce6be",
+      "size": 119710,
+      "artifact": "sha256/ec745bfe78a1580b2bd2940215b7ede85744dd4af1a1ff7f90dd1f7de64ce6be/xcb-proto-1.17.0-r1.apk",
+      "filename": "xcb-proto-1.17.0-r1.apk"
+    },
+    {
+      "name": "xcb-proto-pyc",
+      "version": "1.17.0-r1",
+      "file": "xcb-proto-pyc-1.17.0-r1.0d7746f4.apk",
+      "sha256": "902e300a33baab8c8eaac84cc564e95f520416002605a98f883612604c1a5975",
+      "size": 84230,
+      "artifact": "sha256/902e300a33baab8c8eaac84cc564e95f520416002605a98f883612604c1a5975/xcb-proto-pyc-1.17.0-r1.apk",
+      "filename": "xcb-proto-pyc-1.17.0-r1.apk"
+    },
+    {
+      "name": "xkeyboard-config",
+      "version": "2.48-r0",
+      "file": "xkeyboard-config-2.48-r0.9b9978ca.apk",
+      "sha256": "dc18bff11705cb12b8cf3c82634092249ebe15e37102dedde9823c03becc1582",
+      "size": 565098,
+      "artifact": "sha256/dc18bff11705cb12b8cf3c82634092249ebe15e37102dedde9823c03becc1582/xkeyboard-config-2.48-r0.apk",
+      "filename": "xkeyboard-config-2.48-r0.apk"
+    },
+    {
+      "name": "xorgproto",
+      "version": "2025.1-r0",
+      "file": "xorgproto-2025.1-r0.dd5620c7.apk",
+      "sha256": "457c2b9a11c0e6d6c1975b6821b2dfa94c754603fd4a2a4db7223160f57694c6",
+      "size": 335458,
+      "artifact": "sha256/457c2b9a11c0e6d6c1975b6821b2dfa94c754603fd4a2a4db7223160f57694c6/xorgproto-2025.1-r0.apk",
+      "filename": "xorgproto-2025.1-r0.apk"
+    },
+    {
+      "name": "xtrans",
+      "version": "1.6.0-r0",
+      "file": "xtrans-1.6.0-r0.c409696d.apk",
+      "sha256": "0e6a055e7c7db422343f784e79504c3ecc596c8e7279023487edfcf48164b9bd",
+      "size": 50432,
+      "artifact": "sha256/0e6a055e7c7db422343f784e79504c3ecc596c8e7279023487edfcf48164b9bd/xtrans-1.6.0-r0.apk",
+      "filename": "xtrans-1.6.0-r0.apk"
+    },
+    {
+      "name": "xz",
+      "version": "5.8.3-r0",
+      "file": "xz-5.8.3-r0.b6af7147.apk",
+      "sha256": "256af685293170294ec5fb2d56a9d68261998bc77710ea69af3dccf902b75cc0",
+      "size": 64381,
+      "artifact": "sha256/256af685293170294ec5fb2d56a9d68261998bc77710ea69af3dccf902b75cc0/xz-5.8.3-r0.apk",
+      "filename": "xz-5.8.3-r0.apk"
+    },
+    {
+      "name": "xz-dev",
+      "version": "5.8.3-r0",
+      "file": "xz-dev-5.8.3-r0.ed743a28.apk",
+      "sha256": "f1150f6af9f04fb394ff885a2adace7f69d72d0d5f670956de3edfd43161ec35",
+      "size": 56192,
+      "artifact": "sha256/f1150f6af9f04fb394ff885a2adace7f69d72d0d5f670956de3edfd43161ec35/xz-dev-5.8.3-r0.apk",
+      "filename": "xz-dev-5.8.3-r0.apk"
+    },
+    {
+      "name": "xz-libs",
+      "version": "5.8.3-r0",
+      "file": "xz-libs-5.8.3-r0.4c92c5be.apk",
+      "sha256": "95162110d7b67e3e2fd243fa4a43f75170a9c4839c47f86bb5e34340a6dfe930",
+      "size": 117800,
+      "artifact": "sha256/95162110d7b67e3e2fd243fa4a43f75170a9c4839c47f86bb5e34340a6dfe930/xz-libs-5.8.3-r0.apk",
+      "filename": "xz-libs-5.8.3-r0.apk"
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2-r0",
+      "file": "zlib-1.3.2-r0.167a771b.apk",
+      "sha256": "6e5dd88eb04341f673a40977a2d36bbe825ac772edddd2951192dcff76b9c49e",
+      "size": 56186,
+      "artifact": "sha256/6e5dd88eb04341f673a40977a2d36bbe825ac772edddd2951192dcff76b9c49e/zlib-1.3.2-r0.apk",
+      "filename": "zlib-1.3.2-r0.apk"
+    },
+    {
+      "name": "zlib-dev",
+      "version": "1.3.2-r0",
+      "file": "zlib-dev-1.3.2-r0.72c37244.apk",
+      "sha256": "7d2df1291418fd274b62fa4c0e20a8b0c9f0e4d31a11dc55bd0f740cc4d8ec3d",
+      "size": 34433,
+      "artifact": "sha256/7d2df1291418fd274b62fa4c0e20a8b0c9f0e4d31a11dc55bd0f740cc4d8ec3d/zlib-dev-1.3.2-r0.apk",
+      "filename": "zlib-dev-1.3.2-r0.apk"
+    },
+    {
+      "name": "zstd",
+      "version": "1.5.7-r2",
+      "file": "zstd-1.5.7-r2.bfb9da43.apk",
+      "sha256": "08d11159caba5fe2b71722c5788f29a2eeb8cb9c29a5de64385e5c5bbbfc4de8",
+      "size": 129755,
+      "artifact": "sha256/08d11159caba5fe2b71722c5788f29a2eeb8cb9c29a5de64385e5c5bbbfc4de8/zstd-1.5.7-r2.apk",
+      "filename": "zstd-1.5.7-r2.apk"
+    },
+    {
+      "name": "zstd-dev",
+      "version": "1.5.7-r2",
+      "file": "zstd-dev-1.5.7-r2.2d07eebd.apk",
+      "sha256": "81023e5e61aea6f44291a5ade4067a52ce267d6dba8fac6f93a85c5f3f7acbe9",
+      "size": 54948,
+      "artifact": "sha256/81023e5e61aea6f44291a5ade4067a52ce267d6dba8fac6f93a85c5f3f7acbe9/zstd-dev-1.5.7-r2.apk",
+      "filename": "zstd-dev-1.5.7-r2.apk"
+    },
+    {
+      "name": "zstd-libs",
+      "version": "1.5.7-r2",
+      "file": "zstd-libs-1.5.7-r2.43ac44ea.apk",
+      "sha256": "5025e2207b44a131f1b2262761187d88500829c2171d566d37a1225246fe542e",
+      "size": 374521,
+      "artifact": "sha256/5025e2207b44a131f1b2262761187d88500829c2171d566d37a1225246fe542e/zstd-libs-1.5.7-r2.apk",
+      "filename": "zstd-libs-1.5.7-r2.apk"
+    }
+  ],
+  "missing": [],
+  "new_artifacts_archived_and_readback_verified": 27,
+  "existing_artifacts_reused": 335
+}

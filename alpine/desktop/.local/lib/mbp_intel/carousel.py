@@ -151,6 +151,7 @@ class Controller:
         self.loop = GLib.MainLoop()
         self.history = FocusHistory()
         self.state = self.popup = None
+        self.graphics_primer = None
         self.mode_active = False
         self.modifier = None
         self.closed_frames = 0
@@ -175,10 +176,17 @@ class Controller:
         self.open_timer = None
         for signum in (signal.SIGTERM, signal.SIGINT):
             self.watches.append(GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signum, self.stop))
-        self.write_status()
-
         from ui_priority import request_priority
         request_priority()
+        try:
+            from graphics_warmup import warm_graphics
+            self.graphics_primer = warm_graphics()
+        except Exception as error:
+            print('carousel graphics warmup:', error, file=sys.stderr)
+        # Realization and the first shader draw create driver worker pools that
+        # do not exist at Gtk.init(). Promote those threads after warming too.
+        request_priority()
+        self.write_status()
 
     def candidates(self):
         return window_candidates(self.ipc['request'](self.sway, 4))
@@ -191,6 +199,7 @@ class Controller:
         live = {identity(item) for item in state.candidates} if state else set()
         self.ipc['write_json'](self.directory / 'state.json', {
             'pid': os.getpid(), 'ready': not self.stopping, 'open': popup is not None,
+            'graphics_warm': self.graphics_primer is not None,
             'selected_id': state.selected['id'] if state and state.selected else None,
             'candidate_ids': [item['id'] for item in state.candidates] if state else [],
             'modifier': self.modifier,
@@ -359,6 +368,9 @@ class Controller:
         if not self.stopping:
             self.stopping = True
             self.dismiss()
+            if self.graphics_primer is not None:
+                self.graphics_primer.close()
+                self.graphics_primer = None
             self.loop.quit()
         return False
 

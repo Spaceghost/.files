@@ -629,9 +629,15 @@ class ShortcutProvider:
                     ('mbp-intel-audio', 'mic-mute'): 'Toggle microphone mute',
                     ('mbp-intel-brightness', 'up'): 'Increase brightness',
                     ('mbp-intel-brightness', 'down'): 'Decrease brightness',
-                    ('mbp-intel-keyboard-backlight', 'up'): 'Increase keyboard backlight',
-                    ('mbp-intel-keyboard-backlight', 'down'): 'Decrease keyboard backlight',
+                    ('mbp-intel-keyboard-backlight', 'up'): 'Brighten the keys — adjusts the peak while breathing',
+                    ('mbp-intel-keyboard-backlight', 'down'): 'Dim the keys — all the way down turns breathing off',
                     ('mbp-intel-keyboard-backlight', 'toggle'): 'Toggle keyboard backlight',
+                    ('mbp-intel-keyboard-backlight', 'breathe'): 'Let the whole keyboard breathe — press again for steady light',
+                    ('mbp-intel-keyboard-backlight', 'steady'): 'Hold that glow — stop breathing at your chosen brightness',
+                    ('mbp-intel-keyboard-backlight', 'typing'): 'Pulse the keyboard with each keypress',
+                    ('mbp-intel-keyboard-backlight', 'typing-dark'): 'Start bright, darken as you keep typing',
+                    ('mbp-intel-keyboard-backlight', 'typing-wpm'): 'Pulse only during sustained fast typing',
+                    ('mbp-intel-keyboard-backlight', 'typing-dark-wpm'): 'Darken only during sustained fast typing',
                 }
                 label = known_exec.get((executable, *action))
                 if label:

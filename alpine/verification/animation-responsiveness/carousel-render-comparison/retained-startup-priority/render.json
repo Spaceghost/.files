@@ -1,0 +1,87 @@
+{
+  "construction_ms": 10958.574195,
+  "renderer": "GskGLRenderer",
+  "runs": [
+    {
+      "action": "show",
+      "requested_us": 23640043595,
+      "frames": [
+        {
+          "frame_time_us": 23640087103,
+          "callback_time_us": 23640088195,
+          "position": 0.0,
+          "reveal": 0.6641158277653805,
+          "presentation_time_us": 23651380111,
+          "refresh_interval_us": 16667,
+          "complete": true
+        },
+        {
+          "frame_time_us": 23651387329,
+          "callback_time_us": 23651380860,
+          "position": 0.0,
+          "reveal": 1.0,
+          "presentation_time_us": 0,
+          "refresh_interval_us": 0,
+          "complete": false
+        }
+      ],
+      "settled_ms": 11337.265,
+      "first_tick_ms": 44.6
+    }
+  ],
+  "snapshots": [
+    {
+      "elapsed_ms": 414.828,
+      "position": 0.0,
+      "reveal": 0.6641158277653805
+    },
+    {
+      "elapsed_ms": 12.243,
+      "position": 0.0,
+      "reveal": 1.0
+    }
+  ],
+  "preview_dimensions": [
+    1536,
+    960
+  ],
+  "candidate_count": 7,
+  "probe_nice": -5,
+  "fixed_fixture_palette": {
+    "background": "#21192c",
+    "background_hard": "#171020",
+    "surface": "#362641",
+    "foreground": "#eee7f7",
+    "muted": "#baaccb",
+    "border": "#674d7c",
+    "accent": "#b99bea"
+  },
+  "compose_cards": false,
+  "frame_clock_intervals": {
+    "count": 1,
+    "median_ms": 11300.226,
+    "p95_ms": 11300.226,
+    "maximum_ms": 11300.226
+  },
+  "presentation_intervals": {
+    "count": 0
+  },
+  "navigation_frame_clock_intervals": {
+    "count": 0
+  },
+  "navigation_presentation_intervals": {
+    "count": 0
+  },
+  "python_snapshot_time": {
+    "count": 2,
+    "median_ms": 213.53549999999998,
+    "p95_ms": 414.828,
+    "maximum_ms": 414.828
+  },
+  "idle_gaps": "excluded by separating each requested animation, not by duration",
+  "all_sequences_settled": false,
+  "errors": [
+    "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel_rendering.py\", line 66, in invoke\n    return callback(*args)\n  File \"/home/jack/.files/alpine/tests/verify_carousel_rendering.py\", line 86, in advance\n    subprocess.run(['grim', '-o', 'HEADLESS-1', str(output / 'cards.png')],\n    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n                   check=True, timeout=8)\n                   ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 557, in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 1221, in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 2179, in _communicate\n    self.wait(timeout=self._remaining_time(endtime))\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 1279, in wait\n    return self._wait(timeout=timeout)\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 2076, in _wait\n    raise TimeoutExpired(self.args, timeout)\nsubprocess.TimeoutExpired: Command '['grim', '-o', 'HEADLESS-1', '/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/retained-startup-priority/cards.png']' timed out after 8 seconds\n"
+  ],
+  "status": "failed"
+}

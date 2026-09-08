@@ -1,0 +1,333 @@
+diff --git a/include/modules/sway/ipc/client.hpp b/include/modules/sway/ipc/client.hpp
+index 9033a688c7ee1c16701dc7ca5c1423d976448ecb..4b4937d69960e1502cf1fbfa801e2715c05b2533 100644
+--- a/include/modules/sway/ipc/client.hpp
++++ b/include/modules/sway/ipc/client.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include <atomic>
+ #include <sigc++/sigc++.h>
+ #include <sys/socket.h>
+ #include <sys/un.h>
+@@ -10,8 +11,10 @@
+ #include <mutex>
+ #include <stdexcept>
+ #include <string>
++#include <vector>
+ 
+ #include "ipc.hpp"
++#include "util/scoped_fd.hpp"
+ #include "util/sleeper_thread.hpp"
+ 
+ namespace waybar::modules::sway {
+@@ -29,6 +32,7 @@ class Ipc {
+ 
+   sigc::signal<void, const struct ipc_response&> signal_event;
+   sigc::signal<void, const struct ipc_response&> signal_cmd;
++  sigc::signal<void> signal_reconnect;
+ 
+   void sendCmd(uint32_t type, const std::string& payload = "");
+   void subscribe(const std::string& payload);
+@@ -44,8 +48,13 @@ class Ipc {
+   struct ipc_response send(int fd, uint32_t type, const std::string& payload = "");
+   struct ipc_response recv(int fd);
+ 
+-  int fd_;
+-  int fd_event_;
++  void reconnectEvent();
++
++  std::string socketPath_;
++  std::vector<std::string> subscribed_events_;
++  std::atomic<bool> running_{true};
++  util::ScopedFd fd_;
++  util::ScopedFd fd_event_;
+   std::mutex mutex_;
+   util::SleeperThread thread_;
+ };
+diff --git a/include/modules/sway/workspaces.hpp b/include/modules/sway/workspaces.hpp
+index d8a9e18a8db1f43795557dcdf5cbb7c8a3c39a33..c10742df612c993363b744875f78b7b2d7043a8d 100644
+--- a/include/modules/sway/workspaces.hpp
++++ b/include/modules/sway/workspaces.hpp
+@@ -32,6 +32,7 @@ class Workspaces : public AModule, public sigc::trackable {
+ 
+   void onCmd(const struct Ipc::ipc_response&);
+   void onEvent(const struct Ipc::ipc_response&);
++  void onReconnect();
+   bool filterButtons();
+   static bool hasFlag(const Json::Value&, const std::string&);
+   void updateWindows(const Json::Value&, std::string&);
+diff --git a/include/util/scoped_fd.hpp b/include/util/scoped_fd.hpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..251af14279d82373bcdd1601f7ccf62979c13d3c
+--- /dev/null
++++ b/include/util/scoped_fd.hpp
+@@ -0,0 +1,48 @@
++#pragma once
++
++#include <unistd.h>
++
++namespace waybar::util {
++
++class ScopedFd {
++ public:
++  explicit ScopedFd(int fd = -1) : fd_(fd) {}
++  ~ScopedFd() {
++    if (fd_ != -1) {
++      close(fd_);
++    }
++  }
++
++  ScopedFd(const ScopedFd&) = delete;
++  ScopedFd& operator=(const ScopedFd&) = delete;
++
++  ScopedFd(ScopedFd&& other) noexcept : fd_(other.fd_) { other.fd_ = -1; }
++  ScopedFd& operator=(ScopedFd&& other) noexcept {
++    if (this != &other) {
++      reset(other.fd_);
++      other.fd_ = -1;
++    }
++    return *this;
++  }
++
++  int get() const { return fd_; }
++  operator int() const { return fd_; }
++
++  void reset(int fd = -1) {
++    if (fd_ != -1) {
++      close(fd_);
++    }
++    fd_ = fd;
++  }
++
++  int release() {
++    int fd = fd_;
++    fd_ = -1;
++    return fd;
++  }
++
++ private:
++  int fd_;
++};
++
++}  // namespace waybar::util
+diff --git a/src/modules/sway/ipc/client.cpp b/src/modules/sway/ipc/client.cpp
+index 4139a53b587cb8ac9af9ba84011f469591ed4545..0774d4f05c5999c047364b13ee6f71526c7b389f 100644
+--- a/src/modules/sway/ipc/client.cpp
++++ b/src/modules/sway/ipc/client.cpp
+@@ -1,36 +1,43 @@
+ #include "modules/sway/ipc/client.hpp"
+ 
++#include <cerrno>
++#include <chrono>
+ #include <fcntl.h>
+ #include <spdlog/spdlog.h>
+ 
+ #include <stdexcept>
++#include <utility>
+ 
+ namespace waybar::modules::sway {
++namespace {
++
++void sendAll(int fd, const char* data, size_t size, const char* what) {
++  size_t total = 0;
++  while (total < size) {
++    const auto res = ::send(fd, data + total, size - total, MSG_NOSIGNAL);
++    if (res < 0) {
++      if (errno == EINTR || errno == EAGAIN) continue;
++      throw std::runtime_error(what);
++    }
++    if (res == 0) throw std::runtime_error(what);
++    total += static_cast<size_t>(res);
++  }
++}
++
++}  // namespace
+ 
+ Ipc::Ipc() {
+-  const std::string& socketPath = getSocketPath();
+-  fd_ = open(socketPath);
+-  fd_event_ = open(socketPath);
++  socketPath_ = getSocketPath();
++  fd_ = util::ScopedFd(open(socketPath_));
++  fd_event_ = util::ScopedFd(open(socketPath_));
+ }
+ 
+ Ipc::~Ipc() {
++  running_ = false;
++  // SleeperThread's destructor joins before the descriptor members are
++  // destroyed. Its cancellation wakes a worker blocked in recv without racing
++  // a close or replacement of fd_event_.
+   thread_.stop();
+-
+-  if (fd_ > 0) {
+-    // To fail the IPC header
+-    if (write(fd_, "close-sway-ipc", 14) == -1) {
+-      spdlog::error("Failed to close sway IPC");
+-    }
+-    close(fd_);
+-    fd_ = -1;
+-  }
+-  if (fd_event_ > 0) {
+-    if (write(fd_event_, "close-sway-ipc", 14) == -1) {
+-      spdlog::error("Failed to close sway IPC event handler");
+-    }
+-    close(fd_event_);
+-    fd_event_ = -1;
+-  }
+ }
+ 
+ void Ipc::setWorker(std::function<void()>&& func) { thread_ = func; }
+@@ -64,7 +71,7 @@ const std::string Ipc::getSocketPath() const {
+ }
+ 
+ int Ipc::open(const std::string& socketPath) const {
+-  int32_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
++  util::ScopedFd fd(socket(AF_UNIX, SOCK_STREAM, 0));
+   if (fd == -1) {
+     throw std::runtime_error("Unable to open Unix socket");
+   }
+@@ -78,7 +85,7 @@ int Ipc::open(const std::string& socketPath) const {
+   if (::connect(fd, reinterpret_cast<struct sockaddr*>(&addr), l) == -1) {
+     throw std::runtime_error("Unable to connect to Sway");
+   }
+-  return fd;
++  return fd.release();
+ }
+ 
+ struct Ipc::ipc_response Ipc::recv(int fd) {
+@@ -89,14 +96,12 @@ struct Ipc::ipc_response Ipc::recv(int fd) {
+ 
+   while (total < ipc_header_size_) {
+     auto res = ::recv(fd, header.data() + total, ipc_header_size_ - total, 0);
+-    if (fd_event_ == -1 || fd_ == -1) {
+-      // IPC is closed so just return an empty response
+-      return {0, 0, ""};
+-    }
+-    if (res <= 0) {
++    if (res < 0) {
++      if (errno == EINTR || errno == EAGAIN) continue;
+       throw std::runtime_error("Unable to receive IPC header");
+     }
+-    total += res;
++    if (res == 0) throw std::runtime_error("Unable to receive IPC header");
++    total += static_cast<size_t>(res);
+   }
+   auto magic = std::string(header.data(), header.data() + ipc_magic_.size());
+   if (magic != ipc_magic_) {
+@@ -114,9 +119,10 @@ struct Ipc::ipc_response Ipc::recv(int fd) {
+       }
+       throw std::runtime_error("Unable to receive IPC payload");
+     }
+-    total += res;
++    if (res == 0) throw std::runtime_error("Unable to receive IPC payload");
++    total += static_cast<size_t>(res);
+   }
+-  return {data32[0], data32[1], &payload.front()};
++  return {data32[0], data32[1], std::move(payload)};
+ }
+ 
+ struct Ipc::ipc_response Ipc::send(int fd, uint32_t type, const std::string& payload) {
+@@ -127,12 +133,8 @@ struct Ipc::ipc_response Ipc::send(int fd, uint32_t type, const std::string& pay
+   data32[0] = payload.size();
+   data32[1] = type;
+ 
+-  if (::send(fd, header.data(), ipc_header_size_, 0) == -1) {
+-    throw std::runtime_error("Unable to send IPC header");
+-  }
+-  if (::send(fd, payload.c_str(), payload.size(), 0) == -1) {
+-    throw std::runtime_error("Unable to send IPC payload");
+-  }
++  sendAll(fd, header.data(), ipc_header_size_, "Unable to send IPC header");
++  sendAll(fd, payload.data(), payload.size(), "Unable to send IPC payload");
+   return Ipc::recv(fd);
+ }
+ 
+@@ -144,14 +146,56 @@ void Ipc::sendCmd(uint32_t type, const std::string& payload) {
+ 
+ void Ipc::subscribe(const std::string& payload) {
+   auto res = Ipc::send(fd_event_, IPC_SUBSCRIBE, payload);
++  while ((res.type >> 31) != 0U) {
++    signal_event.emit(res);
++    res = Ipc::recv(fd_event_);
++  }
+   if (res.payload != "{\"success\": true}") {
+     throw std::runtime_error("Unable to subscribe ipc event");
+   }
++  subscribed_events_.push_back(payload);
++}
++
++void Ipc::reconnectEvent() {
++  while (running_) {
++    thread_.sleep_for(std::chrono::seconds(2));
++    if (!running_ || !thread_.isRunning()) return;
++    try {
++      util::ScopedFd replacement(open(socketPath_));
++      for (const auto& payload : subscribed_events_) {
++        auto res = Ipc::send(replacement, IPC_SUBSCRIBE, payload);
++        while ((res.type >> 31) != 0U) {
++          signal_event.emit(res);
++          res = Ipc::recv(replacement);
++        }
++        if (res.payload != "{\"success\": true}") {
++          throw std::runtime_error("Unable to re-subscribe ipc event");
++        }
++      }
++      if (!running_) return;
++      {
++        // Do not let pthread cancellation interrupt the close/replace pair.
++        util::CancellationGuard commit;
++        fd_event_.reset(replacement.release());
++      }
++      spdlog::info("Reconnected to sway IPC event socket");
++      signal_reconnect.emit();
++      return;
++    } catch (const std::exception& e) {
++      spdlog::warn("Failed to reconnect to sway IPC ({}), retrying", e.what());
++    }
++  }
+ }
+ 
+ void Ipc::handleEvent() {
+-  const auto res = Ipc::recv(fd_event_);
+-  signal_event.emit(res);
++  try {
++    const auto res = Ipc::recv(fd_event_);
++    signal_event.emit(res);
++  } catch (const std::exception& e) {
++    if (!running_) return;
++    spdlog::warn("Lost sway IPC event connection ({}), reconnecting", e.what());
++    reconnectEvent();
++  }
+ }
+ 
+ }  // namespace waybar::modules::sway
+diff --git a/src/modules/sway/workspaces.cpp b/src/modules/sway/workspaces.cpp
+index e0255893a8569d23b9bd32459a84e696f2b1f0d5..a04287a33d1628edf326925e1c46f9b2a217e7ec 100644
+--- a/src/modules/sway/workspaces.cpp
++++ b/src/modules/sway/workspaces.cpp
+@@ -73,6 +73,7 @@ Workspaces::Workspaces(const std::string& id, const Bar& bar, const Json::Value&
+   ipc_.subscribe(R"(["window"])");
+   ipc_.signal_event.connect(sigc::mem_fun(*this, &Workspaces::onEvent));
+   ipc_.signal_cmd.connect(sigc::mem_fun(*this, &Workspaces::onCmd));
++  ipc_.signal_reconnect.connect(sigc::mem_fun(*this, &Workspaces::onReconnect));
+   ipc_.sendCmd(IPC_GET_TREE);
+   if (config["enable-bar-scroll"].asBool()) {
+     auto& window = const_cast<Bar&>(bar_).window;
+@@ -97,6 +98,16 @@ void Workspaces::onEvent(const struct Ipc::ipc_response& res) {
+   }
+ }
+ 
++void Workspaces::onReconnect() {
++  try {
++    // Events missed while the subscription was down cannot provoke the normal
++    // onEvent refresh. Always replace the stale snapshot after reconnecting.
++    ipc_.sendCmd(IPC_GET_TREE);
++  } catch (const std::exception& e) {
++    spdlog::error("Workspaces: {}", e.what());
++  }
++}
++
+ void Workspaces::onCmd(const struct Ipc::ipc_response& res) {
+   if (res.type == IPC_GET_TREE) {
+     try {
+

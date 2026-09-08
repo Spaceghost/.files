@@ -4,7 +4,9 @@
 The production runner/guardian, CLI main/IPC/emergency routes, DHCP client and
 lease applier are real. The CLI entrypoint, WPA and physical radio System are
 guarded fixture substitutes. A real contained command pauses before resolver
-publication, with the production command/check/deadline path intact.
+publication, with the production command/check/deadline path intact. The optional
+survivor case deliberately suppresses only its guarded native init parent-death
+signal to exercise real new-observer recovery with detached and nested children.
 """
 import argparse
 import hashlib
@@ -308,6 +310,196 @@ def fixture_cli(host, expected, arguments):
     return legacy.main(arguments)
 
 
+def survivor_guard(host, expected, *, require_init):
+    """Accept only descendants of the sealed, device-masked native fixture."""
+    import fcntl
+    current = guards.guard_private(host)
+    if (current['net'] != expected['net'] or current['pid'] == expected['pid']
+            or current['mnt'] == expected['mnt'] or (require_init and os.getpid() != 1)
+            or os.readlink('/proc/self') != str(os.getpid())
+            or os.readlink('/proc/1/ns/pid') != current['pid']):
+        raise RuntimeError('survivor is not in the expected private child namespaces')
+    info = (PRIVATE / 'seal.json').lstat()
+    if (not stat.S_ISREG(info.st_mode) or info.st_uid != 0
+            or stat.S_IMODE(info.st_mode) != 0o600
+            or read_json(PRIVATE / 'seal.json') != {'host': host, 'expected': expected}):
+        raise RuntimeError('survivor private fixture seal changed')
+    mounts = {}
+    for line in Path('/proc/self/mountinfo').read_text().splitlines():
+        before, after = line.split(' - ', 1)
+        fields = before.split()
+        if any(value.startswith('shared:') for value in fields[6:]):
+            raise RuntimeError('survivor inherited a shared mount')
+        mounts[fields[4]] = after.split()[:2]
+    if (any(mounts.get(path) != ['tmpfs', 'privacyctl-dhcp-fixture']
+            for path in ('/etc', '/run', '/var', '/dev', '/sys'))
+            or any(path.startswith('/var/') for path in mounts)
+            or Path('/dev/rfkill').exists() or Path('/sys/class/rfkill').exists()):
+        raise RuntimeError('survivor host configuration or devices are not hidden')
+    value = os.environ.get('OPENRESOLV_HOST_PROC_FD', '')
+    if not value.isascii() or not value.isdigit() or not 3 <= int(value) <= 1048576:
+        raise RuntimeError('survivor original proc descriptor is missing')
+    descriptor = int(value)
+    proc = f'/proc/self/fd/{descriptor}'
+    if (not stat.S_ISDIR(os.fstat(descriptor).st_mode)
+            or fcntl.fcntl(descriptor, fcntl.F_GETFL) & os.O_ACCMODE != os.O_RDONLY
+            or os.readlink(proc + '/1/ns/pid') != expected['pid']
+            or os.readlink(proc + '/self/ns/net') != expected['net']):
+        raise RuntimeError('survivor original observer proc view changed')
+    return descriptor, current
+
+
+def allow_survival(host, expected):
+    # Explicit fault injection after the production execution gate. Do not
+    # alter the outer fixture init/timeout or any other process's signal state.
+    descriptor, current = survivor_guard(host, expected, require_init=True)
+    if os.readlink(f'/proc/self/fd/{descriptor}/self') != os.environ.get('OPENRESOLV_HOST_PID'):
+        raise RuntimeError('survivor gate PID does not match its original observer identity')
+    import ctypes
+    libc = ctypes.CDLL(None, use_errno=True)
+    if libc.prctl(1, 0, 0, 0, 0) != 0:
+        raise OSError(ctypes.get_errno(), 'survivor parent-death suppression failed')
+    value = ctypes.c_int(-1)
+    if libc.prctl(2, ctypes.byref(value), 0, 0, 0) != 0 or value.value != 0:
+        raise OSError(ctypes.get_errno(), 'survivor parent-death suppression was not verified')
+    return descriptor, current
+
+
+def survivor_record(descriptor, pid=None):
+    proc = f'/proc/self/fd/{descriptor}'
+    if pid is None:
+        pid = int(os.readlink(proc + '/self'))
+    with open(proc + '/' + str(pid) + '/stat') as stream:
+        value = stream.read(8193)
+    if len(value) > 8192:
+        raise RuntimeError('survivor stat exceeds bound')
+    fields = value.rsplit(') ', 1)[1].split()
+    return {'pid': pid, 'start_time': fields[19], 'session': int(fields[3]),
+            'parent_pid': int(fields[1]),
+            'namespaces': {kind: os.readlink(proc + '/' + str(pid) + '/ns/' + kind)
+                           for kind in ('net', 'mnt', 'pid')}}
+
+
+def survivor_child(host, expected, role):
+    if role not in ('detached', 'nested-launcher', 'nested-init'):
+        raise RuntimeError('invalid fixed survivor child role')
+    descriptor, _ = survivor_guard(host, expected, require_init=role == 'nested-init')
+    attempt = read_json(FAULTS / 'fault.json')['attempt']
+    if role == 'nested-launcher':
+        os.set_inheritable(descriptor, True)
+        os.execv('/usr/bin/unshare', ['/usr/bin/unshare', '--mount', '--propagation', 'private',
+            '--pid', '--fork', '--kill-child=KILL', '--mount-proc', PYTHON, '-I', str(SCRIPT),
+            '--survivor-child', json.dumps(host), json.dumps(expected), 'nested-init'])
+    record = survivor_record(descriptor)
+    if role == 'nested-init':
+        # unshare changed the launcher's mount namespace before this fork;
+        # capture its final identity now, not the bootstrap's pre-exec view.
+        base.write_private(FAULTS / 'survivor-nested-launcher.json',
+                           {'attempt': attempt, 'record': survivor_record(descriptor, record['parent_pid'])})
+    base.write_private(FAULTS / ('survivor-' + role + '.json'),
+                       {'attempt': attempt, 'record': record})
+    deadline = time.monotonic() + 30
+    while time.monotonic() < deadline:
+        time.sleep(.025)
+    raise RuntimeError('survivor child outlived its bounded proof window')
+
+
+def survivor_payload(host, expected):
+    descriptor, _ = allow_survival(host, expected)
+    record = survivor_record(descriptor)
+    if str(record['pid']) != os.environ.get('OPENRESOLV_HOST_PID'):
+        raise RuntimeError('survivor gate PID does not match its original observer identity')
+    if os.fork() == 0:
+        try:
+            os.setsid()
+            survivor_child(host, expected, 'detached')
+        finally:
+            os._exit(113)
+    nested = subprocess.Popen([PYTHON, '-I', str(SCRIPT), '--survivor-child',
+        json.dumps(host), json.dumps(expected), 'nested-launcher'], pass_fds=(descriptor,),
+        stdin=subprocess.DEVNULL)
+    # The original init owns both branches. Parent-namespace init completion
+    # must tear down even setsid and the nested PID namespace before readiness.
+    attempt = read_json(FAULTS / 'fault.json')['attempt']
+    deadline = time.monotonic() + 30
+    children = []
+    while time.monotonic() < deadline:
+        if not children:
+            rows = [read_json(FAULTS / ('survivor-' + role + '.json'), {})
+                    for role in ('detached', 'nested-launcher', 'nested-init')]
+            if all(row.get('attempt') == attempt for row in rows):
+                children = [row['record'] for row in rows]
+                if (children[0]['session'] != children[0]['pid']
+                        or children[0]['namespaces']['pid'] != record['namespaces']['pid']
+                        or children[2]['namespaces']['pid'] == record['namespaces']['pid']
+                        or children[0]['parent_pid'] != record['pid']
+                        or children[1]['parent_pid'] != record['pid']
+                        or children[2]['parent_pid'] != children[1]['pid']):
+                    raise RuntimeError('survivor descendant topology changed')
+                base.write_private(FAULTS / 'survivor-ready.json',
+                                   {'attempt': attempt, 'init': record, 'descendants': children,
+                                    'at_boottime': time.clock_gettime(time.CLOCK_BOOTTIME)})
+        if nested.poll() is not None:
+            raise RuntimeError('nested survivor launcher exited early')
+        time.sleep(.005)
+    raise RuntimeError('survivor init outlived its bounded proof window')
+
+
+class SurvivorBarrier:
+    """Observe the real drain; never substitute process completion or signals."""
+    def __init__(self, proof, host, expected, invocation):
+        base.fixture_guard(host, expected)
+        self.proof, self.invocation = proof, invocation
+        self.handles, self.drained = [], False
+        self.observer = process_record(os.getpid())
+        if ((self.observer['pid'], self.observer['start_time']) ==
+                (proof['old_owner']['pid'], proof['old_owner']['start_time'])):
+            raise RuntimeError('survivor proof requires a new observer')
+        if len(proof['descendants']) != 3:
+            raise RuntimeError('survivor proof needs exactly three descendant handles')
+        if (proof['init']['pid'] != proof['writer']['pid']
+                or len({row['pid'] for row in (proof['init'], *proof['descendants'])}) != 4):
+            raise RuntimeError('survivor proof requires four distinct original identities')
+        try:
+            for record in (proof['init'], *proof['descendants']):
+                self.handles.append(Handle(record, host, expected))
+            if any(handle.dead() for handle in self.handles):
+                raise RuntimeError('all survivor processes must be alive at new observer entry')
+            from privacyctl_runtime.writers import capture_writer
+            captured = capture_writer(proof['writer']['pid'], self.handles[0].fd,
+                                      proof['writer']['operation'])
+            if captured != proof['writer']:
+                raise RuntimeError('survivor no longer matches the durable writer record')
+            append_event('surviving_writer_recovery_entry', invocation=invocation,
+                         observer=self.observer, writer=proof['writer'], descendants=proof['descendants'],
+                         all_original_pidfds_live=True)
+        except BaseException:
+            self.close()
+            raise
+
+    def drain(self, record, actual, **kwargs):
+        if record != self.proof['writer']:
+            return actual(record, **kwargs)
+        if any(handle.dead() for handle in self.handles):
+            raise RuntimeError('survivor died before real drain entry')
+        outcome = actual(record, **kwargs)
+        if outcome != 'killed' or any(not handle.dead() for handle in self.handles):
+            raise RuntimeError('real drain did not kill init and complete every descendant')
+        self.drained = True
+        append_event('surviving_writer_drained', invocation=self.invocation,
+                     observer=self.observer, outcome=outcome, all_original_pidfds_ready=True)
+        return outcome
+
+    def require_drained(self):
+        if not self.drained or any(not handle.dead() for handle in self.handles):
+            raise RuntimeError('native cleanup attempted before survivor namespace completion')
+
+    def close(self):
+        for handle in self.handles:
+            handle.close()
+        self.handles = []
+
+
 def measure_call(counter, callback, *args, **kwargs):
     """Keep bounded aggregate timings, including failed calls, only in memory."""
     started = time.monotonic()
@@ -330,7 +522,7 @@ def guardian(host, expected, invocation, journal_delay_ms=0):
     if type(journal_delay_ms) is not int or journal_delay_ms not in (0, 50):
         raise RuntimeError('invalid fixed journal delay')
     sys.path.insert(0, '/usr/local/lib')
-    from privacyctl_runtime import runner, adapter, journal, network
+    from privacyctl_runtime import runner, adapter, journal, network, recovery
     from privacyctl_runtime.adapter import NativeAdapter
     from privacyctl_runtime.network import NativeNetwork
     from privacyctl_runtime.dhcp import DHCPManager
@@ -392,7 +584,11 @@ def guardian(host, expected, invocation, journal_delay_ms=0):
             append_event('blocked', invocation=invocation)
 
     class PausedNetwork(NativeNetwork):
+        survivor_barrier = None
+
         def _run(self, *args, **kwargs):
+            if self.survivor_barrier is not None:
+                self.survivor_barrier.require_drained()
             return measure_call(timing['native_command'], super()._run, *args, **kwargs)
 
         def snapshot(self, *args, **kwargs):
@@ -411,7 +607,36 @@ def guardian(host, expected, invocation, journal_delay_ms=0):
                 base.fixture_guard(host, expected)
                 export(active_owner[0])
                 self._run([PYTHON, '-I', '-S', '-c', PAUSE_COMMAND], **options)
+            elif fault['mode'] == 'apply-survivor-paused':
+                base.fixture_guard(host, expected)
+                export(active_owner[0])
+                self._run([PYTHON, '-I', str(SCRIPT), '--survivor',
+                           json.dumps(host), json.dumps(expected)], operation='native-survivor', **options)
             return super().set_provider(key, content, **options)
+
+    class ObservedRecovery(recovery.RecoveryJournal):
+        def recover(self, **options):
+            if read_json(FAULTS / 'fault.json')['mode'] != 'survivor-recovery':
+                return super().recover(**options)
+            proof = read_json(FAULTS / 'survivor-proof.json')
+            record = self.store.read()
+            if (record is None or record['generation'] != proof['generation']
+                    or record['writers']['native'] != proof['writer']):
+                raise RuntimeError('survivor proof does not match the actual durable journal')
+            barrier = SurvivorBarrier(proof, host, expected, invocation)
+            actual = self._drain
+            self._drain = lambda record, **kwargs: barrier.drain(record, actual, **kwargs)
+            self.backend.survivor_barrier = barrier
+            try:
+                result = super().recover(**options)
+                barrier.require_drained()
+                append_event('surviving_writer_cleanup_complete', invocation=invocation,
+                             observer=barrier.observer, result=result)
+                return result
+            finally:
+                self._drain = actual
+                self.backend.survivor_barrier = None
+                barrier.close()
 
     class ObservedManager(DHCPManager):
         def stop(self):
@@ -469,6 +694,7 @@ def guardian(host, expected, invocation, journal_delay_ms=0):
     journal.Journal = ObservedJournal
     adapter.LeaseApplier = network.LeaseApplier = ObservedApplier
     adapter.JournaledApplier = ObservedWrapper
+    recovery.RecoveryJournal = ObservedRecovery
     runner.NativeAdapter, runner.Owner, runner.DHCPManager = FixtureAdapter, ObservedOwner, ObservedManager
     try:
         runner.run(legacy)
@@ -477,7 +703,7 @@ def guardian(host, expected, invocation, journal_delay_ms=0):
         raise
 
 
-def worker(host, journal_delay_ms=0):
+def worker(host, journal_delay_ms=0, case_selection='baseline'):
     # Prepare/verify private net, mount, PID and resolver/device masks first.
     expected = native.prepare_private(host)
     guards.guard_private(host, expected)
@@ -649,6 +875,70 @@ def worker(host, journal_delay_ms=0):
         base.wait_for(lambda: clean(invocation), 15, 'fresh post-recovery off cleanup', (process,))
         return current['generation']
 
+    def surviving_case(invocation, guard_process, guard_handle, owner_handle):
+        started = time.monotonic()
+        attempt = fault('apply-survivor-paused')
+        request, _ = cli('surviving-writer-connect-' + attempt, 'connect', base.HOME_PROFILE)
+        ready = base.wait_for(lambda: (row if (row := read_json(FAULTS / 'survivor-ready.json', {}))
+                                      .get('attempt') == attempt else None),
+                             15, 'guarded surviving native writer readiness', (guard_process, request))
+        original = [capture(ready['init']), *[capture(row) for row in ready['descendants']]]
+        current = state(invocation)
+        old_dhcp = client_handles(current)
+        hook = capture(current['hooks'][0])
+        orphan = read_json(STATE / 'lease.json')
+        writer = orphan['writers']['native']
+        assert (writer['pid'] == ready['init']['pid']
+                and str(writer['start_time']) == ready['init']['start_time']
+                and writer['operation'] == 'native-survivor' and writer['nspid'] == 1)
+        assert all(not handle.dead() for handle in original)
+        base.write_private(FAULTS / 'survivor-proof.json',
+                           {'attempt': attempt, 'generation': orphan['generation'], 'writer': writer,
+                            'init': ready['init'], 'descendants': ready['descendants'],
+                            'old_owner': owner_handle.record})
+        owner_handle.send(signal.SIGKILL)
+        owner_handle.wait()
+        if not guard_handle.dead():
+            guard_handle.send(signal.SIGKILL)
+        assert guard_process.wait(timeout=5) != 0
+        finish_cli(request, False)
+        for handle in [hook, *old_dhcp]:
+            handle.wait()
+        assert all(not handle.dead() for handle in original)
+        reconnects = reconnect_count()
+        fault('survivor-recovery')
+        replacement, process, _, new_owner = start_guardian(recovering=True)
+        assert (new_owner.record['pid'], new_owner.record['start_time']) != (
+            owner_handle.record['pid'], owner_handle.record['start_time'])
+        entries = events_since(ready['at_boottime'], replacement, 'surviving_writer_recovery_entry')
+        drained = events_since(ready['at_boottime'], replacement, 'surviving_writer_drained')
+        completed = events_since(ready['at_boottime'], replacement, 'surviving_writer_cleanup_complete')
+        assert len(entries) == len(drained) == len(completed) == 1
+        assert (entries[0]['all_original_pidfds_live'] and drained[0]['outcome'] == 'killed'
+                and drained[0]['all_original_pidfds_ready']
+                and entries[0]['observer']['pid'] == new_owner.record['pid'])
+        assert all(handle.dead() for handle in original)
+        assert_idle_without_reconnect(replacement, process, reconnects)
+        fresh_connect_off(replacement, process, 'surviving-writer-recovered', orphan['generation'])
+        record('new_observer_drains_induced_surviving_writer_and_descendants', started,
+               survival_induced_by_fixture_pdeath_suppression=True,
+               all_original_processes_live_at_new_observer=True,
+               original_init_detached_child_and_nested_namespace_completed=True,
+               real_drain_outcome='killed', cleanup_guarded_by_all_original_pidfds=True,
+               old_owner_and_guardian_dead=True, previous_alias_and_unrelated_provider_preserved=True,
+               no_automatic_reconnect=True, fresh_connect_and_off_succeeded=True)
+
+    def complete():
+        base.emit({'phase': 'complete', 'cases': cases, 'guardian_is_production': True,
+                   'cli_main_ipc_emergency_are_production': True,
+                   'cli_entrypoint_and_physical_system_substituted': True,
+                   'baseline_owner_harness_changed': True, 'historical_fault_case_count': 7,
+                   'case_count': len(cases), 'case_selection': case_selection,
+                   'first_six_fault_cases_preserved': True,
+                   'first_six_fault_cases_exercised': case_selection != 'survivor',
+                   'integrated_recovery_cases': 1 if case_selection == 'survivor' else (
+                       4 if case_selection == 'all' else 3)})
+
     try:
         fault('none')
         server, server_handle = spawn([PYTHON, '-I', str(base.SCRIPT), '--dhcp-server',
@@ -680,6 +970,10 @@ def worker(host, journal_delay_ms=0):
         wpa, _ = spawn([PYTHON, '-I', str(SCRIPT), '--fake-wpa', json.dumps(host), json.dumps(expected)], 'wpa')
         base.wait_for(lambda: read_json(FAULTS / 'wpa-ready.json'), 3, 'fake WPA readiness', (wpa,))
         invocation, guard_process, guard_handle, owner_handle = start_guardian()
+        if case_selection == 'survivor':
+            surviving_case(invocation, guard_process, guard_handle, owner_handle)
+            complete()
+            return
 
         for kill_requester in (False, True):
             started = time.monotonic()
@@ -855,12 +1149,9 @@ def worker(host, journal_delay_ms=0):
                native_writer_survival_until_replacement_claimed=False,
                orphan_journal_and_marker_removed=True, previous_alias_restored=True,
                unrelated_provider_preserved=True, fresh_connect_and_off_succeeded=True)
-        base.emit({'phase': 'complete', 'cases': cases, 'guardian_is_production': True,
-                   'cli_main_ipc_emergency_are_production': True,
-                   'cli_entrypoint_and_physical_system_substituted': True,
-                   'baseline_owner_harness_changed': True, 'historical_fault_case_count': 7,
-                   'case_count': len(cases), 'first_six_fault_cases_preserved': True,
-                   'integrated_recovery_cases': 3})
+        if case_selection == 'all':
+            surviving_case(invocation, guard_process, guard_handle, owner_handle)
+        complete()
     except BaseException:
         diagnostic = {'phase': 'failure_diagnostics'}
         for path in sorted(FAULTS.glob('*.json')):
@@ -918,17 +1209,34 @@ def main():
     parser.add_argument('--guardian', nargs=3)
     parser.add_argument('--fake-wpa', nargs=2)
     parser.add_argument('--cli', nargs=3)
+    parser.add_argument('--survivor', nargs=2)
+    parser.add_argument('--survivor-child', nargs=3)
+    parser.add_argument('--case', choices=('baseline', 'survivor', 'all'), default='baseline')
     parser.add_argument('--journal-delay-ms', type=int, choices=(0, 50), default=0)
     args = parser.parse_args()
     if args.host_state_snapshot:
-        if args.worker or args.guardian or args.fake_wpa or args.cli or args.output is not None or args.journal_delay_ms:
+        if (args.worker or args.guardian or args.fake_wpa or args.cli or args.survivor
+                or args.survivor_child or args.output is not None or args.journal_delay_ms
+                or args.case != 'baseline'):
             parser.error('host state snapshot is a standalone read-only mode')
         base.emit(snapshot_state_directory())
         return
     if args.cli:
-        if args.worker or args.guardian or args.fake_wpa or args.output is not None or args.journal_delay_ms:
+        if (args.worker or args.guardian or args.fake_wpa or args.survivor or args.survivor_child
+                or args.output is not None or args.journal_delay_ms or args.case != 'baseline'):
             parser.error('fixture CLI is a standalone private mode')
         raise SystemExit(fixture_cli(*(json.loads(value) for value in args.cli)))
+    if args.survivor or args.survivor_child:
+        if (args.worker or args.guardian or args.fake_wpa or args.output is not None
+                or args.journal_delay_ms or args.case != 'baseline'
+                or (args.survivor and args.survivor_child)):
+            parser.error('survivor payload is a standalone private mode')
+        if args.survivor:
+            survivor_payload(*(json.loads(value) for value in args.survivor))
+        else:
+            survivor_child(json.loads(args.survivor_child[0]),
+                           json.loads(args.survivor_child[1]), args.survivor_child[2])
+        return
     if args.guardian:
         guardian(json.loads(args.guardian[0]), json.loads(args.guardian[1]), args.guardian[2],
                  args.journal_delay_ms)
@@ -938,7 +1246,7 @@ def main():
         return
     if args.worker:
         try:
-            worker(json.loads(args.worker), args.journal_delay_ms)
+            worker(json.loads(args.worker), args.journal_delay_ms, args.case)
         except BaseException:
             base.emit({'phase': 'failed', 'traceback': traceback.format_exc()})
             raise
@@ -963,7 +1271,7 @@ def main():
     result = subprocess.run([*privilege, '/usr/bin/timeout', '-k', '3', '240', '/usr/bin/unshare',
         '--net', '--mount', '--pid', '--fork', '--kill-child=KILL', '--propagation', 'unchanged',
         PYTHON, '-I', str(SCRIPT), '--worker', json.dumps(before['namespaces']),
-        '--journal-delay-ms', str(args.journal_delay_ms)],
+        '--journal-delay-ms', str(args.journal_delay_ms), '--case', args.case],
         capture_output=True, text=True, timeout=248)
     args.output.mkdir(mode=0o700, parents=True)
     base.write_private(args.output / 'worker-result.json', {
@@ -985,6 +1293,7 @@ def main():
               and stable and not cleanup['remaining_namespace_members'])
     evidence = {'schema_version': 1, 'status': 'passed' if passed else 'failed',
         'journal_delay_ms': args.journal_delay_ms,
+        'case_selection': args.case,
         'source_sha256': hashes, 'source_unchanged': stable,
         'host_checks': {key: before[key] == after[key] for key in before},
         'host_state_unchanged': before == after,
@@ -999,7 +1308,10 @@ def main():
             'The native-apply pause is a fixed synthetic command run through the production contained runner.',
             'No physical radio, real trusted association, packet gate, OpenSnitch or OpenRC startup is exercised.',
             'Owner SIGKILL recovery uses a private /var journal and real runner; historical refusal proof is retained separately.',
-            'The native writer is alive at owner kill, but production parent-death cleanup may finish it before replacement startup; a surviving-writer/new-observer drain proof remains separate.']}
+            'Baseline case nine only proves the native writer alive at owner kill; it does not establish survival at new-observer entry. The optional survivor case requires that stronger proof separately.']}
+    evidence['limitations'].append(
+        'The optional survivor case deliberately clears only its guarded native init parent-death signal; '
+        'survival is induced, and outer private PID namespace/timeout/pidfd containment remains intact.')
     base.write_private(args.output / 'evidence.json', evidence)
     base.emit({'status': evidence['status'], 'evidence': str(args.output / 'evidence.json'),
                'elapsed_seconds': evidence['elapsed_seconds']})

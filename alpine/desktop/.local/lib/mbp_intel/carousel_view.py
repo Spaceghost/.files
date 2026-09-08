@@ -481,13 +481,14 @@ class Popup:
         snapshot.restore()
 
     def _card_node(self, candidate, width, height, selected, hovered):
-        # These nodes retain the original texture and vector drawing operations.
-        # Only the changing perspective/position/opacity lives outside the cache.
+        # Compose static clips/shadows once: the legacy GL renderer otherwise
+        # rasterizes these vector operations again under every changing 3D pose.
         identity = candidate['id']
         texture = self._textures.get(identity)
         title = candidate.get('title') or candidate.get('application') or 'Window'
         application = candidate.get('application') or candidate.get('app_id') or 'Window'
-        signature = (width, height, title, application, texture, identity in self._unavailable)
+        scale = self.stage.get_scale_factor()
+        signature = (width, height, scale, title, application, texture, identity in self._unavailable)
         cached = self._card_nodes.get(identity)
         if cached is None or cached[0] != signature:
             cached = (signature, {})
@@ -495,7 +496,7 @@ class Popup:
         variants = cached[1]
         variant = selected, hovered
         if variant in variants:
-            return variants[variant]
+            return variants[variant][1]
         # At most four selection/hover variants are retained per candidate.
         snapshot = self.Gtk.Snapshot.new()
         bounds = self._rectangle(0, 0, width, height)
@@ -526,5 +527,18 @@ class Popup:
         snapshot.pop()
         snapshot.pop()
         node = snapshot.to_node()
-        variants[variant] = node
-        return node
+        # Include the entire shadow bounds at output device scale. Keep the
+        # original vector node and full provider texture for invalidation; no
+        # reduced preview replaces the source. Close clears both cache levels.
+        bounds = node.get_bounds()
+        device_bounds = self._rectangle(bounds.origin.x * scale, bounds.origin.y * scale,
+                                         bounds.size.width * scale, bounds.size.height * scale)
+        composed = self.Gtk.Snapshot.new()
+        composed.scale(scale, scale)
+        composed.append_node(node)
+        rendered = self.window.get_renderer().render_texture(composed.to_node(), device_bounds)
+        composed = self.Gtk.Snapshot.new()
+        composed.append_scaled_texture(rendered, self.Gsk.ScalingFilter.TRILINEAR, bounds)
+        result = composed.to_node()
+        variants[variant] = (node, result)
+        return result

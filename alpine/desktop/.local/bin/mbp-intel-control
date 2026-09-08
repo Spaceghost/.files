@@ -9,6 +9,7 @@ import sys
 
 HOME = Path.home()
 BIN = HOME / ".local/bin"
+PRIVACYCTL = Path("/usr/local/sbin/privacyctl")
 
 
 def run(args, **kwargs):
@@ -85,8 +86,8 @@ def network_report():
 
 
 def radio_off():
-    if shutil.which("privacyctl"):
-        result = run(["doas", "-n", "privacyctl", "off"])
+    if PRIVACYCTL.is_file():
+        result = run(["doas", "-n", PRIVACYCTL, "off"])
         if result.returncode:
             notify("Radio controls", "The radio controller could not complete the request. Inspect its output in a terminal.")
     else:
@@ -98,6 +99,45 @@ def power():
     selected = choose("SESSION CONTROL", list(options))
     if selected in options:
         options[selected]()
+
+
+def keyboard():
+    result = run([BIN / "mbp-intel-keyboard-backlight", "status"],
+                 capture_output=True, text=True)
+    try:
+        state = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        notify("Keyboard glow", "The keyboard light could not report its status.")
+        return
+    if result.returncode or not state.get("available"):
+        notify("Keyboard glow", "This machine does not expose the Apple keyboard light.")
+        return
+    breathing = state.get("mode") == "breathing"
+    typing = state.get("mode") == "typing"
+    typing_dark = state.get("mode") == "typing-dark"
+    typing_wpm = state.get("mode") == "typing-wpm"
+    typing_dark_wpm = state.get("mode") == "typing-dark-wpm"
+    peak = round(state["level"] * 100 / state["maximum"])
+    options = {
+        ("◉  Hold that glow · stop breathing" if breathing else
+         "◌  Let the keys breathe · a slow six-second glow"): "breathe",
+        ("◉  Let your fingers wake the light" if typing else
+         "◌  Typing pulse · brighten with each keypress"): "typing",
+        ("◉  Let your fingers dim the glow" if typing_dark else
+         "◌  Typing shadow · start bright, darken with each keypress"): "typing-dark",
+        ("◉  Keep the glow tied to sustained typing" if typing_wpm else
+         "◌  Typing WPM gate · no glow from slow typing"): "typing-wpm",
+        ("◉  Keep it bright until fast typing drives it down" if typing_dark_wpm else
+         "◌  Typing WPM inverse · only fast typing causes dimming"): "typing-dark-wpm",
+        "☀  Steady light · keep your chosen brightness": "steady",
+        "＋  Brighter · adjust the breathing peak too": "up",
+        "−  Dimmer · all the way down switches it off": "down",
+        "◐  Lights on / off": "toggle",
+    }
+    mode = "BREATHING" if breathing else "STEADY"
+    selected = choose(f"KEYBOARD GLOW · {mode} {peak}% · ALL KEYS TOGETHER", list(options))
+    if selected in options:
+        run([BIN / "mbp-intel-keyboard-backlight", options[selected]])
 
 
 def suspend():
@@ -116,6 +156,7 @@ def menu(section="main"):
             "󰊠  Applications                              Super+D": lambda: launch([BIN / "mbp-intel-menu"]),
             "▦  Expo · all workspaces                  Super+E": lambda: launch([BIN / "mbp-intel-expo"]),
             "󰖯  Switch window": windows,
+            "↓  Bottom decoration                       Super+Ctrl+B": lambda: launch([BIN / "mbp-intel-decoration", "bottom"]),
             "󰸉  Artwork gallery": lambda: launch([BIN / "mbp-intel-wallpaper", "pick"]),
             "▶  YouTube · desktop player & PiP": lambda: launch([BIN / "mbp-intel-youtube", "menu"]),
             "▷  Video background · choose or stop": lambda: launch([BIN / "mbp-intel-video-background", "picker"]),
@@ -123,6 +164,7 @@ def menu(section="main"):
             "󰍛  Reactor · CPU, memory, processes": lambda: launch(["foot", "--title=Ghost Reactor", "-e", "btop"]),
             "󰤨  Transmissions · network and privacy": lambda: menu("network"),
             "󰕾  Sound studio · mixer and microphone": lambda: launch(["pavucontrol"]),
+            "☀  Keyboard glow · breathing and brightness": keyboard,
             "󰒃  Application firewall": firewall,
             "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
             "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),
@@ -146,7 +188,7 @@ if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else "main"
     if action in ("main", "network"):
         menu(action)
-    elif action in ("windows", "firewall", "network-report", "power"):
-        {"windows": windows, "firewall": firewall, "network-report": network_report, "power": power}[action]()
+    elif action in ("windows", "firewall", "network-report", "power", "keyboard"):
+        {"windows": windows, "firewall": firewall, "network-report": network_report, "power": power, "keyboard": keyboard}[action]()
     else:
-        raise SystemExit("usage: mbp-intel-control [windows|network|network-report|firewall|power]")
+        raise SystemExit("usage: mbp-intel-control [windows|network|network-report|firewall|power|keyboard]")

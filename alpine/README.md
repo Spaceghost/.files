@@ -101,6 +101,10 @@ The helper incrementally exports and pushes that branch without rewriting the
 existing GitHub branches. Authenticate once using `gh auth login`, then
 `gh auth setup-git`. Successful publication sends the versioned setup to GitHub;
 keep the full database backup for archived build inputs.
+For automatic publication of new commits every minute, run
+`alpine/bin/install-git-mirror-schedule`. The job retries failed pushes and
+keeps its result in `~/.local/state/mbp-intel/git-mirror/status.json`; the guide
+above includes authentication, cron setup, logs and removal instructions.
 [Bazzite replay](../bazzite/README.md) describes
 applying the shared desktop with Fedora-specific session overrides.
 
@@ -123,7 +127,8 @@ package or of the upstream Codex bundles. Fresh AI generation is deliberately
 nondeterministic: checked-in bitmap hashes preserve the exact existing artwork.
 New daily artwork receives an automatic local Fossil checkpoint scoped to its
 PNG and provenance JSON; unrelated edits remain untouched. These checkpoints
-stay local until `alpine/bin/publish-git-mirror` runs. A failed checkpoint stays
+are published by the minute cron job when enabled, or by a manual
+`alpine/bin/publish-git-mirror` run. A failed checkpoint stays
 pending and is retried without generating another image.
 
 Disk layout, encryption keys, user passwords, Wi-Fi credentials and Codex login

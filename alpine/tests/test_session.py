@@ -1,6 +1,7 @@
 """Session startup tests use fake desktop services in an isolated HOME."""
 import os
 from pathlib import Path
+import shlex
 import signal
 import subprocess
 import tempfile
@@ -20,22 +21,23 @@ class SessionTests(unittest.TestCase):
             services = ['pipewire', 'wireplumber', 'pipewire-pulse', 'swaync', 'swayidle', 'waybar']
             for service in services:
                 path = local_bin / service
-                path.write_text('#!/usr/bin/python3\nimport os,time\n'
-                                'time.sleep(.2)\n'
-                                f'with open({str(root / service)!r}, "a") as f: f.write(str(os.getpid())+"\\n")\n'
-                                'time.sleep(10)\n')
+                # Exercise startup locking without paying interpreter startup
+                # costs for every fake service when the host is under load.
+                path.write_text('#!/bin/sh\nsleep 0.2\n'
+                                'printf \'%s\\n\' "$$" >> '
+                                + shlex.quote(str(root / service)) + '\nsleep 10\n')
                 path.chmod(0o755)
             pgrep = local_bin / 'pgrep'
-            pgrep.write_text('#!/usr/bin/python3\nimport sys\nfrom pathlib import Path\n'
-                             'name=sys.argv[-1]\n'
-                             'if "polkit-gnome" in name: sys.exit(0)\n'
-                             f'sys.exit(0 if (Path({directory!r}) / name).exists() else 1)\n')
+            pgrep.write_text('#!/bin/sh\nfor name do :; done\n'
+                             'case "$name" in *polkit-gnome*) exit 0;; esac\n'
+                             '[ -e ' + shlex.quote(directory) + '/"$name" ]\n')
             pgrep.chmod(0o755)
             for name in ['dbus-update-activation-environment', 'mbp-intel-wallpaper']:
                 (local_bin / name).write_text('#!/bin/sh\nexit 0\n')
                 (local_bin / name).chmod(0o755)
             (local_bin / 'dbus-update-activation-environment').write_text(
-                '#!/bin/sh\nprintf started\\n >>' + str(root / 'setup-runs') + '\n')
+                '#!/bin/sh\nprintf \'%s\\n\' started >> '
+                + shlex.quote(str(root / 'setup-runs')) + '\n')
             env = dict(os.environ, HOME=directory, XDG_RUNTIME_DIR=directory,
                        DBUS_SESSION_BUS_ADDRESS='unix:path=' + directory + '/unused')
             clients = []

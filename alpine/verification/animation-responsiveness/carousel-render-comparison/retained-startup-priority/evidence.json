@@ -1,0 +1,282 @@
+{
+  "status": "failed",
+  "isolation": "private HOME/XDG/D-Bus/SwayFX and synthetic pixels",
+  "scale": 2,
+  "source_sha256": {
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/carousel_view.py": "5d0377514fde7221901a9a9c7a322783cbd65523ff2086193c239a28c3a093de",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/showdesktop.py": "e443fd1b766d60d34e90088ba556e749147e5bc7d5d91fa5f7eb0ee97b44e66d",
+    "/home/jack/.files/alpine/tests/verify_carousel_rendering.py": "235efc5f70fe8d120b9c70b545827b18786349749f4ffa8fa2278d183c216046"
+  },
+  "load_before": [
+    47.6669921875,
+    42.0537109375,
+    31.29052734375
+  ],
+  "private_compositor_startup_priority": {
+    "check": false,
+    "uid": 1000,
+    "processes": [
+      {
+        "pid": 13953,
+        "name": "swayfx",
+        "target_nice": -10,
+        "threads": [
+          {
+            "tid": 13953,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          }
+        ]
+      }
+    ]
+  },
+  "compositor_readiness": {
+    "attempts": 2,
+    "version": {
+      "human_readable": "0.6",
+      "sway_original_version": "1.12.0",
+      "variant": "sway",
+      "major": 0,
+      "minor": 6,
+      "patch": 0,
+      "loaded_config_file_name": "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/retained-startup-priority/sway.conf"
+    },
+    "barrier": "GET_VERSION response"
+  },
+  "private_compositor_priority": {
+    "check": false,
+    "uid": 1000,
+    "processes": [
+      {
+        "pid": 13953,
+        "name": "swayfx",
+        "target_nice": -10,
+        "threads": [
+          {
+            "tid": 13953,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14033,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14035,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14036,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14037,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14038,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14039,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14040,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14042,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14043,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14044,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14047,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14048,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14049,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14057,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14058,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14059,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14087,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14092,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          }
+        ]
+      }
+    ]
+  },
+  "private_probe_priority": {
+    "pid": 14303,
+    "threads": [
+      {
+        "tid": 14303,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14523,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14536,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14537,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14538,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14581,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14582,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14583,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14584,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14585,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14586,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14587,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14588,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14589,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14590,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14592,
+        "nice": 19,
+        "policy": 3
+      },
+      {
+        "tid": 14593,
+        "nice": -5,
+        "policy": 1073741824
+      },
+      {
+        "tid": 14594,
+        "nice": -5,
+        "policy": 1073741824
+      }
+    ]
+  },
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel_rendering.py\", line 308, in private_compositor\n    raise RuntimeError(f'private carousel renderer probe exited {code}')\nRuntimeError: private carousel renderer probe exited 1\n",
+  "load_after": [
+    55.09228515625,
+    44.91943359375,
+    32.93115234375
+  ],
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

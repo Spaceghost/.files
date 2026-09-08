@@ -102,7 +102,11 @@ class BazziteProfileTest(unittest.TestCase):
 
         self.assertFalse((self.home / '.local/bin/mbp-intel-session').exists())
         self.assertFalse((self.home / '.local/bin/mbp-intel-firewall-ui').exists())
-        self.assertFalse((self.home / '.local/bin/mbp-intel-panel-status').exists())
+        # The whole helper tree replays; only the Alpine-bound helpers are excluded.
+        # Waybar's notifications module still runs panel-status on Bazzite.
+        self.assertFalse((self.home / '.local/bin/mbp-intel-keyboard-backlight').exists())
+        self.assertFalse((self.home / '.local/bin/mbp-intel-sway').exists())
+        self.assertTrue((self.home / '.local/bin/mbp-intel-panel-status').exists())
         target = self.home / '.config/systemd/user/mbp-intel-session.target'
         self.assertIn('mbp-intel-waybar.service', target.read_text())
         for name in ('mbp-intel-waybar.service', 'mbp-intel-swaync.service',

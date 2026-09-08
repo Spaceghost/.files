@@ -1,0 +1,472 @@
+{
+  "status": "failed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "f761c54f0bbd269093e1f600a6c3e211cdc016139b12184b9aa01b9303428522",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "6cdbc16e29a685b3ba50cc6f971e2d71d17fa2c44cfc3006b43bb9be3e13aa29",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "e443fd1b766d60d34e90088ba556e749147e5bc7d5d91fa5f7eb0ee97b44e66d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/ui_command.py": "e94a420d2c5beb0e842abdbabd926c05872fc4b0b5fc93f542108130ed79486f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/ui_priority.py": "dc192c23e33fcfb63863c2d8078963355fe14e2cbac68c3f8ce560510adc044b",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/graphics_warmup.py": "d0b3c7b3daa38cfe7e1f07967bf0b93a763104be12ea828efbb6d7e3a884d27d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "5d0377514fde7221901a9a9c7a322783cbd65523ff2086193c239a28c3a093de",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "b0a016b6ed03d6cfc2625e8d1f2b965f9313ad9535764efb3a9c20e6aec6d627"
+  },
+  "checks": [
+    "graphics-primer-warmed-before-readiness",
+    "duplicate-daemon-preserves-single-owner",
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows",
+    "scale-two-previews-preserve-provider-pixels-without-upscaling",
+    "hidden-workspace-preview-renders-without-focus-change",
+    "open-gesture-keeps-still-image-after-real-window-content-changes",
+    "persistent-show-ignores-modifier-release-and-escape-cancels",
+    "new-gesture-refreshes-still-image-at-native-quality"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 14701
+    },
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows": {
+      "pid": 14701,
+      "ready": true,
+      "open": true,
+      "graphics_warm": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": null,
+      "preview_ids": [],
+      "preview_dimensions": {},
+      "frames": 0,
+      "frame_times": []
+    },
+    "scale-two-previews-preserve-provider-pixels-without-upscaling": {
+      "actual": {
+        "6": [
+          720,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ],
+        "5": [
+          720,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ]
+      },
+      "direct_provider": {
+        "5": [
+          720,
+          900
+        ],
+        "6": [
+          720,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ]
+      },
+      "logical_rect_times_output_scale": {
+        "5": [
+          1440,
+          1800
+        ],
+        "6": [
+          1440,
+          1800
+        ],
+        "8": [
+          2880,
+          1800
+        ],
+        "10": [
+          2880,
+          1800
+        ]
+      },
+      "physical_letterboxed_card": {
+        "6": [
+          624.0,
+          780.0
+        ],
+        "10": [
+          1248.0,
+          780.0
+        ],
+        "5": [
+          624.0,
+          780.0
+        ],
+        "8": [
+          1248.0,
+          780.0
+        ]
+      },
+      "grim_explicit_scale_one": [
+        1440,
+        900
+      ]
+    },
+    "hidden-workspace-preview-renders-without-focus-change": {
+      "preview_ids": [
+        5,
+        6,
+        8,
+        10
+      ],
+      "cyan_pixels": 965900,
+      "workspace_focus": 1,
+      "focus_events": []
+    },
+    "open-gesture-keeps-still-image-after-real-window-content-changes": {
+      "unchanged_green_pixels": 476231,
+      "new_magenta_pixels": 0,
+      "preview_dimensions_unchanged": true
+    },
+    "new-gesture-refreshes-still-image-at-native-quality": {
+      "new_magenta_pixels": 473803
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "escape_handoff": false,
+  "modifier_handoff": false,
+  "verifier_sha256": "b7edfe1548c0b28f314d65913c6014c046c450cada0b120c4f8438fe521a242a",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "9476e4f292dc092cd42c2a984cdf9857f4ad248c28311708704049c0fce3be64"
+  },
+  "compositor_readiness": {
+    "attempts": 2,
+    "barrier": "GET_VERSION response",
+    "version": {
+      "human_readable": "0.6",
+      "sway_original_version": "1.12.0",
+      "variant": "sway",
+      "major": 0,
+      "minor": 6,
+      "patch": 0,
+      "loaded_config_file_name": "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-native-warm-lifecycle/sway.conf"
+    }
+  },
+  "private_compositor_priority": {
+    "check": false,
+    "uid": 1000,
+    "processes": [
+      {
+        "pid": 14280,
+        "name": "swayfx",
+        "target_nice": -10,
+        "threads": [
+          {
+            "tid": 14280,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14301,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14302,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14303,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14304,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14305,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14306,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14308,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14312,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14313,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14315,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14318,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14319,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14322,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14323,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 14330,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14364,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 14382,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          }
+        ]
+      }
+    ]
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "held_super_state_transitions": [
+    {
+      "elapsed_ms": 8.583,
+      "open": false,
+      "selected_id": null,
+      "candidate_ids": [],
+      "modifier": null,
+      "frames": 2
+    },
+    {
+      "elapsed_ms": 1192.335,
+      "open": true,
+      "selected_id": 8,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": "super",
+      "frames": 0
+    },
+    {
+      "elapsed_ms": 2828.6,
+      "open": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": "super",
+      "frames": 2
+    },
+    {
+      "elapsed_ms": 4399.213,
+      "open": false,
+      "selected_id": null,
+      "candidate_ids": [],
+      "modifier": null,
+      "frames": 5
+    }
+  ],
+  "error": "second held Tab did not advance",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 670, in run\n    wait_for(lambda: opened(a['id']), 'second held Tab did not advance')\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 45, in wait_for\n    raise AssertionError(message)\nAssertionError: second held Tab did not advance\n",
+  "last_state": {
+    "pid": 14701,
+    "ready": true,
+    "open": false,
+    "graphics_warm": true,
+    "selected_id": null,
+    "candidate_ids": [],
+    "modifier": null,
+    "preview_ids": [],
+    "preview_dimensions": {},
+    "frames": 5,
+    "frame_times": [
+      25327918548,
+      25328418558,
+      25329549048,
+      25329732385,
+      25329814841
+    ]
+  },
+  "last_outputs": [
+    {
+      "id": 3,
+      "type": "output",
+      "orientation": "none",
+      "percent": 1.0,
+      "urgent": false,
+      "marks": [],
+      "layout": "output",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "HEADLESS-1",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        4,
+        7,
+        9
+      ],
+      "fullscreen_mode": 0,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "primary": false,
+      "make": "Unknown",
+      "model": "Unknown",
+      "serial": "Unknown",
+      "modes": [],
+      "features": {
+        "adaptive_sync": false,
+        "hdr": false
+      },
+      "non_desktop": false,
+      "active": true,
+      "dpms": true,
+      "power": true,
+      "scale": 2.0,
+      "scale_filter": "nearest",
+      "transform": "normal",
+      "adaptive_sync_status": "disabled",
+      "layer_shell_surfaces": [
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "current_workspace": "1",
+      "current_mode": {
+        "width": 2880,
+        "height": 1800,
+        "refresh": 0
+      },
+      "max_render_time": 0,
+      "allow_tearing": false,
+      "hdr": false,
+      "focused": true,
+      "subpixel_hinting": "unknown"
+    }
+  ],
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

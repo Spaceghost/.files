@@ -1,0 +1,52 @@
+[
+  {
+    "name": "llama-completion",
+    "version": "0.4.0-r0",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/llama-completion-0.4.0-r0.apk",
+    "archive": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama-completion-0.4.0-r0.apk",
+    "bytes": 3130,
+    "sha256": "8f653ca9f344b64b3526796166ae78c8b338d5a539501e17fdbe836533639385",
+    "signature_exit_code": 0,
+    "signature_output": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama-completion-0.4.0-r0.apk: OK\n"
+  },
+  {
+    "name": "llama.cpp-libs",
+    "version": "0.4.0-r0",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/llama.cpp-libs-0.4.0-r0.apk",
+    "archive": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama.cpp-libs-0.4.0-r0.apk",
+    "bytes": 4245654,
+    "sha256": "a58a90b7224f4e48abc29bfa0a56d3923d3e2036fd858ccb4c664d0f3c2f0fcd",
+    "signature_exit_code": 0,
+    "signature_output": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama.cpp-libs-0.4.0-r0.apk: OK\n"
+  },
+  {
+    "name": "llama.cpp",
+    "version": "0.4.0-r0",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/llama.cpp-0.4.0-r0.apk",
+    "archive": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama.cpp-0.4.0-r0.apk",
+    "bytes": 2317730,
+    "sha256": "5a354d4d4f4178254ebd6a8bb7ab874aba6b2cc4e03add3a4698316c544be307",
+    "signature_exit_code": 0,
+    "signature_output": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/llama.cpp-0.4.0-r0.apk: OK\n"
+  },
+  {
+    "name": "libggml",
+    "version": "0.23.0-r0",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/libggml-0.23.0-r0.apk",
+    "archive": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/libggml-0.23.0-r0.apk",
+    "bytes": 486484,
+    "sha256": "e87905c164bde4df890a3cd4d3e1ab9d57126202d372b9265b714aa91709fd54",
+    "signature_exit_code": 0,
+    "signature_output": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/libggml-0.23.0-r0.apk: OK\n"
+  },
+  {
+    "name": "libggml-cpu",
+    "version": "0.23.0-r0",
+    "url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/libggml-cpu-0.23.0-r0.apk",
+    "archive": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/libggml-cpu-0.23.0-r0.apk",
+    "bytes": 6040356,
+    "sha256": "40527c3f18a3799b5645103b819189b3f9a9f501da18cdd33088dbbab01192f6",
+    "signature_exit_code": 0,
+    "signature_output": "/home/jack/.local/state/oldbook/local-ai-bootstrap/llama.cpp-0.4.0-r0/libggml-cpu-0.23.0-r0.apk: OK\n"
+  }
+]

@@ -19,6 +19,15 @@ both wpa_supplicant handles were read-only. See
 sanitized evidence. No controller, radio OpenRC service, sleep hook, profile,
 WPA or DHCP change has been activated.
 
+The inert `mbp-intel-radio-runtime=0.1.0-r0` APK has since installed the CLI,
+fourteen Python modules and both private DHCP helpers. Only one package was
+added; all nine before/after host-network comparison sections matched, including
+the same WPA/DHCP process identities. The package has no activation scripts,
+profiles, doas grants, OpenRC services or sleep hooks. See the
+[runtime package instructions](../../packages/privacyctl-runtime/README.md).
+Trusted profiles, service startup, sleep integration and WPA/DHCP/resolver
+ownership remain unactivated.
+
 The subsequent `71-privacy-bluetooth-off.rules` preparation software-blocked
 Bluetooth while preserving WLAN radio state, association, addresses and routes.
 The helper and its recovery journal were independently checked; see
@@ -32,13 +41,14 @@ Perform network-changing activation from a local console with recovery ready.
 The staged default is **boot-off with explicit scan/connect**. It does not
 enable automatic discovery or reconnection. The installed permissions and
 Bluetooth policy do not make the full controller ready for unattended networking.
-The persistent controller remains staged. Current source-hashed component and
+The runtime files are installed; controller policy and service activation remain
+staged. Current source-hashed component and
 combined checks are recorded in [owner-verification.json](owner-verification.json);
 the older controller report covers historical helpers only. Combined failure
 tests now pass; see [fault-verification.json](fault-verification.json).
 The [isolated packet-policy proof](../firewall/radio-policy-verification.json)
-also passes. Live policy decisions, [orphan recovery](ORPHAN-RECOVERY.md), OpenRC
-startup and the migration installer remain unfinished. This is the activation
+also passes. Live policy decisions, remaining [orphan recovery acceptance](ORPHAN-RECOVERY.md),
+OpenRC startup and the migration installer remain unfinished. This is the activation
 sequence to implement and verify, not a completed unattended installer.
 
 Before changing anything, keep a known working wired or local-console recovery
@@ -46,7 +56,10 @@ path.  Record the current files and OpenRC membership, then use a temporary
 root shell or separate console to test recovery.  Do not expose the active
 wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
 
-1. Install the staged files with root ownership and these modes:
+1. For a rebuild, install the reviewed inert runtime APK first. This host already
+   has `mbp-intel-radio-runtime=0.1.0-r0`; do not manually replace its CLI, library
+   or helper files. The table records their installed contract together with
+   the policy/service files still awaiting activation:
 
    | Staged source | Target | Mode |
    | --- | --- | --- |
@@ -62,8 +75,9 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    | `root/etc/udev/rules.d/72-privacy-rfkill.rules` | same path | `0644` |
 
    Use [STAGED-MANIFEST.tsv](STAGED-MANIFEST.tsv) for the complete source list.
-   Install the CLI, library and both helpers together; their fixed paths are
-   part of the verified contract. Keep implementation directories root-owned,
+   APK installs the CLI, library and both helpers together; their fixed paths
+   are part of the verified contract. The rfkill permission rule is also already
+   installed through its separate preparation. Keep implementation directories root-owned,
    mode `0755`, with no writable ancestors controlled by another user.
    Create `/etc/privacyctl` as `root:root`, `0700`.  Verify every installed
    file has `root:root`; do not make the profile policy writable by `jack`,
@@ -157,7 +171,7 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
    succeed. Read access preserves Waybar's radio status after restart. Inspect
    `udevadm info --query=property --name=/dev/rfkill` and confirm its tags no
    longer include `uaccess`; confirm root retains write access. Once the staged
-   controller is installed, also run its `privacyctl status` check.
+   controller runtime is installed, its `privacyctl status` check is available.
    Repeat the access check after a seat/session change and reboot. ACL changes
    do not revoke already-open file descriptors, so inspect existing rfkill
    handles before claiming exclusive controller access. This permissions step

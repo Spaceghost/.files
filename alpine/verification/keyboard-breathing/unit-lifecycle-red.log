@@ -1,0 +1,72 @@
+test_breathe_toggles_mode_and_steady_restores_peak (test_keyboard_backlight.KeyboardBacklightTests.test_breathe_toggles_mode_and_steady_restores_peak) ... ok
+test_breathing_service_is_singleton_and_stop_restores_saved_level (test_keyboard_backlight.KeyboardBacklightTests.test_breathing_service_is_singleton_and_stop_restores_saved_level) ... ok
+test_brightness_keys_adjust_breathing_peak_not_current_pulse (test_keyboard_backlight.KeyboardBacklightTests.test_brightness_keys_adjust_breathing_peak_not_current_pulse) ... ok
+test_brightness_steps_and_toggle_preserve_existing_controls (test_keyboard_backlight.KeyboardBacklightTests.test_brightness_steps_and_toggle_preserve_existing_controls) ... ok
+test_concurrent_key_commands_do_not_lose_saved_increments (test_keyboard_backlight.KeyboardBacklightTests.test_concurrent_key_commands_do_not_lose_saved_increments) ... ok
+test_dead_session_peer_stops_service_even_while_socket_path_remains (test_keyboard_backlight.KeyboardBacklightTests.test_dead_session_peer_stops_service_even_while_socket_path_remains) ... ERROR
+test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) ... 
+  test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='up') ... FAIL
+  test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='toggle') ... FAIL
+  test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='restore') ... FAIL
+test_missing_device_is_reported_without_creating_hardware_files (test_keyboard_backlight.KeyboardBacklightTests.test_missing_device_is_reported_without_creating_hardware_files) ... ok
+test_off_and_down_to_zero_stop_breathing (test_keyboard_backlight.KeyboardBacklightTests.test_off_and_down_to_zero_stop_breathing) ... ok
+test_restore_recovers_saved_peak_and_breathing_preference (test_keyboard_backlight.KeyboardBacklightTests.test_restore_recovers_saved_peak_and_breathing_preference) ... ok
+test_service_cleanup_does_not_undo_a_later_manual_off (test_keyboard_backlight.KeyboardBacklightTests.test_service_cleanup_does_not_undo_a_later_manual_off) ... ok
+test_stale_session_cannot_persist_an_unserved_breathing_request (test_keyboard_backlight.KeyboardBacklightTests.test_stale_session_cannot_persist_an_unserved_breathing_request) ... FAIL
+test_status_describes_whole_keyboard_control_without_writing (test_keyboard_backlight.KeyboardBacklightTests.test_status_describes_whole_keyboard_control_without_writing) ... ok
+test_steps_clamp_at_both_hardware_limits (test_keyboard_backlight.KeyboardBacklightTests.test_steps_clamp_at_both_hardware_limits) ... ok
+
+======================================================================
+ERROR: test_dead_session_peer_stops_service_even_while_socket_path_remains (test_keyboard_backlight.KeyboardBacklightTests.test_dead_session_peer_stops_service_even_while_socket_path_remains)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_keyboard_backlight.py", line 258, in test_dead_session_peer_stops_service_even_while_socket_path_remains
+    self.assertIs(future.result(timeout=3), True)
+                  ~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/concurrent/futures/_base.py", line 456, in result
+    raise TimeoutError()
+TimeoutError
+
+======================================================================
+FAIL: test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='up')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_keyboard_backlight.py", line 107, in test_first_use_zero_remains_off_until_a_requested_action
+    self.assertEqual(helper.status()['level'], 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 64 != 0
+
+======================================================================
+FAIL: test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='toggle')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_keyboard_backlight.py", line 107, in test_first_use_zero_remains_off_until_a_requested_action
+    self.assertEqual(helper.status()['level'], 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 64 != 0
+
+======================================================================
+FAIL: test_first_use_zero_remains_off_until_a_requested_action (test_keyboard_backlight.KeyboardBacklightTests.test_first_use_zero_remains_off_until_a_requested_action) (action='restore')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_keyboard_backlight.py", line 107, in test_first_use_zero_remains_off_until_a_requested_action
+    self.assertEqual(helper.status()['level'], 0)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 64 != 0
+
+======================================================================
+FAIL: test_stale_session_cannot_persist_an_unserved_breathing_request (test_keyboard_backlight.KeyboardBacklightTests.test_stale_session_cannot_persist_an_unserved_breathing_request)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_keyboard_backlight.py", line 220, in test_stale_session_cannot_persist_an_unserved_breathing_request
+    self.assertEqual(helper.status()['mode'], 'steady')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'breathing' != 'steady'
+- breathing
++ steady
+
+
+----------------------------------------------------------------------
+Ran 14 tests in 6.149s
+
+FAILED (failures=4, errors=1)

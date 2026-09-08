@@ -1,0 +1,52 @@
+{
+  "isolation": "private Unix IPC fixture; production watcher thread; no live desktop commands",
+  "limitations": "Measures requested IPC cadence, not compositor CPU or physical frame presentation.",
+  "source_sha256": {
+    "before": "f68cf027a2c1dcac34d6311fcee1e8c1c8d9b918aa5f56fd3eff5b2a2804fd6d",
+    "after": "a20217bb856a1abfc28127ef9d480bf98c812c5740dbe278c31d39569d24340f"
+  },
+  "runs": [
+    {
+      "source": "before",
+      "scenario": "quiet",
+      "seconds": 1.000109,
+      "requests": 109,
+      "requests_per_second": 108.988
+    },
+    {
+      "source": "before",
+      "scenario": "motion",
+      "seconds": 1.000118,
+      "requests": 108,
+      "requests_per_second": 107.987
+    },
+    {
+      "source": "before",
+      "scenario": "carousel",
+      "seconds": 1.000113,
+      "requests": 109,
+      "requests_per_second": 108.988
+    },
+    {
+      "source": "after",
+      "scenario": "quiet",
+      "seconds": 1.009948,
+      "requests": 57,
+      "requests_per_second": 56.439
+    },
+    {
+      "source": "after",
+      "scenario": "motion",
+      "seconds": 1.000222,
+      "requests": 101,
+      "requests_per_second": 100.978
+    },
+    {
+      "source": "after",
+      "scenario": "carousel",
+      "seconds": 1.000853,
+      "requests": 0,
+      "requests_per_second": 0.0
+    }
+  ]
+}

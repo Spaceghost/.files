@@ -44,6 +44,7 @@ class SwayServer:
         self.tree = {'id': 1, 'name': 'initial', 'nodes': []}
         self.stall = False
         self.reply_delay = 0
+        self.transform_tree = None
         self.stopped = threading.Event()
         self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.listener.bind(self.path)
@@ -97,6 +98,8 @@ class SwayServer:
                         self.requests.append(connection)
                         self.request_times.append(time.monotonic())
                         tree = self.tree
+                        if self.transform_tree is not None:
+                            tree = self.transform_tree(tree, len(self.requests))
                         stall = self.stall
                         self.condition.notify_all()
                     if not stall:
@@ -118,11 +121,11 @@ class SwayServer:
         with self.condition:
             return self.condition.wait_for(predicate, timeout)
 
-    def event(self, number=3):
+    def event(self, number=3, change='fixture'):
         with self.condition:
             subscribers = tuple(self.subscribers)
         for connection in subscribers:
-            self._send(connection, (1 << 31) | number, {'change': 'fixture'})
+            self._send(connection, (1 << 31) | number, {'change': change})
 
     def disconnect(self):
         with self.condition:
@@ -173,7 +176,7 @@ class DecorationWatchTests(unittest.TestCase):
         self.assertTrue(self.server.wait_for(lambda: len(self.server.requests) >= 5))
         self.assertEqual(len(set(self.server.requests)), 1)
         self.assertEqual(self.server.subscriptions,
-                         [['window', 'workspace', 'output', 'shutdown']])
+                         [['window', 'workspace', 'output', 'mode', 'shutdown']])
         self.assertEqual(len(self.delivered), 1)
         with self.server.condition:
             self.server.tree = {'id': 1, 'name': 'moved', 'nodes': []}
@@ -192,10 +195,62 @@ class DecorationWatchTests(unittest.TestCase):
         self.assertEqual(self.delivered[-1]['id'], 2)
         self.assertEqual(len(set(self.server.requests)), 1)
 
-    def test_request_processing_does_not_add_another_poll_interval(self):
+    def test_stationary_attached_caption_releases_half_the_poll_budget(self):
+        # Keeping an unchanged float attached must not continually compete
+        # with animation clients for the full 120 Hz compositor IPC budget.
+        self.watcher.MOTION_GRACE = 0
+        self.watcher.set_attached(True)
+        self.watcher.start()
+        self.assertTrue(self.server.wait_for(lambda: len(self.server.requests) >= 12))
+        with self.server.condition:
+            times = self.server.request_times[2:12]
+        mean_interval = (times[-1] - times[0]) / (len(times) - 1)
+        self.assertGreaterEqual(mean_interval, 1 / 90)
+        self.assertEqual(len(self.delivered), 1)
+
+    def test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit(self):
+        self.watcher.set_attached(True)
+        self.watcher.start()
+        self.wait_delivered(1)
+        self.assertTrue(self.server.wait_for(lambda: bool(self.server.subscribers)))
+        self.server.event(number=2, change='window-switcher')
+        time.sleep(0.08)
+        with self.server.condition:
+            count = len(self.server.requests)
+            self.server.tree = {'id': 2, 'name': 'latest behind carousel', 'nodes': []}
+        # Title and workspace traffic must not defeat the pause.
+        self.server.event(change='title')
+        self.server.event(number=0, change='focus')
+        self.assertFalse(self.server.wait_for(
+            lambda: len(self.server.requests) > count, timeout=0.12))
+        self.assertEqual(len(self.delivered), 1)
+        self.server.event(number=2, change='default')
+        self.wait_delivered(2)
+        self.assertEqual(self.delivered[-1]['name'], 'latest behind carousel')
+
+    def test_title_changes_do_not_keep_the_motion_poll_budget_running(self):
+        self.watcher.MOTION_GRACE = 0.025
+        self.watcher.QUIET_ATTACHED_INTERVAL = 0.050
+        self.server.transform_tree = lambda tree, count: dict(tree, name=f'title {count}')
+        self.watcher.set_attached(True)
+        self.watcher.start()
+        self.assertTrue(self.server.wait_for(lambda: len(self.server.requests) >= 12))
+        with self.server.condition:
+            times = self.server.request_times[5:12]
+        mean_interval = (times[-1] - times[0]) / (len(times) - 1)
+        self.assertGreaterEqual(mean_interval, 0.035)
+        self.assertGreater(len(self.delivered), 6)
+
+    def test_request_processing_does_not_add_another_poll_interval_while_moving(self):
         # A busy compositor still has enough time to reply within a 60 Hz
-        # frame. Sleeping a full interval afterward would halve that cadence.
+        # frame. Continuous silent geometry changes must keep the fast budget
+        # after its initial grace; a full sleep after each reply halves cadence.
         self.server.reply_delay = 0.010
+        self.server.transform_tree = lambda tree, count: dict(
+            tree, floating_nodes=[{'id': 10, 'rect': {
+                'x': count, 'y': 10, 'width': 600, 'height': 400}}])
+        self.watcher.MOTION_GRACE = 0.025
+        self.watcher.QUIET_ATTACHED_INTERVAL = 0.100
         self.watcher.set_attached(True)
         self.watcher.start()
         self.assertTrue(self.server.wait_for(lambda: len(self.server.requests) >= 18))

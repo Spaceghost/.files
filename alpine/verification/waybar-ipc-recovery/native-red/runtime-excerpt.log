@@ -1,0 +1,37 @@
+2026-09-07 22:41:56 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+[2026-09-07 22:42:04.260] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/config
+[2026-09-07 22:42:04.502] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/config.jsonc
+[2026-09-07 22:42:04.716] [debug] Found config file: /tmp/waybar-ipc-recovery-4s61q_uo/config/waybar/config.jsonc
+[2026-09-07 22:42:04.717] [info] Using configuration file /tmp/waybar-ipc-recovery-4s61q_uo/config/waybar/config.jsonc
+[2026-09-07 22:42:04.759] [info] Unable to receive desktop appearance: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Desktop was not provided by any .service files
+[2026-09-07 22:42:04.759] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/style.css
+[2026-09-07 22:42:04.881] [debug] Found config file: /tmp/waybar-ipc-recovery-4s61q_uo/config/waybar/style.css
+[2026-09-07 22:42:04.881] [info] Using CSS file /tmp/waybar-ipc-recovery-4s61q_uo/config/waybar/style.css
+[2026-09-07 22:42:04.910] [debug] Received SIGCHLD in signalThread
+[Repeated IPC failures omitted; full log hash and location in log-record.json.]
+ err: wayland.c:2442: failed to flush wayland socket: Broken pipe
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer

@@ -1,0 +1,31 @@
+{
+  "source": "physical live carousel;show,next,previous,cancel;no screenshots or window metadata",
+  "open_reported_ms": 1835.276,
+  "samples": [
+    {
+      "action": "opening",
+      "frames": 0,
+      "timestamps_us": []
+    },
+    {
+      "action": "next",
+      "frames": 0,
+      "timestamps_us": []
+    },
+    {
+      "action": "previous",
+      "frames": 0,
+      "timestamps_us": []
+    }
+  ],
+  "active_intervals_ms": {
+    "count": 0,
+    "median": null,
+    "p95": null
+  },
+  "load": [
+    48.13330078125,
+    45.7314453125,
+    34.57958984375
+  ]
+}
