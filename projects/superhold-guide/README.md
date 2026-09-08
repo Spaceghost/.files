@@ -6,7 +6,9 @@ focused app, followed by Sway and applicable terminal or tmux controls.
 
 Run **Superhold Shortcut Guide** from the application menu, or hold either
 **Super** key alone for half a second while the daemon is running. By default,
-the guide stays open after Super is released and closes when focus moves away.
+the guide stays open after Super is released. Press either Super key again to
+close it immediately, or move focus away. Keeping Super held after closing does
+not reopen it; release the key before starting another hold.
 Search, scroll, and click a shortcut; alternatives have separate buttons.
 **Up/Down** selects a result, **Enter** runs it, and **Escape** closes the guide.
 Search ignores case and requires every word to match the shortcut's keys,

@@ -56,6 +56,7 @@ class HoldState:
         self._cancelled = False
         self.cancel_serial = 0
         self.press_serial = 0
+        self.super_press_serial = 0
 
     @property
     def pressed_codes(self):
@@ -91,6 +92,8 @@ class HoldState:
             return
         keys.add(code)
         self.press_serial += 1
+        if code in SUPER_KEYS:
+            self.super_press_serial += 1
 
         if code not in SUPER_KEYS:
             if self._super_down():

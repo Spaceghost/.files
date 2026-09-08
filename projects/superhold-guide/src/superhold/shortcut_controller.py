@@ -26,6 +26,7 @@ class InteractiveController(ServiceController):
         self._hold_cancel_serial = 0
         self._action_press_serial = 0
         self._action_cancel_serial = 0
+        self._super_press_serial = self.monitor.state.super_press_serial
         self.configure(config)
 
     def configure(self, config):
@@ -121,6 +122,8 @@ class InteractiveController(ServiceController):
             return False
         try:
             requested = self._poll_input(now)
+            super_pressed = self.monitor.state.super_press_serial != self._super_press_serial
+            self._super_press_serial = self.monitor.state.super_press_serial
             self.graphical_active = self.guard.allows_overlay(now)
         except (OSError, RuntimeError):
             self.close()
@@ -151,6 +154,11 @@ class InteractiveController(ServiceController):
         if self._pending_action or self._action_future:
             return True
         if self._holding:
+            if super_pressed:
+                # Cancel this hold as well as hiding, so keeping Super down
+                # after dismissing cannot immediately reopen the guide.
+                self.dismiss()
+                return True
             invalidated = self.monitor.state.cancel_serial != self._hold_cancel_serial
             release = self.config.dismiss_mode == 'release' and not self._manual and not requested
             if invalidated or release:
