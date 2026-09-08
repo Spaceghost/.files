@@ -2,6 +2,8 @@
 
 The 0 key selects workspace 10. Keep STRATA on numeric workspace 10, displayed
 after workspaces 1–9; do not introduce a separate workspace 0 for it.
+Only Strata–Fossil is anchored there. Summon the console and system monitor on
+the current workspace; neither dropdown is pinned to a workspace.
 
 Every desktop theme must be complete. The user explicitly rejects palette-only
 themes; do not introduce that category or treat recoloring a few overlays as a

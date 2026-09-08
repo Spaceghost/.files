@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Toggle independent persistent console and monitor windows on the focused output."""
+"""Toggle persistent console and monitor windows on the focused workspace."""
 import argparse
 import fcntl
 import hashlib
@@ -88,12 +88,15 @@ def toggle(profile='terminal'):
                 found = found[0], '__i3_scratch'
         node, workspace = found
         criteria = f'[con_id={node["id"]}]'
+        focused_workspace = next(item for item in ipc('get_workspaces')
+                                 if item.get('focused'))
         if workspace != '__i3_scratch':
             ipc('command', criteria + ' move scratchpad')
-            return
+            # Hide locally; recall a window left on another workspace immediately.
+            if workspace == focused_workspace['name']:
+                return
         output = next(output for output in ipc('get_outputs') if output.get('focused'))
-        workspace = next(item for item in ipc('get_workspaces') if item.get('focused'))
-        x, y, width, height = geometry(output, workspace)
+        x, y, width, height = geometry(output, focused_workspace)
         # One transaction avoids displaying the old centered geometry for a frame.
         ipc('command', criteria + f' scratchpad show, resize set {width} px {height} px, '
             f'move absolute position {x} px {y} px, focus')

@@ -1,25 +1,54 @@
 #!/usr/bin/env python3
-"""Verify Ghostty drop-down behavior in a private Sway session.
+"""Verify console and Foot monitor behavior in a private Sway session.
 
-Run directly; requires sway, dbus-daemon, ghostty, wtype, and grim.
+Run directly; requires sway, dbus-daemon, ghostty, foot, btop, wtype, and grim.
 Retains JSON and a screenshot in alpine/verification/ghostty-dropdown.
 """
+import argparse
 import json
 import os
 import pathlib
 import runpy
+import shutil
 import subprocess
 import tempfile
 import time
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-OUT = ROOT / 'alpine/verification/ghostty-dropdown'
-LOGS = pathlib.Path('/tmp/ghostty-dropdown-verification-logs')
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--output-dir', type=pathlib.Path,
+                    default=ROOT / 'alpine/verification/ghostty-dropdown')
+OUT = parser.parse_args().output_dir.resolve()
+OUT.mkdir(parents=True, exist_ok=True)
+LOGS = OUT / 'logs'
 LOGS.mkdir(exist_ok=True)
-OUT.mkdir(exist_ok=True)
 HELPER = ROOT / 'alpine/desktop/.local/bin/oldbook-dropdown'
 api = runpy.run_path(str(HELPER))
+
+
+def monitor_child(parent):
+    """Find btop descended from this private Foot process."""
+    processes = {}
+    for entry in pathlib.Path('/proc').glob('[0-9]*/stat'):
+        try:
+            data = entry.read_text()
+            fields = data.rsplit(') ', 1)[1].split()
+            processes[int(entry.parent.name)] = (
+                int(fields[1]), data.split('(', 1)[1].rsplit(')', 1)[0])
+        except (OSError, ProcessLookupError):
+            continue
+    for pid, (_, name) in processes.items():
+        if name != 'btop':
+            continue
+        ancestor = pid
+        seen = set()
+        while ancestor in processes and ancestor not in seen:
+            if ancestor == parent:
+                return pid
+            seen.add(ancestor)
+            ancestor = processes[ancestor][0]
+    return None
 
 
 def wait(fn):
@@ -44,6 +73,9 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
     config.write_text((ROOT / 'alpine/desktop/.config/ghostty/config').read_text()
                       + '\ncommand = /bin/sh\nshell-integration = none\n'
                       + 'working-directory = ' + str(home) + '\n')
+    for application in ('foot', 'btop'):
+        shutil.copytree(ROOT / 'alpine/desktop/.config' / application,
+                        home / '.config' / application)
     env = dict(os.environ, HOME=str(home), XDG_CONFIG_HOME=str(home / '.config'),
                XDG_DATA_HOME=str(home / '.local/share'),
                XDG_STATE_HOME=str(home / '.local/state'), XDG_CACHE_HOME=str(base / 'cache'),
@@ -89,12 +121,12 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
             args.append(cmd)
         return json.loads(command(*args).stdout)
 
-    def find():
-        return api['terminal'](ipc('get_tree'))
+    def find(profile='terminal'):
+        return api['terminal'](ipc('get_tree'), app_id=api['PROFILES'][profile][0])
 
-    def toggle():
+    def toggle(profile='terminal'):
         start = time.monotonic()
-        command(str(HELPER))
+        command(str(HELPER), profile)
         return round(time.monotonic() - start, 3)
 
     try:
@@ -128,6 +160,51 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         time.sleep(0.5)
         assert dropdown_count(ipc('get_tree')) == 1
         command('grim', str(OUT / 'headless.png'))
+
+        # A dropdown shown on another workspace must arrive on the first toggle.
+        # Retain the real Foot and btop processes through moves and hiding.
+        home_workspace = next(item['name'] for item in ipc('get_workspaces')
+                              if item.get('focused'))
+        toggle('monitor')
+        monitor, where = find('monitor')
+        assert monitor['visible'] and where == home_workspace
+        monitor_id, monitor_pid = monitor['id'], monitor['pid']
+        assert pathlib.Path(f'/proc/{monitor_pid}/exe').resolve().name == 'foot'
+        btop_pid = wait(lambda: monitor_child(monitor_pid))
+        workspace_moves = []
+        for number in (2, 10):
+            ipc('command', f'workspace number {number}')
+            toggle('monitor')
+            moved, where = find('monitor')
+            assert moved['visible'] and moved['focused'] and where == str(number), (
+                'one monitor toggle must recall it to the focused workspace', where)
+            assert (moved['id'], moved['pid']) == (monitor_id, monitor_pid)
+            assert monitor_child(monitor_pid) == btop_pid
+            workspace_moves.append({'workspace': where, 'container': moved['id'],
+                                    'foot_pid': moved['pid'], 'btop_pid': btop_pid})
+            toggle('monitor')
+            hidden_monitor, where = find('monitor')
+            assert where == '__i3_scratch' and not hidden_monitor['visible']
+            toggle('monitor')
+            reshown_monitor, where = find('monitor')
+            assert reshown_monitor['visible'] and where == str(number)
+            assert (reshown_monitor['id'], reshown_monitor['pid']) == (monitor_id, monitor_pid)
+            assert monitor_child(monitor_pid) == btop_pid
+        command('grim', str(OUT / 'monitor-workspace-ten.png'))
+        toggle('monitor')
+        # Console recall is independent; the hidden monitor stays alive.
+        toggle()
+        recalled_console, where = find()
+        assert recalled_console['visible'] and where == '10'
+        assert (recalled_console['id'], recalled_console['pid']) == (first_id, first_pid)
+        assert find('monitor')[1] == '__i3_scratch'
+        ipc('command', 'workspace ' + json.dumps(home_workspace))
+        toggle()
+        recalled_console, where = find()
+        assert recalled_console['visible'] and where == home_workspace
+        assert (recalled_console['id'], recalled_console['pid']) == (first_id, first_pid)
+        assert monitor_child(monitor_pid) == btop_pid
+
         ipc('command', f'[con_id={first_id}] move scratchpad')
         ipc('command', 'output HEADLESS-1 pos 1440 100')
         toggle()
@@ -147,9 +224,15 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
                        'hide_show_preserves_shell': True, 'focused_when_shown': True,
                        'undecorated': True, 'exit_then_reopen': True, 'offset_output': True,
                        'keyboard_input': True, 'new_window_shortcut_unbound': True},
+            'workspace_checks': {'monitor_first_toggle_recalls_other_workspace': True,
+                                 'monitor_local_toggle_hides': True,
+                                 'monitor_retains_foot_and_btop': True,
+                                 'console_recall_independent': True},
+            'monitor_workspace_moves': workspace_moves,
             'seconds': {'cold_start': cold, 'hide': hidden_time,
                         'show': show_time, 'reopen': reopened_time},
-            'screenshot': 'alpine/verification/ghostty-dropdown/headless.png'}
+            'screenshot': 'headless.png',
+            'monitor_screenshot': 'monitor-workspace-ten.png'}
         (OUT / 'headless.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps(report, indent=2))
     except Exception:
