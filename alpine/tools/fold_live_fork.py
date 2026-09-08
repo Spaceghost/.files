@@ -105,11 +105,13 @@ for kind, path in entries:
             report['conflicts'][target] = conflicts
     else:
         report['skipped'].append((kind, path, 'unexpected kind'))
-# Two slips of the original rename: a renamed service still wanted under its old name, and an
-# error message that took the Python identifier form of a helper name.
+# Slips of the original rename: a renamed service still wanted under its old name, an error
+# message that took the Python identifier form of a helper name, and the shared library path
+# components compared against the hyphenated name although the package directory is mbp_intel.
 SLIPS = [('bazzite/desktop/.config/systemd/user/mbp-intel-session.target',
           'Wants=oldbook-desktop-settings.service', 'Wants=mbp-intel-desktop-settings.service'),
-         ('bazzite/bin/mbp-intel-bazzite-profile', 'from mbp_intel-wallpaper', 'from mbp-intel-wallpaper')]
+         ('bazzite/bin/mbp-intel-bazzite-profile', 'from mbp_intel-wallpaper', 'from mbp-intel-wallpaper'),
+         ('bazzite/bin/mbp-intel-bazzite-profile', "('.local', 'lib', 'mbp-intel')", "('.local', 'lib', 'mbp_intel')")]
 report['slips'] = []
 for path, old, new in SLIPS:
     file = ROOT / path
