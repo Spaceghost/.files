@@ -1,0 +1,61 @@
+{
+  "reviewed_at_utc": "2026-09-08T05:15:04.728140+00:00",
+  "source_path": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture-local",
+  "source_sha256": "3367be0cc8c5be4f469a702a3aaf387c4d6d21211f159431f345d072f5c4632d",
+  "installed_path": "/home/jack/.local/bin/oldbook-scripture-local",
+  "installed_symlink_target": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture-local",
+  "installed_sha256": "3367be0cc8c5be4f469a702a3aaf387c4d6d21211f159431f345d072f5c4632d",
+  "source_install_match": true,
+  "in_flight_generation_invocation_sha256": "9e858b546aca104ae8d7e739e893c27a06f26cae38e3e384161395c1630e06c7",
+  "in_flight_generation_uses_pre_fix_loaded_source": true,
+  "live_processes_signaled": false,
+  "live_deployment_performed": false,
+  "feature_contract_reviewed": "SCRIPTURE in alpine/FEATURES.md; exact selection also preserves DEPLOY-RECOVERY",
+  "review_finding": "Server pidfd acquisition previously preceded its cleanup finally; OSError or interruption could leave the new server running. The cleanup now encloses acquisition and retains ownership through the unreaped Popen child until a pidfd is available.",
+  "tests_source_sha256": "aaf3a6766aad7ead90b3e737964bbb838efb056d6e01b189aed2bce8a9874c83",
+  "disposable_home_deployment": {
+    "command": [
+      "/home/jack/.files/alpine/bin/deploy-home",
+      "--target",
+      "/tmp/scripture-wrapper-deploy-review-nhlt7kw5",
+      "--only",
+      ".local/bin/oldbook-scripture-local"
+    ],
+    "returncode": 0,
+    "exact_changed_home_paths": [
+      ".local/bin/oldbook-scripture-local"
+    ],
+    "manifest_status": "complete",
+    "manifest_sha256": "4dee1a8238f39862327f33ece7659bb05482c34618d3b63a5a11ac029dfdf112",
+    "deployed_symlink_and_bytes_match_source": true,
+    "unrelated_configuration_preserved": true,
+    "rollback_returncode": 0,
+    "rollback_restored_original_bytes_and_mode": true,
+    "disposable_home_removed_after_verification": true
+  },
+  "provenance_review": {
+    "recorded_model_manifest_digest_matches_retained_manifest": true,
+    "retained_model_license_matches_manifest_license_layer": true,
+    "runtime_binary_matches_recorded_sha256": true,
+    "private_soname_alias_target": "libggml-base.so",
+    "model_weight_blobs_rehashed_during_inference": false,
+    "review_limit": "Existing full layer verification accepted from the generation owner; no inference or service request made by this review."
+  },
+  "lifecycle_verification": {
+    "command": "python3 -B -m unittest discover -s alpine/tests -p test_scripture_local.py -v",
+    "red_regression": "Both OSError and SystemExit after real owned-child creation left the server running before the fix; fixture teardown stopped only its own children.",
+    "initial_full_rerun": "New regression passed; the existing native signal fixture hit its five-second startup limit under CPU load. Its startup allowance is now 30 seconds with graceful abort cleanup. The separate signal-to-cleanup limit remains three seconds.",
+    "final_result": "10 tests passed in 17.812 seconds",
+    "unrelated_process_and_retained_model_survived_acquisition_failure": true,
+    "signal_fixture_uses_private_ephemeral_port": true,
+    "wrapper-startup-red.log": {
+      "sha256": "d06bcb1f7ac41ee08721b41d67801768f5e4f5a0488b9e7343ece636f4882391"
+    },
+    "wrapper-startup-first-rerun.log": {
+      "sha256": "61f313464bac29d4dbdc205847316db8e892a237e2c4aa08ea22155350860043"
+    },
+    "wrapper-startup-green.log": {
+      "sha256": "04ac776e8cc285f8d55a421fa5dbe53146c46607dbeb7f6c17271af1b1c9679c"
+    }
+  }
+}

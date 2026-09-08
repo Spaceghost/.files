@@ -1,0 +1,36 @@
+test_exception_during_generation_stops_owned_backend (test_scripture_local.LocalScriptureTests.test_exception_during_generation_stops_owned_backend) ... ok
+test_explicit_timeout_boundaries_reach_generator (test_scripture_local.LocalScriptureTests.test_explicit_timeout_boundaries_reach_generator) ... ok
+test_failed_generation_propagates_exit_code_and_stops_only_owned_backend (test_scripture_local.LocalScriptureTests.test_failed_generation_propagates_exit_code_and_stops_only_owned_backend) ... Local CPU generation can take up to 15 minutes.
+ok
+test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) ... ok
+test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) ... 
+  test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) (signal=<Signals.SIGHUP: 1>) ... FAIL
+  test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) (signal=<Signals.SIGTERM: 15>) ... FAIL
+test_missing_runtime_fails_without_download_or_new_server (test_scripture_local.LocalScriptureTests.test_missing_runtime_fails_without_download_or_new_server) ... ok
+test_occupied_port_does_not_reuse_or_stop_existing_listener (test_scripture_local.LocalScriptureTests.test_occupied_port_does_not_reuse_or_stop_existing_listener) ... ok
+test_owned_server_is_loopback_only_and_staging_arguments_reach_study_cli (test_scripture_local.LocalScriptureTests.test_owned_server_is_loopback_only_and_staging_arguments_reach_study_cli) ... ok
+test_parallel_invocation_reports_busy_and_preserves_first_owned_server (test_scripture_local.LocalScriptureTests.test_parallel_invocation_reports_busy_and_preserves_first_owned_server) ... ok
+test_timeout_outside_bounds_is_rejected_before_starting_server (test_scripture_local.LocalScriptureTests.test_timeout_outside_bounds_is_rejected_before_starting_server) ... ok
+
+======================================================================
+FAIL: test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) (signal=<Signals.SIGHUP: 1>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_local.py", line 214, in test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others
+    self.assertTrue(marker.exists(), 'delegated generator did not start')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : delegated generator did not start
+
+======================================================================
+FAIL: test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) (signal=<Signals.SIGTERM: 15>)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_local.py", line 220, in test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others
+    self.assertEqual(process.wait(timeout=3), 128 + number)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: -15 != 143
+
+----------------------------------------------------------------------
+Ran 10 tests in 27.800s
+
+FAILED (failures=2)

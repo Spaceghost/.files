@@ -1,0 +1,26 @@
+test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (alpine.tests.test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) ... 
+  test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (alpine.tests.test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) (failure='OSError') ... FAIL
+  test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (alpine.tests.test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) (failure='SystemExit') ... FAIL
+
+======================================================================
+FAIL: test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (alpine.tests.test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) (failure='OSError')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_local.py", line 164, in test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server
+    self.assertIsNotNone(created[-1].poll(), 'new server was left running')
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: unexpectedly None : new server was left running
+
+======================================================================
+FAIL: test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (alpine.tests.test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) (failure='SystemExit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_local.py", line 164, in test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server
+    self.assertIsNotNone(created[-1].poll(), 'new server was left running')
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: unexpectedly None : new server was left running
+
+----------------------------------------------------------------------
+Ran 1 test in 0.423s
+
+FAILED (failures=2)

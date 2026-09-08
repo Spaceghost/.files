@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture-local",
+    "2 Corinthians 12:9",
+    "--kind",
+    "study-note",
+    "--assets",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/assets",
+    "--database",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/study.sqlite3",
+    "--no-track",
+    "--timeout",
+    "300"
+  ],
+  "exit_code": 1,
+  "elapsed_seconds": 306.098,
+  "cloud_disabled": true,
+  "real_model_request": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-scripture-local": "327dd1c88f22c20fa2f4790af62d0e0c5c367e7c3253810305d3431982a56cd0",
+    "alpine/desktop/.local/bin/oldbook-scripture-study": "01475c63bd29093a795bc0bfefb830b3a12e554ed57bc2a98d92eddf778a3388",
+    "alpine/desktop/.local/lib/oldbook/scripture_generation.py": "018504befdd5773bfbdcad2a72a9407afd3e2409a730343d7ecb8ec96f2e1b21"
+  },
+  "outcome": "Verified Haswell CPU backend request timed out at300s with no entry saved. Read-only CPU sample observed ~798MHz under load; cause of low frequency is not established."
+}

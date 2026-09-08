@@ -1,0 +1,38 @@
+{
+  "runner_pid": 26543,
+  "first": {
+    "cpu_ticks": 35929,
+    "nice": 10,
+    "threads": 12,
+    "rss_mib": 1207.4,
+    "monotonic_at": 22118.534085302
+  },
+  "second": {
+    "cpu_ticks": 36348,
+    "nice": 10,
+    "threads": 12,
+    "rss_mib": 1207.4,
+    "monotonic_at": 22121.535119268
+  },
+  "observed_cpu_percent": 139.6,
+  "session_cpu_quota": "max 100000",
+  "cpu_mhz": [
+    798.199,
+    798.2,
+    798.251,
+    798.196,
+    798.185,
+    798.216,
+    798.215,
+    798.2
+  ],
+  "all_policies": {
+    "driver": "intel_cpufreq",
+    "governor": "schedutil",
+    "minimum_khz": 800000,
+    "maximum_khz": 3700000,
+    "observed_current_khz_about": 798200
+  },
+  "scope": "Read-only /proc and sysfs observations during the optimized real generation attempt; no power or scheduling changes.",
+  "limitation": "Low observed frequency is confirmed; its underlying cause was not investigated in this task."
+}

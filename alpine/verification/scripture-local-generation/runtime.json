@@ -1,0 +1,26 @@
+{
+  "runtime": "/home/jack/.local/share/oldbook/ollama/runtime-0.17.7-r1",
+  "apk_sha256": "9209558ef09917961c0b3eb96724c5532cc734ff3df2cb669d24a8e86945aafb",
+  "binary_sha256": "09c41e35cfd23760f8c004cc48f6c15b7b2176bcdfd4fd24cb5e9a9617d76dab",
+  "apk_signature": "verified by apk verify",
+  "files": [
+    ".PKGINFO",
+    ".SIGN.RSA.alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+    "usr/bin/ollama",
+    "usr/lib/ollama/libggml-base.so",
+    "usr/lib/ollama/libggml-cpu-alderlake.so",
+    "usr/lib/ollama/libggml-cpu-haswell.so",
+    "usr/lib/ollama/libggml-cpu-icelake.so",
+    "usr/lib/ollama/libggml-cpu-sandybridge.so",
+    "usr/lib/ollama/libggml-cpu-skylakex.so",
+    "usr/lib/ollama/libggml-cpu-sse42.so",
+    "usr/lib/ollama/libggml-cpu-x64.so"
+  ],
+  "apk_url": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/ollama-0.17.7-r1.apk",
+  "apk_license": "MIT",
+  "apk_version": "0.17.7-r1",
+  "compiled_version_reported": "0.0.0",
+  "apk_fossil_artifact": "sha256/9209558ef09917961c0b3eb96724c5532cc734ff3df2cb669d24a8e86945aafb/ollama-0.17.7-r1.apk",
+  "archive_restored_and_signature_verified": true,
+  "global_package_install": false
+}

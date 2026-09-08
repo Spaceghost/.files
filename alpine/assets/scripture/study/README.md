@@ -48,6 +48,23 @@ repository's Git mirror. See [Fossil's artifact model](https://fossil-scm.org/ho
 
 ## Local generation and sources
 
+This laptop also has a retained CPU backend for requests when Alienware is
+unavailable. It starts a private, local-only Ollama process for the request and
+stops that process afterward; the model stays on disk for the next request:
+
+```sh
+oldbook-scripture-local '2 Corinthians 12:9' --kind study-note
+```
+
+The wrapper uses the signed Alpine CPU runtime and `qwen2.5:1.5b` without a
+global package installation. It preserves the existing Alienware settings,
+does not download models automatically, and leaves an occupied port untouched.
+CPU requests have a 15-minute limit; use `--timeout SECONDS` for a shorter wait.
+Startup, model checks and cleanup add some time outside that request limit.
+For an isolated review before adding a record to the library, pass `--assets`
+and `--database` pointing at a disposable Scripture copy, with `--no-track`.
+See [local runtime provenance and replay](../../../verification/scripture-local-generation/README.md).
+
 Use an already installed model on a local Ollama server:
 
 ```sh
