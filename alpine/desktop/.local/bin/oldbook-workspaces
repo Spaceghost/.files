@@ -198,7 +198,9 @@ def daemon(runtime, directory, path):
         def place(windows, apps):
             nonlocal adopt
             candidates = [(view['id'], apps.get(view['id'], {}).get('name')) for view in windows]
-            for identifier, number in placement.plan(candidates, adopt=adopt):
+            stay = {view['id'] for view in windows
+                    if view.get('app_id') == 'oldbook-agent-quick'}
+            for identifier, number in placement.plan(candidates, adopt=adopt, stay=stay):
                 try:
                     command(path, f'[con_id={identifier}] move container to workspace number {number}')
                 except RuntimeError:
@@ -278,6 +280,7 @@ def status(directory):
     if not windows:
         lines.append('No open Codex, ChatGPT or Claude windows')
     lines.append('\nLeft: next AI window · Right: sessions and launchers')
+    lines.append('Super+left / Super+Ctrl+N: new uncontained Codex · Astra ultra · tmux')
     css_class = ('attention' if any(w.get('event') == 'approval-requested' for w in windows)
                  else 'complete' if any(w.get('event') == 'turn-complete' for w in windows)
                  else 'active' if windows else 'idle')

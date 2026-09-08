@@ -1,5 +1,5 @@
 """One-time placement of designated instances and independent artwork choices."""
-DEFAULTS = {'Codex': 1, 'Pithos': 2, 'claude': 3, 'btop': 4, 'Firefox': 5, 'Fossil': 6}
+DEFAULTS = {'Codex': 1, 'Pithos': 2, 'claude': 3, 'btop': 4, 'Firefox': 5, 'Fossil': 0}
 
 
 class Placement:
@@ -8,13 +8,16 @@ class Placement:
         self.seen = set(saved.get('seen', []))
         self.claims = saved.get('claims', {})
 
-    def plan(self, windows, adopt=False):
+    def plan(self, windows, adopt=False, stay=()):
         live = {identifier for identifier, _ in windows}
         self.seen &= live
         self.claims = {name: identifier for name, identifier in self.claims.items()
                        if identifier in live}
         moves = []
         for identifier, name in windows:
+            if identifier in stay:
+                self.seen.add(identifier)
+                continue
             if identifier in self.seen or name not in DEFAULTS:
                 continue
             self.seen.add(identifier)

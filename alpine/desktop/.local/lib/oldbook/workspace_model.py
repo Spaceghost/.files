@@ -1,7 +1,7 @@
 """Select workspace applications and retain user-controlled workspace names."""
 import unicodedata
 
-THEMES = {'1': 'GHOST', '2': 'ORBIT', '3': 'LAB', '4': 'SIGNAL', '5': 'LOUNGE', '6': 'STRATA'}
+THEMES = {'0': 'STRATA', '1': 'GHOST', '2': 'ORBIT', '3': 'LAB', '4': 'SIGNAL', '5': 'LOUNGE'}
 
 
 def children(node):

@@ -115,6 +115,10 @@ mkdir -p "$art_state"
 if command -v oldbook-workspaces >/dev/null 2>&1; then
     oldbook-workspaces daemon 9>&- >>"$art_state/workspaces.log" 2>&1 &
 fi
+# Keeps the dedicated local review window on workspace 0 without raising it.
+if command -v oldbook-strata >/dev/null 2>&1; then
+    oldbook-strata --daemon 9>&- >>"$art_state/strata.log" 2>&1 &
+fi
 # Fades the bar back while a window is fullscreen; it only rewrites the imported
 # stylesheet when that state actually changes.
 if command -v oldbook-waybar-dim >/dev/null 2>&1; then

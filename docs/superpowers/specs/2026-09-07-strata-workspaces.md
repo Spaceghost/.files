@@ -1,21 +1,30 @@
 # STRATA and compact workspace defaults
 
-Super+6 opens or focuses one dedicated Firefox profile running the local Fossil
+Super+0 opens or focuses one dedicated Firefox profile running the local Fossil
 review UI at http://127.0.0.1:8766/timeline?r=alpine-oldbook&y=ci.
-The workspace naming service retains 6: STRATA and labels its browser Fossil.
-The launcher serializes concurrent calls, reuses its review window, starts one
-loopback-only Fossil UI server, and stops that server when the compositor socket
-is removed. The private Firefox profile remains outside the repository.
+The workspace naming service retains 0: STRATA and labels its browser Fossil.
+The launcher serializes concurrent calls and reuses its review window. The
+session starts `oldbook-strata --daemon` in the background; this service keeps
+only the dedicated `oldbook-strata` browser on workspace 0 and maintains one
+loopback-only Fossil UI server. It adopts an existing review window and server,
+restarts failed or closed children with bounded delays, and leaves the current
+workspace focused during background startup. Super+6 is an ordinary workspace
+switch again; Super+Shift+0 moves an ordinary window to workspace 0. The private
+Firefox profile remains outside the repository. See the
+[service follow-up](../decisions/2026-09-07-strata-workspace-zero-service.md).
 
 ## Default placement
 
 Sway IPC handles placement; no Devilspie process is needed. The first recognized
 instance is designated: Codex → 1 GHOST, Pithos → 2 ORBIT, Claude → 3 LAB,
-btop → 4 SIGNAL, Firefox → 5 LOUNGE, and Fossil → 6 STRATA. Existing windows
+btop → 4 SIGNAL, Firefox → 5 LOUNGE, and Fossil → 0 STRATA. Existing windows
 are adopted in place on initial enablement. Designated windows are moved only
 once; later manual moves and additional instances are preserved. Closing a
 primary window does not pull an already open extra window into its place.
 Placement state survives service restart within the same compositor session.
+STRATA is the exception to one-time placement: its dedicated service returns its
+review windows to 0 after manual moves. Ordinary Firefox remains on 5 and is
+not pinned by the STRATA service.
 
 ## Artwork and spacing
 
@@ -58,7 +67,9 @@ Concurrent finer Foot opacity/padding adjustments were retained.
 To undo placement, remove the placement callback in oldbook-workspaces and
 restart that daemon; no manual window moves need reversing. Remove
 workspace_rotations from gallery.json and restart oldbook-wallpaper to restore
-global rotation. Restore the ordinary Super+6 binding to stop launching STRATA;
-close its browser and terminate its --serve helper to stop the local UI.
+global rotation. To stop STRATA supervision, stop its `--daemon` process and
+remove its startup entry from `oldbook-session`. Restore the preceding launcher,
+Sway bindings and placement rules to move review launching back to 6; close the
+review browser and terminate its `--serve` helper to stop the local UI.
 The settings and scripts can also be restored from the preceding Fossil check-in.
 Do not commit or remove the private Firefox profile during configuration rollback.

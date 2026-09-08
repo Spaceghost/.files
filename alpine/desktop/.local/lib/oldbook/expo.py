@@ -16,9 +16,9 @@ def walk(node):
 
 
 def workspaces(tree):
-    desktops = {num: {'num': num, 'name': f'{num}:STRATA' if num == 6 else f'Desktop {num}',
+    desktops = {num: {'num': num, 'name': '0: STRATA' if num == 0 else f'Desktop {num}',
                    'windows': []}
-             for num in range(1, 11)}
+             for num in range(11)}
     for node in walk(tree):
         if node.get('type') != 'workspace' or node.get('num', -1) < 0:
             continue
