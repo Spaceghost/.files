@@ -4,6 +4,7 @@ import html
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
 import time
@@ -103,8 +104,80 @@ def network():
     emit(f"{glyph} ↓{rate(down)}", tooltip, "connected")
 
 
+def notifications():
+    """Restate swaync's own status line with the panel's interaction hints.
+
+    swaync reports a count and a state name; Waybar can only put a fixed
+    sentence in tooltip-format, so the hints and the live state are joined
+    here instead of choosing between them.
+    """
+    states = {
+        "notification": "Transmissions are waiting.",
+        "none": "Nothing is waiting.",
+        "dnd-notification": "Do Not Disturb is on; transmissions are held.",
+        "dnd-none": "Do Not Disturb is on; nothing is waiting.",
+        "inhibited-notification": "Notifications are inhibited; transmissions are held.",
+        "inhibited-none": "Notifications are inhibited; nothing is waiting.",
+        "dnd-inhibited-notification": "Do Not Disturb and inhibited; transmissions are held.",
+        "dnd-inhibited-none": "Do Not Disturb and inhibited; nothing is waiting.",
+    }
+    reader = None
+    pending_signal = None
+    handled = (signal.SIGTERM, signal.SIGINT)
+    previous_handlers = {number: signal.getsignal(number) for number in handled}
+
+    def request_exit(number, _frame):
+        nonlocal pending_signal
+        pending_signal = number
+        if reader is not None:
+            raise SystemExit(128 + number)
+
+    for number in handled:
+        signal.signal(number, request_exit)
+    try:
+        reader = subprocess.Popen(["swaync-client", "-swb"], stdout=subprocess.PIPE,
+                                  text=True)
+        if pending_signal is not None:
+            raise SystemExit(128 + pending_signal)
+        for line in reader.stdout:
+            try:
+                report = json.loads(line)
+            except ValueError:
+                continue
+            if not isinstance(report, dict):
+                continue
+            alt = str(report.get("alt", "none"))
+            count = str(report.get("text", "0"))
+            tooltip = "\n".join([
+                "<b>INCOMING TRANSMISSIONS</b>",
+                states.get(alt, html.escape(alt)),
+                f"Waiting: {html.escape(count)}",
+                "",
+                "Left: notification history · Right: toggle Do Not Disturb",
+            ])
+            print(json.dumps({"text": count, "alt": alt, "tooltip": tooltip,
+                              "class": report.get("class", alt)}, ensure_ascii=False), flush=True)
+    finally:
+        for number, handler in previous_handlers.items():
+            signal.signal(number, handler)
+        if reader is not None:
+            if reader.poll() is None:
+                reader.terminate()
+            try:
+                reader.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                reader.kill()
+                try:
+                    reader.wait(timeout=1)
+                except subprocess.TimeoutExpired:
+                    pass
+            if reader.stdout is not None:
+                reader.stdout.close()
+    raise SystemExit(reader.returncode or 0)
+
+
 if __name__ == "__main__":
-    actions = {"network": network, "radio": radio, "firewall": firewall}
+    actions = {"network": network, "radio": radio, "firewall": firewall, "notifications": notifications}
     if len(sys.argv) != 2 or sys.argv[1] not in actions:
-        raise SystemExit("usage: oldbook-panel-status {network|radio|firewall}")
+        raise SystemExit("usage: oldbook-panel-status {network|radio|firewall|notifications}")
     actions[sys.argv[1]]()

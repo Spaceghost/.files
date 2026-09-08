@@ -8,6 +8,12 @@
 .control-center { padding: 12px; box-shadow: 0 10px 32px rgba(8, 0, 16, 0.65); }
 .notification { margin: 8px; padding: 12px; }
 .notification-row:focus, .notification-row:hover { background: #4d206d; }
+.control-center .control-center-list,
+.control-center .control-center-list > row,
+.control-center .notification-group,
+.control-center .notification-row,
+.control-center .notification-background { background: transparent; box-shadow: none; }
+.control-center .notification-row:hover { background: rgba(77, 32, 109, 0.55); }
 .widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid { margin: 6px 0; padding: 10px; }
 .widget-title > button, .widget-dnd > switch slider, .widget-buttons-grid > flowbox > flowboxchild > button { background: #542476; color: #fff7ff; border-radius: 10px; }
 .widget-title > button:hover, .widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #922b78; }
