@@ -226,9 +226,11 @@ static void scale_changed(GObject *object, GParamSpec *spec, gpointer data) {
     refresh_status(art);
 }
 
-static void action(Artwork *art, const char *name) {
+static void action_from(Artwork *art, const char *name, const char *origin) {
     GError *error = NULL;
-    GSubprocess *process = g_subprocess_new(G_SUBPROCESS_FLAGS_NONE, &error, art->command, name, NULL);
+    GSubprocess *process = origin
+        ? g_subprocess_new(G_SUBPROCESS_FLAGS_NONE, &error, art->command, name, "--from", origin, NULL)
+        : g_subprocess_new(G_SUBPROCESS_FLAGS_NONE, &error, art->command, name, NULL);
     if (process) {
         g_object_unref(process);
     } else {
@@ -237,6 +239,33 @@ static void action(Artwork *art, const char *name) {
         g_error_free(error);
     }
     refresh_status(art);
+}
+
+static void action(Artwork *art, const char *name) {
+    action_from(art, name, NULL);
+}
+
+/* Where the click landed, in the output's logical pixels, so the crossfade can
+ * grow the new painting out of the badge. GDK reports root coordinates
+ * relative to the layer surface, which is the bar itself, so the bar's own
+ * position on the output is added back from its allocation and margins. The
+ * result is a point on the badge; a few pixels either way are invisible in a
+ * reveal that spans the whole screen. */
+static char *click_origin(Artwork *art, GdkEventButton *event) {
+    GtkWidget *toplevel = gtk_widget_get_toplevel(art->box);
+    if (!GTK_IS_WINDOW(toplevel)) return NULL;
+    gint x = 0, y = 0;
+    if (!gtk_widget_translate_coordinates(art->box, toplevel, (gint)event->x, (gint)event->y, &x, &y))
+        return NULL;
+    GdkWindow *window = gtk_widget_get_window(toplevel);
+    if (window) {
+        gint origin_x = 0, origin_y = 0;
+        gdk_window_get_origin(window, &origin_x, &origin_y);
+        x += origin_x;
+        y += origin_y;
+    }
+    if (x < 0 || y < 0) return NULL;
+    return g_strdup_printf("%d,%d", x, y);
 }
 
 static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -252,7 +281,13 @@ static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer data)
     else if (event->button == 2) action(art, "pause");
     else if (event->button == 3) {
         Modifiers modifiers = modifiers_pressed(event->state);
-        action(art, modifiers.super && modifiers.shift ? "prompt-theme" : "next");
+        if (modifiers.super && modifiers.shift) {
+            action(art, "prompt-theme");
+        } else {
+            char *origin = click_origin(art, event);
+            action_from(art, "next", origin);
+            g_free(origin);
+        }
     }
     return TRUE;
 }

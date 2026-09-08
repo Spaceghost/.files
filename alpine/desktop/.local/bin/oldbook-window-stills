@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+"""Cached still images of the windows on one workspace, for the bar's popovers.
+
+The capture itself is the carousel's: this imports `carousel.capture_preview`
+rather than growing a second capture engine, so a still here and a card in the
+window switcher come from the same compositor call and the same limits. Images
+land in the user's cache, never in the checkout, and each one is keyed by the
+window and the size asked for, so hovering the same workspace twice costs one
+Sway query and nothing else.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import runpy
+import sys
+
+LIB = Path(__file__).resolve().parents[1] / 'lib/oldbook'
+sys.path.insert(0, str(LIB))
+from carousel import capture_preview  # noqa: E402
+from window_switching import window_candidates  # noqa: E402
+
+CACHE_NAME = 'oldbook/stills'
+MAX_WINDOWS = 12
+DEFAULT_HEIGHT = 96
+RADIUS = 6
+
+
+def cache_directory(base=None):
+    root = base or os.environ.get('XDG_CACHE_HOME') or str(Path.home() / '.cache')
+    directory = Path(root) / CACHE_NAME
+    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    return directory
+
+
+def still_name(window, height):
+    """One name per window and size; the title is part of it so a retitled
+    window is redrawn rather than showing a stale caption's companion image."""
+    seed = '\x1f'.join(str(window.get(key, '')) for key in
+                       ('id', 'app_id', 'title', 'foreign_toplevel_identifier'))
+    digest = hashlib.sha256(seed.encode()).hexdigest()[:20]
+    return f'{digest}-{int(height)}.png'
+
+
+def write_still(pixels, width, height, destination, target_height, radius=RADIUS):
+    """Scale the captured RGB frame to the requested height, with soft corners."""
+    import gi
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import GdkPixbuf, GLib
+    import cairo
+    source = GdkPixbuf.Pixbuf.new_from_bytes(GLib.Bytes.new(pixels), GdkPixbuf.Colorspace.RGB,
+                                             False, 8, width, height, width * 3)
+    scale = target_height / height
+    target_width = max(1, round(width * scale))
+    target = max(1, int(target_height))
+    scaled = source.scale_simple(target_width, target, GdkPixbuf.InterpType.BILINEAR)
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, target_width, target)
+    context = cairo.Context(surface)
+    import math
+    r = max(0.0, min(radius, target_width / 2.0, target / 2.0))
+    context.new_sub_path()
+    context.arc(target_width - r, r, r, -math.pi / 2, 0)
+    context.arc(target_width - r, target - r, r, 0, math.pi / 2)
+    context.arc(r, target - r, r, math.pi / 2, math.pi)
+    context.arc(r, r, r, math.pi, 3 * math.pi / 2)
+    context.close_path()
+    context.clip()
+    import gi as _gi
+    _gi.require_version('Gdk', '3.0')
+    from gi.repository import Gdk
+    Gdk.cairo_set_source_pixbuf(context, scaled, 0, 0)
+    context.paint()
+    temporary = destination.with_name(destination.name + f'.{os.getpid()}.tmp')
+    surface.write_to_png(str(temporary))
+    os.chmod(temporary, 0o600)
+    temporary.replace(destination)
+    return target_width, target
+
+
+def windows_on(workspace, tree):
+    result = [item for item in window_candidates(tree)
+              if item.get('workspace_num') == workspace]
+    return result[:MAX_WINDOWS]
+
+
+def collect(workspace, height, cache=None, capture=capture_preview):
+    ipc = runpy.run_path(str(Path(__file__).resolve().parent / 'oldbook-workspaces'))
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}'))
+    sway = os.environ.get('SWAYSOCK') or ipc['find_socket'](runtime)
+    if not sway:
+        raise RuntimeError('no compositor session')
+    tree = ipc['request'](sway, 4)
+    directory = cache_directory(cache)
+    stills = []
+    for window in windows_on(workspace, tree):
+        record = {'id': window['id'], 'title': window.get('title') or '',
+                  'application': window.get('application') or ''}
+        destination = directory / still_name(window, height)
+        if destination.is_file():
+            record['still'] = str(destination)
+        else:
+            captured = capture(window)
+            if captured is not None:
+                width, source_height, pixels = captured
+                if width > 0 and source_height > 0 and pixels:
+                    write_still(pixels, width, source_height, destination, height)
+                    record['still'] = str(destination)
+        stills.append(record)
+    return {'workspace': workspace, 'height': int(height), 'windows': stills}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.split('\n\n', 1)[0])
+    parser.add_argument('--workspace', required=True, type=int)
+    parser.add_argument('--height', type=int, default=DEFAULT_HEIGHT)
+    arguments = parser.parse_args(argv)
+    if not 1 <= arguments.height <= 512:
+        parser.error('height must be between 1 and 512 pixels')
+    print(json.dumps(collect(arguments.workspace, arguments.height)))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print('oldbook-window-stills: ' + str(error), file=sys.stderr)
+        sys.exit(1)

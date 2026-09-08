@@ -1,7 +1,7 @@
 # Maintainer: Oldbook local package <oldbook@localhost.invalid>
 pkgname=oldbook-waybar-art
 pkgver=1.0.0
-pkgrel=10
+pkgrel=11
 pkgdesc="Space Ghost artwork controls and contextual hover help for Waybar"
 url="https://github.com/Alexays/Waybar"
 arch="all"
@@ -26,8 +26,8 @@ package() {
 }
 
 sha512sums="
-653a2cd7a444c14f06285d847f65458da024f63b6fc36c6c920077aad6c56a10785e6479f45c3a4c7f3ba84c8b6eed8ef59cfe33abe12f1fd2e43cf6168f2566  art.c
-7acb46f1151abaa3c0cee367b90ad062546d8fe0569c499d0e549e9bb2c7015ed34fc3af0ae9b90e40f9fed6466e559fd4a6b72851e1de9b5ea59f3f2a4c52d9  help.c
+26d093916cae4f942bc362fb5bcd69e2532b977b2a3501671f28eeb82bab91afdcb9d2e9442645ee0b8fae3dcad6d859a4b7c5a820d687c9b45144b850671e16  art.c
+80ef9bb3ec4502850e6fde0958c7a6f4e359e718019f5ce65d45e09cf4f7474cb428f4a400c40ef696e9082ad31628025f245fbec59175813b060bf3b152fa28  help.c
 8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4  help.h
 b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd  waybar_cffi_module.h
 fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2  LICENSE.Waybar

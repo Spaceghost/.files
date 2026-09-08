@@ -1,0 +1,18 @@
+{
+  "fixture": "alpine/packages/waybar-art/tests/workspace-peek.c",
+  "checks_passed": 24,
+  "display": "private Xvfb 1440x900x24, private HOME, scripted stills helper",
+  "module_sha256": "39ec258927f3680f7bc33a6047758c08eaa9ae6580ce54f0be0805a72ea8b2b6",
+  "apk_sha256": "2f4d2c73326363d0ff33a9b38f3ee5a1ec358e1654feba87538e48b00269cacd",
+  "apk_identity": "Q1Ma86NK+KKWlE0krnCcQYCoKOAKU=",
+  "pkgrel": 11,
+  "dwell_ms": 350,
+  "byte_identical_builds": true,
+  "live": {
+    "module_installed": true,
+    "waybar_restarted": true,
+    "maps_new_module": "inode 16680457 matches the installed library",
+    "stills_helper_live_run": "workspace 1 captured one window into the user cache",
+    "visual_check": "pending: the session was locked for the whole of this work"
+  }
+}

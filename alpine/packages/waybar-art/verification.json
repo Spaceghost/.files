@@ -1,16 +1,29 @@
 {
-  "version": "1.0.0-r10",
-  "sha256": "0987095737e6179bf278b106b0701c982ffff72120d7ae0aa2b7a3e411537c7a",
-  "binary_sha256": "208b770dd86d3a9769b4ff1c693fb73ea027f06691b967fca80e54ed1a154d11",
+  "version": "1.0.0-r11",
+  "sha256": "2f4d2c73326363d0ff33a9b38f3ee5a1ec358e1654feba87538e48b00269cacd",
+  "binary_sha256": "39ec258927f3680f7bc33a6047758c08eaa9ae6580ce54f0be0805a72ea8b2b6",
   "byte_identical_signed_apks": true,
   "network": "both builds isolated with unshare --net",
   "evidence": "alpine/verification/gallery-thumbnails",
-  "native_click_checks": "r9 evidence retained in alpine/verification/waybar-reactivity; r10 changes only the badge widget tree, not the pointer callbacks",
+  "native_click_checks": "r9 evidence retained in alpine/verification/waybar-reactivity; r11 adds a right-click reveal origin to the existing next action and leaves every other pointer callback alone",
   "paid_generation_calls": 0,
   "badge": {
-    "thumbnail_states_rendered": ["rotating", "paused", "generating", "no-thumbnail"],
+    "thumbnail_states_rendered": [
+      "rotating",
+      "paused",
+      "generating",
+      "no-thumbnail"
+    ],
     "evidence": "alpine/verification/gallery-thumbnails/badge.png",
     "headless": true,
     "live_visual_check": "pending display wake"
+  },
+  "peek": {
+    "fixture": "alpine/packages/waybar-art/tests/workspace-peek.c",
+    "checks": 24,
+    "dwell_ms": 350,
+    "display": "private Xvfb, private HOME, scripted stills helper",
+    "evidence": "alpine/verification/waybar-popovers",
+    "live_visual_check": "pending: the session was locked throughout"
   }
 }

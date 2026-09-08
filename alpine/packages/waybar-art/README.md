@@ -9,13 +9,21 @@ of waiting for the five-second poll. Pausing rotation dims the picture, and whil
 Space Ghost is painting the amber hourglass glyph takes its place; without a
 thumbnail the original gallery glyph is shown.
 
+Resting the pointer on a workspace button for a third of a second opens a peek
+beneath it: one card per window on that workspace, a rounded still above a
+shortened title, closing again when the pointer leaves. The stills come from
+`oldbook-window-stills`, which reuses the carousel's own capture provider and
+caches its images under `~/.cache/oldbook/stills/`; a window whose capture
+failed keeps its place with a plain tile, and a helper that fails opens nothing.
+
 This small native musl CFFI widget adds three actions to the original artwork
 button: **Command/Super + left click** generates and switches, **Shift +
 left click** opens the prompt editor, and **Command/Super + Shift + left click**
 creates a random named theme and switches to its first painting through the
 gallery's existing new-theme generator. Left click opens the gallery, right
-click advances to the next image, middle click pauses, and scrolling moves to
-the previous or next image. Super/Command + Shift + right click opens a free-form theme description;
+click advances to the next image and hands the crossfade the point it landed
+on, so the new painting grows out of the badge; middle click pauses, and
+scrolling moves to the previous or next image. Super/Command + Shift + right click opens a free-form theme description;
 the generator invents its name and creates a complete desktop design and first
 painting. Empty input or Escape cancels. Other right, middle and scroll actions
 keep their usual behavior. The
@@ -54,7 +62,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r10.apk
+doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r11.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -62,7 +70,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r10 APK identity and archived artifact.
+`manifest.json` records the exact signed r11 APK identity and archived artifact.
 
 ## Verify
 
@@ -95,6 +103,20 @@ instruction used to invalidate the entire popup despite passing text-only tests.
 ```sh
 alpine/packages/waybar-art/verify-headless --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-art-test
 ```
+
+Check the workspace peek without a compositor. The fixture supplies its own
+HOME and a scripted stills helper, so it never asks for a real capture:
+
+```sh
+cc -std=c11 -D_GNU_SOURCE -Wall -Wextra -Werror -o /tmp/peek \
+    alpine/packages/waybar-art/tests/workspace-peek.c alpine/packages/waybar-art/help.c \
+    $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
+Xvfb :77 -screen 0 1440x900x24 & DISPLAY=:77 /tmp/peek /tmp/peek-widgets.png
+```
+
+`verify-workspaces-headless` currently fails on the archived `spaceghost.json`
+theme, before and after this release; the peek fixture and
+[its evidence](../../verification/waybar-popovers/README.md) cover the new work.
 
 The test requires `sway waybar build-base pkgconf wayland-dev grim` and `doas` for a temporary
 uinput keyboard. It disables the exact synthetic devices in existing Sway

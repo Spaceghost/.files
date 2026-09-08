@@ -1,6 +1,16 @@
 /* SPDX-License-Identifier: MIT */
 #include "help.h"
+#include <json-glib/json-glib.h>
+#include <stdlib.h>
 #include <string.h>
+
+/* Rest the pointer on a workspace for this long and its windows appear. Short
+ * enough to feel like part of the hover, long enough that sweeping the bar
+ * never asks the compositor for a single capture. */
+#define PEEK_DWELL_MS 350
+#define PEEK_HEIGHT 96
+#define PEEK_MAX 6
+#define PEEK_TITLE_WIDTH 18
 
 typedef enum {
     HELP_WORKSPACE,
@@ -22,6 +32,14 @@ typedef struct {
     PangoAttrList *original_attributes;
     gboolean styling;
     HelpKind kind;
+    /* Workspace peek: a dwell timer, the running stills helper and the
+     * popover it fills. Only one workspace peeks at a time. */
+    gulong enter_handler;
+    gulong leave_handler;
+    guint dwell_source;
+    GSubprocess *stills;
+    GtkWidget *popover;
+    gboolean hovered;
 } Binding;
 
 struct Help {
@@ -36,6 +54,9 @@ struct Help {
 };
 
 static const char installed_key[] = "oldbook-hover-help-binding";
+/* The open peek is published on its button so a test fixture can find it
+ * without reaching into this file's private binding record. */
+static const char peek_key[] = "oldbook-workspace-peek";
 
 static void widget_gone(gpointer data, GObject *where_widget_was) {
     (void)where_widget_was;
@@ -220,6 +241,167 @@ static gboolean query_help(GtkWidget *widget, gint x, gint y, gboolean keyboard_
     return TRUE;
 }
 
+/* ---- Workspace peek ---------------------------------------------------- */
+
+static void close_peek(Binding *binding) {
+    if (binding->dwell_source) {
+        g_source_remove(binding->dwell_source);
+        binding->dwell_source = 0;
+    }
+    if (binding->stills) {
+        g_subprocess_force_exit(binding->stills);
+        g_clear_object(&binding->stills);
+    }
+    if (binding->popover) {
+        gtk_popover_popdown(GTK_POPOVER(binding->popover));
+        gtk_widget_destroy(binding->popover);
+        binding->popover = NULL;
+    }
+    if (binding->widget) g_object_set_data(G_OBJECT(binding->widget), peek_key, NULL);
+}
+
+static int workspace_number(Binding *binding) {
+    if (!binding->label) return -1;
+    const char *text = gtk_label_get_text(GTK_LABEL(binding->label));
+    if (!text || !g_ascii_isdigit(*text)) return -1;
+    long value = strtol(text, NULL, 10);
+    return value >= 0 && value < 1000 ? (int)value : -1;
+}
+
+static char *shorten(const char *text) {
+    if (!text || !*text) return g_strdup("Window");
+    glong length = g_utf8_strlen(text, -1);
+    if (length <= PEEK_TITLE_WIDTH) return g_strdup(text);
+    char *cut = g_utf8_substring(text, 0, PEEK_TITLE_WIDTH - 1);
+    char *result = g_strconcat(cut, "…", NULL);
+    g_free(cut);
+    return result;
+}
+
+/* One card per window: the still above its own short title. A window whose
+ * capture failed keeps its place with a plain tile, so the peek never
+ * silently drops a window from the count. */
+static GtkWidget *peek_card(JsonObject *window, int scale) {
+    GtkWidget *card = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+    gtk_style_context_add_class(gtk_widget_get_style_context(card), "oldbook-peek-card");
+    JsonNode *node = json_object_get_member(window, "still");
+    const char *still = node && JSON_NODE_HOLDS_VALUE(node) &&
+                        json_node_get_value_type(node) == G_TYPE_STRING
+        ? json_node_get_string(node) : NULL;
+    GtkWidget *image = NULL;
+    if (still && *still) {
+        GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(still, NULL);
+        if (pixbuf) {
+            cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, scale, NULL);
+            image = gtk_image_new_from_surface(surface);
+            cairo_surface_destroy(surface);
+            g_object_unref(pixbuf);
+        }
+    }
+    if (!image) {
+        image = gtk_drawing_area_new();
+        gtk_widget_set_size_request(image, PEEK_HEIGHT * 4 / 3, PEEK_HEIGHT);
+    }
+    gtk_style_context_add_class(gtk_widget_get_style_context(image), "oldbook-peek-still");
+    gtk_box_pack_start(GTK_BOX(card), image, FALSE, FALSE, 0);
+    node = json_object_get_member(window, "title");
+    const char *title = node && JSON_NODE_HOLDS_VALUE(node) &&
+                        json_node_get_value_type(node) == G_TYPE_STRING
+        ? json_node_get_string(node) : NULL;
+    char *shortened = shorten(title);
+    GtkWidget *caption = gtk_label_new(shortened);
+    g_free(shortened);
+    gtk_label_set_ellipsize(GTK_LABEL(caption), PANGO_ELLIPSIZE_END);
+    gtk_label_set_max_width_chars(GTK_LABEL(caption), PEEK_TITLE_WIDTH);
+    gtk_widget_set_halign(caption, GTK_ALIGN_CENTER);
+    gtk_style_context_add_class(gtk_widget_get_style_context(caption), "oldbook-peek-title");
+    gtk_box_pack_start(GTK_BOX(card), caption, FALSE, FALSE, 0);
+    return card;
+}
+
+static void show_peek(Binding *binding, const char *json) {
+    if (!binding->hovered || !binding->widget) return;
+    JsonParser *parser = json_parser_new();
+    GtkWidget *row = NULL;
+    if (json_parser_load_from_data(parser, json, -1, NULL) &&
+            JSON_NODE_HOLDS_OBJECT(json_parser_get_root(parser))) {
+        JsonObject *root = json_node_get_object(json_parser_get_root(parser));
+        JsonNode *node = json_object_get_member(root, "windows");
+        JsonArray *windows = node && JSON_NODE_HOLDS_ARRAY(node) ? json_node_get_array(node) : NULL;
+        guint count = windows ? json_array_get_length(windows) : 0;
+        if (count) {
+            int scale = gtk_widget_get_scale_factor(binding->widget);
+            row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+            for (guint i = 0; i < count && i < PEEK_MAX; ++i) {
+                JsonNode *item = json_array_get_element(windows, i);
+                if (!JSON_NODE_HOLDS_OBJECT(item)) continue;
+                gtk_box_pack_start(GTK_BOX(row), peek_card(json_node_get_object(item), scale > 0 ? scale : 1),
+                                   FALSE, FALSE, 0);
+            }
+        }
+    }
+    g_object_unref(parser);
+    if (!row) return;
+    binding->popover = gtk_popover_new(binding->widget);
+    gtk_widget_set_name(binding->popover, "oldbook-peek");
+    gtk_popover_set_position(GTK_POPOVER(binding->popover), GTK_POS_BOTTOM);
+    gtk_popover_set_modal(GTK_POPOVER(binding->popover), FALSE);
+    gtk_container_set_border_width(GTK_CONTAINER(binding->popover), 10);
+    gtk_container_add(GTK_CONTAINER(binding->popover), row);
+    gtk_widget_show_all(row);
+    gtk_popover_popup(GTK_POPOVER(binding->popover));
+    g_object_set_data(G_OBJECT(binding->widget), peek_key, binding->popover);
+}
+
+static void stills_ready(GObject *source, GAsyncResult *result, gpointer data) {
+    Binding *binding = data;
+    char *output = NULL;
+    gboolean ok = g_subprocess_communicate_utf8_finish(G_SUBPROCESS(source), result,
+                                                       &output, NULL, NULL);
+    if (binding->owner && !binding->owner->disposed && binding->stills == G_SUBPROCESS(source)) {
+        g_clear_object(&binding->stills);
+        if (ok && output && *output) show_peek(binding, output);
+    }
+    g_free(output);
+}
+
+static gboolean peek_now(gpointer data) {
+    Binding *binding = data;
+    binding->dwell_source = 0;
+    if (!binding->owner || binding->owner->disposed || !binding->hovered) return G_SOURCE_REMOVE;
+    int workspace = workspace_number(binding);
+    if (workspace < 0) return G_SOURCE_REMOVE;
+    char number[16];
+    char height[16];
+    g_snprintf(number, sizeof number, "%d", workspace);
+    g_snprintf(height, sizeof height, "%d", PEEK_HEIGHT);
+    char *helper = g_build_filename(g_get_home_dir(), ".local", "bin",
+                                    "oldbook-window-stills", NULL);
+    binding->stills = g_subprocess_new(G_SUBPROCESS_FLAGS_STDOUT_PIPE |
+                                       G_SUBPROCESS_FLAGS_STDERR_SILENCE, NULL,
+                                       helper, "--workspace", number, "--height", height, NULL);
+    g_free(helper);
+    if (binding->stills)
+        g_subprocess_communicate_utf8_async(binding->stills, NULL, NULL, stills_ready, binding);
+    return G_SOURCE_REMOVE;
+}
+
+static gboolean workspace_crossed(GtkWidget *widget, GdkEventCrossing *event, gpointer data) {
+    (void)widget;
+    Binding *binding = data;
+    if (!binding->owner || binding->owner->disposed) return FALSE;
+    if (event->type == GDK_ENTER_NOTIFY) {
+        if (binding->hovered) return FALSE;
+        binding->hovered = TRUE;
+        close_peek(binding);
+        binding->dwell_source = g_timeout_add(PEEK_DWELL_MS, peek_now, binding);
+    } else if (event->detail != GDK_NOTIFY_INFERIOR) {
+        binding->hovered = FALSE;
+        close_peek(binding);
+    }
+    return FALSE;
+}
+
 static void attach(Help *help, GtkWidget *widget, HelpKind kind) {
     if (g_object_get_data(G_OBJECT(widget), installed_key)) return;
     Binding *binding = g_new0(Binding, 1);
@@ -237,6 +419,11 @@ static void attach(Help *help, GtkWidget *widget, HelpKind kind) {
             G_CALLBACK(workspace_button_label_changed), binding);
         binding->style_handler = g_signal_connect(widget, "style-updated",
             G_CALLBACK(workspace_style_changed), binding);
+        gtk_widget_add_events(widget, GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
+        binding->enter_handler = g_signal_connect(widget, "enter-notify-event",
+            G_CALLBACK(workspace_crossed), binding);
+        binding->leave_handler = g_signal_connect(widget, "leave-notify-event",
+            G_CALLBACK(workspace_crossed), binding);
         watch_workspace_label(binding);
     }
 }
@@ -270,6 +457,7 @@ static void discover_workspace_children(Help *help) {
         if (binding->widget || binding->label) {
             i++;
         } else {
+            close_peek(binding);
             g_ptr_array_remove_index_fast(help->bindings, i);
             g_free(binding);
         }
@@ -358,6 +546,8 @@ void oldbook_help_deinit(void *instance) {
             gtk_label_set_attributes(GTK_LABEL(binding->label), binding->original_attributes);
             g_object_weak_unref(G_OBJECT(binding->label), label_gone, binding);
         }
+        binding->hovered = FALSE;
+        close_peek(binding);
         if (binding->widget) {
             if (binding->query_handler)
                 g_signal_handler_disconnect(binding->widget, binding->query_handler);
@@ -365,6 +555,10 @@ void oldbook_help_deinit(void *instance) {
                 g_signal_handler_disconnect(binding->widget, binding->button_label_handler);
             if (binding->style_handler)
                 g_signal_handler_disconnect(binding->widget, binding->style_handler);
+            if (binding->enter_handler)
+                g_signal_handler_disconnect(binding->widget, binding->enter_handler);
+            if (binding->leave_handler)
+                g_signal_handler_disconnect(binding->widget, binding->leave_handler);
             g_object_set_data(G_OBJECT(binding->widget), installed_key, NULL);
             g_object_weak_unref(G_OBJECT(binding->widget), widget_gone, binding);
         }
