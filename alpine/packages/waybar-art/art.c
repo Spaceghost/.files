@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: MIT */
 #include "waybar_cffi_module.h"
+#include "help.h"
 #include <fcntl.h>
 #include <glob.h>
 #include <json-glib/json-glib.h>
@@ -20,6 +21,7 @@ typedef struct {
     GSubprocess *status;
     gint64 started;
     double scroll;
+    void *help;
 } Artwork;
 
 static void release(Artwork *art) {
@@ -215,6 +217,7 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
     g_signal_connect(art->box, "enter-notify-event", G_CALLBACK(crossed), art);
     g_signal_connect(art->box, "leave-notify-event", G_CALLBACK(crossed), art);
     gtk_widget_show_all(art->box);
+    art->help = oldbook_help_init(GTK_WIDGET(info->get_root_widget(info->obj)));
     art->timer = g_timeout_add_seconds(5, refresh_status, art);
     refresh_status(art);
     return art;
@@ -223,6 +226,7 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
 void wbcffi_deinit(void *instance) {
     Artwork *art = instance;
     art->disposed = TRUE;
+    oldbook_help_deinit(art->help);
     g_source_remove(art->timer);
     if (art->status) g_subprocess_force_exit(art->status);
     release(art);

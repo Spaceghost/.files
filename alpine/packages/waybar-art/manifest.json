@@ -3,15 +3,15 @@
   "arch": "x86_64",
   "packages": [
     {
-      "apk_identity": "Q1GeRZY/1SEcBCetwuiTNcijfXS8U=",
+      "apk_identity": "Q1LhLIRdDnLmtHtg43uPvnWF1PrEY=",
       "arch": "x86_64",
-      "artifact": "sha256/d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050/oldbook-waybar-art-1.0.0-r1.apk",
+      "artifact": "sha256/36892a4ef71500708e34d6267616d0e9ccf61d574d12339c6cafc3fca0e6ec5a/oldbook-waybar-art-1.0.0-r2.apk",
       "artifact_arch": "x86_64",
-      "binary_sha256": "3b2356a2fae1bf00dc2298c6ea2d1fc3588239fab4334e6e4b84c6a7d5135826",
-      "filename": "oldbook-waybar-art-1.0.0-r1.apk",
+      "binary_sha256": "6b72010480b4a3f091b3fc7813dbfff2d6f92a656c0d6559e89e81da50002073",
+      "filename": "oldbook-waybar-art-1.0.0-r2.apk",
       "name": "oldbook-waybar-art",
-      "sha256": "d9a253ea2dfef24b2989d42d983939fe0c55f37fbf2776dcf27435a015d0f050",
-      "version": "1.0.0-r1"
+      "sha256": "36892a4ef71500708e34d6267616d0e9ccf61d574d12339c6cafc3fca0e6ec5a",
+      "version": "1.0.0-r2"
     }
   ],
   "schema": 1,
@@ -20,6 +20,7 @@
     "apk verify",
     "Fossil unversioned archive readback",
     "installed binary hash comparison",
-    "isolated headless Sway interaction test"
+    "isolated headless Sway interaction test",
+    "real Waybar module hover screenshots with synthetic title"
   ]
 }

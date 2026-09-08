@@ -1,14 +1,14 @@
 # Maintainer: Oldbook local package <oldbook@localhost.invalid>
 pkgname=oldbook-waybar-art
 pkgver=1.0.0
-pkgrel=1
-pkgdesc="Space Ghost artwork controls for Waybar with additive modifier actions"
+pkgrel=2
+pkgdesc="Space Ghost artwork controls and contextual hover help for Waybar"
 url="https://github.com/Alexays/Waybar"
 arch="all"
 license="MIT"
 depends="waybar"
 makedepends="build-base pkgconf gtk+3.0-dev json-glib-dev"
-source="art.c waybar_cffi_module.h LICENSE.Waybar"
+source="art.c help.c help.h waybar_cffi_module.h LICENSE.Waybar"
 builddir="$srcdir"
 options="!check !net"
 export SOURCE_DATE_EPOCH=1788739200
@@ -17,7 +17,7 @@ build() {
     # Library paths and build timestamps never enter the output.
     # shellcheck disable=SC2086
     ${CC:-cc} $CFLAGS -std=c11 -D_GNU_SOURCE -Wall -Wextra -Werror -fPIC -shared \
-        -o oldbook-art.so art.c $LDFLAGS $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
+        -o oldbook-art.so art.c help.c $LDFLAGS $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
 }
 
 package() {
@@ -26,7 +26,9 @@ package() {
 }
 
 sha512sums="
-1b0a8f4649518115eb7d1490912dff62c947db0b2b3d032ea30af6077f3dafb7ad2e24cd2d5e9b0724355099b7f1f7d5973e0265c5829797e110a1b90ef1e815  art.c
+71baf96023a99ca1e734d6ddb97073ccbd56706e5445f1c7ab86a118c4ee50477b56e8ddcf034196a68af06501495e3eeae33011acb8c541a4285c21318464d3  art.c
+b906e4e02e1cf635e923ceaf3eac95b07207ac7ad54e2d00d51233da7ec03277ceb1e4e553c702c826785eed73a2a050dd7d7dcf59c407abda979b96ca8c1601  help.c
+8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4  help.h
 b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd  waybar_cffi_module.h
 fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2  LICENSE.Waybar
 "

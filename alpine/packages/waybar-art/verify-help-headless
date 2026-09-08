@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""Verify contextual help on real Waybar modules in a private Sway session."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import signal
+import subprocess
+import time
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--module', required=True, type=Path)
+parser.add_argument('--output', required=True, type=Path)
+parser.add_argument('--sway', default='/usr/local/bin/sway')
+args = parser.parse_args()
+module = args.module.resolve(strict=True)
+synthetic_title = 'SAFE SYNTHETIC FIELD NOTES'
+base = Path(__file__).resolve().parent
+out = args.output.absolute()
+out.mkdir(parents=True, exist_ok=False)
+runtime = out / 'runtime'
+runtime.mkdir(mode=0o700)
+env = dict(os.environ, XDG_RUNTIME_DIR=str(runtime), WLR_BACKENDS='headless',
+           WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='pixman', NO_AT_BRIDGE='1',
+           GTK_USE_PORTAL='0', G_MESSAGES_DEBUG='all')
+for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+    env.pop(key, None)
+
+stub = out / 'art-status'
+stub.write_text('#!/bin/sh\nprintf \'%s\\n\' \'{"text":"ART","tooltip":"ARTWORK HELP","class":"rotating"}\'\n')
+stub.chmod(0o755)
+
+for mode in ('client-header', 'private-code'):
+    destination = out / ('pointer.h' if mode == 'client-header' else 'pointer.c')
+    subprocess.run(['wayland-scanner', mode, str(base / 'tests/pointer.xml'),
+                    str(destination)], check=True)
+flags = shlex.split(subprocess.check_output(
+    ['pkg-config', '--cflags', '--libs', 'wayland-client'], text=True))
+subprocess.run(['cc', '-I' + str(out), '-o', str(out / 'pointer-input'),
+                str(base / 'tests/pointer-input.c'), str(out / 'pointer.c'), *flags], check=True)
+(out / 'sway.conf').write_text('''xwayland disable
+output HEADLESS-1 mode 1440x900
+output HEADLESS-1 bg #130a20 solid_color
+seat seat0 fallback true
+focus_follows_mouse no
+mouse_warping none
+mode "resize" {
+    bindsym Escape mode "default"
+    bindsym Return mode "default"
+}
+''')
+config = [{
+    'name': 'top', 'layer': 'top', 'position': 'top', 'height': 48,
+    'fixed-center': True,
+    'modules-left': ['cffi/art', 'sway/workspaces', 'sway/mode'],
+    'modules-center': ['sway/window'],
+    'modules-right': ['cpu'],
+    'cffi/art': {'module_path': str(module), 'command': str(stub)},
+    'sway/workspaces': {'format': '{value}', 'disable-markup': True},
+    'sway/mode': {'format': 'MODE {}'},
+    'sway/window': {'format': '{title}', 'max-length': 28, 'tooltip': True},
+    'cpu': {'format': 'CPU {usage}%'},
+}]
+(out / 'waybar.json').write_text(json.dumps(config))
+(out / 'style.css').write_text('''
+* { font: 16px monospace; }
+window#waybar { background: #130a20; color: #f2e5bc; }
+#custom-art, #workspaces, #mode, #window, #cpu { background: #301744; padding: 0 18px; }
+tooltip { background: #1d2021; color: #f2e5bc; border: 1px solid #b765eb; }
+tooltip label { padding: 12px; }
+''')
+
+
+def stop_group(process):
+    if process is None or process.poll() is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=5)
+    except ProcessLookupError:
+        pass
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=5)
+
+
+processes = []
+checks = []
+with (out / 'runtime.log').open('w') as log:
+    try:
+        sway = subprocess.Popen([args.sway, '-c', str(out / 'sway.conf')], env=env,
+                                stdout=log, stderr=log, start_new_session=True)
+        processes.append(sway)
+        for _ in range(100):
+            sockets = list(runtime.glob('sway-ipc*.sock'))
+            displays = [path for path in runtime.glob('wayland-*') if path.suffix != '.lock']
+            if sockets and displays:
+                env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                break
+            if sway.poll() is not None:
+                raise RuntimeError('Headless compositor exited')
+            time.sleep(.05)
+        else:
+            raise RuntimeError('No headless compositor socket')
+        terminal = subprocess.Popen(
+            ['foot', '--title=' + synthetic_title, '-e', 'sleep', '60'],
+            env=env, stdout=log, stderr=log, start_new_session=True)
+        processes.append(terminal)
+        time.sleep(.5)
+        marker = (out / 'runtime.log').stat().st_size
+        bar = subprocess.Popen(['dbus-run-session', '--', 'waybar', '-c',
+                                str(out / 'waybar.json'), '-s', str(out / 'style.css')],
+                               env=env, stdout=log, stderr=log, start_new_session=True)
+        processes.append(bar)
+        for _ in range(100):
+            if 'Bar configured' in (out / 'runtime.log').read_text()[marker:]:
+                break
+            if bar.poll() is not None:
+                raise RuntimeError('Waybar exited')
+            time.sleep(.05)
+        else:
+            raise RuntimeError('Waybar did not initialize')
+        pointer = subprocess.Popen([str(out / 'pointer-input')], env=env,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=log, text=True, start_new_session=True)
+        processes.append(pointer)
+        if pointer.stdout.readline().strip() != 'ready':
+            raise RuntimeError('Virtual pointer failed to start')
+
+        def send(command):
+            pointer.stdin.write(command + '\n')
+            pointer.stdin.flush()
+            if pointer.stdout.readline().strip() != 'ok':
+                raise RuntimeError('Virtual pointer stopped')
+
+        def hover(name, x):
+            send('move 720 450')
+            time.sleep(.2)
+            before = (out / 'runtime.log').stat().st_size
+            # pointer-input uses an 800x600 absolute coordinate space while
+            # this private output is 1440x900.
+            send(f'move {round(x * 800 / 1440)} {round(24 * 600 / 900)}')
+            time.sleep(1.2)
+            subprocess.run(['grim', str(out / f'{name}.png')], env=env, check=True)
+            emitted = (out / 'runtime.log').read_text()[before:]
+            token = f'oldbook-help: rendered {name} tooltip'
+            if token not in emitted:
+                raise AssertionError(f'{name}: helper callback did not run')
+            if 'Failed to set text' in emitted or 'Entity did not end' in emitted:
+                raise AssertionError(f'{name}: GTK rejected tooltip markup')
+            checks.append(name)
+
+        hover('workspace', 103)
+        hover('window', 720)
+        hover('cpu', 1380)
+        subprocess.run(['swaymsg', 'mode', 'resize'], env=env, check=True,
+                       stdout=subprocess.DEVNULL)
+        time.sleep(.3)
+        hover('mode', 225)
+        send('move 720 450')
+        evidence = {
+            'module': str(module),
+            'module_sha256': hashlib.sha256(module.read_bytes()).hexdigest(),
+            'checks': checks,
+            'synthetic_title': synthetic_title,
+            'screenshots': [name + '.png' for name in checks],
+        }
+        (out / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+        print(json.dumps(evidence, indent=2))
+    finally:
+        for process in reversed(processes):
+            stop_group(process)

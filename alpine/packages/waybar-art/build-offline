@@ -19,7 +19,7 @@ work = args.work.absolute()
 work.mkdir(parents=True, exist_ok=False)
 stage = work / 'oldbook' / 'oldbook-waybar-art'
 stage.mkdir(parents=True)
-for name in ('APKBUILD', 'art.c', 'waybar_cffi_module.h', 'LICENSE.Waybar'):
+for name in ('APKBUILD', 'art.c', 'help.c', 'help.h', 'waybar_cffi_module.h', 'LICENSE.Waybar'):
     shutil.copy2(recipe / name, stage / name)
 user = pwd.getpwuid(os.getuid()).pw_name
 command = ['abuild','-d','-K','-P',str(work/'apks'),'-s',str(work/'distfiles')]

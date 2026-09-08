@@ -7,8 +7,11 @@ preventing accidental paid generation. Existing controls remain: left click
 next, right click gallery, middle click pause, scroll up previous and scroll
 down next. Modifiers do not alter those right, middle, or scroll actions. The
 widget displays the complete tooltip, icon and state classes from
-`oldbook-wallpaper status` without rewriting the help text. Other panel modules
-are unchanged.
+`oldbook-wallpaper status` without rewriting the help text. A bounded startup
+walk also adds contextual hover help to Waybar's workspace, focused-window,
+mode and CPU widgets, whose stock modules do not accept custom tooltip formats.
+It reads and escapes each widget's current label or native tooltip only while
+GTK asks for help, and retains no window titles.
 
 Waybar 0.15 has no custom-module modifier mapping. Its documented CFFI ABI lets
 this widget handle only its own pointer events. Unfocused layer-shell panels
@@ -29,7 +32,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r1.apk
+doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r2.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -37,7 +40,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r1 APK identity and archived artifact.
+`manifest.json` records the exact signed r2 APK identity and archived artifact.
 
 ## Verify
 
@@ -65,6 +68,17 @@ events into a contained panel, and holds a fake Meta bit on a non-keyboard
 device to guard against modifier contamination. Every action goes to a stub; it
 never generates an image. Screenshots and interaction checks are retained in
 the output.
+
+Render the contextual help against Waybar's real Sway and CPU modules:
+
+```sh
+alpine/packages/waybar-art/verify-help-headless \
+    --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-help-test
+```
+
+This second private compositor uses only a synthetic window title, activates a
+synthetic resize mode, and saves workspace, focused-window, CPU and mode hover
+screenshots without logging desktop window titles.
 
 ![Preserved controls and added Command-click help](interaction-preview.png)
 
