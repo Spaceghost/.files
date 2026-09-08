@@ -25,7 +25,7 @@ work = args.work.absolute()
 work.mkdir(parents=True, exist_ok=False)
 stage = work / "oldbook" / "swayfx"
 stage.mkdir(parents=True)
-for name in ["APKBUILD", "bottom-titlebar.patch", "swayfx.desktop", "oldbook-effects.conf"]:
+for name in ["APKBUILD", "bottom-titlebar.patch", "hover-raise.patch", "swayfx.desktop", "oldbook-effects.conf"]:
     shutil.copy2(recipe / name, stage / name)
 shutil.copy2(source, stage / manifest["source"]["filename"])
 user = pwd.getpwuid(os.getuid()).pw_name

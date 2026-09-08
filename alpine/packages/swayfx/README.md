@@ -19,6 +19,25 @@ stock Sway configuration. `titlebar_position top` restores upstream placement;
 
 ## Edit and enable
 
+`hover-raise.patch` adds `mouse_raise_delay 0..60000` in milliseconds. The package
+default is zero (disabled); the desktop's `sway/local.d/hover-raise.conf` selects
+1000 with a quiet runtime IPC command. Both stock Sway and an older running
+SwayFX still parse this include. They ignore the unsupported runtime request;
+the new behavior begins after the patched package starts at the next graphical
+login. Installing an executable or reloading the old process cannot replace the
+running compositor. Do not terminate the current session automatically.
+
+Focus follows pointer entry immediately. A floating window rises after one
+second of continuous dwell over that same window, including movement inside
+it. Pointer leave (even onto empty space while focus remains), a newer focus,
+workspace or geometry changes, mouse actions, fullscreen and locking cancel
+the pending raise. The timer rechecks the actual compositor hit target and
+raises the existing window without changing focus or moving the pointer.
+Keyboard focus alone never starts a timer. No background input reader is used.
+
+Set the include's runtime value to zero to disable this behavior persistently;
+`swaymsg 'mouse_raise_delay 0'` disables it in a patched running session.
+
 `oldbook-effects.conf` is the violet-glass example, also packaged under
 `/usr/share/swayfx/`. Include it only from a configuration loaded by SwayFX;
 stock Sway cannot parse these effects. A user configuration may symlink to this
@@ -55,13 +74,24 @@ its checksum before applying it to the archived source.
 
 ## Verification
 
-Two builds in separate directories, both without networking, produced the same
+For the preceding r1 package, two builds in separate directories, both without networking, produced the same
 signed APK and executable byte for byte. `apk verify` passed. The native musl
 binary parsed every example effect and rendered on both AMD and Intel GLES2
 backends with a headless output. The rebuilt package also passed 22 bottom-title
 checks: tiled/floating geometry, pointer drag/resize, fullscreen edge pixels,
 border modes, grouped headers and multiple floating windows on stacked layouts.
 This does not prove physical display takeover, suspend/resume or battery performance.
+
+The r2 hover behavior is verified separately in
+`alpine/verification/hover-raise/`. Run its private compositor check with:
+
+```sh
+alpine/packages/swayfx/verify-hover-raise --binary /usr/bin/swayfx --output /tmp/swayfx-hover-test
+```
+
+This exercises pointer dwell, cancellation, timing and floating stacking with
+synthetic windows; it also proves that the existing criteria `focus` command
+raises an already focused floating window on this pinned SwayFX version.
 
 After installing the package, run a contained rendering check:
 

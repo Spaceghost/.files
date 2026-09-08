@@ -805,3 +805,35 @@ ordered compositor events establish readiness at creation.
   preserved all window geometry and focus. Reload moved to Super+Ctrl+Shift+C.
 - Physical keypresses and a new login remain unobserved. Evidence and recovery:
   `verification/center-window/`.
+
+
+## Pointer dwell raising — 2026-09-07
+
+- Installed the signed, archived SwayFX 0.6-r2 package and deployed the dedicated
+  hover-raise include. Pointer entry keeps immediate focus; native raising waits
+  for one second over the same floating window and cancels stale targets.
+- All 11 isolated native checks passed against the packaged executable; observed
+  raising was at 1.029 seconds. Empty-space leave, newer focus, workspace and
+  geometry changes, held buttons and destruction are covered. Evidence:
+  `verification/hover-raise/`.
+- Exact installed snapshot `fec17adaeaa5972078b8` contains 1121 verified archived
+  APKs and preserves the preexisting clipboard additions. Recorded installed
+  architectures, versions, identities, world, repositories and public keys
+  match. The restoration-oriented checker reports 233 noarch/index architecture
+  differences on this existing host; direct recorded-host verification passes.
+- Installed binary hash is `47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9`;
+  running PID 3175 still uses the old `ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1`.
+  The old binary validates the complete live config; the quiet runtime request
+  produces no config nag. No compositor restart occurred. The new dwell behavior
+  awaits the next graphical login. Physical pointer use then, session-lock
+  interaction and multiple seats remain unobserved. Recovery retains the old r1
+  APK and scoped deployment backup `1788839554794457799`.
+
+- Core study storage/generation committed as `74177c2598ca`. The live reader,
+  search bar, reader tests and native evidence are staged alongside concurrent
+  Scripture history work and await its integrated commit. Do not publish a
+  reader importing `scripture_history` without including that new module.
+- Final native card evidence checks decoded pixels in a tight Scripture crop:
+  20,264 changed pixels and 8,949 visible text pixels. The full disposable
+  transfer and native rerun passed; screenshots contain only test-desktop
+  content. Additional study CLI deployment journal: `1788839620926671175`.

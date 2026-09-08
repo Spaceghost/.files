@@ -12,11 +12,11 @@
   "upstream_release": "https://github.com/wlrfx/swayfx/releases/tag/0.6",
   "source_date_epoch": 1785905137,
   "package": {
-    "filename": "swayfx-0.6-r1.apk",
-    "sha256": "a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4",
-    "artifact": "sha256/a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4/swayfx-0.6-r1.apk"
+    "filename": "swayfx-0.6-r2.apk",
+    "sha256": "471a36a1e34bc0c645b02dffe2b427575c336cecd8855573d7d3257f4e299327",
+    "artifact": "sha256/471a36a1e34bc0c645b02dffe2b427575c336cecd8855573d7d3257f4e299327/swayfx-0.6-r2.apk"
   },
-  "binary_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
+  "binary_sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9",
   "shared_dependencies": {
     "scenefx": "0.5-r0",
     "wlroots0.20": "0.20.2-r1",
@@ -27,6 +27,18 @@
       "filename": "bottom-titlebar.patch",
       "sha256": "9e551c75e11247312e294b1cd749fb731a54e86eb65e86b00e6dd6491b176deb",
       "purpose": "Optional bottom normal window titles; grouped tab and stack headers retain upstream placement."
+    },
+    {
+      "filename": "hover-raise.patch",
+      "sha256": "4da0d3e6cca46c8197f93894f0f9b52dff7eff65f33879bb0deee2fc865cc05b",
+      "purpose": "Native pointer dwell raises floating windows after the configured delay, with immediate focus and cancellation on stale targets."
     }
-  ]
+  ],
+  "previous_package": {
+    "filename": "swayfx-0.6-r1.apk",
+    "sha256": "a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4",
+    "artifact": "sha256/a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4/swayfx-0.6-r1.apk"
+  },
+  "previous_binary_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
+  "hover_raise_verification": "alpine/verification/hover-raise/native-packaged/evidence.json"
 }

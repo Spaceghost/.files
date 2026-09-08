@@ -1,0 +1,53 @@
+{
+  "binary_sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9",
+  "checks": [
+    {
+      "check": "default disabled; pointer focus remains immediate",
+      "passed": true
+    },
+    {
+      "check": "criteria focus raises an already focused floating window",
+      "passed": true
+    },
+    {
+      "check": "raises after one second of continuous pointer dwell",
+      "passed": true,
+      "elapsed_seconds": 1.0287727520008048
+    },
+    {
+      "check": "leaving for empty space cancels even while target remains focused",
+      "passed": true
+    },
+    {
+      "check": "newer keyboard focus cancels without being hijacked",
+      "passed": true
+    },
+    {
+      "check": "workspace round trip cancels without pointer reentry",
+      "passed": true
+    },
+    {
+      "check": "target geometry change cancels dwell",
+      "passed": true
+    },
+    {
+      "check": "disabling the setting cancels pending raise",
+      "passed": true
+    },
+    {
+      "check": "invalid delay values and argument counts rejected",
+      "passed": true
+    },
+    {
+      "check": "held pointer button does not start passive dwell",
+      "passed": true
+    },
+    {
+      "check": "target destruction cancels safely",
+      "passed": true
+    }
+  ],
+  "live_session_changes": 0,
+  "status": "passed",
+  "compositor_exit_status": 0
+}

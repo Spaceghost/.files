@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Verify pointer dwell and stacking in a private native SwayFX session."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import select
+import shlex
+import subprocess
+import tempfile
+import time
+
+BASE = Path(__file__).resolve().parent
+WIDTH, HEIGHT = 1280, 800
+
+
+def walk(node):
+    yield node
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        yield from walk(child)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    binary = args.binary.resolve(strict=True)
+    out = args.output.absolute()
+    out.mkdir(parents=True, exist_ok=False)
+    evidence = {'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
+                'checks': [], 'live_session_changes': 0, 'status': 'running'}
+    children = []
+
+    def require(condition, message):
+        if not condition:
+            raise AssertionError(message)
+
+    def checked(label, **details):
+        evidence['checks'].append({'check': label, 'passed': True, **details})
+        print(label, flush=True)
+
+    config = out / 'sway.conf'
+    config.write_text(f"""xwayland disable
+output HEADLESS-1 mode {WIDTH}x{HEIGHT}
+output * bg #292336 solid_color
+seat seat0 fallback true
+focus_follows_mouse yes
+mouse_warping none
+default_border normal 2
+default_floating_border normal 2
+font monospace 12
+corner_radius 0
+shadows disable
+blur disable
+animation_duration_ms 0
+for_window [app_id="^hover-"] floating enable
+""")
+    protocol = BASE.parent / 'waybar-art/tests/pointer.xml'
+    for mode, name in [('client-header', 'pointer.h'), ('private-code', 'pointer.c')]:
+        subprocess.run(['wayland-scanner', mode, str(protocol), str(out / name)], check=True)
+    flags = shlex.split(subprocess.check_output(
+        ['pkg-config', '--cflags', '--libs', 'wayland-client'], text=True))
+    subprocess.run(['cc', '-Wall', '-Wextra', '-Werror', '-I' + str(out),
+                    '-o', str(out / 'pointer'), str(BASE / 'tests/titlebar-pointer.c'),
+                    str(out / 'pointer.c'), *flags], check=True)
+
+    with tempfile.TemporaryDirectory(prefix='oldbook-hover-runtime-') as runtime:
+        env = dict(os.environ, XDG_RUNTIME_DIR=runtime, WLR_BACKENDS='headless',
+                   WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='gles2',
+                   WLR_RENDERER_ALLOW_SOFTWARE='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
+        for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+            env.pop(key, None)
+        with (out / 'runtime.log').open('w') as log:
+            try:
+                compositor = subprocess.Popen([str(binary), '--debug', '-c', str(config)],
+                                               env=env, stdout=log, stderr=log)
+                children.append(compositor)
+                for _ in range(120):
+                    sockets = list(Path(runtime).glob('sway-ipc*.sock'))
+                    displays = [p for p in Path(runtime).glob('wayland-*') if p.suffix != '.lock']
+                    if sockets and displays:
+                        env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                        break
+                    require(compositor.poll() is None, 'Private compositor exited during startup')
+                    time.sleep(.05)
+                else:
+                    raise RuntimeError('No private compositor socket')
+
+                def request(command=None, kind=None, success=True):
+                    argv = ['swaymsg', '-r']
+                    if kind:
+                        argv += ['-t', kind]
+                    if command:
+                        argv.append(command)
+                    reply = subprocess.run(argv, env=env, capture_output=True, text=True, timeout=5)
+                    data = json.loads(reply.stdout)
+                    if success:
+                        require(reply.returncode == 0, str(data))
+                        if not kind:
+                            require(data and all(item.get('success') for item in data), str(data))
+                    return data
+
+                def tree():
+                    return request(kind='get_tree')
+
+                def client(name):
+                    matches = [node for node in walk(tree()) if node.get('app_id') == name]
+                    require(len(matches) == 1, f'Expected client {name}')
+                    return matches[0]
+
+                def state():
+                    ws = next(node for node in walk(tree()) if node.get('type') == 'workspace' and node.get('num') == 1)
+                    stack = [node['app_id'] for node in ws['floating_nodes']]
+                    focus = next((node.get('app_id') for node in walk(ws) if node.get('focused')), None)
+                    return {'stack': stack, 'focus': focus}
+
+                def spawn(name, color):
+                    child = subprocess.Popen(['foot', '-c', '/dev/null', '--app-id=' + name,
+                        '--title=' + name, '--override=resize-by-cells=no',
+                        '--override=colors-dark.background=' + color, 'sleep', '120'],
+                        env=env, stdout=log, stderr=log)
+                    children.append(child)
+                    for _ in range(100):
+                        if any(node.get('app_id') == name for node in walk(tree())):
+                            time.sleep(.15)
+                            return client(name)
+                        require(child.poll() is None, f'Client {name} exited')
+                        time.sleep(.05)
+                    raise RuntimeError('Client mapping timed out')
+
+                pointer = subprocess.Popen([str(out / 'pointer'), str(WIDTH), str(HEIGHT)],
+                    env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=log, text=True)
+                children.append(pointer)
+
+                def reply(expected):
+                    require(bool(select.select([pointer.stdout], [], [], 5)[0]), 'Pointer timeout')
+                    require(pointer.stdout.readline().strip() == expected, 'Unexpected pointer response')
+
+                reply('ready')
+
+                def point(command):
+                    pointer.stdin.write(command + '\n')
+                    pointer.stdin.flush()
+                    reply('ok')
+
+                def move(x, y):
+                    point(f'move {x} {y}')
+
+                def command(value):
+                    request(value)
+                    time.sleep(.1)
+
+                def screenshot(name):
+                    subprocess.run(['grim', str(out / name)], env=env, check=True, capture_output=True)
+
+                spawn('hover-a', '4d345f')
+                spawn('hover-b', '284957')
+                command('[app_id="hover-a"] resize set width 600 px height 450 px; move position 100 px 100 px')
+                command('[app_id="hover-b"] resize set width 600 px height 450 px; move position 450 px 200 px')
+
+                def reset():
+                    move(1200, 750)
+                    command('[app_id="hover-a"] move position 100 px 100 px')
+                    command('[app_id="hover-b"] focus')
+                    require(state()['stack'][-1] == 'hover-b', str(state()))
+
+                def hover():
+                    move(150, 150)
+                    require(state()['focus'] == 'hover-a', 'Pointer did not focus immediately')
+                    require(state()['stack'][-1] == 'hover-b', 'Pointer raised before dwell')
+
+                reset()
+                hover()
+                time.sleep(1.15)
+                require(state()['stack'][-1] == 'hover-b', 'Default mode raised automatically')
+                checked('default disabled; pointer focus remains immediate')
+                screenshot('focused-below.png')
+                command('[app_id="hover-a"] focus')
+                require(state()['stack'][-1] == 'hover-a' and state()['focus'] == 'hover-a', str(state()))
+                checked('criteria focus raises an already focused floating window')
+
+                command('mouse_raise_delay 1000')
+                reset()
+                start = time.monotonic()
+                hover()
+                time.sleep(.50)
+                move(170, 160)
+                require(state()['stack'][-1] == 'hover-b', 'Raised before one second')
+                deadline = start + 1.6
+                while time.monotonic() < deadline and state()['stack'][-1] != 'hover-a':
+                    time.sleep(.02)
+                elapsed = time.monotonic() - start
+                require(state()['stack'][-1] == 'hover-a' and state()['focus'] == 'hover-a', str(state()))
+                require(.98 <= elapsed < 1.5, f'Unexpected dwell: {elapsed}')
+                checked('raises after one second of continuous pointer dwell', elapsed_seconds=elapsed)
+                screenshot('raised-after-dwell.png')
+
+                reset(); hover(); time.sleep(.25); move(1200, 750); time.sleep(1.05)
+                require(state()['focus'] == 'hover-a' and state()['stack'][-1] == 'hover-b', str(state()))
+                checked('leaving for empty space cancels even while target remains focused')
+
+                reset(); hover(); time.sleep(.25); command('[app_id="hover-b"] focus'); time.sleep(1.05)
+                require(state()['focus'] == 'hover-b' and state()['stack'][-1] == 'hover-b', str(state()))
+                checked('newer keyboard focus cancels without being hijacked')
+
+                reset(); hover(); time.sleep(.25); command('workspace number 2'); command('workspace number 1'); time.sleep(1.05)
+                require(state()['focus'] == 'hover-a' and state()['stack'][-1] == 'hover-b', str(state()))
+                checked('workspace round trip cancels without pointer reentry')
+
+                reset(); hover(); time.sleep(.25); command('[app_id="hover-a"] move position 120 px 100 px'); time.sleep(1.05)
+                require(state()['stack'][-1] == 'hover-b', str(state()))
+                checked('target geometry change cancels dwell')
+
+                reset(); hover(); time.sleep(.25); command('mouse_raise_delay 0'); time.sleep(1.05)
+                require(state()['stack'][-1] == 'hover-b', str(state()))
+                checked('disabling the setting cancels pending raise')
+
+                for invalid in ('mouse_raise_delay', 'mouse_raise_delay -1', 'mouse_raise_delay 60001',
+                                'mouse_raise_delay 1000x', 'mouse_raise_delay 1 2',
+                                'mouse_raise_delay 9999999999999999999999999999999'):
+                    data = request(invalid, success=False)
+                    require(data and not all(item.get('success') for item in data), invalid)
+                checked('invalid delay values and argument counts rejected')
+
+                command('mouse_raise_delay 1000')
+                reset(); point('press 272'); hover(); time.sleep(1.15)
+                require(state()['stack'][-1] == 'hover-b', 'Raised during held-button motion')
+                point('release 272')
+                checked('held pointer button does not start passive dwell')
+
+                reset(); hover(); time.sleep(.25); command('[app_id="hover-a"] kill'); time.sleep(1.1)
+                require(compositor.poll() is None and state()['focus'] == 'hover-b', 'Closed-target timer survived')
+                checked('target destruction cancels safely')
+                evidence['status'] = 'passed'
+            except Exception as error:
+                evidence['status'] = 'failed'
+                evidence['error'] = str(error)
+                raise
+            finally:
+                (out / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+                for child in reversed(children):
+                    if child.poll() is None:
+                        child.terminate()
+                for child in reversed(children):
+                    try:
+                        child.wait(timeout=4)
+                    except subprocess.TimeoutExpired:
+                        child.kill()
+                        child.wait()
+                evidence['compositor_exit_status'] = children[0].returncode if children else None
+                (out / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+    print(out / 'evidence.json')
+
+
+if __name__ == '__main__':
+    main()

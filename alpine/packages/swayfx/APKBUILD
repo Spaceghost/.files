@@ -1,7 +1,7 @@
 # Maintainer: Oldbook local package <oldbook@localhost.invalid>
 pkgname=swayfx
 pkgver=0.6
-pkgrel=1
+pkgrel=2
 _commit=fd71a6bdc061bd633b488ae7b83e8a6981d22f86
 pkgdesc="SwayFX effects compositor alongside stock Sway"
 url="https://github.com/wlrfx/swayfx"
@@ -14,6 +14,7 @@ makedepends="meson samurai pkgconf scenefx-dev wlroots0.20-dev wayland-dev
     libxkbcommon-dev"
 source="swayfx-$pkgver.tar.gz
     bottom-titlebar.patch
+    hover-raise.patch
     swayfx.desktop
     oldbook-effects.conf"
 builddir="$srcdir/swayfx-$_commit"
@@ -48,6 +49,7 @@ package() {
 sha512sums="
 6cf61acf5d41e1e2d7c4e384cf772aa093e91ac8857f07af72c197ce4bbc31c2d6ed7e89c2cfc47e06497ab2551aeaaa092d7fb706e763f8b894f52bee589554  swayfx-0.6.tar.gz
 4bb6d6bdcaca871d96cdda12cf912f3f8af0003d787249b7a5351aaf3d4edb2a6585d80ae5b9055e5dd51384e8dd5d39b2b156e5bc172e4c4b62e28230b28178  bottom-titlebar.patch
+9bf813a491b3dc2f92c57db8a895bbdb972f0e2521d3b37158ed2cc7ef4ae55a55a2ad8fbc52dfbcc41efc72b704b3748e6d19eba0e2c26e4190db026569afb8  hover-raise.patch
 88c6122aacf801e13458dc59dff5f9d68f2af208239ad04cb2c16fc87ee12f24cdc92a8510bec7bfc0a477de51939cc97829373940bf0758b7528effe6495f7d  swayfx.desktop
 912a7fc13da6799dfb60f6bf9b0eb2711580632a74f21230f94f764999583e717819b286e62435dbf6efccac7ef72eb94f33d2c513cb139bcd1c232730c1eb3f  oldbook-effects.conf
 "

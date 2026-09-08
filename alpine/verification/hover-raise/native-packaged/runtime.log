@@ -1,0 +1,872 @@
+00:00:00.000 [INFO] [sway/main.c:308] swayfx version 0.6 (based on sway version 1.12.0)
+00:00:00.000 [INFO] [sway/main.c:309] wlroots version 0.20.2
+00:00:00.000 [INFO] [sway/main.c:310] scenefx version 0.5.0
+00:00:00.008 [INFO] [sway/main.c:78] Linux oldbook 6.18.49-0-lts #1-Alpine SMP PREEMPT_DYNAMIC 2026-09-07 07:20:48 x86_64 Linux
+00:00:00.008 [INFO] [sway/main.c:94] Contents of /etc/os-release:
+00:00:00.008 [INFO] [sway/main.c:78] NAME="Alpine Linux"
+00:00:00.008 [INFO] [sway/main.c:78] ID=alpine
+00:00:00.008 [INFO] [sway/main.c:78] VERSION_ID=3.25.0_alpha20260805
+00:00:00.008 [INFO] [sway/main.c:78] PRETTY_NAME="Alpine Linux edge"
+00:00:00.008 [INFO] [sway/main.c:78] HOME_URL="https://alpinelinux.org/"
+00:00:00.008 [INFO] [sway/main.c:78] BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
+00:00:00.008 [INFO] [sway/main.c:66] LD_LIBRARY_PATH=
+00:00:00.008 [INFO] [sway/main.c:66] LD_PRELOAD=
+00:00:00.008 [INFO] [sway/main.c:66] PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+00:00:00.008 [INFO] [sway/main.c:66] SWAYSOCK=
+00:00:00.008 [INFO] [sway/main.c:339] Starting swayfx version 0.6 (based on sway version 1.12.0
+00:00:00.008 [DEBUG] [sway/server.c:248] Initializing Wayland server
+00:00:00.009 [INFO] [wlr] [backend/backend.c:342] Loading user-specified backends due to WLR_BACKENDS: headless
+00:00:00.018 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.025 [DEBUG] [wlr] [render/fx_renderer/util.c:34] Opening DRM render node '/dev/dri/renderD128'
+00:00:00.025 [INFO] [wlr] [render/egl.c:205] Supported EGL client extensions: EGL_EXT_client_extensions EGL_EXT_device_base EGL_EXT_device_enumeration EGL_EXT_device_query EGL_EXT_platform_base EGL_KHR_client_get_all_proc_addresses EGL_KHR_debug EGL_EXT_platform_device EGL_EXT_explicit_device EGL_EXT_platform_wayland EGL_KHR_platform_wayland EGL_EXT_platform_x11 EGL_KHR_platform_x11 EGL_EXT_platform_xcb EGL_MESA_platform_gbm EGL_KHR_platform_gbm EGL_MESA_platform_surfaceless
+00:00:00.043 [DEBUG] [wlr] [render/egl.c:526] Using EGL device /dev/dri/card0
+ac_compute_device_uuid's output is based on invalid pci bus info.
+00:00:00.220 [INFO] [wlr] [render/egl.c:369] Using EGL 1.5
+00:00:00.220 [INFO] [wlr] [render/egl.c:370] Supported EGL display extensions: EGL_ANDROID_blob_cache EGL_EXT_config_select_group EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_query_reset_notification_strategy EGL_EXT_surface_compression EGL_KHR_cl_event2 EGL_KHR_config_attribs EGL_KHR_context_flush_control EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_gl_interop EGL_MESA_image_dma_buf_export EGL_MESA_query_driver EGL_MESA_x11_native_visual_id 
+00:00:00.220 [INFO] [wlr] [render/egl.c:372] Supported EGL device extensions: EGL_EXT_device_drm EGL_EXT_device_drm_render_node EGL_EXT_device_query_name EGL_EXT_device_persistent_id
+00:00:00.220 [INFO] [wlr] [render/egl.c:374] EGL vendor: Mesa Project
+00:00:00.220 [INFO] [wlr] [render/egl.c:376] EGL driver name: radeonsi
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:120] Supported DMA-BUF formats:
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:169]   AB4H (0x48344241)
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:169]   XB4H (0x48344258)
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:169]   AB48 (0x38344241)
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.220 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   XB48 (0x38344258)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   AR30 (0x30335241)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   XR30 (0x30335258)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   AB30 (0x30334241)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   XB30 (0x30334258)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   AR24 (0x34325241)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   AB24 (0x34324241)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   XR24 (0x34325258)
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.221 [DEBUG] [wlr] [render/egl.c:169]   XB24 (0x34324258)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   AR15 (0x35315241)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   AB15 (0x35314241)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   AR12 (0x32315241)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   AB12 (0x32314241)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   RG16 (0x36314752)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   R8 (0x20203852)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   R16 (0x20363152)
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.222 [DEBUG] [wlr] [render/egl.c:169]   GR88 (0x38385247)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   GR32 (0x32335247)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   R  H (0x48202052)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   R  F (0x46202052)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   GR H (0x48205247)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   GR F (0x46205247)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   AB8F (0x46384241)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   YUV9 (0x39565559)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:169]   YU11 (0x31315559)
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.223 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YU12 (0x32315559)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YU16 (0x36315559)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YU24 (0x34325559)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YVU9 (0x39555659)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YV11 (0x31315659)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YV12 (0x32315659)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YV16 (0x36315659)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:169]   YV24 (0x34325659)
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.224 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S010 (0x30313053)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S210 (0x30313253)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S410 (0x30313453)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S012 (0x32313053)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S212 (0x32313253)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S412 (0x32313453)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S016 (0x36313053)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:169]   S216 (0x36313253)
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.225 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   S416 (0x36313453)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   NV12 (0x3231564E)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   NV21 (0x3132564E)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   P010 (0x30313050)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   P012 (0x32313050)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   P016 (0x36313050)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   P030 (0x30333050)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   NV16 (0x3631564E)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:169]   NV61 (0x3136564E)
+00:00:00.226 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   NV24 (0x3432564E)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   NV42 (0x3234564E)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   AYUV (0x56555941)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   XYUV (0x56555958)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   Y410 (0x30313459)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   Y412 (0x32313459)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   Y416 (0x36313459)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   YUYV (0x56595559)
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.227 [DEBUG] [wlr] [render/egl.c:169]   YVYU (0x55595659)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:169]   UYVY (0x59565955)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:169]   VYUY (0x59555956)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:169]   Y210 (0x30313259)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:169]   Y212 (0x32313259)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:169]   Y216 (0x36313259)
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.228 [DEBUG] [wlr] [render/egl.c:189] EGL DMA-BUF format modifiers unsupported
+00:00:00.240 [DEBUG] [wlr] [render/egl.c:439] Created EGL context using OpenGL ES 2.0
+00:00:00.240 [DEBUG] [wlr] [render/egl.c:578] Using EGL_PLATFORM_DEVICE_EXT
+00:00:00.241 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:473] Creating scenefx FX renderer
+00:00:00.241 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:474] Using OpenGL ES 3.2 Mesa 26.1.6
+00:00:00.241 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:475] GL vendor: AMD
+00:00:00.241 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:476] GL renderer:  (radeonsi, verde, ACO, DRM 2.51, 6.18.49-0-lts)
+00:00:00.241 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:477] Supported FX extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_draw_instanced GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_NV_conditional_render GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_texture_storage GL_NV_pack_subimage GL_NV_texture_barrier GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_pack_reverse_row_order GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_occlusion_query_boolean GL_EXT_robustness GL_EXT_sRGB GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_APPLE_sync GL_EXT_draw_buffers GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_shadow_samplers GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_generate_mipmap_sRGB GL_NV_pixel_buffer_object GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_debug_label GL_EXT_sRGB_write_control GL_EXT_separate_shader_objects GL_EXT_shader_group_vote GL_EXT_shader_implicit_conversions GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_multi_draw_indirect GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_EXT_texture_view GL_KHR_blend_equation_advanced GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_NV_shader_noperspective_interpolation GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_float_blend GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_EXT_texture_sRGB_R8 GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clear_texture GL_EXT_clip_cull_distance GL_EXT_conservative_depth GL_EXT_disjoint_timer_query GL_EXT_texture_compression_s3tc_srgb GL_EXT_window_rectangles GL_MESA_shader_integer_functions GL_EXT_clip_control GL_EXT_color_buffer_half_float GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_texture_compression_bptc GL_EXT_texture_mirror_clamp_to_edge GL_KHR_parallel_shader_compile GL_NV_alpha_to_coverage_dither_control GL_EXT_EGL_image_storage GL_EXT_texture_shadow_lod GL_INTEL_blackhole_render GL_MESA_framebuffer_flip_y GL_NV_compute_shader_derivatives GL_EXT_demote_to_helper_invocation GL_EXT_depth_clamp GL_EXT_texture_query_lod GL_KHR_shader_subgroup GL_MESA_sampler_objects GL_EXT_EGL_image_storage_compression GL_EXT_texture_storage_compression GL_MESA_bgra GL_MESA_texture_const_bandwidth GL_EXT_shader_clock 
+00:00:00.242 [DEBUG] [wlr] [render/fx_renderer/fx_renderer.c:533] GPU reset notifications are enabled
+00:00:00.343 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:585] FX RENDERER: Shaders Initialized Successfully
+00:00:00.349 [DEBUG] [wlr] [render/allocator/allocator.c:115] Trying to create gbm allocator
+00:00:00.400 [DEBUG] [wlr] [render/allocator/gbm.c:188] Created GBM allocator with backend drm
+00:00:00.401 [DEBUG] [wlr] [render/allocator/gbm.c:191] Using DRM node /dev/dri/renderD128
+00:00:00.401 [DEBUG] [wlr] [types/wlr_drm_lease_v1.c:679] No DRM backend supplied, failed to create wlr_drm_lease_v1_manager
+00:00:00.401 [DEBUG] [sway/server.c:499] Failed to create wlr_drm_lease_device_v1
+00:00:00.401 [INFO] [sway/server.c:500] VR will not be available
+00:00:00.401 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.441 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/verification/hover-raise/native-packaged/sway.conf
+00:00:00.441 [DEBUG] [sway/config.c:819] Read line 1: xwayland disable
+00:00:00.441 [INFO] [sway/commands.c:407] Config command: xwayland disable
+00:00:00.441 [INFO] [sway/commands.c:430] After replacement: xwayland disable
+00:00:00.441 [DEBUG] [sway/config.c:819] Read line 2: output HEADLESS-1 mode 1280x800
+00:00:00.441 [INFO] [sway/commands.c:407] Config command: output HEADLESS-1 mode 1280x800
+00:00:00.441 [INFO] [sway/commands.c:430] After replacement: output HEADLESS-1 mode 1280x800
+00:00:00.441 [DEBUG] [sway/commands.c:462] Subcommand: mode 1280x800
+00:00:00.441 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (1280x800@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.441 [DEBUG] [sway/config.c:819] Read line 3: output * bg #292336 solid_color
+00:00:00.442 [INFO] [sway/commands.c:407] Config command: output * bg #292336 solid_color
+00:00:00.442 [INFO] [sway/commands.c:430] After replacement: output * bg #292336 solid_color
+00:00:00.442 [DEBUG] [sway/commands.c:462] Subcommand: bg #292336 solid_color
+00:00:00.445 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg #292336 solid_color) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.445 [DEBUG] [sway/config.c:819] Read line 4: seat seat0 fallback true
+00:00:00.445 [INFO] [sway/commands.c:407] Config command: seat seat0 fallback true
+00:00:00.445 [INFO] [sway/commands.c:430] After replacement: seat seat0 fallback true
+00:00:00.445 [DEBUG] [sway/commands.c:462] Subcommand: fallback true
+00:00:00.445 [DEBUG] [sway/config/seat.c:65] Adding non-wildcard seat config
+00:00:00.445 [DEBUG] [sway/config/seat.c:82] Config stored for seat seat0
+00:00:00.445 [DEBUG] [sway/config.c:819] Read line 5: focus_follows_mouse yes
+00:00:00.445 [INFO] [sway/commands.c:407] Config command: focus_follows_mouse yes
+00:00:00.445 [INFO] [sway/commands.c:430] After replacement: focus_follows_mouse yes
+00:00:00.445 [DEBUG] [sway/config.c:819] Read line 6: mouse_warping none
+00:00:00.445 [INFO] [sway/commands.c:407] Config command: mouse_warping none
+00:00:00.445 [INFO] [sway/commands.c:430] After replacement: mouse_warping none
+00:00:00.445 [DEBUG] [sway/config.c:819] Read line 7: default_border normal 2
+00:00:00.445 [INFO] [sway/commands.c:407] Config command: default_border normal 2
+00:00:00.445 [INFO] [sway/commands.c:430] After replacement: default_border normal 2
+00:00:00.445 [DEBUG] [sway/config.c:819] Read line 8: default_floating_border normal 2
+00:00:00.446 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 2
+00:00:00.446 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 2
+00:00:00.446 [DEBUG] [sway/config.c:819] Read line 9: font monospace 12
+00:00:00.446 [INFO] [sway/commands.c:407] Config command: font monospace 12
+00:00:00.446 [INFO] [sway/commands.c:430] After replacement: font monospace 12
+00:00:00.518 [DEBUG] [sway/config.c:819] Read line 10: corner_radius 0
+00:00:00.518 [INFO] [sway/commands.c:407] Config command: corner_radius 0
+00:00:00.519 [INFO] [sway/commands.c:430] After replacement: corner_radius 0
+00:00:00.519 [DEBUG] [sway/config.c:819] Read line 11: shadows disable
+00:00:00.519 [INFO] [sway/commands.c:407] Config command: shadows disable
+00:00:00.519 [INFO] [sway/commands.c:430] After replacement: shadows disable
+00:00:00.519 [DEBUG] [sway/config.c:819] Read line 12: blur disable
+00:00:00.519 [INFO] [sway/commands.c:407] Config command: blur disable
+00:00:00.519 [INFO] [sway/commands.c:430] After replacement: blur disable
+00:00:00.519 [DEBUG] [sway/config.c:819] Read line 13: animation_duration_ms 0
+00:00:00.519 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 0
+00:00:00.519 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 0
+00:00:00.519 [DEBUG] [sway/config.c:819] Read line 14: for_window [app_id="^hover-"] floating enable
+00:00:00.519 [INFO] [sway/commands.c:407] Config command: for_window [app_id="^hover-"] floating enable
+00:00:00.519 [INFO] [sway/commands.c:430] After replacement: for_window [app_id="^hover-"] floating enable
+00:00:00.519 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^hover-
+00:00:00.519 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="^hover-"]' -> 'floating enable' added
+00:00:00.520 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat seat0
+00:00:00.520 [DEBUG] [sway/config/output.c:1293] spawn_swaybg cmd[0] = swaybg
+00:00:00.520 [DEBUG] [sway/config/output.c:1293] spawn_swaybg cmd[1] = -o
+00:00:00.520 [DEBUG] [sway/config/output.c:1293] spawn_swaybg cmd[2] = *
+00:00:00.520 [DEBUG] [sway/config/output.c:1293] spawn_swaybg cmd[3] = -c
+00:00:00.520 [DEBUG] [sway/config/output.c:1293] spawn_swaybg cmd[4] = #292336
+00:00:00.525 [INFO] [sway/realtime.c:35] Failed to set scheduling priority to 1
+00:00:00.525 [INFO] [sway/server.c:791] Starting backend on wayland display 'wayland-1'
+00:00:00.525 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:00.526 [DEBUG] [sway/desktop/output.c:635] New output 0x7f4121e1e360: HEADLESS-1 (non-desktop: 0)
+00:00:00.526 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:00.526 [DEBUG] [sway/config/output.c:1008] Committing 1 outputs
+00:00:00.526 [DEBUG] [sway/config/output.c:769] Output state for HEADLESS-1
+00:00:00.526 [DEBUG] [sway/config/output.c:771]     enabled:       yes
+00:00:00.526 [DEBUG] [sway/config/output.c:775]     render_format: XR24
+00:00:00.526 [DEBUG] [sway/config/output.c:780]     custom mode:   1280x800@0mHz
+00:00:00.526 [DEBUG] [sway/config/output.c:793]     scale:         1.000000
+00:00:00.526 [DEBUG] [sway/config/output.c:796]     subpixel:      unknown
+00:00:00.526 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:164] Preparing test commit for 1 outputs with explicit modifiers
+00:00:00.526 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:00.527 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XR24 (0x34325258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.527 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:185] Test commit for 1 outputs succeeded
+00:00:00.527 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.534 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.534 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.536 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.536 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.537 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.537 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.538 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.538 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.539 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.539 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:00.560 [DEBUG] [sway/config/output.c:1072] Commit of 1 outputs succeeded
+00:00:00.560 [DEBUG] [sway/config/output.c:1087] Finalizing config for HEADLESS-1
+00:00:00.560 [DEBUG] [sway/tree/workspace.c:444] Workspace: Generating new workspace name for output HEADLESS-1
+00:00:00.560 [DEBUG] [sway/tree/output.c:170] Creating default workspace 1
+00:00:00.560 [DEBUG] [sway/tree/workspace.c:185] Adding workspace 1 for output HEADLESS-1
+00:00:00.560 [DEBUG] [sway/desktop/layer_shell.c:148] Usable area changed, rearranging output
+00:00:00.560 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:00.560 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:00.560 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:00.560 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:00.560 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f411054ec30 committing with 2 instructions
+00:00:00.560 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f411054ec30
+00:00:00.561 [DEBUG] [wlr] [xcursor/wlr_xcursor.c:233] Loaded cursor theme 'default' at size 24 (26 available cursors)
+00:00:00.561 [INFO] [sway/server.c:803] Running compositor on wayland display 'wayland-1'
+00:00:00.565 [DEBUG] [sway/input/input-manager.c:421] adding virtual pointer: '0:0:wlr_virtual_pointer_v1'
+00:00:00.565 [DEBUG] [sway/input/seat.c:946] adding device 0:0:wlr_virtual_pointer_v1 to seat seat0
+00:00:00.565 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:00.577 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:00.577 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:00.577 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:00.595 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+2026-09-07 20:50:05 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+00:00:00.600 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f411012dfe0 (res 0x7f4111102a30)
+00:00:00.600 [DEBUG] [wlr] [types/wlr_layer_shell_v1.c:502] new layer_surface 0x7f4110450010 (res 0x7f4111102eb0)
+00:00:00.601 [DEBUG] [sway/desktop/layer_shell.c:504] new layer surface: namespace wallpaper layer 0 anchor 0 size 0x0 margin 0,0,0,0,
+00:00:00.602 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:00.661 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:00.665 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:00.726 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:00.733 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:00.746 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f411012f770 (res 0x7f41110cbd90)
+00:00:00.746 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f411012fb80 (res 0x7f41110c6250)
+00:00:00.746 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f411046a7b0 (res 0x7f41110c66d0)
+00:00:00.746 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:00.746 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f4110142960 (res 0x7f4110e9d010)
+00:00:00.747 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f411012ff60 (res 0x7f4110e9d130)
+00:00:00.765 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:00.765 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:00.765 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe654883e8 horizontally
+00:00:00.766 [DEBUG] [sway/tree/view.c:578] Checking criteria [app_id="^hover-"]
+00:00:00.766 [DEBUG] [sway/tree/view.c:583] for_window '[app_id="^hover-"]' matches view 0x7f411113e930, cmd: 'floating enable'
+00:00:00.766 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:00.766 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:00.766 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:00.766 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f4110554440 committing with 3 instructions
+00:00:00.766 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f4110554440 is ready
+00:00:00.766 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f4110554440
+00:00:00.774 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f4110554480 committing with 1 instructions
+00:00:00.774 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f4110554480
+00:00:00.788 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:00.792 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:00.948 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:00.957 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:00.968 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:00.973 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:01.031 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:01.036 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:01.099 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:01.104 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:01.119 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f4110133280 (res 0x7f4110a4c370)
+00:00:01.119 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f41101316f0 (res 0x7f4110a4c7f0)
+00:00:01.119 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f411046a470 (res 0x7f4110a4cc70)
+00:00:01.119 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:01.119 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f4110142780 (res 0x7f4110a5a5b0)
+00:00:01.119 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f4110131b00 (res 0x7f4110a5a6d0)
+00:00:01.137 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:01.137 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.137 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe654883e8 horizontally
+00:00:01.137 [DEBUG] [sway/tree/view.c:578] Checking criteria [app_id="^hover-"]
+00:00:01.137 [DEBUG] [sway/tree/view.c:583] for_window '[app_id="^hover-"]' matches view 0x7f41110fe670, cmd: 'floating enable'
+00:00:01.137 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:01.137 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:01.137 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.137 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10620 committing with 4 instructions
+00:00:01.138 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f40eff10620 is ready
+00:00:01.138 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10620
+00:00:01.142 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10760 committing with 1 instructions
+00:00:01.142 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10760
+00:00:01.164 [DEBUG] [sway/ipc-server.c:196] New client: fd 42
+00:00:01.176 [INFO] [sway/ipc-server.c:570] IPC Client 42 disconnected
+00:00:01.329 [DEBUG] [sway/ipc-server.c:196] New client: fd 42
+00:00:01.335 [INFO] [sway/ipc-server.c:570] IPC Client 42 disconnected
+00:00:01.354 [DEBUG] [sway/ipc-server.c:196] New client: fd 42
+00:00:01.354 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:01.354 [INFO] [sway/commands.c:287] Handling command 'resize set width 600 px height 450 px'
+00:00:01.354 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:01.354 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff158f0 committing with 2 instructions
+00:00:01.356 [INFO] [sway/ipc-server.c:570] IPC Client 42 disconnected
+00:00:01.372 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f40eff158f0 is ready
+00:00:01.372 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff158f0
+00:00:01.374 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:01.374 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 16x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.374 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 16x16
+00:00:01.375 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15eb0 committing with 1 instructions
+00:00:01.376 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15eb0
+00:00:01.462 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.462 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:01.462 [INFO] [sway/commands.c:287] Handling command 'resize set width 600 px height 450 px'
+00:00:01.462 [INFO] [sway/commands.c:287] Handling command 'move position 450 px 200 px'
+00:00:01.462 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff159b0 committing with 1 instructions
+00:00:01.464 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.484 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f40eff159b0 is ready
+00:00:01.484 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff159b0
+00:00:01.487 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:01.487 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.488 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:01.489 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15a30 committing with 1 instructions
+00:00:01.489 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15a30
+00:00:01.570 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:01.570 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:01.570 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:01.571 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10320 committing with 1 instructions
+00:00:01.571 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10320
+00:00:01.572 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:01.681 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:01.681 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:01.682 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:01.682 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15930 committing with 1 instructions
+00:00:01.682 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15930
+00:00:01.682 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:01.786 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:01.791 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:01.796 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:01.802 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:01.805 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:01.806 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:01.815 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:01.816 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.816 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:01.817 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:01.821 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:01.829 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:01.835 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:02.993 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:02.999 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.013 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:03.014 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:03.014 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:03.016 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:03.344 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 0)
+00:00:03.348 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.348 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:03.349 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:03.349 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15e30 committing with 1 instructions
+00:00:03.349 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15e30
+00:00:03.352 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.458 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.463 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.471 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.477 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.483 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.490 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.503 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.503 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000'
+00:00:03.504 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.610 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:03.611 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:03.611 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:03.619 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:03.619 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:03.620 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:03.620 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15770 committing with 1 instructions
+00:00:03.620 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15770
+00:00:03.621 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:03.729 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:03.730 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:03.730 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:03.731 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:03.731 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:03.737 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:03.845 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:03.850 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:03.858 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:03.865 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:03.869 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:03.870 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:03.887 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:03.888 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:03.888 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:03.896 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.904 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:03.910 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:03.916 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.425 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.430 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.437 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.445 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.469 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.473 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.499 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.504 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.530 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.535 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.564 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.569 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.597 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.602 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.630 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.636 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.668 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.676 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.703 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.712 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.742 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.748 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.782 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.789 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.817 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.825 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.854 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.864 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.873 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15d70 committing with 1 instructions
+00:00:04.873 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15d70
+00:00:04.890 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.896 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.901 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.905 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.911 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.931 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.934 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:04.941 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:04.951 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:05.309 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 0)
+00:00:05.313 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:05.313 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:05.313 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:05.317 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:05.318 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:05.318 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:05.318 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15a70 committing with 1 instructions
+00:00:05.319 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15a70
+00:00:05.321 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:05.425 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:05.425 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:05.425 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:05.426 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15b70 committing with 4 instructions
+00:00:05.427 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15b70
+00:00:05.436 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:05.545 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:05.550 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:05.555 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:05.561 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:05.569 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:05.569 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:05.580 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:05.583 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:05.583 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:05.586 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:05.591 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:05.598 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:05.604 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:05.860 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:05.860 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:05.860 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:06.915 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:06.926 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:06.933 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:06.937 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:06.942 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:06.945 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:06.952 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:06.952 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:06.952 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:06.953 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10020 committing with 1 instructions
+00:00:06.953 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10020
+00:00:06.956 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:07.060 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:07.060 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:07.060 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:07.060 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f41105545c0 committing with 4 instructions
+00:00:07.061 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f41105545c0
+00:00:07.070 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:07.171 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:07.176 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:07.181 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:07.187 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:07.192 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:07.193 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:07.204 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:07.205 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:07.205 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:07.206 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:07.209 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:07.216 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:07.221 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:07.477 [DEBUG] [sway/ipc-server.c:196] New client: fd 41
+00:00:07.478 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:07.478 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:07.478 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff104a0 committing with 4 instructions
+00:00:07.478 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff104a0
+00:00:07.482 [INFO] [sway/ipc-server.c:570] IPC Client 41 disconnected
+00:00:08.649 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:08.654 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:08.660 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:08.665 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:08.669 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:08.674 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:08.677 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:08.678 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:08.678 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:08.689 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:08.689 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:08.690 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:08.690 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10620 committing with 1 instructions
+00:00:08.690 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10620
+00:00:08.691 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:08.797 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:08.797 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:08.801 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:08.801 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15730 committing with 1 instructions
+00:00:08.801 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15730
+00:00:08.802 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:08.917 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:08.925 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:08.932 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:08.938 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:08.943 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff100a0 committing with 4 instructions
+00:00:08.944 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff100a0
+00:00:08.950 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:08.953 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:08.953 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:08.955 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:08.974 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:08.982 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:08.989 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:09.250 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:09.250 [INFO] [sway/commands.c:287] Handling command 'workspace number 2'
+00:00:09.250 [DEBUG] [sway/tree/workspace.c:185] Adding workspace 2 for output HEADLESS-1
+00:00:09.250 [DEBUG] [sway/tree/workspace.c:741] Switching to workspace 0x7f411046a920:2
+00:00:09.250 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:09.250 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '2' at 0.000000, 0.000000
+00:00:09.250 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff157b0 committing with 4 instructions
+00:00:09.250 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff157b0
+00:00:09.251 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:09.252 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:09.252 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:09.254 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:09.359 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:09.360 [INFO] [sway/commands.c:287] Handling command 'workspace number 1'
+00:00:09.360 [DEBUG] [sway/tree/workspace.c:741] Switching to workspace 0x7f4110469330:1
+00:00:09.360 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace '2'
+00:00:09.360 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:09.360 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:09.360 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15cb0 committing with 5 instructions
+00:00:09.360 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15cb0
+00:00:09.365 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:09.365 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:09.366 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:09.367 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:10.522 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:10.526 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:10.534 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:10.544 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:10.550 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:10.556 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:10.560 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:10.560 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:10.560 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:10.565 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:10.565 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:10.566 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:10.566 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff158f0 committing with 1 instructions
+00:00:10.566 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff158f0
+00:00:10.568 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:10.673 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:10.673 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:10.674 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:10.674 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15c30 committing with 4 instructions
+00:00:10.674 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15c30
+00:00:10.679 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:10.788 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:10.794 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:10.800 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:10.806 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:10.809 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:10.809 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:10.821 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:10.826 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:10.826 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:10.827 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:10.835 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:10.843 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:10.848 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:11.104 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:11.104 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:11.105 [INFO] [sway/commands.c:287] Handling command 'move position 120 px 100 px'
+00:00:11.105 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15730 committing with 1 instructions
+00:00:11.105 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15730
+00:00:11.111 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:12.270 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:12.281 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:12.291 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:12.296 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:12.299 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:12.300 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:12.300 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:12.304 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:12.304 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:12.304 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:12.305 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff158f0 committing with 1 instructions
+00:00:12.305 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff158f0
+00:00:12.306 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:12.412 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:12.413 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:12.413 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:12.413 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10320 committing with 4 instructions
+00:00:12.413 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10320
+00:00:12.420 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:12.528 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:12.538 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:12.576 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:12.581 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:12.585 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff100a0 committing with 4 instructions
+00:00:12.585 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff100a0
+00:00:12.600 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:12.600 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:12.600 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:12.601 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:12.614 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:12.626 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:12.633 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:12.893 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:12.893 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 0'
+00:00:12.894 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.054 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.065 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.072 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.078 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.091 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.091 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay'
+00:00:14.092 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.107 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.107 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay -1'
+00:00:14.109 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.115 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.115 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 60001'
+00:00:14.116 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.124 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.125 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000x'
+00:00:14.125 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.134 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.134 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1 2'
+00:00:14.135 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.145 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.145 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 9999999999999999999999999999999'
+00:00:14.146 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.153 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.153 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000'
+00:00:14.154 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.256 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:14.256 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:14.256 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:14.261 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:14.262 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:14.262 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:14.262 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff106e0 committing with 1 instructions
+00:00:14.262 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff106e0
+00:00:14.263 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:14.369 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:14.369 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:14.369 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:14.370 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15870 committing with 4 instructions
+00:00:14.370 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15870
+00:00:14.376 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:14.482 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:14.488 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:14.495 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:14.501 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:14.505 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f41105545c0 committing with 3 instructions
+00:00:14.505 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f41105545c0
+00:00:14.508 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10760 committing with 3 instructions
+00:00:14.508 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10760
+00:00:14.510 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:14.510 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:14.510 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:14.513 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.517 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:14.526 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:14.534 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:15.697 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:15.712 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:15.718 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:15.718 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:15.719 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+00:00:15.726 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:15.727 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:15.727 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:15.727 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 1 instructions
+00:00:15.727 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:15.729 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:15.836 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:15.836 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:15.836 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:15.836 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff157f0 committing with 4 instructions
+00:00:15.837 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff157f0
+00:00:15.844 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:15.947 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:15.953 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:15.965 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:15.970 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:15.973 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff10420 committing with 4 instructions
+00:00:15.973 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff10420
+00:00:15.982 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:15.982 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 9x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:15.982 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 9x16
+00:00:15.986 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:15.995 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:16.003 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:16.009 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:16.269 [DEBUG] [sway/ipc-server.c:196] New client: fd 36
+00:00:16.269 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:16.269 [INFO] [sway/commands.c:287] Handling command 'kill'
+00:00:16.270 [INFO] [sway/ipc-server.c:570] IPC Client 36 disconnected
+00:00:16.274 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:16.274 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:16.274 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff15870 committing with 4 instructions
+00:00:16.275 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff15870
+00:00:16.277 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:16.277 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 10x16 GBM buffer with format AR24 (0x34325241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:16.277 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 10x16
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+00:00:17.479 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:17.487 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:17.493 [INFO] [sway/main.c:401] Shutting down sway
+00:00:17.494 [DEBUG] [sway/input/input-manager.c:208] removing device: '0:0:wlr_virtual_pointer_v1'
+00:00:17.494 [DEBUG] [sway/input/seat.c:966] removing device 0:0:wlr_virtual_pointer_v1 from seat seat0
+00:00:17.494 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:17.494 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:17.494 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f40eff159f0 committing with 2 instructions
+00:00:17.494 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f40eff159f0
+ err: 00:00:17.495 wayland.c:2477: failed to roundtrip Wayland display[DEBUG] : Connection reset by peer[sway/tree/output.c:293] Disabling output 'HEADLESS-1'
+
+00:00:17.495  err: [DEBUG] wayland.c:2477: [sway/tree/workspace.c:307] Destroying workspace '1'failed to roundtrip Wayland display
+: Connection reset by peer
+00:00:17.495 [DEBUG] [sway/tree/output.c:310] Destroying output 'HEADLESS-1' err: 
+wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
