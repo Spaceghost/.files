@@ -1,23 +1,48 @@
 #!/bin/sh
+# Volume keys: change the level, then show the new reading on the desktop pill.
 set -eu
 
 action=${1:-}
+
+# Report a level to oldbook-osd; a missing daemon or helper stays silent.
+report() {
+    kind=$1
+    state=$2
+    [ -n "$state" ] || return 0
+    command -v oldbook-osd >/dev/null 2>&1 || return 0
+    percent=$(printf '%s\n' "$state" | awk '{ v = $2 + 0; printf "%d", v * 100 + 0.5 }')
+    case "$state" in
+        *MUTED*) oldbook-osd show --kind "$kind" --value "$percent" --muted ;;
+        *) oldbook-osd show --kind "$kind" --value "$percent" ;;
+    esac
+}
+
 if command -v wpctl >/dev/null 2>&1; then
     case "$action" in
-        up) wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+ ;;
-        down) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%- ;;
-        mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
-        mic-mute) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle ;;
+        up) wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+; target=@DEFAULT_AUDIO_SINK@; kind=volume ;;
+        down) wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-; target=@DEFAULT_AUDIO_SINK@; kind=volume ;;
+        mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; target=@DEFAULT_AUDIO_SINK@; kind=mute ;;
+        mic-mute) wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle; target=@DEFAULT_AUDIO_SOURCE@; kind=mic-mute ;;
         *) printf '%s\n' 'usage: oldbook-audio {up|down|mute|mic-mute}' >&2; exit 64 ;;
     esac
+    # "Volume: 0.40 [MUTED]" from WirePlumber.
+    report "$kind" "$(wpctl get-volume "$target" 2>/dev/null || true)"
 elif command -v pactl >/dev/null 2>&1; then
     case "$action" in
-        up) pactl set-sink-volume @DEFAULT_SINK@ +5% ;;
-        down) pactl set-sink-volume @DEFAULT_SINK@ -5% ;;
-        mute) pactl set-sink-mute @DEFAULT_SINK@ toggle ;;
-        mic-mute) pactl set-source-mute @DEFAULT_SOURCE@ toggle ;;
+        up) pactl set-sink-volume @DEFAULT_SINK@ +5%; kind=volume ;;
+        down) pactl set-sink-volume @DEFAULT_SINK@ -5%; kind=volume ;;
+        mute) pactl set-sink-mute @DEFAULT_SINK@ toggle; kind=mute ;;
+        mic-mute) pactl set-source-mute @DEFAULT_SOURCE@ toggle; kind=mic-mute ;;
         *) printf '%s\n' 'usage: oldbook-audio {up|down|mute|mic-mute}' >&2; exit 64 ;;
     esac
+    case "$kind" in
+        mic-mute) device=source; name=@DEFAULT_SOURCE@ ;;
+        *) device=sink; name=@DEFAULT_SINK@ ;;
+    esac
+    # Rebuild WirePlumber's phrasing from "front-left: 26214 / 40% / ..." and "Mute: no".
+    level=$(pactl "get-$device-volume" "$name" 2>/dev/null | awk -F'/' 'NR == 1 { gsub(/[ %]/, "", $2); printf "%.2f", $2 / 100 }')
+    muted=$(pactl "get-$device-mute" "$name" 2>/dev/null | awk '$2 == "yes" { print " [MUTED]" }')
+    [ -z "$level" ] || report "$kind" "Volume: $level$muted"
 else
     notify-send -u critical 'Audio control unavailable' 'Neither wpctl nor pactl is installed.'
     exit 127

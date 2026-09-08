@@ -1,0 +1,112 @@
+{
+  "renderer": "pixman",
+  "artwork": "2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png",
+  "artwork_sha256": "f932fef36c22728ef6679a40431b2908e69d62e21fe673b6d7435bd6765c1eb1",
+  "daemon_sha256": "b22fa0cfb7f1b2c46eb71d34041a707095e5f7df562b78bcde1597c5f9a3b4a5",
+  "library_sha256": "79741e6c138031e81f8b241bf20f64010c5d8b88f481f5cfe77801b0690b2817",
+  "versions": {
+    "swayfx": "swayfx version 0.6 (based on sway 1.12.0)",
+    "satty": "satty_cli 0.20.1",
+    "grim": "Usage: grim [options...] [output-file]"
+  },
+  "sway_version": "0.6",
+  "idle_surfaces": [],
+  "pill_surface": [
+    {
+      "namespace": "oldbook-osd",
+      "layer": "overlay",
+      "extent": {
+        "width": 300,
+        "height": 66,
+        "x": 570,
+        "y": 798
+      },
+      "effects": {
+        "blur": true,
+        "blur_xray": true,
+        "blur_ignore_transparent": true,
+        "shadows": true,
+        "corner_radius": 14
+      }
+    }
+  ],
+  "pill_box": [
+    570,
+    798,
+    300,
+    66
+  ],
+  "workspace_rect_before": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "workspace_rect_shown": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "hidden_surfaces": [],
+  "luma": {
+    "idle_box": 38.24058745098038,
+    "shown_box": 46.86223137254884,
+    "fading_box": 29.95792862745099,
+    "hidden_box": 38.24058745098038,
+    "flash_full": 129.34983443208776,
+    "after_flash_full": 64.27551791358312,
+    "idle_full": 64.27551791358312
+  },
+  "second_surfaces": [
+    {
+      "namespace": "oldbook-osd",
+      "layer": "overlay",
+      "extent": {
+        "width": 300,
+        "height": 66,
+        "x": 570,
+        "y": 798
+      },
+      "effects": {
+        "blur": true,
+        "blur_xray": true,
+        "blur_ignore_transparent": true,
+        "shadows": true,
+        "corner_radius": 14
+      }
+    }
+  ],
+  "flash_surface": [],
+  "flash_surfaces_after": [],
+  "satty": {
+    "app_id": "com.gabm.satty",
+    "type": "floating_con",
+    "floating": true,
+    "rect": {
+      "x": 115,
+      "y": 111,
+      "width": 1209,
+      "height": 717
+    },
+    "log": [
+      "CSS overrides file <private-home>/home/.config/satty/overrides.css does not exist, using builtin CSS only.",
+      "Fullscreen None | Resize None | Floatinghack false"
+    ]
+  },
+  "daemon_alive_at_end": true,
+  "checks": {
+    "pill_on_overlay_layer": true,
+    "pill_size_matches": true,
+    "workspace_unchanged_while_shown": true,
+    "pill_unmapped_after_fade": true,
+    "pill_visible_then_fading": true,
+    "pill_gone_after_hide": true,
+    "flash_brightened_output": true,
+    "flash_gone_after": true,
+    "satty_floats": true,
+    "satty_config_accepted": true,
+    "daemon_survived": true
+  },
+  "passed": true
+}

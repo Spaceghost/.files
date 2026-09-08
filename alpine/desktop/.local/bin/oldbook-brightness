@@ -1,8 +1,10 @@
 #!/bin/sh
+# Display brightness keys: step the kernel backlight, then show the reading on the desktop pill.
 set -eu
 
 action=${1:-}
-for device in /sys/class/backlight/*; do
+root=${OLDBOOK_BACKLIGHT_ROOT:-/sys/class/backlight}
+for device in "$root"/*; do
     [ -r "$device/brightness" ] && [ -r "$device/max_brightness" ] || continue
     current=$(cat "$device/brightness")
     maximum=$(cat "$device/max_brightness")
@@ -17,7 +19,10 @@ for device in /sys/class/backlight/*; do
     [ "$next" -ge 1 ] || next=1
     if printf '%s\n' "$next" > "$device/brightness" 2>/dev/null; then
         percent=$((next * 100 / maximum))
-        notify-send -h int:value:"$percent" -h string:x-canonical-private-synchronous:spaceghost-brightness 'Brightness' "$percent%"
+        # The pill replaces the old progress notification; without a daemon it stays quiet.
+        if command -v oldbook-osd >/dev/null 2>&1; then
+            oldbook-osd show --kind brightness --value "$percent"
+        fi
         exit 0
     fi
     notify-send -u normal 'Brightness needs device permission' "Cannot write $device/brightness. Grant the active seat write access or install a seat-aware brightness control."

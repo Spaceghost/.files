@@ -1,0 +1,391 @@
+#!/usr/bin/env python3
+"""Themed on-screen feedback for volume, brightness and keyboard light, and the
+screenshot flash.
+
+`oldbook-osd daemon` owns one compact pill on the overlay layer at the bottom
+centre of the focused output, plus a full-output wash used as the screenshot
+flash. `show` and `flash` are socket-only clients: when no daemon is listening
+they exit quietly and never start one, so a key press can never block on GTK.
+"""
+import argparse
+import fcntl
+import os
+from pathlib import Path
+import signal
+import socket
+import stat
+import sys
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+from osd import (FLASH_ALPHA, HOLD_MS, KINDS, MAX_VALUE, Feedback, Flash, describe,
+                 endpoint, flash_message, parse_message, send, show_message)
+from overlay_theme import read_palette
+
+NAMESPACE = 'oldbook-osd'
+FLASH_NAMESPACE = 'oldbook-flash'
+WIDTH, HEIGHT = 300, 66
+PADDING = 18
+RADIUS = 14
+GLYPH_COLUMN = 36
+BAR_HEIGHT = 6
+BOTTOM_MARGIN = 36
+FONT = 'JetBrainsMono Nerd Font'
+# Aged cream rather than pure white, so the wash belongs to the palette.
+FLASH_COLOR = (0.984, 0.945, 0.780)
+
+
+def private_directory(path):
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    info = path.lstat()
+    if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+            or stat.S_IMODE(info.st_mode) & 0o077):
+        raise RuntimeError('OSD runtime must be an owned private directory: ' + str(path))
+
+
+def session_ready(runtime):
+    """Only serve a compositor session that lives in this runtime directory."""
+    sway = os.environ.get('SWAYSOCK')
+    if not runtime or not sway:
+        return False
+    try:
+        info = os.stat(sway, follow_symlinks=False)
+    except OSError:
+        return False
+    return (stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid()
+            and Path(sway).parent == Path(runtime))
+
+
+def rgb(color):
+    color = color.lstrip('#')
+    return tuple(int(color[index:index + 2], 16) / 255.0 for index in (0, 2, 4))
+
+
+def rounded_rectangle(cr, x, y, width, height, radius):
+    import math
+    radius = max(0.0, min(radius, width / 2.0, height / 2.0))
+    cr.new_sub_path()
+    cr.arc(x + width - radius, y + radius, radius, -math.pi / 2, 0)
+    cr.arc(x + width - radius, y + height - radius, radius, 0, math.pi / 2)
+    cr.arc(x + radius, y + height - radius, radius, math.pi / 2, math.pi)
+    cr.arc(x + radius, y + radius, radius, math.pi, 3 * math.pi / 2)
+    cr.close_path()
+
+
+def pango():
+    import gi
+    gi.require_version('Pango', '1.0')
+    gi.require_version('PangoCairo', '1.0')
+    from gi.repository import Pango, PangoCairo
+    return Pango, PangoCairo
+
+
+def layout(cr, text, size, weight='normal'):
+    Pango, PangoCairo = pango()
+    result = PangoCairo.create_layout(cr)
+    description = Pango.FontDescription.from_string(FONT)
+    description.set_absolute_size(size * Pango.SCALE)
+    description.set_weight(Pango.Weight.BOLD if weight == 'bold' else Pango.Weight.MEDIUM)
+    result.set_font_description(description)
+    result.set_text(text, -1)
+    return result
+
+
+def draw_text(cr, text, x, y, size, color, weight='normal', align='left', box_width=None,
+              middle=None):
+    """Draw text with its logical box at (x, y); ``middle`` centres it vertically."""
+    _, PangoCairo = pango()
+    text_layout = layout(cr, text, size, weight)
+    _, logical = text_layout.get_pixel_extents()
+    if align == 'right' and box_width is not None:
+        x = x + box_width - logical.width
+    elif align == 'center' and box_width is not None:
+        x = x + (box_width - logical.width) / 2.0
+    if middle is not None:
+        y = middle - logical.height / 2.0
+    cr.move_to(x - logical.x, y - logical.y)
+    cr.set_source_rgb(*rgb(color))
+    PangoCairo.show_layout(cr, text_layout)
+    return logical
+
+
+def render_pill(cr, width, height, content, palette):
+    """Draw the pill at full opacity; the caller applies the fade."""
+    cr.save()
+    rounded_rectangle(cr, 0, 0, width, height, RADIUS)
+    cr.set_source_rgba(*rgb(palette['background']), 0.86)
+    cr.fill()
+    accent = palette['muted'] if content['muted'] else palette['accent']
+    row_middle = PADDING + 8
+    draw_text(cr, content['glyph'], PADDING, 0, 22, accent, middle=row_middle)
+    left = PADDING + GLYPH_COLUMN
+    span = width - PADDING - left
+    draw_text(cr, content['label'], left, 0, 12, palette['foreground'], middle=row_middle)
+    draw_text(cr, str(content['value']) + '%', left, 0, 13, accent, weight='bold',
+              align='right', box_width=span, middle=row_middle)
+    bar_top = height - PADDING - BAR_HEIGHT + 2
+    rounded_rectangle(cr, left, bar_top, span, BAR_HEIGHT, BAR_HEIGHT / 2.0)
+    cr.set_source_rgba(*rgb(palette['border']), 0.95)
+    cr.fill()
+    filled = span * content['fill']
+    if filled > 0:
+        rounded_rectangle(cr, left, bar_top, max(BAR_HEIGHT, filled), BAR_HEIGHT, BAR_HEIGHT / 2.0)
+        cr.set_source_rgb(*rgb(accent))
+        cr.fill()
+    cr.restore()
+
+
+def preview(kind, value, muted, output, palette=None):
+    """Render the pill into a PNG without a display, for evidence and review."""
+    import cairo
+    palette = palette or read_palette()
+    content = describe(kind, value, muted)
+    scale = 2
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, WIDTH * scale, HEIGHT * scale)
+    cr = cairo.Context(surface)
+    cr.scale(scale, scale)
+    render_pill(cr, WIDTH, HEIGHT, content, palette)
+    surface.write_to_png(str(output))
+    return content
+
+
+def daemon():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        print('oldbook-osd: XDG_RUNTIME_DIR is required', file=sys.stderr)
+        return 1
+    if not session_ready(runtime):
+        return 0
+    directory = Path(runtime) / 'oldbook'
+    private_directory(directory)
+    guard = (directory / 'osd.lock').open('a+')
+    try:
+        fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return 0
+
+    import gi
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('Gdk', '3.0')
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import Gdk, GLib, Gtk, GtkLayerShell
+    import cairo
+
+    if Gdk.Display.get_default() is None or not GtkLayerShell.is_supported():
+        print('oldbook-osd: the Wayland desktop with layer-shell is required', file=sys.stderr)
+        return 1
+    from ui_priority import request_priority
+    request_priority()
+    settings = Gtk.Settings.get_default()
+    animations = bool(settings.get_property('gtk-enable-animations')) if settings else True
+
+    def transparent_window(namespace):
+        window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        window.set_name(namespace)
+        window.set_can_focus(False)
+        window.set_accept_focus(False)
+        window.set_app_paintable(True)
+        visual = window.get_screen().get_rgba_visual()
+        if visual is not None:
+            window.set_visual(visual)
+        GtkLayerShell.init_for_window(window)
+        GtkLayerShell.set_namespace(window, namespace)
+        GtkLayerShell.set_layer(window, GtkLayerShell.Layer.OVERLAY)
+        GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE)
+        # Pointer input passes straight through to whatever is underneath.
+        window.connect('map-event', lambda widget, _event:
+                       widget.get_window().input_shape_combine_region(cairo.Region(), 0, 0))
+        return window
+
+    provider = Gtk.CssProvider()
+    provider.load_from_data(('#%s, #%s { background: transparent; }'
+                             % (NAMESPACE, FLASH_NAMESPACE)).encode())
+    Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), provider,
+                                             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+    def frame_now(widget):
+        clock = widget.get_frame_clock()
+        return (clock.get_frame_time() if clock else GLib.get_monotonic_time()) / 1000.0
+
+    class Pill:
+        def __init__(self):
+            self.state = Feedback(animate=animations)
+            self.palette = read_palette()
+            self.hold_timer = 0
+            self.ticker = 0
+            self.window = transparent_window(NAMESPACE)
+            # Zero reserves nothing but still keeps clear of the bar and the
+            # workspace caption; the compositor picks the focused output on map.
+            GtkLayerShell.set_exclusive_zone(self.window, 0)
+            GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, BOTTOM_MARGIN)
+            self.window.set_resizable(False)
+            self.window.set_default_size(WIDTH, HEIGHT)
+            self.area = Gtk.DrawingArea()
+            self.area.set_size_request(WIDTH, HEIGHT)
+            self.area.connect('draw', self.draw)
+            self.window.add(self.area)
+
+        def show(self, request):
+            self.palette = read_palette()
+            self.state.show(describe(request['kind'], request['value'], request['muted']),
+                            frame_now(self.area))
+            self.stop_clocks()
+            if not self.window.get_visible():
+                self.window.show_all()
+            self.area.queue_draw()
+            self.hold_timer = GLib.timeout_add(int(HOLD_MS), self.start_fade)
+
+        def start_fade(self):
+            self.hold_timer = 0
+            if not self.state.animate:
+                self.hide()
+            else:
+                self.ticker = self.area.add_tick_callback(self.tick)
+            return GLib.SOURCE_REMOVE
+
+        def tick(self, widget, clock):
+            if self.state.hidden_at(clock.get_frame_time() / 1000.0):
+                self.ticker = 0
+                self.hide()
+                return GLib.SOURCE_REMOVE
+            widget.queue_draw()
+            return GLib.SOURCE_CONTINUE
+
+        def stop_clocks(self):
+            if self.hold_timer:
+                GLib.source_remove(self.hold_timer)
+                self.hold_timer = 0
+            if self.ticker:
+                self.area.remove_tick_callback(self.ticker)
+                self.ticker = 0
+
+        def hide(self):
+            self.stop_clocks()
+            self.state.hide()
+            self.window.hide()
+
+        def draw(self, widget, cr):
+            content = self.state.content
+            if content is None:
+                return True
+            alpha = self.state.alpha_at(frame_now(widget))
+            if alpha <= 0.0:
+                return True
+            cr.push_group()
+            render_pill(cr, widget.get_allocated_width(), widget.get_allocated_height(),
+                        content, self.palette)
+            cr.pop_group_to_source()
+            cr.paint_with_alpha(alpha)
+            return True
+
+    class Wash:
+        def __init__(self):
+            self.state = None
+            self.ticker = 0
+            self.window = transparent_window(FLASH_NAMESPACE)
+            GtkLayerShell.set_exclusive_zone(self.window, -1)
+            for edge in (GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM,
+                         GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT):
+                GtkLayerShell.set_anchor(self.window, edge, True)
+            self.area = Gtk.DrawingArea()
+            self.area.connect('draw', self.draw)
+            self.window.add(self.area)
+
+        def flash(self):
+            if not animations:
+                return
+            self.state = Flash(frame_now(self.area), animate=True)
+            if self.ticker:
+                self.area.remove_tick_callback(self.ticker)
+            self.ticker = self.area.add_tick_callback(self.tick)
+            if not self.window.get_visible():
+                self.window.show_all()
+            self.area.queue_draw()
+
+        def tick(self, widget, clock):
+            if self.state is None or self.state.finished_at(clock.get_frame_time() / 1000.0):
+                self.ticker = 0
+                self.state = None
+                self.window.hide()
+                return GLib.SOURCE_REMOVE
+            widget.queue_draw()
+            return GLib.SOURCE_CONTINUE
+
+        def draw(self, widget, cr):
+            if self.state is None:
+                return True
+            alpha = self.state.alpha_at(frame_now(widget))
+            if alpha > 0.0:
+                cr.set_source_rgba(*FLASH_COLOR, alpha)
+                cr.paint()
+            return True
+
+    pill, wash = Pill(), Wash()
+    address = endpoint(runtime)
+    address.unlink(missing_ok=True)
+    control = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    control.bind(str(address))
+    os.chmod(address, 0o600)
+    control.setblocking(False)
+
+    def receive(*_arguments):
+        try:
+            request = parse_message(control.recv(4096))
+        except OSError:
+            return GLib.SOURCE_CONTINUE
+        if request is None:
+            return GLib.SOURCE_CONTINUE
+        if request['action'] == 'flash':
+            wash.flash()
+        else:
+            pill.show(request)
+        return GLib.SOURCE_CONTINUE
+
+    watch = GLib.io_add_watch(control.fileno(), GLib.IO_IN, receive)
+    for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signum, lambda *_: Gtk.main_quit() or False)
+    try:
+        Gtk.main()
+    finally:
+        GLib.source_remove(watch)
+        control.close()
+        address.unlink(missing_ok=True)
+        guard.close()
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.split('\n\n', 1)[0])
+    commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('daemon', help='serve the pill for this desktop session')
+    show = commands.add_parser('show', help='display one reading')
+    show.add_argument('--kind', required=True, choices=KINDS)
+    show.add_argument('--value', required=True, type=int, help='0 to %d percent' % MAX_VALUE)
+    show.add_argument('--muted', action='store_true')
+    commands.add_parser('flash', help='wash the focused output after a screenshot')
+    render = commands.add_parser('preview', help='render the pill to a PNG without a display')
+    render.add_argument('--kind', default='volume', choices=KINDS)
+    render.add_argument('--value', default=42, type=int)
+    render.add_argument('--muted', action='store_true')
+    render.add_argument('--output', required=True, type=Path)
+    arguments = parser.parse_args(argv)
+    if arguments.command == 'daemon':
+        return daemon()
+    if arguments.command == 'preview':
+        content = preview(arguments.kind, arguments.value, arguments.muted, arguments.output)
+        print(content['label'], str(content['value']) + '%', arguments.output)
+        return 0
+    if arguments.command == 'show':
+        send(show_message(arguments.kind, arguments.value, arguments.muted))
+    else:
+        send(flash_message())
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except RuntimeError as error:
+        print('oldbook-osd: ' + str(error), file=sys.stderr)
+        sys.exit(1)
