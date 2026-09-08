@@ -87,6 +87,10 @@ paths at layout time.
 
 ## Scripture
 
+Click **History** on the Scripture heading to open saved passages, study material
+and notes. It uses the heading's active theme font and accent; opening it keeps
+the selected passage unchanged. Clicking the passage itself advances it.
+
 The complete King James text ships in the checkout as
 `alpine/assets/scripture/kjv.tsv.gz`: all 66 books and all 31,102 verses, one
 tab separated record per line, so nothing is fetched at runtime.

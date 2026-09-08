@@ -12,6 +12,7 @@ REPO = Path(__file__).resolve().parents[2]
 BIN = REPO / 'alpine/desktop/.local/bin'
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import desktop_journal as journal
+import conky_layout
 
 
 class ClickCommandsTests(unittest.TestCase):
@@ -99,6 +100,43 @@ assert(conky_oldbook_click({type='button_down',button='left'}) == false)
                                 env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(selection.read_bytes(), previous)
+
+    def test_header_history_hit_target_does_not_advance_the_passage(self):
+        hook = REPO / 'alpine/desktop/.local/lib/oldbook/conky_click.lua'
+        panel = {'id': 'scripture', 'text': '${color1}SCRIPTURE${color2} ${hr 1}\nPassage'}
+        placement = {'x': 40, 'y': 60, 'width': 420, 'height': 200,
+                     'background': [20, 20, 20]}
+        colours = conky_layout.panel_colours(placement, conky_layout.resolve_palette({}))
+        config = self.home / 'scripture.conf'
+        config.write_text(conky_layout.render_config(panel, placement, colours,
+                          {'click_hook': str(hook)}))
+        script = self.home / 'header.lua'
+        script.write_text('conky = {}\n' + f'dofile({json.dumps(str(config))})\n'
+                          + f'conky_config = {json.dumps(str(config))}\n'
+                          + f'dofile({json.dumps(str(hook))})\n' + '''
+if conky.config.lua_startup_hook then
+    local name, x, width, height = conky.config.lua_startup_hook:match('(%S+) (%S+) (%S+) (%S+)')
+    _G['conky_' .. name](x, width, height)
+end
+local commands = {}
+os.execute = function(command) table.insert(commands, command) end
+local function click(x, y, action)
+    assert(conky_oldbook_click({type='button_down', button='left', x=x, y=y}))
+    assert(commands[#commands]:match('oldbook%-conky%-click" ' .. action .. ' >'),
+           'Wrong action for click at ' .. x .. ',' .. y .. ': ' .. commands[#commands])
+end
+click(390, 8, 'scripture%-history')
+click(390, 40, 'scripture')
+click(30, 8, 'scripture')
+click(347, 8, 'scripture')
+click(348, 0, 'scripture%-history')
+click(419, 17, 'scripture%-history')
+click(390, 18, 'scripture')
+assert(#commands == 7)
+''')
+        result = subprocess.run(['lua', str(script)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
 
 
 class JournalClickTests(unittest.TestCase):

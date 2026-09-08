@@ -68,13 +68,7 @@ class SearchBar:
         button.connect('enter-notify-event', lambda *_: self._hover(True))
         button.connect('leave-notify-event', lambda *_: self._hover(False))
         self.button = button
-        controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        controls.pack_start(button, True, True, 0)
-        history_button = Gtk.Button(label='History')
-        history_button.set_tooltip_text('Read saved passages, study material, and notes')
-        history_button.connect('clicked', self.open_history)
-        controls.pack_start(history_button, False, False, 0)
-        self.window.add(controls)
+        self.window.add(button)
 
         self.palette = None
         self.provider = Gtk.CssProvider()
@@ -173,14 +167,6 @@ class SearchBar:
         except OSError:
             pass
         return GLib.SOURCE_CONTINUE
-
-    def open_history(self, *_arguments):
-        try:
-            subprocess.Popen(['/usr/bin/python3', str(FINDER), 'history'],
-                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                             stderr=subprocess.DEVNULL, start_new_session=True)
-        except OSError:
-            pass
 
 
 def claim_single_instance():
