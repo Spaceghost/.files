@@ -10,7 +10,9 @@ attempt per day through the existing Codex login and extra paintings on request.
 ![Gruvbox Space Ghost artwork](assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png)
 
 [The rice, catalogued](RICE.md) lists every piece of eyecandy on this desktop,
-old and new, with its trigger, its file, its off switch and its evidence.
+old and new, with its trigger, its file, its off switch and its evidence. Its
+[tour](RICE.md#take-the-tour) is an ordered checklist for seeing each piece
+with your own eyes, and says plainly which ones nobody has watched yet.
 
 ## Edit the desktop
 
@@ -45,6 +47,14 @@ swaymsg reload
 | Boot console palette, getty banner, banner initramfs | `system/boot/`, `system/mkinitfs/`, `bin/install-boot-console` |
 | Sun, moon, night light, nocturnes | `~/.config/oldbook/location.json`, `desktop/.local/lib/oldbook/astro.py`, `nocturne.py` |
 | Keyboard glow modes | `desktop/.local/bin/oldbook-keyboard-backlight`, `desktop/.config/sway/local.d/keyboard-backlight.conf` |
+| Window and workspace animations | `desktop/.config/swayfx/animations.conf`, `packages/swayfx/window-animations.patch` |
+| Launchpad and Mission Control | `desktop/.local/lib/oldbook/grid_layout.py`, `grid_overlay.py`, `launchpad.py`, `mission_control.py` |
+| Desktop breath and the idle gallery | `desktop/.local/lib/oldbook/air.py`, `desktop/.local/bin/oldbook-screensaver`, `~/.config/oldbook/breath.json` |
+| Accent elected from the painting | `desktop/.local/lib/oldbook/painting_palette.py`, `desktop/.local/bin/oldbook-palette` |
+| Track card and workspace peek | `desktop/.local/bin/oldbook-osd`, `packages/waybar-art/help.c` |
+| Cursors and sound cues | `bin/build-cursor-theme`, `bin/build-sound-theme`, `~/.config/oldbook/sound.json` |
+| GRUB menu theme | `bin/build-grub-theme`, `system/grub/`, `bin/install-boot-console` |
+| Ambient screen brightness | `desktop/.local/bin/oldbook-ambient-display`, `desktop/.local/lib/oldbook/ambient_light.py` |
 
 Waybar reloads CSS automatically; `pkill -USR2 -u "$(id -u)" -x waybar` reloads
 its JSON. Restart an application to load its changed theme. Re-running the
@@ -75,8 +85,33 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
   a muted state greys it.
 - **Print / Shift+Print / Ctrl+Print:** capture, then a cream flash and shutter click;
   Satty opens for annotation (Enter copies, Ctrl+S overwrites).
+- **Mission Control (F3):** every workspace as a card of live window stills; click or
+  Enter to switch, drag a still to move that window. **Launchpad (F4):** every
+  application over the blurred painting; type to filter, Enter to launch.
+- **Rest on a workspace in the bar:** its windows appear beneath, one still and title
+  each. **Right-click the artwork badge:** the next painting grows out of the point
+  you clicked.
+- **A new track starts:** a card slides in at the bottom right with the album art for
+  four seconds; **Now transmitting** in the command deck switches it off.
 - **Alt+F6:** ambient keyboard glow from the room's light; **Alt+Shift+F6:** breathe on
-  air, where keystrokes fill the lungs. Shift+F5 returns to steady light.
+  air, where keystrokes deepen the breath and the painting swells with it. Shift+F5
+  returns to steady light. **Desktop breath** in the command deck holds the picture
+  still.
+- **Ambient screen:** command deck → Ambient screen, or `oldbook-ambient-display on`;
+  set the brightness by hand any time and it learns the level you like.
+- **Leave the desk for four minutes:** the paintings drift and cycle by themselves,
+  and come back exactly as they were when you return. Thirty seconds later the display
+  eases down and the keyboard takes one last breath; any activity brings both back.
+- **Switching workspaces:** the desktop slides sideways in the direction of the
+  workspace number, from the next login; `animations disable` in
+  `~/.config/swayfx/animations.conf` stops all motion.
+- **While the desktop thinks:** the pointer's amber ring turns and breathes.
+- **The accent follows the painting:** `oldbook-palette show` explains the current
+  choice; `oldbook-palette clear` returns to the theme's amber.
+- **Sound cues:** command deck → Sound cues, or `oldbook-sound toggle`;
+  `oldbook-sound list` names them.
+- **Boot menu:** hold `Shift` or `Esc` at power-on for the Ghost Planet menu; it shows
+  itself for three seconds anyway.
 - **Night light:** command deck → Night light, or `oldbook-sun-light toggle`; needs
   `~/.config/oldbook/location.json` (copy `location.example.json`). `oldbook-astro status`
   prints today's sun and moon; the masthead shows them once the file exists.

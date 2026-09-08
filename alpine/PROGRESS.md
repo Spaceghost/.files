@@ -198,6 +198,175 @@ catalogue, with controls and rollback for every piece, is in [RICE.md](RICE.md).
   was restarted so the idle dim stage applies now; the second open leaf from
   another session's Bazzite fix was merged back into the branch.
 
+## Second eyecandy round — 2026-09-08
+
+Seven parallel items in a second pass, on the brief to step past the norm and
+patch or write code rather than configure. Each carries its own check-in, a
+design note under `docs/superpowers/specs/2026-09-08-*.md`, tests and an
+evidence directory. The panel was off or the session locked for most of the
+window, so nearly all of the visual proof is headless; the catalogue's
+[tour](RICE.md#take-the-tour) lists which pieces nobody has actually watched
+yet.
+
+- **Window and workspace animations.** SwayFX r4 adds `window-animations.patch`:
+  workspaces now slide horizontally instead of only crossfading, each animation
+  kind carries its own duration, and `animations disable` stops all motion
+  without losing the values. The arriving workspace enters from the side its
+  number lies on, floating windows travel with it from a recorded base
+  position, and an interrupted switch settles both workspaces first so no stale
+  offset can strand a window. Fullscreen transitions stay unanimated on
+  purpose, because `arrange_fullscreen` writes the output rect straight into
+  the scene graph and rerouting it would disturb video and screen sharing for
+  one transition. Two isolated offline builds were byte-identical, and the
+  packaged binary passed all nine headless checks, proving by colour that a
+  slide separates the workspaces horizontally where a fade does not, with idle
+  cost measured at 0.0% of a core. Settings live in `animations.conf`, which
+  `oldbook-sway` includes only after validating the installed compositor, so an
+  older binary and the running session never meet the new commands. Physical
+  frame pacing and the look alongside blur remain unobserved; the animations
+  begin at the next login.
+- **Launchpad and Mission Control.** The engraved F4 and F3 keys now open two
+  overlays written for this desktop rather than borrowed tools. Launchpad draws
+  every application as a large icon over the blurred painting, filtering from
+  the first keystroke with a ranking that prefers contiguous and word-start
+  matches, paging with dots when the grid overflows. Mission Control draws every
+  workspace as a card of real window stills taken through the carousel's own
+  capture provider, the focused workspace outlined in amber, with click, arrow,
+  number-key and drag-to-move handling and a card that creates the next
+  workspace. Both are GTK 4 layer-shell singletons that hold the keyboard only
+  while mapped. Testing behind an idle lock exposed two gaps that are now
+  closed: a frame clock that never advances is caught by a 420 ms watchdog
+  instead of leaving an invisible surface holding a keyboard grab, and an
+  overview key pressed behind the session lock now opens nothing at all.
+  Fifty-three unit tests, both Sway configs validated, and a private headless
+  SwayFX run recorded both overlays, a typed query and a clean close
+  (`verification/launchpad-mission-control/`). The session was locked for the
+  whole live window, so the fade, hover, drag and the engraved keys have not
+  been watched on the physical panel.
+- **The desktop breathes.** The keyboard's breathing modes now move the whole
+  scene. Its worker publishes the breath to `$XDG_RUNTIME_DIR/oldbook/air.json`
+  twenty times a second, with a closing record when it stops; the background
+  daemon swells the painting from 1.000 to 1.006 at rest and up to 1.018 at
+  full lungs, settling back to exactly the untouched picture, and the caption
+  strip's accent follows the keystroke breath alone. A shared `air.py` holds
+  the record format, the staleness rule, the maths and a smoother with exact
+  settling; both readers stat the file and release the frame clock when nothing
+  moves. Fifty-one new tests, 128 across the affected suites, and a private
+  headless SwayFX session measured every documented scale exactly
+  (`verification/desktop-breath/`). Live, both daemons were restarted onto the
+  new code and a synthetic record made the live painting swell and settle. The
+  keyboard light was off throughout, so the physical breath on the panel is
+  unobserved.
+- **The idle gallery.** Four minutes idle, the paintings take over:
+  `oldbook-screensaver` hands the background daemon a shuffled list of
+  rotation-eligible paintings and it drifts about 1.06 of zoom across each one
+  for thirty seconds before crossfading to the next, then glides back to rest
+  and to the painting it interrupted. The pan is always a fraction of the room
+  the zoom opens, so no edge can show. The shared painting link, the saved
+  selection, the deadline and the pause switch are never written, so it runs
+  even while rotation is paused. Eight headless checks passed
+  (`verification/gallery-screensaver/`) and a two-second live run drifted and
+  restored cleanly; a real 240-second idle and the physical pacing are
+  unobserved.
+- **The accent follows the painting.** The theme's colours stay put, but its
+  accent now moves with the artwork: each new painting is reduced to a weighted
+  OKLab hue signature, every histogram bin goes to the nearest of the theme's
+  own accent candidates, and the largest share wins along with a companion.
+  Nothing is sampled from the canvas, red stays reserved for urgency, and the
+  Ghost badge never changes; a grey painting or one where no colour holds a
+  third of the frame keeps the declared accent. The election lands in a runtime
+  record that `read_palette` honours only for the theme that produced it and
+  only for colours that theme declares, so the pill, launcher, Expo, lock
+  screen, caption strip and scripture bar retint on their next render, while
+  the bar imports a small stylesheet last so it wins over the hardcoded amber.
+  Sixteen new tests cover the election, the ownership and opt-out guards and
+  the helper's paths; a headless verifier photographed the bar and pill for two
+  contrasting paintings and recorded the badge rendering `#ecb32e` under the
+  firelit procession and `#7d9d90` under the Antarctic station
+  (`verification/reactive-palette/`). Sweeping the gallery elects yellow
+  twenty-three times, orange twice and blue once. The live panel was not
+  photographed retinting: the session locked before it could be measured.
+- **Now transmitting and the workspace peek.** The feedback daemon announces a
+  new track on a card at the bottom right for four seconds, with the album art,
+  the title and the artist, sliding in and out on the frame clock and unmapping
+  when it leaves; its whole suppression rule lives away from the bus and the
+  display, so a card appears only for a genuinely new track on a playing player
+  with the desktop unlocked and the notification centre closed. In the bar,
+  resting on a workspace for a third of a second opens a peek of that
+  workspace's windows, one still and title per window, captured through the
+  carousel's own provider and cached in the user's cache; and a right-click on
+  the artwork badge hands the crossfade the point it landed on, so the next
+  painting grows out of the badge. Sixty-one automated checks cover the two
+  features, including a native fixture that drives the peek under a private X
+  server with a scripted helper, and a private headless SwayFX run that
+  photographs the card and proves it reserves no space. Package r11 built
+  byte-identically twice and is installed. The lock suppression was confirmed
+  live; neither the card nor the peek has been watched on the physical panel,
+  which stayed locked throughout.
+- **Cursors and cues.** The waiting pointer is now an amber ring that turns once
+  every 672 milliseconds and breathes as it goes, drawn by `build-cursor-theme`
+  straight into the Xcursor binary format because xcursorgen is not installed;
+  four nominal sizes are drawn so the panel's 24-at-scale-2 request lands on
+  real pixels, and every other shape is inherited from the Simp1e Gruvbox set.
+  Six sound cues were synthesized from sine and triangle partials over filtered
+  room tone, none longer than a second, all at −12 dBFS, and hooked into the
+  lock, the gallery, a critical notification and an edge-triggered battery
+  watcher; sound is never load-bearing, so a missing player or a muted sink is
+  silence rather than failure. Forty-two tests cover the encoder round trip, the
+  drawn geometry, hotspots, frame counts, the player's five separate silences
+  and the battery edges; the tests caught two cues that ended on an audible
+  step, and `place()` now refuses a voice it would have to truncate. A private
+  headless SwayFX session loaded the theme without complaint and all six cues
+  were played once on the speakers. Nobody has watched the cursor spin on the
+  physical panel, and no cue has yet fired from its own occasion.
+- **Ghost Planet GRUB menu.** The boot menu now shows for three seconds over a
+  graded, blurred crop of the current painting, with an amber selection bar, the
+  Ghost wordmark and a countdown, all from the console palette so the menu, the
+  console and the desktop cannot drift apart. GRUB draws menus in its own bitmap
+  format and `grub-mkfont` is not packaged, so `grub_theme.py` writes PF2
+  directly from glyphs rendered with Pango, shipping a 32-pixel face for the
+  entries and a 20-pixel one for the chrome; the stock 16-pixel font is a smear
+  on this panel. The installer copies the theme before `grub-mkconfig` runs,
+  sets the menu keys and hands the graphics mode to the kernel so the palette
+  and Terminus font installed earlier still apply. 38 unit tests, a dry run, a
+  real install, an idempotent rerun and `grub-script-check` passed, and the
+  stock entry still boots the same kernel, initramfs, root and crypt parameters
+  and stays first. The first install rolled itself back over a whitespace-strict
+  check, which is the safety net working. `grub-emu` is not packaged and nothing
+  was rebooted, so the menu is unverified until the next boot; the picture in
+  `verification/grub-theme/` is drawn from the committed theme, not by GRUB.
+- **Ambient display brightness.** The panel can now follow the Apple SMC light
+  sensor the way the keyboard already does, in the opposite direction: a dark
+  room settles it at a fifteen percent floor and a sunlit desk takes it to full,
+  on a log-scale curve with a hysteresis band and a 1.2-second eased fade. It is
+  opt-in and never argues: a brightness set by hand is kept and its distance
+  from the curve is learned as a lasting offset, nothing is written while the
+  pre-lock dim holds the display or while the session is locked, and automatic
+  changes are silent. Thirty tests against a fake sensor and backlight cover the
+  curve, the offset, both pause rules and the fade. On the machine the daemon
+  read the real sensor and both pause rules fired against live state, because
+  the session was dimmed and locked at the time; an eased fade on the physical
+  panel and a real change in room light remain unobserved.
+- **Consolidation and two open gaps.** The shared hooks landed together: the
+  session now starts the ambient screen and the battery cue, exports the Ghost
+  cursor theme, seeds the accent stylesheet, elects a palette at startup and
+  gives swayidle a 240-second gallery stage ahead of the dim; the gallery
+  refreshes the accent and cues a chime on every deliberate change; the command
+  deck gained four entries; both Waybar stylesheets import the accent sheet last
+  and carry the peek rules. `check-features --all` is consistent across 93 check
+  files and both Sway entry configs validate. Two gaps remain, neither from this
+  round. The package lock could not be refreshed: the installed database records
+  waybar and waybar-openrc 0.15.0-r4, pinned by content hash in
+  `/etc/apk/world`, but only r3 exists in the repositories, the caches and the
+  Fossil artifact store, so `package-archive snapshot` refuses to write a
+  closure it cannot reproduce; the recipe under `packages/waybar/` is intact, so
+  no source was lost and only the built artifact is missing. And the full test
+  suite is not a usable gate: about sixty tests break on fixtures another
+  session archived (`spaceghost.json`, `delaware.png`, the spaceghost profile),
+  and seven thumbnail tests fail only when the whole suite shares one Python
+  process with the new GTK 4 grid tests, passing when run alone. Every
+  round-two module passes on its own.
+
 ## Radio preparation and desktop repairs — 2026-09-07
 
 - Bluetooth is now software-blocked by a Bluetooth-only eudev rule. Independent

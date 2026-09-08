@@ -5,7 +5,7 @@ SwayFX glass, the control deck, the gallery and its crossfade, the reading
 cards, the lock screen, the boot console, the keyboard glow, the terminals.
 Each entry says what it looks like, how to trigger it, where to tweak it, how
 to switch it off, and where the evidence lives. Paths are relative to
-`alpine/`; design notes for the 2026-09-08 round are under
+`alpine/`; design notes for the two 2026-09-08 rounds are under
 [`../docs/superpowers/specs/`](../docs/superpowers/specs/) and the behaviour
 contracts live in [FEATURES.md](FEATURES.md).
 
@@ -37,8 +37,9 @@ in both, or run `oldbook-theme sync` after editing the desktop copy.
 | `Super+Shift+N`, click the bell | Notification centre: track card, sliders, quick actions, history |
 | `Super+Escape` | Lock: the desktop dissolves into the blurred painting |
 | `Super+Shift+E`, click the battery | Power deck: lock, suspend, log out, reboot, shut down |
-| `Super+Tab`, `Alt+Tab`, Mission Control (F3) | Window carousel with still previews, recent order |
-| Launchpad (F4) | Application launcher, leaving an overview first |
+| `Super+Tab`, `Alt+Tab` | Window carousel with still previews, recent order |
+| Mission Control (F3) | Every workspace as a card of live window stills; drag a still to move that window |
+| Launchpad (F4) | The application grid over the blurred painting; type to filter |
 | `Super+E`, three fingers up | Expo, the workspace and window picker |
 | Four fingers up / down | Clear the desktop / restore it, or open the carousel when nothing is hidden |
 | Three or four fingers left / right | Next or previous workspace |
@@ -57,11 +58,74 @@ in both, or run `oldbook-theme sync` after editing the desktop copy.
 | `Ctrl+F6`, `Ctrl+F5` | Typing pulse; typing shadow |
 | `Ctrl+Shift+F6`, `Ctrl+Shift+F5` | The same two, gated by sustained typing speed |
 | `Alt+F6` | Ambient glow from the room's light |
-| `Alt+Shift+F6` | Breathe on air: keystrokes fill the lungs (landing today, see below) |
+| `Alt+Shift+F6` | Breathe on air: keystrokes fill the lungs, and the painting swells with them |
 | `Caps Lock` | Escape; the key's LED becomes the AI attention light |
-| Artwork badge: left, right, middle, scroll | Picker; next; pause; browse. Super+click paints; Shift+click edits prompts; Super+Shift+click invents a theme |
+| Artwork badge: left, right, middle, scroll | Picker; next painting growing out of the click point; pause; browse. Super+click paints; Shift+click edits prompts; Super+Shift+click invents a theme |
+| Rest on a workspace button | A peek of that workspace's windows, one still and title each |
 | Hover CPU, network, sound, battery | Drawers slide out with memory and thermals, radio and firewall, microphone, brightness and keep-awake |
 | Caption strip: left, middle, Shift+right | Window picker; float toggle; the decoration editor |
+
+## Take the tour
+
+Everything below exists to be looked at, so here is the order it takes to look
+at it. The right-hand column is the honest one: most of the second 2026-09-08
+round was verified in private headless sessions while the panel was off or the
+session was locked, so **first sighting** means nobody has watched it on this
+screen yet and you are the first.
+
+### Right now, with one key or one click
+
+| Do this | Watch for | Seen before? |
+| --- | --- | --- |
+| Mission Control (F3) | Every workspace as a card of real window stills, the focused one outlined in amber; drag a still onto another card to move that window | First sighting |
+| Launchpad (F4), then type | Every application over the blurred painting, filtering from the first keystroke, page dots underneath | First sighting |
+| Rest the pointer on a workspace button | After a third of a second, a peek of that workspace's windows beneath the bar | First sighting |
+| Right-click the artwork badge | The next painting grows out of the exact point you clicked | Crossfade seen once live; the reveal from a click is a first sighting |
+| `Super+Shift+N` or click the bell | The track as a card with blurred album art, sound and brightness sliders, six quick actions | Reloaded live, never looked at |
+| Tap a volume or brightness key | The pill at the bottom centre, amber bar, gone in about a second | Mapped live while the display was off |
+| `Print` | A cream flash, the shutter click, then Satty | First sighting; the click has not been heard in place |
+| `Super+Escape` | The desktop dissolves into the blurred painting: clock, caption card, the hour's Scripture | First sighting |
+| `Super+Shift+E` or click the battery | Five charcoal power tiles over the blurred desktop | First sighting |
+| `Super+G` | The painting picker with a rounded thumbnail on every row | Seen live |
+| Open a new terminal | The Space Ghost splash beside the painting | Seen live |
+| Skip a track in Pithos | A card slides in at the bottom right for four seconds | First sighting |
+| `oldbook-palette show` | Which accent this painting elected, and why | Command output only |
+| `oldbook-astro status` | Today's sunrise, sunset and moon | Command output only |
+| `oldbook-sound unlock` | One of the six synthesized cues | Each played once, quietly, during the build |
+
+### With a mode switched on
+
+| Do this | Watch for | Seen before? |
+| --- | --- | --- |
+| `Alt+Shift+F6`, then type for a while | The keys breathe deeper as your typing fills the lungs, and the painting swells in time | The swell was driven live by a synthetic record; the real keyboard driving it is a first sighting |
+| `Alt+F6`, then cover the sensor beside the camera | The keys rise as the room darkens | The sensor was read live; a real room change is a first sighting |
+| `oldbook-ambient-display on`, then change the light | The panel eases to the room, and learns any level you set by hand | First sighting |
+| Command deck → Night light, after sunset | The display warms | wlsunset is running; the evening ramp has not been watched |
+
+### By waiting at the desk
+
+| Do this | Watch for | Seen before? |
+| --- | --- | --- |
+| Idle four minutes | The paintings begin to drift and cycle, and restore exactly on return | A two-second run only |
+| Idle four and a half minutes | The display eases to a fifth, the keyboard takes one last breath | Sysfs readings only |
+| Idle five minutes | The lock screen arrives on its own | First sighting |
+
+### At the next login
+
+| Do this | Watch for | Seen before? |
+| --- | --- | --- |
+| `Super+1`…`Super+0` | The whole desktop slides sideways, towards the number you asked for | First sighting; needs SwayFX r4, which loads at login |
+| Open and close any window | It grows into place, and shrinks away | First sighting |
+| Make the desktop wait | The pointer becomes an amber Ghost ring, turning and breathing | First sighting |
+
+### At the next reboot
+
+| Do this | Watch for | Seen before? |
+| --- | --- | --- |
+| Power on | Three seconds of Gruvbox GRUB menu with the Ghost wordmark | First sighting |
+| Let it boot | The LUKS passphrase prompt in Gruvbox, in Terminus 16×32 | First sighting |
+| Hold `Shift` or `Esc`, pick the Ghost Planet entry | A masthead above the passphrase prompt | Never booted |
+| `Ctrl+Alt+F2` | A rescue getty with the Ghost Planet banner | First sighting |
 
 ## Compositor
 
@@ -90,6 +154,25 @@ before starting Sway to disable the mask. Evidence and limits:
 30 percent and comes back on hover; `oldbook-waybar-dim` writes one imported
 stylesheet only when the state changes. Off: remove its block from
 `oldbook-session`. Evidence: [workspace-chrome](verification/workspace-chrome/fullscreen.png).
+
+**Window and workspace motion.** SwayFX r4 carries
+`packages/swayfx/window-animations.patch`: windows grow into place as they open
+and shrink away as they close, layout changes glide instead of snapping, and
+switching workspace slides the whole desktop sideways, the arriving workspace
+entering from the side its number lies on. Floating windows travel with it from
+a recorded base position, and an interrupted switch settles both workspaces
+before the next one starts, so no stale offset can strand a window. Fullscreen
+transitions are deliberately left unanimated. Each kind carries its own
+duration in `desktop/.config/swayfx/animations.conf`: `animation_open_ms` 160,
+`animation_close_ms` 130, `animation_move_ms` 140, `animation_workspace_ms` 220
+and `animation_workspace_style slide|fade|both`. Off: `animations disable` in
+that file, or delete it. The running compositor never sees those commands:
+`oldbook-sway` validates the installed binary against the file at login and
+only then includes it, so an older SwayFX starts exactly as before. **Next
+login:** the patch is installed but the session predates it. Evidence:
+[verification/swayfx-animations/](verification/swayfx-animations/README.md),
+thirty-two frames proving by colour that a slide separates the two workspaces
+horizontally where a fade does not, with idle cost measured at zero.
 
 ## Control deck bar
 
@@ -121,6 +204,20 @@ application is appended after a middle dot in a quieter weight, and Codex or
 ChatGPT windows earn a star. The ✦ button jumps to the next AI window. Tweak
 `desktop/.local/lib/oldbook/workspace_model.py`; names are in `sway/config`.
 Evidence: [workspace-ready](verification/workspace-ready/README.md).
+
+**Workspace peek.** Rest the pointer on a workspace button for 350 ms and a
+popover opens beneath the bar with that workspace's windows: a rounded still
+above a shortened title, one card each. Leaving closes it; a window whose
+capture failed keeps its place as a plain tile, and a workspace with nothing on
+it opens nothing. The stills come from the carousel's own capture provider
+through `desktop/.local/bin/oldbook-window-stills`, cached under
+`~/.cache/oldbook/stills/`, spawned asynchronously so the bar never waits.
+Tweak `PEEK_DWELL_MS` and `PEEK_HEIGHT` in `packages/waybar-art/help.c` and
+rebuild, or the `popover#oldbook-peek` rules in both stylesheets. Off:
+reinstall the archived r10 APK. Evidence:
+[verification/waybar-popovers/](verification/waybar-popovers/README.md)
+(a native fixture under a private X server); the popover has not been opened on
+the panel.
 
 **Music centre.** Previous, play/pause with the track, and next sit directly on
 the bar while an MPRIS player exists; the track accepts play/pause, previous,
@@ -172,6 +269,40 @@ seven headless frames in [verification/background-crossfade/](verification/backg
 one live `next`/`prev` faded on the panel; physical frame pacing is unmeasured.
 
 ![Crossfade caught part-way in a private SwayFX session](verification/background-crossfade/04-fade-part-way.png)
+
+**The desktop breath.** While the keyboard is in a breathing mode, the painting
+breathes with it. The keyboard's single worker publishes its lung state to
+`$XDG_RUNTIME_DIR/oldbook/air.json` twenty times a second, with a closing
+record when it stops; `oldbook-background` swells the picture from 1.000 to
+1.006 at rest and up to 1.018 once your typing has filled the lungs, composing
+the swell into any running crossfade and settling back to exactly the untouched
+image. In breathe-on-air mode the caption strip's amber wash pulses with the
+same number, quantised to twenty-four steps so a 60 Hz breath costs a few
+stylesheet updates a second. Both readers stat the file and release the frame
+clock the moment nothing moves. Shared logic:
+`desktop/.local/lib/oldbook/air.py`. Off: `~/.config/oldbook/breath.json`, or
+**Desktop breath** in the command deck; either half can be stopped alone.
+Evidence: [verification/desktop-breath/](verification/desktop-breath/README.md),
+where the headless session measured 1.000, 1.018, 1.006 and 1.000 exactly. A
+synthetic record made the live painting swell and settle, but the keyboard
+light was off throughout, so the real breath driving the picture is unwatched.
+
+![The painting at rest and at full lungs](verification/desktop-breath/02-full-lungs.png)
+
+**The idle gallery.** Four minutes idle and the desktop becomes a slideshow:
+`oldbook-screensaver` hands the background daemon a shuffled list of
+rotation-eligible paintings, and it drifts about 1.06 of zoom across each one
+for thirty seconds before crossfading to the next, the pan always a fraction of
+the room the zoom opens so no edge can show. Any activity glides it back to
+rest and to the painting it interrupted. The shared painting link, the saved
+selection, the deadline and the pause switch are never written, so it runs even
+while rotation is paused. Off: drop the `timeout 240` clause from the swayidle
+line in `oldbook-session`. Evidence:
+[verification/gallery-screensaver/](verification/gallery-screensaver/README.md);
+a two-second live run drifted and restored, but a real four-minute idle has not
+been watched.
+
+![The gallery drifting mid-screensaver](verification/gallery-screensaver/02-drifting.png)
 
 **Picker thumbnails.** `Super+G` lists every painting with a rounded thumbnail
 beside its title on 40-pixel rows, then the gallery actions. Fuzzel resolves
@@ -291,6 +422,34 @@ workspace and window picker; four fingers up clears the desktop and down
 restores it (or opens the carousel when nothing is hidden). Evidence:
 [gestures](verification/gestures/expo.png), [show-desktop](verification/show-desktop/midflight.png).
 
+**Launchpad and Mission Control.** The engraved Apple keys open two GTK 4
+layer-shell overlays written for this desktop, both drawn over the current
+painting blurred through the lock scene's cache, both singletons that hold the
+keyboard only while mapped. Launchpad (F4) is a paged grid of every application
+with the Oldbook-Gruvbox icons, filtering from the first keystroke with a
+ranking that prefers contiguous and word-start matches, page dots when it
+overflows, Enter or a click launching through the entry's Exec with field codes
+stripped. Mission Control (F3) is a grid of workspace cards carrying the
+carousel's own window stills, the focused workspace outlined in amber, with
+click, arrow, number-key and drag-to-move handling and a card that creates the
+next workspace. A stalled frame clock is caught by a 420 ms watchdog rather
+than leaving an invisible surface holding a grab, and neither opens at all
+behind the session lock. Files:
+`desktop/.local/lib/oldbook/{launchpad,mission_control,grid_overlay,grid_layout,app_index}.py`;
+commands `oldbook-launchpad` and `oldbook-mission-control` take `toggle`,
+`show` and `close`. Tweak the density in `grid_layout.py` (`ICON_CELL`, the
+margin fractions) and the fade in `grid_overlay.py` (`REVEAL_MS`,
+`SCALE_FROM`). Off: restore `desktop/.config/sway/local.d/apple-overview.conf`
+from Fossil, which returns the carousel to F3 and the Fuzzel menu to F4; the
+carousel keeps `Super+Tab` and `Alt+Tab` either way. Evidence:
+[verification/launchpad-mission-control/](verification/launchpad-mission-control/README.md);
+the session was locked for the whole live window, so neither has been seen on
+the panel.
+
+![Mission Control, rendered headlessly](verification/launchpad-mission-control/mission-control.png)
+
+![Launchpad filtering on a typed query](verification/launchpad-mission-control/launchpad-search.png)
+
 **Sizing and raising.** `Super+=` and `Super+-` grow or shrink from the centre,
 `Super+Shift+Space` floats at 90 percent with breathing room, `Super+C` centres
 and raises, and a floating window raises itself after the pointer rests on it
@@ -313,9 +472,12 @@ down drive Expo or show-desktop, a four-finger pinch opens the launcher; two
 fingers stay with the application. `desktop/.config/sway/gestures.conf`; the
 [gesture guide](desktop/GESTURES.md) has the table.
 
-**Engraved keys.** F3 opens the carousel, F4 the launcher, F5 and F6 the
-keyboard light, all without Fn; Fn keeps the function keys. Caps Lock is
-Escape (Shift included). Evidence: [apple-overview](verification/apple-overview/private-key-fixture.png).
+**Engraved keys.** F3 opens Mission Control, F4 opens Launchpad and leaves an
+overview first, F5 and F6 move the keyboard light, all without Fn; Fn keeps the
+function keys. This supersedes F3 meaning the window carousel and F4 the Fuzzel
+menu, both of which keep their own bindings. Caps Lock is Escape (Shift
+included). Evidence: [apple-overview](verification/apple-overview/private-key-fixture.png),
+[launchpad-mission-control](verification/launchpad-mission-control/README.md).
 
 **Hold to Help.** Hold either Super alone for half a second and a scrollable
 overlay lists the focused application's shortcuts, the active Sway mode and
@@ -340,16 +502,34 @@ also in the command deck's Keyboard glow menu):
   1.2 s so nothing jumps. The same sensor is the subject of an upstream pull
   request adding an `applesmc` backend to wluma (details in the
   [ambient spec](../docs/superpowers/specs/2026-09-08-ambient-glow.md)).
-- `Alt+Shift+F6`, **breathe on air**, is landing as this page is written: the
-  breath starts shallow and slow and every keystroke adds a sip of air that
-  deepens and quickens it, leaking away over about twenty seconds of quiet.
-  Check `oldbook-keyboard-backlight status` for the mode name before relying
-  on the binding.
+- `Alt+Shift+F6`, **breathe on air**: the breath starts shallow and slow at
+  about seven seconds a cycle, every keystroke adds a sip of air that deepens
+  and quickens it towards three, and idle lungs leak back over about twenty
+  seconds. Continuous phase and half-second volume smoothing keep the light
+  from ever jumping. While it runs the painting swells and the caption glows
+  with it (see [the desktop breath](#gallery)).
 - The idle stage's **last breath** (below) is an overlay, never a saved level.
 
 Evidence: [keyboard-breathing](verification/keyboard-breathing/README.md),
 [keyboard-ambient](verification/keyboard-ambient/README.md) with live sensor
 readings. A 60 Hz target is not a measured optical refresh.
+
+**Ambient screen.** The panel can follow the same sensor in the opposite
+direction: a dark room settles it at a fifteen percent floor, never off, and a
+sunlit desk takes it to full, on a log-scale curve with a 0.15-unit hysteresis
+band and a 1.2-second cosine ease. It never argues. Set the brightness by hand
+and your level stands, with the distance from the curve kept as a lasting
+offset that shifts the ceiling too, so a habit of dimming gives a dimmer screen
+in every room. Nothing is written while the pre-lock dim holds the display or
+while the session is locked, and automatic changes are silent: only `on` and
+`off` show the pill. It is opt-in and off by default:
+`oldbook-ambient-display on|off|status`, or **Ambient screen** in the command
+deck. Curve in `desktop/.local/lib/oldbook/ambient_light.py`, learned offset in
+`~/.config/oldbook/ambient-display.json`. Off: `oldbook-ambient-display off`;
+delete the preference file to forget the offset. Evidence: thirty tests against
+a fake sensor and backlight, and a live run where the real sensor read 10 in a
+dim room for a target of thirty-six percent and both pause rules refused to
+write. No fade has been seen on the panel.
 
 **Clipboard.** `Super+Shift+V` opens the history picker; `Super+Ctrl+Shift+V`
 deletes an entry. Evidence: [clipboard](verification/clipboard/history-menu.png).
@@ -369,6 +549,25 @@ mapped the pill on the panel while the display was off, so the physical blur,
 shadow and fade await a look.
 
 ![The feedback pill](verification/osd/pill-shown.png)
+
+**Now transmitting.** When the track changes, a card slides into the bottom
+right of the focused output for four seconds: the album art cover-cropped to a
+rounded square, an amber NOW TRANSMITTING eyebrow, the title in cream, the
+artist and album beneath, in the notification centre's card style. No readable
+art falls back to a music glyph. The daemon watches `PropertiesChanged` on
+`org.mpris.MediaPlayer2.Player`, so any player announces itself without
+polling, and the whole suppression rule sits away from the bus and the display:
+a card appears only for a genuinely new track, on a playing player, with the
+desktop unlocked and the notification centre closed. A suppressed announcement
+still counts as seen, so nothing ambushes you at unlock, and locking mid-card
+dismisses it from wherever it has slid to. `oldbook-osd card --title … --artist
+… --art …` drives it by hand; `oldbook-osd preview-card --output card.png`
+renders it without a display. Off: **Now transmitting** in the command deck, or
+`{"card": false}` in `~/.config/oldbook/osd.json`. Evidence:
+[verification/now-transmitting/](verification/now-transmitting/README.md); the
+lock suppression was confirmed live, the card itself has not been seen.
+
+![The now-transmitting card](verification/now-transmitting/card-shown.png)
 
 **Shutter.** After grim writes a screenshot the output flashes a cream wash for
 120 ms, `pw-play` clicks the freedesktop camera shutter, and Satty opens with a
@@ -503,6 +702,30 @@ the physical colour ramp has not been watched through an evening.
 
 ## Boot chain
 
+**Ghost Planet GRUB menu.** The boot menu shows for three seconds over a
+graded, blurred crop of the current painting, with an amber selection bar, the
+Ghost wordmark, a subtitle, a countdown and a help line. GRUB draws menus in
+its own bitmap format and `grub-mkfont` is not packaged, so
+`system/grub/grub_theme.py` writes PF2 directly from glyphs rendered with
+Pango: a 32-pixel face for the title and entries and a 20-pixel one for the
+chrome, 216 glyphs each, covering ASCII, Latin-1, light box drawing and the
+ghost at U+F02A0 the desktop already brands itself with. The stock 16-pixel
+font is about two millimetres of text on this panel. The background is 1280×800
+and heavily blurred on purpose, since GRUB decodes it on the CPU before the
+menu appears and blurred content upscales invisibly; the painting is graded
+rather than pasted, warmed towards amber and held back where the text sits.
+Entry titles are unchanged, because renaming them means changing
+`GRUB_DISTRIBUTOR` and with it the identifiers `set default` selects. Rebuild
+with `bin/build-grub-theme`, install with `doas bin/install-boot-console`. Off:
+`--remove-theme`. **Next boot:** `grub-emu` is not packaged and nothing was
+rebooted, so the picture in
+[verification/grub-theme/](verification/grub-theme/README.md) is drawn from the
+committed theme by our own renderer, not by GRUB. The first install failed and
+rolled itself back over a whitespace-strict menu check, which is the safety net
+working as designed.
+
+![The GRUB menu, simulated from the committed theme](verification/grub-theme/menu-preview.png)
+
 **Console palette and font.** The GRUB command line now carries the sixteen
 Gruvbox console colours (`vt.default_red`, `vt.default_grn`, `vt.default_blu`),
 a cream-on-charcoal default attribute (`vt.color=0x0F`) and the kernel's
@@ -539,20 +762,82 @@ preserved profiles. Evidence: [theme-review](verification/theme-review/gruvbox-d
 [complete-themes](verification/complete-themes/astronomers-vigil.png) (an
 archived generated theme, kept as proof of the pipeline).
 
+**The accent follows the painting.** The theme's colours stay where they are,
+but its accent moves with the artwork. Each new painting is reduced to a
+weighted hue signature in OKLab, every pixel counting by chroma times lightness
+so the charcoal ground and the chiaroscuro shadows do not vote; every histogram
+bin then goes to whichever of the theme's own accent candidates sits nearest on
+the hue circle, and the largest share wins along with a companion. Nothing is
+sampled from the canvas, red stays reserved for urgency, a neutral painting
+keeps the declared amber, and the Ghost badge never changes. The election lands
+in `~/.local/state/oldbook/palette-override.json`, which `read_palette` honours
+only for the theme that produced it and only for colours that theme declares,
+so the pill, launcher, Expo, lock screen, caption strip and scripture bar
+retint on their next render; the bar picks it up through a small
+`waybar-accent.css` imported last so it beats the hardcoded amber. Library
+`desktop/.local/lib/oldbook/painting_palette.py`, helper `oldbook-palette
+apply|show|clear`. Off: `oldbook-palette clear`, or `"reactive_accent": false`
+in `themes/gruvbox-dark.json`. Sweeping the gallery elects yellow twenty-three
+times, orange twice and blue once, which is honest for a collection whose image
+direction asks for warm amber. Evidence:
+[verification/reactive-palette/](verification/reactive-palette/README.md),
+where the badge rendered `#ecb32e` under the firelit procession and `#7d9d90`
+under the Antarctic station; the live panel has not been photographed
+retinting.
+
+![The bar under a warm painting and a cool one](verification/reactive-palette/bar-cool.png)
+
 **Icons, cursor, toolkits.** `Oldbook-Gruvbox` is Papirus with warm gold
-folders rebuilt offline by `bin/build-icon-theme`; the cursor is
-`simp1e-cursors-gruvbox-dark` at 24; GTK 3 and 4 use `adw-gtk3-dark` with a
-semantic Gruvbox palette in `gtk.css`, Qt 6 a matching `qt6ct` palette also
-installed system-wide, and LXQt a named `Gruvbox-Dark` palette for Hold to
-Help. Files under `desktop/.config/gtk-3.0/`, `gtk-4.0/`, `qt6ct/` and
-`desktop/.local/share/`.
+folders rebuilt offline by `bin/build-icon-theme`; GTK 3 and 4 use
+`adw-gtk3-dark` with a semantic Gruvbox palette in `gtk.css`, Qt 6 a matching
+`qt6ct` palette also installed system-wide, and LXQt a named `Gruvbox-Dark`
+palette for Hold to Help. Files under `desktop/.config/gtk-3.0/`, `gtk-4.0/`,
+`qt6ct/` and `desktop/.local/share/`.
+
+**Animated cursors.** The waiting pointer is an amber ring that turns once
+every 672 ms and breathes as it goes, over a dim charcoal track with a dark
+halo so it reads over a bright painting; the busy pointer keeps a hairline
+arrow with the ring at its lower right, on Simp1e's own hotspots so nothing
+jumps. Twenty-four frames at 28 ms across four nominal sizes (24, 32, 48, 72)
+so the panel's 24-at-scale-2 request lands on real pixels. `bin/build-cursor-theme`
+draws them with cairo and writes the Xcursor container itself, since xcursorgen
+is not packaged; every shape not redrawn is inherited from
+`simp1e-cursors-gruvbox-dark`. The theme is `Oldbook-Ghost`, named in
+`sway/theme.conf`, both GTK `settings.ini` files, their profile copies and
+`oldbook-sway`. Off: name `simp1e-cursors-gruvbox-dark` again in those places
+and reload. Evidence: [verification/animated-cursors/](verification/animated-cursors/README.md),
+a contact sheet of the frames; a headless session draws no pointer, so nobody
+has watched it spin.
+
+![The wait cursor's frames](verification/animated-cursors/frames.png)
 
 ## Sound
 
-The desktop is quiet by design. The only cue is the camera shutter after a
-screenshot (`sound-theme-freedesktop` through `pw-play`); Pithos provides the
-music the bar, the cava meter, the notification centre and the splash refer
-to. Notifications, the lock and the power deck make no sound.
+The desktop is nearly quiet, and never load-bearing: a missing player, a
+missing file, an unknown cue, a muted sink or the switch turned off are all
+silence rather than failure.
+
+**Ghost Planet cues.** Six sounds are synthesized offline by
+`bin/build-sound-theme` into `desktop/.local/share/sounds/oldbook/`: the lock
+engaging and opening, a battery crossing 25 or 10 percent, a deliberate gallery
+change, a critical notification and a small interface tick. Sine and triangle
+partials with soft attacks and exponential tails over filtered room tone, none
+longer than 0.92 s, all normalised to −12 dBFS, nothing sampled. `oldbook-sound
+<cue>` plays one through `pw-play` at a fixed low gain, detached;
+`oldbook-sound list` names them. The hooks are one line each: `oldbook-lock`
+after real readiness and after the locker exits, `oldbook-wallpaper` beside the
+crossfade for deliberate changes only, SwayNC's own `scripts` block on
+`urgency: Critical` so the AI attention stream stays silent, and
+`oldbook-battery-cue` watching the thresholds Waybar only colours, edge
+triggered and quiet while charging. Off: `oldbook-sound off`, or **Sound cues**
+in the command deck. Evidence:
+[verification/sound-theme/](verification/sound-theme/README.md); all six were
+played once on the speakers during the build, but no cue has yet fired from its
+own occasion.
+
+**Everything else.** The camera shutter after a screenshot comes from
+`sound-theme-freedesktop`; Pithos provides the music the bar, the cava meter,
+the notification centre and the splash refer to. The power deck makes no sound.
 
 ## Verification ledger
 
@@ -573,6 +858,36 @@ to. Notifications, the lock and the power deck make no sound.
 | Power deck | | yes | binding, battery click, tile press |
 | Splash and shaders | yes | yes | Neovim chrome, drop-down console reflow |
 | Boot console, LUKS prompt, banner entry | | | everything, until the next boot |
+| Window and workspace animations | | yes, by colour | everything, until the next login |
+| Launchpad and Mission Control | | yes | both overlays, the fade, hover and drag |
+| Desktop breath | a synthetic record swelled the painting | yes, measured exactly | the real keyboard driving it |
+| Idle gallery | a two-second run | yes | a real four-minute idle |
+| Reactive accent | the helper ran and wrote the record | yes, two paintings | the bar retinting by eye |
+| Now transmitting card | lock suppression confirmed | yes | the card itself |
+| Workspace peek | | native X fixture | the popover on the panel |
+| Animated cursors | theme selected, session reloaded | frame contact sheet | the ring turning |
+| Sound cues | all six played once | waveforms | any cue firing from its own occasion |
+| GRUB menu | | simulation, not GRUB | everything, until the next boot |
+| Ambient screen | sensor read, both pause rules refused to write | | an eased fade, a real room change |
+
+Two gaps are worth stating plainly, neither of them from these rounds.
+
+**The package lock is stale.** The installed database records waybar and
+waybar-openrc 0.15.0-r4, pinned by content hash in `/etc/apk/world`, but only
+r3 exists in the repositories, the caches and the Fossil artifact store, so
+`bin/package-archive snapshot` refuses to write a new lock rather than record a
+closure it cannot reproduce. No source was lost: the recipe under
+`packages/waybar/` is intact, and it is the built artifact that is missing.
+Rebuilding r4 from that recipe, or reconciling the world pin with the archived
+r3, unblocks the snapshot.
+
+**The full test suite is not a usable gate.** About sixty tests break on
+fixtures another session archived (`themes/spaceghost.json`,
+`assets/gallery/delaware.png`, the spaceghost profile), and seven thumbnail
+tests fail only when the whole suite shares one Python process with the new
+GTK 4 grid tests, passing when run alone. Every module from both rounds passes
+on its own; run them individually until the fixtures and the toolkit isolation
+are repaired.
 
 The earlier features carry their own evidence directories under
 [verification/](verification/) and their contracts in [FEATURES.md](FEATURES.md);
