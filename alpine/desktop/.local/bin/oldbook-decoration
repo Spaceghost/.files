@@ -1,0 +1,246 @@
+#!/usr/bin/env python3
+"""Workspace-edge captions. Right-click the strip to switch bottom/right."""
+import argparse
+import configparser
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import threading
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+from decoration import (action_command, load_settings, output_titles, save_settings,
+                        square_outputs, vertical_title)
+from overlay_theme import read_palette
+
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
+STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
+SETTINGS = CONFIG / 'oldbook/decoration.json'
+
+
+def position():
+    return load_settings(SETTINGS, STATE / 'position')['position']
+
+
+def set_position(value):
+    settings = load_settings(SETTINGS, STATE / 'position')
+    settings['position'] = value
+    save_settings(SETTINGS, settings)
+    STATE.mkdir(parents=True, exist_ok=True)
+    temporary = STATE / f'position.{os.getpid()}.tmp'
+    temporary.write_text(value + '\n')
+    temporary.replace(STATE / 'position')
+
+
+def appearance():
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(CONFIG / 'foot/foot.ini')
+    font = config.get('main', 'font', fallback='JetBrainsMono Nerd Font:size=9.5')
+    family = font.split(':', 1)[0].split(',')[0]
+    match = re.search(r':size=([0-9.]+)', font)
+    size = float(match[1]) if match else 9.5
+    return (family, min(40, max(5, size)), read_palette(),
+            load_settings(SETTINGS, STATE / 'position'))
+
+
+def daemon():
+    import gi
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('Gdk', '3.0')
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import Gdk, GLib, Gtk, GtkLayerShell, Pango
+
+    STATE.mkdir(parents=True, exist_ok=True)
+    guard = (STATE / 'daemon.lock').open('a+')
+    try:
+        fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return 0
+
+    display = Gdk.Display.get_default()
+    if display is None or not GtkLayerShell.is_supported():
+        print('Workspace decoration needs the Wayland desktop.', file=sys.stderr)
+        return 1
+
+    class Caption:
+        def __init__(self, monitor, edge):
+            self.monitor = monitor
+            self.edge = edge
+            self.window = Gtk.Window()
+            self.window.set_name('workspace-decoration')
+            self.window.set_can_focus(False)
+            visual = self.window.get_screen().get_rgba_visual()
+            if visual is not None:
+                self.window.set_visual(visual)
+            GtkLayerShell.init_for_window(self.window)
+            GtkLayerShell.set_namespace(self.window, 'oldbook-decoration')
+            GtkLayerShell.set_monitor(self.window, monitor)
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP)
+            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            anchors = ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM')
+            for name in anchors:
+                side = getattr(GtkLayerShell.Edge, name)
+                GtkLayerShell.set_anchor(self.window, side, True)
+                GtkLayerShell.set_margin(self.window, side, 5)
+            GtkLayerShell.auto_exclusive_zone_enable(self.window)
+            self.box = Gtk.Button()
+            self.box.set_can_focus(False)
+            self.box.get_style_context().add_class('caption')
+            self.label = Gtk.Label()
+            self.label.set_use_markup(False)
+            if edge == 'bottom':
+                self.label.set_ellipsize(Pango.EllipsizeMode.END)
+                self.label.set_xalign(0.5)
+                self.label.set_max_width_chars(1)
+                self.label.set_hexpand(True)
+            self.box.add(self.label)
+            self.box.connect('button-press-event', self.click)
+            self.window.add(self.box)
+            self.provider = Gtk.CssProvider()
+            self.box.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self.label.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self.window.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self.previous = None
+
+        def click(self, _widget, event):
+            command = action_command(event.button)
+            if command:
+                try:
+                    subprocess.Popen(command, stdin=subprocess.DEVNULL,
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                     start_new_session=True)
+                except OSError:
+                    pass
+            elif event.button == 3:
+                set_position('right' if self.edge == 'bottom' else 'bottom')
+            return True
+
+        def update(self, title, style, square=False):
+            if (title, style, square) == self.previous:
+                return
+            family, size, colors, settings = style
+            family = family.replace('\\', '\\\\').replace('"', '\\"')
+            padding = '1px 7px' if self.edge == 'bottom' else '5px 4px'
+            direction = 'to right' if self.edge == 'bottom' else 'to bottom'
+            opacity = settings['opacity']
+            surface_opacity = min(1, opacity + 0.12)
+            radius = 0 if square else settings['corner_radius']
+            self.provider.load_from_data(f'''
+                #workspace-decoration {{ background: transparent; }}
+                .caption {{
+                    background-image: linear-gradient({direction},
+                        alpha({colors['surface']}, {surface_opacity:.3f}),
+                        alpha({colors['background']}, {opacity:.3f}));
+                    border: none;
+                    border-radius: {radius}px; padding: {padding};
+                    min-height: 0; min-width: 0;
+                    box-shadow: 0 2px 10px alpha({colors['background_hard']}, 0.72);
+                    text-shadow: none;
+                }}
+                .caption:hover {{
+                    background-image: linear-gradient({direction},
+                        alpha({colors['accent']}, 0.30),
+                        alpha({colors['surface']}, {min(1, opacity + 0.18):.3f}));
+                }}
+                label {{ font-family: "{family}"; font-size: {size}pt;
+                    color: {colors['foreground']};
+                    text-shadow: 0 1px alpha({colors['background_hard']}, 0.88); }}
+                .caption:hover label {{ color: {colors['accent']}; }}
+            '''.encode())
+            if self.edge == 'right':
+                # Use the actual Pango line height, preserving room for padding
+                # and the top bar. The full title remains available on hover.
+                layout = self.label.create_pango_layout('M')
+                layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
+                height = max(1, layout.get_pixel_size()[1])
+                available = max(1, self.monitor.get_workarea().height - 70)
+                shown = vertical_title(title, available // height)
+            else:
+                shown = title
+            self.label.set_text(shown)
+            self.box.set_tooltip_text(
+                title + '\n\nWINDOW DECK  ·  Left: choose window  ·  Middle: float/tile  ·  Right: move to '
+                + ('right edge' if self.edge == 'bottom' else 'bottom edge'))
+            self.previous = (title, style, square)
+            self.window.show_all()
+
+    captions = {}
+    last_tree = {}
+    busy = False
+    stop = threading.Event()
+
+    def apply(tree):
+        nonlocal busy, last_tree
+        busy = False
+        if tree is not None:
+            last_tree = tree
+        titles = output_titles(last_tree)
+        square = square_outputs(last_tree)
+        style = appearance()
+        edge = style[3]['position']
+        monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
+                    for i in range(display.get_n_monitors())}
+        for name in list(captions):
+            if name not in monitors or captions[name].edge != edge or captions[name].monitor != monitors[name]:
+                captions.pop(name).window.destroy()
+        for name, monitor in monitors.items():
+            if name not in captions:
+                captions[name] = Caption(monitor, edge)
+            captions[name].update(titles.get(name, name), style, name in square)
+        return False
+
+    def poll():
+        nonlocal busy
+        if busy or stop.is_set():
+            return not stop.is_set()
+        busy = True
+
+        def fetch():
+            tree = None
+            try:
+                result = subprocess.run(['swaymsg', '-t', 'get_tree', '-r'],
+                                        capture_output=True, text=True, timeout=2, check=True)
+                tree = json.loads(result.stdout)
+            except (OSError, ValueError, subprocess.SubprocessError):
+                pass
+            if not stop.is_set():
+                GLib.idle_add(apply, tree)
+        threading.Thread(target=fetch, daemon=True).start()
+        return True
+
+    def quit_daemon():
+        stop.set()
+        Gtk.main_quit()
+        return False
+
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
+    GLib.timeout_add(750, poll)
+    poll()
+    Gtk.main()
+    guard.close()
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('daemon', 'bottom', 'right', 'toggle', 'status'))
+    args = parser.parse_args()
+    if args.mode == 'daemon':
+        return daemon()
+    if args.mode == 'status':
+        print(position())
+    else:
+        value = args.mode if args.mode != 'toggle' else ('right' if position() == 'bottom' else 'bottom')
+        set_position(value)
+        print('Workspace decoration: ' + value)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

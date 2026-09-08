@@ -1,0 +1,46 @@
+# Workspace-edge chrome
+
+The workspace has one caption per output, showing the selected workspace's
+focused window. Normal windows use zero-width pixel borders. The caption starts
+at the bottom; `oldbook-decoration right`, `bottom`, or `toggle` changes its edge
+and saves the choice in the user's state directory. Right-click does the same.
+The right edge spells the title vertically, replacing `|` with an em dash and
+keeping combining accents together. Long vertical titles are shortened to the
+available height; hovering shows the full title. Left-click opens the window
+picker, and middle-click toggles the focused window's floating state.
+
+Font family and point size follow Foot's configured font (currently JetBrains
+Mono Nerd Font, 9.5 pt). The active palette supplies the borderless gradient.
+The strip has compact padding and four rounded corners. Fullscreen tiled chrome
+is square; normal fullscreen compositor stacking covers the workspace strip.
+Floating and ordinary windows retain the theme's rounding. The helper does not
+capture keyboard focus, and a lock prevents duplicate instances on reload.
+
+The middle Waybar island uses its natural content width, with an 8-pixel gap on
+either side and slight padding. Its title can grow into available space and
+ellipsizes under pressure; the left workspace controls retain their natural
+width. An empty workspace hides the middle island. The old standby text is
+removed. Waybar's fixed-center mode is disabled and expand-center is false.
+
+Foot profiles use alpha 0.78 with alpha-mode=all so application-painted cells
+remain transparent as well. Existing terminals were repainted using the owned-PTY
+palette helper; newly opened Foot windows get alpha-mode=all. Foot itself makes
+fullscreen terminal backgrounds opaque. Agent launch commands retain the danger
+switches configured earlier.
+
+Validation: decoration unit tests, terminal palette tests, ShellCheck for the
+session script, Foot parsers for all three profiles, and Sway/SwayFX validation.
+`python3 alpine/tests/verify_workspace_chrome.py --output /tmp/chrome-proof`
+creates an isolated SwayFX desktop and records bottom/right/fullscreen, short and
+long title bars, and empty-workspace screenshots. The saved evidence is under
+`alpine/verification/workspace-chrome/`; screenshots use synthetic content.
+
+Recovery: choose `oldbook-decoration bottom` to restore placement. To remove the
+workspace strip, stop its daemon and remove its oldbook-session startup entry.
+The prior SwayFX native-caption defaults were `default_border normal 0` and
+`default_floating_border normal 0`, with `titlebar_position bottom`. Restore those
+only if native per-window captions are wanted again. Prior Foot theme alpha was
+0.94 for Spaceghost and 0.98 for Gruvbox, without alpha-mode=all.
+
+References: [Waybar packing options](https://github.com/Alexays/Waybar/blob/master/man/waybar.5.scd.in)
+and [Foot transparency settings](https://codeberg.org/dnkl/foot/src/branch/master/doc/foot.ini.5.scd).

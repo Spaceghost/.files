@@ -141,3 +141,8 @@ fi
 if command -v oldbook-scripture-library >/dev/null 2>&1; then
     start_service scripture-library oldbook-scripture-library bootstrap
 fi
+
+# One workspace caption per output; the daemon owns its instance lock.
+if command -v oldbook-decoration >/dev/null 2>&1; then
+    oldbook-decoration daemon 9>&- >>"$art_state/decoration.log" 2>&1 &
+fi
