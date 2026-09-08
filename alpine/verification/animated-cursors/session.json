@@ -1,0 +1,30 @@
+{
+  "status": "passed",
+  "theme": "Oldbook-Ghost",
+  "requested_size": 48,
+  "cursor_names": [
+    "00000000000000020006000e7e9ffc3f",
+    "0426c94ea35c87780ff01dc239897213",
+    "08e8e1c95fe2fc01f976f1e063a24ccd",
+    "3ecb610c1bf2410f44200f48c40d3599",
+    "9116a3ea924ed2162ecab71ba103b17f",
+    "clock",
+    "half-busy",
+    "left_ptr_watch",
+    "progress",
+    "wait",
+    "watch"
+  ],
+  "seats": [
+    {
+      "name": "seat0",
+      "capabilities": 0,
+      "focus": 4,
+      "devices": []
+    }
+  ],
+  "cursor_complaints": [],
+  "compositor": "swayfx version 0.6 (based on sway 1.12.0)",
+  "isolation": "private headless SwayFX (pixman renderer), private HOME and XDG directories, XCURSOR_PATH pointed at the checked-in theme",
+  "limits": "A loaded theme is not a photograph of a spinning cursor: headless sessions render no pointer, so the animation itself is shown by the frame contact sheet instead."
+}

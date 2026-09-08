@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""Draw the Oldbook Ghost cursor theme and write it in the Xcursor binary format.
+
+Only the waiting shapes are redrawn: an amber ring that turns and breathes while
+the desktop thinks. Everything else inherits the installed Simp1e Gruvbox set, so
+the pointer, text bar and resize arrows keep the theme the user already has.
+
+xcursorgen is not installed on this machine and the format is small, so the
+encoder lives here. An Xcursor file is a magic word, a table of contents, and one
+image chunk per frame per nominal size; libXcursor and wlroots both animate a
+shape by walking the chunks that share a nominal size in file order.
+"""
+import argparse
+import json
+import math
+import struct
+from pathlib import Path
+
+import cairo
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/icons/Oldbook-Ghost'
+DEFAULT_THEME = REPO / 'alpine/themes/gruvbox-dark.json'
+INHERITS = 'simp1e-cursors-gruvbox-dark'
+
+MAGIC = b'Xcur'
+FILE_HEADER = 16
+FILE_VERSION = 0x00010000
+IMAGE_TYPE = 0xFFFD0002
+IMAGE_HEADER = 36
+IMAGE_VERSION = 1
+
+# Simp1e ships these four nominal sizes, so every scale the desktop asks for
+# resolves to a drawn image instead of a resampled one.
+SIZES = (24, 32, 48, 72)
+FRAMES = 24
+FRAME_DELAY_MS = 28  # 24 x 28ms = 672ms a turn, matching the set we inherit.
+# Simp1e's own left_ptr hotspots; the arrow tip has to land on the same pixel or
+# the pointer appears to jump when the shape changes to the busy one.
+POINTER_HOTSPOTS = {24: 2, 32: 3, 48: 5, 72: 7}
+
+# The arrow outline in a 24-pixel grid with its tip at the hotspot, traced to sit
+# inside Simp1e's silhouette so the two themes read as one family.
+ARROW = ((0.0, 0.0), (0.0, 15.2), (4.1, 11.6), (6.6, 17.4),
+         (9.1, 16.3), (6.5, 10.7), (11.5, 10.2))
+
+
+def load_palette(path):
+    palette = json.loads(Path(path).read_text())['palette']
+    return {name: rgb(value) for name, value in palette.items()}
+
+
+def rgb(value):
+    value = value.lstrip('#')
+    return tuple(int(value[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+def ease_breath(turn):
+    """One inhale and one exhale for every turn of the ring."""
+    return 0.5 - 0.5 * math.cos(2 * math.pi * turn)
+
+
+def draw_ring(ctx, palette, centre, radius, turn, width):
+    """A dim ring with a bright amber comet sweeping around it."""
+    cx, cy = centre
+    breath = ease_breath(turn)
+    radius *= 1 + 0.045 * (breath - 0.5) * 2
+    lead = -math.pi / 2 + 2 * math.pi * turn
+
+    # A dark halo first: the amber has to stay legible over a bright painting.
+    ctx.set_line_width(width * 1.62)
+    ctx.set_source_rgba(*palette['background_hard'], 0.42)
+    ctx.arc(cx, cy, radius, 0, 2 * math.pi)
+    ctx.stroke()
+
+    ctx.set_line_width(width)
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+    ctx.set_source_rgba(*palette['border'], 0.42)
+    ctx.arc(cx, cy, radius, 0, 2 * math.pi)
+    ctx.stroke()
+
+    # Cairo has no angular gradient, so the comet is short arcs that fade back.
+    segments = 14
+    sweep = math.radians(125)
+    for index in range(segments):
+        head = lead - sweep * index / segments
+        tail = lead - sweep * (index + 1) / segments
+        fade = (1 - index / segments) ** 1.7
+        ctx.set_source_rgba(*palette['yellow'], fade * (0.72 + 0.28 * breath))
+        ctx.arc(cx, cy, radius, tail, head)
+        ctx.stroke()
+
+    # The eye at the centre keeps time with the breath.
+    ctx.set_source_rgba(*palette['yellow'], 0.3 + 0.55 * breath)
+    ctx.arc(cx, cy, width * 0.72, 0, 2 * math.pi)
+    ctx.fill()
+
+
+def draw_arrow(ctx, palette, scale, hotspot):
+    ctx.save()
+    ctx.translate(hotspot, hotspot)
+    ctx.scale(scale, scale)
+    ctx.move_to(*ARROW[0])
+    for point in ARROW[1:]:
+        ctx.line_to(*point)
+    ctx.close_path()
+    ctx.restore()
+    ctx.set_source_rgba(*palette['background_hard'], 0.92)
+    ctx.fill_preserve()
+    ctx.set_line_width(max(1.0, scale * 1.15))
+    ctx.set_line_join(cairo.LINE_JOIN_ROUND)
+    ctx.set_source_rgba(*palette['foreground'], 1.0)
+    ctx.stroke()
+
+
+def surface_bytes(size, painter):
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size, size)
+    ctx = cairo.Context(surface)
+    painter(ctx)
+    surface.flush()
+    stride = surface.get_stride()
+    data = bytes(surface.get_data())
+    if stride == size * 4:
+        return data
+    return b''.join(data[row * stride:row * stride + size * 4] for row in range(size))
+
+
+def watch_frames(palette, size, frames=FRAMES):
+    hotspot = size // 2
+    width = max(1.5, size * 0.068)
+    radius = size * 0.32
+    images = []
+    for index in range(frames):
+        turn = index / frames
+
+        def painter(ctx, turn=turn):
+            draw_ring(ctx, palette, (size / 2, size / 2), radius, turn, width)
+
+        images.append((size, size, hotspot, hotspot, FRAME_DELAY_MS,
+                       surface_bytes(size, painter)))
+    return images
+
+
+def progress_frames(palette, size, frames=FRAMES):
+    hotspot = POINTER_HOTSPOTS.get(size, max(2, round(size * 0.096)))
+    scale = size / 24 * 0.92
+    width = max(1.2, size * 0.055)
+    radius = size * 0.185
+    centre = (size * 0.655, size * 0.63)
+    images = []
+    for index in range(frames):
+        turn = index / frames
+
+        def painter(ctx, turn=turn):
+            draw_ring(ctx, palette, centre, radius, turn, width)
+            draw_arrow(ctx, palette, scale, hotspot)
+
+        images.append((size, size, hotspot, hotspot, FRAME_DELAY_MS,
+                       surface_bytes(size, painter)))
+    return images
+
+
+def encode(images):
+    """Pack image chunks into one Xcursor file, grouped by nominal size."""
+    chunks = []
+    for width, height, xhot, yhot, delay, pixels in images:
+        if len(pixels) != width * height * 4:
+            raise ValueError('Pixel buffer does not match the declared size')
+        body = struct.pack('<IIIIIIIII', IMAGE_HEADER, IMAGE_TYPE, width,
+                           IMAGE_VERSION, width, height, xhot, yhot, delay)
+        chunks.append((width, body + pixels))
+    header = struct.pack('<4sIII', MAGIC, FILE_HEADER, FILE_VERSION, len(chunks))
+    position = FILE_HEADER + 12 * len(chunks)
+    table = b''
+    for nominal, chunk in chunks:
+        table += struct.pack('<III', IMAGE_TYPE, nominal, position)
+        position += len(chunk)
+    return header + table + b''.join(chunk for _, chunk in chunks)
+
+
+def decode(data):
+    """Read a file back: the tests compare this against what was asked for."""
+    magic, header, version, count = struct.unpack_from('<4sIII', data, 0)
+    if magic != MAGIC or header != FILE_HEADER or version != FILE_VERSION:
+        raise ValueError('Not an Xcursor file')
+    entries = []
+    for index in range(count):
+        kind, nominal, position = struct.unpack_from('<III', data, header + index * 12)
+        if kind != IMAGE_TYPE:
+            raise ValueError('Unexpected chunk type')
+        fields = struct.unpack_from('<IIIIIIIII', data, position)
+        chunk_header, chunk_type, chunk_nominal, chunk_version = fields[:4]
+        width, height, xhot, yhot, delay = fields[4:]
+        if (chunk_header != IMAGE_HEADER or chunk_type != IMAGE_TYPE
+                or chunk_nominal != nominal or chunk_version != IMAGE_VERSION):
+            raise ValueError('Image chunk disagrees with its table entry')
+        start = position + IMAGE_HEADER
+        pixels = data[start:start + width * height * 4]
+        if len(pixels) != width * height * 4:
+            raise ValueError('Truncated image chunk')
+        entries.append({'nominal': nominal, 'width': width, 'height': height,
+                        'xhot': xhot, 'yhot': yhot, 'delay': delay, 'pixels': pixels})
+    return entries
+
+
+# Every X11 name the two shapes answer to. Deployment links regular files only,
+# so each alias is written out rather than symlinked; the bytes are identical and
+# Fossil stores one blob for all of them.
+SHAPES = {
+    'watch': ('watch', ('wait', 'clock', '0426c94ea35c87780ff01dc239897213')),
+    'left_ptr_watch': ('progress', ('progress', 'half-busy',
+                                    '00000000000000020006000e7e9ffc3f',
+                                    '08e8e1c95fe2fc01f976f1e063a24ccd',
+                                    '3ecb610c1bf2410f44200f48c40d3599',
+                                    '9116a3ea924ed2162ecab71ba103b17f')),
+}
+BUILDERS = {'watch': watch_frames, 'progress': progress_frames}
+
+
+def build(output, palette, sizes=SIZES, frames=FRAMES):
+    cursors = output / 'cursors'
+    cursors.mkdir(parents=True, exist_ok=True)
+    written = {}
+    for name, (kind, aliases) in SHAPES.items():
+        images = []
+        for size in sizes:
+            images.extend(BUILDERS[kind](palette, size, frames))
+        data = encode(images)
+        for target in (name,) + tuple(aliases):
+            path = cursors / target
+            path.write_bytes(data)
+            written[target] = len(data)
+    index = output / 'index.theme'
+    index.write_text('[Icon Theme]\n'
+                     'Name=Oldbook-Ghost\n'
+                     'Comment=Gruvbox Dark cursors: an amber ring that turns while the desktop thinks\n'
+                     f'Inherits={INHERITS}\n')
+    return written
+
+
+def frame_strip(palette, path, size=48, frames=FRAMES, columns=12):
+    """A contact sheet of both shapes for the verification record."""
+    rows = [watch_frames(palette, size, frames), progress_frames(palette, size, frames)]
+    strip_rows = sum(math.ceil(frames / columns) for _ in rows)
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, size * columns, size * strip_rows)
+    ctx = cairo.Context(surface)
+    ctx.set_source_rgb(*palette['background'])
+    ctx.paint()
+    row = 0
+    for images in rows:
+        for index, image in enumerate(images):
+            if index and index % columns == 0:
+                row += 1
+            frame = cairo.ImageSurface.create_for_data(
+                bytearray(image[5]), cairo.FORMAT_ARGB32, size, size, size * 4)
+            ctx.set_source_surface(frame, (index % columns) * size, row * size)
+            ctx.paint()
+        row += 1
+    path.parent.mkdir(parents=True, exist_ok=True)
+    surface.write_to_png(str(path))
+    return path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument('--theme', type=Path, default=DEFAULT_THEME)
+    parser.add_argument('--frames', type=int, default=FRAMES)
+    parser.add_argument('--strip', type=Path, help='also write a contact sheet here')
+    arguments = parser.parse_args()
+    palette = load_palette(arguments.theme)
+    written = build(arguments.output, palette, frames=arguments.frames)
+    for name in sorted(written):
+        print(f'{name}: {written[name]} bytes')
+    if arguments.strip:
+        print('strip:', frame_strip(palette, arguments.strip, frames=arguments.frames))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
