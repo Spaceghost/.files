@@ -1,0 +1,734 @@
+#!/usr/bin/env python3
+"""Crossfade the shared desktop painting on the background layer.
+
+One opaque layer-shell surface per output sits above Sway's own swaybg and
+fades between paintings on the display frame clock. `oldbook-wallpaper` asks
+it to change images over a private session socket; when no daemon answers, the
+caller falls back to Sway's `output bg`, so a stock session still gets its
+painting, only with a hard cut. Sway respawns swaybg on every reload and a new
+surface lands on top of ours, so the daemon watches the stacking order and
+re-creates its surface when it has been covered.
+"""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import stat
+import subprocess
+import sys
+import threading
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import background_fade as fade  # noqa: E402
+
+CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
+DEPLOYED = Path.home() / '.local/share/oldbook/wallpaper.png'
+CONKY = Path(os.environ.get('OLDBOOK_BACKGROUND_CARDS')
+             or Path(__file__).resolve().parent / 'oldbook-conky')
+CHECK_SECONDS = max(2, int(os.environ.get('OLDBOOK_BACKGROUND_CHECK_SECONDS') or 15))
+DEBUG = bool(os.environ.get('OLDBOOK_BACKGROUND_DEBUG'))
+
+
+def note(message):
+    if DEBUG:
+        print('oldbook-background: ' + message, file=sys.stderr, flush=True)
+
+
+def private_directory(path):
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    info = path.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError(f'Background runtime must be an owned private directory: {path}')
+
+
+def initial_paths(sway_socket=None):
+    """Start on what Sway shows for each output, then fade to the shared painting."""
+    shown = fade.sway_background_images(sway_socket) if sway_socket else {}
+    current = CURRENT if CURRENT.is_file() else None
+    deployed = DEPLOYED if DEPLOYED.is_file() else None
+
+    def initial(name):
+        for candidate in (shown.get(name), shown.get('*')):
+            if candidate and Path(candidate).is_file():
+                return Path(candidate)
+        return deployed or current
+
+    def target(name):
+        first = initial(name)
+        if current is None or first is None or first.resolve() == current.resolve():
+            return None
+        return current
+    return initial, target
+
+
+def same_image(first, second):
+    """The gallery hands over real paths while the shared link names a symlink."""
+    if not first or not second:
+        return False
+    return os.path.realpath(first) == os.path.realpath(second)
+
+
+def hex_rgb(value):
+    text = value.lstrip('#')
+    return tuple(int(text[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+def daemon():
+    import gi
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('Gdk', '3.0')
+    gi.require_version('GdkPixbuf', '2.0')
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import Gdk, GdkPixbuf, GLib, Gtk, GtkLayerShell
+    import cairo
+    from overlay_theme import read_palette
+
+    runtime = fade.runtime_directory()
+    private_directory(runtime)
+    guard = fade.lock_path().open('a+')
+    try:
+        fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return 0
+    display = Gdk.Display.get_default()
+    if display is None or not GtkLayerShell.is_supported():
+        print('The background crossfade needs the Wayland desktop.', file=sys.stderr)
+        return 1
+    screen = Gdk.Screen.get_default()
+    try:
+        background = hex_rgb(read_palette()['background'])
+    except (KeyError, ValueError):
+        background = (0.157, 0.157, 0.157)
+
+    class Fade:
+        __slots__ = ('surface', 'path', 'start', 'duration_us', 'origin', 'radius', 'value', 'done')
+
+        def __init__(self, surface, path, duration_ms, origin, radius, done):
+            self.surface, self.path = surface, path
+            self.duration_us = duration_ms * 1000
+            self.origin, self.radius = origin, radius
+            self.start, self.value, self.done = None, 0.0, done
+
+    class Canvas:
+        def __init__(self, owner, monitor, name):
+            self.owner, self.monitor, self.name = owner, monitor, name
+            self.current, self.current_path, self.fade = None, None, None
+            self.size = None
+            self.tick_id = 0
+            self.disposed = False
+            self.window = Gtk.Window()
+            self.window.set_decorated(False)
+            self.window.set_can_focus(False)
+            self.window.set_accept_focus(False)
+            self.window.set_app_paintable(True)
+            GtkLayerShell.init_for_window(self.window)
+            GtkLayerShell.set_namespace(self.window, fade.NAMESPACE)
+            GtkLayerShell.set_monitor(self.window, monitor)
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BACKGROUND)
+            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            GtkLayerShell.set_exclusive_zone(self.window, -1)
+            for edge in ('TOP', 'BOTTOM', 'LEFT', 'RIGHT'):
+                GtkLayerShell.set_anchor(self.window, getattr(GtkLayerShell.Edge, edge), True)
+            self.area = Gtk.DrawingArea()
+            self.area.connect('draw', self.draw)
+            self.area.connect('size-allocate', self.allocated)
+            self.window.add(self.area)
+            self.window.connect('realize', self.realized)
+            self.window.connect('map-event', self.mapped)
+            self.window.connect('notify::scale-factor', lambda *_: self.allocated(self.area, None))
+
+        def expected_size(self):
+            geometry = self.monitor.get_geometry()
+            return geometry.width, geometry.height, max(1, self.monitor.get_scale_factor())
+
+        def show(self):
+            self.window.show_all()
+
+        def realized(self, window):
+            # A painting has no controls: pointer events pass to the surfaces below.
+            surface = window.get_window()
+            if surface is not None:
+                surface.input_shape_combine_region(cairo.Region(), 0, 0)
+
+        def mapped(self, *_arguments):
+            self.owner.canvas_mapped(self)
+            return False
+
+        def allocated(self, _widget, _allocation):
+            if self.disposed:
+                return
+            allocation = self.area.get_allocation()
+            size = (allocation.width, allocation.height, max(1, self.area.get_scale_factor()))
+            if size[0] <= 1 or size[1] <= 1 or size == self.size:
+                return
+            self.size = size
+            self.owner.rerender(self)
+
+        def paint_fade(self, cr, current_fade):
+            cr.set_source_surface(current_fade.surface, 0, 0)
+            if current_fade.origin is None:
+                cr.paint_with_alpha(current_fade.value)
+                return
+            inner, outer = fade.reveal_rings(current_fade.value, current_fade.radius)
+            x, y = current_fade.origin
+            mask = cairo.RadialGradient(x, y, inner, x, y, outer)
+            mask.add_color_stop_rgba(0, 0, 0, 0, 1)
+            mask.add_color_stop_rgba(1, 0, 0, 0, 0)
+            cr.mask(mask)
+
+        def draw(self, _widget, cr):
+            if self.current is None:
+                cr.set_source_rgb(*background)
+                cr.paint()
+                return True
+            cr.set_source_surface(self.current, 0, 0)
+            cr.paint()
+            if self.fade is not None and self.fade.value > 0:
+                self.paint_fade(cr, self.fade)
+            return True
+
+        def flatten(self):
+            """Bake an in-flight fade into the current surface, keeping what is on screen."""
+            current_fade = self.fade
+            if current_fade is None:
+                return
+            if self.current is not None and current_fade.value > 0:
+                _, _, scale = self.size
+                composite = cairo.ImageSurface(cairo.FORMAT_RGB24, self.current.get_width(),
+                                               self.current.get_height())
+                composite.set_device_scale(scale, scale)
+                cr = cairo.Context(composite)
+                cr.set_source_surface(self.current, 0, 0)
+                cr.paint()
+                self.paint_fade(cr, current_fade)
+                composite.flush()
+                self.current = composite
+            self.fade = None
+            current_fade.done(self, 'superseded')
+
+        def begin(self, surface, path, duration_ms, origin, done):
+            self.flatten()
+            if self.current is None or duration_ms <= 0 or self.size is None:
+                self.current, self.current_path = surface, path
+                self.area.queue_draw()
+                done(self, 'settled')
+                return
+            width, height, _ = self.size
+            radius = fade.reveal_radius(origin, width, height) if origin is not None else None
+            self.fade = Fade(surface, path, duration_ms, origin, radius, done)
+            if not self.tick_id:
+                self.tick_id = self.area.add_tick_callback(self.tick)
+            self.area.queue_draw()
+
+        def tick(self, _widget, clock):
+            current_fade = self.fade
+            if current_fade is None or self.disposed:
+                self.tick_id = 0
+                return GLib.SOURCE_REMOVE
+            now = clock.get_frame_time()
+            if current_fade.start is None:
+                current_fade.start = now
+            current_fade.value = fade.progress(now - current_fade.start, current_fade.duration_us)
+            self.area.queue_draw()
+            if current_fade.value >= 1.0:
+                self.finish()
+                self.tick_id = 0
+                return GLib.SOURCE_REMOVE
+            return GLib.SOURCE_CONTINUE
+
+        def finish(self):
+            current_fade = self.fade
+            if current_fade is None:
+                return
+            self.current, self.current_path, self.fade = current_fade.surface, current_fade.path, None
+            self.area.queue_draw()
+            note(f'{self.name}: settled on {self.current_path}')
+            current_fade.done(self, 'settled')
+
+        def adopt(self, other):
+            """Take over another canvas's pixels so a re-created surface shows no seam."""
+            self.current, self.current_path = other.current, other.current_path
+            self.fade, other.fade = other.fade, None
+            if other.tick_id:
+                other.area.remove_tick_callback(other.tick_id)
+                other.tick_id = 0
+            if self.fade is not None:
+                self.tick_id = self.area.add_tick_callback(self.tick)
+
+        def target_path(self):
+            return self.fade.path if self.fade is not None else self.current_path
+
+        def destroy(self):
+            if self.disposed:
+                return
+            self.disposed = True
+            if self.tick_id:
+                self.area.remove_tick_callback(self.tick_id)
+                self.tick_id = 0
+            if self.fade is not None:
+                current_fade, self.fade = self.fade, None
+                current_fade.done(self, 'settled')
+            self.window.destroy()
+
+    class Daemon:
+        def __init__(self):
+            self.canvases = {}
+            self.retired = []
+            self.queue = []
+            self.busy = False
+            self.check_source = 0
+            self.checking = False
+            self.started = False
+            self.ipc = None
+            self.ipc_watch = 0
+            self.ipc_buffer = bytearray()
+            self.sway = os.environ.get('SWAYSOCK')
+            self.initial_for, self.target_for = initial_paths(self.sway)
+            self.control_path = fade.endpoint()
+            self.control_path.unlink(missing_ok=True)
+            self.control = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+            self.control.bind(str(self.control_path))
+            self.control.setblocking(False)
+            self.control_watch = GLib.io_add_watch(self.control.fileno(), GLib.IO_IN, self.receive)
+            display.connect('monitor-added', lambda _display, monitor: self.refresh_monitors())
+            display.connect('monitor-removed', lambda _display, monitor: self.refresh_monitors())
+            self.refresh_monitors()
+            targets = {self.target_for(name) for name in self.canvases} - {None}
+            if targets:
+                self.queue.append({'action': 'set', 'id': 'startup', 'path': str(targets.pop()),
+                                   'duration_ms': fade.STARTUP_DURATION_MS, 'origin': None,
+                                   'address': None})
+            GLib.timeout_add_seconds(CHECK_SECONDS, self.periodic_check)
+            self.connect_ipc()
+
+        # Monitors -----------------------------------------------------------
+        def monitors(self):
+            found = {}
+            for index in range(display.get_n_monitors()):
+                name = screen.get_monitor_plug_name(index) or f'monitor-{index}'
+                found[name] = display.get_monitor(index)
+            return found
+
+        def refresh_monitors(self):
+            found = self.monitors()
+            for name in list(self.canvases):
+                if name not in found or self.canvases[name].monitor != found[name]:
+                    self.canvases.pop(name).destroy()
+            for name, monitor in found.items():
+                if name not in self.canvases:
+                    self.create_canvas(name, monitor)
+            self.process_next()
+
+        def create_canvas(self, name, monitor, adopt_from=None):
+            canvas = Canvas(self, monitor, name)
+            self.canvases[name] = canvas
+            if adopt_from is not None:
+                canvas.adopt(adopt_from)
+                canvas.size = adopt_from.size
+                canvas.show()
+                return canvas
+            path = self.initial_for(name)
+            size = canvas.expected_size()
+            if path is None or size[0] <= 1 or size[1] <= 1:
+                canvas.show()
+                return canvas
+            # Render before mapping so the first frame is the painting, not a colour.
+            def ready(rendered, error):
+                if canvas.disposed:
+                    return False
+                if rendered is not None and not canvas.size:
+                    canvas.size = size
+                    canvas.current, canvas.current_path = rendered[size], str(path)
+                elif error:
+                    print('oldbook-background: ' + error, file=sys.stderr, flush=True)
+                canvas.show()
+                return False
+            self.load(str(path), [size], ready)
+            return canvas
+
+        def canvas_mapped(self, canvas):
+            for old in list(self.retired):
+                if old.name == canvas.name:
+                    self.retired.remove(old)
+                    old.destroy()
+            if not self.started:
+                # A daemon started into a running session lands above cards that
+                # already existed; put them back on top straight away.
+                self.started = True
+                self.schedule_check('startup')
+            self.process_next()
+
+        def rerender(self, canvas):
+            """A new size or scale needs fresh pixels; a fade in flight settles first."""
+            canvas.finish()
+            initial = self.initial_for(canvas.name)
+            path = canvas.current_path or (str(initial) if initial else None)
+            if path is None:
+                canvas.area.queue_draw()
+                self.process_next()
+                return
+            size = canvas.size
+
+            def ready(rendered, error):
+                if canvas.disposed or canvas.size != size:
+                    return False
+                if rendered is not None:
+                    canvas.current, canvas.current_path = rendered[size], path
+                    canvas.area.queue_draw()
+                elif error:
+                    print('oldbook-background: ' + error, file=sys.stderr, flush=True)
+                self.process_next()
+                return False
+            self.load(path, [size], ready)
+
+        # Rendering ----------------------------------------------------------
+        def load(self, path, sizes, callback):
+            def work():
+                try:
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(path)
+                    rendered = {}
+                    for size in sizes:
+                        width, height, scale = size
+                        target = (width * scale, height * scale)
+                        fill_width, fill_height, x, y = fade.fill_geometry(
+                            pixbuf.get_width(), pixbuf.get_height(), *target)
+                        image = pixbuf
+                        if (fill_width, fill_height) != (pixbuf.get_width(), pixbuf.get_height()):
+                            image = pixbuf.scale_simple(fill_width, fill_height,
+                                                        GdkPixbuf.InterpType.BILINEAR)
+                        rendered[size] = (image, x, y)
+                    GLib.idle_add(finish, rendered, None)
+                except Exception as error:  # GLib.Error carries the loader's reason
+                    GLib.idle_add(finish, None, f'could not render {path}: {error}')
+
+            def finish(rendered, error):
+                surfaces = None
+                if rendered is not None:
+                    surfaces = {size: self.make_surface(image, x, y, size)
+                                for size, (image, x, y) in rendered.items()}
+                return callback(surfaces, error)
+
+            threading.Thread(target=work, name='background-render', daemon=True).start()
+
+        def make_surface(self, image, x, y, size):
+            width, height, scale = size
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24, width * scale, height * scale)
+            cr = cairo.Context(surface)
+            Gdk.cairo_set_source_pixbuf(cr, image, x, y)
+            cr.paint()
+            surface.flush()
+            surface.set_device_scale(scale, scale)
+            return surface
+
+        # Requests -----------------------------------------------------------
+        def reply(self, address, message):
+            if not address:
+                return
+            try:
+                self.control.sendto(json.dumps(message).encode(), address)
+            except OSError:
+                pass
+
+        def receive(self, _fd, _condition):
+            try:
+                data, address = self.control.recvfrom(fade.MAX_MESSAGE)
+            except OSError:
+                return True
+            try:
+                message = fade.parse_request(data)
+            except ValueError as error:
+                self.reply(address, {'ok': False, 'id': None, 'state': 'error', 'error': str(error)})
+                return True
+            token = message['id']
+            if message['action'] == 'status':
+                self.reply(address, {'ok': True, 'id': token, 'state': 'status', 'pid': os.getpid(),
+                                     'outputs': self.status()})
+            elif message['action'] == 'raise':
+                self.reply(address, {'ok': True, 'id': token, 'state': 'accepted'})
+                self.check_layers('raise', force=True,
+                                  done=lambda: self.reply(address, {'ok': True, 'id': token,
+                                                                    'state': 'settled'}))
+            elif message['action'] == 'quit':
+                self.reply(address, {'ok': True, 'id': token, 'state': 'settled'})
+                Gtk.main_quit()
+            else:
+                self.reply(address, {'ok': True, 'id': token, 'state': 'accepted'})
+                message['address'] = address
+                self.queue.append(message)
+                self.process_next()
+            return True
+
+        def status(self):
+            return {name: {'path': canvas.current_path, 'fading': canvas.fade is not None,
+                           'target': canvas.target_path(), 'size': list(canvas.size or ())}
+                    for name, canvas in self.canvases.items()}
+
+        def ready_canvases(self):
+            return [canvas for canvas in self.canvases.values() if canvas.size]
+
+        def process_next(self):
+            if self.busy or not self.queue:
+                return
+            if any(canvas.size is None for canvas in self.canvases.values()):
+                return
+            request = self.queue.pop(0)
+            note(f"request {request['id']} -> {request['path']}")
+            canvases = self.ready_canvases()
+            path = request['path']
+            if not canvases or all(same_image(canvas.target_path(), path) for canvas in canvases):
+                self.reply(request['address'], {'ok': True, 'id': request['id'], 'state': 'settled',
+                                                'outputs': self.status(), 'changed': False})
+                self.process_next()
+                return
+            self.busy = True
+            self.check_layers('set', done=lambda: self.start_fade(request))
+
+        def start_fade(self, request):
+            canvases = self.ready_canvases()
+            sizes = sorted({canvas.size for canvas in canvases})
+            duration = request['duration_ms']
+            if duration is None:
+                duration = fade.DEFAULT_DURATION_MS
+            pending = {'count': 0}
+
+            def done(_canvas, _state):
+                pending['count'] -= 1
+                if pending['count'] <= 0 and not pending.get('replied'):
+                    pending['replied'] = True
+                    self.reply(request['address'], {'ok': True, 'id': request['id'],
+                                                    'state': 'settled', 'outputs': self.status(),
+                                                    'changed': True})
+
+            def ready(surfaces, error):
+                self.busy = False
+                note(f"rendered {request['path']}: {'ok' if surfaces else error}")
+                if surfaces is None:
+                    self.reply(request['address'], {'ok': False, 'id': request['id'],
+                                                    'state': 'error', 'error': error})
+                    self.process_next()
+                    return False
+                live = [canvas for canvas in self.ready_canvases() if canvas.size in surfaces]
+                pending['count'] = len(live)
+                if not live:
+                    done(None, 'settled')
+                for canvas in live:
+                    canvas.begin(surfaces[canvas.size], request['path'], duration,
+                                 request['origin'], done)
+                self.process_next()
+                return False
+
+            self.load(request['path'], sizes, ready)
+
+        # Stacking -----------------------------------------------------------
+        def schedule_check(self, reason):
+            if self.check_source:
+                GLib.source_remove(self.check_source)
+            self.check_source = GLib.timeout_add(400, self.debounced_check, reason)
+
+        def debounced_check(self, reason):
+            self.check_source = 0
+            self.check_layers(reason)
+            return False
+
+        def periodic_check(self):
+            self.check_layers('timer')
+            return True
+
+        def check_layers(self, reason, done=None, force=False):
+            """Re-create covered surfaces; restore cards hidden underneath a new one."""
+            if self.checking or not self.sway:
+                if done is not None:
+                    done()
+                return
+
+            def work():
+                try:
+                    result = subprocess.run(['swaymsg', '-s', self.sway, '-r', '-t', 'get_outputs'],
+                                            capture_output=True, text=True, timeout=5)
+                    outputs = json.loads(result.stdout) if result.returncode == 0 else []
+                except (OSError, ValueError, subprocess.SubprocessError):
+                    outputs = []
+                GLib.idle_add(apply, outputs)
+
+            def apply(outputs):
+                self.checking = False
+                raised = []
+                cards_hidden = False
+                for output in outputs:
+                    canvas = self.canvases.get(output.get('name'))
+                    if canvas is None:
+                        continue
+                    order = fade.surface_order(output)
+                    note(f"{reason}: {output.get('name')} {order}")
+                    if force or order['buried']:
+                        raised.append(self.raise_canvas(canvas))
+                    elif order['cards_below']:
+                        cards_hidden = True
+                if raised:
+                    # After a re-creation our surface is the newest: any cards
+                    # that were above it are below it now and need re-creating.
+                    cards_hidden = cards_hidden or any(
+                        any(surface.get('namespace') in fade.CARD_NAMESPACES
+                            for surface in output.get('layer_shell_surfaces', [])
+                            if surface.get('layer') == 'background')
+                        for output in outputs if output.get('name') in self.canvases)
+                if cards_hidden and reason != 'set':
+                    self.restore_cards()
+                if done is not None:
+                    done()
+                return False
+
+            self.checking = True
+            threading.Thread(target=work, name='background-stacking', daemon=True).start()
+
+        def raise_canvas(self, canvas):
+            note(f'{canvas.name}: re-creating the surface above a newer swaybg')
+            previous = self.canvases.pop(canvas.name)
+            self.retired.append(previous)
+            return self.create_canvas(previous.name, previous.monitor, adopt_from=previous)
+
+        def restore_cards(self):
+            if not CONKY.is_file():
+                return
+            try:
+                subprocess.Popen(['/usr/bin/python3', str(CONKY), 'restart'], stdin=subprocess.DEVNULL,
+                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                 start_new_session=True)
+            except OSError:
+                pass
+
+        # Sway events ---------------------------------------------------------
+        def connect_ipc(self):
+            if not self.sway or self.ipc is not None:
+                return False
+            try:
+                connection = socket.socket(socket.AF_UNIX)
+                connection.settimeout(3)
+                connection.connect(self.sway)
+                connection.sendall(fade.ipc_frame(fade.IPC_SUBSCRIBE, '["output","shutdown"]'))
+                header = b''
+                while len(header) < fade.IPC_HEADER.size:
+                    chunk = connection.recv(fade.IPC_HEADER.size - len(header))
+                    if not chunk:
+                        raise ConnectionError('Sway closed the subscription')
+                    header += chunk
+                length, _ = fade.ipc_unpack(header)
+                remaining = length
+                while remaining > 0:
+                    chunk = connection.recv(remaining)
+                    if not chunk:
+                        raise ConnectionError('Sway closed the subscription')
+                    remaining -= len(chunk)
+                connection.setblocking(False)
+            except (OSError, ValueError) as error:
+                print(f'oldbook-background: Sway events unavailable: {error}', file=sys.stderr,
+                      flush=True)
+                GLib.timeout_add_seconds(5, self.connect_ipc)
+                return False
+            self.ipc = connection
+            self.ipc_buffer = bytearray()
+            self.ipc_watch = GLib.io_add_watch(connection.fileno(),
+                                               GLib.IO_IN | GLib.IO_HUP | GLib.IO_ERR, self.ipc_event)
+            return False
+
+        def drop_ipc(self):
+            if self.ipc is not None:
+                self.ipc.close()
+                self.ipc = None
+            self.ipc_watch = 0
+            GLib.timeout_add_seconds(5, self.connect_ipc)
+
+        def ipc_event(self, _fd, condition):
+            if condition & (GLib.IO_HUP | GLib.IO_ERR):
+                self.drop_ipc()
+                return False
+            try:
+                data = self.ipc.recv(65536)
+            except BlockingIOError:
+                return True
+            except OSError:
+                self.drop_ipc()
+                return False
+            if not data:
+                self.drop_ipc()
+                return False
+            self.ipc_buffer += data
+            while len(self.ipc_buffer) >= fade.IPC_HEADER.size:
+                try:
+                    length, kind = fade.ipc_unpack(bytes(self.ipc_buffer[:fade.IPC_HEADER.size]))
+                except ValueError:
+                    self.drop_ipc()
+                    return False
+                if len(self.ipc_buffer) < fade.IPC_HEADER.size + length:
+                    break
+                del self.ipc_buffer[:fade.IPC_HEADER.size + length]
+                if kind == fade.IPC_EVENT_SHUTDOWN:
+                    Gtk.main_quit()
+                elif kind == fade.IPC_EVENT_OUTPUT:
+                    self.schedule_check('event')
+            return True
+
+        def close(self):
+            GLib.source_remove(self.control_watch)
+            self.control.close()
+            self.control_path.unlink(missing_ok=True)
+            if self.ipc is not None:
+                self.ipc.close()
+            for canvas in list(self.canvases.values()) + self.retired:
+                canvas.destroy()
+
+    service = Daemon()
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, Gtk.main_quit)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, Gtk.main_quit)
+    from ui_priority import request_priority
+    request_priority()
+    try:
+        Gtk.main()
+    finally:
+        service.close()
+        guard.close()
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('daemon', help='own the background surfaces for this session')
+    setter = commands.add_parser('set', help='crossfade to an image')
+    setter.add_argument('path', type=Path)
+    setter.add_argument('--duration', type=int, default=None, metavar='MS')
+    setter.add_argument('--from', dest='origin', default=None, metavar='X,Y',
+                        help='logical output position for a radial reveal')
+    setter.add_argument('--no-wait', action='store_true', help='return once the fade is accepted')
+    commands.add_parser('status', help='print the daemon state as JSON')
+    commands.add_parser('raise', help='re-create the surfaces above a respawned swaybg')
+    commands.add_parser('quit', help='stop the daemon for this session')
+    args = parser.parse_args()
+    if args.command == 'daemon':
+        return daemon()
+    if args.command == 'set':
+        path = args.path.resolve()
+        if not path.is_file():
+            raise RuntimeError(f'not an image file: {path}')
+        origin = fade.parse_origin(args.origin) if args.origin else None
+        result = fade.crossfade(str(path), args.duration, origin,
+                                settle_timeout=0 if args.no_wait else None)
+    else:
+        result = fade.request(fade.encode_request(args.command), ack_timeout=3,
+                              settle_timeout=5 if args.command == 'raise' else None)
+    if result is None:
+        print('oldbook-background: no daemon is listening for this session', file=sys.stderr)
+        return 1
+    print(json.dumps(result))
+    return 0 if result.get('ok') else 1
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-background: {error}', file=sys.stderr)
+        sys.exit(1)

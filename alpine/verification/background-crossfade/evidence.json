@@ -1,0 +1,292 @@
+{
+  "paintings": {
+    "A": "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-0986082ea557.png",
+    "B": "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-luminist-lighthouse-3653179c5221.png",
+    "C": "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png"
+  },
+  "daemon_sha256": "04552306721022720773dda106e974510c7ca90c9bd30df73610dbf333e55c87",
+  "timed_fade_ms": 20000,
+  "steps": [
+    {
+      "name": "00-swaybg-only",
+      "expect": "A",
+      "surfaces": [
+        "wallpaper"
+      ],
+      "capture_seconds": 3.615,
+      "distance": {
+        "A": 1.07,
+        "B": 30.94,
+        "C": 35.2
+      },
+      "card_visible": false,
+      "card_colour": [
+        21,
+        30,
+        40
+      ]
+    },
+    {
+      "name": "01-card-before-daemon",
+      "expect": "A",
+      "surfaces": [
+        "conky",
+        "wallpaper"
+      ],
+      "capture_seconds": 2.423,
+      "distance": {
+        "A": 3.82,
+        "B": 32.77,
+        "C": 37.11
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    },
+    {
+      "name": "02-daemon-shows-current",
+      "expect": "B",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 2.166,
+      "distance": {
+        "A": 33.25,
+        "B": 2.35,
+        "C": 28.96
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    },
+    {
+      "name": "03-fade-early",
+      "expect": "B>C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 7.43,
+      "distance": {
+        "A": 32.51,
+        "B": 4.63,
+        "C": 26.67
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ],
+      "blend": {
+        "value": 0.08,
+        "distance": 2.71
+      }
+    },
+    {
+      "name": "04-fade-part-way",
+      "expect": "B>C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 6.579,
+      "distance": {
+        "A": 34.48,
+        "B": 23.25,
+        "C": 8.05
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ],
+      "blend": {
+        "value": 0.78,
+        "distance": 2.8
+      }
+    },
+    {
+      "name": "05-fade-settled",
+      "expect": "C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 1.997,
+      "distance": {
+        "A": 37.1,
+        "B": 28.85,
+        "C": 2.45
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    },
+    {
+      "name": "06-swaybg-respawned",
+      "expect": "A>C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 3.657,
+      "distance": {
+        "A": 37.1,
+        "B": 28.85,
+        "C": 2.45
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ],
+      "blend": {
+        "value": 1.0,
+        "distance": 2.45
+      }
+    },
+    {
+      "name": "07-healed-above-swaybg",
+      "expect": "C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 1.765,
+      "distance": {
+        "A": 37.1,
+        "B": 28.85,
+        "C": 2.45
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    },
+    {
+      "name": "08-after-raise",
+      "expect": "C",
+      "surfaces": [
+        "conky",
+        "oldbook-background",
+        "wallpaper"
+      ],
+      "capture_seconds": 2.011,
+      "distance": {
+        "A": 37.1,
+        "B": 28.85,
+        "C": 2.45
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    },
+    {
+      "name": "09-fallback-after-quit",
+      "expect": "A",
+      "surfaces": [
+        "conky",
+        "wallpaper"
+      ],
+      "capture_seconds": 3.922,
+      "distance": {
+        "A": 3.82,
+        "B": 32.77,
+        "C": 37.11
+      },
+      "card_visible": true,
+      "card_colour": [
+        184,
+        186,
+        38
+      ]
+    }
+  ],
+  "startup_fade_seconds": 4.23,
+  "set_reply": {
+    "ok": true,
+    "id": "9a7c59bd7f7740adaa5519dd6d1741bf",
+    "state": "accepted"
+  },
+  "part_way_seconds": 14.31,
+  "after_respawn_surfaces": [
+    "wallpaper",
+    "conky",
+    "oldbook-background"
+  ],
+  "raise_reply": {
+    "ok": true,
+    "id": "a4bd7dc10a4d441fb1d876004cb5e21e",
+    "state": "settled"
+  },
+  "status_before_quit": {
+    "ok": true,
+    "id": "1b964fc4c9fc450ca669b14a67031cec",
+    "state": "status",
+    "pid": 26695,
+    "outputs": {
+      "HEADLESS-1": {
+        "path": "/home/jack/.files/alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png",
+        "fading": false,
+        "target": "/home/jack/.files/alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png",
+        "size": [
+          1280,
+          720,
+          1
+        ]
+      }
+    }
+  },
+  "quit_reply": {
+    "ok": true,
+    "id": "49baaafd5fb84635ae8e5ec9dce9d747",
+    "state": "settled"
+  },
+  "card_helper_log": [
+    "start",
+    "restart",
+    "restart",
+    "restart"
+  ],
+  "daemon_exit": 0,
+  "checks": {
+    "swaybg_shows_a": true,
+    "daemon_starts_on_current": true,
+    "card_restored_at_start": true,
+    "fade_progresses": true,
+    "part_way_is_a_blend": true,
+    "fade_settles_on_c": true,
+    "healed_surface_shows_c": true,
+    "healed_order": true,
+    "card_restored_after_heal": true,
+    "raise_keeps_order": true,
+    "fallback_after_quit": true,
+    "daemon_exited_cleanly": true
+  },
+  "passed": true,
+  "kept_frames": "480x270 copies of the private 1280x720 captures"
+}
