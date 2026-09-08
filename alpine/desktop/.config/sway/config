@@ -149,7 +149,7 @@ for_window [app_id="^(io[.]github[.]Pithos|pithos)$"] move scratchpad
 for_window [class="^Pithos$"] move scratchpad
 
 exec_always --no-startup-id ~/.local/bin/oldbook-session
-include ~/.config/sway/local.d/*
+include ~/.config/sway/local.d/*.conf
 
 # YouTube PiP is controlled from the launcher; its desktop mode uses a bottom layer.
 for_window [app_id="oldbook-youtube"] floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt
