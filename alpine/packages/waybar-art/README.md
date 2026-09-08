@@ -17,7 +17,9 @@ GTK asks for help, and retains no window titles.
 
 Workspace labels use Pango attribute ranges: the active number and workspace
 name are bold and bright, inactive numbers stay bold with regular names, and
-process suffixes remain regular and subdued. Named colors
+process suffixes remain regular and subdued. Reserved empty names such as
+`4: Signal` and `10: Strata` retain those attributes in both Titlecase and
+legacy uppercase spelling. Named colors
 `oldbook_workspace_active` and `oldbook_workspace_secondary` come from the
 selected Waybar stylesheet. Labels remain plain text, including literal Unicode
 and markup characters, so workspace names and click commands stay intact.
@@ -41,7 +43,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r7.apk
+doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r8.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -49,7 +51,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r7 APK identity and archived artifact.
+`manifest.json` records the exact signed r8 APK identity and archived artifact.
 
 ## Verify
 

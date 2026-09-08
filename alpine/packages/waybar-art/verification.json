@@ -1,79 +1,75 @@
 {
   "activation": {
-    "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
-    "evidence": "alpine/verification/workspace-strata-ten/activation.json",
-    "installed_library_inode": 16680457,
-    "log": "/home/jack/.local/state/oldbook/waybar-workspace-ten.log",
-    "mapped_current_inode": true,
-    "mapped_library": "/usr/lib/waybar/oldbook-art.so",
-    "mapped_library_inode": 16680457,
-    "pid": 13318,
-    "preserved_original_environment_argv_cwd": true,
-    "previous_pid": 25862,
-    "restarted_only_matching_waybar": true,
-    "screenshot": "alpine/verification/workspace-strata-ten/workspace-ten-live.png",
-    "screenshot_geometry": "4,0 610x32 logical pixels; top-left workspace strip only",
-    "screenshot_sha256": "4b4c184492ba693ef2f53476e8838e6e8b334ba50229f5ec5b4922c4395d87c8",
-    "screenshot_visually_verified": true,
-    "separate_config_notice": "A red Sway configuration notice below the bar is outside this crop and is being handled separately by the root agent.",
+    "binary_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+    "evidence": "alpine/verification/workspace-titlecase/activation.json",
+    "mapped_installed_inode": true,
+    "mapping_deleted": false,
+    "old_pid": 13318,
     "status": "passed",
-    "strata_number": 10,
-    "sway_socket": "/run/user/1000/sway-ipc.1000.3175.sock",
-    "targeted_style_reload": "SIGUSR2 sent to the same Waybar PID once after initial capture showed no bar; a later repaint exposed the configured bar.",
-    "visible_workspace_labels": [
-      "1: GHOST",
-      "2: ORBIT",
-      "4: SIGNAL",
-      "10: STRATA"
-    ],
-    "workspace_numbers": [
-      1,
-      2,
-      4,
-      10
-    ],
-    "workspace_zero_absent": true
+    "version": "1.0.0-r8",
+    "waybar_pid": 26778
   },
-  "apk_identity": "Q1zaxuiP8v8BCbkE4QJoIcoU4kxg0=",
+  "apk_identity": "Q1I8SvLt4V5W80gtWF/hLcETb/wYA=",
   "apk_signature": "apk verify: both builds OK",
-  "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+  "binary_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+  "build_warning": {
+    "evidence": "alpine/verification/workspace-titlecase/archive-ownership.json",
+    "message": "libfakeroot internal error: payload not recognized!",
+    "result": "Both builds completed successfully. The signed archives are byte-identical; all payload entries were verified root:root with library mode 0755 and license mode 0644."
+  },
   "builds": [
     {
-      "directory": "/home/jack/.local/state/oldbook/build/waybar-strata-r7-a",
-      "log": "alpine/verification/workspace-strata-ten/build-a.log",
+      "directory": "/home/jack/.local/state/oldbook/build/waybar-titlecase-r8-a",
+      "log": "alpine/verification/workspace-titlecase/build-a.log",
       "network": "disabled with unshare --net",
-      "sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b"
+      "sha256": "2c4b759117efb06a103dffd8c6480594728db0adb6faa8d8e6a6822edd68fb11"
     },
     {
-      "directory": "/home/jack/.local/state/oldbook/build/waybar-strata-r7-b",
-      "log": "alpine/verification/workspace-strata-ten/build-b.log",
+      "directory": "/home/jack/.local/state/oldbook/build/waybar-titlecase-r8-b",
+      "log": "alpine/verification/workspace-titlecase/build-b.log",
       "network": "disabled with unshare --net",
-      "sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b"
+      "sha256": "2c4b759117efb06a103dffd8c6480594728db0adb6faa8d8e6a6822edd68fb11"
     }
   ],
   "byte_identical_signed_apks": true,
   "date": "2026-09-07",
   "fossil_unversioned_readback_matches": true,
-  "frozen_source": "/home/jack/.local/state/oldbook/build/waybar-strata-r7-source",
+  "frozen_source": "/home/jack/.local/state/oldbook/build/waybar-titlecase-r8-source",
   "frozen_sources_match_checkout": true,
   "installation": {
-    "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
-    "evidence": "alpine/verification/workspace-strata-ten/installation.json",
+    "binary_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+    "command": [
+      "doas",
+      "-n",
+      "apk",
+      "add",
+      "--no-network",
+      "/home/jack/.local/state/oldbook/build/waybar-titlecase-r8-a/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r8.apk"
+    ],
+    "evidence": "alpine/verification/workspace-titlecase/installation.json",
+    "installed": {
+      "apk_identity": "Q1I8SvLt4V5W80gtWF/hLcETb/wYA=",
+      "arch": "x86_64",
+      "name": "oldbook-waybar-art",
+      "version": "1.0.0-r8"
+    },
     "network": "disabled",
     "package_count": 1119,
+    "status": "passed",
     "unrelated_installed_identities_unchanged": true,
-    "version": "1.0.0-r7"
+    "version": "1.0.0-r8",
+    "waybar_restarted": false
   },
   "installed_binary_matches_package": true,
-  "package": "oldbook-waybar-art-1.0.0-r7.apk",
-  "package_sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b",
+  "package": "oldbook-waybar-art-1.0.0-r8.apk",
+  "package_sha256": "2c4b759117efb06a103dffd8c6480594728db0adb6faa8d8e6a6822edd68fb11",
   "pending_checks": [],
   "previous_release_gallery_checks": {
     "headless_output": "/home/jack/.local/state/alpine-rice/verify/art-r4-final",
     "interaction_check_count": 23,
     "package": "oldbook-waybar-art-1.0.0-r4.apk",
     "package_sha256": "04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509",
-    "scope": "Historical r4 gallery gesture proof; unchanged art.c retained, not a fresh r6 gesture run.",
+    "scope": "Historical r4 gallery gesture proof; unchanged art.c retained, not a fresh r8 gesture run.",
     "source_unchanged": {
       "art.c": "d794d1c7c67446ca7d9f6f505e9353e7a4b0786c75719ccd906b9c4a4fe6de30af48e1c9cf48aa36a704ae678bc78d2135062c235c4146f7be3593d51762ef1f"
     }
@@ -127,7 +123,15 @@
     },
     "package": "oldbook-waybar-art-1.0.0-r5.apk",
     "package_sha256": "077ca2e6838cae9b169c9bd2e110b8eb3c8fc9701ea4aea30aca31eb1a16f176",
-    "scope": "Historical r5 Waybar focus, rename and hover evidence. r6 changes only the empty STRATA workspace number."
+    "scope": "Historical r5 Waybar focus, rename and hover evidence; retained. The r8 change recognizes reserved empty workspace names regardless of ASCII letter case."
+  },
+  "previous_release_workspace_ten_checks": {
+    "evidence": "alpine/verification/workspace-titlecase/previous-r7-verification.json",
+    "gtk_check_count": 49,
+    "module_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+    "package": "oldbook-waybar-art-1.0.0-r7.apk",
+    "package_sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b",
+    "scope": "Historical r7 workspace-ten typography, installation and activation proof; superseded by this r8 candidate."
   },
   "previous_release_workspace_zero_checks": {
     "evidence": "alpine/verification/workspace-strata-zero/README.md",
@@ -144,36 +148,49 @@
       "arch",
       "apk_identity"
     ],
-    "evidence": "alpine/verification/workspace-strata-ten/lock-update.json",
+    "evidence": "alpine/verification/workspace-titlecase/lock-update.json",
     "installed_identities_match": true,
     "package_count": 1119,
-    "path": "alpine/packages/locks/2866c8caaa0d133d4cc2.json",
-    "sha256": "2866c8caaa0d133d4cc24131f13b31be18fbefe4c7f0631201c65c37bdeccfa2"
+    "path": "alpine/packages/locks/368a9c51ce0830f4e791.json",
+    "sha256": "368a9c51ce0830f4e791b5864e655c60982b9df107f3b75856f0eb875ce22865",
+    "status": "passed"
   },
-  "schema": 7,
+  "schema": 8,
   "shellcheck": "shellcheck -s sh -e SC2034,SC2154,SC2046 alpine/packages/waybar-art/APKBUILD: passed",
   "source_date_epoch": 1788739200,
   "source_sha512": {
-    "APKBUILD": "625aa967f39b3844173e05b263bec9b6177aef511659d5c18f4d8cd00318ba02abe010eb33bf3f33f8fc72a18d4c5e6a07058eff41043d7c4e471f61e6194913",
+    "APKBUILD": "056d37881726651d8defa96192e66328e625b7da25f380967720123c8d14e56690f74d01444216df94433604922dfc7d1aef4b444cb8a17676b7522e87b41777",
     "LICENSE.Waybar": "fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2",
     "art.c": "d794d1c7c67446ca7d9f6f505e9353e7a4b0786c75719ccd906b9c4a4fe6de30af48e1c9cf48aa36a704ae678bc78d2135062c235c4146f7be3593d51762ef1f",
-    "help.c": "5ae9b57ac92e0d594a58dcac59b9bfe7029a53f765a8f1d74d2660564e3676a88e9d98ea85b96ff30225bd878906061e4be73e4878d42e78f7e5cec47b55b1f4",
+    "build-offline": "ed867ee39468e1a107480b740e11641349425aa7718995b21ed1f633b3f7a2fcde6dafb3ae823cfc519fee9705dee221bf81e1e3e7db7078d46df327505ed8c8",
+    "help.c": "7acb46f1151abaa3c0cee367b90ad062546d8fe0569c499d0e549e9bb2c7015ed34fc3af0ae9b90e40f9fed6466e559fd4a6b72851e1de9b5ea59f3f2a4c52d9",
     "help.h": "8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4",
     "waybar_cffi_module.h": "b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd"
   },
   "workspace_gtk_checks": {
-    "count": 49,
+    "count": 126,
     "fatal_gtk_warnings": true,
     "isolation": "private Xvfb, D-Bus, HOME and XDG directories",
-    "legacy_zero_recognition_retained": true,
-    "log": "alpine/verification/workspace-strata-ten/apk-green.log",
-    "module_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+    "legacy_uppercase_and_zero_recognition_retained": true,
+    "log": "alpine/verification/workspace-titlecase/apk-green.log",
+    "module_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+    "recognized_titlecase_labels": [
+      "0: Strata",
+      "1: Ghost",
+      "2: Orbit",
+      "3: Lab",
+      "4: Signal",
+      "5: Lounge",
+      "10: Strata"
+    ],
     "regression_red": {
+      "baseline_help_sha512": "5ae9b57ac92e0d594a58dcac59b9bfe7029a53f765a8f1d74d2660564e3676a88e9d98ea85b96ff30225bd878906061e4be73e4878d42e78f7e5cec47b55b1f4",
       "exit_code": -6,
-      "failure": "empty active 10: STRATA name had normal weight 400 instead of bold 700",
-      "log": "alpine/verification/workspace-strata-ten/red.log"
+      "failure": "The unchanged r7 helper gave an active Titlecase empty workspace name normal weight 400 instead of bold 700.",
+      "log": "alpine/verification/workspace-titlecase/red.log"
     },
     "result": "passed",
-    "test": "alpine/packages/waybar-art/tests/workspace-emphasis.c"
+    "test": "alpine/packages/waybar-art/tests/workspace-emphasis.c",
+    "test_sha256": "8946fc3907619b029e8bd0cfdc5ea0401aa7a8bb97c4837048f53d67fb21871c"
   }
 }

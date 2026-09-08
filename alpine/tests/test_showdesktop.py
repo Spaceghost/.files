@@ -196,7 +196,7 @@ class Timing(unittest.TestCase):
 class Switching(unittest.TestCase):
     def test_a_numbered_workspace_is_addressed_by_number(self):
         self.assertEqual(showdesktop.switch_command({'name': '3: LAB · vim', 'num': 3}),
-                         'workspace number 3')
+                         'workspace number "3: Lab"')
 
     def test_a_named_workspace_falls_back_to_back_and_forth(self):
         # Live renaming makes the captured name an unreliable address.

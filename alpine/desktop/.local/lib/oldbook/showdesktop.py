@@ -20,7 +20,7 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from workspace_model import displayed_views, fullscreen_nodes, workspace_nodes
+from workspace_model import displayed_views, fullscreen_nodes, workspace_name, workspace_nodes
 
 STATE_VERSION = 1
 HIDDEN_WORKSPACE = 'desktop'
@@ -214,7 +214,7 @@ def travel_at(slot, count, elapsed, duration, restoring):
 def switch_command(workspace):
     number = workspace.get('num', -1)
     if isinstance(number, int) and number >= 0:
-        return f'workspace number {number}'
+        return 'workspace number ' + json.dumps(workspace_name(number))
     # A renamed workspace cannot be addressed by its captured name; Sway still
     # remembers where the hidden workspace was entered from.
     return 'workspace back_and_forth'

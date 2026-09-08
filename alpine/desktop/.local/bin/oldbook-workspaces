@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Live application workspace names and a local Codex/ChatGPT window switcher."""
 import argparse
+import errno
 import fcntl
 import html
 import json
@@ -17,7 +18,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
 from workspace_model import (WorkspaceNames, addressable_name, all_views, largest_view,
-                             safe_label, valid_record, workspace_nodes)
+                             safe_label, valid_record, workspace_name, workspace_nodes)
 
 HEADER = struct.Struct('=6sII')
 
@@ -45,8 +46,21 @@ def send(connection, kind, payload=''):
 
 def request(path, kind, payload=''):
     with socket.socket(socket.AF_UNIX) as connection:
-        connection.settimeout(3)
-        connection.connect(str(path))
+        deadline = time.monotonic() + 3
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('Sway IPC connect timed out')
+            connection.settimeout(remaining)
+            try:
+                connection.connect(str(path))
+                break
+            except BlockingIOError as error:
+                if error.errno != errno.EAGAIN:
+                    raise
+                # AF_UNIX reports a full listen backlog immediately even with
+                # a socket timeout. Give Sway time to accept queued clients.
+                time.sleep(min(.01, max(0, deadline - time.monotonic())))
         send(connection, kind, payload)
         response_kind, response = receive(connection)
         if response_kind != kind:
@@ -64,8 +78,17 @@ def rename(path, old, new):
     # This is Sway command quoting, passed through IPC without a shell.
     if not addressable_name(old) or not addressable_name(new):
         raise ValueError('workspace name cannot be represented losslessly for Sway IPC')
-    command(path, 'rename workspace ' + json.dumps(old, ensure_ascii=False)
-            + ' to ' + json.dumps(new, ensure_ascii=False))
+    commands = []
+    if old != new and old.lower() == new.lower():
+        # Sway looks names up without case and treats a case-only rename as
+        # success without changing it. Finish both steps in one IPC command.
+        temporary = new + f' [rename-{os.getpid()}-{time.monotonic_ns()}]'
+        commands.append('rename workspace ' + json.dumps(old, ensure_ascii=False)
+                        + ' to ' + json.dumps(temporary, ensure_ascii=False))
+        old = temporary
+    commands.append('rename workspace ' + json.dumps(old, ensure_ascii=False)
+                    + ' to ' + json.dumps(new, ensure_ascii=False))
+    command(path, '; '.join(commands))
 
 
 def read_json(path, default):
@@ -202,7 +225,8 @@ def daemon(runtime, directory, path):
                     if view.get('app_id') == 'oldbook-agent-quick'}
             for identifier, number in placement.plan(candidates, adopt=adopt, stay=stay):
                 try:
-                    command(path, f'[con_id={identifier}] move container to workspace number {number}')
+                    command(path, f'[con_id={identifier}] move container to workspace number '
+                            + json.dumps(workspace_name(number)))
                 except RuntimeError:
                     # A window may close between inspection and placement.
                     pass

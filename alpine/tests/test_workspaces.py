@@ -1,11 +1,14 @@
 """Workspace geometry and naming regressions; no live compositor mutations."""
 from pathlib import Path
 import contextlib
+import errno
 import io
 import json
 import runpy
+import socket
 import stat
 import tempfile
+import threading
 import time
 import unittest
 from unittest import mock
@@ -207,6 +210,54 @@ class WorkspaceServiceTests(unittest.TestCase):
         self.runtime = Path(self.temp.name)
         self.events = self.runtime / 'oldbook/codex-events'
         self.events.mkdir(parents=True)
+
+    def test_request_recovers_after_a_private_unix_socket_backlog_drains(self):
+        path = self.runtime / 'backlog.sock'
+        result = {'workspaces': [{'num': 4, 'name': '4: Signal'}]}
+        errors = []
+        with socket.socket(socket.AF_UNIX) as listener, socket.socket(socket.AF_UNIX) as filler:
+            listener.bind(str(path))
+            listener.listen(0)
+            listener.settimeout(1)
+            filler.connect(str(path))
+            with socket.socket(socket.AF_UNIX) as probe:
+                probe.settimeout(.1)
+                with self.assertRaises(BlockingIOError) as full:
+                    probe.connect(str(path))
+                self.assertEqual(full.exception.errno, errno.EAGAIN)
+
+            def drain_and_reply():
+                try:
+                    time.sleep(.05)
+                    blocked, _ = listener.accept()
+                    blocked.close()
+                    connection, _ = listener.accept()
+                    with connection:
+                        connection.settimeout(1)
+                        header = bytearray()
+                        while len(header) < self.module['HEADER'].size:
+                            chunk = connection.recv(self.module['HEADER'].size - len(header))
+                            if not chunk:
+                                raise AssertionError('Request closed before sending its header')
+                            header.extend(chunk)
+                        magic, length, kind = self.module['HEADER'].unpack(header)
+                        self.assertEqual((magic, length, kind), (b'i3-ipc', 0, 4))
+                        payload = json.dumps(result).encode()
+                        connection.sendall(self.module['HEADER'].pack(b'i3-ipc', len(payload), 4) + payload)
+                except Exception as error:
+                    errors.append(error)
+
+            worker = threading.Thread(target=drain_and_reply)
+            started = time.monotonic()
+            worker.start()
+            try:
+                self.assertEqual(self.module['request'](path, 4), result)
+            finally:
+                worker.join(timeout=2)
+            self.assertFalse(worker.is_alive(), 'Private IPC peer did not finish')
+            if errors:
+                raise errors[0]
+            self.assertLess(time.monotonic() - started, 3)
 
     def test_events_match_exact_panes_and_disappear_when_cleared(self):
         path = self.events / 'event.json'

@@ -759,3 +759,25 @@ was performed.
 - Physical F5/F6 presses, operation during an actual locked session, and
   restoration after a new graphical login remain unverified. The existing
   `hid_apple` Fn policy remains unchanged.
+
+## Workspace names ready before first focus — 2026-09-07
+
+Named workspace switch/move commands now include their full titlecase labels
+at creation. `4: Signal` is present in the first Sway init/focus event, with
+no dependency on the application naming daemon. The overview, show-desktop
+return and automatic placement use the same names; existing custom names
+and workspace identities remain intact. Exact legacy uppercase defaults
+migrate through a batched rename because Sway otherwise ignores case-only
+changes. The IPC client retries a full Unix listen backlog within three seconds.
+
+Validation: 99 focused Python tests, 17 private native Sway checks, the Sway
+parser and 126 native GTK checks pass. The signed r8 bar APK came from two
+identical offline builds, is archived and installed, and matches the running
+Waybar mapping. The immutable 1119-package lock is
+`alpine/packages/locks/368a9c51ce0830f4e791.json`. The live workspace strip was
+visually checked; focus and workspace IDs were preserved during migration.
+Evidence and recovery: `alpine/verification/workspace-ready/`,
+`alpine/verification/workspace-titlecase/`, and
+`docs/superpowers/decisions/2026-09-07-workspace-names-at-creation.md`.
+No required checks remain. Physical key-to-screen timing was not measured;
+ordered compositor events establish readiness at creation.
