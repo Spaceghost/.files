@@ -159,7 +159,8 @@ def collect(tree, resolver, runtime, names, placement=None):
             identity = apps.get(view['id'], {})
             if identity.get('kind') in ('codex', 'chatgpt', 'claude'):
                 ai.append({'id': view['id'], 'workspace': plan['base'],
-                           'name': safe_label(identity['name'], 28), 'kind': identity['kind'],
+                           'name': safe_label(identity['name'], 28) + (' (tmux)' if identity.get('tmux_pane') else ''),
+                           'kind': identity['kind'],
                            'event': identity.get('event'), 'focused': bool(view.get('focused'))})
     return plans, ai
 

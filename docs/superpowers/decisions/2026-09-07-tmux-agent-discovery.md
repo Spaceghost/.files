@@ -24,3 +24,9 @@ Recovery: restore the preceding app_identity.py and restart only
 This change covers tmux clients attached to desktop terminal windows; it does not
 change the existing exclusion of detached sessions or hidden scratchpad windows
 from this window switcher.
+
+The selector and bar tooltip label resolved tmux agents as `Codex (tmux)`
+(or `Claude (tmux)`). This suffix is applied only to the session display name
+when the resolver supplies a tmux pane; workspace names, agent kinds, counting
+and Sway container targets stay unchanged. All 41 identity/workspace checks
+pass after the label change.
