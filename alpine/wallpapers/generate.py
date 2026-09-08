@@ -5,6 +5,7 @@ import binascii
 import datetime as dt
 import fcntl
 import hashlib
+import html
 import json
 import os
 import re
@@ -236,16 +237,33 @@ def checkpoint_record(record, metadata, repository=REPO):
     return 0
 
 
-def notify(title, message):
+def notify(title, message, *, image=None):
     env = os.environ.copy()
     runtime = Path('/run/user') / str(os.getuid())
     if 'DBUS_SESSION_BUS_ADDRESS' not in env and (runtime / 'bus').exists():
         env['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=' + str(runtime / 'bus')
+    command = ['notify-send', '--app-name=Ghost Gallery', '--icon=image-x-generic']
+    if image is not None:
+        image = Path(image).resolve()
+        command.append('--hint=string:image-path:' + str(image))
+        message += '<img src="' + image.as_uri() + '" alt="Generated painting"/>'
     try:
-        subprocess.run(['notify-send', '--app-name=Ghost Gallery', '--icon=image-x-generic',
-                        title, message], env=env, capture_output=True, timeout=5)
+        subprocess.run([*command, '--', title, message], env=env, capture_output=True, timeout=5)
     except (OSError, subprocess.TimeoutExpired):
         pass
+
+
+def notify_theme_complete(entry, metadata):
+    location = 'now on your desktop' if metadata.get('activated') else 'saved in your gallery'
+    message = html.escape(entry['theme_name'])
+    if entry['title'] != entry['theme_name']:
+        message += '\nPainting: ' + html.escape(entry['title'])
+    message += '\nYour complete theme and painting are ' + location + '.'
+    if metadata.get('activation_error'):
+        message += ' The desktop could not switch; choose it from the gallery.'
+    if metadata['status'] == 'checkpoint-pending':
+        message += ' The local Fossil checkpoint is pending.'
+    notify('Theme created: ' + entry['theme_name'], message, image=REPO / entry['file'])
 
 
 def records():
@@ -334,7 +352,8 @@ def activate_artwork(record, metadata, entry):
     except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
         metadata.update({'activated': False, 'activation_error': str(error)})
         atomic_json(record, metadata)
-        notify('Artwork saved to the gallery', 'Could not switch the desktop. Select ' + entry['title'] + ' from the gallery when Sway is available.')
+        if not metadata.get('new_theme'):
+            notify('Artwork saved to the gallery', 'Could not switch the desktop. Select ' + entry['title'] + ' from the gallery when Sway is available.')
         return 1
     metadata.update({'activated': True})
     metadata.pop('activation_error', None)
@@ -342,7 +361,8 @@ def activate_artwork(record, metadata, entry):
     message = entry['title'] + ' is now on your desktop.'
     if metadata['status'] == 'checkpoint-pending':
         message += ' The image is saved; its local Fossil checkpoint is pending.'
-    notify('Space Ghost has finished painting', message)
+    if not metadata.get('new_theme'):
+        notify('Space Ghost has finished painting', message)
     return 0
 
 
@@ -525,6 +545,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             atomic_json(record, metadata)
             checkpoint_result = checkpoint_record(record, metadata, REPO)
             activation_result = activate_artwork(record, metadata, entry) if activate else 0
+            if new_theme is not None:
+                notify_theme_complete(entry, metadata)
             return max(checkpoint_result, activation_result)
         except Exception as error:
             if metadata.get('status') not in ('checkpoint-pending', 'complete'):

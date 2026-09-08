@@ -29,6 +29,11 @@ oldbook-wallpaper generate --theme gruvbox-dark
 oldbook-wallpaper edit-prompts
 ```
 
+When a new theme and its painting finish, Ghost Gallery sends a desktop
+notification with the theme name and painting preview. It says whether the
+desktop switched or the work was saved in the gallery, and reports any pending
+local checkpoint. Failed image generation does not announce finished artwork.
+
 The gallery preserves the painting list and appends next/previous, pause/resume,
 **Help & gallery controls**, and **Open command deck** alongside generation.
 The picker shows up to 28 rows so the current gallery and its controls fit on
