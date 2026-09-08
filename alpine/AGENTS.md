@@ -62,3 +62,7 @@ user prefers no automatic reflow to abrupt motion or continuous CPU work.
 Use fixed caption clearance when laying out cards, favor useful lower-right
 space, and preserve native click-to-advance on the reading cards. Scripture
 search may adapt to free/occupied edges and must follow the active theme.
+
+Scripture cards must read continuously: passage and source citation, reflection,
+then practice. Do not insert a separate speaker/“who said” or duplicate title
+section. Preserve author/source metadata in the reading library and history.
