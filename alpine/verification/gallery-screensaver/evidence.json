@@ -1,0 +1,111 @@
+{
+  "part": "screensaver",
+  "checks": [
+    {
+      "name": "the daemon accepts the idle gallery",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "id": "e5d55dc522794489beacd3f8b069a832",
+        "state": "settled",
+        "screensaver": true
+      }
+    },
+    {
+      "name": "the painting drifts",
+      "passed": true,
+      "detail": [
+        1.015,
+        -5.4,
+        -1.1812
+      ]
+    },
+    {
+      "name": "the drift pans as it zooms",
+      "passed": true,
+      "detail": [
+        1.0187,
+        -5.0692,
+        -1.1089
+      ]
+    },
+    {
+      "name": "it crossfades to the next painting",
+      "passed": true,
+      "detail": "/home/jack/.files/alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-ce02c5a83434.png"
+    },
+    {
+      "name": "the shared painting link is untouched",
+      "passed": true,
+      "detail": "/home/jack/.files/alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-0986082ea557.png"
+    },
+    {
+      "name": "the daemon accepts the stop",
+      "passed": true,
+      "detail": {
+        "ok": true,
+        "id": "3d2c452cffbc4d878ea70e583c9a3576",
+        "state": "settled",
+        "screensaver": false
+      }
+    },
+    {
+      "name": "the drift glides back to rest",
+      "passed": true,
+      "detail": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "the painting it interrupted comes back",
+      "passed": true,
+      "detail": "/home/jack/.files/alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-0986082ea557.png"
+    }
+  ],
+  "frames": [
+    {
+      "name": "01-before",
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "02-drifting",
+      "transform": [
+        1.0133,
+        -5.3332,
+        -1.1666
+      ]
+    },
+    {
+      "name": "03-next-painting",
+      "transform": [
+        1.018,
+        5.1909,
+        1.1355
+      ]
+    },
+    {
+      "name": "04-restored",
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "daemon_sha256": "913659f342c604542ed4314e94c2ec7ace6337ccf41f28595c4c3d485e8df97f",
+  "air_sha256": "0a439af573bef220b9bda61c5aaade158b2c540ca17cde5073ca318c40afb22f",
+  "renderer": "pixman (headless); no compositor blur in these frames",
+  "paintings": [
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-0986082ea557.png",
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-ce02c5a83434.png",
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-american-gothic-fd04831dfb5e.png"
+  ],
+  "status": "passed",
+  "failures": []
+}

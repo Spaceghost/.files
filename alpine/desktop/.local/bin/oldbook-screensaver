@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Idle gallery: let the paintings drift while nobody is watching.
+
+A quarter of an hour into the evening the desktop stops being a desktop and
+becomes a slideshow. `start` hands the background daemon a shuffled list of the
+gallery's rotation-eligible paintings; the daemon drifts slowly across each one
+and crossfades to the next until something wakes the session, then glides back
+to exactly the painting that was there before.
+
+Nothing here changes the gallery's own state: the shared painting link, the
+saved selection, the rotation deadline and the pause switch are untouched, so
+the screensaver can run while rotation is paused and leave no trace.
+"""
+import argparse
+import json
+from pathlib import Path
+import random
+import runpy
+import sys
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import background_fade as fade  # noqa: E402
+
+GALLERY = Path(__file__).resolve().parent / 'oldbook-wallpaper'
+
+
+def gallery_entries():
+    """The gallery's own listing, loaded from the tool that owns it."""
+    module = runpy.run_path(str(GALLERY), run_name='oldbook_wallpaper_gallery')
+    entries, _interval = module['load_gallery']()
+    return entries
+
+
+def candidates(entries, current=None, limit=fade.MAX_SCREENSAVER_PATHS, rng=None):
+    """Rotation-eligible paintings, shuffled, without the one already on screen.
+
+    The gallery's own filter decides what may rotate; a collection too small to
+    filter falls back to everything, exactly as the timer does.
+    """
+    eligible = [entry for entry in entries if entry.get('rotate', True)] or list(entries)
+    paths = []
+    for entry in eligible:
+        path = entry.get('path')
+        if not path or (current and str(path) == str(current)):
+            continue
+        paths.append(str(path))
+    (rng or random).shuffle(paths)
+    return paths[:limit]
+
+
+def current_painting():
+    link = Path.home() / '.local/share/oldbook/current-wallpaper.png'
+    try:
+        return str(link.resolve())
+    except OSError:
+        return None
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('start', 'stop', 'status'))
+    parser.add_argument('--hold', type=int, default=None, metavar='MS',
+                        help='time on each painting, including its drift')
+    parser.add_argument('--fade', type=int, default=None, metavar='MS')
+    parser.add_argument('--zoom', type=float, default=None)
+    arguments = parser.parse_args()
+    if arguments.action == 'status':
+        result = fade.request(fade.encode_request('status'), ack_timeout=2)
+    elif arguments.action == 'stop':
+        result = fade.request(fade.encode_screensaver(False), ack_timeout=2)
+    else:
+        try:
+            paths = candidates(gallery_entries(), current_painting())
+        except (OSError, ValueError, KeyError) as error:
+            print(f'oldbook-screensaver: gallery unavailable: {error}', file=sys.stderr)
+            paths = []
+        result = fade.request(fade.encode_screensaver(
+            True, paths, hold_ms=arguments.hold, fade_ms=arguments.fade,
+            zoom=arguments.zoom), ack_timeout=3)
+    if result is None:
+        print('oldbook-screensaver: no background daemon is listening for this session',
+              file=sys.stderr)
+        return 1
+    print(json.dumps(result, sort_keys=True))
+    return 0 if result.get('ok') else 1
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-screensaver: {error}', file=sys.stderr)
+        sys.exit(1)

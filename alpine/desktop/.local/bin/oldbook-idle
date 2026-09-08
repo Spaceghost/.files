@@ -23,7 +23,7 @@ RAMP_SECONDS = 1.5
 RAMP_STEPS = 30
 RESTORE_SECONDS = 0.3
 RESTORE_STEPS = 8
-ACTIONS = ('dim', 'undim', 'status')
+ACTIONS = ('screensaver', 'dim', 'undim', 'status')
 
 
 def backlight_devices(root):
@@ -38,10 +38,12 @@ def backlight_devices(root):
 
 
 class IdleDimmer:
-    def __init__(self, runtime_dir, backlight_root='/sys/class/backlight', keyboard_command=None):
+    def __init__(self, runtime_dir, backlight_root='/sys/class/backlight', keyboard_command=None,
+                 screensaver_command=None):
         self.runtime_dir = Path(runtime_dir)
         self.backlight_root = Path(backlight_root)
         self.keyboard_command = list(keyboard_command or [])
+        self.screensaver_command = list(screensaver_command or [])
         self.state_file = self.runtime_dir / 'display.json'
         self.cancel_file = self.runtime_dir / 'cancel'
         self.runtime_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -95,8 +97,24 @@ class IdleDimmer:
         except (OSError, subprocess.TimeoutExpired) as error:
             print(f'oldbook-idle: keyboard {action} failed: {error}', file=sys.stderr)
 
+    def screensaver(self, state):
+        """Start or stop the idle gallery; a missing daemon is not an error."""
+        if not self.screensaver_command:
+            return 'no-screensaver'
+        try:
+            result = subprocess.run([*self.screensaver_command, state], stdin=subprocess.DEVNULL,
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                    timeout=15, check=False)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            print(f'oldbook-idle: screensaver {state} failed: {error}', file=sys.stderr)
+            return 'screensaver-failed'
+        return f'screensaver-{state}' if result.returncode == 0 else 'no-background-daemon'
+
     def dim(self, spawn=True):
         """Remember the display level, start the ramp, and request the last breath."""
+        # The paintings stop drifting before the display fades; the daemon
+        # glides back to the picture the screensaver interrupted.
+        self.screensaver('stop')
         with self.locked():
             state = self.read_state()
             if state is not None and self.alive(state.get('pid')) and not self.cancel_file.exists():
@@ -191,6 +209,7 @@ class IdleDimmer:
 
     def undim(self):
         """Cancel any ramp, bring the display back, and restore the keyboard light."""
+        self.screensaver('stop')
         result = 'nothing-to-restore'
         with self.locked():
             state = self.read_state()
@@ -221,8 +240,10 @@ def main():
     runtime = Path(os.environ.get('XDG_RUNTIME_DIR', Path.home() / '.local/state')) / 'oldbook/idle'
     keyboard = os.environ.get('OLDBOOK_KEYBOARD_BACKLIGHT',
                               str(Path(__file__).resolve().parent / 'oldbook-keyboard-backlight'))
+    saver = os.environ.get('OLDBOOK_SCREENSAVER',
+                           str(Path(__file__).resolve().parent / 'oldbook-screensaver'))
     dimmer = IdleDimmer(runtime, os.environ.get('OLDBOOK_BACKLIGHT_ROOT', '/sys/class/backlight'),
-                        [keyboard])
+                        [keyboard], [saver])
     action = sys.argv[1]
     try:
         if action == 'ramp':
@@ -230,6 +251,9 @@ def main():
             return 0
         if action == 'status':
             print(json.dumps(dimmer.read_state() or {}, sort_keys=True))
+            return 0
+        if action == 'screensaver':
+            print(dimmer.screensaver('start'))
             return 0
         print(dimmer.dim() if action == 'dim' else dimmer.undim())
         return 0
