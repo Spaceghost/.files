@@ -1,0 +1,111 @@
+{
+  "status": "passed",
+  "source": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-waybar-dim",
+  "source_sha256": "296eaf6adcce78d141420b92e42b6475315f878b41064318664a03ecea683d36",
+  "preexisting_concurrent_runtime_change": {
+    "previously_observed_waybar_pid": 26778,
+    "previously_observed_dim_pid": 10227,
+    "at_activation_waybar_pid": 26230,
+    "at_activation_dim_pid": 26333,
+    "changes_made_by_this_probe": false
+  },
+  "before": {
+    "waybar": {
+      "pid": 26230,
+      "start_ticks": "1870342",
+      "argv": [
+        "waybar"
+      ],
+      "uid": 1000
+    },
+    "workspace": {
+      "pid": 10225,
+      "start_ticks": "1806847",
+      "argv": [
+        "python3",
+        "/home/jack/.local/bin/oldbook-workspaces",
+        "daemon"
+      ],
+      "uid": 1000
+    },
+    "dim": {
+      "pid": 26333,
+      "start_ticks": "1870442",
+      "argv": [
+        "python3",
+        "/home/jack/.local/bin/oldbook-waybar-dim"
+      ],
+      "uid": 1000
+    }
+  },
+  "workspace_samples": [
+    {
+      "observed_at": 1788840225.1951053,
+      "updated_at": 1788840224.3785121,
+      "workspaces": 5,
+      "ai_windows": 3
+    },
+    {
+      "observed_at": 1788840226.9975445,
+      "updated_at": 1788840226.4445283,
+      "workspaces": 5,
+      "ai_windows": 3
+    },
+    {
+      "observed_at": 1788840227.9979522,
+      "updated_at": 1788840227.478255,
+      "workspaces": 5,
+      "ai_windows": 3
+    },
+    {
+      "observed_at": 1788840228.9984555,
+      "updated_at": 1788840228.5244536,
+      "workspaces": 5,
+      "ai_windows": 3
+    },
+    {
+      "observed_at": 1788840229.9987051,
+      "updated_at": 1788840229.565651,
+      "workspaces": 5,
+      "ai_windows": 3
+    }
+  ],
+  "live_signals": [
+    {
+      "pid": 26333,
+      "signal": "SIGTERM",
+      "identity": "verified through pidfd"
+    }
+  ],
+  "after_dim": {
+    "pid": 29947,
+    "start_ticks": "1889301",
+    "argv": [
+      "python3",
+      "/home/jack/.local/bin/oldbook-waybar-dim"
+    ],
+    "uid": 1000
+  },
+  "preserved_processes": {
+    "waybar": {
+      "pid": 26230,
+      "start_ticks": "1870342",
+      "argv": [
+        "waybar"
+      ],
+      "uid": 1000
+    },
+    "workspace": {
+      "pid": 10225,
+      "start_ticks": "1806847",
+      "argv": [
+        "python3",
+        "/home/jack/.local/bin/oldbook-workspaces",
+        "daemon"
+      ],
+      "uid": 1000
+    }
+  },
+  "workspace_state_advancing": true,
+  "completed_at": 1788840229.9987142
+}
