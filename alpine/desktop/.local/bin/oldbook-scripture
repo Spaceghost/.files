@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import signal
 import select
+import sqlite3
 import sys
 import textwrap
 import time
@@ -16,6 +17,7 @@ import time
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import scripture
+import scripture_history as history
 
 ASSETS = REPO / 'alpine/assets/scripture'
 STATE = Path.home() / '.local/state/oldbook/scripture'
@@ -23,6 +25,51 @@ SELECTION = STATE / 'selection.json'
 TRANSLATION = STATE / 'translation'
 WITNESS_SELECTION = STATE / 'witness.json'
 PANEL_WIDTH = 52
+STUDY_KINDS = ('reflection', 'study-note', 'inspiration', 'observation')
+KIND_TITLES = {'reflection': 'Reflection', 'study-note': 'Study note',
+               'inspiration': 'Inspiration', 'observation': 'Observation'}
+
+
+def study_entries():
+    from scripture_study import load_entries
+    return load_entries(ASSETS)
+
+
+def study_selection(bible, entry):
+    records = bible.lookup(entry['reference'])
+    if not records:
+        raise RuntimeError('Study passage is unavailable: ' + entry['reference'])
+    return dict(entry, **passage_document(bible, records), kind=entry.get('kind', 'reflection'))
+
+
+def passage_document(bible, records):
+    translation = getattr(bible, '_translation', None) or current_translation()
+    metadata = next((item for item in scripture.available_translations(ASSETS)
+                     if item['id'] == translation), {'id': translation})
+    return {'reference': scripture.format_reference(records),
+            'text': scripture.passage_text(records), 'passage_records': records,
+            'edition': records[0].get('edition') or metadata.get('title', translation),
+            'source_url': records[0].get('source_url', ''),
+            'license': records[0].get('license') or metadata.get('license', ''),
+            'translation': translation, 'translation_metadata': metadata,
+            'passage_provenance': {'method': 'offline-library', 'translation_id': translation}}
+
+
+def study_label(entry):
+    kind = KIND_TITLES.get(entry.get('kind', 'reflection'), 'Reflection')
+    figure = entry.get('figure')
+    title = f'{figure} · {entry["title"]}' if figure else entry['title']
+    return f'✦  {kind} · {title}  — {entry["reference"]}'
+
+
+def study_choices(entries):
+    labels = [study_label(entry) for entry in entries]
+    choices = {}
+    for entry, label in zip(entries, labels):
+        if labels.count(label) > 1:
+            label += ' · ' + entry['id']
+        choices[label] = entry['id']
+    return choices
 
 
 def current_translation():
@@ -109,13 +156,32 @@ def state_directory():
     return STATE
 
 
-def write_selection(document):
+def mirror_selection(record):
     state_directory()
-    document['chosen_utc'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
-    temporary = SELECTION.with_name(f'{SELECTION.name}.{os.getpid()}.tmp')
-    temporary.write_text(json.dumps(document, indent=2, ensure_ascii=False) + '\n')
-    temporary.replace(SELECTION)
+    with (STATE / 'selection.lock').open('a+') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        # A slower panel process may arrive after a newer manual selection.
+        # Always mirror the canonical pointer while holding the mirror lock.
+        record = history.current() or record
+        document = dict(record['document'], history_id=record['id'], chosen_utc=record['selected_utc'],
+                        next_at=record['next_at'])
+        content = json.dumps(document, indent=2, ensure_ascii=False) + '\n'
+        try:
+            if SELECTION.read_text() == content:
+                return document
+        except FileNotFoundError:
+            pass
+        temporary = SELECTION.with_name(f'{SELECTION.name}.{os.getpid()}.tmp')
+        temporary.write_text(content)
+        temporary.replace(SELECTION)
+        return document
+
+
+def write_selection(document):
+    record = history.select(document)
+    mirror_selection(record)
     refresh_panel()
+    return record
 
 
 def refresh_panel(identifier='scripture'):
@@ -138,33 +204,55 @@ def refresh_panel(identifier='scripture'):
         try:
             pids = json.loads((directory / 'pids.json').read_text())
             pid = int(pids[identifier])
-            descriptor = os.pidfd_open(pid)
         except (OSError, ValueError, KeyError):
             return
+        descriptor = None
         try:
-            proc = Path('/proc') / str(pid)
-            arguments = (proc / 'cmdline').read_bytes().split(b'\0')
-            if (proc.stat().st_uid == os.getuid()
-                    and (proc / 'exe').resolve().name == 'conky'
-                    and os.fsencode(directory / f'{identifier}.conf') in arguments):
-                config = directory / f'{identifier}.conf'
-                if not config.is_file():
+            config = directory / f'{identifier}.conf'
+            if not config.is_file():
+                return
+            try:
+                descriptor = os.pidfd_open(pid)
+            except ProcessLookupError:
+                # Preserve the known layout, and revive only this Scripture
+                # card when its previously recorded process has exited.
+                if identifier != 'scripture':
                     return
-                with (directory / f'{identifier}.log').open('ab') as log:
-                    replacement = subprocess.Popen(['conky', '-c', str(config)],
-                        stdin=subprocess.DEVNULL, stdout=log, stderr=log,
-                        start_new_session=True)
-                pids[identifier] = replacement.pid
-                temporary = directory / f'pids.json.{os.getpid()}.tmp'
-                temporary.write_text(json.dumps(pids, indent=2) + '\n')
-                temporary.replace(directory / 'pids.json')
+            if descriptor is not None:
+                proc = Path('/proc') / str(pid)
+                arguments = (proc / 'cmdline').read_bytes().split(b'\0')
+                if not (proc.stat().st_uid == os.getuid()
+                        and (proc / 'exe').resolve().name == 'conky'
+                        and os.fsencode(config) in arguments):
+                    raise RuntimeError('Passage saved; Scripture card process identity changed.')
+            with (directory / f'{identifier}.log').open('ab') as log:
+                replacement = subprocess.Popen(['conky', '-c', str(config)],
+                    stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                    start_new_session=True)
+            pids[identifier] = replacement.pid
+            temporary = directory / f'pids.json.{os.getpid()}.tmp'
+            temporary.write_text(json.dumps(pids, indent=2) + '\n')
+            temporary.replace(directory / 'pids.json')
+            if descriptor is not None:
                 signal.pidfd_send_signal(descriptor, signal.SIGTERM)
                 if not select.select([descriptor], [], [], 1)[0]:
                     signal.pidfd_send_signal(descriptor, signal.SIGKILL)
         except OSError:
             return
         finally:
-            os.close(descriptor)
+            if descriptor is not None:
+                os.close(descriptor)
+
+
+def scripture_panel_running():
+    directory = Path.home() / '.local/state/oldbook/conky'
+    try:
+        pid = int(json.loads((directory / 'pids.json').read_text())['scripture'])
+        proc = Path('/proc') / str(pid)
+        return (proc.stat().st_uid == os.getuid() and (proc / 'exe').resolve().name == 'conky'
+                and os.fsencode(directory / 'scripture.conf') in (proc / 'cmdline').read_bytes().split(b'\0'))
+    except (OSError, ValueError, KeyError):
+        return False
 
 
 def read_selection():
@@ -178,54 +266,43 @@ def select_reference(bible, reference):
     records = bible.lookup(reference)
     if not records:
         raise RuntimeError('No passage matches: ' + reference)
-    write_selection({'kind': 'passage', 'reference': scripture.format_reference(records),
-                     'text': scripture.passage_text(records),
-                     'edition': records[0].get('edition', 'King James Version'),
-                     'source_url': records[0].get('source_url', ''),
-                     'license': records[0].get('license', 'Public domain in the United States')})
+    write_selection(dict(passage_document(bible, records), kind='passage'))
     return scripture.format_reference(records)
 
 
 def select_reflection(bible, identifier):
-    entries = scripture.load_reflections(ASSETS)
+    entries = study_entries()
     entry = next((item for item in entries if item['id'] == identifier), None)
     if entry is None:
-        raise RuntimeError('No reflection called: ' + identifier)
-    records = bible.lookup(entry['reference'])
-    write_selection({'kind': 'reflection', 'id': entry['id'],
-                     'reference': scripture.format_reference(records) or entry['reference'],
-                     'text': scripture.passage_text(records),
-                     'figure': entry['figure'], 'title': entry['title'],
-                     'trial': entry['trial'], 'reflection': entry['reflection'],
-                     'practice': entry['practice']})
+        raise RuntimeError('No reflection or study called: ' + identifier)
+    write_selection(study_selection(bible, entry))
     return entry['id']
 
 
-def current(bible):
-    """The chosen passage, or the reflection for today when nothing is chosen."""
+def initial_selection(bible):
+    """Import the prior selection once, materializing study and source content."""
     selection = read_selection()
     if selection.get('kind') == 'passage' and selection.get('text'):
-        return selection
-    if selection.get('kind') == 'reflection' and selection.get('id'):
-        entries = scripture.load_reflections(ASSETS)
-        if any(item['id'] == selection['id'] for item in entries):
-            return selection
-    entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
-    records = bible.lookup(entry['reference'])
-    return {'kind': 'reflection', 'id': entry['id'],
-            'reference': scripture.format_reference(records) or entry['reference'],
-            'text': scripture.passage_text(records), 'figure': entry['figure'],
-            'title': entry['title'], 'trial': entry['trial'],
-            'reflection': entry['reflection'], 'practice': entry['practice']}
+        return dict(selection, legacy_chosen_utc=selection['chosen_utc']) if selection.get('chosen_utc') else selection
+    entries = study_entries()
+    if selection.get('kind') in STUDY_KINDS and selection.get('id'):
+        entry = next((item for item in entries if item['id'] == selection['id']), None)
+        if entry:
+            document = study_selection(bible, entry)
+            if selection.get('chosen_utc'):
+                document['legacy_chosen_utc'] = selection['chosen_utc']
+            return document
+    return study_selection(bible, scripture.daily_reflection(entries))
 
 
-def next_selection(bible):
-    """Continue a passage in its collection, or rotate the curated reflections."""
-    selected = current(bible)
-    if selected['kind'] == 'reflection':
-        entries = scripture.load_reflections(ASSETS)
-        index = next(index for index, entry in enumerate(entries) if entry['id'] == selected['id'])
-        return select_reflection(bible, entries[(index + 1) % len(entries)]['id'])
+def following_selection(bible, selected):
+    """Continue a passage in its collection, or rotate the complete study catalog."""
+    if selected['kind'] in STUDY_KINDS:
+        entries = study_entries()
+        index = next((index for index, entry in enumerate(entries) if entry['id'] == selected['id']), -1)
+        return study_selection(bible, entries[(index + 1) % len(entries)])
+    if selected.get('translation') and selected['translation'] != getattr(bible, '_translation', selected['translation']):
+        bible = _LazyBible(translation=selected['translation'])
     records = bible.lookup(selected['reference'])
     if not records:
         raise RuntimeError('The selected passage is not in the current collection')
@@ -236,7 +313,39 @@ def next_selection(bible):
               if ('Torah' if record['book'].startswith('Torah ') else
                   'Talmud' if record['book'].startswith('Talmud ') else 'Bible') == collection]
     following = verses[(verses.index(last) + 1) % len(verses)]
-    return select_reference(bible, scripture.format_reference([following]))
+    return dict(passage_document(bible, [following]), kind='passage')
+
+
+def current(bible):
+    """Read the durable selection and advance exactly once when its hour is due."""
+    record = history.advance(lambda: initial_selection(bible),
+                             lambda selected: following_selection(bible, selected))
+    return mirror_selection(record)
+
+
+def tick(bible):
+    """Honor the saved deadline independently of Conky's cached rendering."""
+    selected = current(bible)
+    try:
+        rendered = int((STATE / 'panel-entry').read_text())
+    except (OSError, ValueError):
+        rendered = None
+    if rendered != selected['history_id'] or not scripture_panel_running():
+        # Only panel() acknowledges produced text. A busy layout or failed
+        # replacement stays pending for the next clock check.
+        refresh_panel()
+    return 0
+
+
+def next_selection(bible):
+    if history.current() is None:
+        current(bible)
+    record = history.advance(lambda: initial_selection(bible),
+                             lambda selected: following_selection(bible, selected), force=True)
+    mirror_selection(record)
+    refresh_panel()
+    document = record['document']
+    return document.get('id') or document['reference']
 
 
 def wrap(text, width, limit):
@@ -248,20 +357,22 @@ def wrap(text, width, limit):
 
 
 def panel(bible, width=PANEL_WIDTH):
-    """The desktop block: the passage, then who lived it and what to do about it."""
+    """The desktop block: passage and citation, reflection, then practice."""
     entry = current(bible)
     lines = ['${color1}' + entry.get('reference', '')]
     if entry.get('edition'):
         lines.append('${color2}' + entry['edition'])
     lines += ['${color}' + line for line in wrap(entry.get('text', ''), width, 4)]
-    if entry.get('kind') == 'reflection':
-        lines.append('${color2}' + entry['figure'] + ' · ' + entry['title'])
+    if entry.get('kind') in STUDY_KINDS:
         lines += ['${color2}' + line for line in wrap(entry.get('reflection', ''), width, 3)]
         lines += ['${color1}Practice: ${color2}' + line
                   for line in wrap(entry.get('practice', ''), width, 2)[:1]]
         remainder = wrap(entry.get('practice', ''), width, 2)[1:]
         lines += ['${color2}' + line for line in remainder]
     print('\n'.join(lines))
+    temporary = STATE / f'panel-entry.{os.getpid()}.tmp'
+    temporary.write_text(str(entry['history_id']) + '\n')
+    temporary.replace(STATE / 'panel-entry')
     return 0
 
 
@@ -280,9 +391,9 @@ def show(bible, reference, width=78):
 
 
 def search(bible, query, limit):
-    entries = scripture.search_reflections(scripture.load_reflections(ASSETS), query)
+    entries = scripture.search_reflections(study_entries(), query)
     for entry in entries[:limit]:
-        print(f'reflection\t{entry["id"]}\t{entry["figure"]} · {entry["title"]}\t{entry["reference"]}')
+        print(f'{entry["kind"]}\t{entry["id"]}\t{entry["figure"]} · {entry["title"]}\t{entry["reference"]}')
     for record in bible.search(query, limit):
         reference = scripture.format_reference([record])
         print(f'verse\t{reference}\t{record["text"]}\t{reference}')
@@ -291,10 +402,9 @@ def search(bible, query, limit):
 
 def find(bible, include_all=False):
     """Bible-only by default; the expanded picker puts Bible matches last."""
-    entries = scripture.load_reflections(ASSETS) if include_all else []
-    lines = [f"✦  {entry['figure']} · {entry['title']}  — {entry['reference']}"
-             for entry in entries]
-    reflection_ids = {line: entry['id'] for line, entry in zip(lines, entries)}
+    entries = study_entries() if include_all else []
+    reflection_ids = study_choices(entries)
+    lines = list(reflection_ids)
     bible_rows, torah_rows, talmud_rows = [], [], []
     for record in bible.verses:
         row = f"{record['book']} {record['chapter']}:{record['verse']}  {record['text']}"
@@ -319,8 +429,21 @@ def find(bible, include_all=False):
     return 0
 
 
+def reflections(bible):
+    entries = study_entries()
+    choices = study_choices(entries)
+    launcher = Path(__file__).resolve().parent / 'oldbook-fuzzel'
+    result = subprocess.run([str(launcher), '--dmenu', '--prompt', 'Reflections & study ❯ ',
+                             '--no-sort', '--lines', '14', '--width', '96'],
+                            input='\n'.join(choices) + '\n', capture_output=True, text=True)
+    chosen = result.stdout.rstrip('\n')
+    if result.returncode == 0 and chosen in choices:
+        print(select_reflection(bible, choices[chosen]))
+    return 0
+
+
 def figures():
-    for name in scripture.figures(scripture.load_reflections(ASSETS)):
+    for name in scripture.figures(study_entries()):
         print(name)
     return 0
 
@@ -329,15 +452,68 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='panel',
                         choices=['panel', 'show', 'search', 'find', 'select',
-                                 'select-reflection', 'figures', 'daily', 'bar',
-                                 'witness', 'witness-next', 'next', 'refresh', 'translations', 'use'])
+                                 'select-reflection', 'reflections', 'figures', 'daily', 'bar',
+                                 'witness', 'witness-next', 'next', 'refresh', 'translations', 'use',
+                                 'history', 'history-list', 'history-show', 'history-use',
+                                 'history-add', 'history-add-study', 'history-backup', 'tick'])
     parser.add_argument('query', nargs='*', help='A reference, reflection ID or search words.')
     parser.add_argument('--limit', type=int, default=25)
     parser.add_argument('--width', type=int, default=PANEL_WIDTH)
     parser.add_argument('--translation', help='Read from an installed text.')
-    parser.add_argument('--all', action='store_true', help='include Torah, Talmud and reflections in the picker')
+    parser.add_argument('--all', action='store_true', help='include Torah, Talmud, reflections and study in the picker')
+    parser.add_argument('--entry', type=int, help='History entry ID for additional material')
+    parser.add_argument('--kind', choices=['note', 'research', 'generated'], default='note')
+    parser.add_argument('--input', type=Path, help='UTF-8 text file for additional material')
+    parser.add_argument('--metadata', type=Path, help='JSON metadata including sources, license and provenance')
+    parser.add_argument('--json', action='store_true', help='Export complete history entry data as JSON')
     arguments = parser.parse_args()
     query = ' '.join(arguments.query).strip()
+
+    if arguments.action == 'history':
+        from scripture_history_reader import run
+        return run(Path(__file__).resolve(), history.database_path())
+    if arguments.action == 'history-list':
+        for entry in history.entries(limit=arguments.limit):
+            if arguments.json:
+                print(json.dumps(history.get(entry['id']), ensure_ascii=False))
+                continue
+            print(f'{entry["id"]}\t{entry["selected_utc"]}\t{entry["document"]["reference"]}\t'
+                  + entry['document'].get('title', ''))
+        return 0
+    if arguments.action == 'history-show':
+        entry = history.get(int(query))
+        print(json.dumps(entry, ensure_ascii=False, indent=2) if arguments.json else history.render(entry))
+        return 0
+    if arguments.action == 'history-backup':
+        if not query:
+            parser.error('history-backup needs a new destination filename')
+        print(history.backup(query))
+        return 0
+    if arguments.action == 'history-use':
+        entry = history.get(int(query))
+        write_selection(entry['document'])
+        return 0
+    if arguments.action in ('history-add', 'history-add-study'):
+        selected = arguments.entry
+        if selected is None:
+            active = history.current()
+            if active is None:
+                parser.error('No current history entry; select a passage first')
+            selected = active['id']
+        if arguments.action == 'history-add-study':
+            entry = next((item for item in study_entries() if item['id'] == query), None)
+            if entry is None:
+                parser.error('No study entry ' + query)
+            material = study_selection(_LazyBible(), entry)
+            print(history.append(selected, material, kind='study'))
+        else:
+            material = json.loads(arguments.metadata.read_text()) if arguments.metadata else {}
+            if not isinstance(material, dict):
+                parser.error('Extra material metadata must be a JSON object')
+            material['text'] = arguments.input.read_text() if arguments.input else query
+            material.setdefault('provenance', {'method': 'user-supplied'})
+            print(history.append(selected, material, kind=arguments.kind))
+        return 0
 
     if arguments.action == 'figures':
         return figures()
@@ -360,16 +536,18 @@ def main():
         helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
         os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
     include_extra = arguments.action != 'find' or arguments.all
-    if arguments.action == 'next':
-        include_extra = read_selection().get('reference', '').startswith(('Torah ', 'Talmud '))
     bible = _LazyBible(include_extra=include_extra,
                        translation=arguments.translation)
+    if arguments.action == 'tick':
+        return tick(bible)
     if arguments.action == 'panel':
         return panel(bible, arguments.width)
     if arguments.action == 'find':
         return find(bible, arguments.all)
+    if arguments.action == 'reflections':
+        return reflections(bible)
     if arguments.action == 'daily':
-        entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
+        entry = scripture.daily_reflection(study_entries())
         return select_reflection(bible, entry['id']) and 0
     if arguments.action == 'next':
         print(next_selection(bible))
@@ -390,6 +568,6 @@ def main():
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (RuntimeError, OSError, ValueError) as error:
+    except (RuntimeError, OSError, ValueError, sqlite3.Error) as error:
         print(f'oldbook-scripture: {error}', file=sys.stderr)
         sys.exit(1)

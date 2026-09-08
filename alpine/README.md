@@ -60,6 +60,13 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
 
 [Panel actions](desktop/.config/waybar/README.md) · [Gallery and cron](wallpapers/README.md)
 
+Scripture advances hourly; a manual choice displays immediately and stays for an
+hour. Its **History** button opens saved passages, full study material, citations
+and notes. Browse older entries and append research or generated material without
+losing the original text. Personal history lives in a separate SQLite database;
+see [history commands and recovery](verification/scripture-history/README.md).
+**Super+/** remains Bible-only and **Super+Shift+/** searches all collections.
+
 [Gruvbox theme guide](themes/README.md) explains live terminal recoloring,
 application settings, preserved theme profiles, and themed/general artwork
 collections. Folder icons rebuild locally with `alpine/bin/build-icon-theme`.

@@ -21,7 +21,7 @@
       "prefer": "top-right",
       "width": 420,
       "height": 204,
-      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 60 ~/.local/bin/oldbook-scripture panel --width 52}"
+      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
     },
     {
       "id": "power",

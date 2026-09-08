@@ -54,7 +54,7 @@ class SearchBar:
         icon.get_style_context().add_class('icon')
         row.pack_start(icon, False, False, 0)
         self.label = Gtk.Label(
-            label='Search scripture — a reference like Isaiah 53, a name like Paul, or any words')
+            label='Search Bible · right-click for reflections & study')
         self.label.get_style_context().add_class('hint')
         self.label.set_xalign(0)
         row.pack_start(self.label, True, True, 0)
@@ -68,7 +68,13 @@ class SearchBar:
         button.connect('enter-notify-event', lambda *_: self._hover(True))
         button.connect('leave-notify-event', lambda *_: self._hover(False))
         self.button = button
-        self.window.add(button)
+        controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        controls.pack_start(button, True, True, 0)
+        history_button = Gtk.Button(label='History')
+        history_button.set_tooltip_text('Read saved passages, study material, and notes')
+        history_button.connect('clicked', self.open_history)
+        controls.pack_start(history_button, False, False, 0)
+        self.window.add(controls)
 
         self.palette = None
         self.provider = Gtk.CssProvider()
@@ -77,6 +83,12 @@ class SearchBar:
         self.refresh_theme()
         self.theme_timer = GLib.timeout_add_seconds(1, self.refresh_theme)
         self.window.connect('destroy', self.cleanup_theme)
+        # Conky can restart its cache after a layout/theme change. The saved
+        # hourly deadline remains authoritative; tick only redraws a due entry.
+        self.clock_process = None
+        self.clock_timer = GLib.timeout_add_seconds(60, self.refresh_selection)
+        self.window.connect('destroy', self.cleanup_clock)
+        self.refresh_selection()
         self.window.show_all()
         STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
         (STATE / 'bar.pid').write_text(f'{os.getpid()}\n')
@@ -140,14 +152,35 @@ class SearchBar:
         GLib.source_remove(self.theme_timer)
         Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
 
-    def open_finder(self, *_arguments):
+    def refresh_selection(self):
+        if self.clock_process is None or self.clock_process.poll() is not None:
+            try:
+                self.clock_process = subprocess.Popen(['/usr/bin/python3', str(FINDER), 'tick'],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, start_new_session=True)
+            except OSError:
+                pass
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_clock(self, _window):
+        GLib.source_remove(self.clock_timer)
+
+    def open_finder(self, _widget=None, event=None):
+        action = 'reflections' if getattr(event, 'button', None) == 3 else 'find'
         try:
-            subprocess.Popen(['/usr/bin/python3', str(FINDER), 'find'],
+            subprocess.Popen(['/usr/bin/python3', str(FINDER), action],
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
         except OSError:
             pass
         return GLib.SOURCE_CONTINUE
+
+    def open_history(self, *_arguments):
+        try:
+            subprocess.Popen(['/usr/bin/python3', str(FINDER), 'history'],
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+        except OSError:
+            pass
 
 
 def claim_single_instance():

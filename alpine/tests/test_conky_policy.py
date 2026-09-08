@@ -58,6 +58,16 @@ class QuietPanelTests(unittest.TestCase):
                 interval = self.load([self.panel('Notes')], value)['update_interval']
                 self.assertTrue(60 <= interval <= 300)
 
+    def test_scripture_alone_keeps_the_explicit_hourly_interval(self):
+        document = self.load([self.panel('${execpi 60 scripture panel}', 'scripture'),
+                              self.panel('${execpi 3600 scripture witness}', 'witness'),
+                              self.panel('${execpi 3600 journal panel}', 'ghost')])
+        texts = {panel['id']: panel['text'] for panel in document['panels']}
+        self.assertIn('${execpi 3600 ', texts['scripture'])
+        self.assertIn('${execpi 300 ', texts['witness'])
+        self.assertIn('${execpi 300 ', texts['ghost'])
+        self.assertEqual(document['update_interval'], 60)
+
     def test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry(self):
         helper = importlib.machinery.SourceFileLoader(
             'quiet_conky_helper', str(REPO / 'alpine/desktop/.local/bin/oldbook-conky')).load_module()
@@ -74,7 +84,7 @@ class QuietPanelTests(unittest.TestCase):
                  patch.object(helper, 'hardware', return_value={}), \
                  patch.object(helper, 'wallpaper_path', return_value=image), \
                  patch.object(helper, 'screen_rectangle', return_value={
-                     'width': 1440, 'height': 900, 'name': 'test'}), \
+                     'width': 1440, 'height': 900, 'name': 'test', 'origin_y': 42}), \
                  patch.object(helper, 'load_theme', return_value={'id': 'test'}), \
                  patch.object(conky_layout, 'analyze_image', return_value={}) as analyze, \
                  patch.object(conky_layout, 'place_panels', return_value=[placement]):

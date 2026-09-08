@@ -9,6 +9,7 @@ import sys
 
 MIN_INTERVAL = 60
 MAX_INTERVAL = 300
+SCRIPTURE_INTERVAL = 3600
 TELEMETRY_PREFIXES = (
     'cpu', 'mem', 'swap', 'top', 'disk', 'downspeed', 'upspeed',
     'totaldown', 'totalup', 'wireless', 'fs_', 'hwmon', 'acpitemp',
@@ -41,7 +42,8 @@ def quiet_document(document):
                   'system stats belong in Waybar', file=sys.stderr)
             continue
         text = INTERVAL_COMMAND.sub(
-            lambda match: match[1] + f'{slow_interval(match[2]):g}', panel['text'])
+            lambda match: match[1] + (str(SCRIPTURE_INTERVAL) if panel['id'] == 'scripture'
+                                     else f'{slow_interval(match[2]):g}'), panel['text'])
         panels.append(dict(panel, text=text))
     return dict(document, panels=panels,
                 update_interval=slow_interval(document.get('update_interval')))

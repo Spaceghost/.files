@@ -830,9 +830,9 @@ ordered compositor events establish readiness at creation.
   APK and scoped deployment backup `1788839554794457799`.
 
 - Core study storage/generation committed as `74177c2598ca`. The live reader,
-  search bar, reader tests and native evidence are staged alongside concurrent
-  Scripture history work and await its integrated commit. Do not publish a
-  reader importing `scripture_history` without including that new module.
+  search bar and reader tests now integrate with the durable Scripture history
+  module. Keep both history modules with the reader when restoring application
+  code, and preserve the personal history database independently.
 - Final native card evidence checks decoded pixels in a tight Scripture crop:
   20,264 changed pixels and 8,949 visible text pixels. The full disposable
   transfer and native rerun passed; screenshots contain only test-desktop
@@ -863,3 +863,25 @@ ordered compositor events establish readiness at creation.
   `verification/window-navigation/`, `verification/carousel/`,
   `verification/near-full-resize/`, `verification/showdesktop-recovery/`.
   Physical keyboard/touchpad input and a fresh login remain manual checks.
+
+## Hourly Scripture history — 2026-09-07
+
+- Scripture rotates once per hour and preserves every observed selection as a
+  complete snapshot in private `~/.local/share/oldbook/scripture/history.sqlite3`.
+  Manual choices display immediately and reset the hour; concurrent checks share
+  an atomic deadline and do not invent missed entries after sleep.
+- The History button opens full passages, study text, sources and provenance.
+  Older/newer navigation preserves draft notes for their original entry. Added
+  notes, research and generated material append without replacing earlier data.
+  The rebuildable study catalog stays separate from personal reading history.
+- The existing bar checks deadlines each minute; the Scripture Conky cache uses
+  3600 seconds. Busy refreshes retry and a missing Scripture card revives from its
+  existing layout while other cards and the disabled preference are preserved.
+- All 80 Scripture tests, 44 Conky tests and seven native GTK reader checks pass.
+  Final scoped activation preserved the database and all other Conky card PIDs.
+  The current entry was rendered, and both live SQLite integrity checks passed.
+  Evidence and recovery: `verification/scripture-history/README.md`.
+- Private backup: `~/.local/state/oldbook/backups/scripture-hourly-activation-20260908T041657Z`.
+  Earlier failed observations and concurrent rebuilds are retained. No physical
+  one-hour wait was performed; hourly boundaries use controlled-clock checks.
+  Restore application code independently of history; never commit the live DB.

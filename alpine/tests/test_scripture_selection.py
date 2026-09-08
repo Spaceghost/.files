@@ -1,5 +1,6 @@
 import importlib.machinery
 import json
+import os
 from pathlib import Path
 import sys
 import tempfile
@@ -10,7 +11,16 @@ REPO=Path(__file__).resolve().parents[2]
 helper=importlib.machinery.SourceFileLoader('scripture_command_test',str(REPO/'alpine/desktop/.local/bin/oldbook-scripture')).load_module()
 
 
-class SelectionTests(unittest.TestCase):
+class IsolatedSelectionTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix='scripture-selection-data-')
+        self.addCleanup(temporary.cleanup)
+        environment = patch.dict(os.environ, {'XDG_DATA_HOME': temporary.name})
+        environment.start()
+        self.addCleanup(environment.stop)
+
+
+class SelectionTests(IsolatedSelectionTests):
     def test_enter_saves_selection_then_requests_immediate_panel_refresh(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'selection.json'
@@ -32,7 +42,7 @@ class SelectionTests(unittest.TestCase):
             selected.assert_called_once_with(bible,'John 3:16')
 
 
-class LibraryTests(unittest.TestCase):
+class LibraryTests(IsolatedSelectionTests):
     def test_talmud_daf_reference_and_optional_collection_prefix(self):
         bible=helper.scripture.Bible([
             {'book':'Talmud Berakhot','chapter':'2a','verse':1,'text':'First segment'},
