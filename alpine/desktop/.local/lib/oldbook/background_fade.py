@@ -24,8 +24,18 @@ ROTATION_DURATION_MS = 1600
 STARTUP_DURATION_MS = 1000
 MAX_DURATION_MS = 20000
 MAX_MESSAGE = 8192
-ACTIONS = ('set', 'status', 'raise', 'quit')
+ACTIONS = ('set', 'status', 'raise', 'quit', 'screensaver')
 FEATHER = 0.14
+# The idle gallery: a slow drift across each painting, a crossfade to the next,
+# and a short glide back to the untouched picture when the session wakes.
+SCREENSAVER_HOLD_MS = 30000
+SCREENSAVER_FADE_MS = 3000
+SCREENSAVER_ZOOM = 1.06
+SCREENSAVER_RETURN_MS = 900
+MAX_SCREENSAVER_PATHS = 64
+# Corners the drift heads for, in turn, so consecutive paintings never repeat
+# the same move. Each pair is a fraction of the room the zoom opens up.
+DRIFT_DIRECTIONS = ((1.0, 0.35), (-1.0, -0.35), (-0.7, 0.6), (0.7, -0.6))
 IPC_HEADER = struct.Struct('=6sII')
 IPC_SUBSCRIBE = 2
 IPC_GET_OUTPUTS = 3
@@ -97,6 +107,35 @@ def reveal_rings(value, radius, feather=FEATHER):
     return max(0.0, outer - band), outer
 
 
+def smoothstep(t):
+    """Ease in and out; a drift that starts and ends without a visible push."""
+    t = min(1.0, max(0.0, t))
+    return t * t * (3 - 2 * t)
+
+
+def ken_burns(progress, zoom, direction, width, height):
+    """View transform for a slow drift: (scale, dx, dy) in logical pixels.
+
+    The pan is always a fraction of the room the current zoom opens up, so the
+    picture covers the output at every moment and the segment begins on exactly
+    the untouched painting. Progress runs 0 to 1 across one held image.
+    """
+    if zoom < 1.0:
+        raise ValueError('a drift cannot zoom out past the output')
+    eased = smoothstep(progress)
+    scale = 1.0 + (zoom - 1.0) * eased
+    travel = eased * 2 - 1
+    room_x = (scale - 1.0) / 2 * width
+    room_y = (scale - 1.0) / 2 * height
+    return scale, direction[0] * travel * room_x, direction[1] * travel * room_y
+
+
+def blend_transform(start, end, progress):
+    """Ease one view transform into another, for the glide back to rest."""
+    eased = ease_out(progress)
+    return tuple(a + (b - a) * eased for a, b in zip(start, end))
+
+
 def parse_origin(text):
     try:
         x, y = (float(part) for part in text.split(','))
@@ -111,6 +150,15 @@ def encode_request(action, path=None, duration_ms=None, origin=None, token=None)
     message = parse_request(json.dumps({
         'action': action, 'path': path, 'duration_ms': duration_ms,
         'origin': list(origin) if origin is not None else None,
+        'id': token or uuid.uuid4().hex}).encode())
+    return json.dumps(message).encode()
+
+
+def encode_screensaver(enable, paths=(), hold_ms=None, fade_ms=None, zoom=None, token=None):
+    """One screensaver request: turn the idle gallery on with a list, or off."""
+    message = parse_request(json.dumps({
+        'action': 'screensaver', 'enable': bool(enable), 'paths': list(paths),
+        'hold_ms': hold_ms, 'fade_ms': fade_ms, 'zoom': zoom,
         'id': token or uuid.uuid4().hex}).encode())
     return json.dumps(message).encode()
 
@@ -130,6 +178,34 @@ def parse_request(data):
         raise ValueError('request needs a short id')
     result = {'action': message['action'], 'id': token, 'path': None,
               'duration_ms': None, 'origin': None}
+    if message['action'] == 'screensaver':
+        result['enable'] = bool(message.get('enable'))
+        paths = message.get('paths') or []
+        if not isinstance(paths, (list, tuple)) or len(paths) > MAX_SCREENSAVER_PATHS:
+            raise ValueError('screensaver needs a short list of paths')
+        cleaned = []
+        for path in paths:
+            if not isinstance(path, str) or not path.startswith('/') or '\0' in path:
+                raise ValueError('screensaver paths must be absolute')
+            cleaned.append(path)
+        result['paths'] = cleaned
+        for key, default, low, high in (('hold_ms', SCREENSAVER_HOLD_MS, 2000, 600000),
+                                        ('fade_ms', SCREENSAVER_FADE_MS, 0, MAX_DURATION_MS)):
+            value = message.get(key)
+            if value is None:
+                result[key] = default
+            elif isinstance(value, bool) or not isinstance(value, (int, float)):
+                raise ValueError(f'{key} must be a number of milliseconds')
+            else:
+                result[key] = int(min(high, max(low, value)))
+        zoom = message.get('zoom')
+        if zoom is None:
+            result['zoom'] = SCREENSAVER_ZOOM
+        elif isinstance(zoom, bool) or not isinstance(zoom, (int, float)) or not math.isfinite(zoom):
+            raise ValueError('zoom must be a number')
+        else:
+            result['zoom'] = float(min(1.5, max(1.0, zoom)))
+        return result
     if message['action'] == 'set':
         path = message.get('path')
         if not isinstance(path, str) or not path.startswith('/') or '\0' in path:

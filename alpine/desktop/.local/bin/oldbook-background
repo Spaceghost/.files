@@ -22,6 +22,7 @@ import sys
 import threading
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import air  # noqa: E402
 import background_fade as fade  # noqa: E402
 
 CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
@@ -30,6 +31,12 @@ CONKY = Path(os.environ.get('OLDBOOK_BACKGROUND_CARDS')
              or Path(__file__).resolve().parent / 'oldbook-conky')
 CHECK_SECONDS = max(2, int(os.environ.get('OLDBOOK_BACKGROUND_CHECK_SECONDS') or 15))
 DEBUG = bool(os.environ.get('OLDBOOK_BACKGROUND_DEBUG'))
+# The breath is polled, not pushed: a stat while the keyboard rests, a read at
+# the publisher's own rate while it breathes. Nothing wakes when nobody breathes.
+AIR_ACTIVE_MS = 50
+AIR_IDLE_MS = 300
+# A view transform that moved by less than this is not worth a repaint.
+MOTION_EPSILON = 1e-4
 
 
 def note(message):
@@ -119,6 +126,14 @@ def daemon():
             self.size = None
             self.tick_id = 0
             self.disposed = False
+            # Motion is the view transform: the breath swelling the painting and
+            # the idle gallery's slow drift. It rides its own tick so a fade and
+            # a drift can run together without either owning the frame clock.
+            self.breath = air.Smoother(1.0, response=0.09, tolerance=2e-5)
+            self.drift = None
+            self.motion_id = 0
+            self.motion_last = None
+            self.painted = (1.0, 0.0, 0.0)
             self.window = Gtk.Window()
             self.window.set_decorated(False)
             self.window.set_can_focus(False)
@@ -179,15 +194,97 @@ def daemon():
             mask.add_color_stop_rgba(1, 0, 0, 0, 0)
             cr.mask(mask)
 
+        # Motion: the breath and the idle drift ------------------------------
+        def transform(self):
+            """The view transform for this frame: (scale, dx, dy) in logical pixels.
+
+            The drift sets the frame the painting is seen through; the breath
+            multiplies it. Both only ever enlarge, so the picture keeps covering
+            the output and no edge of the surface below can show.
+            """
+            scale, dx, dy = 1.0, 0.0, 0.0
+            if self.drift is not None and self.size:
+                width, height, _ = self.size
+                scale, dx, dy = self.drift_transform(width, height)
+            return scale * self.breath.value, dx, dy
+
+        def drift_transform(self, width, height):
+            state = self.drift
+            progress = state['progress']
+            if state['mode'] == 'return':
+                return fade.blend_transform(state['from'], (1.0, 0.0, 0.0), progress)
+            return fade.ken_burns(progress, state['zoom'], state['direction'], width, height)
+
+        def start_drift(self, zoom, direction, duration_ms):
+            self.drift = {'mode': 'drift', 'zoom': zoom, 'direction': direction,
+                          'duration_us': max(1, duration_ms * 1000), 'start': None,
+                          'progress': 0.0}
+            self.animate()
+
+        def release_drift(self, duration_ms):
+            """Glide the drift back to the untouched painting, then stop moving."""
+            if self.drift is None:
+                return
+            width, height, _ = self.size or (1, 1, 1)
+            self.drift = {'mode': 'return', 'from': self.drift_transform(width, height),
+                          'duration_us': max(1, duration_ms * 1000), 'start': None,
+                          'progress': 0.0}
+            self.animate()
+
+        def animate(self):
+            if self.disposed or self.motion_id:
+                return
+            self.motion_last = None
+            self.motion_id = self.area.add_tick_callback(self.motion)
+
+        def motion(self, _widget, clock):
+            if self.disposed:
+                self.motion_id = 0
+                return GLib.SOURCE_REMOVE
+            now = clock.get_frame_time()
+            elapsed = 0.0 if self.motion_last is None else max(0.0, (now - self.motion_last) / 1e6)
+            self.motion_last = now
+            _, settled = self.breath.advance(self.owner.breath_target, elapsed)
+            moving = not settled or self.owner.breath_target != 1.0
+            if self.drift is not None:
+                state = self.drift
+                if state['start'] is None:
+                    state['start'] = now
+                state['progress'] = min(1.0, (now - state['start']) / state['duration_us'])
+                if state['mode'] == 'return' and state['progress'] >= 1.0:
+                    self.drift = None
+                else:
+                    moving = True
+            current = self.transform()
+            if any(abs(a - b) > MOTION_EPSILON for a, b in zip(current, self.painted)):
+                self.painted = current
+                self.area.queue_draw()
+            if moving:
+                return GLib.SOURCE_CONTINUE
+            # Nothing is moving: the surface holds its last frame and the clock
+            # is released until the next breath or drift asks for it.
+            self.motion_id = 0
+            return GLib.SOURCE_REMOVE
+
         def draw(self, _widget, cr):
             if self.current is None:
                 cr.set_source_rgb(*background)
                 cr.paint()
                 return True
+            scale, dx, dy = self.transform()
+            transformed = scale != 1.0 or dx or dy
+            if transformed:
+                width, height, _ = self.size or (0, 0, 1)
+                cr.save()
+                cr.translate(width / 2 + dx, height / 2 + dy)
+                cr.scale(scale, scale)
+                cr.translate(-width / 2, -height / 2)
             cr.set_source_surface(self.current, 0, 0)
             cr.paint()
             if self.fade is not None and self.fade.value > 0:
                 self.paint_fade(cr, self.fade)
+            if transformed:
+                cr.restore()
             return True
 
         def flatten(self):
@@ -257,6 +354,16 @@ def daemon():
                 other.tick_id = 0
             if self.fade is not None:
                 self.tick_id = self.area.add_tick_callback(self.tick)
+            # Carry the breath and the drift across, so a surface re-created
+            # above a respawned swaybg resumes mid-motion without a jump.
+            self.breath, self.drift = other.breath, other.drift
+            self.painted = other.painted
+            if other.motion_id:
+                other.area.remove_tick_callback(other.motion_id)
+                other.motion_id = 0
+            other.drift = None
+            if self.drift is not None or self.breath.value != 1.0:
+                self.animate()
 
         def target_path(self):
             return self.fade.path if self.fade is not None else self.current_path
@@ -268,6 +375,9 @@ def daemon():
             if self.tick_id:
                 self.area.remove_tick_callback(self.tick_id)
                 self.tick_id = 0
+            if self.motion_id:
+                self.area.remove_tick_callback(self.motion_id)
+                self.motion_id = 0
             if self.fade is not None:
                 current_fade, self.fade = self.fade, None
                 current_fade.done(self, 'settled')
@@ -286,6 +396,14 @@ def daemon():
             self.ipc_watch = 0
             self.ipc_buffer = bytearray()
             self.sway = os.environ.get('SWAYSOCK')
+            self.breath_target = 1.0
+            self.air = air.AirWatcher()
+            self.preferences = air.Watcher(air.preferences_path(),
+                                           parse=lambda data, _now: data)
+            self.allow_breath = air.read_preferences().get('wallpaper', True)
+            self.air_source = 0
+            self.air_interval = 0
+            self.saver = None
             self.initial_for, self.target_for = initial_paths(self.sway)
             self.control_path = fade.endpoint()
             self.control_path.unlink(missing_ok=True)
@@ -302,7 +420,89 @@ def daemon():
                                    'duration_ms': fade.STARTUP_DURATION_MS, 'origin': None,
                                    'address': None})
             GLib.timeout_add_seconds(CHECK_SECONDS, self.periodic_check)
+            self.schedule_air(AIR_IDLE_MS)
             self.connect_ipc()
+
+        # The breath -----------------------------------------------------------
+        def schedule_air(self, interval_ms):
+            if self.air_source and self.air_interval == interval_ms:
+                return
+            if self.air_source:
+                GLib.source_remove(self.air_source)
+            self.air_interval = interval_ms
+            self.air_source = GLib.timeout_add(interval_ms, self.poll_air)
+
+        def poll_air(self):
+            """Follow the keyboard's breath, or let the painting rest."""
+            self.air_source = 0
+            raw = self.preferences.poll()
+            if raw is not None or self.preferences.value is None:
+                self.allow_breath = air.read_preferences().get('wallpaper', True)
+            reading = self.air.poll() if self.allow_breath else None
+            target = air.wallpaper_scale(reading)
+            if target != self.breath_target:
+                self.breath_target = target
+                for canvas in self.canvases.values():
+                    canvas.animate()
+            self.air_source = GLib.timeout_add(
+                AIR_ACTIVE_MS if reading is not None else AIR_IDLE_MS, self.poll_air)
+            self.air_interval = AIR_ACTIVE_MS if reading is not None else AIR_IDLE_MS
+            return False
+
+        # The idle gallery -----------------------------------------------------
+        def start_screensaver(self, request):
+            paths = [path for path in request['paths'] if Path(path).is_file()]
+            restore = {name: canvas.target_path() for name, canvas in self.canvases.items()}
+            if self.saver is not None:
+                restore = self.saver['restore']
+            self.saver = {'paths': paths, 'index': 0, 'turn': 0, 'timer': 0,
+                          'hold_ms': request['hold_ms'], 'fade_ms': request['fade_ms'],
+                          'zoom': request['zoom'], 'restore': restore}
+            self.begin_drift()
+
+        def begin_drift(self):
+            state = self.saver
+            if state is None:
+                return
+            direction = fade.DRIFT_DIRECTIONS[state['turn'] % len(fade.DRIFT_DIRECTIONS)]
+            for canvas in self.canvases.values():
+                canvas.start_drift(state['zoom'], direction, state['hold_ms'])
+            if state['timer']:
+                GLib.source_remove(state['timer'])
+            state['timer'] = GLib.timeout_add(state['hold_ms'], self.next_painting)
+
+        def next_painting(self):
+            state = self.saver
+            if state is None:
+                return False
+            state['timer'] = 0
+            state['turn'] += 1
+            if state['paths']:
+                path = state['paths'][state['index'] % len(state['paths'])]
+                state['index'] += 1
+                self.queue.append({'action': 'set', 'id': 'screensaver', 'path': path,
+                                   'duration_ms': state['fade_ms'], 'origin': None,
+                                   'address': None})
+                self.process_next()
+            self.begin_drift()
+            return False
+
+        def stop_screensaver(self, restore=True):
+            """Glide back to rest and, when asked, to the painting we interrupted."""
+            state, self.saver = self.saver, None
+            if state is None:
+                return
+            if state['timer']:
+                GLib.source_remove(state['timer'])
+            for canvas in self.canvases.values():
+                canvas.release_drift(fade.SCREENSAVER_RETURN_MS)
+            if not restore:
+                return
+            for path in {value for value in state['restore'].values() if value}:
+                self.queue.append({'action': 'set', 'id': 'screensaver-restore', 'path': path,
+                                   'duration_ms': fade.SCREENSAVER_RETURN_MS, 'origin': None,
+                                   'address': None})
+            self.process_next()
 
         # Monitors -----------------------------------------------------------
         def monitors(self):
@@ -445,6 +645,8 @@ def daemon():
             token = message['id']
             if message['action'] == 'status':
                 self.reply(address, {'ok': True, 'id': token, 'state': 'status', 'pid': os.getpid(),
+                                     'screensaver': self.saver is not None,
+                                     'breath_target': round(self.breath_target, 5),
                                      'outputs': self.status()})
             elif message['action'] == 'raise':
                 self.reply(address, {'ok': True, 'id': token, 'state': 'accepted'})
@@ -452,9 +654,20 @@ def daemon():
                                   done=lambda: self.reply(address, {'ok': True, 'id': token,
                                                                     'state': 'settled'}))
             elif message['action'] == 'quit':
+                self.stop_screensaver(restore=False)
                 self.reply(address, {'ok': True, 'id': token, 'state': 'settled'})
                 Gtk.main_quit()
+            elif message['action'] == 'screensaver':
+                if message['enable']:
+                    self.start_screensaver(message)
+                else:
+                    self.stop_screensaver()
+                self.reply(address, {'ok': True, 'id': token, 'state': 'settled',
+                                     'screensaver': self.saver is not None})
             else:
+                # A deliberate change of painting ends the idle gallery; the
+                # request itself becomes what is on screen, so nothing is restored.
+                self.stop_screensaver(restore=False)
                 self.reply(address, {'ok': True, 'id': token, 'state': 'accepted'})
                 message['address'] = address
                 self.queue.append(message)
@@ -463,7 +676,10 @@ def daemon():
 
         def status(self):
             return {name: {'path': canvas.current_path, 'fading': canvas.fade is not None,
-                           'target': canvas.target_path(), 'size': list(canvas.size or ())}
+                           'target': canvas.target_path(), 'size': list(canvas.size or ()),
+                           'breath': round(canvas.breath.value, 5),
+                           'drifting': canvas.drift is not None,
+                           'transform': [round(value, 4) for value in canvas.transform()]}
                     for name, canvas in self.canvases.items()}
 
         def ready_canvases(self):
@@ -672,6 +888,12 @@ def daemon():
             return True
 
         def close(self):
+            if self.saver is not None and self.saver['timer']:
+                GLib.source_remove(self.saver['timer'])
+            self.saver = None
+            if self.air_source:
+                GLib.source_remove(self.air_source)
+                self.air_source = 0
             GLib.source_remove(self.control_watch)
             self.control.close()
             self.control_path.unlink(missing_ok=True)
@@ -706,6 +928,13 @@ def main():
     commands.add_parser('status', help='print the daemon state as JSON')
     commands.add_parser('raise', help='re-create the surfaces above a respawned swaybg')
     commands.add_parser('quit', help='stop the daemon for this session')
+    saver = commands.add_parser('screensaver', help='drift and cycle paintings while idle')
+    saver.add_argument('state', choices=('start', 'stop'))
+    saver.add_argument('paths', nargs='*', type=Path, help='paintings to cycle through')
+    saver.add_argument('--hold', type=int, default=None, metavar='MS',
+                       help='time on each painting, including its drift')
+    saver.add_argument('--fade', type=int, default=None, metavar='MS')
+    saver.add_argument('--zoom', type=float, default=None)
     args = parser.parse_args()
     if args.command == 'daemon':
         return daemon()
@@ -716,6 +945,11 @@ def main():
         origin = fade.parse_origin(args.origin) if args.origin else None
         result = fade.crossfade(str(path), args.duration, origin,
                                 settle_timeout=0 if args.no_wait else None)
+    elif args.command == 'screensaver':
+        paths = [str(item.resolve()) for item in args.paths]
+        result = fade.request(fade.encode_screensaver(
+            args.state == 'start', paths, hold_ms=args.hold, fade_ms=args.fade,
+            zoom=args.zoom), ack_timeout=3)
     else:
         result = fade.request(fade.encode_request(args.command), ack_timeout=3,
                               settle_timeout=5 if args.command == 'raise' else None)

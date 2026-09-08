@@ -14,6 +14,7 @@ import threading
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import air
 from decoration import action_command, load_settings, save_settings, vertical_title
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
@@ -193,6 +194,15 @@ def daemon():
             self.provider = Gtk.CssProvider()
             Gtk.StyleContext.add_provider_for_screen(self.window.get_screen(), self.provider,
                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            # The accent wash behind the brand button follows the keyboard's
+            # breath while you type. It rides its own provider above the styled
+            # one so a pulse never reparses the whole caption stylesheet.
+            self.breath_provider = Gtk.CssProvider()
+            Gtk.StyleContext.add_provider_for_screen(self.window.get_screen(),
+                                                    self.breath_provider, 900)
+            self.breath = air.Smoother(air.CAPTION_LOW, response=0.09, tolerance=1e-4)
+            self.breath_painted = None
+            self.accent = None
             self.previous_style = None
             self.previous_display = None
 
@@ -255,10 +265,24 @@ def daemon():
                     self.motion_rect, self.motion_velocity, self.motion_target,
                     elapsed, response=0.045)
                 self.render_geometry()
+            if not self.breathe(elapsed):
+                settled = False
             if settled and self.alpha == target_alpha:
                 self.tick_id = 0
                 return False
             return True
+
+        def breathe(self, elapsed):
+            """Follow the shared breath; True once the accent has come to rest."""
+            value, settled = self.breath.advance(breath_state['target'], elapsed)
+            if self.accent is not None:
+                painted = air.quantise(value)
+                if painted != self.breath_painted:
+                    self.breath_painted = painted
+                    self.breath_provider.load_from_data(
+                        f'#{self.css_name} .brand {{ background: alpha({self.accent}, '
+                        f'{painted:.3f}); }}'.encode())
+            return settled and breath_state['target'] == air.CAPTION_LOW
 
         def retire(self):
             if not self.animations:
@@ -394,6 +418,9 @@ def daemon():
                 return
             family, size, colors, settings = style
             family = family.replace('\\', '\\\\').replace('"', '\\"')
+            if colors['accent'] != self.accent:
+                self.accent = colors['accent']
+                self.breath_painted = None
             opacity = settings['opacity']
             radius = 0 if square else settings['corner_radius']
             # Ghost Observatory captions: roomier padding, medium-weight title.
@@ -523,6 +550,8 @@ def daemon():
                 self.menu.destroy()
                 self.menu = None
             Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(),
+                                                        self.breath_provider)
             self.window.destroy()
 
         def handoff(self, placement):
@@ -551,6 +580,10 @@ def daemon():
 
     captions = {}
     retired = set()
+    # One breath for every caption on every output, polled in one place.
+    air_watch = air.AirWatcher()
+    breath_state = {'target': air.CAPTION_LOW, 'interval': 400,
+                    'allow': air.read_preferences().get('caption', True)}
     last_tree = {}
     stop = threading.Event()
     style = appearance()
@@ -630,6 +663,25 @@ def daemon():
         apply(None)
         return True
 
+    def follow_breath():
+        """Track the keyboard's air; only the keystroke breath moves the caption."""
+        reading = air_watch.poll() if breath_state['allow'] else None
+        target = air.caption_alpha(reading)
+        if target != breath_state['target']:
+            breath_state['target'] = target
+            for caption in tuple(captions.values()) + tuple(retired):
+                caption.animate()
+        interval = 50 if reading is not None else 400
+        if interval != breath_state['interval']:
+            breath_state['interval'] = interval
+            GLib.timeout_add(interval, follow_breath)
+            return False
+        return True
+
+    def refresh_breath_preference():
+        breath_state['allow'] = air.read_preferences().get('caption', True)
+        return True
+
     def quit_daemon():
         stop.set()
         Gtk.main_quit()
@@ -639,6 +691,8 @@ def daemon():
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
     GLib.timeout_add(750, refresh_appearance)
+    GLib.timeout_add(breath_state['interval'], follow_breath)
+    GLib.timeout_add_seconds(5, refresh_breath_preference)
     watcher.start()
     from ui_priority import request_priority
     request_priority()

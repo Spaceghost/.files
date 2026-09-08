@@ -69,6 +69,11 @@ AIR_SMOOTHING = 0.5
 AIR_PERIOD_REST = 7.0
 AIR_PERIOD_FULL = 3.0
 BREATH_FLOOR = 0.12
+# The breath is published for the rest of the desktop: the painting swells with
+# it and the caption's accent follows it. Twenty times a second is finer than
+# the eye needs and cheap on a tmpfs; readers smooth it to their own frame rate.
+AIR_FILENAME = 'air.json'
+AIR_PUBLISH_INTERVAL = 0.05
 
 
 def osd_shown(percent):
@@ -188,6 +193,7 @@ class KeyboardBacklight:
         self.mode_file = self.state_dir / 'keyboard-backlight-mode'
         self.owner_file = self.runtime_dir / 'keyboard-backlight-owner'
         self.overlay_file = self.runtime_dir / 'keyboard-backlight-overlay'
+        self.air_file = self.runtime_dir / AIR_FILENAME
         if sensor is None:
             self.sensor = _discover_sensor()
         else:
@@ -271,6 +277,21 @@ class KeyboardBacklight:
     def clear_overlay(self):
         with contextlib.suppress(FileNotFoundError):
             self.overlay_file.unlink()
+
+    def publish_air(self, mode, volume, phase, breath, tempo):
+        """Share the current breath with the painting and the caption strip.
+
+        A record is written only while the light is actually breathing; one
+        final record with an empty volume tells readers to settle and stop.
+        """
+        self.save(self.air_file, json.dumps({
+            'mode': mode,
+            'volume': round(_clamp(volume, 0.0, 1.0), 4),
+            'phase': round(phase % 1.0, 4),
+            'breath': round(_clamp(breath, 0.0, 1.0), 4),
+            'tempo_seconds': round(max(0.1, tempo), 3),
+            'updated': round(time.time(), 3),
+        }, sort_keys=True))
 
     def running(self):
         with (self.runtime_dir / 'keyboard-backlight.run.lock').open('a') as lock:
@@ -573,6 +594,8 @@ class KeyboardBacklight:
             wpm_samples = deque()
             ambient = None
             lung = None
+            next_air = 0.0
+            air_live = False
             try:
                 with self.locked():
                     try:
@@ -610,6 +633,9 @@ class KeyboardBacklight:
                             # mode resumes untouched once `restore` clears the overlay.
                             current_mode = 'overlay'
                         finished = False
+                        # Only a breathing frame publishes air; the typing and
+                        # ambient modes leave the painting and caption still.
+                        air = None
 
                         if mode != current_mode:
                             mode = current_mode
@@ -631,9 +657,16 @@ class KeyboardBacklight:
                         if mode == 'overlay':
                             peak = level if level else max(1, round(maximum * 0.25))
                             value, finished = _last_breath_value(overlay, peak, now)
+                            # The lungs empty as the light falls, so the painting
+                            # settles back to rest along with the keyboard.
+                            air = ('last-breath', value / peak, 0.0, value / peak,
+                                   LAST_BREATH_RISE + LAST_BREATH_FALL)
                         elif mode == 'breathing':
-                            wave = (1 + math.cos(2 * math.pi * (now - started) / PERIOD)) / 2
-                            value = max(1, min(maximum, round(level * (0.12 + 0.88 * wave))))
+                            cycle = (now - started) / PERIOD
+                            wave = (1 + math.cos(2 * math.pi * cycle)) / 2
+                            curve = 0.12 + 0.88 * wave
+                            value = max(1, min(maximum, round(level * curve)))
+                            air = ('breathing', 1.0, cycle, curve, PERIOD)
                         elif mode == 'ambient':
                             if ambient is None:
                                 origin = previous if previous is not None else self.read('brightness')
@@ -688,6 +721,8 @@ class KeyboardBacklight:
                             wave = (1 - math.cos(2 * math.pi * lung['phase'])) / 2
                             floor = level * BREATH_FLOOR
                             value = max(1, min(maximum, round(floor + lung['air'] * (level - floor) * wave)))
+                            air = ('breathe-air', lung['air'], lung['phase'],
+                                   BREATH_FLOOR + lung['air'] * (1 - BREATH_FLOOR) * wave, period)
                         else:
                             if poller is None:
                                 poller, handles = self._open_key_devices()
@@ -745,6 +780,14 @@ class KeyboardBacklight:
                         if value != previous:
                             self.write(value)
                             previous = value
+                        if air is None or (air[0] == 'last-breath' and finished):
+                            if air_live:
+                                self.publish_air('off', 0.0, 0.0, 0.0, 0.0)
+                                air_live = False
+                        elif now >= next_air:
+                            self.publish_air(*air)
+                            air_live = True
+                            next_air = now + AIR_PUBLISH_INTERVAL
                     if finished:
                         # Nothing is moving: hold the level and only watch for changes.
                         next_frame = time.monotonic() + OVERLAY_IDLE_WAIT
@@ -752,6 +795,10 @@ class KeyboardBacklight:
                         next_frame += INTERVAL
                     stop.wait(max(0, next_frame - time.monotonic()))
             finally:
+                if air_live:
+                    # However this worker ends, the desktop is told to settle.
+                    with contextlib.suppress(OSError):
+                        self.publish_air('off', 0.0, 0.0, 0.0, 0.0)
                 if poller is not None:
                     for fd in list(handles):
                         with contextlib.suppress(OSError):

@@ -1,0 +1,161 @@
+{
+  "part": "breath",
+  "checks": [
+    {
+      "name": "the painting starts untouched",
+      "passed": true,
+      "detail": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "full lungs swell the painting",
+      "passed": true,
+      "detail": [
+        1.018,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "the swell keeps to its ceiling",
+      "passed": true,
+      "detail": [
+        1.018,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "resting lungs swell it only a little",
+      "passed": true,
+      "detail": [
+        1.006,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "the breath settles back to the untouched painting",
+      "passed": true,
+      "detail": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "the preference holds the painting still",
+      "passed": true,
+      "detail": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "name": "01-at-rest",
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "02-full-lungs",
+      "transform": [
+        1.018,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "03-resting-lungs",
+      "transform": [
+        1.006,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "04-settled",
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "name": "05-preference-off",
+      "transform": [
+        1.0,
+        0.0,
+        0.0
+      ]
+    }
+  ],
+  "daemon_sha256": "913659f342c604542ed4314e94c2ec7ace6337ccf41f28595c4c3d485e8df97f",
+  "air_sha256": "0a439af573bef220b9bda61c5aaade158b2c540ca17cde5073ca318c40afb22f",
+  "renderer": "pixman (headless); no compositor blur in these frames",
+  "paintings": [
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-0986082ea557.png",
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-alpine-rescue-ce02c5a83434.png",
+    "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-american-gothic-fd04831dfb5e.png"
+  ],
+  "status": "passed",
+  "failures": [],
+  "caption": {
+    "checks": [
+      {
+        "name": "the caption brightens with the breath",
+        "passed": true,
+        "detail": 0.2668
+      },
+      {
+        "name": "the plain six-second breath leaves the caption alone",
+        "passed": true,
+        "detail": [
+          44.359,
+          44.232,
+          43.91
+        ]
+      },
+      {
+        "name": "the caption settles back when the breathing stops",
+        "passed": true,
+        "detail": [
+          44.359,
+          44.232,
+          43.91
+        ]
+      }
+    ],
+    "caption_strip_rgb": {
+      "empty": [
+        44.35897727272727,
+        44.23159090909091,
+        43.91020833333334
+      ],
+      "full": [
+        44.51380681818182,
+        44.341742424242426,
+        43.90842803030303
+      ],
+      "plain": [
+        44.35897727272727,
+        44.23159090909091,
+        43.91020833333334
+      ],
+      "settled": [
+        44.35897727272727,
+        44.23159090909091,
+        43.91020833333334
+      ]
+    },
+    "frames": []
+  }
+}
