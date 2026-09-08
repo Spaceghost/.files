@@ -122,8 +122,10 @@ class Splash(unittest.TestCase):
         self.assertEqual(len(cache), 1)
         name, body = cache[0]
         self.assertTrue(name.endswith('.sixel'))
-        self.assertTrue(body.startswith(b'\x1bPq"1;1;') and body.endswith(b'\x1b\\'))
-        self.assertIn(b'#215;2;100;100;100', body)
+        # libsixel or the numpy fallback: a DCS sixel stream with raster attributes.
+        self.assertTrue(body.startswith(b'\x1bP') and body.endswith(b'\x1b\\'))
+        self.assertRegex(body, rb'q"1;1;\d+;\d+')
+        self.assertIn(b'#', body)
         self.assertIn(b'-', body)
         # The cache key depends on the painting bytes, logo cells and cell size only.
         again, cache_again = self.run_splash({'OLDBOOK_SPLASH_LOGO': 'sixel'}, tiny_png(24, 12))

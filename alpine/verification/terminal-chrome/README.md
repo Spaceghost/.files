@@ -10,7 +10,7 @@ cell size reported by the terminal.
 | File | What it shows |
 | --- | --- |
 | `splash-ghostty-kitty.png` | `oldbook-splash` in Ghostty with the live config: the painting through the kitty *file* medium, Gruvbox keys, Fossil branch, painting title and Scripture rows; both shaders loaded. |
-| `splash-foot-sixel.png` | The same splash in Foot through the cached numpy sixel encoder (216-colour cube, ordered dithering). |
+| `splash-foot-sixel.png` | The same splash in Foot through the numpy fallback sixel encoder (216-colour cube, ordered dithering); the shipped helper prefers the packaged libsixel, which renders a median-cut palette and was confirmed live on the 2× panel. |
 | `ghostty-cursor-smear-slowed.png` | `cursor-smear.glsl` with `DURATION` raised to 8 s for the capture, two seconds after the cursor jumped from the bottom-left to row 3, column 44: the tail has retreated toward the cursor. The shipped shader fades in 150 ms. |
 | `neovim-chrome-foot.png` | Neovim with two vertical splits: winbar file names, thin `▏` separator, and the statusline with mode, file, Fossil branch, filetype and position blocks. |
 

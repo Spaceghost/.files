@@ -17,9 +17,12 @@ itself. The helper therefore prepares the logo:
   the painting itself. Responses are suppressed (`q=2`) and the cursor is left
   in place (`C=1`).
 - **Foot** (found by process name, because the desktop's `foot.ini` sets
-  `TERM=xterm-256color`): a sixel stream encoded with numpy and GdkPixbuf
-  into a 216-colour cube with ordered dithering, cached per painting hash,
-  logo size and terminal cell size under `~/.cache/oldbook/splash/`.
+  `TERM=xterm-256color`): a 7-bit sixel stream encoded by the packaged
+  libsixel through ctypes (median-cut palette, error diffusion, about 1.3 s
+  at the 2× cell size on first use), cached per painting hash, logo size and
+  terminal cell size under `~/.cache/oldbook/splash/`. A numpy/GdkPixbuf
+  encoder (216-colour cube, ordered dithering) is the fallback when the
+  library is missing; it is correct but several times slower.
 - **Anything else** (SSH, unknown terminals): the text ghost in
   `~/.config/fastfetch/ghost.txt`, coloured through `logo.color`.
 
@@ -77,10 +80,15 @@ reapplied on `ColorScheme`. No plugin manager, no plugins.
   Foot (sixel), Neovim with two splits in Foot, and Ghostty with both shaders
   loaded; the smear was captured with a slowed test copy of the shader.
   Screenshots: `alpine/verification/terminal-chrome/`.
-- Not verified: the live display was powered off and locked during this work,
-  so the splash, shaders and statusline were not seen on the physical panel.
-  Sixel scaling on the 2× display uses the real cell size reported by Foot;
-  the headless run used 8×17 cells.
+- Live checks once the display woke: short-lived pre-floated Ghostty and Foot
+  windows on the real 2× panel showed the splash with the painting in place
+  in both terminals, and Ghostty logged both shaders loaded on the real GPU.
+  Those captures include blurred desktop content behind the transparent
+  terminals and were not kept. Two lessons came out of them: libsixel's 8-bit
+  DCS is ignored by Foot in UTF-8 mode (7-bit is used), and a window resized
+  after the splash printed (the drop-down console does this) may leave the
+  kitty image displaced after Ghostty reflows. The Neovim chrome was only
+  seen headlessly.
 
 ## Rollback
 

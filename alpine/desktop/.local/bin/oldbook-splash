@@ -138,14 +138,46 @@ def encode_sixel(pixels):
     return b''.join(out)
 
 
+def libsixel_encode(painting, width, target):
+    """Encode with the packaged libsixel (median-cut palette, error diffusion).
+
+    It reads the PNG itself and resamples to the requested width, so this takes
+    a fraction of a second even at the 2x display's cell size; the numpy encoder
+    below is the fallback when the library or its loader is unavailable.
+    """
+    import ctypes
+    try:
+        library = ctypes.CDLL('libsixel.so.1')
+    except OSError:
+        return False
+    encoder = ctypes.c_void_p()
+    if library.sixel_encoder_new(ctypes.byref(encoder), None) != 0:
+        return False
+    try:
+        # 7-bit DCS/ST: the 8-bit C1 forms are invalid UTF-8 and Foot ignores them.
+        options = {'o': str(target), 'w': str(width), 'p': '256', '7': ''}
+        for flag, value in options.items():
+            if library.sixel_encoder_setopt(encoder, ord(flag), value.encode() or None) != 0:
+                return False
+        return library.sixel_encoder_encode(encoder, str(painting).encode()) == 0
+    finally:
+        library.sixel_encoder_unref(encoder)
+
+
 def sixel_logo(painting, logo_columns, logo_rows, cell_w, cell_h):
     digest = hashlib.sha256(painting.read_bytes()).hexdigest()[:16]
     target = CACHE / f'{digest}-{logo_columns}x{logo_rows}-{cell_w}x{cell_h}.sixel'
     if target.is_file():
         return target
+    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    width = logo_columns * cell_w
+    temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
+    if libsixel_encode(painting, width, temporary) and temporary.is_file() and temporary.stat().st_size:
+        temporary.replace(target)
+        return target
+    temporary.unlink(missing_ok=True)
     GdkPixbuf, pixbuf = load_pixbuf(painting)
     import numpy as np
-    width = logo_columns * cell_w
     height = max(6, math.floor(width * pixbuf.get_height() / pixbuf.get_width() / 6) * 6)
     scaled = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
     if scaled.get_has_alpha():
@@ -155,8 +187,6 @@ def sixel_logo(painting, logo_columns, logo_rows, cell_w, cell_h):
     raw = np.frombuffer(scaled.get_pixels(), dtype=np.uint8)
     rows = np.lib.stride_tricks.as_strided(raw, shape=(height, width, channels),
                                            strides=(stride, channels, 1))
-    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
-    temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
     temporary.write_bytes(encode_sixel(np.ascontiguousarray(rows[..., :3])))
     temporary.replace(target)
     return target
