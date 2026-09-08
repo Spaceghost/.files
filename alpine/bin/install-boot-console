@@ -7,16 +7,28 @@ Root actions, each backed up under /var/backups/alpine-rice/boot-console-*:
    GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub (idempotent: the managed
    tokens are replaced, every other token and line is kept).
 2. Install the versioned /etc/issue banner for the rescue gettys.
-3. Regenerate /boot/grub/grub.cfg into a temporary file, check it with
+3. Unless --skip-ghost: build /boot/initramfs-lts-ghost from the versioned
+   banner init (a copy of the installed mkinitfs init with a Gruvbox masthead
+   printed before the encrypted-root passphrase prompt), prove the archive
+   holds that init and the stock file set, and publish it as an additional,
+   non-default GRUB entry through a managed block in /etc/grub.d/40_custom.
+   /boot/initramfs-lts and the stock entry are never touched.
+4. Regenerate /boot/grub/grub.cfg into a temporary file, check it with
    grub-script-check, prove the stock entry still boots the same kernel,
-   initramfs, root and crypt parameters plus exactly the managed tokens, and
-   only then move it into place. Any mismatch restores this run's backups.
+   initramfs, root and crypt parameters plus exactly the managed tokens and
+   stays first, and only then move it into place. Any mismatch restores this
+   run's backups.
 
-`--dry-run` shows the planned edits without root. `--rollback DIR` restores the
-files recorded in a backup directory. A reboot is never performed here.
+`--dry-run` shows the planned edits without root. `--render-init` (as the
+user) refreshes the versioned banner init from the installed mkinitfs after a
+mkinitfs upgrade. `--remove-ghost` withdraws the banner entry and initramfs.
+`--rollback DIR` restores the files recorded in a backup directory. A reboot is
+never performed here.
 """
 import argparse
 import difflib
+import filecmp
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -31,10 +43,19 @@ import boot_console  # noqa: E402
 
 PALETTE = REPO / 'alpine/system/boot/console-palette.json'
 ISSUE_TEMPLATE = REPO / 'alpine/system/boot/issue.template'
+MKINITFS_SOURCES = REPO / 'alpine/system/mkinitfs'
+GHOST_INIT = MKINITFS_SOURCES / 'initramfs-init'
+STOCK_INIT_COPY = MKINITFS_SOURCES / 'initramfs-init.stock'
+STOCK_INIT_RECORD = MKINITFS_SOURCES / 'stock.json'
+GHOST_PATCH = MKINITFS_SOURCES / 'ghost-banner.patch'
+STOCK_INIT = Path('/usr/share/mkinitfs/initramfs-init')
 BACKUP_ROOT = Path('/var/backups/alpine-rice')
 GRUB_DEFAULT = Path('/etc/default/grub')
 GRUB_CFG = Path('/boot/grub/grub.cfg')
+GRUB_CUSTOM = Path('/etc/grub.d/40_custom')
 ISSUE = Path('/etc/issue')
+STOCK_INITRAMFS = Path('/boot/initramfs-lts')
+GHOST_INITRAMFS = Path('/boot/initramfs-lts-ghost')
 
 
 class Installer:
@@ -60,6 +81,12 @@ class Installer:
                                     str(path), str(path) + ' (new)')
         self.changes.append(''.join(diff) or 'replace %s' % path)
 
+    def save_previous(self, path):
+        saved = self.backup / path.relative_to('/')
+        saved.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(path, saved)
+        self.manifest['backed_up'].append(str(path))
+
     def write(self, path, data, mode):
         path = Path(path)
         before = path.read_bytes() if path.is_file() else None
@@ -69,10 +96,7 @@ class Installer:
         if self.dry_run:
             return True
         if before is not None:
-            saved = self.backup / path.relative_to('/')
-            saved.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(path, saved)
-            self.manifest['backed_up'].append(str(path))
+            self.save_previous(path)
         else:
             self.manifest['created'].append(str(path))
         temporary = path.with_name(path.name + '.oldbook-new')
@@ -82,6 +106,31 @@ class Installer:
         except OSError:
             pass  # FAT boot partitions ignore modes
         os.replace(temporary, path)
+        return True
+
+    def place(self, path, prepared):
+        """Move a prepared file into place with the same backup rules."""
+        path = Path(path)
+        if path.is_file() and filecmp.cmp(path, prepared, shallow=False):
+            prepared.unlink()
+            return False
+        self.changes.append(('replace %s' if path.exists() else 'create %s') % path)
+        if path.is_file():
+            self.save_previous(path)
+        else:
+            self.manifest['created'].append(str(path))
+        os.replace(prepared, path)
+        return True
+
+    def remove(self, path):
+        path = Path(path)
+        if not path.is_file():
+            return False
+        self.changes.append('remove %s' % path)
+        if self.dry_run:
+            return True
+        self.save_previous(path)
+        path.unlink()
         return True
 
     def restore_all(self):
@@ -110,6 +159,7 @@ def kernel_config(release):
 
 
 def run(command, **kwargs):
+    kwargs.setdefault('timeout', 600)
     return subprocess.run(command, check=True, text=True, capture_output=True, **kwargs)
 
 
@@ -118,6 +168,91 @@ def generate_grub_cfg(temporary):
     run(['grub-mkconfig', '-o', str(temporary)])
     run(['grub-script-check', str(temporary)])
     return temporary.read_text()
+
+
+def initramfs_listing(archive):
+    return run(['sh', '-c', 'gzip -dc "$1" | cpio -t --quiet', '_', str(archive)]).stdout
+
+
+def initramfs_member(archive, name):
+    return subprocess.run(['sh', '-c', 'gzip -dc "$1" | cpio -i --quiet --to-stdout "$2"', '_',
+                           str(archive), name], check=True, capture_output=True, timeout=600).stdout
+
+
+def render_init_sources():
+    """Refresh the versioned banner init from the installed mkinitfs (run as the user)."""
+    stock = STOCK_INIT.read_text()
+    patched = boot_console.patch_init(stock)
+    MKINITFS_SOURCES.mkdir(parents=True, exist_ok=True)
+    STOCK_INIT_COPY.write_text(stock)
+    GHOST_INIT.write_text(patched)
+    GHOST_INIT.chmod(0o755)
+    package = run(['apk', 'list', '-I', 'mkinitfs']).stdout.split()[0]
+    STOCK_INIT_RECORD.write_text(json.dumps({
+        'package': package,
+        'source': str(STOCK_INIT),
+        'sha256': hashlib.sha256(stock.encode()).hexdigest(),
+        'patched_sha256': hashlib.sha256(patched.encode()).hexdigest(),
+        'license': 'GPL-2.0-only (mkinitfs); the stock copy is kept so the banner patch reproduces offline',
+    }, indent=2) + '\n')
+    diff = subprocess.run(['diff', '-u', '--label', 'a/usr/share/mkinitfs/initramfs-init',
+                           '--label', 'b/usr/share/mkinitfs/initramfs-init',
+                           str(STOCK_INIT_COPY), str(GHOST_INIT)], capture_output=True, text=True)
+    GHOST_PATCH.write_text(diff.stdout)
+    run(['sh', '-n', str(GHOST_INIT)])
+    print(diff.stdout)
+    print('Rendered', GHOST_INIT, 'from', package)
+
+
+def check_ghost_sources():
+    if not GHOST_INIT.is_file():
+        raise RuntimeError('missing %s; run --render-init as the user first' % GHOST_INIT)
+    expected = boot_console.patch_init(STOCK_INIT.read_text())
+    if expected != GHOST_INIT.read_text():
+        raise RuntimeError('the versioned banner init no longer matches the installed mkinitfs init; '
+                           'run --render-init as the user, review ghost-banner.patch, commit, then rerun')
+
+
+def build_ghost_initramfs(installer, kernel, rebuild=False):
+    """Build, verify and place /boot/initramfs-lts-ghost. Returns a summary."""
+    check_ghost_sources()
+    if not Path('/lib/modules', kernel).is_dir():
+        raise RuntimeError('no modules directory for kernel ' + kernel)
+    if GHOST_INITRAMFS.is_file() and not rebuild:
+        # A previous build already carries this init for this kernel: keep the
+        # exact bytes instead of producing a new archive on every run.
+        try:
+            names = boot_console.parse_listing(initramfs_listing(GHOST_INITRAMFS))
+            current = initramfs_member(GHOST_INITRAMFS, 'init') == GHOST_INIT.read_bytes()
+        except subprocess.CalledProcessError:
+            names, current = set(), False
+        if current and any(name.startswith('usr/lib/modules/%s/' % kernel) for name in names):
+            return {'kernel': kernel, 'files': len(names), 'size': GHOST_INITRAMFS.stat().st_size,
+                    'sha256': hashlib.sha256(GHOST_INITRAMFS.read_bytes()).hexdigest(), 'reused': True}
+    prepared = GHOST_INITRAMFS.with_name(GHOST_INITRAMFS.name + '.oldbook-new')
+    prepared.unlink(missing_ok=True)
+    try:
+        run(['mkinitfs', '-i', str(GHOST_INIT), '-o', str(prepared), kernel])
+        member = initramfs_member(prepared, 'init')
+        if member != GHOST_INIT.read_bytes():
+            raise RuntimeError('the built initramfs does not carry the versioned banner init')
+        listing = initramfs_listing(prepared)
+        names = boot_console.parse_listing(listing)
+        if not any(name.startswith('usr/lib/modules/%s/' % kernel) for name in names):
+            raise RuntimeError('the built initramfs has no modules for kernel ' + kernel)
+        comparison = boot_console.compare_listings(initramfs_listing(STOCK_INITRAMFS), listing) \
+            if STOCK_INITRAMFS.is_file() else {'missing': [], 'extra': []}
+        summary = {'kernel': kernel, 'files': len(names), 'size': prepared.stat().st_size,
+                   'sha256': hashlib.sha256(prepared.read_bytes()).hexdigest(),
+                   'missing_from_stock_set': comparison['missing'], 'beyond_stock_set': comparison['extra']}
+        if installer.dry_run:
+            prepared.unlink()
+        else:
+            installer.place(GHOST_INITRAMFS, prepared)
+        return summary
+    except BaseException:
+        prepared.unlink(missing_ok=True)
+        raise
 
 
 def rollback(directory):
@@ -134,9 +269,17 @@ def rollback(directory):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--dry-run', action='store_true', help='print the planned edits; write nothing')
+    parser.add_argument('--skip-ghost', action='store_true', help='leave the banner initramfs and its entry alone')
+    parser.add_argument('--remove-ghost', action='store_true', help='withdraw the banner entry and initramfs')
+    parser.add_argument('--rebuild-ghost', action='store_true', help='rebuild the banner initramfs even if current')
+    parser.add_argument('--render-init', action='store_true',
+                        help='refresh alpine/system/mkinitfs from the installed mkinitfs init (no root)')
     parser.add_argument('--rollback', type=Path, metavar='DIR', help='restore the files recorded in DIR')
-    parser.add_argument('--kernel', default=os.uname().release, help='kernel release to check the font against')
+    parser.add_argument('--kernel', default=os.uname().release, help='kernel release for the font check and initramfs')
     args = parser.parse_args(argv)
+    if args.render_init:
+        render_init_sources()
+        return 0
     if not args.dry_run and os.geteuid() != 0:
         raise SystemExit('Run with doas to change the boot console (or use --dry-run).')
     if args.rollback:
@@ -154,19 +297,43 @@ def main(argv=None):
     installer = Installer(backup, dry_run=args.dry_run)
     previous_cfg = GRUB_CFG.read_text() if GRUB_CFG.is_file() else None
     temporary_cfg = GRUB_CFG.with_name('grub.cfg.oldbook-new')
+    ghost_summary = None
     try:
         grub_default = boot_console.rewrite_grub_default(GRUB_DEFAULT.read_text(), parameters)
         installer.write(GRUB_DEFAULT, grub_default.encode(), 0o644)
         installer.write(ISSUE, boot_console.render_issue(ISSUE_TEMPLATE.read_text()), 0o644)
+        custom = GRUB_CUSTOM.read_text()
+        if args.remove_ghost:
+            installer.write(GRUB_CUSTOM, boot_console.remove_custom_fragment(custom).encode(), 0o755)
+            installer.remove(GHOST_INITRAMFS)
+            ghost_expected = False
+        elif args.skip_ghost:
+            ghost_expected = boot_console.CUSTOM_BEGIN in custom
+        elif args.dry_run and os.geteuid() != 0:
+            check_ghost_sources()
+            installer.changes.append('build %s (needs root; skipped in this dry run)' % GHOST_INITRAMFS)
+            ghost_expected = True
+        else:
+            ghost_summary = build_ghost_initramfs(installer, args.kernel, rebuild=args.rebuild_ghost)
+            ghost_expected = True
         if args.dry_run:
             print('Kernel parameters:', ' '.join(parameters))
             print('\n'.join(installer.changes) or 'Nothing to change.')
+            if ghost_summary:
+                print('Ghost initramfs would be rebuilt:', json.dumps(ghost_summary, indent=2))
             print('grub.cfg regeneration and validation happen only in a real run.')
             return 0
         if previous_cfg is None:
             raise RuntimeError('no existing /boot/grub/grub.cfg to compare against')
         generated = generate_grub_cfg(temporary_cfg)
-        boot_console.validate_generated_cfg(previous_cfg, generated, parameters)
+        if ghost_expected and not args.skip_ghost:
+            entry = boot_console.ghost_menuentry(generated, str(STOCK_INITRAMFS).replace('/boot', '', 1),
+                                                 str(GHOST_INITRAMFS).replace('/boot', '', 1))
+            if installer.write(GRUB_CUSTOM, boot_console.render_custom_fragment(custom, entry).encode(), 0o755):
+                generated = generate_grub_cfg(temporary_cfg)
+        boot_console.validate_generated_cfg(
+            previous_cfg, generated, parameters,
+            ghost_initrd=str(GHOST_INITRAMFS).replace('/boot', '', 1) if ghost_expected else None)
         installer.write(GRUB_CFG, generated.encode(), 0o755)
     except BaseException:
         temporary_cfg.unlink(missing_ok=True)
@@ -178,6 +345,8 @@ def main(argv=None):
         installer.save_manifest()
     print('Kernel parameters:', ' '.join(parameters))
     print('\n'.join(installer.changes) or 'Boot console already installed; nothing changed.')
+    if ghost_summary:
+        print('Ghost initramfs:', json.dumps(ghost_summary, indent=2))
     if installer.manifest['backed_up'] or installer.manifest['created']:
         print('Backup:', backup)
     print('The palette and font take effect at the next boot; nothing was rebooted.')
@@ -187,7 +356,9 @@ def main(argv=None):
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError) as error:
+    except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
         detail = getattr(error, 'stderr', '') or ''
+        if isinstance(detail, bytes):
+            detail = detail.decode(errors='replace')
         print('install-boot-console: %s %s' % (error, detail.strip()), file=sys.stderr)
         sys.exit(1)

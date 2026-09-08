@@ -1,0 +1,16 @@
+--- a/usr/share/mkinitfs/initramfs-init
++++ b/usr/share/mkinitfs/initramfs-init
+@@ -789,6 +789,13 @@
+ # check if root=... was set
+ if [ -n "$KOPT_root" ]; then
+ 	# run nlplug-findfs before SINGLEMODE so we load keyboard drivers
++	# Oldbook: a Gruvbox masthead on the console before the encrypted-root
++	# passphrase prompt that nlplug-findfs/cryptsetup print below. Sixteen-colour
++	# escapes only, so the vt.default_* kernel palette supplies the actual tones.
++	if [ -n "$KOPT_cryptroot" ]; then
++		printf '\n  \033[1;93mGHOST PLANET\033[0m  \033[37mOldbook - Alpine Linux\033[0m\n'
++		printf '  \033[97mEncrypted root.\033[0m \033[37mEnter the passphrase to continue.\033[0m\n\n'
++	fi
+ 	ebegin "Mounting root"
+ 	# shellcheck disable=SC2086
+ 	$MOCK nlplug-findfs $cryptopts -p /sbin/mdev ${KOPT_debug_init:+-d} \

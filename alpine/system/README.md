@@ -35,10 +35,26 @@ its own backups and exits non-zero.
 
 ```sh
 alpine/bin/install-boot-console --dry-run          # preview, no root needed
-doas alpine/bin/install-boot-console               # install or re-apply
+doas alpine/bin/install-boot-console               # install or re-apply (builds the banner initramfs too)
+doas alpine/bin/install-boot-console --skip-ghost  # palette, font and getty banner only
+doas alpine/bin/install-boot-console --remove-ghost
 doas alpine/bin/install-boot-console --rollback /var/backups/alpine-rice/boot-console-<ns>
+alpine/bin/install-boot-console --render-init      # after a mkinitfs upgrade, as the user; review and commit
 python3 -m unittest alpine/tests/test_boot_console.py -v
 ```
+
+## Banner initramfs
+
+`alpine/system/mkinitfs/initramfs-init` is the installed mkinitfs init plus one
+guarded block that prints a Gruvbox masthead before the encrypted-root
+passphrase prompt. The installer builds it into `/boot/initramfs-lts-ghost`
+with `mkinitfs -i`, proves the archive carries that exact init and the kernel's
+modules, compares its file list with the stock archive, and publishes it as an
+additional GRUB entry derived from the stock entry (managed block in
+`/etc/grub.d/40_custom`). The stock entry stays first and default;
+`/boot/initramfs-lts` is never replaced. Select the entry from the one-second
+GRUB menu to test it. Rerun the installer after a kernel upgrade so the ghost
+archive matches the new modules. See `docs/superpowers/specs/2026-09-08-luks-prompt.md`.
 
 Nothing here reboots, switches VTs or loads a font into a live console. The
 visual result is only observable at the next boot.
