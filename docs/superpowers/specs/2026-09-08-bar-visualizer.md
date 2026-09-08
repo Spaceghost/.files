@@ -15,6 +15,11 @@ Waybar 0.15 on this desktop is not linked against libcava, so the module is a
   cava is terminated so the module costs nothing, and the module shows the
   `silent` class with empty text. Half a second of all-zero frames while a
   player is playing also collapses it, so gaps between tracks do not jitter.
+- The feeder cannot outlive its bar: it asks the kernel for SIGTERM when its
+  parent dies (`PR_SET_PDEATHSIG`), polls the module pipe once a second so a
+  closed reader ends a silent feeder too, and its signal handler only unwinds
+  so cleanup never runs inside an interrupted wait (a headless run had left one
+  orphan blocked on a lock before this).
 - No clicks, no tooltip: BAR-LAYOUT's music controls keep their actions and
   the meter sits after `mpris#next`. CSS colours it aqua like `#mpris`, and
   `.silent` drops padding and margin so the centre group does not reserve space.

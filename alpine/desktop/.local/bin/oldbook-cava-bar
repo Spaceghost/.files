@@ -161,15 +161,27 @@ class Bar:
             self.emit(text, 'playing')
 
 
+def follow_parent():
+    """Ask the kernel for SIGTERM if Waybar dies, so no feeder outlives its bar."""
+    try:
+        import ctypes
+        libc = ctypes.CDLL(None, use_errno=True)
+        libc.prctl(1, signal.SIGTERM, 0, 0, 0)  # PR_SET_PDEATHSIG
+    except (OSError, AttributeError):
+        pass
+
+
 def main():
     bar = Bar()
 
     def leave(*_):
-        bar.stop()
-        sys.exit(0)
+        # Only unwind here; the cleanup runs in the main loop's finally, never
+        # inside a handler that may have interrupted a wait or a write.
+        raise SystemExit(0)
 
     signal.signal(signal.SIGTERM, leave)
     signal.signal(signal.SIGINT, leave)
+    follow_parent()
     try:
         bar.run()
     except BrokenPipeError:
