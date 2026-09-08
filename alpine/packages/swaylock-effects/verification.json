@@ -1,0 +1,39 @@
+{
+  "package": "oldbook-swaylock-effects-1.7.0.0-r0",
+  "built_utc": "2026-09-08T09:42Z",
+  "builds": [
+    {
+      "work": "build1",
+      "apks": {
+        "oldbook-swaylock-effects-1.7.0.0-r0.apk": "53cc9309739616c81fc5a4220d6d4adf3129ec0471e3d586169a33e98158fabd",
+        "oldbook-swaylock-effects-doc-1.7.0.0-r0.apk": "106a07cc8a626d8c0c58a2d33f01836483ff875defcedf3793a1f6ce0c82f625"
+      }
+    },
+    {
+      "work": "build2",
+      "apks": {
+        "oldbook-swaylock-effects-1.7.0.0-r0.apk": "53cc9309739616c81fc5a4220d6d4adf3129ec0471e3d586169a33e98158fabd",
+        "oldbook-swaylock-effects-doc-1.7.0.0-r0.apk": "106a07cc8a626d8c0c58a2d33f01836483ff875defcedf3793a1f6ce0c82f625"
+      }
+    }
+  ],
+  "byte_identical": true,
+  "isolation": "abuild -d -K under doas unshare --net, as the desktop user, with the user abuild key",
+  "installed": {
+    "command": "doas apk add --no-network <apk>",
+    "files": [
+      "/usr/bin/swaylock-effects",
+      "/etc/pam.d/swaylock-effects"
+    ],
+    "stock_swaylock_retained": true,
+    "swaylockd_retained": true
+  },
+  "build_inputs_added": [
+    "linux-pam-dev"
+  ],
+  "patches": {
+    "0001-ready-fd.patch": "529d3b5d54a0105e021cde7778504f687a6c79c150d49dfec9d3462c4fa34aba",
+    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381"
+  },
+  "limits": "Package identity and coexistence proof only; the live lock screen was verified headlessly, see alpine/verification/lock-screen/."
+}

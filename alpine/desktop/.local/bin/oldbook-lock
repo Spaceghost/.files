@@ -1,10 +1,18 @@
 #!/usr/bin/env python3
-"""Wait for compositor lock readiness, serialized across all session callers."""
+"""Wait for compositor lock readiness, serialized across all session callers.
+
+Two lockers are supported. The Oldbook lock scene runs swaylock-effects, which
+alpine/packages/swaylock-effects installs beside stock swaylock, under the
+internal supervisor below. Stock swaylock under swaylockd remains the recovery
+route and is used automatically whenever the scene cannot be prepared or the
+effects locker never reports readiness.
+"""
 import fcntl
 import json
 import os
 from pathlib import Path
 import select
+import shutil
 import signal
 import stat
 import subprocess
@@ -13,6 +21,11 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
 from overlay_theme import THEMES, read_palette
+
+STOCK_SUPERVISOR = 'swaylockd'
+EFFECTS_LOCKER = 'swaylock-effects'
+FIRST_RUN_OPTIONS = {'-R': 1, '--ready-fd': 1, '--fade-in': 1, '--screenshots': 0, '-S': 0}
+MAX_RESTARTS = 5
 
 
 def private_directory(path):
@@ -59,6 +72,7 @@ def ready_process(record, compositor):
 
 
 def lock_arguments(ready_fd):
+    """Stock swaylock: the current painting and a palette ring; the recovery route."""
     wallpaper = Path.home() / '.local/share/oldbook/current-wallpaper.png'
     if not wallpaper.is_file():
         wallpaper = Path.home() / '.local/share/oldbook/wallpaper.png'
@@ -92,7 +106,83 @@ def lock_arguments(ready_fd):
                    else ['-c', palette['background'].lstrip('#')])
 
 
-def acquire_lock(runtime, command='swaylockd', timeout=10):
+def effects_arguments(ready_fd, runtime):
+    """The Oldbook scene: blurred painting, caption card, clock and idle-invisible ring."""
+    import lock_scene
+    palette = read_palette(THEMES)
+    geometry = lock_scene.output_geometry()
+    return lock_scene.scene_arguments(ready_fd, palette, geometry, runtime)
+
+
+def select_backend():
+    choice = os.environ.get('OLDBOOK_LOCK_BACKEND', 'auto')
+    if choice == 'auto':
+        return 'effects' if shutil.which(EFFECTS_LOCKER) else 'stock'
+    return choice if choice in ('stock', 'effects') else 'stock'
+
+
+def launchers(runtime, command=None):
+    """Ordered (label, argv builder) pairs; a later entry recovers an earlier failure."""
+    if command is not None:
+        return [(Path(command).name, lambda fd: [command] + lock_arguments(fd))]
+    stock = (STOCK_SUPERVISOR, lambda fd: [STOCK_SUPERVISOR] + lock_arguments(fd))
+    if select_backend() != 'effects':
+        return [stock]
+    effects = (EFFECTS_LOCKER, lambda fd: [sys.executable, os.path.realpath(__file__), 'supervise', '--',
+                                           EFFECTS_LOCKER] + effects_arguments(fd, runtime))
+    return [effects, stock]
+
+
+def launch_until_ready(label, build, directory, record, compositor, runtime, timeout):
+    deadline = time.monotonic() + timeout
+    read_fd, write_fd = os.pipe()
+    process = None
+    try:
+        # Keep the supervisor in the foreground so its lifetime is identifiable.
+        # A process name alone never proves a locked surface.
+        argv = build(write_fd)
+        process = subprocess.Popen(argv, pass_fds=(write_fd,), start_new_session=True,
+                                   stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        os.close(write_fd)
+        write_fd = -1
+        while time.monotonic() < deadline:
+            if process.poll() is not None:
+                raise RuntimeError(f'{label} exited before lock readiness')
+            readable, _, _ = select.select([read_fd], [], [], min(0.1, max(0, deadline - time.monotonic())))
+            if readable:
+                if not os.read(read_fd, 1):
+                    raise RuntimeError(f'{label} closed its readiness pipe without locking')
+                identity = process_identity(process.pid)
+                if identity is None or process.poll() is not None:
+                    raise RuntimeError('Lock process disappeared during readiness')
+                if compositor_identity(runtime) != compositor:
+                    raise RuntimeError('Compositor changed during lock acquisition')
+                temporary = directory / f'ready.{os.getpid()}.tmp'
+                fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                with os.fdopen(fd, 'w') as stream:
+                    json.dump({'process': identity, 'compositor': compositor, 'locker': label}, stream)
+                    stream.write('\n')
+                temporary.replace(record)
+                return
+        raise RuntimeError(f'{label} did not report readiness within the deadline')
+    except BaseException:
+        if process is not None and process.poll() is None:
+            # swaylockd blocks signals and can restart a terminated child; the
+            # internal supervisor ignores them. Kill only this launch's group.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            process.wait(timeout=2)
+        raise
+    finally:
+        os.close(read_fd)
+        if write_fd >= 0:
+            os.close(write_fd)
+
+
+def acquire_lock(runtime, command=None, timeout=10):
     private_directory(runtime)
     directory = runtime / 'oldbook-screen-lock'
     private_directory(directory)
@@ -113,63 +203,100 @@ def acquire_lock(runtime, command='swaylockd', timeout=10):
         if ready_process(record, compositor):
             return
         record.unlink(missing_ok=True)
-        read_fd, write_fd = os.pipe()
-        process = None
-        try:
-            # Keep swaylockd in the foreground so its supervised process lifetime
-            # is identifiable. A process name alone never proves a locked surface.
-            process = subprocess.Popen([command] + lock_arguments(write_fd),
-                                       pass_fds=(write_fd,), start_new_session=True,
-                                       stdin=subprocess.DEVNULL,
-                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            os.close(write_fd)
-            write_fd = -1
-            while time.monotonic() < deadline:
-                if process.poll() is not None:
-                    raise RuntimeError('swaylockd exited before lock readiness')
-                readable, _, _ = select.select([read_fd], [], [], min(0.1, max(0, deadline - time.monotonic())))
-                if readable:
-                    if not os.read(read_fd, 1):
-                        raise RuntimeError('swaylockd closed its readiness pipe without locking')
-                    identity = process_identity(process.pid)
-                    if identity is None or process.poll() is not None:
-                        raise RuntimeError('Lock process disappeared during readiness')
-                    if compositor_identity(runtime) != compositor:
-                        raise RuntimeError('Compositor changed during lock acquisition')
-                    temporary = directory / f'ready.{os.getpid()}.tmp'
-                    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-                    with os.fdopen(fd, 'w') as stream:
-                        json.dump({'process': identity, 'compositor': compositor}, stream)
-                        stream.write('\n')
-                    temporary.replace(record)
-                    return
-            raise RuntimeError('swaylockd did not report readiness within the deadline')
-        except BaseException:
-            if process is not None and process.poll() is None:
-                # swaylockd blocks signals and can restart a terminated child.
-                # Kill only this failed launch's separate process group.
-                try:
-                    os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-                process.wait(timeout=2)
-            raise
-        finally:
-            os.close(read_fd)
-            if write_fd >= 0:
-                os.close(write_fd)
+        failures = []
+        for label, build in launchers(runtime, command):
+            try:
+                launch_until_ready(label, build, directory, record, compositor, runtime, timeout)
+                return
+            except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+                failures.append(f'{label}: {error}')
+                print(f'oldbook-lock: {label} failed ({error}); trying the next locker', file=sys.stderr)
+        raise RuntimeError('; '.join(failures))
 
 
-def main():
+def strip_first_run_options(argv):
+    """Restarts rejoin an already locked session: no readiness pipe, no dissolve."""
+    result = []
+    skip = 0
+    for item in argv:
+        if skip:
+            skip -= 1
+            continue
+        if item in FIRST_RUN_OPTIONS:
+            skip = FIRST_RUN_OPTIONS[item]
+            continue
+        result.append(item)
+    return result
+
+
+def supervise(argv):
+    """Keep the locker alive across crashes, like swaylockd; exit with its final status."""
+    if argv[:1] == ['--']:
+        argv = argv[1:]
+    if not argv:
+        raise RuntimeError('supervise needs a locker command')
+    for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP, signal.SIGQUIT):
+        signal.signal(signum, signal.SIG_IGN)
+    ready_fd = None
+    for option in ('-R', '--ready-fd'):
+        if option in argv:
+            ready_fd = int(argv[argv.index(option) + 1])
+    log_path = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'oldbook/lock.log'
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log = open(log_path, 'a')
+    except OSError:
+        log = open(os.devnull, 'a')
+    restarts = 0
+    first = True
+    with log:
+        while True:
+            command = argv if first else strip_first_run_options(argv)
+            pass_fds = (ready_fd,) if first and ready_fd is not None else ()
+            try:
+                child = subprocess.Popen(command, pass_fds=pass_fds, stdin=subprocess.DEVNULL,
+                                         stdout=log, stderr=log)
+            except OSError as error:
+                print(f'oldbook-lock supervisor: cannot start {command[0]}: {error}', file=log, flush=True)
+                return 1
+            if first and ready_fd is not None:
+                os.close(ready_fd)
+            first = False
+            code = child.wait()
+            if code >= 0:
+                return code
+            restarts += 1
+            print(f'oldbook-lock supervisor: {command[0]} terminated by signal {-code}; '
+                  f'restart {restarts}/{MAX_RESTARTS}', file=log, flush=True)
+            if restarts > MAX_RESTARTS:
+                return 1
+
+
+def main(argv):
+    if argv[:1] == ['supervise']:
+        return supervise(argv[1:])
     runtime = os.environ.get('XDG_RUNTIME_DIR')
     if not runtime:
         raise RuntimeError('XDG_RUNTIME_DIR is required for safe session locking')
+    if argv[:1] == ['prerender']:
+        import lock_scene
+        painting = lock_scene.current_painting()
+        if painting is None:
+            raise RuntimeError('No current painting to prerender')
+        print(lock_scene.render_background(painting, lock_scene.output_geometry(), read_palette(THEMES)))
+        return 0
+    if argv[:1] == ['arguments']:
+        print('\n'.join(effects_arguments(None, Path(runtime))))
+        return 0
+    if argv:
+        raise RuntimeError('usage: oldbook-lock [prerender|arguments|supervise -- COMMAND ...]')
     acquire_lock(Path(runtime))
+    return 0
 
 
 if __name__ == '__main__':
     try:
-        main()
+        sys.exit(main(sys.argv[1:]))
     except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
         print(f'oldbook-lock: {error}', file=sys.stderr)
         sys.exit(1)

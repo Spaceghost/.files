@@ -1,0 +1,43 @@
+{
+  "name": "oldbook-swaylock-effects",
+  "version": "1.7.0.0",
+  "release": 0,
+  "source_date_epoch": 1788850800,
+  "upstream": "https://github.com/jirutka/swaylock-effects/archive/refs/tags/v1.7.0.0.tar.gz",
+  "source": {
+    "filename": "swaylock-effects-1.7.0.0.tar.gz",
+    "sha256": "e94d79e189602694bedfbafb553ce3c6c976426e16f76d93bf7e226dc2876eb6",
+    "artifact": "sha256/e94d79e189602694bedfbafb553ce3c6c976426e16f76d93bf7e226dc2876eb6/swaylock-effects-1.7.0.0.tar.gz"
+  },
+  "patches": [
+    "0001-ready-fd.patch",
+    "0002-idle-colors.patch"
+  ],
+  "packages": [
+    {
+      "filename": "oldbook-swaylock-effects-1.7.0.0-r0.apk",
+      "sha256": "53cc9309739616c81fc5a4220d6d4adf3129ec0471e3d586169a33e98158fabd",
+      "artifact": "sha256/53cc9309739616c81fc5a4220d6d4adf3129ec0471e3d586169a33e98158fabd/oldbook-swaylock-effects-1.7.0.0-r0.apk"
+    },
+    {
+      "filename": "oldbook-swaylock-effects-doc-1.7.0.0-r0.apk",
+      "sha256": "106a07cc8a626d8c0c58a2d33f01836483ff875defcedf3793a1f6ce0c82f625",
+      "artifact": "sha256/106a07cc8a626d8c0c58a2d33f01836483ff875defcedf3793a1f6ce0c82f625/oldbook-swaylock-effects-doc-1.7.0.0-r0.apk"
+    }
+  ],
+  "coexistence": {
+    "binary": "/usr/bin/swaylock-effects",
+    "pam_service": "/etc/pam.d/swaylock-effects",
+    "stock_locker_kept": "swaylock 1.8.6 and swaylockd remain installed as the recovery route"
+  },
+  "reproducibility": {
+    "builds": 2,
+    "signed_apks_byte_identical": true,
+    "network": "separate empty network namespace",
+    "verification": "alpine/packages/swaylock-effects/verification.json"
+  },
+  "patches_sha256": {
+    "0001-ready-fd.patch": "529d3b5d54a0105e021cde7778504f687a6c79c150d49dfec9d3462c4fa34aba",
+    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381"
+  }
+}

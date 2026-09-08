@@ -1,0 +1,89 @@
+--- a/include/swaylock.h
++++ b/include/swaylock.h
+@@ -66,6 +66,7 @@
+ 	bool show_failed_attempts;
+ 	bool daemonize;
+ 	bool indicator_idle_visible;
++	int ready_fd;
+ 
+ 	bool screenshots;
+ 	struct swaylock_effect *effects;
+--- a/main.c
++++ b/main.c
+@@ -698,7 +698,15 @@
+ };
+ 
+ static void ext_session_lock_v1_handle_locked(void *data, struct ext_session_lock_v1 *lock) {
+-	// Who cares
++	struct swaylock_state *state = data;
++	if (state->args.ready_fd >= 0) {
++		// s6/systemd style readiness: the caller may only trust the lock now.
++		if (write(state->args.ready_fd, "\n", 1) != 1) {
++			swaylock_log(LOG_ERROR, "Failed to send readiness notification");
++		}
++		close(state->args.ready_fd);
++		state->args.ready_fd = -1;
++	}
+ }
+ 
+ static void ext_session_lock_v1_handle_finished(void *data, struct ext_session_lock_v1 *lock) {
+@@ -994,6 +1002,7 @@
+ 		{"help", no_argument, NULL, 'h'},
+ 		{"image", required_argument, NULL, 'i'},
+ 		{"screenshots", no_argument, NULL, 'S'},
++		{"ready-fd", required_argument, NULL, 'R'},
+ 		{"disable-caps-lock-text", no_argument, NULL, 'L'},
+ 		{"indicator-caps-lock", no_argument, NULL, 'l'},
+ 		{"line-uses-inside", no_argument, NULL, 'n'},
+@@ -1098,6 +1107,8 @@
+ 			"Display the given image, optionally only on the given output.\n"
+ 		"  -S, --screenshots                "
+ 			"Use a screenshots as the background image.\n"
++		"  -R, --ready-fd <fd>              "
++			"Write a newline to <fd> and close it once the session is locked.\n"
+ 		"  -k, --show-keyboard-layout       "
+ 			"Display the current xkb layout while typing.\n"
+ 		"  -K, --hide-keyboard-layout       "
+@@ -1227,7 +1238,7 @@
+ 	optind = 1;
+ 	while (1) {
+ 		int opt_idx = 0;
+-		c = getopt_long(argc, argv, "c:deFfhi:SkKLlnrs:tuvC:", long_options,
++		c = getopt_long(argc, argv, "c:deFfhi:R:SkKLlnrs:tuvC:", long_options,
+ 				&opt_idx);
+ 		if (c == -1) {
+ 			break;
+@@ -1274,6 +1285,11 @@
+ 				state->args.screenshots = true;
+ 			}
+ 			break;
++		case 'R':
++			if (state) {
++				state->args.ready_fd = strtol(optarg, NULL, 10);
++			}
++			break;
+ 		case 'k':
+ 			if (state) {
+ 				state->args.show_keyboard_layout = true;
+@@ -1837,6 +1853,7 @@
+ 		.hide_keyboard_layout = false,
+ 		.show_failed_attempts = false,
+ 		.indicator_idle_visible = false,
++		.ready_fd = -1,
+ 
+ 		.screenshots = false,
+ 		.effects = NULL,
+--- a/swaylock.1.scd
++++ b/swaylock.1.scd
+@@ -82,6 +82,11 @@
+ 	a background color. If the path potentially contains a ':', prefix it with another
+ 	':' to prevent interpreting part of it as <output>.
+ 
++*-R, --ready-fd* <fd>
++	Write a newline to the file descriptor _fd_ and close it once the
++	session is locked. Callers that wait on this notification never trust
++	a lock that has not actually been acquired.
++
+ *-S, --screenshots*
+ 	Display a screenshot.
+ 

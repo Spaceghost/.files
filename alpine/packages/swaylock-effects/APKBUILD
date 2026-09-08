@@ -1,0 +1,80 @@
+# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+# swaylock-effects rebuilt to live beside stock swaylock: the binary, PAM
+# service and manual are named swaylock-effects, so Alpine's swaylock package
+# (the recovery locker for oldbook-lock) is never replaced.
+pkgname=oldbook-swaylock-effects
+pkgver=1.7.0.0
+pkgrel=0
+pkgdesc="Screen locker with blur, compose, clock and readiness notification for the Oldbook lock screen"
+url="https://github.com/jirutka/swaylock-effects"
+arch="all"
+license="MIT"
+options="!check !net" # no test suite
+depends="linux-pam"
+makedepends="
+	cairo-dev
+	gdk-pixbuf-dev
+	libxkbcommon-dev
+	linux-pam-dev
+	meson
+	samurai
+	scdoc
+	wayland-dev
+	wayland-protocols
+	"
+subpackages="$pkgname-doc"
+source="swaylock-effects-$pkgver.tar.gz
+	0001-ready-fd.patch
+	0002-idle-colors.patch
+	"
+builddir="$srcdir/swaylock-effects-$pkgver"
+export SOURCE_DATE_EPOCH=1788850800
+
+prepare() {
+	default_prepare
+
+	# Distinct binary, PAM service and manual so stock swaylock coexists.
+	mv pam/swaylock pam/swaylock-effects
+	mv swaylock.1.scd swaylock-effects.1.scd
+	sed -i \
+		-e "s|executable('swaylock',|executable('swaylock-effects',|" \
+		-e "s|'pam/swaylock'|'pam/swaylock-effects'|" \
+		-e "s|'swaylock.1.scd'|'swaylock-effects.1.scd'|" \
+		meson.build
+	sed -i 's|pam_start("swaylock"|pam_start("swaylock-effects"|' pam.c
+
+	# Same PAM stack as Alpine's swaylock package.
+	sed -i 's/login/base-auth/g' pam/swaylock-effects
+	cat <<-__EOF__ >> pam/swaylock-effects
+
+	# Unlock GNOME Keyring if available
+	-auth		optional	pam_gnome_keyring.so
+	-session	optional	pam_gnome_keyring.so auto_start
+
+	# Unlock KWallet if available
+	-auth		optional	pam_kwallet5.so
+	-session	optional	pam_kwallet5.so auto_start
+	__EOF__
+}
+
+build() {
+	abuild-meson \
+		-Dpam=enabled \
+		-Dgdk-pixbuf=enabled \
+		-Dman-pages=enabled \
+		-Dbash-completions=false \
+		-Dfish-completions=false \
+		-Dzsh-completions=false \
+		. output
+	meson compile -C output --verbose
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+6a4ecfd55b0f666b108d1c11a3b32518ec9f91831494f40eb49bb9d463e250ffdec3d353f917afcfbabffce6720f14934d2730ccfcf7fd52d6c931c89fa8d6b2  swaylock-effects-1.7.0.0.tar.gz
+1f08adfce7f31c996acd9050dc2a4cd10d5c78eec6ebf0e1d7853ae9e7a9fbed9b43a19473d4018f95bc67cb49dd490a3d7d83a3a2e0c344a98f40d85f91fea2  0001-ready-fd.patch
+1b2d35c0cb6231e4792b9db9d308986ede279c0042985bc103dde842c8ab67f5afd77ec89e9f7aba1bda807a745edca9c0226e67d97cffb11f4d80869554f9f0  0002-idle-colors.patch
+"

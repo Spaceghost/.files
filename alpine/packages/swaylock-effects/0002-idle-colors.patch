@@ -1,0 +1,148 @@
+--- b/include/swaylock.h
++++ c/include/swaylock.h
+@@ -28,6 +28,9 @@
+ 	uint32_t caps_lock;
+ 	uint32_t verifying;
+ 	uint32_t wrong;
++	// Optional idle colour: without it the idle indicator keeps the input colour.
++	uint32_t idle;
++	bool idle_set;
+ };
+ 
+ struct swaylock_colors {
+--- b/main.c
++++ c/main.c
+@@ -990,6 +990,10 @@
+ 		LO_GRACE,
+ 		LO_GRACE_NO_MOUSE,
+ 		LO_GRACE_NO_TOUCH,
++		LO_INSIDE_IDLE_COLOR,
++		LO_LINE_IDLE_COLOR,
++		LO_RING_IDLE_COLOR,
++		LO_TEXT_IDLE_COLOR,
+ 	};
+ 
+ 	static struct option long_options[] = {
+@@ -1026,6 +1030,7 @@
+ 		{"indicator-y-position", required_argument, NULL, LO_IND_Y_POSITION},
+ 		{"indicator-image", required_argument, NULL, LO_IND_IMAGE},
+ 		{"inside-color", required_argument, NULL, LO_INSIDE_COLOR},
++		{"inside-idle-color", required_argument, NULL, LO_INSIDE_IDLE_COLOR},
+ 		{"inside-clear-color", required_argument, NULL, LO_INSIDE_CLEAR_COLOR},
+ 		{"inside-caps-lock-color", required_argument, NULL, LO_INSIDE_CAPS_LOCK_COLOR},
+ 		{"inside-ver-color", required_argument, NULL, LO_INSIDE_VER_COLOR},
+@@ -1035,17 +1040,20 @@
+ 		{"layout-border-color", required_argument, NULL, LO_LAYOUT_BORDER_COLOR},
+ 		{"layout-text-color", required_argument, NULL, LO_LAYOUT_TXT_COLOR},
+ 		{"line-color", required_argument, NULL, LO_LINE_COLOR},
++		{"line-idle-color", required_argument, NULL, LO_LINE_IDLE_COLOR},
+ 		{"line-clear-color", required_argument, NULL, LO_LINE_CLEAR_COLOR},
+ 		{"line-caps-lock-color", required_argument, NULL, LO_LINE_CAPS_LOCK_COLOR},
+ 		{"line-ver-color", required_argument, NULL, LO_LINE_VER_COLOR},
+ 		{"line-wrong-color", required_argument, NULL, LO_LINE_WRONG_COLOR},
+ 		{"ring-color", required_argument, NULL, LO_RING_COLOR},
++		{"ring-idle-color", required_argument, NULL, LO_RING_IDLE_COLOR},
+ 		{"ring-clear-color", required_argument, NULL, LO_RING_CLEAR_COLOR},
+ 		{"ring-caps-lock-color", required_argument, NULL, LO_RING_CAPS_LOCK_COLOR},
+ 		{"ring-ver-color", required_argument, NULL, LO_RING_VER_COLOR},
+ 		{"ring-wrong-color", required_argument, NULL, LO_RING_WRONG_COLOR},
+ 		{"separator-color", required_argument, NULL, LO_SEP_COLOR},
+ 		{"text-color", required_argument, NULL, LO_TEXT_COLOR},
++		{"text-idle-color", required_argument, NULL, LO_TEXT_IDLE_COLOR},
+ 		{"text-clear", required_argument, NULL, LO_TEXT_CLEAR},
+ 		{"text-clear-color", required_argument, NULL, LO_TEXT_CLEAR_COLOR},
+ 		{"text-caps-lock", required_argument, NULL, LO_TEXT_CAPS_LOCK},
+@@ -1157,6 +1165,8 @@
+ 			"Sets the vertical position of the indicator.\n"
+ 		"  --indicator-image <path>         "
+ 			"Display the given image inside of the indicator.\n"
++		"  --inside-idle-color <color>      "
++			"Sets the color of the inside of the indicator while idle.\n"
+ 		"  --inside-color <color>           "
+ 			"Sets the color of the inside of the indicator.\n"
+ 		"  --inside-clear-color <color>     "
+@@ -1176,6 +1186,8 @@
+ 			"Sets the color of the border of the box containing the layout text.\n"
+ 		"  --layout-text-color <color>      "
+ 			"Sets the color of the layout text.\n"
++		"  --line-idle-color <color>        "
++			"Sets the color of the line between the inside and ring while idle.\n"
+ 		"  --line-color <color>             "
+ 			"Sets the color of the line between the inside and ring.\n"
+ 		"  --line-clear-color <color>       "
+@@ -1194,6 +1206,8 @@
+ 			"Use the inside color for the line between the inside and ring.\n"
+ 		"  -r, --line-uses-ring             "
+ 			"Use the ring color for the line between the inside and ring.\n"
++		"  --ring-idle-color <color>        "
++			"Sets the color of the ring of the indicator while idle.\n"
+ 		"  --ring-color <color>             "
+ 			"Sets the color of the ring of the indicator.\n"
+ 		"  --ring-clear-color <color>       "
+@@ -1207,6 +1221,8 @@
+ 			"Sets the color of the ring of the indicator when invalid.\n"
+ 		"  --separator-color <color>        "
+ 			"Sets the color of the lines that separate highlight segments.\n"
++		"  --text-idle-color <color>        "
++			"Sets the color of the text while idle.\n"
+ 		"  --text-color <color>             "
+ 			"Sets the color of the text.\n"
+ 		"  --text-clear-color <color>       "
+@@ -1403,6 +1419,30 @@
+ 		case LO_INSIDE_COLOR:
+ 			if (state) {
+ 				state->args.colors.inside.input = parse_color(optarg);
++			}
++			break;
++		case LO_INSIDE_IDLE_COLOR:
++			if (state) {
++				state->args.colors.inside.idle = parse_color(optarg);
++				state->args.colors.inside.idle_set = true;
++			}
++			break;
++		case LO_LINE_IDLE_COLOR:
++			if (state) {
++				state->args.colors.line.idle = parse_color(optarg);
++				state->args.colors.line.idle_set = true;
++			}
++			break;
++		case LO_RING_IDLE_COLOR:
++			if (state) {
++				state->args.colors.ring.idle = parse_color(optarg);
++				state->args.colors.ring.idle_set = true;
++			}
++			break;
++		case LO_TEXT_IDLE_COLOR:
++			if (state) {
++				state->args.colors.text.idle = parse_color(optarg);
++				state->args.colors.text.idle_set = true;
+ 			}
+ 			break;
+ 		case LO_INSIDE_CLEAR_COLOR:
+--- b/render.c
++++ c/render.c
+@@ -19,7 +19,9 @@
+ 
+ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
+ 		struct swaylock_colorset *colorset) {
+-	if (state->auth_state == AUTH_STATE_VALIDATING) {
++	if (state->auth_state == AUTH_STATE_IDLE && colorset->idle_set) {
++		cairo_set_source_u32(cairo, colorset->idle);
++	} else if (state->auth_state == AUTH_STATE_VALIDATING) {
+ 		cairo_set_source_u32(cairo, colorset->verifying);
+ 	} else if (state->auth_state == AUTH_STATE_INVALID) {
+ 		cairo_set_source_u32(cairo, colorset->wrong);
+--- b/swaylock.1.scd
++++ c/swaylock.1.scd
+@@ -198,6 +198,11 @@
+ *-r, --line-uses-ring*
+ 	Use the ring color for the line between the inside and ring.
+ 
++*--ring-idle-color* <rrggbb[aa]>
++	Sets the color of the ring of the indicator while idle. Without it the
++	idle ring uses *--ring-color*. *--inside-idle-color*, *--line-idle-color*
++	and *--text-idle-color* give the same treatment to the other parts.
++
+ *--ring-color* <rrggbb[aa]>
+ 	Sets the color of the ring of the indicator when typing or idle.
+ 

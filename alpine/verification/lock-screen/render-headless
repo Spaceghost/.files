@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""Render the Oldbook lock scene in a private headless SwayFX session and capture it.
+
+The live desktop is never touched: a throwaway compositor on the headless
+backend shows the current painting and one synthetic terminal, then the real
+oldbook-lock helper locks that private session with swaylock-effects. The
+script records readiness timing for a cold and a warm scene cache, the
+readiness record, and screenshots of the desktop, the idle scene, typing,
+backspace, the cleared state, Caps Lock and the warm relock.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import tempfile
+import time
+
+BASE = Path(__file__).resolve().parent
+REPO = BASE.parents[2]
+LOCK = REPO / 'alpine/desktop/.local/bin/oldbook-lock'
+CLIENT = REPO / 'alpine/themes/concepts/ghost-observatory/client.py'
+
+
+class Session:
+    """One private compositor with the painting and a synthetic terminal."""
+
+    def __init__(self, binary, config, base_env, log, width, height, scale):
+        self.binary, self.config, self.base_env, self.log = binary, config, base_env, log
+        self.width, self.height, self.scale = width, height, scale
+        self.processes = []
+        self.runtime = None
+        self.env = None
+
+    def __enter__(self):
+        self.runtime = tempfile.mkdtemp(prefix='lock-preview-runtime-')
+        os.chmod(self.runtime, 0o700)
+        self.env = dict(self.base_env, XDG_RUNTIME_DIR=self.runtime)
+        subprocess.run([str(self.binary), '--validate', '-c', str(self.config)], env=self.env,
+                       stdout=self.log, stderr=self.log, check=True)
+        compositor = self.spawn([str(self.binary), '-c', str(self.config)])
+        for _ in range(100):
+            sockets = list(Path(self.runtime).glob('sway-ipc*.sock'))
+            displays = [p for p in Path(self.runtime).glob('wayland-*') if p.suffix != '.lock']
+            if sockets and displays:
+                self.env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                break
+            if compositor.poll() is not None:
+                raise RuntimeError('Private compositor exited; see runtime.log')
+            time.sleep(.05)
+        else:
+            raise RuntimeError('Private compositor did not start')
+        terminal = self.spawn(['foot', '-c', str(REPO / 'alpine/desktop/.config/foot/foot.ini'),
+                               '--override=pad=24x18', '--override=colors-dark.alpha=0.9',
+                               '--app-id=lock-preview-desk', '--title=THE OBSERVATORY',
+                               'python3', str(CLIENT), 'desk'])
+        for _ in range(100):
+            if any(n.get('app_id') == 'lock-preview-desk' for n in self.walk(self.ipc(None, 'get_tree'))):
+                break
+            if terminal.poll() is not None:
+                raise RuntimeError('Preview Foot exited; see runtime.log')
+            time.sleep(.05)
+        else:
+            raise RuntimeError('Preview Foot did not map')
+        logical_w, logical_h = self.width // self.scale, self.height // self.scale
+        self.ipc(f'[app_id="lock-preview-desk"] resize set width {int(logical_w * .46)} px height '
+                 f'{int(logical_h * .5)} px, move absolute position {int(logical_w * .5)} px {int(logical_h * .18)} px')
+        time.sleep(1.0)
+        return self
+
+    def __exit__(self, *_):
+        for process in reversed(self.processes):
+            if process.poll() is None:
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait(timeout=5)
+        shutil.rmtree(self.runtime, ignore_errors=True)
+
+    def spawn(self, command):
+        process = subprocess.Popen(command, env=self.env, stdout=self.log, stderr=self.log,
+                                   start_new_session=True)
+        self.processes.append(process)
+        return process
+
+    def ipc(self, command, kind=None):
+        invocation = ['swaymsg', '-r'] + (['-t', kind] if kind else []) + ([command] if command else [])
+        data = json.loads(subprocess.check_output(invocation, env=self.env, text=True, timeout=5))
+        if not kind and not all(item.get('success') for item in data):
+            raise RuntimeError(data)
+        return data
+
+    @classmethod
+    def walk(cls, node):
+        yield node
+        for child in node.get('nodes', []) + node.get('floating_nodes', []):
+            yield from cls.walk(child)
+
+    def shot(self, path):
+        subprocess.run(['grim', str(path)], env=self.env, check=True, timeout=90)
+
+    def wtype(self, *arguments):
+        subprocess.run(['wtype', *arguments], env=self.env, check=True, timeout=10)
+
+    def lock(self, evidence, label):
+        started = time.monotonic()
+        result = subprocess.run([str(LOCK)], env=self.env, capture_output=True, text=True, timeout=30)
+        evidence['timings'][label] = round(time.monotonic() - started, 3)
+        if result.returncode:
+            raise RuntimeError(f'oldbook-lock failed ({label}): {result.stderr}')
+        if result.stderr.strip():
+            evidence.setdefault('lock_stderr', {})[label] = result.stderr.strip()
+        record = json.loads((Path(self.runtime) / 'oldbook-screen-lock/ready.json').read_text())
+        if record.get('locker') != 'swaylock-effects':
+            raise RuntimeError(f'Unexpected locker in readiness record: {record}')
+        if not (Path('/proc') / str(record['process']['pid'])).exists():
+            raise RuntimeError('Supervisor process is not alive after readiness')
+        return record
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, default=Path('/usr/bin/swayfx'))
+    parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
+    parser.add_argument('--mode', default='2880x1800')
+    parser.add_argument('--scale', type=int, default=2)
+    parser.add_argument('--renderer', default='pixman')
+    args = parser.parse_args()
+    binary = args.binary.resolve(strict=True)
+    output = args.output.absolute()
+    output.mkdir(parents=True, exist_ok=False)
+    width, height = (int(value) for value in args.mode.split('x'))
+    painting = (Path.home() / '.local/share/oldbook/current-wallpaper.png').resolve()
+    cache = output / 'cache'
+    cache.mkdir(mode=0o700)
+    config = output / 'sway.conf'
+    config.write_text(f'''xwayland disable
+output HEADLESS-1 mode {args.mode} scale {args.scale}
+output * bg "{painting}" fill
+seat seat0 fallback true
+focus_follows_mouse no
+mouse_warping none
+include "{REPO / 'alpine/desktop/.config/sway/theme.conf'}"
+default_border pixel 0
+for_window [app_id="lock-preview-.*"] floating enable
+''')
+    locker = shutil.which('swaylock-effects')
+    evidence = {'status': 'started', 'binary': str(binary),
+                'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
+                'locker': locker, 'painting': str(painting),
+                'painting_sha256': hashlib.sha256(painting.read_bytes()).hexdigest(),
+                'mode': args.mode, 'scale': args.scale, 'renderer': args.renderer, 'timings': {}}
+    if locker:
+        evidence['locker_sha256'] = hashlib.sha256(Path(locker).read_bytes()).hexdigest()
+        evidence['locker_version'] = subprocess.run([locker, '--version'], capture_output=True,
+                                                    text=True, timeout=10).stdout.strip()
+    base_env = os.environ.copy()
+    base_env.update(WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER=args.renderer,
+                    WLR_RENDERER_ALLOW_SOFTWARE='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0',
+                    OLDBOOK_LOCK_BACKEND='effects', OLDBOOK_LOCK_CACHE=str(cache))
+    for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'XDG_RUNTIME_DIR'):
+        base_env.pop(key, None)
+    with (output / 'runtime.log').open('w') as log:
+        # Cold cache: the scene is rendered for this painting during the lock call.
+        with Session(binary, config, base_env, log, width, height, args.scale) as session:
+            session.shot(output / 'desktop.png')
+            evidence['ready_record'] = session.lock(evidence, 'cold_lock_seconds')
+            evidence['lock_arguments'] = subprocess.run([str(LOCK), 'arguments'], env=session.env,
+                                                        capture_output=True, text=True, timeout=20).stdout.split('\n')
+            time.sleep(2.5)  # let the dissolve finish under load
+            session.shot(output / 'idle.png')
+            session.wtype('-s', '60', 'ghostplanet')
+            time.sleep(.25)
+            session.shot(output / 'typing.png')
+            session.wtype('-k', 'BackSpace')
+            time.sleep(.15)
+            session.shot(output / 'backspace.png')
+            session.wtype('-k', 'Escape')
+            time.sleep(.15)
+            session.shot(output / 'cleared.png')
+            time.sleep(1.5)
+            session.wtype('-k', 'Caps_Lock')
+            session.wtype('-s', '40', 'ZORAK')
+            time.sleep(.2)
+            session.shot(output / 'capslock.png')
+            session.wtype('-k', 'Caps_Lock')
+            session.wtype('-k', 'Escape')
+        # Warm cache: a fresh compositor and a fresh lock call reuse the rendered scene.
+        with Session(binary, config, base_env, log, width, height, args.scale) as session:
+            session.lock(evidence, 'warm_lock_seconds')
+            time.sleep(2.5)
+            session.shot(output / 'relocked.png')
+    evidence['status'] = 'rendered'
+    evidence['screenshots'] = {name: hashlib.sha256((output / name).read_bytes()).hexdigest()
+                               for name in ('desktop.png', 'idle.png', 'typing.png', 'backspace.png',
+                                            'cleared.png', 'capslock.png', 'relocked.png')}
+    evidence['cache_files'] = sorted(path.name for path in cache.glob('*.png'))
+    (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+    print(output / 'idle.png')
+
+
+if __name__ == '__main__':
+    main()
