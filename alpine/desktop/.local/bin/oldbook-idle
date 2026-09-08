@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""Idle stage before the lock: dim the display and give the keyboard a last breath.
+
+`dim` runs from swayidle shortly before the session locks. It remembers the
+current display brightness, ramps the panel down smoothly in a detached worker,
+and asks the keyboard light for one last breath. `undim` runs on resume: it
+cancels a ramp still in flight, brings the display back unless somebody moved
+it meanwhile, and restores the keyboard light's saved level and mode. Neither
+step changes a saved preference; the helper only keeps runtime state.
+"""
+import contextlib
+import fcntl
+import json
+import math
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+DIM_FRACTION = 0.2
+RAMP_SECONDS = 1.5
+RAMP_STEPS = 30
+RESTORE_SECONDS = 0.3
+RESTORE_STEPS = 8
+ACTIONS = ('dim', 'undim', 'status')
+
+
+def backlight_devices(root):
+    """Kernel backlights this user can read and write, like oldbook-brightness."""
+    devices = []
+    for device in sorted(Path(root).glob('*')):
+        brightness = device / 'brightness'
+        maximum = device / 'max_brightness'
+        if os.access(brightness, os.R_OK | os.W_OK) and os.access(maximum, os.R_OK):
+            devices.append(device)
+    return devices
+
+
+class IdleDimmer:
+    def __init__(self, runtime_dir, backlight_root='/sys/class/backlight', keyboard_command=None):
+        self.runtime_dir = Path(runtime_dir)
+        self.backlight_root = Path(backlight_root)
+        self.keyboard_command = list(keyboard_command or [])
+        self.state_file = self.runtime_dir / 'display.json'
+        self.cancel_file = self.runtime_dir / 'cancel'
+        self.runtime_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+    @contextlib.contextmanager
+    def locked(self):
+        with (self.runtime_dir / 'lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            yield
+
+    def read_state(self):
+        try:
+            state = json.loads(self.state_file.read_text())
+        except (OSError, ValueError):
+            return None
+        return state if isinstance(state, dict) and 'device' in state else None
+
+    def write_state(self, state):
+        temporary = self.state_file.with_name(self.state_file.name + f'.{os.getpid()}.tmp')
+        temporary.write_text(json.dumps(state) + '\n')
+        temporary.replace(self.state_file)
+
+    def clear_state(self):
+        for path in (self.state_file, self.cancel_file):
+            with contextlib.suppress(FileNotFoundError):
+                path.unlink()
+
+    @staticmethod
+    def read_value(path):
+        return int(Path(path).read_text().strip())
+
+    @staticmethod
+    def write_value(path, value):
+        Path(path).write_text(str(int(value)) + '\n')
+
+    @staticmethod
+    def alive(pid):
+        try:
+            os.kill(int(pid), 0)
+        except (OSError, TypeError, ValueError):
+            return False
+        return True
+
+    def keyboard(self, action):
+        if not self.keyboard_command:
+            return
+        try:
+            subprocess.run([*self.keyboard_command, action], stdin=subprocess.DEVNULL,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                           timeout=8, check=False)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            print(f'oldbook-idle: keyboard {action} failed: {error}', file=sys.stderr)
+
+    def dim(self, spawn=True):
+        """Remember the display level, start the ramp, and request the last breath."""
+        with self.locked():
+            state = self.read_state()
+            if state is not None and self.alive(state.get('pid')) and not self.cancel_file.exists():
+                return 'already-dimming'
+            if state is not None:
+                self.clear_state()
+            plan = None
+            for device in backlight_devices(self.backlight_root):
+                try:
+                    current = self.read_value(device / 'brightness')
+                    maximum = self.read_value(device / 'max_brightness')
+                except (OSError, ValueError):
+                    continue
+                target = max(1, int(round(maximum * DIM_FRACTION)))
+                plan = dict(device=str(device), original=current, last=current, target=target,
+                            maximum=maximum, pid=os.getpid(), started=time.time(),
+                            ramp=current > target, adjusted=False)
+                break
+            if plan is not None:
+                self.write_state(plan)
+        self.keyboard('last-breath')
+        if plan is None:
+            return 'no-display'
+        if not plan['ramp']:
+            return 'already-dim'
+        if spawn:
+            worker = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'ramp'],
+                                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                      stderr=subprocess.DEVNULL, start_new_session=True,
+                                      close_fds=True)
+            with self.locked():
+                state = self.read_state()
+                if state is not None and state.get('pid') == os.getpid():
+                    state['pid'] = worker.pid
+                    self.write_state(state)
+        else:
+            self.ramp()
+        return 'dimming'
+
+    def ramp(self):
+        """Ease the display down; stop if cancelled or if someone else moves it."""
+        with self.locked():
+            state = self.read_state()
+            if state is None or not state.get('ramp') or self.cancel_file.exists():
+                return
+            state['pid'] = os.getpid()
+            self.write_state(state)
+            device = Path(state['device'])
+            original, target = state['original'], state['target']
+        for step in range(1, RAMP_STEPS + 1):
+            time.sleep(RAMP_SECONDS / RAMP_STEPS)
+            with self.locked():
+                state = self.read_state()
+                if state is None or self.cancel_file.exists() or state.get('pid') != os.getpid():
+                    return
+                try:
+                    current = self.read_value(device / 'brightness')
+                except (OSError, ValueError):
+                    return
+                if current != state['last']:
+                    # Somebody else moved the display; leave their choice alone.
+                    state.update(adjusted=True, ramp=False, pid=None)
+                    self.write_state(state)
+                    return
+                progress = step / RAMP_STEPS
+                eased = (1 - math.cos(math.pi * progress)) / 2
+                value = int(round(original + (target - original) * eased))
+                if value != current:
+                    try:
+                        self.write_value(device / 'brightness', value)
+                    except OSError:
+                        state.update(ramp=False, pid=None)
+                        self.write_state(state)
+                        return
+                    state['last'] = value
+                    self.write_state(state)
+        with self.locked():
+            state = self.read_state()
+            if state is not None and state.get('pid') == os.getpid():
+                state.update(ramp=False, pid=None)
+                self.write_state(state)
+
+    def restore_display(self, device, current, original):
+        for step in range(1, RESTORE_STEPS + 1):
+            value = int(round(current + (original - current) * step / RESTORE_STEPS))
+            try:
+                self.write_value(device / 'brightness', value)
+            except OSError:
+                return
+            if step < RESTORE_STEPS:
+                time.sleep(RESTORE_SECONDS / RESTORE_STEPS)
+
+    def undim(self):
+        """Cancel any ramp, bring the display back, and restore the keyboard light."""
+        result = 'nothing-to-restore'
+        with self.locked():
+            state = self.read_state()
+            if state is not None:
+                self.cancel_file.touch()
+                device = Path(state['device'])
+                try:
+                    current = self.read_value(device / 'brightness')
+                except (OSError, ValueError):
+                    current = None
+                if state.get('adjusted') or current is None or current != state['last']:
+                    result = 'kept-adjusted-level'
+                elif current != state['original']:
+                    self.restore_display(device, current, state['original'])
+                    result = 'restored'
+                else:
+                    result = 'unchanged'
+                self.clear_state()
+        self.keyboard('restore')
+        return result
+
+
+def main():
+    os.umask(0o077)
+    if len(sys.argv) != 2 or sys.argv[1] not in (*ACTIONS, 'ramp'):
+        print('usage: oldbook-idle {' + '|'.join(ACTIONS) + '}', file=sys.stderr)
+        return 64
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', Path.home() / '.local/state')) / 'oldbook/idle'
+    keyboard = os.environ.get('OLDBOOK_KEYBOARD_BACKLIGHT',
+                              str(Path(__file__).resolve().parent / 'oldbook-keyboard-backlight'))
+    dimmer = IdleDimmer(runtime, os.environ.get('OLDBOOK_BACKLIGHT_ROOT', '/sys/class/backlight'),
+                        [keyboard])
+    action = sys.argv[1]
+    try:
+        if action == 'ramp':
+            dimmer.ramp()
+            return 0
+        if action == 'status':
+            print(json.dumps(dimmer.read_state() or {}, sort_keys=True))
+            return 0
+        print(dimmer.dim() if action == 'dim' else dimmer.undim())
+        return 0
+    except OSError as error:
+        print(f'oldbook-idle: {error}', file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

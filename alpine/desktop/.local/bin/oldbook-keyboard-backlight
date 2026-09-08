@@ -4,11 +4,13 @@
 import contextlib
 import errno
 import fcntl
+import glob
 import json
 import math
 import os
 from collections import deque
 from pathlib import Path
+import re
 import select
 import signal
 import socket
@@ -31,14 +33,32 @@ INPUT_PRESS = {1, 2}
 MAX_KEYS_PER_FRAME = 64
 ACTIONS = ('up', 'down', 'toggle', 'restore', 'breathe', 'steady',
            'typing', 'typing-dark', 'typing-wpm', 'typing-dark-wpm',
-           'status')
+           'ambient', 'last-breath', 'status')
 ACTIVE_MODES = {'breathing', 'typing', 'typing-dark', 'typing-wpm',
-                'typing-dark-wpm'}
+                'typing-dark-wpm', 'ambient'}
+MODES = {'steady', *ACTIVE_MODES}
 TYPING_RISING_MODES = {'typing', 'typing-wpm'}
 TYPING_DARKING_MODES = {'typing-dark', 'typing-dark-wpm'}
 TYPING_WPM_MODES = {'typing-wpm', 'typing-dark-wpm'}
 TYPING_WPM_THRESHOLD = 22
 TYPING_WPM_WINDOW = 5.0
+# The Apple SMC ambient light sensor reports "(left,right)"; newer MacBooks put
+# one 10-bit reading in the left slot and leave the right slot at zero.
+SENSOR_GLOB = '/sys/devices/platform/applesmc.*/light'
+SENSOR_INTERVAL = 2.0
+# Readings are smoothed on a log scale, so a lamp switching on and a cloud
+# passing settle within a few samples; the hysteresis band is in log units.
+AMBIENT_SMOOTHING = 0.5
+AMBIENT_DARK = 3
+AMBIENT_BRIGHT = 240
+AMBIENT_HYSTERESIS = 0.15
+AMBIENT_FADE = 1.2
+# One last breath before the session locks: a short rise, then a long fall to
+# fully dark. The overlay lives in the runtime directory and never touches the
+# saved level or mode; `restore` clears it.
+LAST_BREATH_RISE = 1.5
+LAST_BREATH_FALL = 4.5
+OVERLAY_IDLE_WAIT = 0.25
 
 
 def notify(message, percent=None):
@@ -83,8 +103,52 @@ def _clamp(value, minimum, maximum):
     return max(minimum, min(maximum, value))
 
 
+def _discover_sensor():
+    for path in sorted(glob.glob(SENSOR_GLOB)):
+        if os.access(path, os.R_OK):
+            return Path(path)
+    return None
+
+
+def _parse_light(text):
+    """Return the brighter of the SMC's two ambient readings, or None."""
+    match = re.search(r'\(\s*(-?\d+)\s*,\s*(-?\d+)\s*\)', text)
+    if match is not None:
+        return max(0, int(match.group(1)), int(match.group(2)))
+    stripped = text.strip()
+    if stripped.lstrip('-').isdigit():
+        return max(0, int(stripped))
+    return None
+
+
+def _ambient_target(reading, peak):
+    """Map room light to keyboard brightness: dark rooms glow, bright rooms go dark."""
+    if reading <= AMBIENT_DARK:
+        return peak
+    if reading >= AMBIENT_BRIGHT:
+        return 0
+    span = math.log(AMBIENT_BRIGHT + 1) - math.log(AMBIENT_DARK + 1)
+    position = (math.log(reading + 1) - math.log(AMBIENT_DARK + 1)) / span
+    eased = position * position * (3 - 2 * position)
+    return int(round(peak * (1 - eased)))
+
+
+def _last_breath_value(overlay, peak, now):
+    """Rise briefly from the visible level, then fall to dark; True once dark."""
+    elapsed = max(0.0, now - float(overlay.get('started', now)))
+    start = _clamp(int(overlay.get('from', 0)), 0, peak)
+    if elapsed < LAST_BREATH_RISE:
+        wave = (1 - math.cos(math.pi * elapsed / LAST_BREATH_RISE)) / 2
+        return int(round(start + (peak - start) * wave)), False
+    elapsed -= LAST_BREATH_RISE
+    if elapsed < LAST_BREATH_FALL:
+        wave = (1 + math.cos(math.pi * elapsed / LAST_BREATH_FALL)) / 2
+        return int(round(peak * wave)), False
+    return 0, True
+
+
 class KeyboardBacklight:
-    def __init__(self, led_dir, state_dir, runtime_dir, session=None):
+    def __init__(self, led_dir, state_dir, runtime_dir, session=None, sensor=None):
         self.led_dir = Path(led_dir)
         self.state_dir = Path(state_dir)
         self.runtime_dir = Path(runtime_dir)
@@ -92,6 +156,11 @@ class KeyboardBacklight:
         self.level_file = self.state_dir / 'keyboard-backlight'
         self.mode_file = self.state_dir / 'keyboard-backlight-mode'
         self.owner_file = self.runtime_dir / 'keyboard-backlight-owner'
+        self.overlay_file = self.runtime_dir / 'keyboard-backlight-overlay'
+        if sensor is None:
+            self.sensor = _discover_sensor()
+        else:
+            self.sensor = Path(sensor) if sensor else None
         self.state_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
         self.runtime_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
 
@@ -134,8 +203,7 @@ class KeyboardBacklight:
             mode = self.mode_file.read_text().strip()
         except FileNotFoundError:
             mode = 'steady'
-        if mode not in {'steady', 'breathing', 'typing', 'typing-dark',
-                        'typing-wpm', 'typing-dark-wpm'}:
+        if mode not in MODES:
             mode = 'steady'
         if mode in ACTIVE_MODES and not level:
             level = max(1, round(maximum * 0.25))
@@ -145,6 +213,33 @@ class KeyboardBacklight:
 
     def write(self, value):
         (self.led_dir / 'brightness').write_text(str(value) + '\n')
+
+    def read_light(self):
+        """The current ambient reading, or None when no sensor is readable."""
+        if self.sensor is None:
+            return None
+        try:
+            return _parse_light(self.sensor.read_text())
+        except (OSError, ValueError):
+            return None
+
+    def overlay(self):
+        """A transient animation request; it never changes the saved preference."""
+        try:
+            overlay = json.loads(self.overlay_file.read_text())
+        except (OSError, ValueError):
+            return None
+        if isinstance(overlay, dict) and overlay.get('kind') == 'last-breath':
+            return overlay
+        return None
+
+    def set_overlay(self, kind, start):
+        self.save(self.overlay_file, json.dumps(
+            {'kind': kind, 'started': time.monotonic(), 'from': int(start)}))
+
+    def clear_overlay(self):
+        with contextlib.suppress(FileNotFoundError):
+            self.overlay_file.unlink()
 
     def running(self):
         with (self.runtime_dir / 'keyboard-backlight.run.lock').open('a') as lock:
@@ -160,9 +255,17 @@ class KeyboardBacklight:
                         per_key=False, running=False)
         with self.locked():
             maximum, level, mode = self.settings()
-            return dict(available=True, device=DEVICE, control='whole-keyboard',
-                        per_key=False, maximum=maximum, brightness=self.read('brightness'),
-                        level=level, mode=mode, running=self.running())
+            status = dict(available=True, device=DEVICE, control='whole-keyboard',
+                          per_key=False, maximum=maximum, brightness=self.read('brightness'),
+                          level=level, mode=mode, running=self.running(),
+                          sensor=str(self.sensor) if self.sensor is not None else None)
+            light = self.read_light()
+            if light is not None:
+                status['light'] = light
+            overlay = self.overlay()
+            if overlay is not None:
+                status['overlay'] = overlay['kind']
+            return status
 
     def _open_key_devices(self):
         handles = {}
@@ -230,8 +333,12 @@ class KeyboardBacklight:
             raise ValueError(f'Unknown keyboard-light action: {action}')
         if action == 'restore' and not (self.led_dir / 'brightness').exists():
             return self.status()
+        if action == 'last-breath':
+            return self.last_breath(spawn)
         with self.locked():
             maximum, level, mode = self.settings()
+            # Any explicit choice ends a pending last breath.
+            self.clear_overlay()
             previous_mode = mode
             step = max(1, int(maximum * 0.1))
             if action == 'up':
@@ -252,9 +359,13 @@ class KeyboardBacklight:
                 mode = 'typing-wpm'
             elif action == 'typing-dark-wpm':
                 mode = 'typing-dark-wpm'
+            elif action == 'ambient':
+                if self.read_light() is None:
+                    raise ValueError('No readable Apple SMC ambient light sensor is available.')
+                mode = 'ambient'
 
             if action in {'typing', 'typing-dark', 'typing-wpm',
-                          'typing-dark-wpm'} or (
+                          'typing-dark-wpm', 'ambient'} or (
                     action == 'breathe' and mode == 'breathing'):
                 level = _mode_peak(maximum, mode, level)
 
@@ -278,6 +389,28 @@ class KeyboardBacklight:
             self.save(self.level_file, level)
             self.save(self.mode_file, mode)
         if mode in ACTIVE_MODES and spawn:
+            self.start()
+        return self.status()
+
+    def last_breath(self, spawn=True):
+        """Rise once, fall to dark, and stay dark until `restore` clears the overlay."""
+        if not (self.led_dir / 'brightness').exists():
+            return self.status()
+        requested = False
+        with self.locked():
+            maximum, level, _mode = self.settings()
+            # Keys that are off by preference stay off; nothing lights up for idling.
+            if level:
+                trigger = self.led_dir / 'trigger'
+                if trigger.exists() and '[none]' not in trigger.read_text():
+                    raise ValueError('Another kernel trigger controls the keyboard light.')
+                if not self.running():
+                    _, peer = self.connect_session()
+                    if peer is not None:
+                        peer.close()
+                self.set_overlay('last-breath', _clamp(self.read('brightness'), 0, maximum))
+                requested = True
+        if requested and spawn:
             self.start()
         return self.status()
 
@@ -361,7 +494,7 @@ class KeyboardBacklight:
             owner = None
             launch = False
             with self.locked():
-                if self.settings()[2] not in ACTIVE_MODES:
+                if self.settings()[2] not in ACTIVE_MODES and self.overlay() is None:
                     return
                 expected = self.owner_session(self.session_identity())
                 if self.running():
@@ -373,7 +506,7 @@ class KeyboardBacklight:
             if owner is not None:
                 alive = self.owner_alive(owner)
                 with self.locked():
-                    if self.settings()[2] not in ACTIVE_MODES:
+                    if self.settings()[2] not in ACTIVE_MODES and self.overlay() is None:
                         return
                     if not self.running() or self.read_owner() != owner:
                         continue
@@ -405,6 +538,7 @@ class KeyboardBacklight:
             anchor_time = None
             observed_level = None
             wpm_samples = deque()
+            ambient = None
             try:
                 with self.locked():
                     try:
@@ -429,13 +563,19 @@ class KeyboardBacklight:
                     next_frame = max(next_frame, now)
                     with self.locked():
                         maximum, level, current_mode = self.settings()
-                        if current_mode not in ACTIVE_MODES:
+                        overlay = self.overlay()
+                        if current_mode not in ACTIVE_MODES and overlay is None:
                             try:
                                 self.write(level)
                             finally:
                                 fcntl.flock(owner, fcntl.LOCK_UN)
                                 owned = False
                             return True
+                        if overlay is not None:
+                            # A last breath overrides whichever mode is saved; that
+                            # mode resumes untouched once `restore` clears the overlay.
+                            current_mode = 'overlay'
+                        finished = False
 
                         if mode != current_mode:
                             mode = current_mode
@@ -443,14 +583,52 @@ class KeyboardBacklight:
                             anchor_time = now
                             observed_level = level
                             wpm_samples.clear()
+                            ambient = None
                         elif observed_level != level:
                             anchor_level = float(level)
                             anchor_time = now
                             observed_level = level
+                            if ambient is not None:
+                                # F5/F6 moved the peak: retarget at the next sample.
+                                ambient['reference'] = None
+                                ambient['next_sample'] = now
 
-                        if mode == 'breathing':
+                        if mode == 'overlay':
+                            peak = level if level else max(1, round(maximum * 0.25))
+                            value, finished = _last_breath_value(overlay, peak, now)
+                        elif mode == 'breathing':
                             wave = (1 + math.cos(2 * math.pi * (now - started) / PERIOD)) / 2
                             value = max(1, min(maximum, round(level * (0.12 + 0.88 * wave))))
+                        elif mode == 'ambient':
+                            if ambient is None:
+                                origin = previous if previous is not None else self.read('brightness')
+                                ambient = dict(filtered=None, reference=None, target=int(origin),
+                                               origin=float(origin), fade_start=now, next_sample=now)
+                            if now >= ambient['next_sample']:
+                                ambient['next_sample'] = now + SENSOR_INTERVAL
+                                reading = self.read_light()
+                                if reading is not None:
+                                    sample = math.log(reading + 1)
+                                    if ambient['filtered'] is None:
+                                        ambient['filtered'] = sample
+                                    else:
+                                        ambient['filtered'] += AMBIENT_SMOOTHING * (sample - ambient['filtered'])
+                                    filtered = ambient['filtered']
+                                    reference = ambient['reference']
+                                    if reference is None or abs(filtered - reference) > AMBIENT_HYSTERESIS:
+                                        target = _ambient_target(math.exp(filtered) - 1, level)
+                                        if target != ambient['target']:
+                                            # Start the next fade from wherever this one is.
+                                            progress = min(1.0, (now - ambient['fade_start']) / AMBIENT_FADE)
+                                            eased = progress * progress * (3 - 2 * progress)
+                                            ambient['origin'] += (ambient['target'] - ambient['origin']) * eased
+                                            ambient['target'] = target
+                                            ambient['fade_start'] = now
+                                        ambient['reference'] = filtered
+                            progress = min(1.0, (now - ambient['fade_start']) / AMBIENT_FADE)
+                            eased = progress * progress * (3 - 2 * progress)
+                            value = int(round(ambient['origin'] + (ambient['target'] - ambient['origin']) * eased))
+                            finished = progress >= 1.0
                         else:
                             if poller is None:
                                 poller, handles = self._open_key_devices()
@@ -508,7 +686,11 @@ class KeyboardBacklight:
                         if value != previous:
                             self.write(value)
                             previous = value
-                    next_frame += INTERVAL
+                    if finished:
+                        # Nothing is moving: hold the level and only watch for changes.
+                        next_frame = time.monotonic() + OVERLAY_IDLE_WAIT
+                    else:
+                        next_frame += INTERVAL
                     stop.wait(max(0, next_frame - time.monotonic()))
             finally:
                 if poller is not None:
@@ -567,6 +749,11 @@ def main():
         elif result['mode'] == 'typing-dark-wpm':
             percent = round(result['level'] * 100 / result['maximum'])
             notify(f'Ghost keys only darken when typing is sustained · {percent}%', percent)
+        elif action == 'last-breath':
+            pass
+        elif result['mode'] == 'ambient':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys follow the room light · {percent}% in the dark', percent)
         elif action != 'restore':
             percent = round(result['level'] * 100 / result['maximum'])
             notify(f'Steady keyboard light · {percent}%', percent)

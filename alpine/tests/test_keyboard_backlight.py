@@ -336,6 +336,161 @@ class KeyboardBacklightTests(unittest.TestCase):
         self.assertIs(future.result(timeout=3), True)
         self.assertEqual(self.brightness(), 64)
 
+    def controlled_run(self, prepare, stop_at, hooks=(), sensor=False):
+        """Serve on a synthetic clock; hooks are (time, callback) pairs run in order."""
+        now = [0.0]
+        samples = []
+        pending = sorted(hooks, key=lambda item: item[0])
+
+        def advance(seconds):
+            if len(samples) >= 6000:
+                raise AssertionError('worker did not make bounded clock progress')
+            samples.append((now[0], self.brightness()))
+            now[0] += max(float(seconds), .000001)
+            while pending and pending[0][0] <= now[0]:
+                pending.pop(0)[1]()
+
+        class ControlledStop:
+            def is_set(self):
+                return now[0] >= stop_at
+
+            def wait(self, seconds):
+                advance(seconds)
+                return self.is_set()
+
+        with patch('time.monotonic', side_effect=lambda: now[0]), patch('time.sleep', side_effect=advance):
+            helper = load_helper()(self.led, self.state, self.runtime, sensor=sensor)
+            prepare(helper)
+            self.assertIs(helper.serve(ControlledStop()), True)
+        return samples
+
+    @staticmethod
+    def nearest(samples, stamp):
+        return min(samples, key=lambda row: abs(row[0] - stamp))[1]
+
+    def test_last_breath_rises_falls_dark_and_holds_without_saving(self):
+        self.saved.write_text('200\n')
+        (self.led / 'brightness').write_text('60\n')
+        saved_mtime = self.saved.stat().st_mtime_ns
+        samples = self.controlled_run(lambda helper: helper.command('last-breath', spawn=False),
+                                      stop_at=8.0)
+        self.assertEqual(samples[0][1], 60)
+        self.assertAlmostEqual(self.nearest(samples, 0.75), 130, delta=4)
+        self.assertAlmostEqual(self.nearest(samples, 1.5), 200, delta=3)
+        self.assertAlmostEqual(self.nearest(samples, 3.75), 100, delta=4)
+        self.assertEqual(self.nearest(samples, 6.1), 0)
+        self.assertEqual(self.nearest(samples, 7.9), 0)
+        rise = [level for stamp, level in samples if stamp <= 1.5]
+        fall = [level for stamp, level in samples if 1.5 <= stamp <= 6.0]
+        self.assertEqual(rise, sorted(rise))
+        self.assertEqual(fall, sorted(fall, reverse=True))
+        # Once dark the worker only checks for changes a few times a second.
+        self.assertLessEqual(len([row for row in samples if 6.5 <= row[0] <= 8.0]), 8)
+        self.assertEqual(int(self.saved.read_text()), 200)
+        self.assertEqual(self.saved.stat().st_mtime_ns, saved_mtime)
+        self.assertEqual(self.helper().status()['mode'], 'steady')
+        # The overlay outlives the worker until restore clears it; stopping restores the level.
+        self.assertEqual(self.helper().status()['overlay'], 'last-breath')
+        self.assertEqual(self.brightness(), 200)
+        status = self.helper().command('restore', spawn=False)
+        self.assertNotIn('overlay', status)
+        self.assertEqual(status['level'], 200)
+        self.assertEqual(self.brightness(), 200)
+
+    def test_last_breath_interrupts_breathing_and_restore_resumes_it(self):
+        self.saved.write_text('200\n')
+        self.mode.write_text('breathing\n')
+        (self.led / 'brightness').write_text('200\n')
+        hooks = [(7.0, lambda: self.helper().command('restore', spawn=False))]
+        samples = self.controlled_run(lambda helper: helper.command('last-breath', spawn=False),
+                                      stop_at=9.0, hooks=hooks)
+        self.assertEqual(self.nearest(samples, 6.5), 0)
+        resumed = [level for stamp, level in samples if stamp >= 7.4]
+        self.assertTrue(resumed and min(resumed) >= 24, 'breathing did not resume after restore')
+        self.assertEqual(self.helper().status()['mode'], 'breathing')
+        self.assertNotIn('overlay', self.helper().status())
+        self.assertEqual(int(self.saved.read_text()), 200)
+
+    def test_last_breath_keeps_keys_off_when_the_preference_is_off(self):
+        self.saved.write_text('0\n')
+        (self.led / 'brightness').write_text('0\n')
+        status = self.helper().command('last-breath', spawn=False)
+        self.assertNotIn('overlay', status)
+        self.assertEqual(self.brightness(), 0)
+        self.assertFalse(status['running'])
+
+    def test_explicit_actions_end_a_pending_last_breath(self):
+        helper = self.helper()
+        self.assertEqual(helper.command('last-breath', spawn=False)['overlay'], 'last-breath')
+        status = helper.command('up', spawn=False)
+        self.assertNotIn('overlay', status)
+        self.assertEqual(status['level'], 89)
+        self.assertEqual(self.brightness(), 89)
+
+    def test_ambient_requires_a_readable_sensor(self):
+        with self.assertRaises(ValueError):
+            self.helper(sensor=self.base / 'missing-light').command('ambient', spawn=False)
+        self.assertEqual(self.helper().status()['mode'], 'steady')
+        self.assertEqual(self.brightness(), 64)
+
+    def test_ambient_status_and_peak_adjustment(self):
+        sensor = self.base / 'light'
+        sensor.write_text('(11,0)\n')
+        helper = self.helper(sensor=sensor)
+        status = helper.command('ambient', spawn=False)
+        self.assertEqual(status['mode'], 'ambient')
+        self.assertEqual(status['level'], 64)
+        self.assertEqual(status['light'], 11)
+        self.assertEqual(status['sensor'], str(sensor))
+        self.assertEqual(helper.command('up', spawn=False)['level'], 89)
+        self.assertEqual(helper.status()['mode'], 'ambient')
+        self.assertEqual(helper.command('steady', spawn=False)['mode'], 'steady')
+        self.assertEqual(self.brightness(), 89)
+
+    def test_ambient_mapping_glows_in_the_dark_and_sleeps_in_daylight(self):
+        module = runpy.run_path(str(HELPER))
+        target = module['_ambient_target']
+        self.assertEqual(target(0, 200), 200)
+        self.assertEqual(target(3, 200), 200)
+        self.assertEqual(target(240, 200), 0)
+        self.assertEqual(target(1000, 200), 0)
+        levels = [target(reading, 200) for reading in range(0, 260, 5)]
+        self.assertEqual(levels, sorted(levels, reverse=True))
+        self.assertTrue(0 < target(30, 200) < 200)
+        parse = module['_parse_light']
+        self.assertEqual(parse('(11,0)\n'), 11)
+        self.assertEqual(parse('(4,17)\n'), 17)
+        self.assertEqual(parse('42\n'), 42)
+        self.assertIsNone(parse('garbage\n'))
+
+    def test_ambient_mode_fades_with_the_room_light_without_saving(self):
+        sensor = self.base / 'light'
+        sensor.write_text('(2,0)\n')
+        self.saved.write_text('200\n')
+        (self.led / 'brightness').write_text('200\n')
+        recorded = {}
+
+        def prepare(helper):
+            # Choosing the mode saves it once; the animation must not save again.
+            helper.command('ambient', spawn=False)
+            recorded['mtime'] = self.saved.stat().st_mtime_ns
+
+        hooks = [(10.0, lambda: sensor.write_text('(600,0)\n')),
+                 (30.0, lambda: sensor.write_text('(1,0)\n'))]
+        samples = self.controlled_run(prepare, stop_at=50.0, hooks=hooks, sensor=sensor)
+        saved_mtime = recorded['mtime']
+        dark = [level for stamp, level in samples if stamp < 10.0]
+        self.assertTrue(dark and min(dark) == 200 and max(dark) == 200)
+        self.assertEqual(self.nearest(samples, 22.0), 0)
+        self.assertEqual(self.nearest(samples, 29.5), 0)
+        self.assertEqual(self.nearest(samples, 45.0), 200)
+        steps = [abs(after[1] - before[1]) for before, after in zip(samples, samples[1:])]
+        self.assertLessEqual(max(steps), 8, 'ambient changes must fade, not jump')
+        self.assertEqual(int(self.saved.read_text()), 200)
+        self.assertEqual(self.saved.stat().st_mtime_ns, saved_mtime)
+        self.assertEqual(self.helper().status()['mode'], 'ambient')
+        self.assertEqual(self.brightness(), 200)
+
     def pulse_samples(self, peak):
         (self.led / 'max_brightness').write_text('1000\n')
         (self.led / 'brightness').write_text(f'{peak}\n')
