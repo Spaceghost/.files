@@ -1,0 +1,44 @@
+{
+  "scope": "Caption focus excludes the current and legacy drop-down terminal app IDs plus com.oldbook.monitor. Fullscreen flags on these drop-downs and wrappers containing only them are excluded; ordinary fullscreen siblings retain their existing edge policy.",
+  "unit_tests": {
+    "command": "python3 -m unittest discover -s alpine/tests -p 'test_decoration*.py' -v",
+    "result": "passed",
+    "count": 47,
+    "regression_failures_before_fix": 4,
+    "log": "unit-tests.log",
+    "fullscreen_regression_failures_before_fix": 5
+  },
+  "native_tests": {
+    "command": "python3 alpine/tests/verify_decoration_attachment.py --output /home/jack/.local/state/oldbook/verify/decoration-dropdown-monitor-final-retry",
+    "result": "passed",
+    "count": 34,
+    "evidence": "native-evidence.json",
+    "new_checks": [
+      "dropdown-ghostty-keeps-ordinary-caption",
+      "dropdown-ghostty-hide-keeps-caption",
+      "dropdown-legacy-foot-keeps-ordinary-caption",
+      "dropdown-legacy-foot-hide-keeps-caption",
+      "dropdown-monitor-keeps-ordinary-caption",
+      "dropdown-monitor-hide-keeps-caption"
+    ],
+    "monitor_extension_startup_failure": "native-monitor-startup-failure.json: initial private compositor IPC timeout occurred before tests; unchanged-source retry passed."
+  },
+  "live_activation": {
+    "result": "passed",
+    "evidence": "activation.json",
+    "earlier_evidence": "activation-initial.json",
+    "pid": 28213,
+    "singleton_count": 1,
+    "native_caption_surfaces": 1,
+    "settings_unchanged": true,
+    "window_or_focus_commands_sent": 0,
+    "source_hashes_match_final_native_proof": true
+  },
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230",
+    "alpine/tests/test_decoration_placement.py": "e4edd7d27278d633bf463b81a80372df6a152ca1406ac1c264446d59571f446c",
+    "alpine/tests/verify_decoration_attachment.py": "9e999aaab9e0483e4318b02d8eec60aa1f1f0911024b2db8ef1ec7fcda4d9131"
+  }
+}

@@ -431,6 +431,24 @@ def run_verifier(output):
                         and state["clients"]["attachment-tiled"]["rect"] == baseline,
                         "bottom caption did not attach flush without reserving workspace space")
 
+                for app_id, label in (("com.oldbook.dropdown", "ghostty"),
+                                      ("oldbook-dropdown", "legacy-foot"),
+                                      ("com.oldbook.monitor", "monitor")):
+                    terminal(app_id, "Private drop-down console")
+                    console = wait_for(lambda: node(app_id), "drop-down client missing")
+                    ipc(command=f'[con_id={console["id"]}] floating enable, '
+                                'resize set 1000 220, move absolute position 100 60, focus')
+                    capture("dropdown-" + label + "-keeps-ordinary-caption", lambda state:
+                            attached(state, "bottom") and state["clients"][app_id]["focused"],
+                            "console focus moved the ordinary window caption")
+                    ipc(command=f'[con_id={console["id"]}] move scratchpad')
+                    capture("dropdown-" + label + "-hide-keeps-caption", lambda state:
+                            attached(state, "bottom")
+                            and state["clients"]["attachment-floating"]["focused"],
+                            "hiding the console did not retain ordinary caption focus")
+                    expected_exits.add(app_id)
+                    ipc(command=f'[con_id={console["id"]}] kill')
+
                 pointer = spawn("pointer", [str(pointer_binary)], pointer=True)
                 pointer_reply(pointer, "ready")
 
