@@ -30,3 +30,9 @@ palette = 12=#83a598
 palette = 13=#d3869b
 palette = 14=#8ec07c
 palette = 15=#ebdbb2
+
+# Shaders: a short cursor smear and a faint warm bloom, both cheap. Ghostty
+# animates them only while the surface is focused. Paths may start with ~/.
+custom-shader = ~/.config/ghostty/shaders/warm-bloom.glsl
+custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
+custom-shader-animation = true

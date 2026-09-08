@@ -8,6 +8,9 @@ window-padding-x = 3
 window-padding-y = 3
 window-decoration = server
 window-theme = dark
+custom-shader = ~/.config/ghostty/shaders/warm-bloom.glsl
+custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
+custom-shader-animation = true
 
 background = 282828
 foreground = ebdbb2
