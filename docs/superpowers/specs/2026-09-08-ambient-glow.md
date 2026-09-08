@@ -31,11 +31,18 @@ KEYBOARD-GLOW contract already describes.
 
 ## Upstream
 
-`wluma` cannot use this sensor because it is not an IIO device. A branch adds an
-`[als.applesmc]` backend (configurable `path`, `(l,r)` parsing, brighter slot,
-raw reading scaled as lux for its predictor), documented in its README and
-covered by unit tests; the pull request records exactly what was built and
-tested on this machine. The local ambient mode does not depend on it.
+`wluma` cannot use this sensor because it is not an IIO device. Pull request
+[max-baz/wluma#179](https://github.com/max-baz/wluma/pull/179) (branch
+`als-applesmc` on the Spaceghost fork, kept locally under `~/src/wluma`) adds
+an `[als.applesmc]` backend: configurable `path` with discovery of the first
+`applesmc.*` device, `(l,r)` parsing of both formats, the brighter slot as a
+raw reading on wluma's lux scale, automatic selection after external and IIO
+sources, README documentation and unit tests. `cargo fmt`, `cargo clippy
+-- -Dwarnings` and `cargo test --locked` (165 tests) passed on this machine
+with Rust 1.97; a 12-second run of the release binary against the real sensor
+logged the device path and live readings
+(`alpine/verification/keyboard-ambient/wluma-hardware-run.log`). The local
+ambient mode does not depend on the upstream change.
 
 ## Verification
 

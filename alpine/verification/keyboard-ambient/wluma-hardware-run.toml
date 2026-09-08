@@ -1,0 +1,14 @@
+# Hardware check for the applesmc backend: read the real sensor, drive nothing.
+[als.applesmc]
+
+[idle]
+enabled = false
+
+[[output.backlight]]
+name = "eDP-1"
+enabled = false
+gamma = false
+
+[[keyboard]]
+name = "keyboard"
+path = "/sys/class/leds/smc::kbd_backlight"

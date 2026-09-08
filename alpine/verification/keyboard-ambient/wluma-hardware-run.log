@@ -1,0 +1,59 @@
+[2026-09-08T10:04:45Z DEBUG wluma] == wluma v4.11.1-65-g0fe205f ==
+[2026-09-08T10:04:45Z DEBUG wluma] Using Config {
+        als: Applesmc {
+            path: None,
+        },
+        idle: None,
+        output: [
+            Backlight(
+                BacklightOutput {
+                    name: "eDP-1",
+                    path: "",
+                    capturer: Auto,
+                    vulkan_device: Auto,
+                    min_brightness: 1,
+                    kind: Display,
+                    predictor: Adaptive,
+                    gamma: false,
+                    enabled: false,
+                },
+            ),
+            Backlight(
+                BacklightOutput {
+                    name: "keyboard",
+                    path: "/sys/class/leds/smc::kbd_backlight",
+                    capturer: None,
+                    vulkan_device: Auto,
+                    min_brightness: 0,
+                    kind: Keyboard,
+                    predictor: Adaptive,
+                    gamma: false,
+                    enabled: true,
+                },
+            ),
+        ],
+    }
+[2026-09-08T10:04:45Z INFO  wluma::als::applesmc] Using Apple SMC ambient light sensor '/sys/devices/platform/applesmc.768/light'
+[2026-09-08T10:04:45Z INFO  wluma] Continue adjusting brightness and wluma will learn your preference over time.
+[2026-09-08T10:04:45Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:45Z DEBUG wluma::config::discovery] Ignoring disabled output 'eDP-1'
+[2026-09-08T10:04:45Z DEBUG wluma::runtime] Discovered keyboard 'keyboard' using backlight /sys/class/leds/smc::kbd_backlight
+[2026-09-08T10:04:45Z DEBUG wluma::brightness::backlight] Using direct write on /sys/class/leds/smc::kbd_backlight to change brightness value
+[2026-09-08T10:04:45Z INFO  wluma::runtime] Started using output 'keyboard'
+[2026-09-08T10:04:45Z INFO  wluma::frame::capturer] Screen capture is disabled for 'keyboard'
+[2026-09-08T10:04:46Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:47Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:48Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:49Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:49Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:50Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:51Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:52Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:53Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:53Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:54Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:55Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:56Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:57Z TRACE wluma::als::applesmc] ALS (applesmc): 11
+[2026-09-08T10:04:57Z DEBUG wluma] Received shutdown signal: Ok(Int)
+[2026-09-08T10:04:57Z TRACE wluma::als::applesmc] ALS (applesmc): 11
