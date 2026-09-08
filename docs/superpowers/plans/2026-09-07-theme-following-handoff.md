@@ -1,4 +1,8 @@
 # Resume: every application must follow the selected desktop theme
+Update: the user subsequently requested packaging/installation. Superhold dev1 is
+now installed and its theme refresh and rollback verified; see
+`../decisions/2026-09-07-superhold-dev1-install.md`. The observations below describe
+the original pre-install state. The other application audit leads remain open.
 
 Paused at the user's explicit request on 2026-09-07: wrap up quickly and leave
 findings to continue when capacity improves. The original issue is unresolved;
