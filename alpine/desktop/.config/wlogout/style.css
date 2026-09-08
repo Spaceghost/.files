@@ -1,0 +1,44 @@
+/* Space Ghost power deck: Gruvbox tiles over the blurred desktop.
+   SwayFX blurs the desktop behind the logout_dialog layer; the window itself
+   only tints it. Glyph tiles are rendered by alpine/bin/build-wlogout-icons
+   and referenced relative to this stylesheet. */
+* {
+    background-image: none;
+    box-shadow: none;
+    font-family: "Inter", "JetBrainsMono Nerd Font", sans-serif;
+}
+window {
+    background-color: rgba(29, 32, 33, 0.55);
+}
+button {
+    color: #ebdbb2;
+    background-color: rgba(60, 56, 54, 0.94);
+    border: none;
+    border-radius: 22px;
+    outline: none;
+    font-size: 15px;
+    font-weight: 500;
+    padding-top: 152px;
+    background-repeat: no-repeat;
+    background-position: center 32%;
+    background-size: 92px 92px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+button:hover, button:focus {
+    background-color: #fabd2f;
+    color: #1d2021;
+}
+button:active {
+    background-color: #d79921;
+    color: #1d2021;
+}
+#lock { background-image: url("icons/lock.png"); }
+#lock:hover, #lock:focus { background-image: url("icons/lock-active.png"); }
+#suspend { background-image: url("icons/suspend.png"); }
+#suspend:hover, #suspend:focus { background-image: url("icons/suspend-active.png"); }
+#logout { background-image: url("icons/logout.png"); }
+#logout:hover, #logout:focus { background-image: url("icons/logout-active.png"); }
+#reboot { background-image: url("icons/reboot.png"); }
+#reboot:hover, #reboot:focus { background-image: url("icons/reboot-active.png"); }
+#shutdown { background-image: url("icons/shutdown.png"); }
+#shutdown:hover, #shutdown:focus { background-image: url("icons/shutdown-active.png"); }

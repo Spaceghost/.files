@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+"""Render the power deck's Nerd Font glyph tiles as PNG button backgrounds.
+
+wlogout draws each button's icon from a CSS background image and cannot load
+SVG without a pixbuf loader, so the deck's glyphs are rasterised once from the
+installed JetBrains Mono Nerd Font and versioned beside the layout. Re-run this
+after changing a glyph or the palette; the output is deterministic for the same
+font build and libraries.
+"""
+import argparse
+import hashlib
+from pathlib import Path
+import sys
+
+import cairo
+import gi
+
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
+from gi.repository import Pango, PangoCairo  # noqa: E402
+
+REPO = Path(__file__).resolve().parents[2]
+ICONS = REPO / 'alpine/desktop/.config/wlogout/icons'
+FONT = 'JetBrainsMono Nerd Font 112'
+SIZE = 192
+# nf-md-lock, nf-md-sleep, nf-md-logout, nf-md-restart, nf-md-power
+GLYPHS = {'lock': '\U000f033e', 'suspend': '\U000f04b2', 'logout': '\U000f0343',
+          'reboot': '\U000f0709', 'shutdown': '\U000f0425'}
+# Cream on the charcoal tile; near-black on the amber hover/focus tile.
+VARIANTS = {'': '#ebdbb2', '-active': '#1d2021'}
+
+
+def render(glyph, color, path):
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, SIZE, SIZE)
+    context = cairo.Context(surface)
+    layout = PangoCairo.create_layout(context)
+    layout.set_font_description(Pango.FontDescription(FONT))
+    layout.set_text(glyph, -1)
+    ink, _ = layout.get_pixel_extents()
+    if ink.width <= 0 or ink.height <= 0:
+        raise SystemExit(f'{FONT} did not render {glyph!r}; install font-jetbrains-mono-nerd')
+    context.move_to((SIZE - ink.width) / 2 - ink.x, (SIZE - ink.height) / 2 - ink.y)
+    context.set_source_rgb(*(int(color[i:i + 2], 16) / 255 for i in (1, 3, 5)))
+    PangoCairo.show_layout(context, layout)
+    surface.flush()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    surface.write_to_png(str(path))
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('--output', type=Path, default=ICONS)
+    args = parser.parse_args()
+    for name, glyph in GLYPHS.items():
+        for suffix, color in VARIANTS.items():
+            path = args.output / f'{name}{suffix}.png'
+            digest = render(glyph, color, path)
+            print(f'{digest[:12]}  {path.relative_to(REPO) if path.is_relative_to(REPO) else path}')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

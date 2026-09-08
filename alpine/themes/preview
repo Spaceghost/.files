@@ -1,0 +1,220 @@
+#!/usr/bin/env python3
+"""Render the production desktop chrome in a private headless SwayFX session.
+
+Unlike the Ghost Observatory concept preview, nothing is overridden: the active
+theme profile's window chrome, compositor effects, bar, launcher geometry and
+the workspace caption daemon are rendered exactly as deployed, over the pinned
+Yosemite painting. Pass --power-deck to also photograph the wlogout deck.
+The live session is untouched; every process started here is terminated.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import tempfile
+import time
+
+BASE = Path(__file__).resolve().parent
+REPO = BASE.parents[1]
+CONCEPT = BASE / 'concepts/ghost-observatory'
+ART = REPO / 'alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png'
+
+
+def sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def gaps(config):
+    values = {'inner': 3, 'outer': 4}
+    for kind, value in re.findall(r'^gaps (inner|outer) (\d+)', config.read_text(), re.MULTILINE):
+        values[kind] = int(value)
+    return values
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('--binary', type=Path, default=Path('/usr/bin/swayfx'))
+    parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
+    parser.add_argument('--render-device', default='/dev/dri/renderD128')
+    parser.add_argument('--profile', default=(BASE / 'current').read_text().strip(),
+                        help='Theme profile under alpine/themes/profiles (default: the active theme)')
+    parser.add_argument('--power-deck', action='store_true', help='Also render the wlogout deck')
+    parser.add_argument('--artwork', type=Path, default=ART)
+    args = parser.parse_args()
+    binary = args.binary.resolve(strict=True)
+    output = args.output.absolute()
+    output.mkdir(parents=True, exist_ok=False)
+    profile = BASE / 'profiles' / args.profile / '.config'
+    desktop = REPO / 'alpine/desktop/.config'
+    home_bin = REPO / 'alpine/desktop/.local/bin'
+    if not profile.is_dir():
+        raise SystemExit('Unknown theme profile: ' + args.profile)
+    artwork = args.artwork.resolve(strict=True)
+    spacing = gaps(desktop / 'sway/config')
+
+    bar = json.loads((profile / 'waybar/config.jsonc').read_text())
+    bar[0]['output'] = 'HEADLESS-1'
+    (output / 'waybar.json').write_text(json.dumps(bar, indent=2) + '\n')
+    (output / 'waybar.css').write_text((profile / 'waybar/style.css').read_text())
+    (output / 'waybar-state.css').write_text('/* Preview: no fullscreen dimming. */\n')
+    config = output / 'sway.conf'
+    config.write_text(f'''xwayland disable
+output HEADLESS-1 mode 1440x900
+output * bg "{artwork}" fill
+seat seat0 fallback true
+focus_follows_mouse no
+mouse_warping none
+gaps inner {spacing['inner']}
+gaps outer {spacing['outer']}
+smart_gaps off
+include "{profile / 'sway/theme.conf'}"
+include "{profile / 'swayfx/effects.conf'}"
+titlebar_position bottom
+default_border pixel 0
+default_floating_border pixel 0
+for_window [all] border pixel 0
+workspace "1: Ghost"
+''')
+    processes = []
+    evidence = {'status': 'rendered', 'binary': str(binary), 'binary_sha256': sha256(binary),
+                'artwork': str(artwork.relative_to(REPO)) if artwork.is_relative_to(REPO) else str(artwork),
+                'artwork_sha256': sha256(artwork), 'profile': args.profile, 'gaps': spacing,
+                'live_session_changes': 0, 'screenshots': [],
+                'content': 'Synthetic terminal copy; real compositor, Foot, Waybar, caption daemon and telemetry'}
+    with tempfile.TemporaryDirectory(prefix='oldbook-preview-runtime-') as runtime, \
+            tempfile.TemporaryDirectory(prefix='oldbook-preview-state-') as state:
+        env = os.environ.copy()
+        env.update(XDG_RUNTIME_DIR=runtime, XDG_STATE_HOME=state, WLR_BACKENDS='headless',
+                   WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='gles2', WLR_RENDERER_ALLOW_SOFTWARE='1',
+                   WLR_RENDER_DRM_DEVICE=args.render_device, NO_AT_BRIDGE='1', GTK_USE_PORTAL='0',
+                   PATH=str(home_bin) + os.pathsep + env.get('PATH', ''))
+        pulse = Path('/run/user') / str(os.getuid()) / 'pulse/native'
+        if pulse.exists():
+            env['PULSE_SERVER'] = 'unix:' + str(pulse)
+        for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+            env.pop(key, None)
+        with (output / 'runtime.log').open('w') as log:
+            def spawn(command):
+                process = subprocess.Popen(command, env=env, stdout=log, stderr=log,
+                                           start_new_session=True)
+                processes.append(process)
+                return process
+
+            def ipc(command, kind=None):
+                invocation = ['swaymsg', '-r']
+                if kind:
+                    invocation.extend(['-t', kind])
+                if command:
+                    invocation.append(command)
+                data = json.loads(subprocess.check_output(invocation, env=env, text=True))
+                if not kind and not all(item.get('success') for item in data):
+                    raise RuntimeError(data)
+                return data
+
+            def walk(node):
+                yield node
+                for child in node.get('nodes', []) + node.get('floating_nodes', []):
+                    yield from walk(child)
+
+            def wait_for(condition, failure, process=None, attempts=100, pause=.05):
+                for _ in range(attempts):
+                    if condition():
+                        return
+                    if process is not None and process.poll() is not None:
+                        raise RuntimeError(failure + '; see runtime.log')
+                    time.sleep(pause)
+                raise RuntimeError(failure + '; see runtime.log')
+
+            def screenshot(name):
+                # Repaint the whole private output before photographing it.
+                ipc('output HEADLESS-1 power off')
+                time.sleep(.1)
+                ipc('output HEADLESS-1 power on')
+                time.sleep(.6)
+                subprocess.run(['grim', str(output / name)], env=env, check=True)
+                evidence['screenshots'].append(name)
+
+            try:
+                bus_socket = Path(runtime) / 'bus'
+                bus_config = Path(runtime) / 'bus.conf'
+                bus_config.write_text(f'''<busconfig><type>session</type>
+<listen>unix:path={bus_socket}</listen><auth>EXTERNAL</auth>
+<policy context="default"><allow send_destination="*"/>
+<allow receive_sender="*"/><allow own="*"/></policy></busconfig>''')
+                spawn(['dbus-daemon', '--nofork', '--config-file=' + str(bus_config)])
+                wait_for(bus_socket.exists, 'Private D-Bus did not start')
+                env['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=' + str(bus_socket)
+                subprocess.run([str(binary), '--validate', '-c', str(config)], env=env,
+                               stdout=log, stderr=log, check=True)
+                compositor = spawn([str(binary), '-c', str(config)])
+
+                def compositor_ready():
+                    sockets = list(Path(runtime).glob('sway-ipc*.sock'))
+                    displays = [p for p in Path(runtime).glob('wayland-*') if p.suffix != '.lock']
+                    if sockets and displays:
+                        env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                        return True
+                    return False
+                wait_for(compositor_ready, 'Private compositor did not start', compositor)
+                panel = spawn(['waybar', '-c', str(output / 'waybar.json'), '-s', str(output / 'waybar.css')])
+                wait_for(lambda: 'Bar configured' in (output / 'runtime.log').read_text(),
+                         'Preview Waybar did not configure', panel, attempts=150, pause=.2)
+                caption = spawn([str(home_bin / 'oldbook-decoration'), 'daemon'])
+
+                cards = [('field', '01  /  FIELD NOTES', None),
+                         ('desk', '02  /  THE OBSERVATORY · RESEARCH DESK', None),
+                         ('signal', '03  /  INCOMING TRANSMISSION', (880, 520, 500, 300))]
+                for name, title, geometry in cards:
+                    app_id = 'preview-' + name
+                    process = spawn(['foot', '-c', str(profile / 'foot/foot.ini'),
+                                     '--override=resize-by-cells=no', '--app-id=' + app_id,
+                                     '--title=' + title, 'python3', str(CONCEPT / 'client.py'), name])
+                    wait_for(lambda: any(n.get('app_id') == app_id for n in walk(ipc(None, 'get_tree'))),
+                             'Preview Foot did not map', process)
+                    time.sleep(.2)
+                    if geometry:
+                        x, y, width, height = geometry
+                        ipc(f'[app_id="{app_id}"] floating enable, resize set width {width} px '
+                            f'height {height} px, move absolute position {x} px {y} px')
+                    time.sleep(.2)
+                for name, _, _ in cards:
+                    ipc(f'[app_id="preview-{name}"] title_format "%title"')
+                time.sleep(.5)
+                if caption.poll() is not None:
+                    raise RuntimeError('Caption daemon exited; see runtime.log')
+                ipc('[app_id="preview-desk"] focus')
+                time.sleep(1.5)
+                screenshot('production.png')
+                ipc('[app_id="preview-signal"] focus')
+                time.sleep(1.5)
+                screenshot('production-floating.png')
+                if args.power_deck:
+                    deck = spawn(['wlogout', '-p', 'layer-shell', '-b', '5', '-c', '22', '-r', '0',
+                                  '-L', '96', '-R', '96', '-T', '300', '-B', '300',
+                                  '-l', str(desktop / 'wlogout/layout'), '-C', str(desktop / 'wlogout/style.css')])
+                    time.sleep(1.5)
+                    if deck.poll() is not None:
+                        raise RuntimeError('wlogout exited; see runtime.log')
+                    screenshot('power-deck.png')
+                    os.killpg(deck.pid, signal.SIGTERM)
+                (output / 'tree.json').write_text(json.dumps(ipc(None, 'get_tree'), indent=2) + '\n')
+            finally:
+                for process in reversed(processes):
+                    if process.poll() is None:
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait(timeout=5)
+    (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+    for name in evidence['screenshots']:
+        print(output / name)
+
+
+if __name__ == '__main__':
+    main()

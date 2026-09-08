@@ -1,0 +1,44 @@
+#!/bin/sh
+# Space Ghost power deck: wlogout over the blurred desktop, or the command
+# deck's session menu when wlogout is not installed. The subcommands are the
+# deck's own actions, so the layout never needs shell features of its own.
+set -eu
+
+bin=$HOME/.local/bin
+case ${1:-deck} in
+    deck)
+        if ! command -v wlogout >/dev/null 2>&1; then
+            exec "$bin/oldbook-control" power
+        fi
+        # A second press closes the open deck instead of stacking another.
+        if pkill -u "$(id -u)" -x wlogout 2>/dev/null; then
+            exit 0
+        fi
+        # Five tiles in one row on the 1440x900 logical display; the layer-shell
+        # surface spans the output so the desktop shows through the blur.
+        exec wlogout -p layer-shell -b 5 -c 22 -r 0 -L 96 -R 96 -T 300 -B 300
+        ;;
+    lock)
+        exec "$bin/oldbook-lock"
+        ;;
+    suspend)
+        # Suspend only behind a verified lock, exactly like the command deck.
+        if "$bin/oldbook-lock"; then
+            exec loginctl suspend
+        fi
+        exit 1
+        ;;
+    logout)
+        exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+        ;;
+    reboot)
+        exec swaynag -t warning -m 'Reboot the Oldbook?' -B 'Reboot' 'loginctl reboot'
+        ;;
+    shutdown)
+        exec swaynag -t warning -m 'Power off the Oldbook?' -B 'Shut down' 'loginctl poweroff'
+        ;;
+    *)
+        printf '%s\n' 'usage: oldbook-power [deck|lock|suspend|logout|reboot|shutdown]' >&2
+        exit 64
+        ;;
+esac
