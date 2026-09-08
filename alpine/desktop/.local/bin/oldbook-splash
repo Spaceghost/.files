@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""Space Ghost splash: fastfetch with a painting this terminal can draw.
+
+Ghostty speaks the kitty graphics protocol and Foot speaks sixel, but the
+installed fastfetch cannot decode images by itself: it looks for ImageMagick at
+runtime and that library is not part of the package closure.  So the logo is
+prepared here.  Ghostty is asked to read the PNG directly (the kitty "file"
+medium, no pixels cross the pty).  Foot receives a sixel stream encoded once
+per painting and cell size and cached under XDG_CACHE_HOME.  Everything else,
+including SSH sessions and unknown terminals, gets the text ghost.
+
+The .zshrc guard runs this once per terminal, outside tmux, on a real TTY.
+Set OLDBOOK_SPLASH_LOGO to kitty, sixel, text or none to override detection.
+"""
+import base64
+import fcntl
+import hashlib
+import itertools
+import math
+import os
+from pathlib import Path
+import struct
+import sys
+import termios
+
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'fastfetch'
+CACHE = Path(os.environ.get('XDG_CACHE_HOME', Path.home() / '.cache')) / 'oldbook/splash'
+PAINTING = Path.home() / '.local/share/oldbook/wallpaper.png'
+TEXT_LOGO = CONFIG / 'ghost.txt'
+KITTY_TERMINALS = {'ghostty', 'kitty', 'wezterm', 'wezterm-gui', 'konsole', 'wayst'}
+SIXEL_TERMINALS = {'foot', 'footclient', 'mlterm', 'contour', 'xterm'}
+MAX_COLUMNS = 30
+
+
+def parent_of(pid):
+    """The parent PID from /proc; the field after the parenthesised name."""
+    try:
+        stat = (Path('/proc') / str(pid) / 'stat').read_text()
+        return int(stat.rsplit(')', 1)[1].split()[1])
+    except (OSError, ValueError, IndexError):
+        return 0
+
+
+def process_name(pid):
+    try:
+        return (Path('/proc') / str(pid) / 'comm').read_text().strip()
+    except OSError:
+        return ''
+
+
+def detect_protocol():
+    override = os.environ.get('OLDBOOK_SPLASH_LOGO', '').strip().lower()
+    if override in ('kitty', 'sixel', 'text', 'none'):
+        return override
+    if os.environ.get('TERM_PROGRAM', '').lower() == 'ghostty':
+        return 'kitty'
+    pid = os.getppid()
+    for _ in range(6):
+        if pid <= 1:
+            break
+        name = process_name(pid).lower()
+        if name in KITTY_TERMINALS:
+            return 'kitty'
+        if name in SIXEL_TERMINALS:
+            return 'sixel'
+        pid = parent_of(pid)
+    return 'text'
+
+
+def terminal_geometry():
+    """Columns, rows and the cell size in pixels, with safe defaults."""
+    try:
+        packed = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, b'\0' * 8)
+        rows, columns, xpixel, ypixel = struct.unpack('HHHH', packed)
+    except (OSError, ValueError):
+        rows, columns, xpixel, ypixel = 0, 0, 0, 0
+    columns = columns or 80
+    rows = rows or 24
+    cell_w = xpixel // columns if xpixel and columns else 10
+    cell_h = ypixel // rows if ypixel and rows else 20
+    return columns, rows, max(1, cell_w), max(1, cell_h)
+
+
+def logo_cells(columns, cell_w, cell_h, width, height):
+    logo_columns = MAX_COLUMNS if columns >= 84 else max(10, columns // 3)
+    logo_rows = max(1, math.ceil(logo_columns * cell_w * height / (width * cell_h)))
+    return logo_columns, logo_rows
+
+
+def load_pixbuf(path):
+    import gi
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import GdkPixbuf
+    return GdkPixbuf, GdkPixbuf.Pixbuf.new_from_file(str(path))
+
+
+def png_size(path):
+    with path.open('rb') as stream:
+        header = stream.read(24)
+    if header[:8] != b'\x89PNG\r\n\x1a\n' or header[12:16] != b'IHDR':
+        raise ValueError('The splash logo must be a PNG')
+    width, height = struct.unpack('>II', header[16:24])
+    return width, height
+
+
+def run_length(data):
+    parts = []
+    for byte, group in itertools.groupby(data):
+        count = len(list(group))
+        char = bytes((byte,))
+        parts.append(b'!%d%s' % (count, char) if count > 3 else char * count)
+    return b''.join(parts)
+
+
+def encode_sixel(pixels):
+    """A 216-colour cube with ordered dithering: no decoder or palette library needed."""
+    import numpy as np
+    height, width, _ = pixels.shape
+    bayer = (np.array([[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]],
+                      dtype=np.float32) / 16.0 - 0.5)
+    threshold = np.tile(bayer, (height // 4 + 1, width // 4 + 1))[:height, :width][..., None]
+    levels = np.clip(np.round(pixels.astype(np.float32) / 51.0 + threshold * 0.85), 0, 5)
+    index = (levels[..., 0] * 36 + levels[..., 1] * 6 + levels[..., 2]).astype(np.uint8)
+    out = [b'\x1bPq', b'"1;1;%d;%d' % (width, height)]
+    for color in range(216):
+        out.append(b'#%d;2;%d;%d;%d' % (color, color // 36 * 20, color // 6 % 6 * 20, color % 6 * 20))
+    weights = (1 << np.arange(6, dtype=np.uint8))[:, None]
+    for band in range(height // 6):
+        rows = index[band * 6:(band + 1) * 6]
+        for position, color in enumerate(np.unique(rows)):
+            bits = ((rows == color) * weights).sum(axis=0).astype(np.uint8)
+            line = run_length(bytes(bits + 63)).rstrip(b'?')
+            if position:
+                out.append(b'$')
+            out.append(b'#%d' % color + line)
+        out.append(b'-')
+    out.append(b'\x1b\\')
+    return b''.join(out)
+
+
+def sixel_logo(painting, logo_columns, logo_rows, cell_w, cell_h):
+    digest = hashlib.sha256(painting.read_bytes()).hexdigest()[:16]
+    target = CACHE / f'{digest}-{logo_columns}x{logo_rows}-{cell_w}x{cell_h}.sixel'
+    if target.is_file():
+        return target
+    GdkPixbuf, pixbuf = load_pixbuf(painting)
+    import numpy as np
+    width = logo_columns * cell_w
+    height = max(6, math.floor(width * pixbuf.get_height() / pixbuf.get_width() / 6) * 6)
+    scaled = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+    if scaled.get_has_alpha():
+        scaled = scaled.composite_color_simple(width, height, GdkPixbuf.InterpType.NEAREST,
+                                               255, 16, 0x282828, 0x282828)
+    stride, channels = scaled.get_rowstride(), scaled.get_n_channels()
+    raw = np.frombuffer(scaled.get_pixels(), dtype=np.uint8)
+    rows = np.lib.stride_tricks.as_strided(raw, shape=(height, width, channels),
+                                           strides=(stride, channels, 1))
+    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
+    temporary.write_bytes(encode_sixel(np.ascontiguousarray(rows[..., :3])))
+    temporary.replace(target)
+    return target
+
+
+def kitty_logo(painting, logo_columns, logo_rows):
+    """Ask the terminal to read the PNG itself; only the path crosses the pty."""
+    target = CACHE / f'kitty-{logo_columns}x{logo_rows}.apc'
+    CACHE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    encoded = base64.b64encode(str(painting.resolve()).encode())
+    body = b'\x1b_Gq=2,a=T,t=f,f=100,C=1,c=%d,r=%d;%s\x1b\\' % (logo_columns, logo_rows, encoded)
+    temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
+    temporary.write_bytes(body)
+    temporary.replace(target)
+    return target
+
+
+def logo_arguments(protocol):
+    if protocol in ('none', 'text') or not PAINTING.is_file():
+        if protocol != 'none' and TEXT_LOGO.is_file():
+            return ['--logo-type', 'file', '--logo', str(TEXT_LOGO)]
+        return ['--logo-type', 'none']
+    columns, _rows, cell_w, cell_h = terminal_geometry()
+    width, height = png_size(PAINTING)
+    logo_columns, logo_rows = logo_cells(columns, cell_w, cell_h, width, height)
+    if protocol == 'kitty':
+        logo = kitty_logo(PAINTING, logo_columns, logo_rows)
+    else:
+        logo = sixel_logo(PAINTING, logo_columns, logo_rows, cell_w, cell_h)
+    return ['--logo-type', 'raw', '--logo', str(logo),
+            '--logo-width', str(logo_columns), '--logo-height', str(logo_rows)]
+
+
+def main(argv):
+    try:
+        arguments = logo_arguments(detect_protocol())
+    except (OSError, ValueError, ImportError) as error:
+        print('oldbook-splash: ' + str(error), file=sys.stderr)
+        arguments = (['--logo-type', 'file', '--logo', str(TEXT_LOGO)] if TEXT_LOGO.is_file()
+                     else ['--logo-type', 'none'])
+    os.execvp('fastfetch', ['fastfetch', *arguments, *argv])
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])

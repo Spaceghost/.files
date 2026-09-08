@@ -1,0 +1,44 @@
+// Space Ghost splash: what greets a new terminal. Gruvbox keys, the desktop's
+// own state beside the painting, and the terminal palette as a row of dots.
+// oldbook-splash supplies the logo (kitty graphics in Ghostty, sixel in Foot,
+// the text ghost elsewhere); this file only describes the layout.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "padding": { "top": 1, "left": 1, "right": 3 },
+    "color": { "1": "#fabd2f", "2": "#ebdbb2", "3": "#928374" }
+  },
+  "display": {
+    "separator": "  ",
+    "color": { "keys": "#fabd2f", "title": "#fabd2f", "output": "#ebdbb2", "separator": "#928374" },
+    "key": { "width": 16 },
+    "size": { "binaryPrefix": "iec", "maxPrefix": "TB" },
+    "percent": { "type": 9 },
+    "bar": { "width": 10, "char": { "elapsed": "━", "total": "─" }, "border": { "left": "", "right": "" } }
+  },
+  "modules": [
+    { "type": "custom", "format": "{#1}{#keys}󰊠  GHOST PLANET{#}   {#separator}Coast to Coast · broadcasting live from the Oldbook{#}" },
+    { "type": "custom", "format": "{#separator}──────────────────────────────────────────────────────────{#}" },
+    { "type": "os", "key": "  System", "format": "{pretty-name}" },
+    { "type": "kernel", "key": "󰌽  Kernel", "format": "{release}" },
+    { "type": "uptime", "key": "󰅐  Uptime" },
+    { "type": "packages", "key": "󰏖  Packages" },
+    { "type": "shell", "key": "󰆍  Shell", "format": "{pretty-name} {version}" },
+    { "type": "wm", "key": "󰖲  Compositor" },
+    { "type": "terminal", "key": "  Terminal", "format": "{pretty-name} {version}" },
+    { "type": "terminalfont", "key": "󰛖  Font" },
+    { "type": "custom", "format": "{#separator}──────────────────────────────────────────────────────────{#}" },
+    { "type": "cpu", "key": "󰻠  CPU", "format": "{name} · {cores-physical} cores" },
+    { "type": "gpu", "key": "󰢮  GPU", "format": "{name}" },
+    { "type": "memory", "key": "󰍛  Memory" },
+    { "type": "disk", "key": "󰋊  Disk", "folders": "/", "format": "{size-used} / {size-total} ({size-percentage})" },
+    { "type": "battery", "key": "󰁹  Battery", "format": "{capacity} {status}" },
+    { "type": "custom", "format": "{#separator}──────────────────────────────────────────────────────────{#}" },
+    { "type": "command", "key": "󰜘  Fossil", "text": "cd ~/.files 2>/dev/null && fossil branch current 2>/dev/null" },
+    { "type": "command", "key": "󰸉  Painting", "text": "jq -r '.title // empty' ~/.local/state/oldbook/wallpaper/state.json 2>/dev/null" },
+    { "type": "command", "key": "󰂺  Scripture", "text": "jq -r '.reference // empty' ~/.local/state/oldbook/scripture/selection.json 2>/dev/null" },
+    { "type": "media", "key": "󰝚  On air", "format": "{title}  {#separator}· {artist}{#}" },
+    { "type": "break" },
+    { "type": "colors", "symbol": "circle", "paddingLeft": 2 }
+  ]
+}

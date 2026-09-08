@@ -38,3 +38,10 @@ alias v='nvim'
 alias c='clear'
 command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
 command -v starship >/dev/null && eval "$(starship init zsh)"
+
+# Space Ghost splash: once per terminal, never inside tmux, only on a real TTY.
+# oldbook-splash picks the image protocol; nested shells inherit the guard.
+if [[ -z $OLDBOOK_SPLASH && -z $TMUX && -t 1 && -x $HOME/.local/bin/oldbook-splash ]]; then
+    export OLDBOOK_SPLASH=1
+    "$HOME/.local/bin/oldbook-splash"
+fi
