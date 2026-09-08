@@ -1,0 +1,1386 @@
+{
+  "scenarios": [
+    {
+      "scenario": "01-free",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 16,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 16,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 16,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 845
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 845
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "02-tiled",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 60,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 60,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 60,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 801
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 801
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "03-floating",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 16,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 16,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 16,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 845
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 845
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "04-fullscreen",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 60,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 60,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 60,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [],
+      "bar_extent": null,
+      "surfaces": [
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "05-restored-floating",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 16,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 16,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 16,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 845
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 845
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "06-clear",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 16,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 16,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 16,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 845
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 845
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "07-workspace-caption",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 60,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 60,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 60,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 801
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 801
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "overlay",
+          "extent": {
+            "width": 1440,
+            "height": 28,
+            "x": 0,
+            "y": 867
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "scenario": "08-caption-cleared",
+      "screen": {
+        "name": "HEADLESS-1",
+        "width": 1440,
+        "height": 900,
+        "top": 60,
+        "bottom": 60,
+        "left": 16,
+        "right": 60,
+        "origin_y": 40
+      },
+      "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+      "bar_bottom": 16,
+      "pids": {
+        "masthead": 10766,
+        "ghost": 10776
+      },
+      "bar_properties": {
+        "bottom": 16,
+        "left": 340,
+        "screen": {
+          "name": "HEADLESS-1",
+          "width": 1440,
+          "height": 900,
+          "top": 60,
+          "bottom": 16,
+          "left": 16,
+          "right": 16,
+          "origin_y": 40
+        }
+      },
+      "placements": [
+        {
+          "id": "masthead",
+          "x": 20,
+          "y": 60,
+          "width": 280,
+          "height": 100,
+          "cell": {
+            "left": 1,
+            "top": 3,
+            "columns": 14,
+            "rows": 5
+          },
+          "score": -0.2312,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        },
+        {
+          "id": "ghost",
+          "x": 1160,
+          "y": 720,
+          "width": 220,
+          "height": 120,
+          "cell": {
+            "left": 58,
+            "top": 36,
+            "columns": 11,
+            "rows": 6
+          },
+          "score": -0.5239,
+          "background": [
+            29,
+            32,
+            33
+          ]
+        }
+      ],
+      "conky_extents": [
+        {
+          "width": 1,
+          "height": 1,
+          "x": 1160,
+          "y": 720
+        },
+        {
+          "width": 1,
+          "height": 1,
+          "x": 20,
+          "y": 60
+        }
+      ],
+      "bar_extent": {
+        "width": 760,
+        "height": 39,
+        "x": 340,
+        "y": 845
+      },
+      "surfaces": [
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 1160,
+            "y": 720
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "conky",
+          "layer": "background",
+          "extent": {
+            "width": 1,
+            "height": 1,
+            "x": 20,
+            "y": 60
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "oldbook-scripture",
+          "layer": "bottom",
+          "extent": {
+            "width": 760,
+            "height": 39,
+            "x": 340,
+            "y": 845
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        },
+        {
+          "namespace": "top",
+          "layer": "top",
+          "extent": {
+            "width": 1440,
+            "height": 40,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    }
+  ],
+  "isolated_home_runtime_compositor": true,
+  "window_changes_keep_conky_processes_and_placements": true,
+  "idle_bar": {
+    "measured_seconds": 5.003,
+    "cpu_seconds": 0.01,
+    "percent_of_one_core": 0.2
+  },
+  "disabled_panels_stay_disabled": true,
+  "native_origins_match_planner_with_top_exclusive_zone": true,
+  "conky_extent_note": "SwayFX reports desired layer size 1x1; screenshots show rendered cards at the recorded origins.",
+  "status": "passed"
+}

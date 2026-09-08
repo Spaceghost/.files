@@ -20,8 +20,8 @@ from gi.repository import Gtk, Gdk, GLib, GtkLayerShell
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
-sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
-import conky_layout
+from overlay_theme import gtk_css, read_palette
+from desktop_space import read_screen, search_rectangle
 
 STATE = Path.home() / '.local/state/oldbook/scripture'
 FINDER = REPO / 'alpine/desktop/.local/bin/oldbook-scripture'
@@ -35,10 +35,16 @@ class SearchBar:
         GtkLayerShell.init_for_window(self.window)
         GtkLayerShell.set_namespace(self.window, 'oldbook-scripture')
         GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        # Match the planner’s absolute screen coordinates, independent of bars.
+        GtkLayerShell.set_exclusive_zone(self.window, -1)
         GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
-        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, 26)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.LEFT, True)
         GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
         self.window.set_size_request(WIDTH, -1)
+        self.geometry = None
+        self.refresh_geometry()
+        self.geometry_timer = GLib.timeout_add_seconds(1, self.refresh_geometry)
+        self.window.connect('destroy', self.cleanup_geometry)
 
         button = Gtk.EventBox()
         button.get_style_context().add_class('bar')
@@ -64,7 +70,13 @@ class SearchBar:
         self.button = button
         self.window.add(button)
 
-        self.apply_theme()
+        self.palette = None
+        self.provider = Gtk.CssProvider()
+        Gtk.StyleContext.add_provider_for_screen(
+            self.window.get_screen(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.refresh_theme()
+        self.theme_timer = GLib.timeout_add_seconds(1, self.refresh_theme)
+        self.window.connect('destroy', self.cleanup_theme)
         self.window.show_all()
         STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
         (STATE / 'bar.pid').write_text(f'{os.getpid()}\n')
@@ -76,35 +88,57 @@ class SearchBar:
         (style.add_class if inside else style.remove_class)('hover')
         return False
 
-    def apply_theme(self):
+    def refresh_geometry(self):
         try:
-            from theme_catalog import load_theme
-            palette = conky_layout.resolve_palette(load_theme(REPO))
-        except Exception:
-            palette = conky_layout.resolve_palette({})
-        css = f'''
-        #scripture-bar {{ background: transparent; }}
-        .bar {{
-            background: alpha({palette['background']}, 0.72);
-            border: 1px solid alpha({palette['accent']}, 0.40);
+            screen = read_screen()
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
+            return GLib.SOURCE_CONTINUE
+        if screen == self.geometry:
+            return GLib.SOURCE_CONTINUE
+        display = Gdk.Display.get_default()
+        for index in range(display.get_n_monitors()):
+            if Gdk.Screen.get_default().get_monitor_plug_name(index) == screen['name']:
+                GtkLayerShell.set_monitor(self.window, display.get_monitor(index))
+                break
+        rectangle = search_rectangle(screen)
+        self.window.set_size_request(rectangle['width'], -1)
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, screen['bottom'])
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rectangle['x'])
+        self.geometry = screen
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_geometry(self, *_arguments):
+        GLib.source_remove(self.geometry_timer)
+
+    def refresh_theme(self):
+        palette = read_palette()
+        if palette == self.palette:
+            return GLib.SOURCE_CONTINUE
+        self.provider.load_from_data(gtk_css('''
+        #scripture-bar { background: transparent; }
+        .bar {
+            background: alpha(@theme_background, 0.72);
+            border: 1px solid alpha(@theme_accent, 0.40);
             border-radius: 10px;
-        }}
-        .bar.hover {{ border-color: alpha({palette['accent']}, 0.85); }}
-        .entry-row {{ padding: 11px 16px; }}
-        .icon {{ color: {palette['accent']}; font-size: 13px; }}
-        .hint {{
-            color: {palette['muted']};
+        }
+        .bar.hover { border-color: alpha(@theme_accent, 0.85); }
+        .entry-row { padding: 11px 16px; }
+        .icon { color: @theme_accent; font-size: 13px; }
+        .hint {
+            color: @theme_muted;
             font-family: "JetBrainsMono Nerd Font", monospace; font-size: 12px;
-        }}
-        .shortcut {{
-            color: {palette['accent']};
+        }
+        .shortcut {
+            color: @theme_accent;
             font-family: "JetBrainsMono Nerd Font", monospace; font-size: 11px;
-        }}
-        '''
-        provider = Gtk.CssProvider()
-        provider.load_from_data(css.encode())
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        }
+        ''', palette))
+        self.palette = palette
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_theme(self, _window):
+        GLib.source_remove(self.theme_timer)
+        Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
 
     def open_finder(self, *_arguments):
         try:

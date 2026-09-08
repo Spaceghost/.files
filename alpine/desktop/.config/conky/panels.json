@@ -18,7 +18,7 @@
       "title": "Scripture",
       "enabled": true,
       "priority": 98,
-      "prefer": "right",
+      "prefer": "top-right",
       "width": 420,
       "height": 204,
       "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 60 ~/.local/bin/oldbook-scripture panel --width 52}"
@@ -48,7 +48,7 @@
       "title": "Coast to Coast",
       "enabled": true,
       "priority": 58,
-      "prefer": "bottom",
+      "prefer": "bottom-right",
       "width": 360,
       "height": 140,
       "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"

@@ -139,10 +139,22 @@ def _block_mean(array, columns, rows):
     return result
 
 
-def _region(grid, key, left, top, width, height):
-    values = [grid[key][row][column]
-              for row in range(top, top + height) for column in range(left, left + width)]
-    return values or [0.0]
+def _image_scores(grid, width, height):
+    """Measure each candidate rectangle once per panel size, in NumPy."""
+    import numpy
+
+    detail = numpy.asarray(grid['detail'], dtype=numpy.float64)
+    brightness = numpy.asarray(grid['brightness'], dtype=numpy.float64)
+    rows, columns = detail.shape[0] - height + 1, detail.shape[1] - width + 1
+    total = numpy.zeros((rows, columns), dtype=numpy.float64)
+    # Each addition handles every candidate at once. Close scores are checked
+    # with Python's sum below, preserving its float compensation and tie order.
+    for row in range(height):
+        for column in range(width):
+            total += detail[row:row + rows, column:column + columns]
+    windows = numpy.lib.stride_tricks.sliding_window_view(brightness, (height, width))
+    spread = windows.max(axis=(-2, -1)) - windows.min(axis=(-2, -1))
+    return (DETAIL_WEIGHT * (total / (width * height)) + CONTRAST_WEIGHT * spread).tolist()
 
 
 def region_colour(grid, left, top, width, height):
@@ -154,12 +166,16 @@ def region_colour(grid, left, top, width, height):
 
 
 def _score(grid, left, top, width, height, prefer, columns, rows):
-    detail = _region(grid, 'detail', left, top, width, height)
-    brightness = _region(grid, 'brightness', left, top, width, height)
-    mean_detail = sum(detail) / len(detail)
-    spread = max(brightness) - min(brightness)
-    score = DETAIL_WEIGHT * mean_detail + CONTRAST_WEIGHT * spread
+    detail = [grid['detail'][row][column]
+              for row in range(top, top + height) for column in range(left, left + width)]
+    brightness = [grid['brightness'][row][column]
+                  for row in range(top, top + height) for column in range(left, left + width)]
+    score = DETAIL_WEIGHT * (sum(detail) / len(detail)) + \
+        CONTRAST_WEIGHT * (max(brightness) - min(brightness))
+    return _position_score(score, left, top, width, height, prefer, columns, rows)
 
+
+def _position_score(score, left, top, width, height, prefer, columns, rows):
     centre_column = (left + width / 2) / columns
     centre_row = (top + height / 2) / rows
     # The subject of a painting normally sits near the middle; keep panels off it.
@@ -169,6 +185,11 @@ def _score(grid, left, top, width, height, prefer, columns, rows):
              'top': 1 - centre_row, 'bottom': centre_row}
     if prefer in edges:
         score -= EDGE_BONUS * edges[prefer]
+    elif prefer in ('top-right', 'bottom-right'):
+        # Give both edges a voice, while leaving a busy corner free to lose to
+        # a calmer region. A plain bottom preference ties the two corners.
+        vertical, horizontal = prefer.split('-')
+        score -= EDGE_BONUS * (edges[vertical] + edges[horizontal])
     return score
 
 
@@ -202,27 +223,40 @@ def place_panels(panels, grid, area, *, gap=1, reserved=()):
     last_column = columns - math.ceil(area.get('right', 0) / cell_width)
     taken = list(reserved_cells(reserved, grid, area))
     placements = []
+    image_scores = {}
     for panel in sorted(panels, key=lambda item: -item.get('priority', 0)):
         width = max(1, min(columns, round(panel['width'] / cell_width)))
         height = max(1, min(rows, round(panel['height'] / cell_height)))
+        if width > last_column - first_column or height > last_row - first_row:
+            continue
+        if (width, height) not in image_scores:
+            image_scores[width, height] = _image_scores(grid, width, height)
+        costs = image_scores[width, height]
+        prefer = panel.get('prefer')
         best = None
         for top in range(first_row, last_row - height + 1):
             for left in range(first_column, last_column - width + 1):
                 if any(_overlaps(left, top, width, height, other, gap) for other in taken):
                     continue
-                score = _score(grid, left, top, width, height, panel.get('prefer'), columns, rows)
+                score = _position_score(costs[top][left], left, top, width, height,
+                                        prefer, columns, rows)
+                if best is not None and abs(score - best[0]) < 1e-12:
+                    score = _score(grid, left, top, width, height, prefer, columns, rows)
+                    best = (_score(grid, best[1], best[2], width, height,
+                                   prefer, columns, rows), best[1], best[2])
                 if best is None or score < best[0]:
                     best = (score, left, top)
         if best is None:
             continue
         _, left, top = best
+        score = _score(grid, left, top, width, height, prefer, columns, rows)
         taken.append((left, top, width, height))
         placements.append({
             'id': panel['id'], 'x': int(round(left * cell_width)),
             'y': int(round(top * cell_height)),
             'width': int(round(width * cell_width)), 'height': int(round(height * cell_height)),
             'cell': {'left': left, 'top': top, 'columns': width, 'rows': height},
-            'score': round(best[0], 4),
+            'score': round(score, 4),
             'background': [round(channel) for channel in region_colour(grid, left, top, width, height)],
         })
     return placements
@@ -265,7 +299,7 @@ def render_config(panel, placement, colours, options):
         'own_window_class': lua_string('oldbook-conky'),
         'own_window_title': lua_string('oldbook-conky-' + panel['id']),
         'alignment': lua_string('top_left'),
-        'gap_x': placement['x'], 'gap_y': placement['y'],
+        'gap_x': placement['x'], 'gap_y': placement['y'] - options.get('origin_y', 0),
         'minimum_width': placement['width'], 'maximum_width': placement['width'],
         'minimum_height': placement['height'],
         'update_interval': options.get('update_interval', 60.0),
@@ -282,6 +316,9 @@ def render_config(panel, placement, colours, options):
         'override_utf8_locale': 'true', 'format_human_readable': 'true',
         'cpu_avg_samples': 2, 'net_avg_samples': 2, 'top_name_width': 12,
     }
+    if options.get('click_hook') and panel['id'] in ('scripture', 'witness', 'ghost', 'gallery'):
+        settings['lua_load'] = lua_string(options['click_hook'])
+        settings['lua_mouse_hook'] = lua_string('oldbook_click')
     for index, colour in enumerate(colours['series'][:6], start=3):
         settings[f'color{index}'] = lua_string(colour)
     lines = ['-- Generated by oldbook-conky; edits are replaced on the next wallpaper change.',

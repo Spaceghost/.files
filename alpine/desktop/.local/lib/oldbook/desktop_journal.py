@@ -73,7 +73,7 @@ def seed(db, records, legacy):
         db.execute("INSERT INTO metadata VALUES('seed-v1','imported')")
 
 
-def choose(db, now=None):
+def choose(db, now=None, advance=False):
     now = time.time() if now is None else now
     slot = int(now // INTERVAL)
     with db:
@@ -81,7 +81,7 @@ def choose(db, now=None):
         state = db.execute('SELECT * FROM rotation WHERE singleton=1').fetchone()
         previous = (db.execute('SELECT * FROM entries WHERE id=?', (state['entry_id'],)).fetchone()
                     if state else None)
-        if state and state['slot'] == slot and previous and previous['enabled']:
+        if not advance and state and state['slot'] == slot and previous and previous['enabled']:
             return dict(previous)
         counter = db.execute("SELECT value FROM metadata WHERE key='rotation-count'").fetchone()
         count = int(counter[0]) if counter else 0
@@ -122,6 +122,7 @@ def main():
     parser.add_argument('--database', type=Path, default=data / 'oldbook/journal/entries.sqlite3')
     commands = parser.add_subparsers(dest='action', required=True)
     commands.add_parser('show', help='print the current four-minute desktop excerpt')
+    commands.add_parser('next', help='advance the desktop excerpt immediately')
     commands.add_parser('list', help='print every complete entry as JSON')
     add = commands.add_parser('add', help='save a journal note or a Coast to Coast line')
     add.add_argument('--text', required=True)
@@ -138,8 +139,8 @@ def main():
             legacy_path = Path.home() / '.config/conky/panels.json'
             legacy = json.loads(legacy_path.read_text()).get('ghost_lines', []) if legacy_path.exists() else []
             seed(db, json.loads(source.read_text()), legacy)
-        if args.action == 'show':
-            print(render(choose(db)))
+        if args.action in ('show', 'next'):
+            print(render(choose(db, advance=args.action == 'next')))
         elif args.action == 'list':
             print(json.dumps([dict(row) for row in db.execute('SELECT * FROM entries ORDER BY id')],
                              ensure_ascii=False, indent=2))

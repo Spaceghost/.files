@@ -20,6 +20,24 @@ bytes, the screen geometry, the theme and the panel set, so one painting is
 always dressed the same way and is only re-analysed when one of those changes.
 `oldbook-wallpaper` refits the panels whenever the desktop image changes.
 
+Scripture search uses a 16-pixel margin when the bottom edge is free. A fullscreen
+window, tiled window reaching the bottom, or fixed edge bar moves it to a
+clearance position (at least 60 pixels). Floating captions do not displace it.
+Larger fixed bars reserve their actual depth plus breathing room. The bar reads
+Sway directly once a second, without launching polling subprocesses.
+
+Conky stays in stable clearance positions, with at least 60 pixels at the bottom
+and right. Window and fullscreen changes never trigger a Conky reflow or restart.
+This avoids repeated placement searches and keeps the slow content intervals
+intact. Conky margins compensate for the live Waybar top surface reported by
+SwayFX, so planned wallpaper coordinates match rendered coordinates. Insets and
+the search rectangle participate in the wallpaper layout cache.
+
+Scripture favors the upper right and Coast to Coast favors the lower right.
+The layouter can choose another position when the painting's subject or another
+card occupies the preferred corner. The Scripture search bar follows the active
+theme automatically, including theme changes while it is already running.
+
 Panels are fully transparent: the window colour is `#00000000` and legibility
 comes from the contrast pass plus a text shadow, never from a filled box.
 
@@ -45,6 +63,13 @@ also follow this policy. Email still needs a configured mailbox source.
 - **Super+Shift+/** searches Torah, Talmud and reflections, with Bible matches last.
 - The gallery picker (**Super+G**) also offers *Desktop panels · switch on/off*
   and *Refit desktop panels to this painting*.
+- **Click Scripture:** advance to the next verse or reflection.
+- **Click Witness:** advance its quotation.
+- **Click Coast to Coast:** advance the journal rotation.
+- **Click Ghost Gallery:** show the next painting.
+
+These clicks refresh the affected card immediately. They use Conky's native
+mouse handling; application windows above a card keep their own pointer input.
 
 ```sh
 oldbook-conky layout      # refit to the current wallpaper

@@ -1,5 +1,11 @@
 # Persistent desktop preferences
 
+Every desktop theme must be complete. The user explicitly rejects palette-only
+themes; do not introduce that category or treat recoloring a few overlays as a
+finished theme. Generated themes have the same requirement as built-in themes.
+Theme switching must apply the theme across the desktop and applications;
+silently retaining the previous theme's application styling is incomplete.
+
 Conky is a slow information display, not a system monitor. Preserve the user's
 explicit choice across theme changes, wallpaper pairing, template updates and
 rebuilds: no CPU/load/frequency, memory/swap/process, storage I/O, network or
@@ -32,3 +38,9 @@ Enter must save the choice and refresh only the Scripture card immediately;
 keep background refresh intervals at 60–300 seconds. Preserve the offline
 English Torah (JPS 1917) and Babylonian Talmud (William Davidson) collection,
 source manifests and attribution alongside the Bible and curated reflections.
+
+Keep Conky placement stable through window, focus and fullscreen changes; the
+user prefers no automatic reflow to abrupt motion or continuous CPU work.
+Use fixed caption clearance when laying out cards, favor useful lower-right
+space, and preserve native click-to-advance on the reading cards. Scripture
+search may adapt to free/occupied edges and must follow the active theme.

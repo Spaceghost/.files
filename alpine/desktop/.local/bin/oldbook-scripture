@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Choose and render the scripture shown on the desktop."""
 import argparse
+from datetime import date
 import json
 import fcntl
 import os
@@ -20,6 +21,7 @@ ASSETS = REPO / 'alpine/assets/scripture'
 STATE = Path.home() / '.local/state/oldbook/scripture'
 SELECTION = STATE / 'selection.json'
 TRANSLATION = STATE / 'translation'
+WITNESS_SELECTION = STATE / 'witness.json'
 PANEL_WIDTH = 52
 
 
@@ -49,10 +51,34 @@ def translation_title(identifier):
     return 'King James Version'
 
 
+def current_witness(quotes):
+    try:
+        selected = json.loads(WITNESS_SELECTION.read_text())
+    except (OSError, ValueError):
+        selected = {}
+    if selected.get('date') == date.today().isoformat():
+        match = next((entry for entry in quotes if entry['id'] == selected.get('id')), None)
+        if match:
+            return match
+    return scripture.daily_witness(quotes)
+
+
+def next_witness():
+    quotes = scripture.load_witnesses(ASSETS)
+    previous = current_witness(quotes)
+    entry = quotes[(quotes.index(previous) + 1) % len(quotes)]
+    state_directory()
+    temporary = WITNESS_SELECTION.with_name(f'witness.json.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps({'id': entry['id'], 'date': date.today().isoformat()}) + '\n')
+    temporary.replace(WITNESS_SELECTION)
+    refresh_panel('witness')
+    return 0
+
+
 def witness(width=PANEL_WIDTH):
     """A remark about the faith from someone who did not share it."""
     quotes = scripture.load_witnesses(ASSETS)
-    entry = scripture.daily_witness(quotes)
+    entry = current_witness(quotes)
     lines = ['${color1}' + entry['author'] + '${color2} · ' + entry['stance']]
     lines += ['${color}' + line for line in wrap('“' + entry['quote'] + '”', width, 6)]
     lines += ['${color2}' + line for line in wrap(entry['note'], width, 2)]
@@ -92,8 +118,10 @@ def write_selection(document):
     refresh_panel()
 
 
-def refresh_panel():
-    """Replace only the owned Scripture Conky, bypassing its cached execpi text."""
+def refresh_panel(identifier='scripture'):
+    """Replace only an owned text card, bypassing its cached execpi text."""
+    if identifier not in ('scripture', 'witness', 'ghost'):
+        raise ValueError('No refreshable text card: ' + identifier)
     directory = Path.home() / '.local/state/oldbook/conky'
     if not directory.is_dir() or (directory / 'disabled').exists():
         return
@@ -109,7 +137,7 @@ def refresh_panel():
                 time.sleep(.05)
         try:
             pids = json.loads((directory / 'pids.json').read_text())
-            pid = int(pids['scripture'])
+            pid = int(pids[identifier])
             descriptor = os.pidfd_open(pid)
         except (OSError, ValueError, KeyError):
             return
@@ -118,15 +146,15 @@ def refresh_panel():
             arguments = (proc / 'cmdline').read_bytes().split(b'\0')
             if (proc.stat().st_uid == os.getuid()
                     and (proc / 'exe').resolve().name == 'conky'
-                    and os.fsencode(directory / 'scripture.conf') in arguments):
-                config = directory / 'scripture.conf'
+                    and os.fsencode(directory / f'{identifier}.conf') in arguments):
+                config = directory / f'{identifier}.conf'
                 if not config.is_file():
                     return
-                with (directory / 'scripture.log').open('ab') as log:
+                with (directory / f'{identifier}.log').open('ab') as log:
                     replacement = subprocess.Popen(['conky', '-c', str(config)],
                         stdin=subprocess.DEVNULL, stdout=log, stderr=log,
                         start_new_session=True)
-                pids['scripture'] = replacement.pid
+                pids[identifier] = replacement.pid
                 temporary = directory / f'pids.json.{os.getpid()}.tmp'
                 temporary.write_text(json.dumps(pids, indent=2) + '\n')
                 temporary.replace(directory / 'pids.json')
@@ -189,6 +217,26 @@ def current(bible):
             'text': scripture.passage_text(records), 'figure': entry['figure'],
             'title': entry['title'], 'trial': entry['trial'],
             'reflection': entry['reflection'], 'practice': entry['practice']}
+
+
+def next_selection(bible):
+    """Continue a passage in its collection, or rotate the curated reflections."""
+    selected = current(bible)
+    if selected['kind'] == 'reflection':
+        entries = scripture.load_reflections(ASSETS)
+        index = next(index for index, entry in enumerate(entries) if entry['id'] == selected['id'])
+        return select_reflection(bible, entries[(index + 1) % len(entries)]['id'])
+    records = bible.lookup(selected['reference'])
+    if not records:
+        raise RuntimeError('The selected passage is not in the current collection')
+    last = records[-1]
+    collection = ('Torah' if last['book'].startswith('Torah ') else
+                  'Talmud' if last['book'].startswith('Talmud ') else 'Bible')
+    verses = [record for record in bible.verses
+              if ('Torah' if record['book'].startswith('Torah ') else
+                  'Talmud' if record['book'].startswith('Talmud ') else 'Bible') == collection]
+    following = verses[(verses.index(last) + 1) % len(verses)]
+    return select_reference(bible, scripture.format_reference([following]))
 
 
 def wrap(text, width, limit):
@@ -282,7 +330,7 @@ def main():
     parser.add_argument('action', nargs='?', default='panel',
                         choices=['panel', 'show', 'search', 'find', 'select',
                                  'select-reflection', 'figures', 'daily', 'bar',
-                                 'witness', 'translations', 'use'])
+                                 'witness', 'witness-next', 'next', 'refresh', 'translations', 'use'])
     parser.add_argument('query', nargs='*', help='A reference, reflection ID or search words.')
     parser.add_argument('--limit', type=int, default=25)
     parser.add_argument('--width', type=int, default=PANEL_WIDTH)
@@ -295,6 +343,11 @@ def main():
         return figures()
     if arguments.action == 'witness':
         return witness(arguments.width)
+    if arguments.action == 'witness-next':
+        return next_witness()
+    if arguments.action == 'refresh':
+        refresh_panel(query or 'scripture')
+        return 0
     if arguments.action == 'translations':
         for item in scripture.available_translations(ASSETS):
             mark = '*' if item['id'] == current_translation() else ' '
@@ -306,7 +359,10 @@ def main():
     if arguments.action == 'bar':
         helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
         os.execv('/usr/bin/python3', ['/usr/bin/python3', str(helper), *arguments.query])
-    bible = _LazyBible(include_extra=arguments.action != 'find' or arguments.all,
+    include_extra = arguments.action != 'find' or arguments.all
+    if arguments.action == 'next':
+        include_extra = read_selection().get('reference', '').startswith(('Torah ', 'Talmud '))
+    bible = _LazyBible(include_extra=include_extra,
                        translation=arguments.translation)
     if arguments.action == 'panel':
         return panel(bible, arguments.width)
@@ -315,6 +371,9 @@ def main():
     if arguments.action == 'daily':
         entry = scripture.daily_reflection(scripture.load_reflections(ASSETS))
         return select_reflection(bible, entry['id']) and 0
+    if arguments.action == 'next':
+        print(next_selection(bible))
+        return 0
     if not query:
         parser.error(f'{arguments.action} needs a reference, ID or search words')
     if arguments.action == 'show':
