@@ -494,7 +494,10 @@ class ShortcutProvider:
         display_key = cls._sway_key(key, bind_type)
         if flags['release']:
             display_key += ' (release)'
-        row = {'key': display_key, 'description': cls._sway_description(command)}
+        description = cls._sway_description(command)
+        if mode == 'window-switcher' and command == 'mode default':
+            description = 'Leave the overview and return to your window'
+        row = {'key': display_key, 'description': description}
         return identity, row, unbind
 
     @staticmethod
@@ -527,6 +530,8 @@ class ShortcutProvider:
             'mod4': 'Super', 'mod1': 'Alt', 'control': 'Ctrl', 'ctrl': 'Ctrl',
             'shift': 'Shift', 'return': 'Enter', 'prior': 'PageUp',
             'next': 'PageDown', 'space': 'Space',
+            'xf86launcha': 'Mission Control (F3)',
+            'xf86launchb': 'Launchpad (F4)',
         }
         parts = key.split('+')
         normalized = []
@@ -543,6 +548,12 @@ class ShortcutProvider:
     @staticmethod
     def _sway_description(command):
         command = _clean(command, 180)
+        if re.fullmatch(r'exec (?:[^ ]*/)?oldbook-carousel cancel, mode ["\']?default["\']?', command):
+            return 'Leave the overview and return to your window'
+        if re.fullmatch(r'exec (?:[^ ]*/)?oldbook-carousel cancel, mode ["\']?default["\']?, exec (?:[^ ]*/)?oldbook-menu', command):
+            return 'Leave the overview and open the application launcher'
+        if re.fullmatch(r'mode ["\']?default["\']?, exec (?:[^ ]*/)?oldbook-menu', command):
+            return 'Leave the overview and open the application launcher'
         if command == 'kill':
             return 'Close focused window'
         if command == 'reload':

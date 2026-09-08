@@ -338,7 +338,10 @@ def generate_native(config, prompt, env, log):
 
 def activate_artwork(record, metadata, entry):
     try:
-        if metadata.get('new_theme'):
+        # Apply the palette used for this painting, including existing themes.
+        # The active theme may have changed while generation was in progress.
+        # Unthemed artwork has no desktop profile to apply.
+        if entry.get('theme') not in (None, 'none'):
             response = subprocess.run(['/usr/bin/python3',
                 str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'), 'use', entry['theme']],
                 capture_output=True, text=True, timeout=120)

@@ -1,5 +1,33 @@
 # Persistent desktop preferences
 
+## Feature preservation contract
+
+Read [FEATURES.md](FEATURES.md) before changing the desktop, gallery, theme
+renderer, package closure or deployment. Its feature IDs pin the user's current
+behavior choices; historical PROGRESS entries and older screenshots do not
+override them. Run `alpine/bin/check-features <changed-path> ...` from the checkout
+to identify overlapping contracts and their existing checks. Use `--run` to run
+those checks, then perform the relevant native/visual verification described in
+the contract. Unmapped files need review; passing unit checks alone does not
+prove the live desktop or physical frame rate.
+
+Preserve every affected contract unless the current user request explicitly
+changes it. A new explicit choice authorizes updating that pin and recording
+which earlier choice it supersedes. Otherwise, when two requirements actually
+conflict, explain the concrete conflict and ask the user while continuing
+independent work. Do not silently drop behavior, reset personal settings, use a
+theme profile as permission to replace shared controls, or overwrite another
+session's edits. Update the contract and check index alongside intentional
+behavior changes; record validation gaps honestly in PROGRESS. Before a scoped
+Fossil commit, review source/install drift and the exact paths being committed.
+
+## Existing durable preferences
+
+Run AI inference on the Alienware's GPUs, not on this MacBook Pro. Do not start
+or restart a local Ollama server or model runner on the MacBook. Desktop
+responsiveness takes priority; an unavailable Alienware endpoint is not
+permission to fall back to the MacBook's CPU.
+
 The 0 key selects workspace 10. Keep STRATA on numeric workspace 10, displayed
 after workspaces 1–9; do not introduce a separate workspace 0 for it.
 Only Strata–Fossil is anchored there. Summon the console and system monitor on

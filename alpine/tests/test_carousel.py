@@ -45,6 +45,20 @@ class CarouselTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 decode_preview(data)
 
+    def test_retina_preview_keeps_all_native_pixels(self):
+        width, height = 2880, 1800
+        pixels = b'\x17\x89\xff' * (width * height)
+        result = decode_preview(f'P6\n{width} {height}\n255\n'.encode() + pixels)
+        self.assertEqual(result, (width, height, pixels))
+
+    def test_capture_uses_native_scale_without_a_thumbnail_override(self):
+        from carousel import capture_preview
+        response = Mock(stdout=b'P6\n1 1\n255\nabc')
+        with patch('carousel.subprocess.run', return_value=response) as run:
+            self.assertEqual(capture_preview({'foreign_toplevel_identifier': 'exact-window'}),
+                             (1, 1, b'abc'))
+        self.assertNotIn('-s', run.call_args.args[0])
+
     def test_runtime_is_scoped_to_compositor(self):
         first = runtime_directory(Path('/run/user/1000'), '/one.sock')
         self.assertNotEqual(first, runtime_directory(Path('/run/user/1000'), '/two.sock'))
@@ -80,6 +94,31 @@ class CarouselTests(unittest.TestCase):
         self.assertEqual(len(executor.calls), 2)
         executor.calls[1][2].set_result((1, 1, b'abc'))
         self.assertEqual(received, [(second, 1, 1, b'abc')])
+
+    def test_completed_rgb_payload_is_released_without_live_recapture(self):
+        executor = DeferredExecutor()
+        store = PreviewStore(executor, lambda callback: callback(), lambda *_args: None)
+        candidate = {'id': 9, 'pid': 100, 'app_id': 'one', 'foreign_toplevel_identifier': 'one'}
+        store.request([candidate])
+        executor.calls[0][2].set_result((2, 1, b'abcdef'))
+        self.assertEqual(store.pending, {})
+        self.assertEqual(store.dimensions[(9, 100, 'one')], (2, 1))
+        store.request([dict(candidate, title='The application changed')])
+        self.assertEqual(len(executor.calls), 1)
+        store.clear()
+        self.assertEqual(store.dimensions, {})
+        store.request([candidate])
+        self.assertEqual(len(executor.calls), 2)
+
+    def test_failed_preview_does_not_retry_during_the_same_opening(self):
+        executor = DeferredExecutor()
+        store = PreviewStore(executor, lambda callback: callback(), lambda *_args: None)
+        candidate = {'id': 9, 'pid': 100, 'app_id': 'one', 'foreign_toplevel_identifier': 'one'}
+        store.request([candidate])
+        executor.calls[0][2].set_result(None)
+        store.request([candidate])
+        self.assertEqual(len(executor.calls), 1)
+        self.assertEqual(store.pending, {})
 
     def test_mode_takeover_prevents_late_modifier_commit(self):
         controller = Controller.__new__(Controller)

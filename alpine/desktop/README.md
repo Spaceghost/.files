@@ -61,6 +61,8 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | `Super+C`, `Super+Shift+C` | Center the active window and bring it forward |
 | `Super+Ctrl+Shift+C` | Reload Sway configuration |
 | `Super+Tab` or `Alt+Tab` | Browse all windows in recent-use order; add Shift to reverse, release Super/Alt to select, or Escape to cancel. |
+| Mission Control key (F3 keycap) | Open or close the window overview. Fn+F3 remains an application key. |
+| Launchpad key (F4 keycap) | Open the application launcher, leaving the overview first if needed. Fn+F4 remains an application key. |
 | `Super+Shift+Space` | Float the window, size it to 90% of usable space, and center it with breathing room. |
 | Four-finger swipe up / down | Clear the desktop / restore its windows. Down opens the all-workspace carousel when nothing is hidden. |
 | `Super+0` | Workspace **10: Strata**, after workspaces 1–9. |
@@ -89,7 +91,10 @@ remains on Super+i and Super+Shift+i. The gesture-opened carousel stays open:
 use arrows, Tab/Shift+Tab, the wheel or a card click; Enter selects and Escape
 returns to the window you started from. Its angled previews are captured from
 each exact window, including other workspaces, without moving focus. Images
-stay in process memory and are discarded when the carousel closes.
+stay in process memory and are discarded when the carousel closes. Previews
+retain the capture source's full resolution and use trilinear sampling. They
+are still images: changing a window or revisiting its card does not refresh
+the image until the carousel is reopened.
 
 Leaving an exposed desktop ends that expose session and restores the captured
 output where necessary, preserving the workspace you chose. The warm

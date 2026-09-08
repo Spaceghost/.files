@@ -1,0 +1,65 @@
+{
+  "observed_at": "2026-09-07",
+  "device": {
+    "vendor": "05ac",
+    "product": "0274",
+    "name": "Apple Internal Keyboard / Trackpad"
+  },
+  "hid_apple_fnmode": "3",
+  "installed_module": "/lib/modules/6.18.49-0-lts/kernel/drivers/hid/hid-apple.ko.gz",
+  "installed_module_decompressed_sha256": "3d51c9886ed2ab9c5d979444caade27774b420fdd32b12189fa0f1e945bb0df6",
+  "installed_module_device_quirks": 5,
+  "mapping": [
+    {
+      "keycap": "Mission Control / F3",
+      "from_linux_keycode": 61,
+      "translated_linux_keycode": 120,
+      "linux_name": "KEY_SCALE",
+      "xkb_keycode": 128,
+      "keysym": "XF86LaunchA",
+      "with_fn": "F3"
+    },
+    {
+      "keycap": "Launchpad / F4",
+      "from_linux_keycode": 62,
+      "translated_linux_keycode": 204,
+      "linux_name": "KEY_ALL_APPLICATIONS / KEY_DASHBOARD",
+      "xkb_keycode": 212,
+      "keysym": "XF86LaunchB",
+      "with_fn": "F4"
+    }
+  ],
+  "local_sources": [
+    "/sys/module/hid_apple/parameters/fnmode",
+    "/sys/class/input/event2/device/id/vendor",
+    "/sys/class/input/event2/device/id/product",
+    "/sys/class/input/event2/device/capabilities/key",
+    "/usr/include/linux/input-event-codes.h",
+    "/usr/share/X11/xkb/symbols/inet",
+    "/usr/include/X11/XF86keysym.h"
+  ],
+  "upstream_driver_source": "https://raw.githubusercontent.com/torvalds/linux/v6.18/drivers/hid/hid-apple.c",
+  "physical_keyboard_events_read": 0,
+  "unit_test_results": {
+    "test_apple_overview.py": 4,
+    "test_shortcut_sources.py": 22,
+    "status": "passed"
+  },
+  "full_sway_config_validation": {
+    "command": "/usr/bin/swayfx --validate --config alpine/desktop/.config/sway/config",
+    "exit_code": 0
+  },
+  "source_sha256": {
+    "alpine/desktop/.config/sway/local.d/apple-overview.conf": "e0de78a3c2b0990be26b7382091dfee39ffe593f16a9aff6820c5adc731ff6d7",
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "c54ff19c1d1e888d52ba470f0a3fb16c571a75469a9d04189174ec4d59ae15e9",
+    "alpine/tests/test_apple_overview.py": "42f807ab6543fb63d500a839c9be7569b1b598e1605f4933d38b672e60fe88b1",
+    "alpine/tests/test_shortcut_sources.py": "9625050d7dc1a459ff5683bdab450a9bab77ab77edced61925ad37e9d943b459",
+    "alpine/tests/verify_apple_overview.py": "07ac38af6d5cdfd0129a50e704138cec5977df96399514ef89f71ef655bb79d7"
+  },
+  "fuzzel_release_note": {
+    "source": "https://codeberg.org/dnkl/fuzzel/raw/tag/1.14.1/CHANGELOG.md",
+    "observed_installed_version": "1.14.1-r0",
+    "cancellation_exit_code": 2,
+    "scope": "The 1.14 release changed dmenu cancellation from 1 to 2."
+  }
+}

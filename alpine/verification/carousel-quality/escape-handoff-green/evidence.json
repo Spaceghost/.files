@@ -1,0 +1,58 @@
+{
+  "status": "passed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "f761c54f0bbd269093e1f600a6c3e211cdc016139b12184b9aa01b9303428522",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "406128d6ea2545c4c5c7db64dfea26990e044a3ff749773d4a10e839d451b8fc",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "e93f9a8d3083a3a4676af15786b4359db4e73861fb15787e7ccc9d0cf50a90f9",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "f5e822cd0833abacba9a70330bbfcbb3a8f3521f7dce9615188c60878c1e9a24",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "escape-1-closes-via-mode-event",
+    "escape-1-reopen-survives-delayed-cancel",
+    "escape-2-closes-via-mode-event",
+    "escape-2-reopen-survives-delayed-cancel",
+    "escape-3-closes-via-mode-event",
+    "escape-3-reopen-survives-delayed-cancel",
+    "production-source-hashes-stable"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 10970
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 1,
+  "escape_handoff": true,
+  "verifier_sha256": "5812656fdded9e24eca626ba631b2c005dfd3260a1e0b1734fa1cd38c680d986",
+  "private_cancel_delay_seconds": 0.75,
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

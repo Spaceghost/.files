@@ -19,6 +19,7 @@ from window_switching import FocusHistory, SwitchState, identity, window_candida
 
 HEADER = struct.Struct('=6sII')
 ACTIONS = ('show', 'next', 'previous', 'commit', 'cancel', 'status')
+MAX_PREVIEW_PIXELS = 16 * 1024 * 1024
 
 
 class EventFrames:
@@ -49,10 +50,10 @@ def runtime_directory(runtime, sway):
 
 def decode_preview(data):
     from showdesktop import parse_ppm
-    if len(data) > 16 * 1024 * 1024:
+    if len(data) > MAX_PREVIEW_PIXELS * 3 + 65536:
         raise ValueError('preview exceeds size limit')
     width, height, offset = parse_ppm(data)
-    if width * height > 4 * 1024 * 1024:
+    if width * height > MAX_PREVIEW_PIXELS:
         raise ValueError('preview exceeds pixel limit')
     return width, height, data[offset:offset + width * height * 3]
 
@@ -61,11 +62,10 @@ def capture_preview(candidate):
     identifier = candidate.get('foreign_toplevel_identifier')
     if not identifier:
         return None
-    rect = candidate.get('rect') or {}
-    extent = max(rect.get('width', 1), rect.get('height', 1), 1)
-    scale = min(.35, 1200 / extent)
     try:
-        result = subprocess.run(['grim', '-T', identifier, '-s', str(scale), '-t', 'ppm', '-'],
+        # Keep every pixel supplied by the compositor's toplevel capture.
+        # One immutable snapshot per opening is enough; never poll live video.
+        result = subprocess.run(['grim', '-T', identifier, '-t', 'ppm', '-'],
                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
                                 timeout=3, check=True)
         return decode_preview(result.stdout)
@@ -80,21 +80,26 @@ class PreviewStore:
         self.executor, self.dispatch, self.deliver = executor, dispatch, deliver
         self.generation = 0
         self.pending = {}
+        self.requested = set()
         self.ready = set()
+        self.dimensions = {}
 
     def clear(self):
         self.generation += 1
         for future in self.pending.values():
             future.cancel()
         self.pending.clear()
+        self.requested.clear()
         self.ready.clear()
+        self.dimensions.clear()
 
     def request(self, candidates):
         generation = self.generation
         for candidate in candidates:
             token = identity(candidate)
-            if token in self.pending or not candidate.get('foreign_toplevel_identifier'):
+            if token in self.requested or not candidate.get('foreign_toplevel_identifier'):
                 continue
+            self.requested.add(token)
             future = self.executor.submit(capture_preview, dict(candidate))
             self.pending[token] = future
 
@@ -102,12 +107,16 @@ class PreviewStore:
                 def publish():
                     if generation != self.generation or done.cancelled():
                         return False
+                    # GTK owns the texture after delivery. Do not retain a
+                    # second full-resolution RGB image inside a done Future.
+                    self.pending.pop(key, None)
                     try:
                         pixels = done.result()
                     except Exception:
                         pixels = None
                     if pixels is not None:
                         self.ready.add(key)
+                        self.dimensions[key] = pixels[:2]
                         self.deliver(item, *pixels)
                     else:
                         self.deliver(item, 0, 0, None)
@@ -168,6 +177,9 @@ class Controller:
             self.watches.append(GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signum, self.stop))
         self.write_status()
 
+        from ui_priority import request_priority
+        request_priority()
+
     def candidates(self):
         return window_candidates(self.ipc['request'](self.sway, 4))
 
@@ -176,12 +188,15 @@ class Controller:
 
     def write_status(self):
         popup, state = self.popup, self.state
+        live = {identity(item) for item in state.candidates} if state else set()
         self.ipc['write_json'](self.directory / 'state.json', {
             'pid': os.getpid(), 'ready': not self.stopping, 'open': popup is not None,
             'selected_id': state.selected['id'] if state and state.selected else None,
             'candidate_ids': [item['id'] for item in state.candidates] if state else [],
             'modifier': self.modifier,
-            'preview_ids': sorted(token[0] for token in self.previews.ready),
+            'preview_ids': sorted(token[0] for token in self.previews.ready & live),
+            'preview_dimensions': {str(token[0]): list(size)
+                                   for token, size in self.previews.dimensions.items() if token in live},
             'frames': popup.frames if popup else self.closed_frames,
             'frame_times': list(popup.frame_times if popup else self.closed_frame_times)[-240:],
         })
@@ -215,7 +230,7 @@ class Controller:
                 if mask not in popup.current_modifiers():
                     self.action('commit')
             return False
-        self.GLib.timeout_add(50, released_before_map)
+        popup.when_keyboard_ready(released_before_map)
 
     def action(self, action, modifier=None):
         if action == 'status':

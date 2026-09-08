@@ -1,0 +1,69 @@
+{
+  "completed_at_utc": "2026-09-08T05:25:07.408877+00:00",
+  "provenance": "Read-only review of concurrently authored implementation; reviewer made no production or test edits, and no live Sway reload.",
+  "source_hashes": {
+    "alpine/desktop/.local/bin/oldbook-theme": "8aa0ee35dea7010a2ec32bfef895de3fdc3c7de330883538a1be650f52797bde",
+    "alpine/tests/test_theme_sway_reload.py": "b3be848e5dd91f4b4fcfe00807e39b91c904fcb8ead2c6f94ebe7009578d4093",
+    "alpine/tests/test_theme_session.py": "ac6132309b87c7077bede514b13ade7a8064e6b065066d57c1bf472715d82e34",
+    "alpine/tests/test_theme_refresh.py": "a25bc1cc4bf0b5be186767b76c8cb789a88449db655075d3a849ff8ef08d6f0b"
+  },
+  "source_hashes_match_review_start": true,
+  "checks": [
+    {
+      "command": "python3 -m unittest discover -s alpine/tests -p 'test_theme_sway_reload.py' -v",
+      "exit_code": 0,
+      "tests_passed": 8,
+      "reported_seconds": 6.648
+    },
+    {
+      "command": "python3 -m unittest discover -s alpine/tests -p 'test_theme_session.py' -v",
+      "exit_code": 0,
+      "tests_passed": 2,
+      "reported_seconds": 0.784
+    },
+    {
+      "command": "python3 -m unittest discover -s alpine/tests -p 'test_theme_refresh.py' -v",
+      "exit_code": 0,
+      "tests_passed": 4,
+      "reported_seconds": 24.594
+    }
+  ],
+  "implementation_review": {
+    "deadline_seconds": 20,
+    "absolute_deadline_covers": [
+      "connect",
+      "send",
+      "fragmented header",
+      "fragmented payload"
+    ],
+    "validation": [
+      "owned explicit SWAYSOCK",
+      "i3-ipc magic",
+      "command reply type 0",
+      "32 MiB payload upper bound",
+      "nonempty command result list",
+      "boolean success in every result",
+      "server rejection details preserved"
+    ],
+    "retries": "Only connect-before-send may retry; the reload command is never resubmitted after ambiguous timeout.",
+    "session_discovery": "Missing explicit SWAYSOCK fails visibly; intended gallery generator and activation inherit the identified session. No guessing another compositor."
+  },
+  "live_evidence_supplied_by_root": {
+    "path": "/home/jack/.local/state/oldbook/window-navigation-quality/reload-acknowledgement.json",
+    "sha256": "997e5e1a8dfedf1e51bd67b9042e384c141145fdf412d71b11c74226c9c5dc05",
+    "result": {
+      "elapsed_seconds": 8.199969592998968,
+      "response_type": 0,
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    },
+    "scope": "Root direct native IPC probe; proves compositor acknowledgement can exceed swaymsg fixed three-second timeout, not activation of this helper."
+  },
+  "limitations": [
+    "No live invocation of the new helper by this reviewer.",
+    "Successful reply fragmentation and oversize header branches were reviewed but do not have dedicated assertions in the current eight-test suite."
+  ]
+}

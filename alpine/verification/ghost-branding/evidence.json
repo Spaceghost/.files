@@ -1,0 +1,64 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "base-renders-original-purple-badge",
+      "passed": true,
+      "purple_pixels": 752,
+      "layers": [
+        {
+          "namespace": "top",
+          "layer": "overlay",
+          "extent": {
+            "width": 500,
+            "height": 35,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    },
+    {
+      "name": "waxen-meridian-renders-original-purple-badge",
+      "passed": true,
+      "purple_pixels": 752,
+      "layers": [
+        {
+          "namespace": "top",
+          "layer": "overlay",
+          "extent": {
+            "width": 500,
+            "height": 35,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    }
+  ],
+  "host_changes": 0,
+  "scope": "Real private Waybar custom/ghost; synthetic context only; no live input or helpers.",
+  "source_sha256": {
+    "alpine/desktop/.config/waybar/style.css": "40abe4f2574c779338f6b84fc38db04f6d992aa34b537b23163e174479fe3638",
+    "alpine/themes/profiles/waxen-meridian-373c11cb12f0/.config/waybar/style.css": "84dea4fb9570835027ca46ddaae93bfa2c876b812ec34e716342a2b291122ab9"
+  },
+  "verifier_sha256": "74147863b3ff7eb1fc4f267c43349583250d13f9e7f27c8ddd11e281b6fb2880",
+  "cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

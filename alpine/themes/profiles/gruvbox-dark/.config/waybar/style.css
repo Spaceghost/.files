@@ -24,14 +24,14 @@ window#waybar { background: transparent; color: #ebdbb2; }
     font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
     font-size: 21px;
     min-width: 36px;
-    color: #fbf1c7;
-    background: linear-gradient(135deg, #d79921, #af7414 60%, #d65d0e);
-    text-shadow: 0 0 5px #fabd2f;
+    color: #fff6ff;
+    background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
+    text-shadow: 0 0 5px #e3baff;
     border-radius: 10px;
     margin: 3px 5px 3px 3px;
     padding: 0;
 }
-#custom-ghost:hover { background: linear-gradient(135deg, #fabd2f, #d79921 65%, #fe8019); }
+#custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
 #workspaces { margin: 3px 5px 3px 0; }
 #workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 8px; color: #a89984; transition: all 180ms ease-in-out; }
 #workspaces button.empty { color: #7c6f64; }

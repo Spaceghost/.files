@@ -1,0 +1,122 @@
+{
+  "recovery": "The first activation passed parser/link deployment and replaced the old daemon, but its ten-second readiness observation expired. The new PID21698 subsequently became ready. This resumes verification without restarting it again.",
+  "state_before": {
+    "pid": 21698,
+    "ready": true,
+    "open": true,
+    "selected_id": 409,
+    "candidate_ids": [
+      409,
+      385,
+      412,
+      339,
+      421,
+      406,
+      19,
+      306,
+      361
+    ],
+    "modifier": null,
+    "preview_ids": [],
+    "preview_dimensions": {},
+    "frames": 1,
+    "frame_times": [
+      24092492374
+    ]
+  },
+  "windows_before": [
+    19,
+    132,
+    205,
+    306,
+    315,
+    319,
+    339,
+    361,
+    368,
+    385,
+    406,
+    409,
+    412,
+    421
+  ],
+  "reload_seconds": 8.159571463002067,
+  "state_after": {
+    "pid": 21698,
+    "ready": true,
+    "open": true,
+    "selected_id": 385,
+    "candidate_ids": [
+      409,
+      385,
+      412,
+      339,
+      421,
+      406,
+      19,
+      306,
+      361
+    ],
+    "modifier": null,
+    "preview_ids": [],
+    "preview_dimensions": {},
+    "frames": 1,
+    "frame_times": [
+      24092492374
+    ]
+  },
+  "windows_after": [
+    19,
+    132,
+    205,
+    306,
+    315,
+    319,
+    339,
+    361,
+    368,
+    385,
+    406,
+    409,
+    412,
+    421
+  ],
+  "removed_window_ids": [],
+  "binding_modes": [
+    "default",
+    "resize",
+    "window-switcher"
+  ],
+  "binding_mode": {
+    "name": "default"
+  },
+  "workspaces": [
+    1,
+    2,
+    3,
+    4,
+    10
+  ],
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/carousel.py": "3295ea8291eab9e71ef372fa599503aa31c18a022a6cae3d36920f12bf1df778",
+    "alpine/desktop/.local/lib/oldbook/carousel_view.py": "5d0377514fde7221901a9a9c7a322783cbd65523ff2086193c239a28c3a093de",
+    "alpine/desktop/.local/bin/oldbook-carousel": "6cdbc16e29a685b3ba50cc6f971e2d71d17fa2c44cfc3006b43bb9be3e13aa29",
+    "alpine/desktop/.config/sway/local.d/apple-overview.conf": "508ea4ab61a2b119f22bf3bac99f729ced5a4aa66a96387e41d0f58ec1579406",
+    "alpine/desktop/.config/sway/local.d/window-switcher.conf": "f761c54f0bbd269093e1f600a6c3e211cdc016139b12184b9aa01b9303428522",
+    "alpine/desktop/.local/bin/oldbook-theme": "8aa0ee35dea7010a2ec32bfef895de3fdc3c7de330883538a1be650f52797bde"
+  },
+  "apple_link": "/home/jack/.files/alpine/desktop/.config/sway/local.d/apple-overview.conf",
+  "current_theme": "the-bellows-intercept-b503d18336b4",
+  "theme_profile_links_match": false,
+  "painting": {
+    "id": "2026-09-07-the-bellows-intercept-b503d18336b4-scene-e542baaf069561be-806f1286ff0e",
+    "theme": "the-bellows-intercept-b503d18336b4"
+  },
+  "ghost_palette_present": true,
+  "theme_profile_links_match_except_runtime_state": true,
+  "runtime_state_exception": {
+    "path": ".config/waybar/waybar-state.css",
+    "reason": "The fullscreen dimmer intentionally replaces this generated CSS state file. All24 actual theme configuration links match the selected profile."
+  },
+  "activation_status": "ready"
+}

@@ -5,7 +5,7 @@ from overlay_theme import read_palette
 from window_switching import key_action, modifier_release_commits
 
 
-def spring_step(value, velocity, target, seconds, frequency=20.0):
+def spring_step(value, velocity, target, seconds, frequency=40.0):
     """Exact critically damped motion, independent of the display refresh rate."""
     seconds = max(0.0, seconds)
     offset = value - target
@@ -92,10 +92,15 @@ class Popup:
         self.frames, self.frame_times = 0, []
         self._tick_id, self._last_frame = None, None
         self._deferred = set()
+        self._keyboard_ready_callback = None
+        self._keyboard_focus_handler = None
+        self._keyboard_ready_source = None
+        self._keyboard_focus_epoch = 0
         self._position = self._target = float(state.index or 0)
         self._velocity, self._reveal, self._reveal_velocity = 0.0, 0.0, 0.0
         self._ids = [candidate['id'] for candidate in state.candidates]
         self._textures, self._layouts = {}, {}
+        self._card_nodes = {}
         self._unavailable = set()
         self._hovered = None
         self._last_scroll = 0
@@ -165,6 +170,12 @@ class Popup:
         if self.closed:
             return
         self.closed = True
+        self._keyboard_ready_callback = None
+        self._keyboard_focus_epoch += 1
+        self._keyboard_ready_source = None
+        if self._keyboard_focus_handler is not None:
+            self.window.disconnect(self._keyboard_focus_handler)
+            self._keyboard_focus_handler = None
         if self._tick_id is not None:
             self.stage.remove_tick_callback(self._tick_id)
             self._tick_id = None
@@ -180,6 +191,7 @@ class Popup:
         if not display.is_closed():
             display.sync()
         self._textures.clear()
+        self._card_nodes.clear()
         self._unavailable.clear()
         self._layouts.clear()
 
@@ -196,6 +208,8 @@ class Popup:
             self._textures = {identity: texture for identity, texture in self._textures.items()
                               if identity in ids}
             self._unavailable.intersection_update(ids)
+            self._card_nodes = {identity: cached for identity, cached in self._card_nodes.items()
+                                if identity in ids}
         elif ids:
             self._target += cyclic_delta(index, self._target, len(ids))
         self._layouts.clear()
@@ -209,6 +223,7 @@ class Popup:
         texture = self.Gdk.MemoryTexture.new(width, height, self.Gdk.MemoryFormat.R8G8B8,
                                               self.GLib.Bytes.new(bytes(pixels)), width * 3)
         self._textures[identity] = texture
+        self._card_nodes.pop(identity, None)
         self._unavailable.discard(identity)
         self.stage.queue_draw()
         return True
@@ -217,8 +232,55 @@ class Popup:
         if self.closed or identity not in self._ids:
             return False
         self._unavailable.add(identity)
+        self._card_nodes.pop(identity, None)
         self.stage.queue_draw()
         return True
+
+    def when_keyboard_ready(self, callback):
+        self._keyboard_ready_callback = callback
+        self._keyboard_focus_handler = self.window.connect(
+            'notify::is-active', self._keyboard_focus_changed)
+        self._keyboard_focus_changed()
+
+    def _keyboard_focus_changed(self, *_args):
+        self._keyboard_focus_epoch += 1
+        if self._keyboard_ready_source is not None:
+            self.GLib.source_remove(self._keyboard_ready_source)
+            self._deferred.discard(self._keyboard_ready_source)
+            self._keyboard_ready_source = None
+        if not self.closed and self._keyboard_ready_callback and self.window.is_active():
+            self._queue_keyboard_ready(self._keyboard_focus_epoch, False)
+
+    def _queue_keyboard_ready(self, epoch, synchronized):
+        source = self.GLib.idle_add(self._keyboard_ready, epoch, synchronized)
+        self._keyboard_ready_source = source
+        self._deferred.add(source)
+
+    def _keyboard_ready(self, epoch, synchronized):
+        self._deferred.discard(self._keyboard_ready_source)
+        self._keyboard_ready_source = None
+        if self.closed or epoch != self._keyboard_focus_epoch or not self.window.is_active():
+            return False
+        if not synchronized:
+            display = self.window.get_display()
+            if display.is_closed():
+                return False
+            # is-active follows Wayland keyboard enter. A roundtrip delivers
+            # the modifiers that the protocol requires after that enter,
+            # including an unchanged zero mask for a quick released hotkey.
+            display.sync()
+            if not self.closed and epoch == self._keyboard_focus_epoch:
+                # GDK queues focus events: let a queued focus-out run before
+                # deciding that the synchronized zero mask means release.
+                self._queue_keyboard_ready(epoch, True)
+            return False
+        callback, self._keyboard_ready_callback = self._keyboard_ready_callback, None
+        if self._keyboard_focus_handler is not None:
+            self.window.disconnect(self._keyboard_focus_handler)
+            self._keyboard_focus_handler = None
+        if callback:
+            callback()
+        return False
 
     def current_modifiers(self):
         seat = self.window.get_display().get_default_seat()
@@ -307,13 +369,16 @@ class Popup:
         if palette != self.palette:
             self.palette = palette
             self._colors.clear()
+            self._card_nodes.clear()
             self.stage.queue_draw()
         return True
 
     def _animate(self):
         self.stage.queue_draw()
         if self._tick_id is None:
-            self._last_frame = None
+            # Frame-clock timestamps share GLib's monotonic time base. Start
+            # at the input request so the first frame already shows movement.
+            self._last_frame = self.GLib.get_monotonic_time()
             self._tick_id = self.stage.add_tick_callback(self._tick)
 
     def _tick(self, _widget, clock):
@@ -321,13 +386,16 @@ class Popup:
             self._tick_id = None
             return False
         stamp = clock.get_frame_time()
-        seconds = min(.1, (stamp - self._last_frame) / 1000000) if self._last_frame else 0.0
+        # The exact spring stays stable across delayed frames: use all elapsed
+        # time instead of turning one missed frame into prolonged slow motion.
+        seconds = max(0.0, (stamp - self._last_frame) / 1000000)
         self._last_frame = stamp
         self.frames += 1
         self.frame_times.append(stamp)
         del self.frame_times[:-240]
         self._position, self._velocity = spring_step(self._position, self._velocity, self._target, seconds)
-        self._reveal, self._reveal_velocity = spring_step(self._reveal, self._reveal_velocity, 1.0, seconds)
+        self._reveal, self._reveal_velocity = spring_step(
+            self._reveal, self._reveal_velocity, 1.0, seconds, frequency=60.0)
         settled = (abs(self._position - self._target) < .0005 and abs(self._velocity) < .01
                    and abs(self._reveal - 1.0) < .0005 and abs(self._reveal_velocity) < .01)
         if settled:
@@ -406,28 +474,49 @@ class Popup:
         snapshot.rotate_3d(card['angle'], self.Graphene.Vec3().init(0, 1, 0))
         snapshot.scale(card['scale'], card['scale'])
         snapshot.translate(self.Graphene.Point().init(-width / 2, -height / 2))
-        snapshot.push_opacity(1.0 if card['index'] == self._hovered else card['opacity'])
+        hovered = card['index'] == self._hovered
+        snapshot.push_opacity(1.0 if hovered else card['opacity'])
+        snapshot.append_node(self._card_node(candidate, width, height, selected, hovered))
+        snapshot.pop()
+        snapshot.restore()
+
+    def _card_node(self, candidate, width, height, selected, hovered):
+        # These nodes retain the original texture and vector drawing operations.
+        # Only the changing perspective/position/opacity lives outside the cache.
+        identity = candidate['id']
+        texture = self._textures.get(identity)
+        title = candidate.get('title') or candidate.get('application') or 'Window'
+        application = candidate.get('application') or candidate.get('app_id') or 'Window'
+        signature = (width, height, title, application, texture, identity in self._unavailable)
+        cached = self._card_nodes.get(identity)
+        if cached is None or cached[0] != signature:
+            cached = (signature, {})
+            self._card_nodes[identity] = cached
+        variants = cached[1]
+        variant = selected, hovered
+        if variant in variants:
+            return variants[variant]
+        # At most four selection/hover variants are retained per candidate.
+        snapshot = self.Gtk.Snapshot.new()
         bounds = self._rectangle(0, 0, width, height)
         rounded = self.Gsk.RoundedRect().init_from_rect(bounds, 18)
         snapshot.append_outset_shadow(rounded, self._color('background_hard', .8), 0, 18, 0, 38)
-        if selected or card['index'] == self._hovered:
+        if selected or hovered:
             snapshot.append_outset_shadow(rounded, self._color('accent', .18), 0, 5, 0, 30)
         snapshot.push_rounded_clip(rounded)
         snapshot.append_color(self._color('surface'), bounds)
         snapshot.append_color(self._color('accent', .09 if selected else .025), bounds)
-        title = candidate.get('title') or candidate.get('application') or 'Window'
         self._text(snapshot, title, 18, 12, width - 36, 12, 'foreground', bold=selected)
         preview_bounds = self._rectangle(12, 38, width - 24, height - 50)
         preview_round = self.Gsk.RoundedRect().init_from_rect(preview_bounds, 10)
         snapshot.push_rounded_clip(preview_round)
         snapshot.append_color(self._color('background_hard'), preview_bounds)
-        texture = self._textures.get(candidate['id'])
         if texture is not None:
             x, y, fitted_width, fitted_height = letterbox(texture.get_width(), texture.get_height(),
                                                           width - 24, height - 50)
-            snapshot.append_texture(texture, self._rectangle(12 + x, 38 + y, fitted_width, fitted_height))
+            snapshot.append_scaled_texture(texture, self.Gsk.ScalingFilter.TRILINEAR,
+                self._rectangle(12 + x, 38 + y, fitted_width, fitted_height))
         else:
-            application = candidate.get('application') or candidate.get('app_id') or 'Window'
             self._text(snapshot, application, 30, height / 2 - 10, width - 60,
                        21, 'foreground', True, True)
             message = ('Preview unavailable · Enter still takes you there'
@@ -436,5 +525,6 @@ class Popup:
                        width - 60, 12, 'muted', centered=True)
         snapshot.pop()
         snapshot.pop()
-        snapshot.pop()
-        snapshot.restore()
+        node = snapshot.to_node()
+        variants[variant] = node
+        return node

@@ -1,0 +1,57 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "production-fragments-parse-together",
+      "passed": true
+    },
+    {
+      "name": "held-mission-control-opens-once",
+      "passed": true
+    },
+    {
+      "name": "launchpad-opens-application-menu",
+      "passed": true
+    },
+    {
+      "name": "held-mission-control-closes-once-and-restores-default-mode",
+      "passed": true
+    },
+    {
+      "name": "launchpad-cancels-overview-opens-menu-and-restores-default-mode",
+      "passed": true
+    },
+    {
+      "name": "later-mode-block-preserves-existing-escape-and-new-apple-keys",
+      "passed": true
+    },
+    {
+      "name": "raw-F3-reaches-application-without-desktop-action",
+      "passed": true
+    },
+    {
+      "name": "raw-F4-reaches-application-without-desktop-action",
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "alpine/desktop/.config/sway/local.d/apple-overview.conf": "e0de78a3c2b0990be26b7382091dfee39ffe593f16a9aff6820c5adc731ff6d7",
+    "alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "alpine/tests/verify_apple_overview.py": "07ac38af6d5cdfd0129a50e704138cec5977df96399514ef89f71ef655bb79d7"
+  },
+  "host_changes": 0,
+  "physical_keyboard_events_read": 0,
+  "scope": "Native Sway dispatch to private stubs; real Foot receives raw F3/F4. Does not test actual carousel/menu GTK teardown ordering.",
+  "application_key_bytes_hex": {
+    "F3": "1b4f52",
+    "F4": "1b4f53"
+  },
+  "dispatch_trace": [
+    "oldbook-carousel show",
+    "oldbook-menu ",
+    "oldbook-carousel cancel",
+    "oldbook-carousel cancel",
+    "oldbook-menu ",
+    "oldbook-carousel cancel"
+  ]
+}

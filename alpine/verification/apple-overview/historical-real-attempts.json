@@ -1,0 +1,91 @@
+[
+  {
+    "attempt": "apple-overview-real-native-20260907",
+    "status": "failed",
+    "passed_checks": 5,
+    "error": "Fuzzel did not cancel with Escape",
+    "fuzzel_exit_code": null,
+    "verifier_sha256": "420c622d79434be4d1ed22b392a3869311f1859297335c10f663c942dd30d317",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-real-diagnostic-20260907",
+    "status": "failed",
+    "passed_checks": 5,
+    "error": "Fuzzel did not cancel with Escape: exit 2",
+    "fuzzel_exit_code": 2,
+    "verifier_sha256": "2fc17302f09a617a2d97bde2e65ceaa0be886b793f67eae0811b882b5cae09b4",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-real-final-20260907",
+    "status": "failed",
+    "passed_checks": 5,
+    "error": "Fuzzel did not cancel with Escape: exit 1",
+    "fuzzel_exit_code": 1,
+    "verifier_sha256": "495a42496a4e7e38a3205437a27429663797de9bb45d80342bc628bcd17b04a3",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-real-persistent-keyboard-20260907",
+    "status": "failed",
+    "passed_checks": 4,
+    "error": "Mission Control did not reopen the actual overview",
+    "fuzzel_exit_code": null,
+    "verifier_sha256": "bbeb62f03f604386b581f09fc57aa250883ab894ae7461eb7b25ed8c539d893d",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-real-handoff-20260907",
+    "status": "failed",
+    "passed_checks": 4,
+    "error": "Launchpad did not hand off from carousel to real Fuzzel",
+    "fuzzel_exit_code": null,
+    "verifier_sha256": "106d206c0747a3faf2b5a43e373b796fec9a6d7c45d0982301c88a9d3473ce8d",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-real-traced-20260907",
+    "status": "passed",
+    "passed_checks": 8,
+    "error": null,
+    "fuzzel_exit_code": 2,
+    "verifier_sha256": "aa9be3d2798cec38a789e2583743fc12e80df8e4727f376e9cf3cc0143f0e56a",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Historical fixture attempt before waiting for GTK mapped mode and painted frames."
+  },
+  {
+    "attempt": "apple-overview-mode-close-final-20260907",
+    "status": "failed",
+    "passed_checks": 2,
+    "error": "Mission Control did not map the actual overview",
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    },
+    "notes": "Cached overview was open in the correct mode with ready preview but had2drawframes; replace arbitrary3frame condition with actual painted-caption pixels."
+  }
+]

@@ -1,0 +1,36 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 21:34:43 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7ffac4ba1d70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7ffac4ba1d70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7ffac4ba1d70
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+Gdk-Message: 21:35:16.205: Error flushing display: Broken pipe
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer err: 
+wayland.c:2442: failed to flush wayland socket: Connection reset by peer

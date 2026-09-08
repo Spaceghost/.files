@@ -1,0 +1,139 @@
+{
+  "theme": {
+    "features": [
+      "THEME-COMPLETE",
+      "GHOST-BRAND",
+      "LOCK-THEME",
+      "GALLERY-ACTIONS",
+      "GALLERY-ACTIVATION",
+      "TERMINAL-SURFACE",
+      "NOTIFICATION-PLACEMENT",
+      "BAR-LAYOUT",
+      "DECORATION-STYLE",
+      "CONKY-READING",
+      "TMUX-CONTROLS",
+      "ARTWORK-ARCHIVE"
+    ],
+    "tests": [
+      "test_agent_switcher.py",
+      "test_app_identity.py",
+      "test_application_theme_refresh.py",
+      "test_bar_ipc_recovery.py",
+      "test_complete_themes.py",
+      "test_conky_clicks.py",
+      "test_conky_layout.py",
+      "test_conky_policy.py",
+      "test_decoration.py",
+      "test_decoration_watch.py",
+      "test_desktop_space.py",
+      "test_fresh_scenes.py",
+      "test_gallery_picker.py",
+      "test_gallery_prompts.py",
+      "test_generation_retries.py",
+      "test_ghost_branding.py",
+      "test_lock.py",
+      "test_lxqt_theme.py",
+      "test_manual_artwork.py",
+      "test_new_themes.py",
+      "test_overlay_theme.py",
+      "test_pithos_controls.py",
+      "test_prompt_catalog.py",
+      "test_terminal_theme.py",
+      "test_theme_completion_notification.py",
+      "test_theme_picker.py",
+      "test_theme_refresh.py",
+      "test_theme_switch.py",
+      "test_themed_artwork.py",
+      "test_wallpaper_checkpoint.py",
+      "test_wallpapers.py",
+      "test_waybar_dim.py"
+    ],
+    "unmapped_paths": [],
+    "contract": "alpine/FEATURES.md",
+    "manual_only": [
+      "NOTIFICATION-PLACEMENT"
+    ],
+    "note": "Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification."
+  },
+  "apple": {
+    "features": [
+      "WORKSPACE-IDENTITY",
+      "WINDOW-SWITCHING",
+      "WINDOW-RESIZE",
+      "EXPOSE-LIFECYCLE",
+      "APPLE-KEYS",
+      "SHORTCUT-HELP",
+      "SESSION-OWNERSHIP",
+      "DEPLOY-RECOVERY",
+      "SCRIPTURE"
+    ],
+    "tests": [
+      "test_ai_notification_stream.py",
+      "test_apple_overview.py",
+      "test_carousel.py",
+      "test_carousel_responsiveness.py",
+      "test_carousel_view.py",
+      "test_centered_resize.py",
+      "test_conky_policy.py",
+      "test_deploy.py",
+      "test_expo.py",
+      "test_feature_contracts.py",
+      "test_manual_artwork.py",
+      "test_notification_led.py",
+      "test_scripture_generation.py",
+      "test_scripture_history.py",
+      "test_scripture_library.py",
+      "test_scripture_local.py",
+      "test_scripture_selection.py",
+      "test_scripture_study.py",
+      "test_session.py",
+      "test_shortcut_hold.py",
+      "test_shortcut_service.py",
+      "test_shortcut_sources.py",
+      "test_showdesktop.py",
+      "test_showdesktop_lifecycle.py",
+      "test_strata.py",
+      "test_video_background.py",
+      "test_window_switching.py",
+      "test_workspace_defaults.py",
+      "test_workspaces.py"
+    ],
+    "unmapped_paths": [],
+    "contract": "alpine/FEATURES.md",
+    "manual_only": [],
+    "note": "Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification."
+  },
+  "guide": {
+    "features": [
+      "THEME-COMPLETE",
+      "SHORTCUT-HELP"
+    ],
+    "tests": [
+      "test_application_theme_refresh.py",
+      "test_complete_themes.py",
+      "test_lxqt_theme.py",
+      "test_manual_artwork.py",
+      "test_overlay_theme.py",
+      "test_shortcut_hold.py",
+      "test_shortcut_service.py",
+      "test_shortcut_sources.py",
+      "test_theme_picker.py",
+      "test_theme_refresh.py",
+      "test_theme_switch.py"
+    ],
+    "unmapped_paths": [],
+    "contract": "alpine/FEATURES.md",
+    "manual_only": [],
+    "note": "Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification."
+  },
+  "unmapped": {
+    "features": [],
+    "tests": [],
+    "unmapped_paths": [
+      "alpine/new-component/unknown.py"
+    ],
+    "contract": "alpine/FEATURES.md",
+    "manual_only": [],
+    "note": "Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification."
+  }
+}

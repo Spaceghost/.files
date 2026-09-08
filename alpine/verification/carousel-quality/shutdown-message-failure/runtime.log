@@ -1,0 +1,45 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 21:30:38 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fcf9f5cfd70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fcf9f5cfd70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fcf9f5cfd70
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+Gdk-Message: 21:31:36.272: Lost connection to Wayland compositor.
+ err: wayland.c:1769: failed to read events from the Wayland socket: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+Traceback (most recent call last):
+  File "/tmp/carousel-native-uyycsgvt/home/.local/bin/oldbook-carousel", line 8, in <module>
+    main()
+    ~~~~^^
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py", line 383, in main
+    sway = ipc['find_socket'](runtime)
+  File "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces", line 137, in find_socket
+    raise RuntimeError('no owned Sway session socket')
+RuntimeError: no owned Sway session socket

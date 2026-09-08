@@ -6,7 +6,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import select
+import shlex
 import signal
 import socket
 import statistics
@@ -14,6 +16,7 @@ import struct
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import traceback
 
@@ -78,22 +81,25 @@ class FocusTrace:
         self.ipc.close()
 
 
-def color_pixels(path, color, tolerance=8):
+def color_pixels(path, color, tolerance=8, region=None):
     import gi
+    import numpy
     gi.require_version('GdkPixbuf', '2.0')
     from gi.repository import GdkPixbuf
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(path))
-    pixels = memoryview(pixbuf.get_pixels())
-    target = bytes.fromhex(color)
+    width, height = pixbuf.get_width(), pixbuf.get_height()
     channels, stride = pixbuf.get_n_channels(), pixbuf.get_rowstride()
-    count = 0
-    for y in range(pixbuf.get_height()):
-        for x in range(pixbuf.get_width()):
-            index = y * stride + x * channels
-            if all(abs(pixels[index + channel] - target[channel]) <= tolerance
-                   for channel in range(3)):
-                count += 1
-    return count
+    pixels = numpy.ndarray((height, width, channels), dtype=numpy.uint8,
+                           buffer=pixbuf.get_pixels(), strides=(stride, channels, 1))
+    if region is not None:
+        left, top, right, bottom = region
+        pixels = pixels[int(top * height):int(bottom * height),
+                        int(left * width):int(right * width)]
+    matches = numpy.ones(pixels.shape[:2], dtype=bool)
+    for channel, target in enumerate(bytes.fromhex(color)):
+        matches &= pixels[:, :, channel] >= max(0, target - tolerance)
+        matches &= pixels[:, :, channel] <= min(255, target + tolerance)
+    return int(numpy.count_nonzero(matches))
 
 
 def stop_private(processes, marker, exclude=()):
@@ -179,13 +185,17 @@ def run(arguments):
         sources.extend([HELPER, HELPER.with_name('oldbook-workspaces')])
         library = ROOT / 'alpine/desktop/.local/lib/oldbook'
         sources.extend([library / 'window_switching.py', library / 'overlay_theme.py',
-                        library / 'showdesktop.py', library / 'workspace_model.py'])
+                        library / 'showdesktop.py', library / 'workspace_model.py',
+                        library / 'ui_command.py', library / 'ui_priority.py'])
         sources.extend(library.glob('*carousel*.py'))
     hashes = {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources}
     report = {'status': 'running', 'baseline': arguments.baseline, 'host_changes': 0,
               'source_sha256': hashes, 'checks': [], 'states': {},
               'isolation': 'private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard',
               'keyboard': 'one wtype device owns each full modifier/key/release sequence'}
+    report['output_scale'] = arguments.scale
+    report['escape_handoff'] = arguments.escape_handoff
+    report['modifier_handoff'] = arguments.modifier_handoff
     report['verifier_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     processes = []
     connection = trace = None
@@ -194,11 +204,23 @@ def run(arguments):
     local = Path(env['HOME']) / '.local/bin'
     local.mkdir(parents=True)
     if not arguments.baseline:
-        (local / 'oldbook-carousel').symlink_to(HELPER)
+        if arguments.escape_handoff:
+            # Make asynchronous cancel startup latency deterministic without
+            # changing the real helper or the binding under test.
+            wrapper = local / 'oldbook-carousel'
+            wrapper.write_text('#!/bin/sh\n'
+                               'if [ "$1" = cancel ]; then sleep 0.75; fi\n'
+                               'exec ' + shlex.quote(str(HELPER)) + ' "$@"\n')
+            wrapper.chmod(0o700)
+            report['private_cancel_delay_seconds'] = .75
+        else:
+            (local / 'oldbook-carousel').symlink_to(HELPER)
     config = output / 'sway.conf'
     captured_bindings = output / 'bindings.conf'
     captured_bindings.write_bytes(bindings.read_bytes())
-    config.write_text('xwayland disable\noutput HEADLESS-1 mode 1440x900\n'
+    config.write_text('xwayland disable\n'
+                      f'output HEADLESS-1 mode {1440 * arguments.scale}x{900 * arguments.scale} '
+                      f'scale {arguments.scale}\n'
                       'output * bg #13151b solid_color\nseat seat0 fallback true\n'
                       'focus_follows_mouse no\ndefault_border pixel 0\n'
                       'default_floating_border pixel 0\nset $mod Mod4\n'
@@ -208,6 +230,35 @@ def run(arguments):
     foot = base / 'foot.ini'
     foot.write_text('[main]\nfont=monospace:size=12\npad=12x12\n'
                     'resize-by-cells=no\n[colors-dark]\nforeground=ffffff\nalpha=1.0\n')
+    paint_control = base / 'fixture-paint.fifo'
+    os.mkfifo(paint_control, mode=0o600)
+    paint_ready = base / 'fixture-paint.json'
+    painter = base / 'paint-fixture.py'
+    painter.write_text('''import json, os, re, select, sys
+from pathlib import Path
+control, ready = Path(sys.argv[1]), Path(sys.argv[2])
+descriptor = os.open(control, os.O_RDWR | os.O_NONBLOCK)
+def paint(color):
+    if not re.fullmatch('[0-9a-f]{6}', color):
+        raise ValueError('invalid private fixture color')
+    os.write(1, ('\\x1b]11;#' + color + '\\x07\\x1b[?25l\\x1b[2J\\x1b[H'
+                 '\\x1b[38;2;0;0;0m').encode())
+    lines = ['PRIVATE STILL-FRAME CONTROL  |  0123456789  AaBbCcDdEeFf',
+             'NATIVE PIXELS  /  FINE TEXT  /  NO LIVE REFRESH',
+             '+-----+-----+-----+-----+-----+-----+-----+',
+             '|  01 |  02 |  03 |  04 |  05 |  06 |  07 |',
+             '+-----+-----+-----+-----+-----+-----+-----+']
+    os.write(1, ('\\r\\n'.join(lines) + '\\r\\n').encode())
+    ready.write_text(json.dumps({'color': color}))
+paint('247742')
+pending = b''
+while True:
+    select.select([descriptor], [], [])
+    pending += os.read(descriptor, 4096)
+    while b'\\n' in pending:
+        line, pending = pending.split(b'\\n', 1)
+        paint(line.decode())
+''')
 
     def save():
         (output / 'evidence.json').write_text(json.dumps(report, indent=2) + '\n')
@@ -251,12 +302,18 @@ def run(arguments):
 
     def client(number, app_id, color, title):
         ipc(0, f'workspace number {number}')
+        fixture_command = (['/usr/bin/python3', str(painter), str(paint_control), str(paint_ready)]
+                           if arguments.scale == 2 and app_id == 'firefox' else
+                           ['sh', '-c', 'printf "Private carousel fixture\\n"; exec sleep 180'])
         spawn(app_id, ['foot', '--config', str(foot), '--app-id', app_id,
                       '--title', title, '--override=colors-dark.background=' + color,
-                      'sh', '-c', 'printf "Private carousel fixture\\n"; exec sleep 180'])
-        return wait_for(lambda: next((node for node in views()
-                                     if node.get('app_id') == app_id), None),
-                        f'{app_id} did not map')
+                      *fixture_command])
+        result = wait_for(lambda: next((node for node in views()
+                                       if node.get('app_id') == app_id), None),
+                          f'{app_id} did not map')
+        if arguments.scale == 2 and app_id == 'firefox':
+            wait_for(paint_ready.is_file, 'private still-image fixture did not paint')
+        return result
 
     def layers():
         return [surface for item in ipc(3) for surface in item.get('layer_shell_surfaces', [])
@@ -280,6 +337,22 @@ def run(arguments):
                  and focused() == identifier, label)
         require(ipc(12).get('name') == 'default', label + ': Sway mode not restored')
 
+    def painted_screenshot(path, color):
+        # A state update precedes rendering. Wait for the chosen card's center
+        # to paint; a matching angled neighbor does not satisfy this barrier.
+        output_rect = next(item['rect'] for item in ipc(3) if item['name'] == 'HEADLESS-1')
+        width = output_rect['width'] * arguments.scale
+        height = output_rect['height'] * arguments.scale
+        region = (.46, .44, .54, .52)
+        area = (int(region[2] * width) - int(region[0] * width)) * (
+            int(region[3] * height) - int(region[1] * height))
+
+        def ready():
+            command('grim', '-o', 'HEADLESS-1', str(path))
+            return color_pixels(path, color, tolerance=14, region=region) >= area * .98
+
+        wait_for(ready, f'central preview did not paint {color}', seconds=12)
+
     def start_keys(family, middle, reverse=False):
         modifier, key = ('logo', 'Super_L') if family == 'super' else ('alt', 'Alt_L')
         argv = ['wtype', '-M', modifier, '-P', key]
@@ -299,13 +372,38 @@ def run(arguments):
                                'sha256': hashlib.sha256(compositor.read_bytes()).hexdigest()}
         sway = spawn('sway', [str(compositor), '-c', str(config)])
 
+        readiness_attempts = 0
+
         def ready():
+            nonlocal readiness_attempts
             sockets = list(runtime.glob('sway-ipc*.sock'))
             displays = [path for path in runtime.glob('wayland-*') if path.is_socket()]
-            return (sockets[0], displays[0].name) if sockets and displays else None
+            if not sockets or not displays:
+                return None
+            readiness_attempts += 1
+            probe = None
+            try:
+                probe = SwayIPC(sockets[0])
+                version = probe.requests([(7, '')])[0]
+                if version.get('human_readable'):
+                    return sockets[0], displays[0].name, version
+            except (OSError, ConnectionError):
+                return None
+            finally:
+                if probe is not None:
+                    probe.close()
 
-        sway_socket, display = wait_for(ready, 'private Sway did not start')
+        sway_socket, display, version = wait_for(
+            ready, 'private Sway did not answer GET_VERSION', seconds=15)
+        report['compositor_readiness'] = {'attempts': readiness_attempts,
+                                          'barrier': 'GET_VERSION response', 'version': version}
         env.update(SWAYSOCK=str(sway_socket), WAYLAND_DISPLAY=display)
+        priority = Path('/usr/local/sbin/oldbook-ui-priority')
+        if priority.is_file():
+            applied = subprocess.run(['/usr/bin/doas', '-n', str(priority), '--session',
+                                      str(sway_socket)], env=env, capture_output=True,
+                                     text=True, check=True, timeout=12)
+            report['private_compositor_priority'] = json.loads(applied.stdout)
         command('dbus-update-activation-environment', 'SWAYSOCK', 'WAYLAND_DISPLAY')
         connection = SwayIPC(sway_socket)
         trace = FocusTrace(sway_socket)
@@ -338,16 +436,78 @@ def run(arguments):
         state_path = runtime / 'oldbook' / ('carousel-' + session) / 'state.json'
         daemon = spawn('carousel-daemon', [str(HELPER), 'daemon'])
         wait_for(lambda: state_path.is_file() or daemon.poll() is not None,
-                 'carousel daemon did not initialize')
+                 'carousel daemon did not initialize', seconds=30)
         require(daemon.poll() is None, 'carousel daemon exited at startup')
         original_pid = state()['pid']
-        duplicate = spawn('duplicate-carousel-daemon', [str(HELPER), 'daemon'])
-        require(duplicate.wait(timeout=4) == 0 and state()['pid'] == original_pid,
-                'second daemon did not preserve singleton')
-        check('duplicate-daemon-preserves-single-owner', {'pid': original_pid})
+        if not arguments.modifier_handoff:
+            duplicate = spawn('duplicate-carousel-daemon', [str(HELPER), 'daemon'])
+            require(duplicate.wait(timeout=4) == 0 and state()['pid'] == original_pid,
+                    'second daemon did not preserve singleton')
+            check('duplicate-daemon-preserves-single-owner', {'pid': original_pid})
         for item in (a, c, b):
             focus(item['id'])
         expected = [b['id'], c['id'], a['id'], d['id']]
+
+        if arguments.modifier_handoff:
+            command(str(HELPER), 'show')
+            wait_for(lambda: opened(b['id']) and len(layers()) == 1
+                     and ipc(12).get('name') == 'window-switcher',
+                     'could not warm the actual popup before modifier checks', seconds=30)
+            command(str(HELPER), 'cancel')
+            settled(b['id'], 'warm popup reset failed')
+            for family in ('super', 'alt'):
+                focus(c['id'])
+                focus(b['id'])
+                trace.drain()
+                started = time.monotonic()
+                keys = start_keys(family, ['-s', '2800'])
+                wait_for(lambda: opened(c['id']), f'{family} held gesture did not open')
+                require(time.monotonic() < started + 2.5,
+                        'fixture did not map in time to observe the held modifier')
+                samples = 0
+                while time.monotonic() < started + 2.5:
+                    require(opened(c['id']), f'{family} committed before its real modifier release')
+                    require(not trace.drain(), f'{family} moved focus while still held')
+                    samples += 1
+                    time.sleep(.01)
+                keys.wait(timeout=5)
+                settled(c['id'], f'{family} actual release did not commit')
+                check(f'{family}-remains-open-until-actual-release', {'held_samples': samples})
+                keys = start_keys(family, [])
+                keys.wait(timeout=3)
+                settled(b['id'], f'{family} quick release before mapping did not commit')
+                check(f'{family}-quick-release-before-map-commits')
+            require(all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
+                        for path, digest in hashes.items()), 'production changed during native run')
+            check('production-source-hashes-stable')
+            report['status'] = 'passed'
+            return
+
+        if arguments.escape_handoff:
+            for attempt in range(3):
+                command(str(HELPER), 'show')
+                wait_for(lambda: opened(b['id']) and len(layers()) == 1
+                         and ipc(12).get('name') == 'window-switcher',
+                         'Escape handoff fixture did not open')
+                command('wtype', '-k', 'Escape')
+                settled(b['id'], 'real Escape failed to close and restore default mode')
+                check(f'escape-{attempt + 1}-closes-via-mode-event')
+                command(str(HELPER), 'show')
+                wait_for(lambda: opened(b['id']), 'immediate reopen failed')
+                deadline = time.monotonic() + 1.5
+                while time.monotonic() < deadline:
+                    require(opened(b['id']), 'previous Escape cancelled the reopened gesture')
+                    time.sleep(.01)
+                require(len(layers()) == 1 and ipc(12).get('name') == 'window-switcher',
+                        'reopened gesture lost its layer or input mode')
+                check(f'escape-{attempt + 1}-reopen-survives-delayed-cancel')
+                command(str(HELPER), 'cancel')
+                settled(b['id'], 'controlled fixture reset failed')
+            require(all(hashlib.sha256(Path(path).read_bytes()).hexdigest() == digest
+                        for path, digest in hashes.items()), 'production changed during native run')
+            check('production-source-hashes-stable')
+            report['status'] = 'passed'
+            return
 
         command(str(HELPER), 'show')
         current = wait_for(lambda: opened(b['id']), 'persistent carousel did not select current window')
@@ -359,16 +519,63 @@ def run(arguments):
         trace.drain()
         wait_for(lambda: set(ids).issubset(state().get('preview_ids', [])),
                  'real previews were not captured for every fixture', seconds=12)
+        native_dimensions = None
+        if arguments.scale == 2:
+            native_dimensions = state().get('preview_dimensions', {})
+            live_by_id = {item['id']: item for item in views()}
+            output_scaled_dimensions = {
+                str(identifier): [live_by_id[identifier]['rect'][axis] * arguments.scale
+                                  for axis in ('width', 'height')]
+                for identifier in ids}
+            require(all(str(identifier) in native_dimensions
+                        and len(native_dimensions[str(identifier)]) == 2 for identifier in ids),
+                    'preview status does not report every fixture dimension')
+
+            def direct_capture_dimensions(identifier, extra):
+                result = subprocess.run(['grim', '-T', live_by_id[identifier]['foreign_toplevel_identifier'],
+                                         *extra, '-t', 'ppm', '-'], env=env,
+                                        stdout=subprocess.PIPE, stderr=log,
+                                        check=True, timeout=8)
+                match = re.match(rb'P6\s+(\d+)\s+(\d+)\s+255\s', result.stdout[:100])
+                require(match, 'private grim dimension probe returned invalid PPM')
+                return [int(match[1]), int(match[2])]
+
+            provider_dimensions = {str(identifier): direct_capture_dimensions(identifier, [])
+                                   for identifier in ids}
+            explicit_one = direct_capture_dimensions(d['id'], ['-s', '1'])
+            require(provider_dimensions == native_dimensions
+                    and explicit_one == native_dimensions[str(d['id'])],
+                    'production preview disagrees with native -T capture dimensions')
+            # This SwayFX provider exports logical scene pixels, even on a
+            # scale-2 output. Preserve those actual pixels; do not synthesize
+            # a larger buffer with grim -s2. Check they cover the physical
+            # pixels occupied by the renderer's centered, letterboxed image.
+            sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib/oldbook'))
+            from carousel_view import card_layout, letterbox
+            output_rect = next(item['rect'] for item in ipc(3) if item['name'] == 'HEADLESS-1')
+            card = next(item for item in card_layout(len(ids), 0, output_rect['width'], output_rect['height'])
+                        if item['index'] == 0)
+            rendered_dimensions = {
+                identifier: [round(value * arguments.scale, 2) for value in letterbox(
+                    *dimensions, card['width'] - 24, card['height'] - 50)[2:]]
+                for identifier, dimensions in native_dimensions.items()}
+            require(all(all(actual >= shown for actual, shown in zip(dimensions, rendered_dimensions[identifier]))
+                        for identifier, dimensions in native_dimensions.items()),
+                    f'preview would upscale source pixels: {native_dimensions}; rendered {rendered_dimensions}')
+            check('scale-two-previews-preserve-provider-pixels-without-upscaling',
+                  {'actual': native_dimensions, 'direct_provider': provider_dimensions,
+                   'logical_rect_times_output_scale': output_scaled_dimensions,
+                   'physical_letterboxed_card': rendered_dimensions,
+                   'grim_explicit_scale_one': explicit_one})
         command(str(HELPER), 'previous')
         wait_for(lambda: opened(d['id']), 'hidden Strata preview could not be highlighted')
-        time.sleep(.6)
+        shot = output / 'carousel-hidden-previews.png'
+        painted_screenshot(shot, '1bd6cc')
         require(workspace_number() == 1, 'capturing hidden previews changed workspace')
         events = trace.drain()
         require(not any(event['type'] in ('con', 'floating_con')
                         and event['id'] != b['id'] for event in events),
                 'hidden preview capture focused another fixture')
-        shot = output / 'carousel-hidden-previews.png'
-        command('grim', '-o', 'HEADLESS-1', str(shot))
         cyan = color_pixels(shot, '1bd6cc', tolerance=14)
         require(cyan > 400, f'hidden Strata preview has no cyan fixture pixels: {cyan}')
         check('hidden-workspace-preview-renders-without-focus-change',
@@ -376,23 +583,100 @@ def run(arguments):
                'workspace_focus': workspace_number(), 'focus_events': events})
         command(str(HELPER), 'next')
         wait_for(lambda: opened(b['id']), 'preview selection did not return to origin')
+        if arguments.scale == 2:
+            descriptor = os.open(paint_control, os.O_WRONLY | os.O_NONBLOCK)
+            try:
+                os.write(descriptor, b'c92a9d\n')
+            finally:
+                os.close(descriptor)
+            wait_for(lambda: paint_ready.read_text() == json.dumps({'color': 'c92a9d'}),
+                     'private fixture did not change its visible content')
+            updated_source = output / 'still-source-updated.png'
+
+            def content_changed():
+                command('grim', '-T', b['foreign_toplevel_identifier'], str(updated_source))
+                return color_pixels(updated_source, 'c92a9d', tolerance=14) > 1000
+
+            wait_for(content_changed, 'real origin toplevel did not repaint magenta')
+            command(str(HELPER), 'next')
+            wait_for(lambda: opened(c['id']), 'still-preview test could not advance')
+            command(str(HELPER), 'previous')
+            wait_for(lambda: opened(b['id']), 'still-preview test could not return')
+            held_shot = output / 'still-preview-held.png'
+            painted_screenshot(held_shot, '247742')
+            old_pixels = color_pixels(held_shot, '247742', tolerance=14)
+            changed_pixels = color_pixels(held_shot, 'c92a9d', tolerance=14)
+            require(old_pixels > 1000 and changed_pixels == 0,
+                    f'open gesture refreshed its still image: old={old_pixels}, new={changed_pixels}')
+            require(state().get('preview_dimensions') == native_dimensions,
+                    'cycling changed captured preview dimensions')
+            check('open-gesture-keeps-still-image-after-real-window-content-changes',
+                  {'unchanged_green_pixels': old_pixels, 'new_magenta_pixels': changed_pixels,
+                   'preview_dimensions_unchanged': True})
         command('wtype', '-M', 'logo', '-P', 'Super_L', '-s', '100', '-m', 'logo', '-p', 'Super_L')
         time.sleep(.15)
         require(opened(b['id']), 'modifier release accepted persistent gesture')
         command('wtype', '-k', 'Escape')
         settled(b['id'], 'persistent Escape changed focus or stranded popup')
         check('persistent-show-ignores-modifier-release-and-escape-cancels')
+        if arguments.scale == 2:
+            command(str(HELPER), 'show')
+            wait_for(lambda: opened(b['id']) and b['id'] in state().get('preview_ids', []),
+                     'new gesture did not capture origin again')
+            refreshed_shot = output / 'still-preview-next-gesture.png'
+            painted_screenshot(refreshed_shot, 'c92a9d')
+            changed_pixels = color_pixels(refreshed_shot, 'c92a9d', tolerance=14)
+            require(changed_pixels > 1000, 'new gesture reused the previous stale still image')
+            require(state().get('preview_dimensions', {}).get(str(b['id']))
+                    == native_dimensions[str(b['id'])], 'new capture lost native dimensions')
+            check('new-gesture-refreshes-still-image-at-native-quality',
+                  {'new_magenta_pixels': changed_pixels})
+            command(str(HELPER), 'cancel')
+            settled(b['id'], 'quality preview cancel failed')
 
-        keys = start_keys('super', ['-s', '1500', '-k', 'Tab', '-s', '1200',
-                                   '-M', 'shift', '-k', 'Tab', '-m', 'shift', '-s', '1500'])
-        initial = wait_for(lambda: opened(c['id']), 'Super+Tab did not select actual previous window')
-        frozen = initial['candidate_ids']
-        require(workspace_number() == 1, 'held Super+Tab changed workspace before release')
-        wait_for(lambda: opened(a['id']), 'second held Tab did not advance')
-        wait_for(lambda: opened(c['id']), 'held Shift+Tab did not reverse')
-        require(state()['candidate_ids'] == frozen and len(layers()) == 1,
-                'cycling reordered candidates or duplicated popup')
-        keys.wait(timeout=5)
+        transitions = report['held_super_state_transitions'] = []
+        sampling_done = threading.Event()
+        sample_start = time.monotonic()
+
+        def sample_states():
+            previous = None
+            while not sampling_done.is_set():
+                current = state()
+                signature = (current.get('open'), current.get('selected_id'),
+                             tuple(current.get('candidate_ids', [])), current.get('modifier'))
+                if signature != previous:
+                    transitions.append({'elapsed_ms': round((time.monotonic() - sample_start) * 1000, 3),
+                                        'open': signature[0], 'selected_id': signature[1],
+                                        'candidate_ids': list(signature[2]), 'modifier': signature[3],
+                                        'frames': current.get('frames', 0)})
+                    previous = signature
+                sampling_done.wait(.005)
+
+        sampler = threading.Thread(target=sample_states, daemon=True)
+        trace.drain()
+        sampler.start()
+        try:
+            keys = start_keys('super', ['-s', '1500', '-k', 'Tab', '-s', '1200',
+                                       '-M', 'shift', '-k', 'Tab', '-m', 'shift', '-s', '1500'])
+            initial = wait_for(lambda: opened(c['id']), 'Super+Tab did not select actual previous window')
+            frozen = initial['candidate_ids']
+            # Do not insert a blocking IPC query between short-lived selections.
+            # The subscribed events prove focus stayed put without delaying the
+            # observer long enough to miss the next real key transition.
+            require(not trace.drain(), 'held Super+Tab changed focus before release')
+            wait_for(lambda: opened(a['id']), 'second held Tab did not advance')
+            require(not trace.drain(), 'repeated held Tab changed focus before release')
+            wait_for(lambda: opened(c['id']), 'held Shift+Tab did not reverse')
+            require(not trace.drain(), 'held reverse Tab changed focus before release')
+            require(state()['candidate_ids'] == frozen and len(layers()) == 1,
+                    'cycling reordered candidates or duplicated popup')
+            keys.wait(timeout=5)
+        finally:
+            sampling_done.set()
+            sampler.join(timeout=1)
+        require([item['selected_id'] for item in transitions if item['open']]
+                == [c['id'], a['id'], c['id']],
+                f'held key selection order changed: {transitions}')
         settled(c['id'], 'Super release failed to commit')
         times = state().get('frame_times', [])
         intervals = [(right - left) / 1000 for left, right in zip(times, times[1:])]
@@ -505,7 +789,10 @@ def run(arguments):
         require(sway.wait(timeout=5) == 0, 'private compositor did not exit')
         daemon_exit = daemon.wait(timeout=8)
         log.flush()
-        gdk_disconnect = 'Error flushing display: Broken pipe' in (output / 'runtime.log').read_text()
+        runtime_log = (output / 'runtime.log').read_text()
+        gdk_disconnect = any(message in runtime_log for message in (
+            'Error flushing display: Broken pipe',
+            'Lost connection to Wayland compositor.'))
         require(daemon_exit == 0 or (daemon_exit == 1 and gdk_disconnect),
                 f'carousel exited unexpectedly during compositor shutdown: {daemon_exit}')
         check('compositor-exit-stops-carousel-daemon',
@@ -534,7 +821,8 @@ def run(arguments):
             connection.close()
         # Stop fixture clients before tearing down their private compositor.
         sway_pid = sway.pid if 'sway' in locals() and sway.poll() is None else None
-        stop_private(processes[1:], marker, exclude=(sway_pid,) if sway_pid else ())
+        if processes[1:]:
+            stop_private(processes[1:], marker, exclude=(sway_pid,) if sway_pid else ())
         if sway_pid:
             sway.terminate()
             try:
@@ -552,6 +840,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--bindings', type=Path)
     parser.add_argument('--baseline', action='store_true')
+    parser.add_argument('--scale', type=int, choices=(1, 2), default=1)
+    parser.add_argument('--escape-handoff', action='store_true')
+    parser.add_argument('--modifier-handoff', action='store_true')
     arguments = parser.parse_args()
     if os.environ.get(BUS_MARKER) != '1':
         with tempfile.TemporaryDirectory(prefix='carousel-native-') as directory:

@@ -885,3 +885,66 @@ ordered compositor events establish readiness at creation.
   Earlier failed observations and concurrent rebuilds are retained. No physical
   one-hour wait was performed; hourly boundaries use controlled-clock checks.
   Restore application code independently of history; never commit the live DB.
+
+
+## Pinned feature preservation contracts — 2026-09-07
+
+- Added `FEATURES.md` with 30 stable contracts covering current desktop behavior,
+  durable content and package/deployment recovery. Intentional replacements are
+  explicit: music center, workspace 10 on Super+0, borderless bottom/right caption,
+  complete themes with the original ghost brand, and high-quality still previews.
+- Contributor instructions now require affected-feature review. Explicit new user
+  choices update a pin; actual unresolved conflicts require a user decision while
+  independent work continues. Existing durable preferences are preserved.
+- `bin/check-features` maps changed paths (including new hidden Fossil files) to
+  overlapping contracts and existing tests. It supports explicit feature IDs,
+  JSON impact reports, deduplicated test execution and failure propagation;
+  unmapped files/manual-only checks remain visible. The index includes separate
+  project sources and requires parity with all 30 documented IDs.
+- Nine focused impact/runner tests pass. Evidence and exact source hashes are in
+  `verification/feature-contracts/`. This proves the workflow, not every underlying
+  feature: physical 60fps/input/hotplug, fresh boot, application-specific refresh
+  and other native limits remain explicit in the contracts.
+
+
+## Still previews, overview handoff, theme recovery and ghost branding — 2026-09-07
+
+- Carousel previews retain the full compositor-supplied capture, use trilinear
+  sampling and stay frozen until reopening. Completed captures release duplicate
+  RGB payloads; cached card nodes preserve image quality. Existing warm socket
+  handoff and elapsed-time animation work from the parallel session is retained.
+- Mission Control/F3 and Launchpad/F4 keycaps control overview/launcher while
+  Fn+F3/F4 remain application keys. Escape/mode exit no longer launches a delayed
+  cancel that can close the next overview. Early modifier release is evaluated
+  only after actual keyboard entry, Wayland synchronization and queued focus
+  delivery, replacing a 50ms guess.
+- The current carousel checks pass 34 tests. The late-cancel fix passes 8 native
+  checks, Apple behavior passed 8 real GUI checks plus 26 units, and pre-cache
+  quality/navigation passed 18 native groups. Later cached-source runs proved 7
+  quality/still-image groups but exposed the handoff races. The final focus
+  barrier has unit/source proof; three final native attempts stopped before any
+  gesture under load 49 on 8 CPUs. Final held/quick input and physical 60fps remain
+  unverified, explicitly recorded in `verification/carousel-quality/`.
+- Existing-theme gallery generation now applies its exact theme before selecting
+  its saved painting. Unthemed and nonactivating requests preserve the desktop
+  palette; failed activation preserves the saved image. All 48 focused checks
+  pass, including both current modified-click tooltip descriptions.
+- Concurrently authored theme repair distinguishes Scripture database snapshots
+  from deployment journals and waits for actual Sway reload acknowledgement.
+  Private switching changed 25 profile links without touching copied backup data;
+  14 focused IPC/session/refresh checks passed. A real reload needed 8.200 seconds,
+  explaining swaymsg's false failure after 3 seconds. The final installed helper
+  acknowledged success after 8.160 seconds.
+- Restored the original 21px white/purple/pink ghost, including hover/glow, while
+  preserving centered width and all neighboring styling. Existing profile badges
+  are repaired and future rendering protects the brand selectors. Six tests and
+  two real private Waybar renders pass; no APK rebuild is required.
+- Activated carousel PID 21698 and the Apple bindings. Its cold start exceeded the
+  first 10-second observer but became ready; verification resumed without another
+  restart. Checked reload removed no window IDs and retains workspaces 1, 2, 3, 4, 10.
+  Bellows theme, exact painting, all 24 actual theme links and original ghost colors
+  match. The dimmer's generated waybar-state.css is intentionally runtime data.
+  The Bellows PNG/metadata/descriptor were checkpointed separately as 03bd636b8582.
+- Recovery, source hashes, synthetic screenshots and honest failed attempts live
+  in `verification/carousel-quality/`, `verification/apple-overview/`,
+  `verification/ghost-branding/` and `verification/theme-switch-repair/`.

@@ -89,6 +89,69 @@ class ThemedArtworkTests(unittest.TestCase):
         self.assertEqual(entry['theme'], 'none')
         self.assertNotIn('Warm charcoal and ochre.', entry['prompt'])
 
+    def test_existing_theme_generation_applies_saved_theme_before_exact_painting(self):
+        for selection in ('spaceghost', 'active'):
+            with self.subTest(selection=selection):
+                (self.themes / 'current').write_text('gruvbox-dark\n')
+                expected = 'gruvbox-dark' if selection == 'active' else selection
+                def paint(*args):
+                    # Completion belongs to the palette chosen at the start,
+                    # even if the active desktop changes while painting.
+                    (self.themes / 'current').write_text('spaceghost\n')
+                    return str(self.native)
+                with mock.patch.object(generator, 'generate_native', side_effect=paint), \
+                        mock.patch.object(generator, 'checkpoint_generated', return_value='abc123'), \
+                        mock.patch.object(generator.subprocess, 'run', return_value=subprocess.CompletedProcess(
+                            [], 0, 'Logged in using ChatGPT', '')) as run:
+                    self.assertEqual(generator.run_once(manual=True, activate=True, theme=selection), 0)
+                saved = json.loads(max((self.state / 'manual').glob('*.json')).read_text())
+                entry = json.loads((self.repo / saved['file']).with_suffix('.json').read_text())
+                actions = [call.args[0][-2:] for call in run.call_args_list
+                           if 'use' in call.args[0] or 'select' in call.args[0]]
+                self.assertEqual(actions, [['use', expected], ['select', entry['id']]])
+                self.assertTrue(saved['activated'])
+
+    def test_theme_activation_failure_preserves_painting_and_does_not_select_it(self):
+        def external(command, **kwargs):
+            if 'use' in command:
+                return subprocess.CompletedProcess(command, 1, '', 'Theme deployment failed')
+            return subprocess.CompletedProcess(command, 0, 'Logged in using ChatGPT', '')
+        with mock.patch.object(generator, 'generate_native', return_value=str(self.native)) as native, \
+                mock.patch.object(generator, 'checkpoint_generated', return_value='abc123'), \
+                mock.patch.object(generator.subprocess, 'run', side_effect=external) as run:
+            self.assertEqual(generator.run_once(manual=True, activate=True, theme='spaceghost'), 1)
+        native.assert_called_once()
+        saved = json.loads(next((self.state / 'manual').glob('*.json')).read_text())
+        self.assertEqual(saved['status'], 'complete')
+        self.assertFalse(saved['activated'])
+        self.assertIn('Theme deployment failed', saved['activation_error'])
+        self.assertTrue((self.repo / saved['file']).is_file())
+        self.assertFalse(any('select' in call.args[0] for call in run.call_args_list))
+
+    def test_unthemed_activation_selects_painting_without_replacing_desktop_theme(self):
+        with mock.patch.object(generator, 'generate_native', return_value=str(self.native)), \
+                mock.patch.object(generator, 'checkpoint_generated', return_value='abc123'), \
+                mock.patch.object(generator.subprocess, 'run', return_value=subprocess.CompletedProcess(
+                    [], 0, 'Logged in using ChatGPT', '')) as run:
+            self.assertEqual(generator.run_once(manual=True, activate=True, theme='none'), 0)
+        saved = json.loads(next((self.state / 'manual').glob('*.json')).read_text())
+        entry = json.loads((self.repo / saved['file']).with_suffix('.json').read_text())
+        actions = [call.args[0][-2:] for call in run.call_args_list
+                   if 'use' in call.args[0] or 'select' in call.args[0]]
+        self.assertEqual(actions, [['select', entry['id']]])
+        self.assertTrue(saved['activated'])
+
+    def test_nonactivating_generation_does_not_switch_theme_or_painting(self):
+        for manual in (False, True):
+            with self.subTest(manual=manual), \
+                    mock.patch.object(generator, 'generate_native', return_value=str(self.native)), \
+                    mock.patch.object(generator, 'checkpoint_generated', return_value='abc123'), \
+                    mock.patch.object(generator.subprocess, 'run', return_value=subprocess.CompletedProcess(
+                        [], 0, 'Logged in using ChatGPT', '')) as run:
+                self.assertEqual(generator.run_once(manual=manual, theme='spaceghost'), 0)
+                self.assertFalse(any('use' in call.args[0] or 'select' in call.args[0]
+                                     for call in run.call_args_list))
+
     def test_unsafe_or_unknown_theme_does_not_reserve_attempt(self):
         for theme in ('../outside', 'unknown', '/tmp/theme', 'A Theme'):
             with self.subTest(theme=theme), self.assertRaises((RuntimeError, ValueError)):

@@ -69,6 +69,13 @@ def colors(theme):
 
 
 def recolor(body, baseline, palette, path):
+    if path == '.config/waybar/style.css':
+        # The command-deck ghost is fixed branding, including its hover glow.
+        # Recolor the surrounding controls while keeping these authored rules.
+        parts = re.split(r'(?m)(^[ \t]*#custom-ghost(?:\s*|:hover\s*)\{[^}]*\})', body)
+        if len(parts) > 1:
+            return ''.join(part if index % 2 else recolor(part, baseline, palette, path)
+                           for index, part in enumerate(parts))
     replacements = {value.lower(): palette[key] for key, value in baseline.items() if key in palette}
     replacements['#fabd2f'] = palette['accent']
     replacements['#fbf1c7'] = blend(palette['foreground'], '#ffffff', .2)

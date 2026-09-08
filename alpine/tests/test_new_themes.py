@@ -155,7 +155,7 @@ class NewThemeTests(unittest.TestCase):
                 mock.patch.object(generator, 'generate_native', return_value=str(fixture.native)) as native, \
                 mock.patch.object(generator, 'checkpoint_generated', return_value='abc123'), \
                 mock.patch.object(generator.subprocess, 'run', return_value=subprocess.CompletedProcess(
-                    [], 0, 'Logged in using ChatGPT', '')):
+                    [], 0, 'Logged in using ChatGPT', '')) as run:
             self.assertEqual(generator.run_once(manual=True, activate=True, new_theme='moon books'), 0)
         self.assertEqual(design.call_args.args[4], 'moon books')
         self.assertIn(theme['scene'], native.call_args.args[1])
@@ -164,3 +164,6 @@ class NewThemeTests(unittest.TestCase):
         entry = json.loads((fixture.repo / record['file']).with_suffix('.json').read_text())
         self.assertEqual(entry['theme'], theme['id'])
         self.assertRegex(entry['theme_descriptor_sha256'], r'^[0-9a-f]{64}$')
+        actions = [call.args[0][-2:] for call in run.call_args_list
+                   if 'use' in call.args[0] or 'select' in call.args[0]]
+        self.assertEqual(actions, [['use', theme['id']], ['select', entry['id']]])

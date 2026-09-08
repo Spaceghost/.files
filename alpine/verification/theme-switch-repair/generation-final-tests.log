@@ -1,0 +1,76 @@
+Review alpine/FEATURES.md for these pinned behaviors:
+  GALLERY-ACTIVATION — 5 check files
+5 unique check files. Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.
+test_exhausted_daily_generation_stops_after_three_retries (test_generation_retries.GenerationRetryTests.test_exhausted_daily_generation_stops_after_three_retries) ... ok
+test_failed_theme_design_retries_before_painting (test_generation_retries.GenerationRetryTests.test_failed_theme_design_retries_before_painting) ... ok
+test_invalid_image_retries_and_checkpoint_failure_does_not_repaint (test_generation_retries.GenerationRetryTests.test_invalid_image_retries_and_checkpoint_failure_does_not_repaint) ... ok
+test_malformed_native_result_is_reported_as_a_retryable_failure (test_generation_retries.GenerationRetryTests.test_malformed_native_result_is_reported_as_a_retryable_failure) ... ok
+test_third_retry_saves_one_image_and_keeps_designed_name (test_generation_retries.GenerationRetryTests.test_third_retry_saves_one_image_and_keeps_designed_name) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 4.756s
+
+OK
+test_activation_failure_keeps_successful_checkpoint_and_artifact (test_manual_artwork.ManualArtworkTests.test_activation_failure_keeps_successful_checkpoint_and_artifact) ... ok
+test_edit_prompts_command_opens_editor (test_manual_artwork.ManualArtworkTests.test_edit_prompts_command_opens_editor) ... ok
+test_failed_native_request_never_selects_or_creates_artwork (test_manual_artwork.ManualArtworkTests.test_failed_native_request_never_selects_or_creates_artwork) ... ok
+test_gallery_controls_remain_reachable_with_eighteen_paintings (test_manual_artwork.ManualArtworkTests.test_gallery_controls_remain_reachable_with_eighteen_paintings) ... ok
+test_gallery_generation_entry_does_not_shift_existing_selections (test_manual_artwork.ManualArtworkTests.test_gallery_generation_entry_does_not_shift_existing_selections) ... ok
+test_gallery_keeps_browse_and_pause_commands_without_generating (test_manual_artwork.ManualArtworkTests.test_gallery_keeps_browse_and_pause_commands_without_generating) ... ok
+test_gallery_opens_prompt_editor_without_changing_or_generating_art (test_manual_artwork.ManualArtworkTests.test_gallery_opens_prompt_editor_without_changing_or_generating_art) ... ok
+test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release (test_manual_artwork.ManualArtworkTests.test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release) ... ok
+test_hover_tooltip_renders_full_help_in_every_state (test_manual_artwork.ManualArtworkTests.test_hover_tooltip_renders_full_help_in_every_state) ... ok
+test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image (test_manual_artwork.ManualArtworkTests.test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image) ... ok
+test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit (test_manual_artwork.ManualArtworkTests.test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit) ... ok
+test_select_resets_rotation_deadline_and_preserves_pause (test_manual_artwork.ManualArtworkTests.test_select_resets_rotation_deadline_and_preserves_pause) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 20.590s
+
+OK
+test_cancelled_phrase_menu_does_not_launch (test_new_themes.NewThemeTests.test_cancelled_phrase_menu_does_not_launch) ... ok
+test_existing_themes_are_selected_in_a_separate_picker (test_new_themes.NewThemeTests.test_existing_themes_are_selected_in_a_separate_picker) ... ok
+test_generated_name_matching_an_action_still_paints_that_theme (test_new_themes.NewThemeTests.test_generated_name_matching_an_action_still_paints_that_theme) ... ok
+test_invalid_model_output_never_writes_descriptor (test_new_themes.NewThemeTests.test_invalid_model_output_never_writes_descriptor) ... ok
+test_new_theme_command_launches_random_theme_and_activates_debut_art (test_new_themes.NewThemeTests.test_new_theme_command_launches_random_theme_and_activates_debut_art) ... ok
+test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline) ... ok
+test_phrase_menu_passes_literal_text_to_background_job (test_new_themes.NewThemeTests.test_phrase_menu_passes_literal_text_to_background_job) ... ok
+test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) ... ok
+test_random_and_phrase_prompts (test_new_themes.NewThemeTests.test_random_and_phrase_prompts) ... ok
+test_save_unique_discoverable_collection_without_replacing_existing (test_new_themes.NewThemeTests.test_save_unique_discoverable_collection_without_replacing_existing) ... ok
+test_symlink_theme_directory_is_rejected (test_new_themes.NewThemeTests.test_symlink_theme_directory_is_rejected) ... ok
+test_theme_design_receives_saved_artwork_guidance (test_new_themes.NewThemeTests.test_theme_design_receives_saved_artwork_guidance) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 2.770s
+
+OK
+test_image_path_and_titles_remain_literal_arguments (test_theme_completion_notification.NotificationTransportTests.test_image_path_and_titles_remain_literal_arguments) ... ok
+test_unavailable_notifier_does_not_fail_completed_artwork (test_theme_completion_notification.NotificationTransportTests.test_unavailable_notifier_does_not_fail_completed_artwork) ... ok
+test_failed_activation_announces_saved_artwork_without_claiming_desktop_switch (test_theme_completion_notification.ThemeCompletionTests.test_failed_activation_announces_saved_artwork_without_claiming_desktop_switch) ... ok
+test_failed_image_does_not_announce_completion (test_theme_completion_notification.ThemeCompletionTests.test_failed_image_does_not_announce_completion) ... ok
+test_gallery_only_success_does_not_claim_desktop_activation (test_theme_completion_notification.ThemeCompletionTests.test_gallery_only_success_does_not_claim_desktop_activation) ... ok
+test_pending_checkpoint_announces_saved_artwork_with_accurate_pending_status (test_theme_completion_notification.ThemeCompletionTests.test_pending_checkpoint_announces_saved_artwork_with_accurate_pending_status) ... ok
+test_success_names_theme_and_previews_exact_saved_image_after_activation (test_theme_completion_notification.ThemeCompletionTests.test_success_names_theme_and_previews_exact_saved_image_after_activation) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.898s
+
+OK
+test_destination_changed_during_generation_never_receives_artwork (test_themed_artwork.ThemedArtworkTests.test_destination_changed_during_generation_never_receives_artwork) ... ok
+test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) ... ok
+test_gallery_adds_theme_and_general_generation_after_existing_controls (test_themed_artwork.ThemedArtworkTests.test_gallery_adds_theme_and_general_generation_after_existing_controls) ... ok
+test_manual_active_theme_records_palette_and_saves_nested_pair (test_themed_artwork.ThemedArtworkTests.test_manual_active_theme_records_palette_and_saves_nested_pair) ... ok
+test_nonactivating_generation_does_not_switch_theme_or_painting (test_themed_artwork.ThemedArtworkTests.test_nonactivating_generation_does_not_switch_theme_or_painting) ... ok
+test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art (test_themed_artwork.ThemedArtworkTests.test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art) ... ok
+test_symlinked_theme_configuration_never_reserves_or_generates (test_themed_artwork.ThemedArtworkTests.test_symlinked_theme_configuration_never_reserves_or_generates) ... ok
+test_theme_activation_failure_preserves_painting_and_does_not_select_it (test_themed_artwork.ThemedArtworkTests.test_theme_activation_failure_preserves_painting_and_does_not_select_it) ... ok
+test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available (test_themed_artwork.ThemedArtworkTests.test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available) ... ok
+test_unsafe_or_unknown_theme_does_not_reserve_attempt (test_themed_artwork.ThemedArtworkTests.test_unsafe_or_unknown_theme_does_not_reserve_attempt) ... ok
+test_unthemed_activation_selects_painting_without_replacing_desktop_theme (test_themed_artwork.ThemedArtworkTests.test_unthemed_activation_selects_painting_without_replacing_desktop_theme) ... ok
+test_unthemed_generation_uses_general_folder_without_active_palette (test_themed_artwork.ThemedArtworkTests.test_unthemed_generation_uses_general_folder_without_active_palette) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 9.174s
+
+OK

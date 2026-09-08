@@ -365,6 +365,9 @@ def recover_state(ipc, sway, directory):
 
 
 def launch_carousel():
+    from ui_command import send_command
+    if send_command('carousel', 'show'):
+        return
     subprocess.Popen([str(Path.home() / '.local/bin/oldbook-carousel'), 'show'],
                      stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                      start_new_session=True)
@@ -489,6 +492,8 @@ def daemon():
 def serve(ipc, sway, directory, control):
     recover_state(ipc, sway, directory)
     warm_up()
+    from ui_priority import request_priority
+    request_priority()
     from gi.repository import GLib
 
     loop = GLib.MainLoop()
@@ -512,7 +517,8 @@ def serve(ipc, sway, directory, control):
             session.expected.clear()
         if pending['action'] and not pending['stopping']:
             action, pending['action'] = pending['action'], None
-            GLib.idle_add(lambda: (run_action(action), GLib.SOURCE_REMOVE)[1])
+            GLib.idle_add(lambda: (run_action(action), GLib.SOURCE_REMOVE)[1],
+                          priority=GLib.PRIORITY_HIGH_IDLE)
 
     def gesture(fd, condition):
         try:
