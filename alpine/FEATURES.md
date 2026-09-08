@@ -61,15 +61,24 @@ to theme recoloring, not permission to stop theming other controls.
 
 ### LOCK-THEME
 
-The lock background fallback, ring, text, typing, verification, failure and
-Caps Lock indicators follow the active validated palette. Lock acquisition must
-wait for actual readiness, serialize concurrent requests and reject stale
-process/compositor identities; a matching process name is insufficient.
+The lock dissolves from the desktop into the current painting blurred, darkened
+and vignetted, with a clock and date on an idle-invisible ring, a caption card
+(painting title and story, the hour's Scripture, Ghost Planet mark), and the
+amber ring, key highlights, verification, failure, cleared and Caps Lock states
+in the active validated palette. No grace period. swaylock-effects runs under
+the helper's own supervisor with the ready-fd handshake; stock swaylock under
+swaylockd remains the automatic fallback. Lock acquisition must wait for actual
+readiness, serialize concurrent requests and reject stale process/compositor
+identities; a matching process name is insufficient.
 
-- Implementation: [oldbook-lock](desktop/.local/bin/oldbook-lock).
+- Implementation: [oldbook-lock](desktop/.local/bin/oldbook-lock),
+  [lock scene](desktop/.local/lib/oldbook/lock_scene.py),
+  [coexisting swaylock-effects](packages/swaylock-effects/README.md).
 - Checks: [lock regressions](tests/test_lock.py),
+  [headless lock evidence](verification/lock-screen/README.md),
   [recorded settings/theme work](PROGRESS.md#2026-09-07--theme-aware-desktop-decoration-settings-and-native-tools).
-  Theme argument and readiness checks do not constitute a physical live lock test.
+  Headless captures are not a physical lock; the first live lock after this
+  change remains the user's check.
 
 ### BAR-LAYOUT
 
@@ -79,6 +88,9 @@ decoration, not a resurrected center title subbar. Preserve helpful, characterfu
 valid GTK tooltips and native modified clicks. Music actions target the displayed
 player; Pithos supports delayed single-click playback, double-click open,
 right-click show/hide, middle-click tired and Super+middle-click ban.
+The optional `custom/cava` signal meter sits after the media controls, has no
+clicks or tooltip, collapses when silent, stops cava when nothing plays, and is
+removable by deleting it from `modules-center`.
 
 - Implementation: [Waybar config](desktop/.config/waybar/config.jsonc),
   [Pithos controls](desktop/.local/bin/oldbook-pithos), [native artwork module](packages/waybar-art/art.c).
@@ -93,7 +105,10 @@ Retain app icon, readable title, window state, helpful hover text and interactiv
 window/workspace controls. Bottom is the saved default; right-edge placement
 remains available. The preference editor exposes placement, opacity and corners
 beside editable JSON, validates changes and refuses stale overwrites. Preserve
-the user's saved values, currently bottom / 0.67 opacity / radius 7.
+the user's saved values, currently bottom / 0.67 opacity / radius 7. Caption
+typography follows the active theme's design typeface (Inter Medium for Gruvbox
+Dark) one point above the terminal size, left-aligned with Ghost Observatory
+padding; a theme without a design font keeps the terminal font.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),
@@ -147,12 +162,17 @@ Notifications appear over ordinary windows without moving/resizing them, taking
 terminal focus or sliding out a panel. Keep notification surfaces on TOP below
 overlay stay-on-top chrome, with no exclusive zone. Only an explicit action opens
 compact history. The empty host stays transparent; style actual cards rather
-than blurring/shadowing/clipping the entire hosting surface.
+than blurring/shadowing/clipping the entire hosting surface. The control center
+carries the playing MPRIS track with album art, sound and brightness sliders and
+a quick-action grid above the history; those widgets are additive and never
+change popup placement or the bar's notification clicks.
 
 - Implementation: [SwayNC config](desktop/.config/swaync/config.json),
   [SwayFX effects](desktop/.config/swayfx/effects.conf).
 - Evidence: [notification placement](verification/notifications/),
-  [host transparency diagnostic](verification/notification-overlay/).
+  [host transparency diagnostic](verification/notification-overlay/),
+  [control-center widgets](verification/swaync-widgets/) rendered by
+  [verify_swaync_widgets.py](tests/verify_swaync_widgets.py).
   These are layer-shell popups with the requested nonintrusive behavior,
   not ordinary Sway-managed floating containers.
 
@@ -267,6 +287,16 @@ at its decayed level. Ctrl+Shift+XF86KbdBrightnessDown adds an
 inverse sustained mode: it starts bright and only darkens while typing remains
 above that threshold, then recovers as you pause. The device remains whole-keyboard
 Apple SMC output.
+Option/Alt+XF86KbdBrightnessUp adds an ambient mode that follows the Apple SMC
+light sensor (`/sys/devices/platform/applesmc.*/light`): bright keys in a dark
+room up to the saved peak, off in daylight, with log-scale smoothing, a hysteresis
+band and a short fade so the light never flickers. It persists like the other
+modes, F5/F6 still move the peak, and it is refused when no sensor is readable.
+Option/Alt+Shift+XF86KbdBrightnessUp adds `breathe-air`: a continuous breath
+whose lungs start a quarter full at about seven seconds per cycle, take a fixed
+sip from every keystroke up to full (three seconds per cycle at full amplitude),
+leak back toward the quiet baseline with a twenty-second time constant while
+idle, and keep a continuous phase so no keystroke ever jumps the light.
 Keep the same controls and same
 mode persistence rules as the existing features.
 The Ghost control deck exposes the same controls with useful descriptions.
@@ -276,12 +306,21 @@ or theme changes. Animation samples must never replace the saved brightness.
 One worker controls the physical keyboard, uses elapsed time, skips redundant
 writes and restores the chosen level on shutdown or compositor loss. Keep the
 Caps Lock attention indicator and display backlight separate.
+Shortly before the idle lock, `oldbook-idle dim` eases the display down to about
+20% and asks for one `last-breath`: a short rise, a long fall to fully dark, then
+dark until activity. The last breath is a runtime overlay, never a saved level or
+mode; keys that are off by preference stay off; any explicit key or `restore`
+ends it, and `oldbook-idle undim` restores the display unless it was adjusted
+meanwhile. The keyboard's saved level and mode survive the whole cycle.
 
 - Implementation: [keyboard light](desktop/.local/bin/oldbook-keyboard-backlight),
   [bindings](desktop/.config/sway/local.d/keyboard-backlight.conf),
-  [control deck](desktop/.local/bin/oldbook-control).
+  [control deck](desktop/.local/bin/oldbook-control),
+  [idle stage](desktop/.local/bin/oldbook-idle), [session](desktop/.local/bin/oldbook-session).
 - Checks: [state and lifecycle](tests/test_keyboard_backlight.py),
-  [hardware evidence](verification/keyboard-breathing/README.md).
+  [idle dim](tests/test_idle_dim.py),
+  [hardware evidence](verification/keyboard-breathing/README.md),
+  [ambient and last-breath evidence](verification/keyboard-ambient/README.md).
   A 60Hz update target and sysfs readback do not prove optical refresh timing;
   the kernel can coalesce writes. Suspend/resume and physical keypresses need
   their own observation.
@@ -321,13 +360,15 @@ Super+Enter opens Ghostty; Foot remains available, including the system monitor.
 Use real terminal/compositor transparency with theme-aligned colors and typography,
 not wallpaper imitation. Preserve explicit surface/opacity preferences and themed
 selection/cursor/ANSI colors. Refresh existing terminal colors without killing
-shells, tmux sessions or running programs.
+shells, tmux sessions or running programs. New shells outside tmux show the
+Space Ghost splash once; Ghostty carries the bloom and cursor-smear shaders.
 
 - Implementation: [preferred terminal](desktop/.config/sway/local.d/terminal.conf),
   [Ghostty](desktop/.config/ghostty/config), [Foot](desktop/.config/foot/foot.ini),
   [live terminal refresh](desktop/.local/bin/oldbook-refresh-terminal-theme).
 - Checks: [terminal theme](tests/test_terminal_theme.py), [theme derivation](tests/test_theme_switch.py),
-  [transparency evidence](verification/workspace-chrome/).
+  [terminal chrome](tests/test_terminal_chrome.py), [transparency evidence](verification/workspace-chrome/),
+  [splash and shader renders](verification/terminal-chrome/).
   Saved font settings and runtime per-window font zoom are distinct.
 
 ### DROPDOWN-WINDOWS
@@ -365,7 +406,9 @@ Use the OpenRC/Wayland session and one owner per compositor session for desktop
 helpers. Reloads must not stack bars, notification services, media services,
 shortcut guides or animation daemons. Preserve the configured physical output,
 audio/backlight/screenshot controls and stock-Sway recovery route. No automatic
-video background or inferred location/night-light policy. AI attention indicates
+video background or inferred location/night-light policy: the night light runs
+only while an explicit `~/.config/oldbook/location.json` exists, and a user stop
+persists across reloads. AI attention indicates
 only attributable, unvisited targets; ordinary or retained notices do not light
 Caps Lock, and clearing one target must not clear the others.
 
@@ -375,6 +418,30 @@ Caps Lock, and clearing one target must not clear the others.
 - Checks: [session](tests/test_session.py), [notification stream](tests/test_ai_notification_stream.py),
   [LED](tests/test_notification_led.py), [video](tests/test_video_background.py).
   A reload test is not a fresh-login, suspend/resume or hardware-hotplug test.
+
+### FEEDBACK-OSD
+
+Volume, mute, microphone, display brightness and keyboard-light changes show
+one themed pill at the bottom centre of the focused output: a Nerd Font glyph,
+label, amber bar and percentage from the active palette, on the overlay layer,
+reserving no space, taking no keyboard focus and passing pointer input through.
+It holds about 1.1 seconds, fades on the display frame clock without overshoot
+and stops rendering when hidden; disabled desktop animations skip the fade.
+Screenshots keep their three fixed modes and, only after the capture is saved,
+flash a short cream wash and click the shutter; a missing daemon, player, sound
+or annotator never fails a capture. The key helpers report through the socket
+client only and never start the daemon; the session owns one daemon per
+compositor session. Permission and missing-device errors remain notifications.
+
+- Implementation: [oldbook-osd](desktop/.local/bin/oldbook-osd),
+  [state model](desktop/.local/lib/oldbook/osd.py),
+  [audio](desktop/.local/bin/oldbook-audio), [brightness](desktop/.local/bin/oldbook-brightness),
+  [screenshot](desktop/.local/bin/oldbook-screenshot),
+  [Satty profile](desktop/.config/satty/config.toml).
+- Checks: [feedback tests](tests/test_osd.py), [shutter tests](tests/test_screenshot_shutter.py);
+  `oldbook-osd preview` renders the pill without a display. Live capture evidence is recorded in
+  [the design note](../docs/superpowers/specs/2026-09-08-osd.md); a headless
+  render does not prove physical frame timing or the compositor blur.
 
 ## Gallery and durable reading content
 
@@ -386,11 +453,16 @@ creates a random complete theme and Super+Shift+right prompts for a theme.
 Preserve the searchable existing-theme picker, prompt-created names, image
 paging, explicit deletion flow, help and command deck. New actions are additive;
 ordinary artwork selection remains distinct from choosing a desktop theme.
+Painting rows carry a cached rounded thumbnail and the bar badge shows the
+painting on screen; a missing thumbnail falls back to plain text or the glyph,
+never to a blocked menu or bar.
 
 - Implementation: [gallery](desktop/.local/bin/oldbook-wallpaper),
-  [native click handling](packages/waybar-art/art.c).
+  [native click handling](packages/waybar-art/art.c),
+  [thumbnail cache](desktop/.local/lib/oldbook/thumbnails.py).
 - Checks: [manual artwork](tests/test_manual_artwork.py), [picker](tests/test_gallery_picker.py),
-  [new themes](tests/test_new_themes.py), [prompt editor](tests/test_gallery_prompts.py).
+  [new themes](tests/test_new_themes.py), [prompt editor](tests/test_gallery_prompts.py),
+  [thumbnails](tests/test_thumbnails.py), [headless renders](verification/gallery-thumbnails/).
 
 ### GALLERY-ACTIVATION
 
@@ -412,7 +484,9 @@ New-theme completion names the theme and previews the actual saved painting.
 
 All workspaces share the painting/timer; keep 20-minute rotation and pause state.
 Use the active/unthemed rotation filter without hiding other saved art from manual
-browsing. Preserve prompts, provenance, exact PNG hashes, fresh scene/mix history,
+browsing. With an explicit location the timer alone may prefer nocturnes about
+3:1 after sunset; it never excludes a painting or touches manual navigation.
+Preserve prompts, provenance, exact PNG hashes, fresh scene/mix history,
 one daily reservation, the single generation lock and bounded 2/4/8-second retry
 waits. Checkpoint only the generated pair and required descriptor; retry a failed
 checkpoint without regenerating. Existing images are reproducible bytes; fresh
@@ -423,18 +497,39 @@ AI output is not deterministic.
 - Checks: [wallpapers](tests/test_wallpapers.py), [checkpoints](tests/test_wallpaper_checkpoint.py),
   [fresh scenes](tests/test_fresh_scenes.py), [retries](tests/test_generation_retries.py).
 
+### ARTWORK-CROSSFADE
+
+Painting changes crossfade on the frame clock (0.8 s for a deliberate change,
+1.6 s for the timer, an optional radial reveal from a screen position) through
+the background-layer daemon; Sway's own background is only the fallback and is
+never refreshed after a fade. The daemon starts on what swaybg shows, re-creates
+its surface when a respawned swaybg covers it, restores desktop cards it
+displaced, and exits with the session. Manual browsing, the pause state and the
+shared painting link are unchanged.
+
+- Implementation: [oldbook-background](desktop/.local/bin/oldbook-background),
+  [fade model](desktop/.local/lib/oldbook/background_fade.py),
+  [gallery apply](desktop/.local/bin/oldbook-wallpaper), [session](desktop/.local/bin/oldbook-session).
+- Checks: [daemon tests](tests/test_background.py), [gallery hooks](tests/test_background_gallery.py),
+  [headless crossfade evidence](verification/background-crossfade/README.md).
+  Headless proof is not physical frame pacing; hotplug and a fresh login are unobserved.
+
 ### CONKY-READING
 
 Conky is a quiet reading display, not telemetry. Preserve disabled-card choices,
 stable placement and caption clearance; do not reflow on focus/fullscreen changes.
 Keep date, Scripture, gallery notes and text; battery is allowed, configured email
-is welcome. No CPU, memory, processes, disk/network I/O or thermals: Waybar owns
-those. Background refresh is 60–300 seconds, except hourly Scripture. Preserve
-native reading-card click actions; Scripture search may adapt to free space.
+is welcome, and the masthead's offline sunrise/sunset/moon line appears only for
+an explicit `~/.config/oldbook/location.json`. No CPU, memory, processes,
+disk/network I/O or thermals: Waybar owns those. Background refresh is 60–300
+seconds, except hourly Scripture. Preserve native reading-card click actions;
+Scripture search may adapt to free space.
 
 - Implementation: [runtime policy](desktop/.local/lib/oldbook/conky_policy.py),
-  [layout](desktop/.local/lib/oldbook/conky_layout.py), [panels](desktop/.config/conky/panels.json).
+  [layout](desktop/.local/lib/oldbook/conky_layout.py), [panels](desktop/.config/conky/panels.json),
+  [sun and moon](desktop/.local/lib/oldbook/astro.py), [masthead helper](desktop/.local/bin/oldbook-astro).
 - Checks: [policy](tests/test_conky_policy.py), [layout](tests/test_conky_layout.py),
+  [sun and moon](tests/test_astro.py),
   [clicks](tests/test_conky_clicks.py), [desktop space](tests/test_desktop_space.py),
   [native click evidence](verification/conky-clicks/README.md).
   [Persistent requirements](AGENTS.md) apply to every theme and rebuild.
@@ -571,6 +666,29 @@ never close the current desktop merely to load a new executable.
 - Evidence: [screen corner verification](verification/screen-corners/).
   Headless renderer proof does not establish physical frame rate or DRM scanout.
 
+### BOOT-CONSOLE
+
+Every text-mode screen is Gruvbox from the first frame: the initramfs LUKS
+passphrase prompt, kernel messages and the rescue gettys on tty2–tty6. The
+palette, the cream-on-charcoal default attribute and the kernel's Terminus 16x32
+are kernel parameters appended to GRUB_CMDLINE_LINUX_DEFAULT; the rescue banner
+is a rendered /etc/issue. Installation is idempotent, backs up every replaced
+file, regenerates grub.cfg into a temporary file and keeps it only when the
+stock entry still boots the same kernel, initramfs, root and crypt parameters
+plus exactly the managed tokens and stays first. The Ghost Planet banner
+initramfs is an additional non-default GRUB entry built from the versioned
+patched init; /boot/initramfs-lts and mkinitfs.conf stay untouched. Nothing
+here reboots, switches VTs or loads a font into a live console.
+
+- Implementation: [installer](bin/install-boot-console),
+  [console logic](system/boot/boot_console.py), [palette](system/boot/console-palette.json),
+  [rescue banner](system/boot/issue.template), [banner initramfs](system/mkinitfs/).
+- Checks: [boot console tests](tests/test_boot_console.py),
+  [boot console record](../docs/superpowers/specs/2026-09-08-boot-console.md),
+  [LUKS prompt record](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
+  A generated grub.cfg and a listed initramfs are not a boot: the visual result
+  stays unverified until the next physical boot.
+
 ## Superseded choices and evidence limits
 
 These replacements are already decided; do not ask the user to choose again.
@@ -589,6 +707,8 @@ These replacements are already decided; do not ask the user to choose again.
 | Low-resolution or live carousel previews | Full-provider-resolution still images once per opening (`CAROUSEL-STILLS`). |
 | Every theme recolors the Ghost badge | Original Ghost branding is explicitly preserved (`GHOST-BRAND`). |
 | Per-workspace painting timers or automatic Conky focus reflow | Shared painting/timer and stable quiet cards (`ARTWORK-ARCHIVE`, `CONKY-READING`). |
+| Compact 6px corners, 3/4 gaps, edge-hugging bar islands, terminal-font captions | Ghost Observatory geometry: 22px corners, 6/7 gaps, floating pill islands, Inter captions (`THEME-COMPLETE`, `DECORATION-STYLE`); the bar centre and Ghost badge stay as pinned. |
+| swaynag logout prompt on Super+Shift+E; fuzzel session menu on the battery | wlogout power deck with confirmations kept for log out, reboot and shut down (`SESSION-OWNERSHIP`, `BAR-LAYOUT`). |
 | JSON/random desktop notes, telemetry cards or lost old study text | Durable reading/journal contracts (`CONKY-READING`, `JOURNAL`, `SCRIPTURE`). |
 | npm Codex or partial CLI-only installation | Complete native APK and preserved tool/resource layout (`CODEX-PACKAGING`). |
 | Personal package named oldbook-desktop | spaceghost-desktop (`PERSONAL-DESKTOP`); old artifacts are recovery history. |

@@ -2,6 +2,202 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Eyecandy round — 2026-09-08
+
+Eighteen additions were built in one pass by parallel agents, each with its own
+check-in, design note under `docs/superpowers/specs/2026-09-08-*.md`, tests and
+evidence directory. The display was powered off and the session locked for the
+first half of the work, so most visual proof is from private headless SwayFX
+sessions; the physical checks that remain are listed with each item. The whole
+catalogue, with controls and rollback for every piece, is in [RICE.md](RICE.md).
+
+- **Notification centre widgets.** The SwayNC control center now carries the
+  playing MPRIS track with album art and controls, the output volume with a
+  per-application drawer, the gmux_backlight slider with a 40/1023 floor, and six
+  quick actions (lock, command deck, next painting, hold rotation, mic off,
+  desktop cards) whose toggles refresh each time the panel opens; both stylesheet
+  copies gained Gruvbox rules for the GTK 4 widget elements. `verify_swaync_widgets.py`
+  rendered the real config in a private headless SwayFX and D-Bus session with a
+  fake MPRIS player and two synthetic notifications (`verification/swaync-widgets/`);
+  the live swaync accepted config and CSS reloads. SwayNC wraps button commands
+  in `/bin/sh -c "..."`, so the commands avoid double quotes. The live look
+  waits for the user's next click on the notification glyph.
+- **On-screen feedback and screenshot shutter.** `oldbook-osd` draws one themed
+  300×66 pill at the bottom centre of the focused output for volume, mute,
+  microphone, display brightness and keyboard light: overlay layer, no reserved
+  space, no focus, pointer pass-through, a 1.1 s hold and a frame-clock fade that
+  unmaps the surface when done; disabled animations skip the fade. Screenshots
+  flash a cream wash and click the freedesktop shutter only after the capture is
+  written, then open Satty with a Gruvbox profile (Swappy fallback). Message
+  validation, timing, the quiet client, the runtime guard and the
+  audio/brightness/screenshot wiring are covered by 18 new tests; a private
+  headless SwayFX run recorded the pill mapping, the unchanged workspace
+  rectangle, the fade, the flash and Satty floating (`verification/osd/`). The
+  live daemon started from a reload and mapped the pill on eDP-1 with the SwayFX
+  effects reported; the physical look and the sound remain unobserved, and
+  pixman evidence does not show blur.
+- **Gruvbox boot console.** Every text-mode screen now inherits the Gruvbox
+  palette, a cream-on-charcoal default attribute and the kernel's Terminus 16x32
+  through kernel parameters on the GRUB command line; the rescue gettys print a
+  Ghost Planet `/etc/issue` masthead. `alpine/bin/install-boot-console` rewrites
+  `/etc/default/grub` idempotently, backs up every replaced file under
+  `/var/backups/alpine-rice/boot-console-*`, regenerates grub.cfg into a
+  temporary file and keeps it only after `grub-script-check` and a structural
+  proof that the stock entry still boots the same kernel, initramfs, root and
+  crypt parameters. 16 unit tests, a dry run, a real install and an idempotent
+  re-run passed. No reboot was performed; the visual result is unverified until
+  the next boot. The consolefont service stays disabled.
+- **LUKS prompt and banner initramfs.** The passphrase prompt is printed on the
+  kernel console after the palette parameters apply, so it is already Gruvbox.
+  A versioned copy of the mkinitfs init with one guarded masthead block builds
+  `/boot/initramfs-lts-ghost` (init member proven byte-identical, modules
+  present, file list compared with the stock archive) and is published as an
+  additional, non-default GRUB entry derived from the stock entry;
+  `/boot/initramfs-lts` and mkinitfs.conf are untouched. Withdraw with
+  `--remove-ghost`; rerun after kernel upgrades. The entry has not been booted;
+  select it from the one-second GRUB menu to test.
+- **Power deck.** Super+Shift+E and the battery module open `oldbook-power`, a
+  wlogout 1.2.2 layer-shell deck of five Gruvbox tiles (lock, suspend behind a
+  verified lock, log out, reboot, shut down) over the SwayFX-blurred desktop,
+  falling back to the command deck menu without wlogout. Log out, reboot and
+  shut down confirm on a Gruvbox swaynag bar. Glyph tiles are rasterised from
+  the Nerd Font by `build-wlogout-icons`. Evidence: `verification/power-deck/`
+  headless render; ShellCheck and both Sway validations passed. The display was
+  off during the work, so the binding, battery click and tile actions await a
+  physical check.
+- **Ghost Observatory adopted.** Production now uses the concept's 22px corners,
+  34px shadows, 6/7 gaps, 18px floating bar islands, tooltips and launcher, and
+  Inter Medium captions on the decoration strip (theme design font, one point
+  above the terminal size, left-aligned); the descriptor records radius 22 /
+  spacing 6 and the renderer accepts up to 24. The centre title, native
+  titlebars and amber badge were not adopted per BAR-LAYOUT, DECORATION-* and
+  GHOST-BRAND. `alpine/themes/preview` renders the deployed chrome headlessly;
+  evidence in `verification/ghost-observatory/`. Decoration and theme suites
+  pass; `test_ghost_branding`/`test_new_themes` still reference archived assets.
+  Live reload applied with the caption daemon restarted; the Waybar JSON reload
+  happened later in the round and the physical look remains pending.
+- **Gallery thumbnails and art badge.** Gallery picker rows and the bar's
+  artwork badge now show rounded thumbnails of the paintings. A shared
+  GdkPixbuf/cairo cache under `~/.cache/oldbook/thumbnails/` is published as a
+  private `Oldbook-Thumbnails` icon theme because Fuzzel's dmenu icon protocol
+  resolves theme names, not paths (absolute paths verified to render nothing).
+  The native badge asks `oldbook-wallpaper status --thumbnail-height` for a
+  scale-sized PNG and follows `current-wallpaper.png` link changes through a
+  debounced file monitor; paused dims, generating shows the hourglass, missing
+  thumbnails fall back to the glyph. r10 of `oldbook-waybar-art` built twice
+  byte-identically offline, was archived, installed and mapped into the
+  restarted bar. 9 thumbnail-library tests and 6 picker tests pass; headless
+  SwayFX renders of the picker and all four badge states are under
+  `verification/gallery-thumbnails/`, and both were confirmed on the physical
+  panel once it woke. A live picker check was killed by a `timeout` wrapper and
+  left the picker on screen for about half a minute before it was closed; no
+  selection was made. The pre-existing `delaware.png` fixture move still breaks
+  `test_manual_artwork`, `test_new_themes` and `test_themed_artwork`.
+- **Lock screen.** swaylock-effects 1.7.0.0 is rebuilt as
+  `oldbook-swaylock-effects` and installed beside stock swaylock, with a
+  backported `--ready-fd` and new idle-colour options; two isolated builds were
+  byte-identical and the inputs are archived. `oldbook-lock` supervises it
+  itself, keeps the readiness and identity checks, and falls back to swaylockd
+  and stock swaylock inside the same call. The lock dissolves from the desktop
+  into the blurred, vignetted painting with an Inter Display clock, a caption
+  card (title, story, the hour's Scripture, Ghost Planet mark) and an amber ring
+  only while typing; no grace period. Scene and caption are cached; quiet
+  cold/warm lock timings were 1.0 s. All 10 lock tests pass. A private headless
+  SwayFX session locked with the real helper produced `verification/lock-screen/`.
+  The live session was not locked by the agents (it was locked by swayidle, then
+  in use), Caps Lock text was not observed headlessly, and physical dissolve
+  pacing is unmeasured; the user's next Super+Escape is the live check.
+- **Sun and moon.** Added offline NOAA sunrise/sunset/twilight and low-precision
+  lunar phase in `astro.py`, driven only by an explicit
+  `~/.config/oldbook/location.json` (example shipped, live file kept out of
+  Fossil). The masthead card shows one sunrise/sunset/moon line every 300 s;
+  `oldbook-sun-light` runs wlsunset from the configured coordinates with a stop
+  that survives reloads and a command-deck toggle; the automatic timer prefers
+  nocturnes about 3:1 after sunset without excluding any painting. Eighteen
+  tests pass against published times; Conky was refitted live and the card
+  rendered headlessly (`verification/sun-and-moon/`). A full night of weighted
+  rotation, the physical colour ramp and an eye check of the card remain
+  unobserved.
+- **Bar visualizer (optional).** `oldbook-cava-bar` feeds a `custom/cava`
+  ten-bar meter after the media controls, stops cava when nothing plays,
+  collapses after half a second of silence, and cannot outlive its bar (pipe
+  poll, PDEATHSIG, unwinding-only signal handler). Four tests with fake
+  cava/playerctl pass; headless renders show the bar height unchanged; cost with
+  music is about 4 % of one core across feeder, cava and Waybar redraws
+  (`verification/bar-visualizer/`). Remove by deleting `custom/cava` from both
+  `modules-center` lists.
+- **Terminal chrome.** New shells outside tmux greet with a fastfetch splash
+  beside the Space Ghost painting (kitty file medium in Ghostty, libsixel in
+  Foot, text ghost elsewhere) with Gruvbox keys, the Fossil branch, the current
+  painting, the hour's Scripture and the track on air, once per terminal.
+  Ghostty gained warm-bloom and cursor-smear shaders, animated only while
+  focused, and Neovim a hand-rolled Gruvbox statusline, winbar and thin splits
+  with no plugins, all in both config copies. Fourteen unit tests pass; headless
+  SwayFX renders and brief live 2× checks confirmed the splash and shader
+  loading (`verification/terminal-chrome/`). A transient Ghostty config banner
+  appeared during the minutes between the shader lines and the deployed shader
+  files; the live config validates clean now. The Neovim chrome and the
+  drop-down console's post-resize image placement remain unobserved live;
+  `test_application_theme_refresh.py` still expects the archived spaceghost
+  profile.
+- **Wallpaper crossfade.** Paintings now crossfade: `oldbook-background` owns a
+  background-layer surface above swaybg and eases between images on the frame
+  clock, 0.8 s for a deliberate change and 1.6 s for the timer, with an optional
+  radial reveal from a screen position. It starts on the image swaybg shows and
+  fades to the shared painting, so logins and reloads no longer cut. SwayFX
+  lists layer surfaces top-first and respawns swaybg above everything on each
+  reload; the daemon detects a covering swaybg before each fade, on Sway output
+  events and every 15 s, re-creates its surface seamlessly and puts displaced
+  Conky cards back on top. `oldbook-wallpaper` falls back to `output bg`
+  whenever the daemon is not answering. Eighteen unit checks and a twelve-check
+  private headless SwayFX run with real paintings passed (evidence:
+  `verification/background-crossfade/`); one live `next`/`prev` faded and
+  restored the painting with the pause state kept. Physical frame pacing,
+  hotplug and a fresh login remain unobserved.
+- **Dim before lock and the keyboard's last breath.** Added `oldbook-idle`: a
+  swayidle stage 30 s before the lock eases the display to 20% in a detached
+  worker and gives the keyboard one last breath (rise, long fall, hold dark)
+  through a runtime overlay in the single keyboard worker; resume cancels the
+  ramp, restores the display unless adjusted meanwhile, and restores the saved
+  keyboard level and mode. Nine subprocess tests and eight synthetic-clock
+  keyboard tests cover cancel, manual adjustment, already-dim, no-display, stale
+  records and the overlay's shape; a short real dim/undim cycle on the MacBook
+  recorded display 1023 → 310 → 1023 and keyboard 0 → 255 → breathing resumed
+  with saved 255/breathing untouched (`verification/keyboard-ambient/`). The
+  running swayidle keeps the old command line until the next login; a real
+  270-second idle and suspend/resume remain unobserved.
+- **Ambient keyboard glow and the wluma pull request.** Option+F6 selects an
+  ambient keyboard mode driven by the Apple SMC light sensor with log-scale
+  smoothing, hysteresis and 1.2-second fades between the saved peak in the dark
+  and off in daylight; it persists like the other modes, F5/F6 still move the
+  peak, and it is refused without a readable sensor. A fake-sensor run on the
+  real LED with private state went 255 → 0 → 255 without touching preferences.
+  A stray `nand-disk` trigger found on the LED (a root write at 02:32 of unknown
+  origin) was reset to `none`. Upstream, max-baz/wluma#179 adds an
+  `[als.applesmc]` backend with auto-selection, docs and tests; fmt, clippy and
+  165 tests passed locally and the release binary read the live sensor. The
+  Rust toolchain and dev headers installed for that build were removed again
+  afterwards so the package lock stays a desktop closure; `~/src/wluma` keeps
+  the branch and the built binary. A real room-light change, the physical chord
+  and the older two-value sensor format were not observed.
+- **Breathe on air.** Option+Shift+F6 selects `breathe-air`: lungs start a
+  quarter full at seven seconds per cycle, every keystroke from the typing
+  modes' evdev sampling adds a fixed sip up to full (three seconds per cycle),
+  idle lungs leak back over a twenty-second time constant, and continuous phase
+  plus half-second volume smoothing keep the light from ever jumping. A
+  90-second synthetic run with scripted keystrokes and an eight-second live run
+  at rest (31 → 87 → 31) passed; keystroke inflation on hardware was not
+  observed.
+- **Consolidation.** The shared hooks (session services, gallery crossfade and
+  nocturne calls, control-deck entries, bar modules, effects, contracts and the
+  check index) were reviewed together: both Sway entry configs validate, both
+  Waybar configs parse, the effects copies are identical, the check index is
+  consistent, and the full unit suite ran 1,076 tests with a clean PATH and no
+  failures. The keyboard light now reports level changes through the feedback
+  pill. The complete catalogue is [RICE.md](RICE.md). The running swayidle
+  was restarted so the idle dim stage applies now; the second open leaf from
+  another session's Bazzite fix was merged back into the branch.
+
 ## Radio preparation and desktop repairs — 2026-09-07
 
 - Bluetooth is now software-blocked by a Bluetooth-only eudev rule. Independent

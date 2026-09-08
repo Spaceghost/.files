@@ -15,10 +15,11 @@ Glib dispatcher warning during in-process reload).
 | CPU | Hover to reveal memory, temperature, and root storage; click to open btop. |
 | Network | Live receive rate; hover shows transmit rate, IP addresses, and signal. Hover also reveals radio and firewall state. Left: network controls. Right: connection report. |
 | Sound | Scroll for volume, left for mixer, right for mute. Hover reveals microphone; click its icon to toggle microphone mute. |
-| Battery | Hover reveals brightness and keep-awake controls. Scroll brightness to adjust. Left: lock/suspend/logout menu. |
+| Battery | Hover reveals brightness and keep-awake controls. Scroll brightness to adjust. Left: power deck (lock, suspend, log out, reboot, shut down) over the blurred desktop; the command deck's session menu remains the fallback. |
 | Agents (✦) | Left: next AI window. Right: sessions and launchers. Super+left or Super+Ctrl+N: fresh GPT-6 Astra Codex with ultra reasoning, approvals and sandbox bypassed, in its own tmux session on the workspace where launched. Starts in `~`; Super+N opens the session picker for reattachment. |
 | Notifications | Left: compact notification history. Right: Do Not Disturb. |
 | Clock | Los Angeles time. Click to show the full date; scroll to browse the calendar. |
+| Signal (optional) | Ten-bar spectrum from `cava` right after the media controls while a player is playing; it collapses after half a second of silence and stops `cava` entirely when nothing plays. No clicks or tooltip. To remove it, delete `"custom/cava"` from `modules-center` in both `config.jsonc` copies. |
 
 The active workspace number and name are bold and bright. Inactive workspace
 numbers remain bold, while their names use regular weight. The process text

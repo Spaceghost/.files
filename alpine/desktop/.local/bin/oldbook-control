@@ -117,10 +117,20 @@ def keyboard():
     typing_dark = state.get("mode") == "typing-dark"
     typing_wpm = state.get("mode") == "typing-wpm"
     typing_dark_wpm = state.get("mode") == "typing-dark-wpm"
+    ambient = state.get("mode") == "ambient"
+    breathe_air = state.get("mode") == "breathe-air"
     peak = round(state["level"] * 100 / state["maximum"])
-    options = {
+    options = {}
+    if state.get("sensor"):
+        light = state.get("light")
+        room = f" · room light {light}" if light is not None else ""
+        options[("◉  Following the room light · steady stops it" if ambient else
+                 f"◌  Ambient glow · bright keys in the dark, off in daylight{room}")] = "ambient"
+    options.update({
         ("◉  Hold that glow · stop breathing" if breathing else
          "◌  Let the keys breathe · a slow six-second glow"): "breathe",
+        ("◉  Breathing on your air · every keystroke deepens the breath" if breathe_air else
+         "◌  Breathe on air · shallow and slow until your keystrokes fill the lungs"): "breathe-air",
         ("◉  Let your fingers wake the light" if typing else
          "◌  Typing pulse · brighten with each keypress"): "typing",
         ("◉  Let your fingers dim the glow" if typing_dark else
@@ -133,8 +143,9 @@ def keyboard():
         "＋  Brighter · adjust the breathing peak too": "up",
         "−  Dimmer · all the way down switches it off": "down",
         "◐  Lights on / off": "toggle",
-    }
-    mode = "BREATHING" if breathing else "STEADY"
+    })
+    mode = ("BREATHING" if breathing else "BREATHING ON AIR" if breathe_air
+            else "AMBIENT" if ambient else "STEADY")
     selected = choose(f"KEYBOARD GLOW · {mode} {peak}% · ALL KEYS TOGETHER", list(options))
     if selected in options:
         run([BIN / "oldbook-keyboard-backlight", options[selected]])
@@ -165,6 +176,7 @@ def menu(section="main"):
             "󰤨  Transmissions · network and privacy": lambda: menu("network"),
             "󰕾  Sound studio · mixer and microphone": lambda: launch(["pavucontrol"]),
             "☀  Keyboard glow · breathing and brightness": keyboard,
+            "󰖨  Night light · warm after sunset, needs location.json": lambda: run([BIN / "oldbook-sun-light", "toggle"]),
             "󰒃  Application firewall": firewall,
             "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
             "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),

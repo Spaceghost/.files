@@ -14,8 +14,8 @@ window#waybar { background: transparent; color: #ebdbb2; }
 .modules-left, .modules-right {
     background: linear-gradient(180deg, rgba(60, 56, 54, 0.98), rgba(29, 32, 33, 0.98));
     border: none;
-    border-radius: 13px;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.40);
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(29, 32, 33, 0.55);
     margin-bottom: 5px;
 }
 .modules-center { background: transparent; margin: 0 8px; padding: 0; }
@@ -27,13 +27,13 @@ window#waybar { background: transparent; color: #ebdbb2; }
     color: #fff6ff;
     background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
     text-shadow: 0 0 5px #e3baff;
-    border-radius: 10px;
+    border-radius: 12px;
     margin: 3px 5px 3px 3px;
     padding: 0;
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
 #workspaces { margin: 3px 5px 3px 0; }
-#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 8px; color: #a89984; transition: all 180ms ease-in-out; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a89984; transition: all 180ms ease-in-out; }
 #workspaces button.empty { color: #7c6f64; }
 #workspaces button:hover { background: #504945; color: #fbf1c7; box-shadow: none; }
 #workspaces button.focused {
@@ -43,7 +43,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
     box-shadow: none;
 }
 #workspaces button.urgent { background: #cc241d; color: #fbf1c7; }
-#custom-ai { color: #fabd2f; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 8px; }
+#custom-ai { color: #fabd2f; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 11px; }
 #custom-ai:hover { background: #504945; color: #fbf1c7; }
 #custom-ai.idle { color: #928374; }
 #custom-ai.complete { color: #b8bb26; background: #32361a; }
@@ -53,11 +53,14 @@ window#waybar { background: transparent; color: #ebdbb2; }
 #mpris.paused { color: #a89984; }
 #mpris.previous, #mpris.next { font-size: 15px; padding: 0 8px; }
 #mpris:hover { background: rgba(142, 192, 124, 0.16); }
+/* Optional transmission meter beside the music controls; silent frames collapse it. */
+#custom-cava { color: #8ec07c; padding: 0 6px; margin: 0 2px; font-size: 10px; }
+#custom-cava.silent { padding: 0; margin: 0; }
 #cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
 #pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
     padding: 0 8px;
     margin: 4px 0;
-    border-radius: 8px;
+    border-radius: 11px;
 }
 #cpu { color: #d3869b; }
 #memory, #disk { color: #a89984; }
@@ -84,13 +87,18 @@ window#waybar { background: transparent; color: #ebdbb2; }
 #pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
     background: rgba(146, 131, 116, 0.22);
 }
-tooltip { background: rgba(29, 32, 33, 0.99); border: none; border-radius: 12px; box-shadow: 0 5px 16px rgba(0, 0, 0, 0.46); }
+tooltip { background: rgba(29, 32, 33, 0.99); border: none; border-radius: 16px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.46); }
 tooltip label { color: #ebdbb2; padding: 13px 15px; font-size: 11px; font-weight: 500; }
 @keyframes distress { to { background: #cc241d; } }
 #custom-art { color: #a89984; font-size: 15px; padding: 0 7px 0 4px; }
 #custom-art:hover { color: #fbf1c7; }
 #custom-art.paused { color: #7c6f64; }
 #custom-art.generating { color: #fabd2f; text-shadow: 0 0 7px #d79921; }
+/* The badge is a thumbnail of the painting on screen; paused dims it and
+   generating shows the hourglass glyph in its place. */
+#custom-art image.thumbnail { margin: 0 2px; }
+#custom-art.paused image.thumbnail { opacity: 0.55; }
+#custom-art:hover image.thumbnail { opacity: 0.85; }
 
 /* While a window is fullscreen the bar fades back so it stops competing with
    the content; oldbook-waybar-dim writes the opacity into waybar-state.css.

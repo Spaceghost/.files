@@ -36,6 +36,17 @@ local checkpoint. Failed image generation does not announce finished artwork.
 
 The gallery preserves the painting list and appends next/previous, pause/resume,
 **Help & gallery controls**, and **Open command deck** alongside generation.
+Every painting row carries a rounded thumbnail of its picture, and the bar's
+artwork badge shows the painting on screen. Thumbnails are rendered once per
+painting and size with GdkPixbuf into `~/.cache/oldbook/thumbnails/`, never into
+the checkout, and the four rows on screen are rendered before the page opens
+while the rest warm up in the background at low priority. Fuzzel resolves dmenu
+icons through an icon theme rather than file paths, so the cache is also the
+single directory of a private `Oldbook-Thumbnails` theme under
+`~/.local/share/icons/`, which inherits the desktop icon theme. Deleting the
+cache or the theme directory is safe; both are recreated on the next gallery
+open. Rows without a thumbnail keep their plain text.
+
 The picker shows up to 28 rows so the current gallery and its controls fit on
 the laptop display. Scroll or type part of an action/title to find further entries.
 **Edit artwork prompts** is available there too. Its shared guidance and scene
@@ -119,6 +130,18 @@ icon) edits both banks and their selection modes on separate tabs.
 python3 alpine/wallpapers/generate.py --manual --activate
 python3 alpine/wallpapers/generate.py --manual --scene observatory-night --medium cyanotype
 ```
+
+## Nocturnes after dark
+
+With `~/.config/oldbook/location.json` configured (see the desktop README), the
+automatic timer leans toward night paintings between the computed sunset and
+sunrise: each nocturne carries about three times the weight of any other
+painting in a weighted random draw, and nothing is ever excluded. Manual
+browsing, picks and refreshes are untouched, and rotation stays sequential in
+daylight or without a location. A sidecar may declare `"time_of_day": "night"`
+(or `"day"`) explicitly; otherwise a painting counts as a nocturne only when its
+title or description contains a whole word such as night, moon, nocturne,
+dusk, stars, candle, lantern, midnight or aurora.
 
 ## Reverence
 
@@ -280,3 +303,28 @@ Command-line equivalents:
 python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme
 python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme 'Moonlit library'
 ```
+
+## Crossfade
+
+`oldbook-background` owns an opaque surface on the background layer, above
+Sway's own swaybg, and fades between paintings on the display frame clock:
+the timer eases across in 1.6 seconds, a deliberate change answers in 0.8.
+`oldbook-wallpaper next --from 700,20` reveals the next painting from that
+logical position with a soft radial edge instead of a plain fade; `prev`,
+`select` and `refresh` take the same option. The session starts the daemon
+before the gallery's restore, so a reload fades rather than cuts. When the
+daemon is not answering, the gallery falls back to Sway's `output bg` cut, and
+Sway's login background stays exactly that: a fallback. Sway respawns swaybg
+above everything on every reload, so the daemon watches the stacking order,
+re-creates its surface when it has been covered, and asks the desktop panels
+to return on top when a restart put them underneath.
+
+```sh
+oldbook-background status          # what each output shows, and whether it is fading
+oldbook-background set IMAGE --duration 1200 --from 300,200
+oldbook-background raise           # re-create the surfaces above a respawned swaybg
+oldbook-background quit            # back to plain cuts until the next login
+```
+
+Design notes and rollback: `docs/superpowers/specs/2026-09-08-crossfade.md`;
+headless evidence: `alpine/verification/background-crossfade/`.

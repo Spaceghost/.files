@@ -95,7 +95,9 @@ if ! has_comm swaync; then
     start_service swaync swaync
 fi
 if ! has_comm swayidle; then
-    start_service swayidle swayidle -w timeout 300 'oldbook-lock' timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' before-sleep 'oldbook-lock'
+    # Half a minute before the lock, oldbook-idle eases the display down and gives
+    # the keyboard light one last breath; activity brings both back.
+    start_service swayidle swayidle -w timeout 270 'oldbook-idle dim' resume 'oldbook-idle undim' timeout 300 'oldbook-lock' timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' before-sleep 'oldbook-lock'
 fi
 # The bar imports this stylesheet, so it must exist before Waybar reads style.css.
 # oldbook-waybar-dim owns its contents from then on.
@@ -107,6 +109,11 @@ if ! has_comm waybar; then
 fi
 if command -v oldbook-firewall-ui >/dev/null 2>&1; then
     start_service firewall-ui oldbook-firewall-ui
+fi
+# Night light only for an explicit ~/.config/oldbook/location.json; nothing is inferred.
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/oldbook/location.json" ] \
+        && command -v oldbook-sun-light >/dev/null 2>&1 && ! has_comm wlsunset; then
+    start_service sun-light oldbook-sun-light run
 fi
 
 # The wallpaper service uses a flock; starting it after reload is safe.
@@ -127,6 +134,11 @@ fi
 if command -v oldbook-waybar-dim >/dev/null 2>&1; then
     oldbook-waybar-dim 9>&- >>"$art_state/waybar-dim.log" 2>&1 &
 fi
+# Volume, brightness and keyboard-light feedback plus the screenshot flash; the
+# key helpers stay quiet when it is absent and never start it themselves.
+if command -v oldbook-osd >/dev/null 2>&1; then
+    start_service osd oldbook-osd daemon
+fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
 fi
@@ -138,6 +150,21 @@ fi
 # Record global window focus order and keep the carousel ready for Tab/swipes.
 if command -v oldbook-carousel >/dev/null 2>&1; then
     oldbook-carousel daemon 9>&- >>"$art_state/carousel.log" 2>&1 &
+fi
+# The crossfade surface should answer before the gallery restores its painting,
+# so the restore fades instead of cutting. The wallpaper tool falls back to
+# Sway's own background whenever the daemon is not answering.
+if command -v oldbook-background >/dev/null 2>&1; then
+    oldbook-background daemon 9>&- >>"$art_state/background.log" 2>&1 &
+    # Its socket appears once the daemon owns the session; requests are
+    # answered as soon as its loop runs, within the gallery's own wait.
+    background_key=$(printf '%s' "${SWAYSOCK:-${WAYLAND_DISPLAY:-default}}" | sha256sum | cut -c1-12)
+    attempts=0
+    while [ ! -S "${XDG_RUNTIME_DIR:-/run/user/$uid}/oldbook/background-$background_key.sock" ] \
+            && [ "$attempts" -lt 15 ]; do
+        sleep 0.1
+        attempts=$((attempts + 1))
+    done
 fi
 if command -v oldbook-wallpaper >/dev/null 2>&1; then
     oldbook-wallpaper refresh >>"$art_state/wallpaper.log" 2>&1 || true

@@ -20,11 +20,18 @@ sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 from workspace_defaults import choose_artwork
+import background_fade as fade
+from nocturne import nocturne_preference
+import thumbnails
 
 STATE = Path.home() / '.local/state/oldbook/wallpaper'
 CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
 GENERATION = Path.home() / '.local/state/oldbook/wallpaper-generation'
 MENU = Path(__file__).resolve().parent / 'oldbook-fuzzel'
+# Picker rows are 40 logical pixels tall so a painting reads as a picture;
+# thumbnails are rendered taller than the slot so HiDPI panels stay crisp.
+PICKER_ROW_HEIGHT = 40
+PICKER_THUMBNAIL_HEIGHT = 96
 
 
 def atomic_json(path, value):
@@ -141,20 +148,47 @@ def sway_socket():
     raise RuntimeError('No owned active physical Sway session found')
 
 
-def apply(entry):
+def fade_duration(action):
+    """The timer eases across slowly; a deliberate change answers quickly."""
+    return fade.ROTATION_DURATION_MS if action == 'tick' else None
+
+
+def crossfade_to(path, origin=None, duration=None):
+    """True when this session's background daemon accepted the change.
+
+    A brief wait catches an image the daemon cannot decode; a fade that is
+    still running (or waiting for a powered-off display) is already accepted.
+    """
+    try:
+        reply = fade.crossfade(path, duration, origin, ack_timeout=2.0, settle_timeout=1.0)
+    except OSError:
+        return False
+    if reply is None:
+        return False
+    if not reply.get('ok'):
+        print('oldbook-wallpaper: crossfade refused: ' + str(reply.get('error')), file=sys.stderr)
+        return False
+    return True
+
+
+def apply(entry, origin=None, duration=None):
     socket = sway_socket()
     CURRENT.parent.mkdir(parents=True, exist_ok=True)
     temporary = CURRENT.with_name(CURRENT.name + f'.{os.getpid()}.tmp')
     temporary.unlink(missing_ok=True)
     temporary.symlink_to(entry['path'])
-    # JSON quoting matches Sway's double-quoted string escaping, no shell involved.
-    command = 'output * bg ' + json.dumps(entry['path']) + ' fill'
-    response = subprocess.run(['swaymsg', '-s', socket, '-r', command],
-                              capture_output=True, text=True, timeout=5)
-    results = json.loads(response.stdout)
-    if response.returncode or not results or not all(item.get('success') for item in results):
-        temporary.unlink(missing_ok=True)
-        raise RuntimeError('Sway rejected wallpaper command')
+    # The crossfade daemon owns the visible painting while it answers. Sway's
+    # own background stays the fallback only: each `output bg` respawns swaybg
+    # above the daemon's surface, so it is not refreshed after a fade.
+    if not crossfade_to(entry['path'], origin, duration):
+        # JSON quoting matches Sway's double-quoted string escaping, no shell involved.
+        command = 'output * bg ' + json.dumps(entry['path']) + ' fill'
+        response = subprocess.run(['swaymsg', '-s', socket, '-r', command],
+                                  capture_output=True, text=True, timeout=5)
+        results = json.loads(response.stdout)
+        if response.returncode or not results or not all(item.get('success') for item in results):
+            temporary.unlink(missing_ok=True)
+            raise RuntimeError('Sway rejected wallpaper command')
     temporary.replace(CURRENT)
     relayout_panels()
     return socket
@@ -236,8 +270,12 @@ def delete_current(confirm=True):
 def delete_many(entries, labels):
     """Tick several paintings, then remove them in one confirmed step."""
     marked = set()
+    # Thumbnails already rendered by the gallery pages or its warm-up appear
+    # beside their rows; this list never waits on rendering.
+    row_icons = painting_icons(entries, labels, render=False)
     while True:
         menu_options = {'← Back to the gallery': ('back', None)}
+        icons = {}
         done = f'󰩹  Delete {len(marked)} selected…' if marked else None
         if done:
             menu_options[done] = ('confirm', None)
@@ -245,8 +283,10 @@ def delete_many(entries, labels):
             option = ('[x] ' if index in marked else '[  ] ') + label
             option = unique_label(option, menu_options)
             menu_options[option] = ('toggle', index)
+            if label in row_icons:
+                icons[option] = row_icons[label]
         chosen = gallery_menu(f'Select images to delete ({len(marked)}) ❯ ',
-                             list(menu_options.keys()))
+                             list(menu_options.keys()), icons)
         action = menu_options.get(chosen)
         if action is None:
             return 0
@@ -291,7 +331,7 @@ def current_theme_id():
         return 'none'
 
 
-def update(action, selected=None):
+def update(action, selected=None, origin=None):
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'state.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -339,11 +379,17 @@ def update(action, selected=None):
                                 occupied.add(json.loads(path.read_text()).get('id'))
                             except (OSError, ValueError):
                                 pass
-                chosen = choose_artwork([entry['id'] for entry in entries],
-                                        state.get('id'), 1, occupied)
+                chosen = None
+                if selected is None and action == 'tick' and scope == 'global':
+                    # After dark the timer leans toward nocturnes; every painting
+                    # stays eligible and manual browsing is untouched.
+                    chosen = nocturne_preference(entries, state.get('id'))
+                if chosen is None:
+                    chosen = choose_artwork([entry['id'] for entry in entries],
+                                            state.get('id'), 1, occupied)
                 index = next(i for i, entry in enumerate(entries) if entry['id'] == chosen)
             entry = entries[index]
-            socket = apply(entry)
+            socket = apply(entry, origin, fade_duration(action))
             state.update({k: entry.get(k, '') for k in ('id', 'title', 'description', 'file', 'theme', 'theme_name')})
             deadline = state.get('next_at') if action == 'refresh' else None
             state.update({'next_at': deadline or time.time() + interval, 'socket': socket})
@@ -397,7 +443,19 @@ def edit_prompts():
                      start_new_session=True)
 
 
-def status():
+def current_thumbnail(height):
+    """A cached thumbnail of the painting on screen, for the bar's badge."""
+    if not height or height <= 0:
+        return None
+    try:
+        source = CURRENT.resolve(strict=True)
+    except OSError:
+        return None
+    path = thumbnails.thumbnail(source, height=height)
+    return str(path) if path is not None else None
+
+
+def status(thumbnail_height=None):
     state = read_state()
     title = state.get('title', 'Space Ghost gallery')
     minutes = max(1, int(state.get('interval_seconds', 1200)) // 60)
@@ -421,9 +479,13 @@ def status():
     busy = generation_status()
     if busy is not None:
         tooltip = '<b>Space Ghost is painting…</b>\n' + html.escape(busy.get('title', 'New artwork')) + '\n\n' + tooltip
-    print(json.dumps({'text': '󰔟' if busy is not None else '󰸉', 'alt': title,
-                      'class': 'generating' if busy is not None else ('paused' if state.get('paused') else 'rotating'),
-                      'tooltip': tooltip}))
+    report = {'text': '󰔟' if busy is not None else '󰸉', 'alt': title,
+              'class': 'generating' if busy is not None else ('paused' if state.get('paused') else 'rotating'),
+              'tooltip': tooltip}
+    thumbnail = current_thumbnail(thumbnail_height)
+    if thumbnail:
+        report['thumbnail'] = thumbnail
+    print(json.dumps(report))
 
 
 def artwork_date(entry):
@@ -442,20 +504,68 @@ def artwork_date(entry):
         return 0
 
 
-def gallery_menu(prompt, options):
+def gallery_menu(prompt, options, icons=None):
+    """Show one menu page; `icons` maps an option to an icon-theme name.
+
+    Rows with an icon use Fuzzel's dmenu icon protocol and the private
+    thumbnail theme; the returned selection is always the plain option text.
+    """
     if not options:
         return None
+    icons = {option: icons[option] for option in options if icons and icons.get(option)}
+    command = [str(MENU), '--dmenu', '--no-sort', '--prompt', prompt,
+               '--lines', str(min(9, len(options))), '--width', '48']
+    if icons:
+        command += ['--icon-theme', thumbnails.THEME, '--line-height', str(PICKER_ROW_HEIGHT)]
+    rows = [option + '\0icon\x1f' + icons[option] if option in icons else option
+            for option in options]
     try:
-        result = subprocess.run([str(MENU), '--dmenu', '--no-sort', '--prompt', prompt,
-                                '--lines', str(min(9, len(options))), '--width', '48'],
-                               input='\n'.join(options) + '\n', capture_output=True,
-                               text=True)
+        result = subprocess.run(command, input='\n'.join(rows) + '\n', capture_output=True,
+                                text=True)
     except FileNotFoundError:
         return None
     if result.returncode != 0:
         return None
-    selected = result.stdout.rstrip('\n')
+    selected = result.stdout.rstrip('\n').split('\0', 1)[0]
     return selected if selected in options else None
+
+
+def painting_icons(entries, labels, render=True):
+    """Icon names for painting rows whose thumbnails exist, keyed by label.
+
+    Rendering happens lazily for the rows on screen; `render=False` only reuses
+    thumbnails that a previous page or the background warm-up already made.
+    """
+    icons = {}
+    for entry, label in zip(entries, labels):
+        path = entry.get('path')
+        if not path:
+            continue
+        make = thumbnails.thumbnail if render else thumbnails.cached
+        thumbnail = make(path, height=PICKER_THUMBNAIL_HEIGHT, digest=entry.get('sha256'))
+        if thumbnail is not None:
+            icons[label] = thumbnails.icon_name(thumbnail)
+    if icons:
+        try:
+            thumbnails.icon_theme()
+        except (OSError, RuntimeError) as error:
+            print(f'Thumbnail icon theme unavailable: {error}', file=sys.stderr)
+            return {}
+    return icons
+
+
+def warm_thumbnails(entries):
+    """Render every painting's thumbnail in the background at low priority."""
+    sources = [entry['path'] for entry in entries if entry.get('path')]
+    if not sources:
+        return
+    try:
+        subprocess.Popen(['nice', '-n', '19', '/usr/bin/python3', str(thumbnails.__file__),
+                          '--quiet', '--height', str(PICKER_THUMBNAIL_HEIGHT), *sources],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        pass
 
 
 def unique_label(base, seen):
@@ -512,15 +622,18 @@ def pick():
     # Four paintings leave room for both paging controls and all three actions.
     page_size = 4
     page_count = max(1, (len(entries) + page_size - 1) // page_size)
+    warm_thumbnails(entries)
     while True:
-        options = labels[page * page_size:(page + 1) * page_size]
+        shown = slice(page * page_size, (page + 1) * page_size)
+        options = labels[shown]
+        icons = painting_icons(entries[shown], labels[shown])
         if page:
             options += ['← Newer images']
         if page + 1 < page_count:
             options += ['Older images →']
         options += [phrase_label, existing_label, 'Gallery actions…']
         selected = gallery_menu(
-            f'Gallery {page + 1}/{page_count} · {active_name} ❯ ', options)
+            f'Gallery {page + 1}/{page_count} · {active_name} ❯ ', options, icons)
         if selected not in options:
             return
         if selected == 'Older images →':
@@ -622,13 +735,23 @@ def main():
                                  'generate', 'new-theme', 'prompt-theme', 'select', 'edit-prompts', 'delete'])
     parser.add_argument('artwork_id', nargs='?', help='Exact gallery ID for select')
     parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
+    parser.add_argument('--thumbnail-height', type=int, metavar='PIXELS',
+                        help='For status: also report a cached thumbnail of this height.')
+    parser.add_argument('--from', dest='origin', metavar='X,Y',
+                        help='For next/prev/select/refresh: reveal the painting from this '
+                             'logical output position instead of a plain crossfade.')
     args = parser.parse_args()
+    origin = fade.parse_origin(args.origin) if args.origin else None
+    if origin is not None and args.action not in ('next', 'prev', 'select', 'refresh'):
+        parser.error('--from only applies to next, prev, select and refresh')
     if (args.action == 'select') != (args.artwork_id is not None):
         parser.error('select requires an artwork ID; other actions take no ID')
     if args.theme != 'active' and args.action != 'generate':
         parser.error('--theme only applies to generate')
+    if args.thumbnail_height is not None and args.action != 'status':
+        parser.error('--thumbnail-height only applies to status')
     if args.action == 'status':
-        status()
+        status(args.thumbnail_height)
     elif args.action == 'pick':
         pick()
     elif args.action == 'daemon':
@@ -644,7 +767,7 @@ def main():
     elif args.action == 'delete':
         return delete_current(confirm=False)
     else:
-        update(args.action, args.artwork_id)
+        update(args.action, args.artwork_id, origin)
 
 
 if __name__ == '__main__':

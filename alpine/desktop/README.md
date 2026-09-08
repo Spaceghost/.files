@@ -4,8 +4,11 @@ This is the deployable HOME overlay for the Oldbook Alpine desktop. It is design
 
 `~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then the active theme's solid background. Its ring, text and authentication states follow the same palette.
 
+The lock screen uses swaylock-effects (installed beside stock swaylock by `alpine/packages/swaylock-effects/`): the desktop dissolves into the blurred current painting with a clock, the painting's title and story, the hour's Scripture and an amber ring that appears only while typing. `OLDBOOK_LOCK_BACKEND=stock` restores the stock locker; `oldbook-lock prerender` warms the scene cache.
+
 All workspaces now share the same painting and gallery timer. Foot uses 78%
-opacity with 4-pixel padding; Sway keeps a small 4-pixel outer gap. Ghostty is
+opacity with 4-pixel padding; Sway keeps Ghost Observatory gaps of 6 inner and
+7 outer pixels around 22-pixel window corners. Ghostty is
 also installed with matching colors and opacity: launch `ghostty` or select it
 in the command deck. To play a muted, looping video behind transparent windows,
 run `oldbook-video-background ~/Videos/example.webm`, or choose **Video background**
@@ -67,14 +70,15 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Four-finger swipe up / down | Clear the desktop / restore its windows. Down opens the all-workspace carousel when nothing is hidden. |
 | `Super+0` | Workspace **10: Strata**, after workspaces 1–9. |
 | Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
-| `Super+Escape` | Lock with the installed `swaylockd` PAM-compatible binary |
-| `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot |
-| Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback |
-| Brightness keys | Kernel backlight steps, with a clear notification if the seat lacks write permission |
+| `Super+Escape` | Lock: the desktop dissolves into the blurred current painting with the clock, the painting's caption and the hour's Scripture; swaylock-effects under the helper's supervisor, stock `swaylockd` as the fallback |
+| `Super+Shift+E` or click the battery | Power deck over the blurred desktop: lock, suspend, log out, reboot, shut down (keys `l` `u` `e` `r` `s`, Escape closes). Suspend locks first; log out, reboot and shut down ask on a Gruvbox swaynag bar |
+| `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot; a cream flash and shutter click follow the capture |
+| Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback; the new level shows on the bottom-centre pill |
+| Brightness keys | Kernel backlight steps shown on the same pill, with a clear notification if the seat lacks write permission |
 | Keyboard illumination keys (`F5` / `F6` on the MacBook) | Dim / brighten the keyboard by 10%, including fully off; also available while locked |
 | `Shift+F6` / `Shift+F5` | Toggle keyboard breathing / return to steady light; use the engraved illumination keys without Fn |
 | Click the panel audio icon | Open pavucontrol |
-| Click the notification glyph | Toggle the compact notification history card |
+| Click the notification glyph | Toggle the notification centre: the playing track with album art and controls, sound and brightness sliders with a per-app drawer, quick actions (lock, command deck, next painting, hold rotation, mic off, desktop cards), then the compact history |
 | Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
 | Shift + left click the artwork icon | Edit shared artwork guidance and scene prompts |
 | `Caps Lock` | Escape (including with Shift); the original Escape key still works |
@@ -122,6 +126,32 @@ writes, and restores the chosen level when stopped or its Sway connection ends.
 Sway reloads do not reset it. With this MacBook's unchanged `hid_apple` setting `fnmode=3` (auto),
 `F5`/`F6` adjust the light and `Fn+F5`/`Fn+F6` remain application function keys.
 
+`Option+F6` (`Mod1+XF86KbdBrightnessUp`) selects **ambient** mode: the worker
+reads the Apple SMC light sensor at `/sys/devices/platform/applesmc.768/light`
+every two seconds, smooths it on a log scale with a hysteresis band, and fades
+the keys between your saved peak in a dark room and off in daylight, the way
+macOS does. `F5`/`F6` still move the peak; `Shift+F5` returns to steady light.
+The mode is refused when no sensor is readable. The control deck's **Keyboard
+glow** menu shows the current room reading beside the ambient entry.
+
+`Option+Shift+F6` (`Mod1+Shift+XF86KbdBrightnessUp`) selects **breathe on
+air**: the keys breathe continuously, but the lungs start a quarter full at a
+slow seven-second tempo; every keystroke is a sip of air that deepens the
+breath and quickens it toward three seconds per cycle when full, and idle
+lungs leak back to the quiet baseline over about twenty seconds. The phase
+is continuous, so typing never makes the light jump. `F5`/`F6` move the peak;
+`Shift+F5` returns to steady light.
+
+Half a minute before the idle lock, swayidle runs `oldbook-idle dim`: the
+display eases down to about 20% over 1.5 seconds and the keyboard takes one
+last breath (a short rise, then a long fall to dark). Moving the mouse or
+typing runs `oldbook-idle undim`, which cancels a ramp in flight, restores the
+display unless you changed it meanwhile, and restores the keyboard's saved
+level and mode. The last breath is a runtime overlay under
+`$XDG_RUNTIME_DIR/oldbook/`; it never touches the saved preference files, keys
+that are off by preference stay off, and any keyboard-light key ends it early.
+`oldbook-idle status` prints the runtime record while a dim is pending.
+
 The artwork icon opens the gallery with left click, advances with right click,
 pauses with middle click, and scrolls previous/next. Its small
 `oldbook-waybar-art` package supplies native modifier handling; see the
@@ -154,9 +184,9 @@ To disable the light integration, remove the notification helper launch from
 to retain the Escape mapping. A reboot or keyboard reconnect restores the
 kernel's default LED trigger; the helper detaches it again when it starts.
 
-Screenshots are stored in `~/Pictures/Screenshots` and offered to Swappy for annotation. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
+Screenshots are stored in `~/Pictures/Screenshots` and offered to Satty for annotation (Swappy remains the fallback), with the Gruvbox palette from `~/.config/satty/config.toml`; Enter copies the annotated image and closes, Ctrl+S overwrites the capture. The flash and shutter sound run only after the file is written, so neither appears in the picture, and `oldbook-osd` also draws the volume, microphone, brightness and keyboard-light pill; `oldbook-osd preview --output pill.png` renders it without a display. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
 
-The overlay does not infer a geographic location. It leaves `wlsunset` disabled by default. Add an explicit, local `wlsunset` command in `~/.config/sway/local.d/` only after choosing the correct location or an intentional fixed schedule.
+The overlay does not infer a geographic location. Sun and moon features start only when you create `~/.config/oldbook/location.json` yourself (copy `location.example.json` beside it: `name`, `latitude`, `longitude`, `timezone`). With that file present, `oldbook-session` starts `oldbook-sun-light run`, which execs `wlsunset` with the configured coordinates so the display warms after the computed sunset; `oldbook-sun-light toggle` (also **Night light** in the command deck) switches it off and on, and a stop stays in force across Sway reloads. The same file feeds the masthead's sunrise/sunset/moon line (`oldbook-astro panel`, see [desktop panels](DESKTOP-PANELS.md)) and the gallery's night preference for nocturnes ([gallery guide](../wallpapers/README.md)). All of it is computed offline; without the file the night light stays off and the line stays empty. A manual `wlsunset` schedule in `~/.config/sway/local.d/` remains possible instead.
 
 Every tmux theme loads `~/.config/tmux/oldbook.conf` for the personal controls
 carried over from the historical config: `Ctrl+A` prefix (twice to send a literal

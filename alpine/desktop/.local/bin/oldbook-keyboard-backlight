@@ -16,6 +16,7 @@ import signal
 import socket
 import stat
 import struct
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -70,7 +71,28 @@ AIR_PERIOD_FULL = 3.0
 BREATH_FLOOR = 0.12
 
 
+def osd_shown(percent):
+    """Show the level on the feedback pill; False when no daemon owns the session."""
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime or not (Path(runtime) / 'oldbook' / 'osd.sock').exists():
+        return False
+    client = shutil.which('oldbook-osd') or str(Path(__file__).resolve().parent / 'oldbook-osd')
+    if not Path(client).is_file():
+        return False
+    try:
+        subprocess.run([client, 'show', '--kind', 'keyboard', '--value', str(int(percent))],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       timeout=2, check=False)
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return False
+    return True
+
+
 def notify(message, percent=None):
+    # Plain level changes read best on the pill alone; mode changes keep their
+    # descriptive notification beside it.
+    if percent is not None and osd_shown(percent) and message.startswith('Steady keyboard light'):
+        return
     args = ['notify-send', '-h',
             'string:x-canonical-private-synchronous:oldbook-keyboard-backlight']
     if percent is not None:

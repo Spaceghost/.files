@@ -3,11 +3,11 @@
     "name": "top",
     "layer": "overlay",
     "position": "top",
-    "height": 32,
-    "spacing": 2,
-    "margin-top": 0,
-    "margin-left": 4,
-    "margin-right": 4,
+    "height": 34,
+    "spacing": 3,
+    "margin-top": 6,
+    "margin-left": 10,
+    "margin-right": 10,
     "exclusive": true,
     "fixed-center": false,
     "reload_style_on_change": true,
@@ -21,7 +21,8 @@
     "modules-center": [
       "mpris#previous",
       "mpris",
-      "mpris#next"
+      "mpris#next",
+      "custom/cava"
     ],
     "modules-right": [
       "group/status"
@@ -249,8 +250,8 @@
         "\udb80\udc80",
         "\udb80\udc79"
       ],
-      "tooltip-format": "<b>POWER RESERVE</b>\n{capacity}% \u00b7 {timeTo}\nPower draw: {power} W\n\nLeft: session controls\nHover for brightness and keep-awake.",
-      "on-click": "~/.local/bin/oldbook-control power"
+      "tooltip-format": "<b>POWER RESERVE</b>\n{capacity}% \u00b7 {timeTo}\nPower draw: {power} W\n\nLeft: power deck \u00b7 lock, suspend, log out, reboot, shut down\nHover for brightness and keep-awake.",
+      "on-click": "~/.local/bin/oldbook-power"
     },
     "backlight": {
       "format": "\udb80\udcdf {percent}%",
@@ -317,6 +318,13 @@
     },
     "cffi/art": {
       "module_path": "/usr/lib/waybar/oldbook-art.so"
+    },
+    "custom/cava": {
+      "exec": "~/.local/bin/oldbook-cava-bar",
+      "return-type": "json",
+      "restart-interval": 5,
+      "format": "{}",
+      "tooltip": false
     },
     "custom/ai": {
       "exec": "~/.local/bin/oldbook-workspaces status",

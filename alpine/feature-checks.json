@@ -51,12 +51,17 @@
         "alpine/themes/*",
         "alpine/desktop/.local/bin/oldbook-lock",
         "alpine/desktop/.config/swaylock/*",
-        "alpine/desktop/.local/lib/oldbook/overlay_theme.py"
+        "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
+        "alpine/desktop/.local/lib/oldbook/lock_scene.py",
+        "alpine/packages/swaylock-effects/*",
+        "alpine/verification/lock-screen/*"
       ],
       "tests": [
         "test_lock.py"
       ],
-      "evidence": []
+      "evidence": [
+        "verification/lock-screen/"
+      ]
     },
     {
       "id": "GALLERY-ACTIONS",
@@ -66,16 +71,20 @@
         "alpine/themes/profiles/*/.config/waybar/*",
         "alpine/packages/waybar-art/*",
         "alpine/wallpapers/*",
-        "alpine/packages/waybar-art/art.c"
+        "alpine/packages/waybar-art/art.c",
+        "alpine/desktop/.local/lib/oldbook/thumbnails.py"
       ],
       "tests": [
         "test_gallery_picker.py",
         "test_gallery_prompts.py",
         "test_manual_artwork.py",
         "test_new_themes.py",
-        "test_theme_picker.py"
+        "test_theme_picker.py",
+        "test_thumbnails.py"
       ],
-      "evidence": []
+      "evidence": [
+        "verification/gallery-thumbnails/"
+      ]
     },
     {
       "id": "GALLERY-ACTIVATION",
@@ -108,14 +117,21 @@
         "alpine/packages/ghostty/*",
         "alpine/themes/profiles/*/.config/foot/*",
         "alpine/themes/profiles/*/.config/ghostty/*",
-        "alpine/wallpapers/desktop_theme.py"
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/desktop/.config/fastfetch/*",
+        "alpine/desktop/.local/bin/oldbook-splash",
+        "alpine/desktop/.config/ghostty/shaders/*",
+        "alpine/desktop/.config/nvim/*",
+        "alpine/themes/profiles/*/.config/fastfetch/*"
       ],
       "tests": [
         "test_terminal_theme.py",
-        "test_theme_switch.py"
+        "test_theme_switch.py",
+        "test_terminal_chrome.py"
       ],
       "evidence": [
-        "verification/workspace-chrome/"
+        "verification/workspace-chrome/",
+        "verification/terminal-chrome/"
       ]
     },
     {
@@ -127,12 +143,14 @@
         "alpine/packages/swayfx/*",
         "alpine/themes/profiles/*/.config/swayfx/effects.conf",
         "alpine/themes/profiles/*/.config/swaync/*",
-        "alpine/wallpapers/desktop_theme.py"
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/tests/verify_swaync_widgets.py"
       ],
       "tests": [],
       "evidence": [
         "verification/notifications/",
-        "verification/notification-overlay/"
+        "verification/notification-overlay/",
+        "verification/swaync-widgets/"
       ]
     },
     {
@@ -142,6 +160,7 @@
         "alpine/desktop/.config/waybar/config.jsonc",
         "alpine/desktop/.local/bin/oldbook-pithos",
         "alpine/desktop/.local/bin/oldbook-waybar-dim",
+        "alpine/desktop/.local/bin/oldbook-cava-bar",
         "alpine/packages/waybar-art/*",
         "alpine/packages/waybar-art/art.c",
         "alpine/themes/profiles/*/.config/waybar/*",
@@ -149,6 +168,7 @@
       ],
       "tests": [
         "test_bar_ipc_recovery.py",
+        "test_cava_bar.py",
         "test_pithos_controls.py",
         "test_waybar_dim.py"
       ],
@@ -269,14 +289,18 @@
         "alpine/desktop/.local/bin/oldbook-control",
         "alpine/desktop/.config/sway/local.d/keyboard-backlight.conf",
         "alpine/desktop/.local/lib/oldbook/shortcut_sources.py",
-        "alpine/tests/test_keyboard_backlight.py"
+        "alpine/desktop/.local/bin/oldbook-idle",
+        "alpine/tests/test_keyboard_backlight.py",
+        "alpine/tests/test_idle_dim.py"
       ],
       "tests": [
         "test_keyboard_backlight.py",
+        "test_idle_dim.py",
         "test_shortcut_sources.py"
       ],
       "evidence": [
-        "verification/keyboard-breathing/README.md"
+        "verification/keyboard-breathing/README.md",
+        "verification/keyboard-ambient/README.md"
       ]
     },
     {
@@ -405,6 +429,7 @@
         "alpine/desktop/.local/bin/oldbook-session",
         "alpine/desktop/.local/bin/oldbook-showdesktop",
         "alpine/desktop/.local/bin/oldbook-strata",
+        "alpine/desktop/.local/bin/oldbook-sun-light",
         "alpine/desktop/.local/bin/oldbook-video-background",
         "alpine/desktop/.local/lib/oldbook/carousel.py",
         "alpine/desktop/.local/lib/oldbook/showdesktop.py",
@@ -416,6 +441,7 @@
       ],
       "tests": [
         "test_ai_notification_stream.py",
+        "test_astro.py",
         "test_notification_led.py",
         "test_session.py",
         "test_showdesktop_lifecycle.py",
@@ -425,6 +451,25 @@
         "test_ui_command.py",
         "test_ui_priority_request.py",
         "test_ui_startup.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "FEEDBACK-OSD",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-osd",
+        "alpine/desktop/.local/lib/oldbook/osd.py",
+        "alpine/desktop/.local/bin/oldbook-audio",
+        "alpine/desktop/.local/bin/oldbook-brightness",
+        "alpine/desktop/.local/bin/oldbook-screenshot",
+        "alpine/desktop/.config/satty/*",
+        "alpine/desktop/.config/sway/local.d/screenshot.conf",
+        "alpine/desktop/.local/bin/oldbook-session"
+      ],
+      "tests": [
+        "test_osd.py",
+        "test_screenshot_shutter.py",
+        "test_session.py"
       ],
       "evidence": []
     },
@@ -470,6 +515,8 @@
         "alpine/desktop/.local/lib/oldbook/conky*",
         "alpine/desktop/.local/bin/oldbook-conky",
         "alpine/desktop/.local/bin/oldbook-conky-click",
+        "alpine/desktop/.local/bin/oldbook-astro",
+        "alpine/desktop/.local/lib/oldbook/astro.py",
         "alpine/themes/profiles/*/.config/conky/*",
         "alpine/wallpapers/desktop_theme.py",
         "alpine/desktop/.local/lib/oldbook/conky_policy.py",
@@ -480,6 +527,7 @@
         "alpine/verification/conky-clicks/*"
       ],
       "tests": [
+        "test_astro.py",
         "test_conky_clicks.py",
         "test_conky_layout.py",
         "test_conky_policy.py",
@@ -600,9 +648,12 @@
         "alpine/bin/archive-source",
         "alpine/wallpapers/gallery.json",
         "alpine/wallpapers/generate.py",
-        "alpine/wallpapers/prompt_catalog.py"
+        "alpine/wallpapers/prompt_catalog.py",
+        "alpine/desktop/.local/bin/oldbook-wallpaper",
+        "alpine/desktop/.local/lib/oldbook/nocturne.py"
       ],
       "tests": [
+        "test_astro.py",
         "test_fresh_scenes.py",
         "test_generation_retries.py",
         "test_prompt_catalog.py",
@@ -610,6 +661,23 @@
         "test_wallpapers.py"
       ],
       "evidence": []
+    },
+    {
+      "id": "ARTWORK-CROSSFADE",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-background",
+        "alpine/desktop/.local/lib/oldbook/background_fade.py",
+        "alpine/desktop/.local/bin/oldbook-wallpaper",
+        "alpine/desktop/.local/bin/oldbook-session",
+        "alpine/tests/verify_background_crossfade.py"
+      ],
+      "tests": [
+        "test_background.py",
+        "test_background_gallery.py"
+      ],
+      "evidence": [
+        "verification/background-crossfade/"
+      ]
     },
     {
       "id": "PACKAGE-CLOSURE",
@@ -648,6 +716,18 @@
       "evidence": [
         "verification/screen-corners/"
       ]
+    },
+    {
+      "id": "BOOT-CONSOLE",
+      "paths": [
+        "alpine/system/boot/*",
+        "alpine/system/mkinitfs/*",
+        "alpine/bin/install-boot-console"
+      ],
+      "tests": [
+        "test_boot_console.py"
+      ],
+      "evidence": []
     }
   ]
 }
