@@ -36,6 +36,29 @@ class PithosControlsTests(unittest.TestCase):
     def test_right_click_hides_visible_window_without_quitting(self):
         self.assertEqual(self.command('toggle', self.tree()), ['[con_id=42] move scratchpad'])
 
+    def test_middle_click_selects_tired_and_super_selects_ban(self):
+        for held, expected in ((False, 'tired'), (True, 'ban')):
+            with self.subTest(super_held=held), \
+                    patch.object(self.module, 'super_pressed', return_value=held), \
+                    patch.object(self.module, 'rate_song') as rate:
+                self.module.middle_click()
+                rate.assert_called_once_with(expected)
+
+    def test_meta_on_non_keyboard_is_ignored(self):
+        meta = bytearray(96)
+        meta[125 // 8] |= 1 << (125 % 8)
+        self.assertFalse(self.module.keyboard_super(bytearray(96), meta))
+
+    def test_both_command_keys_are_supported(self):
+        capabilities = bytearray(96)
+        for key in (30, 28, 57):
+            capabilities[key // 8] |= 1 << (key % 8)
+        for key in (125, 126):
+            pressed = bytearray(96)
+            pressed[key // 8] |= 1 << (key % 8)
+            self.assertTrue(self.module.keyboard_super(capabilities, pressed))
+        self.assertFalse(self.module.keyboard_super(capabilities, bytearray(96)))
+
     def test_alpine_lowercase_app_id_is_recognized(self):
         self.assertEqual(self.command('toggle', self.tree(app_id='pithos')),
                          ['[con_id=42] move scratchpad'])

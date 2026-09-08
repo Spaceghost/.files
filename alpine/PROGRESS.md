@@ -709,3 +709,25 @@ and nine isolated cases with 50 ms added to each journal write passed. Earlier
 failed runs and limits are retained. This does not activate the staged controller
 or establish physical-radio, OpenRC, surviving-writer or reboot acceptance.
 
+
+## 2026-09-07 — Complete theme profiles and music ratings
+
+- Every existing theme has a validated desktop design; future generation requires
+  font, geometry, spacing, opacity, bar/widget placement and launcher width.
+  Missing profiles render from shared controls. Switching deploys the full
+  application overlay and matching art; new-theme activation uses the switcher.
+- Music area middle-click shelves the current Pithos song as tired; Super+middle
+  bans it. Native GTK actions work without raising the player. All three music
+  sections retain their playback and window controls. The live bar was reloaded.
+- Validation: 49 theme/artwork tests, 3 complete-profile/recovery tests, 42 Conky
+  tests and 13 Pithos tests passed. Foot, Fuzzel and Ghostty parsed 11 profiles.
+  Two native private desktop previews and private Pithos gesture evidence are
+  in verification/complete-themes/. Vespersteel Archive subsequently arrived
+  with the required design fields and became active through the new pipeline.
+- Limits: previews cover two themes, not every application in every theme.
+  Physical modifier snapshots have unit coverage; native pointer/D-Bus tests
+  used fixture modifiers and a fake player. No actual songs were rated by tests.
+- Recovery: restore the source checkpoint with Fossil, run oldbook-theme sync,
+  then oldbook-theme use <id> --no-reload to rebuild HOME. Deployment backups
+  retain the previous configuration. Rendered profiles are local derived files.
+  Unrelated pending desktop, security and publication edits are preserved.

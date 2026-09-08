@@ -13,6 +13,9 @@ class NewThemeTests(unittest.TestCase):
     def definition(self):
         return {'name': 'Moonlit Library', 'image_style': 'Ink blue books and gold moonlight.',
                 'palette': {'background': '#101020', 'foreground': '#eeeecc', 'accent': '#ffcc44'},
+                'design': {'font': 'DejaVu Serif', 'radius': 4, 'spacing': 8,
+                           'opacity': 0.94, 'bar_position': 'top',
+                           'widget_edge': 'left', 'launcher_width': 52},
                 'scene': 'Space Ghost reads a giant book on the moon.'}
 
     def test_save_unique_discoverable_collection_without_replacing_existing(self):
@@ -28,6 +31,7 @@ class NewThemeTests(unittest.TestCase):
         invalid = [dict(self.definition(), name='../bad\nname'),
                    dict(self.definition(), palette={'background': 'url(evil)'}),
                    dict(self.definition(), scene=''), dict(self.definition(), id='../escape')]
+        invalid.append({key: value for key, value in self.definition().items() if key != 'design'})
         with tempfile.TemporaryDirectory() as directory:
             for definition in invalid:
                 with self.subTest(definition=definition), self.assertRaises(ValueError):

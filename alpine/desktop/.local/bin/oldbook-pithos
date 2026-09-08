@@ -5,12 +5,66 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import subprocess
 import sys
 import time
 import uuid
 
 APP_ID = 'io.github.Pithos'
+
+
+def keyboard_super(capabilities, pressed):
+    def bit(bits, key):
+        return bool(bits[key // 8] & (1 << (key % 8)))
+    return (all(bit(capabilities, key) for key in (30, 28, 57))
+            and any(bit(pressed, key) for key in (125, 126)))
+
+
+def super_pressed():
+    # Match the artwork control's Linux key snapshot: no event stream or history.
+    for device in Path('/dev/input').glob('event*'):
+        try:
+            fd = os.open(device, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC | os.O_NOFOLLOW)
+            try:
+                if not stat.S_ISCHR(os.fstat(fd).st_mode):
+                    continue
+                capabilities, pressed = bytearray(96), bytearray(96)
+                fcntl.ioctl(fd, 0x80604521, capabilities)  # EVIOCGBIT(EV_KEY, 96)
+                fcntl.ioctl(fd, 0x80604518, pressed)  # EVIOCGKEY(96)
+                if keyboard_super(capabilities, pressed):
+                    return True
+            finally:
+                os.close(fd)
+        except OSError:
+            continue
+    return False
+
+
+def rate_song(action):
+    from gi.repository import Gio, GLib
+    if action not in ('tired', 'ban'):
+        raise ValueError('Unknown song rating')
+    bus = Gio.bus_get_sync(Gio.BusType.SESSION)
+    flags = Gio.DBusCallFlags.NO_AUTO_START
+    root = '/io/github/Pithos/window'
+    reply = bus.call_sync(APP_ID, root, 'org.freedesktop.DBus.Introspectable',
+                          'Introspect', None, GLib.VariantType.new('(s)'), flags, 5000, None)
+    node = Gio.DBusNodeInfo.new_for_xml(reply.unpack()[0])
+    for child in node.nodes:
+        path = root + '/' + child.path
+        actions = bus.call_sync(APP_ID, path, 'org.gtk.Actions', 'List', None,
+                                GLib.VariantType.new('(as)'), flags, 5000, None).unpack()[0]
+        if action in actions:
+            bus.call_sync(APP_ID, path, 'org.gtk.Actions', 'Activate',
+                          GLib.Variant('(sava{sv})', (action, [], {})),
+                          None, flags, 5000, None)
+            return
+    raise RuntimeError('Pithos has no current song action')
+
+
+def middle_click():
+    rate_song('ban' if super_pressed() else 'tired')
 
 
 def ipc(kind, command=None):
@@ -112,8 +166,11 @@ def click(runtime, delay=.35):
 
 def main():
     action = sys.argv[1] if len(sys.argv) == 2 else ''
+    if action == 'middle':
+        middle_click()
+        return
     if action not in ('start', 'show', 'toggle', 'click'):
-        raise SystemExit('Usage: oldbook-pithos start|show|toggle|click')
+        raise SystemExit('Usage: oldbook-pithos start|show|toggle|click|middle')
     session = hashlib.sha256(os.environ['SWAYSOCK'].encode()).hexdigest()[:16]
     runtime = Path(os.environ['XDG_RUNTIME_DIR']) / ('oldbook-pithos-' + session)
     runtime.mkdir(mode=0o700, exist_ok=True)

@@ -277,6 +277,12 @@ def generate_native(config, prompt, env, log):
 
 def activate_artwork(record, metadata, entry):
     try:
+        if metadata.get('new_theme'):
+            response = subprocess.run(['/usr/bin/python3',
+                str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'), 'use', entry['theme']],
+                capture_output=True, text=True, timeout=120)
+            if response.returncode:
+                raise RuntimeError(response.stderr.strip()[:1500] or 'Could not apply the complete theme')
         response = subprocess.run(['/usr/bin/python3',
                                    str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'),
                                    'select', entry['id']], capture_output=True, text=True, timeout=20)
@@ -369,6 +375,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
         seed = prompt_catalog.variation_seed()
         started = time.time()
         metadata.update({'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
+                    'new_theme': new_theme is not None,
                     'insertion': insertion['id'] if insertion else None,
                     'medium': medium['id'] if medium else None, 'variation_seed': seed,
                     'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],

@@ -268,8 +268,7 @@ def switch_theme():
     labels = {}
     for theme in themes:
         mark = '●' if theme['id'] == active else '○'
-        suffix = '' if (REPO / 'alpine/themes/profiles' / theme['id']).is_dir() else '  (palette only)'
-        labels[f'{mark}  {theme["name"]}{suffix}'] = theme['id']
+        labels[f'{mark}  {theme["name"]}'] = theme['id']
     chosen = gallery_menu('Switch theme ❯ ', ['← Back to the gallery', *labels])
     if chosen is None or chosen not in labels:
         return 0

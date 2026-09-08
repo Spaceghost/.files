@@ -60,9 +60,9 @@
       "format": "\uf048",
       "format-paused": "\uf048",
       "format-stopped": "\uf048",
-      "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track\nRight: show/hide Pithos",
+      "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track\nRight: show/hide Pithos\nMiddle: tired of this song \u00b7 Super+middle: ban song",
       "on-click": "playerctl --player=io.github.Pithos previous",
-      "on-click-middle": "playerctl --player=io.github.Pithos previous",
+      "on-click-middle": "~/.local/bin/oldbook-pithos middle",
       "on-click-right": "~/.local/bin/oldbook-pithos toggle",
       "player": "io"
     },
@@ -83,21 +83,22 @@
         "paused": "\uf04b",
         "stopped": "\uf04b"
       },
-      "tooltip-format": "NOW TRANSMITTING\n{title}\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Double-click: open Pithos\nRight: show/hide Pithos \u00b7 Middle: previous\nScroll: seek five seconds",
+      "tooltip-format": "NOW TRANSMITTING\n{title}\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Double-click: open Pithos\nRight: show/hide Pithos\nScroll: seek five seconds\nMiddle: tired of this song \u00b7 Super+middle: ban song",
       "on-scroll-up": "playerctl --player=io.github.Pithos position 5+",
       "on-scroll-down": "playerctl --player=io.github.Pithos position 5-",
       "smooth-scrolling-threshold": 2,
       "player": "io",
       "on-click": "~/.local/bin/oldbook-pithos click",
-      "on-click-right": "~/.local/bin/oldbook-pithos toggle"
+      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
+      "on-click-middle": "~/.local/bin/oldbook-pithos middle"
     },
     "mpris#next": {
       "format": "\uf051",
       "format-paused": "\uf051",
       "format-stopped": "\uf051",
-      "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track\nRight: show/hide Pithos",
+      "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track\nRight: show/hide Pithos\nMiddle: tired of this song \u00b7 Super+middle: ban song",
       "on-click": "playerctl --player=io.github.Pithos next",
-      "on-click-middle": "playerctl --player=io.github.Pithos next",
+      "on-click-middle": "~/.local/bin/oldbook-pithos middle",
       "on-click-right": "~/.local/bin/oldbook-pithos toggle",
       "player": "io"
     },

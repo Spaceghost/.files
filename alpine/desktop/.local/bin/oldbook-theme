@@ -13,6 +13,7 @@ running so the change is visible without logging out.
 import argparse
 import os
 from pathlib import Path
+import re
 import runpy
 import signal
 import subprocess
@@ -21,6 +22,7 @@ import sys
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
+from desktop_theme import ensure_profile
 
 THEMES = REPO / 'alpine/themes'
 
@@ -82,6 +84,8 @@ def ghostty_from_foot(foot_ini, base, name=None):
 def sync_profiles(repo):
     """Materialise the per-theme files that are derived rather than authored."""
     written = []
+    for theme in available_themes(repo):
+        ensure_profile(repo, theme)
     base = base_ghostty(repo)
     for profile in sorted((repo / 'alpine/themes/profiles').glob('*')):
         if not profile.is_dir() or has_symlink(profile, repo):
@@ -89,11 +93,18 @@ def sync_profiles(repo):
         foot_ini = profile / '.config/foot/foot.ini'
         if not foot_ini.is_file():
             continue
+        theme = {}
         try:
-            name = load_theme(repo, profile.name)['name']
+            theme = load_theme(repo, profile.name)
+            name = theme['name']
         except (OSError, ValueError, RuntimeError):
             name = profile.name
-        body = ghostty_from_foot(foot_ini, base, name)
+        local_base = list(base)
+        if theme.get('design'):
+            spacing = theme['design']['spacing']
+            local_base = [re.sub(r'^(window-padding-[xy])\s*=.*', rf'\1 = {spacing}', line)
+                          for line in local_base]
+        body = ghostty_from_foot(foot_ini, local_base, name)
         if body is None:
             continue
         target = profile / '.config/ghostty/config'
@@ -106,7 +117,7 @@ def sync_profiles(repo):
 
 
 def profile_directory(identity):
-    """Return the theme's HOME overlay, or None when it only carries a palette."""
+    """Return an existing authored or rendered HOME overlay."""
     profile = THEMES / 'profiles' / identity
     if not safe_theme_id(identity) or has_symlink(profile, REPO) or not profile.is_dir():
         return None
@@ -122,8 +133,7 @@ def current_identity():
 
 def describe(theme, active):
     mark = '●' if theme['id'] == active else '○'
-    profile = '' if profile_directory(theme['id']) else '   (palette only)'
-    return f'{mark} {theme["name"]}{profile}'
+    return f'{mark} {theme["name"]}'
 
 
 def record(identity):
@@ -195,6 +205,10 @@ def refresh_session():
     here = Path(__file__).resolve().parent
 
     notes.append('sway reloaded' if run(['swaymsg', 'reload']) else 'sway reload FAILED')
+    gtk_settings = here / 'oldbook-gtk-settings'
+    if gtk_settings.is_file():
+        notes.append('GTK settings applied' if run(['/usr/bin/python3', str(gtk_settings)])
+                     else 'GTK settings refresh FAILED')
 
     count = signal_processes(('waybar',), signal.SIGUSR2)
     notes.append(f'waybar reloaded ({count})')
@@ -240,7 +254,7 @@ def refresh_session():
 
 def use(identity, *, reload=True):
     theme = load_theme(REPO, identity)
-    profile = profile_directory(theme['id'])
+    profile = ensure_profile(REPO, theme)
     deployed = None
     if profile is not None:
         # The deployer owns the symlink journal and its rollback, so switching
@@ -248,6 +262,12 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
+    if reload:
+        gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))
+        entries, _interval = gallery['load_gallery']()
+        matching = [entry for entry in entries if entry.get('theme') == theme['id']]
+        if matching:
+            gallery['update']('select', matching[-1]['id'])
     notes = refresh_session() if reload else []
     return theme, profile, deployed, notes
 
@@ -279,10 +299,7 @@ def main():
         parser.error('use requires a theme ID')
     theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload)
     print(f'Switched to {theme["name"]}')
-    if profile is None:
-        print('  This collection carries only a palette, so overlays follow it '
-              'but application configuration is unchanged.')
-    elif deployed is None:
+    if deployed is None:
         print('  Configuration already matched this theme.')
     else:
         print(f'  Previous configuration backed up to {deployed}')

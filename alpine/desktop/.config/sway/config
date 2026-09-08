@@ -7,9 +7,9 @@ set $lock ~/.local/bin/oldbook-lock
 set $wallpaper ~/.local/share/oldbook/wallpaper.png
 
 # Palette and window chrome are switchable without changing shortcuts.
-include ~/.config/sway/theme.conf
 gaps inner 3
 gaps outer 4
+include ~/.config/sway/theme.conf
 smart_gaps off
 focus_follows_mouse yes
 mouse_warping output

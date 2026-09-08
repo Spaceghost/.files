@@ -145,6 +145,13 @@ def run_fake_mpris(actions, player_name, track_title):
         app = Gtk.Application(application_id="io.github.Pithos")
         app.register(None)
         window = Gtk.ApplicationWindow(application=app, title="Private Pithos test")
+        for rating in ('tired', 'ban'):
+            action = Gio.SimpleAction.new(rating, None)
+            def record_rating(action, _parameter):
+                with actions.open('a') as stream:
+                    stream.write('io.github.Pithos:' + action.get_name() + '\n')
+            action.connect('activate', record_rating)
+            window.add_action(action)
         window.set_default_size(500, 400)
         window.add(Gtk.Label(label="Private Pithos controls verification"))
         app.connect("activate", lambda *_: window.present())
@@ -222,8 +229,17 @@ def run_verifier(output):
 
         local_bin = base / "home/.local/bin"
         local_bin.mkdir(parents=True)
-        (local_bin / "oldbook-pithos").symlink_to(
-            REPO / "alpine/desktop/.local/bin/oldbook-pithos")
+        modifiers = base / 'super-held'
+        modifiers.write_text('0')
+        # Keep the private pointer test independent of keys held on the user's
+        # physical keyboard. Run the production helper with a fixture snapshot.
+        (local_bin / 'oldbook-pithos').write_text(
+            '#!/usr/bin/python3\nimport runpy\n'
+            'from pathlib import Path\n'
+            'module = runpy.run_path(' + repr(str(REPO / 'alpine/desktop/.local/bin/oldbook-pithos')) + ')\n'
+            'module["middle_click"].__globals__["super_pressed"] = lambda: Path(' +
+            repr(str(modifiers)) + ').read_text() == "1"\nmodule["main"]()\n')
+        (local_bin / 'oldbook-pithos').chmod(0o755)
         (local_bin / "pithos").write_text("#!/bin/sh\nexec gapplication launch io.github.Pithos\n")
         (local_bin / "pithos").chmod(0o755)
 
@@ -394,11 +410,12 @@ def run_verifier(output):
                                env=env, check=True, timeout=12)
                 require(not pithos_visible(), "session reload raised Pithos")
 
-                for x in (560, 720, 885):
+                for count, x in enumerate((560, 720, 885), 1):
                     event(f"move {round(x * 800 / 1440)} 16")
                     event("press 272")
                     event("release 272")
-                    time.sleep(0.5)
+                    wait_for(lambda: actions.exists() and
+                             len(actions.read_text().splitlines()) == count, [])
                 event("move 400 16")
                 time.sleep(1.2)
                 subprocess.run(
@@ -409,6 +426,21 @@ def run_verifier(output):
                 )
                 found = actions.read_text().splitlines() if actions.exists() else []
                 require(found == EXPECTED_ACTIONS, f"MPRIS actions were {found!r}")
+                for count, x in enumerate((560, 720, 885), 1):
+                    event(f"move {round(x * 800 / 1440)} 16")
+                    event('press 274')
+                    event('release 274')
+                    wait_for(lambda: len(actions.read_text().splitlines()) == 3 + count, [])
+                require(actions.read_text().splitlines() == EXPECTED_ACTIONS +
+                        ['io.github.Pithos:tired'] * 3, 'middle-click did not shelf the song')
+                modifiers.write_text('1')
+                event('move 400 16')
+                event('press 274')
+                event('release 274')
+                wait_for(lambda: len(actions.read_text().splitlines()) == 7, [])
+                modifiers.write_text('0')
+                require(actions.read_text().splitlines()[-1] == 'io.github.Pithos:ban',
+                        'ban did not reach the private Pithos action')
                 # Right-click works on the arrows as well as the center title.
                 for x in (560, 885):
                     event(f"move {round(x * 800 / 1440)} 16")
@@ -432,13 +464,14 @@ def run_verifier(output):
                 event("release 272")
                 wait_for(pithos_visible, [])
                 time.sleep(.5)
-                require(actions.read_text().splitlines() == EXPECTED_ACTIONS,
+                require(actions.read_text().splitlines() == EXPECTED_ACTIONS +
+                        ['io.github.Pithos:tired'] * 3 + ['io.github.Pithos:ban'],
                         "show/hide or double-click unexpectedly changed playback")
                 subprocess.run(["grim", str(output / "pithos-open.png")], env=env, check=True)
                 evidence = {
                     "selected": selected,
                     "pithos_controls": "hidden startup, reload, right show/hide, double open without playback: PASS",
-                    "actions": found,
+                    "actions": actions.read_text().splitlines(),
                     "screenshots": ["music.png", "tooltip.png", "pithos-open.png"],
                 }
                 (output / "evidence.json").write_text(

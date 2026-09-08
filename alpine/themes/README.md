@@ -1,5 +1,21 @@
 # Gruvbox Dark × Space Ghost
 
+## Complete desktop themes
+
+Every theme includes a desktop design and application profile. Run
+`oldbook-theme list` and `oldbook-theme use <id>` to switch. Generated collections
+now specify typography, corner geometry, spacing, opacity, bar placement, widget
+placement and launcher width as well as colors and artwork. Switching applies
+the application files, selects an available matching painting and refreshes the
+session. Applications that cannot reload styling pick it up when reopened.
+
+`wallpapers/desktop_theme.py` renders missing profiles from the shared desktop
+configuration, preserving functional controls. `oldbook-theme sync` materializes
+all profiles; `oldbook-theme use <id> --no-reload` restores one into HOME without
+reloading the session. Profiles use the deployment journal's backups and rollback.
+Generated profile files are derived locally; the descriptor and renderer are the
+rebuild inputs. Existing authored profile files remain editable.
+
 The active desktop uses warm charcoal, aged cream, amber, olive and muted aqua.
 Window borders, launcher outlines and panel outlines are disabled. Focus is
 shown through surface and text color. Existing shortcuts, controls, tooltips,
@@ -72,8 +88,9 @@ active-theme, unthemed and named-theme generation. See the
 
 `profiles/spaceghost/` preserves the original application theme configurations;
 `profiles/gruvbox-dark/` records this theme's starting configuration. These are
-reference/restore copies, not a switcher that overwrites later feature edits.
-The active overlay and Fossil history remain the source for the installed setup.
+authored profiles used by the switcher. Missing application files are supplied
+from the shared desktop configuration. The active overlay and Fossil history
+remain the source for the installed setup.
 
 The exact cursor and Papirus inputs are in the APK lock. The Qt system palette
 link is installed by `alpine/bin/install-desktop-system`. The native artwork

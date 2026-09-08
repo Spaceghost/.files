@@ -3,7 +3,10 @@
 The gallery can paint within existing themes but cannot create another theme.
 Add random and phrase/title actions which design a reusable named artwork
 collection, then generate and select one matching debut wallpaper. Application
-configuration remains independent, as described to the user during implementation.
+configuration remained independent in the original implementation. This is
+superseded by the user's requirement that every desktop theme be complete:
+generated themes must also supply application styling. A descriptor and debut
+wallpaper alone are not a finished desktop theme.
 
 Use the existing logged-in Codex CLI with strict structured output for name,
 palette, art direction and debut scene. Disable tools for this text-only phase.
