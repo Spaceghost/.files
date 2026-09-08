@@ -25,8 +25,11 @@ def screen_space(output, tree):
              'top': CAPTION_CLEARANCE, 'bottom': EDGE_MARGIN,
              'left': EDGE_MARGIN, 'right': EDGE_MARGIN, 'origin_y': 0}
     for surface in output.get('layer_shell_surfaces', []):
-        name, layer = surface.get('namespace'), surface.get('layer')
+        name, layer = surface.get('namespace') or '', surface.get('layer')
+        # swaync popups and its control center are transient overlays; the popup
+        # window spans the full free height, so it would read as a right strip.
         if (layer == 'background' or name in ('conky', 'wallpaper', 'mbp-intel-scripture')
+                or name.startswith('swaync')
                 or (name == 'mbp-intel-decoration' and layer == 'top')):
             continue
         extent = surface.get('extent', {})
