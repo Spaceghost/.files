@@ -201,7 +201,7 @@ def transform(relative, content, target):
                 raise RuntimeError('Cannot select stock swaylock in mbp-intel-lock')
             text = text.replace('swaylockd', 'swaylock')
         return text.encode(errors='surrogateescape')
-    if relative.parts[:3] == ('.local', 'lib', 'mbp-intel') and relative.suffix == '.py':
+    if relative.parts[:3] == ('.local', 'lib', 'mbp_intel') and relative.suffix == '.py':
         text = content.decode()
         if 'parents[5]' in text:
             if LIB_ANCHOR not in text:
