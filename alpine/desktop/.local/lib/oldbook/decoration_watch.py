@@ -46,8 +46,8 @@ class TreeWatch:
     unchanged tree is never delivered twice, and only one request is in flight.
     """
 
-    # Feed the GTK frame clock at roughly 60 Hz during floating movement.
-    ATTACHED_INTERVAL = 0.016
+    # Keep fresh geometry available to 60 Hz and 120 Hz display frame clocks.
+    ATTACHED_INTERVAL = 1 / 120
     IDLE_INTERVAL = 0.750
     RECONNECT_DELAY = 0.250
 
@@ -143,6 +143,7 @@ class TreeWatch:
                     next_refresh = 0
                     while not self._stopped.is_set():
                         if time.monotonic() >= next_refresh:
+                            started = time.monotonic()
                             _send(request, _GET_TREE)
                             kind, body = _receive(request)
                             if kind != _GET_TREE:
@@ -157,7 +158,10 @@ class TreeWatch:
                             with self._lock:
                                 interval = (self.ATTACHED_INTERVAL if self._attached
                                             else self.IDLE_INTERVAL)
-                            next_refresh = time.monotonic() + interval
+                            # Account for IPC/decoding work inside the budget.
+                            # Late replies skip the wait, never queue catch-up
+                            # requests or pay a second full interval afterward.
+                            next_refresh = max(started + interval, time.monotonic())
                         ready, _, _ = select.select(
                             [subscriber, self._wake_read], [], [],
                             max(0, next_refresh - time.monotonic()))

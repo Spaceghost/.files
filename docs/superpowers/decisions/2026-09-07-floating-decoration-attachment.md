@@ -26,8 +26,10 @@ fullscreen tiled captions are square and floating captions retain rounding.
 
 Sway emits no continuous floating move or resize events. `decoration_watch.py`
 therefore keeps a persistent request socket and a separate event subscription.
-Attached geometry is checked every 16 ms; workspace-only polling and appearance
-refreshes use 750 ms. Unchanged trees are suppressed and pending GTK updates are
+Attached geometry uses a 120 Hz request budget; workspace-only polling and appearance
+refreshes use 750 ms. The [frame-budget follow-up](2026-09-07-decoration-frame-budget.md)
+includes IPC processing time in that budget and avoids redundant GTK resizing.
+Unchanged trees are suppressed and pending GTK updates are
 coalesced, so motion creates neither a subprocess per frame nor a stale queue.
 
 GTK's display frame clock drives a critically damped geometry spring with a

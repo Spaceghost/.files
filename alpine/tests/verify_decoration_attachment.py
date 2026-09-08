@@ -6,8 +6,11 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import select
 import shlex
 import signal
+import socket
+import struct
 import subprocess
 import sys
 import tempfile
@@ -21,11 +24,67 @@ PRIVATE_BUS_MARKER = "OLDBOOK_DECORATION_ATTACHMENT_PRIVATE_BUS"
 WIDTH = 1440
 HEIGHT = 900
 TOP_ZONE = 32
+IPC_HEADER = struct.Struct("=6sII")
+IPC_TYPES = {"get_workspaces": 1, "get_outputs": 3, "get_tree": 4}
 
 
 def require(condition, message):
     if not condition:
         raise AssertionError(message)
+
+
+class SwayIPC:
+    """Keep geometry sampling within a frame instead of spawning swaymsg."""
+
+    def __init__(self, path):
+        self.connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.connection.settimeout(4)
+        self.connection.connect(str(path))
+
+    def read(self, size, deadline):
+        data = bytearray()
+        while len(data) < size:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError("private compositor IPC response timed out")
+            self.connection.settimeout(remaining)
+            part = self.connection.recv(size - len(data))
+            if not part:
+                raise ConnectionError("private compositor IPC disconnected")
+            data.extend(part)
+        return data
+
+    def requests(self, requests):
+        deadline = time.monotonic() + 4
+        encoded = [(kind, value.encode()) for kind, value in requests]
+        self.connection.settimeout(4)
+        self.connection.sendall(b"".join(
+            IPC_HEADER.pack(b"i3-ipc", len(body), kind) + body
+            for kind, body in encoded
+        ))
+        replies = []
+        for kind, _body in encoded:
+            magic, size, returned = IPC_HEADER.unpack(self.read(IPC_HEADER.size, deadline))
+            require(magic == b"i3-ipc" and returned == kind and size <= 32 * 1024 * 1024,
+                    "invalid private compositor IPC response")
+            replies.append(json.loads(self.read(size, deadline)))
+        return replies
+
+    def close(self):
+        self.connection.close()
+
+
+def pointer_reply(process, expected):
+    deadline = time.monotonic() + 4
+    reply = bytearray()
+    while not reply.endswith(b"\n"):
+        remaining = deadline - time.monotonic()
+        require(remaining > 0 and select.select([process.stdout], [], [], remaining)[0],
+                "private pointer reply timed out")
+        part = os.read(process.stdout.fileno(), 1)
+        require(part and len(reply) < 64, "private pointer disconnected or sent invalid reply")
+        reply.extend(part)
+    require(reply.decode().strip() == expected, "private pointer command failed")
 
 
 def fixture_panel():
@@ -194,6 +253,7 @@ def run_verifier(output):
             env.pop(key, None)
         processes = []
         expected_exits = set()
+        connection = None
         pointer_binary = build_pointer(base)
         with (output / "runtime.log").open("w") as log:
 
@@ -207,17 +267,15 @@ def run_verifier(output):
                 return process
 
             def ipc(kind="get_tree", command=None):
-                arguments = ["swaymsg", "-r"]
-                arguments.extend(["-t", kind] if command is None else [command])
-                result = json.loads(subprocess.check_output(
-                    arguments, env=env, text=True, timeout=4
-                ))
+                result = connection.requests([
+                    (IPC_TYPES[kind], "") if command is None else (0, command)
+                ])[0]
                 if command is not None:
                     require(all(item.get("success") for item in result),
                             f"IPC command failed: {command}: {result!r}")
                 return result
 
-            def wait_for(test, message, seconds=8):
+            def wait_for(test, message, seconds=8, interval=0.05):
                 deadline = time.monotonic() + seconds
                 while time.monotonic() < deadline:
                     for name, process in processes:
@@ -226,7 +284,7 @@ def run_verifier(output):
                     result = test()
                     if result:
                         return result
-                    time.sleep(0.05)
+                    time.sleep(interval)
                 raise AssertionError(message)
 
             def node(app_id):
@@ -234,8 +292,10 @@ def run_verifier(output):
                              if item.get("app_id") == app_id), None)
 
             def snapshot():
-                tree = ipc()
-                outputs = ipc("get_outputs")
+                tree, outputs, workspaces = connection.requests([
+                    (IPC_TYPES[kind], "")
+                    for kind in ("get_tree", "get_outputs", "get_workspaces")
+                ])
                 active = next(item for item in outputs if item["name"] == "HEADLESS-1")
                 captions = [item for item in active.get("layer_shell_surfaces", [])
                             if item["namespace"] == "oldbook-decoration"]
@@ -251,7 +311,7 @@ def run_verifier(output):
                 return {
                     "output": active["rect"], "captions": captions,
                     "caption_global_rect": absolute, "clients": clients,
-                    "workspaces": ipc("get_workspaces"),
+                    "workspaces": workspaces,
                 }
 
             def attached(state, edge, app_id="attachment-floating"):
@@ -340,6 +400,7 @@ def run_verifier(output):
                 )
                 env["SWAYSOCK"] = str(sway_socket)
                 env["WAYLAND_DISPLAY"] = wayland_display
+                connection = SwayIPC(sway_socket)
                 spawn("fixture-top", [sys.executable, str(Path(__file__).resolve()),
                                       "--fixture-panel"])
                 wait_for(lambda: any(item["namespace"] == "attachment-fixture-top"
@@ -369,12 +430,12 @@ def run_verifier(output):
                         "bottom caption did not attach flush without reserving workspace space")
 
                 pointer = spawn("pointer", [str(pointer_binary)], pointer=True)
-                require(pointer.stdout.readline().strip() == "ready", "pointer did not connect")
+                pointer_reply(pointer, "ready")
 
                 def event(command):
                     pointer.stdin.write(command + "\n")
                     pointer.stdin.flush()
-                    require(pointer.stdout.readline().strip() == "ok", "pointer command failed")
+                    pointer_reply(pointer, "ok")
 
                 def move_pointer(x, y):
                     event(f"move {round(x * 800 / WIDTH)} {round(y * 600 / HEIGHT)}")
@@ -403,7 +464,7 @@ def run_verifier(output):
 
                     held = wait_for(follows_held_drag,
                                     "caption did not follow an active pointer drag within 250ms",
-                                    seconds=0.25)
+                                    seconds=0.25, interval=0.004)
                     evidence["drag_follow_ms"] = round((time.monotonic() - started) * 1000, 1)
                     states["drag-tracks-before-release"] = held
                     checks.append("drag-tracks-before-release")
@@ -531,14 +592,30 @@ def run_verifier(output):
                 traceback.print_exc()
                 raise
             finally:
+                if connection is not None:
+                    connection.close()
                 for _name, process in reversed(processes):
-                    if process.poll() is None:
+                    # The shell/fixture may have exited before its children.
+                    # Each fixture owns a new process group, so clean that group
+                    # even when its leader has already been reaped.
+                    try:
                         os.killpg(process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    if process.poll() is None:
                         try:
                             process.wait(timeout=3)
                         except subprocess.TimeoutExpired:
-                            os.killpg(process.pid, signal.SIGKILL)
-                            process.wait()
+                            pass
+                    # A child can ignore TERM after its leader has exited.
+                    try:
+                        os.killpg(process.pid, signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+                    process.wait()
+                    for stream in (process.stdin, process.stdout):
+                        if stream is not None:
+                            stream.close()
     print(output)
 
 

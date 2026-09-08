@@ -1,0 +1,12 @@
+{
+  "command": "python3 -m unittest discover -s alpine/tests -p 'test_decoration*.py' -v",
+  "tests": 41,
+  "duration_seconds": 1.227,
+  "exit_code": 0,
+  "result": "OK",
+  "regression_red_before_fix": {
+    "test": "test_request_processing_does_not_add_another_poll_interval",
+    "mean_request_interval_seconds": 0.030378389,
+    "maximum_allowed_seconds": 0.016666666666666666
+  }
+}

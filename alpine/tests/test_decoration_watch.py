@@ -39,9 +39,11 @@ class SwayServer:
         self.subscribers = set()
         self.workers = []
         self.requests = []
+        self.request_times = []
         self.subscriptions = []
         self.tree = {'id': 1, 'name': 'initial', 'nodes': []}
         self.stall = False
+        self.reply_delay = 0
         self.stopped = threading.Event()
         self.listener = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self.listener.bind(self.path)
@@ -93,10 +95,13 @@ class SwayServer:
                 elif kind == 4:
                     with self.condition:
                         self.requests.append(connection)
+                        self.request_times.append(time.monotonic())
                         tree = self.tree
                         stall = self.stall
                         self.condition.notify_all()
                     if not stall:
+                        if self.reply_delay:
+                            time.sleep(self.reply_delay)
                         self._send(connection, kind, tree)
                 else:
                     return
@@ -185,6 +190,19 @@ class DecorationWatchTests(unittest.TestCase):
         self.server.event()
         self.wait_delivered(2)
         self.assertEqual(self.delivered[-1]['id'], 2)
+        self.assertEqual(len(set(self.server.requests)), 1)
+
+    def test_request_processing_does_not_add_another_poll_interval(self):
+        # A busy compositor still has enough time to reply within a 60 Hz
+        # frame. Sleeping a full interval afterward would halve that cadence.
+        self.server.reply_delay = 0.010
+        self.watcher.set_attached(True)
+        self.watcher.start()
+        self.assertTrue(self.server.wait_for(lambda: len(self.server.requests) >= 18))
+        with self.server.condition:
+            times = self.server.request_times[2:18]
+        mean_interval = (times[-1] - times[0]) / (len(times) - 1)
+        self.assertLessEqual(mean_interval, 1 / 60)
         self.assertEqual(len(set(self.server.requests)), 1)
 
     def test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll(self):

@@ -81,6 +81,7 @@ def daemon():
             edge = self.edge
             self.attachment_mode = placement['mode']
             self.previous_geometry = None
+            self.rendered_size = None
             self.motion_rect = None
             self.motion_target = None
             self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
@@ -197,9 +198,14 @@ def daemon():
             rect = {key: round(value) for key, value in self.motion_rect.items()}
             GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rect['x'])
             GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, rect['y'])
-            self.window.set_size_request(rect['width'] if self.edge == 'bottom' else -1,
-                                         rect['height'] if self.edge == 'right' else -1)
-            self.window.resize(max(1, rect['width']), max(1, rect['height']))
+            size = (max(1, rect['width']), max(1, rect['height']))
+            if size != self.rendered_size:
+                # GTK queues layout even when resize() repeats the same size.
+                # Moving a caption only needs new margins and a repaint.
+                self.window.set_size_request(size[0] if self.edge == 'bottom' else -1,
+                                             size[1] if self.edge == 'right' else -1)
+                self.window.resize(*size)
+                self.rendered_size = size
 
         def animate(self):
             if self.animations and not self.tick_id:
