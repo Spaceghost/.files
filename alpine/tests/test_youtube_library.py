@@ -7,7 +7,7 @@ import unittest
 from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
-MODULE = REPO / 'alpine/desktop/.local/lib/oldbook/youtube_library.py'
+MODULE = REPO / 'alpine/desktop/.local/lib/mbp_intel/youtube_library.py'
 
 
 class YoutubeLibraryTests(unittest.TestCase):
@@ -76,7 +76,7 @@ class YoutubeLibraryTests(unittest.TestCase):
 
     def test_browsing_playlist_selects_video_without_loading_playlist_as_video(self):
         import runpy
-        player=runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-youtube'))
+        player=runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-youtube'))
         globals_=player['browse'].__globals__
         pages=[{'entries':[{'url':'https://www.youtube.com/playlist?list=PLone',
                            'title':'Books','channel':'','kind':'playlist'}],'more':False},
@@ -92,7 +92,7 @@ class YoutubeLibraryTests(unittest.TestCase):
 
     def test_cancel_browsing_preserves_current_queue(self):
         import runpy
-        player=runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-youtube'))
+        player=runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-youtube'))
         with mock.patch.object(player['library'],'fetch',return_value={'entries':[],'more':False}), \
                 mock.patch.dict(player['browse'].__globals__,choose=mock.Mock(return_value=None),
                                 notify=mock.Mock(),request=mock.Mock()) as patched:

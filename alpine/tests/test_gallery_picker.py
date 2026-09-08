@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import unittest
 from unittest import mock
 
-API = runpy.run_path(str(Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-wallpaper'))
+API = runpy.run_path(str(Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-wallpaper'))
 
 
 class GalleryPickerTests(unittest.TestCase):

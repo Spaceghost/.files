@@ -27,7 +27,7 @@ installs the desktop into a disposable root; installed identities match its
 lock. Codex, SwayFX and Waybar version checks succeed there. Home deployment
 passes in a disposable HOME. Maintainer scripts were disabled in the root test;
 fresh boot/hardware behavior is not claimed. Evidence lives in Cascadia under
-`docs/assets/oldbook/`. Public Pages/signing setup remains the existing Cascadia
+`docs/assets/mbp-intel/`. Public Pages/signing setup remains the existing Cascadia
 issue #22; local and private-release recovery do not require public hosting.
 
 The current package and command are named `spaceghost-desktop`, per the owner.

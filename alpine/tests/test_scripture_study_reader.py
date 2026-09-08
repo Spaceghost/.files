@@ -13,7 +13,7 @@ from unittest.mock import patch
 REPO = Path(__file__).resolve().parents[2]
 reader = importlib.machinery.SourceFileLoader(
     'scripture_study_reader_test',
-    str(REPO / 'alpine/desktop/.local/bin/oldbook-scripture')).load_module()
+    str(REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture')).load_module()
 
 
 def entry(kind='inspiration', identifier='study-fixture'):

@@ -13,9 +13,9 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[2]
-LIB = REPO / 'alpine/desktop/.local/lib/oldbook'
+LIB = REPO / 'alpine/desktop/.local/lib/mbp_intel'
 LIB_PARENT = LIB.parent
-COMMAND = REPO / 'alpine/desktop/.local/bin/oldbook-shortcuts'
+COMMAND = REPO / 'alpine/desktop/.local/bin/mbp-intel-shortcuts'
 sys.path.insert(0, str(LIB))
 
 try:
@@ -282,7 +282,7 @@ class RuntimeSafetyTests(unittest.TestCase):
     def setUp(self):
         if IMPORT_ERROR is not None:
             self.fail(f'shortcut service is unavailable: {IMPORT_ERROR}')
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-shortcuts-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-shortcuts-')
         self.addCleanup(self.temp.cleanup)
         self.runtime = Path(self.temp.name)
         self.runtime.chmod(0o700)
@@ -335,7 +335,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         lease = SessionLease(self.runtime, self.sway_socket)
         with self.assertRaisesRegex(RuntimeError, 'owned private directory'):
             lease.acquire()
-        self.assertFalse((self.runtime / 'oldbook-shortcuts').exists())
+        self.assertFalse((self.runtime / 'mbp-intel-shortcuts').exists())
 
     def test_socket_watch_detects_peer_shutdown(self):
         left, right = socket.socketpair()
@@ -358,7 +358,7 @@ class RuntimeSafetyTests(unittest.TestCase):
             'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
         }
         info = wayland_path.stat()
-        record = self.runtime / 'oldbook-screen-lock/ready.json'
+        record = self.runtime / 'mbp-intel-screen-lock/ready.json'
         record.parent.mkdir(mode=0o700)
         record.write_text(json.dumps({
             'process': identity,
@@ -372,7 +372,7 @@ class RuntimeSafetyTests(unittest.TestCase):
 
     def test_missing_wayland_socket_with_live_lock_record_fails_conservative(self):
         missing = self.runtime / 'wayland-gone'
-        record = self.runtime / 'oldbook-screen-lock/ready.json'
+        record = self.runtime / 'mbp-intel-screen-lock/ready.json'
         record.parent.mkdir(mode=0o700)
         record.write_text(json.dumps({
             'process': {'pid': os.getpid(), 'start_time': 'any', 'boot_id': 'any'},
@@ -440,7 +440,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         lease.acquire()
         self.addCleanup(lease.close)
         env = dict(os.environ, XDG_RUNTIME_DIR=str(self.runtime),
-                   PYTHONPATH=str(LIB_PARENT), OLDBOOK_SHORTCUTS_LEGACY='1')
+                   PYTHONPATH=str(LIB_PARENT), MBP_INTEL_SHORTCUTS_LEGACY='1')
         result = subprocess.run(
             [str(COMMAND), 'status', '--socket', str(self.sway_socket)],
             env=env, text=True, capture_output=True, timeout=3)
@@ -450,7 +450,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         self.assertTrue(status['live'])
         imported = subprocess.run(
             [sys.executable, '-c',
-             'import sys; import oldbook.shortcut_overlay; print("gi" in sys.modules)'],
+             'import sys; import mbp_intel.shortcut_overlay; print("gi" in sys.modules)'],
             env=env, text=True, capture_output=True, timeout=3)
         self.assertEqual(imported.returncode, 0, imported.stderr)
         self.assertEqual(imported.stdout.strip(), 'False')
@@ -464,7 +464,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         record['process']['start_time'] = 'reused-pid'
         lease.status_path.write_text(json.dumps(record))
         env = dict(os.environ, XDG_RUNTIME_DIR=str(self.runtime),
-                   PYTHONPATH=str(LIB_PARENT), OLDBOOK_SHORTCUTS_LEGACY='1')
+                   PYTHONPATH=str(LIB_PARENT), MBP_INTEL_SHORTCUTS_LEGACY='1')
         result = subprocess.run(
             [str(COMMAND), 'status', '--socket', str(self.sway_socket)],
             env=env, text=True, capture_output=True, timeout=3)

@@ -13,7 +13,7 @@ import unittest
 from unittest import mock
 
 
-HELPER = Path(__file__).resolve().parents[1] / "desktop/.local/bin/oldbook-firewall-ui"
+HELPER = Path(__file__).resolve().parents[1] / "desktop/.local/bin/mbp-intel-firewall-ui"
 loader = importlib.machinery.SourceFileLoader("firewall_ui", str(HELPER))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 ui = importlib.util.module_from_spec(spec)
@@ -22,7 +22,7 @@ loader.exec_module(ui)
 
 class FirewallUITests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="oldbook-firewall-ui-test-")
+        self.temporary = tempfile.TemporaryDirectory(prefix="mbp-intel-firewall-ui-test-")
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.runlevels = self.root / "runlevels"
@@ -33,7 +33,7 @@ class FirewallUITests(unittest.TestCase):
         self.proc.mkdir()
         self.runtime = self.root / "runtime"
         self.runtime.mkdir(mode=0o700)
-        for name in ("oldbook-firewall", "opensnitchd"):
+        for name in ("mbp-intel-firewall", "opensnitchd"):
             (self.initd / name).write_text("#!/bin/sh\nexit 0\n")
         for name, value in (("RUNLEVELS", self.runlevels), ("INITD", self.initd), ("PROC", self.proc)):
             patch = mock.patch.object(ui, name, value)
@@ -47,19 +47,19 @@ class FirewallUITests(unittest.TestCase):
         self.addCleanup(patch.stop)
 
     def enable(self, name=None):
-        for service in (name,) if name else ("oldbook-firewall", "opensnitchd"):
+        for service in (name,) if name else ("mbp-intel-firewall", "opensnitchd"):
             (self.runlevels / "boot" / service).symlink_to(self.initd / service)
 
     def test_disabled_or_partially_enabled_setup_does_nothing(self):
         with mock.patch.object(ui.subprocess, "call") as launch:
             self.assertEqual(ui.main(), 0)
-            self.enable("oldbook-firewall")
+            self.enable("mbp-intel-firewall")
             self.assertEqual(ui.main(), 0)
             launch.assert_not_called()
         self.assertEqual(list(self.runtime.iterdir()), [])
 
     def test_service_names_without_valid_runlevel_links_do_not_enable(self):
-        self.enable("oldbook-firewall")
+        self.enable("mbp-intel-firewall")
         (self.runlevels / "boot" / "opensnitchd").write_text("not an OpenRC link")
         self.assertFalse(ui.services_enabled())
         (self.runlevels / "boot" / "opensnitchd").unlink()

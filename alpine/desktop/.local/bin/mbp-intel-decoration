@@ -1,0 +1,624 @@
+#!/usr/bin/env python3
+"""Interactive floating-window and workspace captions with saved appearance."""
+import argparse
+import configparser
+import fcntl
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import threading
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
+from decoration import action_command, load_settings, save_settings, vertical_title
+from decoration_actions import (application_items, execute, launchers, menu_items,
+                                output_contexts, terminal_source, window_item, window_items)
+from overlay_theme import read_palette
+from decoration_placement import output_placements
+from decoration_motion import advance, advance_rect
+from decoration_watch import TreeWatch
+
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
+STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'mbp-intel/decoration'
+SETTINGS = CONFIG / 'mbp-intel/decoration.json'
+
+
+def position():
+    return load_settings(SETTINGS, STATE / 'position')['position']
+
+
+def set_position(value):
+    settings = load_settings(SETTINGS, STATE / 'position')
+    settings['position'] = value
+    save_settings(SETTINGS, settings, STATE / 'position')
+
+
+def launch(command):
+    try:
+        subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        return True
+    except OSError:
+        return False
+
+
+def appearance():
+    config = configparser.ConfigParser(interpolation=None)
+    config.read(CONFIG / 'foot/foot.ini')
+    font = config.get('main', 'font', fallback='JetBrainsMono Nerd Font:size=9.5')
+    family = font.split(':', 1)[0].split(',')[0]
+    match = re.search(r':size=([0-9.]+)', font)
+    size = float(match[1]) if match else 9.5
+    return (family, min(40, max(5, size)), read_palette(),
+            load_settings(SETTINGS, STATE / 'position'))
+
+
+def daemon():
+    import gi
+    gi.require_version('Gtk', '3.0')
+    gi.require_version('Gdk', '3.0')
+    gi.require_version('GtkLayerShell', '0.1')
+    from gi.repository import Gdk, Gio, GLib, Gtk, GtkLayerShell, Pango
+
+    STATE.mkdir(parents=True, exist_ok=True)
+    guard = (STATE / 'daemon.lock').open('a+')
+    try:
+        fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        return 0
+
+    display = Gdk.Display.get_default()
+    if display is None or not GtkLayerShell.is_supported():
+        print('Workspace decoration needs the Wayland desktop.', file=sys.stderr)
+        return 1
+
+    class Caption:
+        def __init__(self, monitor, placement, animate_entry=True):
+            self.monitor, self.edge = monitor, placement['edge']
+            edge = self.edge
+            self.attachment_mode = placement['mode']
+            self.previous_geometry = None
+            self.rendered_size = None
+            self.motion_rect = None
+            self.motion_target = None
+            self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
+            self.frame_time = None
+            self.tick_id = 0
+            self.retiring = False
+            self.animations = Gtk.Settings.get_default().get_property('gtk-enable-animations')
+            self.alpha = 0.0 if self.animations and animate_entry else 1.0
+            self.alpha_velocity = 0.0
+            self.context = {'id': None, 'edge': edge, 'node': {}}
+            self.tree = {}
+            self.menu = None
+            self.disposed = False
+            self.icon_key = None
+            self.window = Gtk.Window()
+            self.window.set_opacity(self.alpha)
+            self.css_name = 'workspace-decoration-' + str(id(self))
+            self.window.set_name(self.css_name)
+            self.window.set_can_focus(False)
+            visual = self.window.get_screen().get_rgba_visual()
+            if visual is not None:
+                self.window.set_visual(visual)
+            GtkLayerShell.init_for_window(self.window)
+            GtkLayerShell.set_namespace(self.window, 'mbp-intel-decoration')
+            GtkLayerShell.set_monitor(self.window, monitor)
+            attached = self.attachment_mode == 'window'
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP if attached
+                                    else GtkLayerShell.Layer.OVERLAY)
+            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            anchors = (('TOP', 'LEFT') if attached else
+                       ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM'))
+            for name in anchors:
+                side = getattr(GtkLayerShell.Edge, name)
+                GtkLayerShell.set_anchor(self.window, side, True)
+                GtkLayerShell.set_margin(self.window, side, 0 if attached else 5)
+            if attached:
+                # Use the entire output coordinate space, independent of other
+                # reserved edges. Negative zone reserves no workspace space.
+                GtkLayerShell.set_exclusive_zone(self.window, -1)
+            else:
+                GtkLayerShell.auto_exclusive_zone_enable(self.window)
+            orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
+            self.box = Gtk.Box(orientation=orientation, spacing=4)
+            self.box.get_style_context().add_class('caption')
+            self.window.add(self.box)
+            self.brand = self.button('', 'Window actions', lambda button: self.popup(button))
+            self.brand.get_style_context().add_class('brand')
+            self.image = Gtk.Image.new_from_icon_name('application-x-executable-symbolic', Gtk.IconSize.MENU)
+            self.brand.set_image(self.image)
+            self.brand.set_always_show_image(True)
+            self.box.pack_start(self.brand, False, False, 0)
+            self.title_button = Gtk.Button()
+            self.title_button.set_can_focus(False)
+            self.title_button.get_style_context().add_class('title-button')
+            self.label = Gtk.Label()
+            self.label.set_use_markup(False)
+            if edge == 'bottom':
+                self.label.set_ellipsize(Pango.EllipsizeMode.END)
+                self.label.set_max_width_chars(1)
+                self.label.set_hexpand(True)
+                self.label.set_xalign(0.5)
+            self.title_button.add(self.label)
+            self.title_button.connect('button-press-event', self.title_click)
+            self.box.pack_start(self.title_button, True, True, 0)
+            self.state_label = Gtk.Label()
+            self.state_label.get_style_context().add_class('window-state')
+            self.box.pack_start(self.state_label, False, False, 4)
+            self.empty_controls = Gtk.Box(orientation=orientation, spacing=3)
+            for action in launchers({}):
+                control = self.button(action['label'], 'Open ' + action['label'],
+                                      lambda button, action=action: self.run(dict(
+                                          action, workspace=self.context.get('workspace'))))
+                self.empty_controls.pack_start(control, False, False, 0)
+            self.box.pack_start(self.empty_controls, False, False, 0)
+            self.tile_button = self.button('▱', 'Float this window', lambda button: self.toggle_float())
+            self.full_button = self.button('⛶', 'Fullscreen', lambda button: self.toggle_fullscreen())
+            self.windows_button = self.button('▤', 'Choose a window', lambda button: self.popup(button, windows=True))
+            self.more_button = self.button('⋯', 'Window actions and strip appearance', lambda button: self.popup(button))
+            for button in (self.tile_button, self.full_button, self.windows_button, self.more_button):
+                self.box.pack_start(button, False, False, 0)
+            self.provider = Gtk.CssProvider()
+            Gtk.StyleContext.add_provider_for_screen(self.window.get_screen(), self.provider,
+                                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            self.previous_style = None
+            self.previous_display = None
+
+        def place(self, placement, output_rect):
+            if self.attachment_mode != 'window':
+                return
+            rect = placement['rect']
+            geometry = (tuple(rect.get(key, 0) for key in ('x', 'y', 'width', 'height')),
+                        tuple(output_rect.get(key, 0) for key in ('x', 'y')),
+                        self.previous_style)
+            if geometry == self.previous_geometry:
+                return
+            x = rect['x'] - output_rect['x']
+            y = rect['y'] - output_rect['y']
+            if self.edge == 'bottom':
+                y += rect['height']
+                width = max(1, rect['width'])
+                height = max(1, self.box.get_preferred_height_for_width(width)[1])
+            else:
+                x += rect['width']
+                height = max(1, rect['height'])
+                width = max(1, self.box.get_preferred_width_for_height(height)[1])
+            self.motion_target = dict(x=x, y=y, width=width, height=height)
+            if self.motion_rect is None or not self.animations:
+                self.motion_rect = dict(self.motion_target)
+                self.render_geometry()
+            self.animate()
+            self.previous_geometry = geometry
+
+        def render_geometry(self):
+            rect = {key: round(value) for key, value in self.motion_rect.items()}
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rect['x'])
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, rect['y'])
+            size = (max(1, rect['width']), max(1, rect['height']))
+            if size != self.rendered_size:
+                # GTK queues layout even when resize() repeats the same size.
+                # Moving a caption only needs new margins and a repaint.
+                self.window.set_size_request(size[0] if self.edge == 'bottom' else -1,
+                                             size[1] if self.edge == 'right' else -1)
+                self.window.resize(*size)
+                self.rendered_size = size
+
+        def animate(self):
+            if self.animations and self.window.get_mapped() and not self.tick_id:
+                self.frame_time = None
+                self.tick_id = self.window.add_tick_callback(self.frame)
+
+        def frame(self, widget, clock):
+            now = clock.get_frame_time() / 1_000_000
+            elapsed = 0 if self.frame_time is None else now - self.frame_time
+            self.frame_time = now
+            target_alpha = 0.0 if self.retiring else 1.0
+            self.alpha, self.alpha_velocity = advance(
+                self.alpha, self.alpha_velocity, target_alpha, elapsed,
+                response=0.09, tolerance=0.002)
+            self.window.set_opacity(self.alpha)
+            settled = True
+            if self.motion_target is not None and not self.retiring:
+                self.motion_rect, self.motion_velocity, settled = advance_rect(
+                    self.motion_rect, self.motion_velocity, self.motion_target,
+                    elapsed, response=0.045)
+                self.render_geometry()
+            if settled and self.alpha == target_alpha:
+                self.tick_id = 0
+                return False
+            return True
+
+        def retire(self):
+            if not self.animations:
+                self.destroy()
+                return
+            self.retiring = True
+            self.window.set_sensitive(False)
+            GtkLayerShell.set_exclusive_zone(self.window, -1)
+            retired.add(self)
+            self.animate()
+            # Also dispose when an output disappears and stops frame callbacks.
+            GLib.timeout_add(220, lambda: (self.destroy(), False)[1])
+
+        def button(self, label, hint, callback):
+            button = Gtk.Button.new_with_label(label)
+            button.set_can_focus(False)
+            button.set_tooltip_text(hint)
+            button.get_accessible().set_name(hint)
+            button.connect('clicked', callback)
+            button.connect('button-press-event', self.secondary_click)
+            return button
+
+        def secondary_click(self, widget, event):
+            if event.button != 3:
+                return False
+            if event.state & Gdk.ModifierType.SHIFT_MASK:
+                launch(action_command(3, shifted=True))
+            else:
+                self.popup(widget, event=event)
+            return True
+
+        def title_click(self, widget, event):
+            if event.button == 3:
+                return self.secondary_click(widget, event)
+            if event.button == 2:
+                self.toggle_float()
+                return True
+            if event.button == 1:
+                self.popup(widget, windows=bool(self.context.get('id')), event=event)
+                return True
+            return False
+
+        def run(self, action):
+            threading.Thread(target=execute, args=(action,), daemon=True).start()
+
+        def toggle_float(self):
+            context = dict(self.context)
+            self.run(window_item(context, '', 'floating disable' if context.get('floating') else 'floating enable'))
+
+        def toggle_fullscreen(self):
+            context = dict(self.context)
+            self.run(window_item(context, '', 'fullscreen disable' if context.get('fullscreen') else 'fullscreen enable'))
+
+        def fill_menu(self, menu, actions):
+            for action in actions:
+                if action is None:
+                    menu.append(Gtk.SeparatorMenuItem())
+                    continue
+                entry = Gtk.MenuItem.new_with_label(action['label'])
+                children = action.get('children')
+                if children is not None:
+                    submenu = self.new_menu()
+                    self.fill_menu(submenu, children)
+                    entry.set_submenu(submenu)
+                    entry.set_sensitive(bool(children))
+                elif action.get('command'):
+                    entry.connect('activate', lambda widget, action=action: self.run(action))
+                else:
+                    entry.set_sensitive(False)
+                menu.append(entry)
+
+        def new_menu(self):
+            menu = Gtk.Menu()
+            menu.get_style_context().add_class('decoration-menu')
+            menu.set_reserve_toggle_size(False)
+            return menu
+
+        def popup(self, widget, windows=False, event=None):
+            if self.menu:
+                self.menu.destroy()
+            context = dict(self.context)
+            menu = self.new_menu()
+            self.menu = menu
+            heading = Gtk.MenuItem.new_with_label('Choose a window' if windows else
+                       (context.get('title') or 'Workspace ' + context.get('workspace', ''))[:65])
+            heading.set_sensitive(False)
+            menu.append(heading)
+            menu.append(Gtk.SeparatorMenuItem())
+            self.fill_menu(menu, window_items(self.tree) if windows else menu_items(context, self.tree))
+            menu.connect('selection-done', self.menu_closed)
+            if not windows and context.get('id'):
+                app_entry = Gtk.MenuItem.new_with_label('Application actions…')
+                app_entry.set_sensitive(False)
+                menu.insert(app_entry, 2)
+
+                def discover():
+                    try:
+                        actions = application_items(context)
+                    except Exception as error:
+                        print('Application actions unavailable: ' + type(error).__name__, file=sys.stderr)
+                        actions = []
+                    GLib.idle_add(self.app_menu_ready, menu, app_entry, actions)
+                threading.Thread(target=discover, daemon=True).start()
+            menu.show_all()
+            if self.edge == 'bottom':
+                anchors = (Gdk.Gravity.NORTH_EAST, Gdk.Gravity.SOUTH_EAST)
+            else:
+                anchors = (Gdk.Gravity.NORTH_WEST, Gdk.Gravity.NORTH_EAST)
+            menu.popup_at_widget(widget, *anchors, event or Gtk.get_current_event())
+
+        def app_menu_ready(self, menu, entry, actions):
+            if self.disposed or self.menu is not menu:
+                return False
+            if actions:
+                submenu = self.new_menu()
+                self.fill_menu(submenu, actions)
+                entry.set_submenu(submenu)
+                entry.set_label('Application actions')
+                entry.set_sensitive(True)
+                submenu.show_all()
+            else:
+                entry.hide()
+            return False
+
+        def menu_closed(self, menu):
+            if self.menu is menu:
+                self.menu = None
+            # Defer disposal until GTK has finished delivering the activation.
+            GLib.idle_add(lambda: (menu.destroy(), False)[1])
+
+        def restyle(self, style, square):
+            if (style, square) == self.previous_style:
+                return
+            family, size, colors, settings = style
+            family = family.replace('\\', '\\\\').replace('"', '\\"')
+            opacity = settings['opacity']
+            radius = 0 if square else settings['corner_radius']
+            padding = '2px 5px' if self.edge == 'bottom' else '5px 2px'
+            self.provider.load_from_data(f'''
+                #workspace-decoration {{ background: transparent; }}
+                #workspace-decoration .caption {{
+                    background-image: linear-gradient(to bottom,
+                        alpha({colors['surface']}, {min(1, opacity + .16):.3f}),
+                        alpha({colors['background']}, {opacity:.3f}));
+                    border: none;
+                    outline: none; border-radius: {radius}px;
+                    padding: {padding}; min-height: 24px;
+                    box-shadow: 0 2px 9px alpha({colors['background_hard']}, .5);
+                }}
+                #workspace-decoration button {{
+                    background: transparent; background-image: none;
+                    border: none; outline: none; box-shadow: none;
+                    border-radius: {min(5, radius)}px; padding: 2px 7px;
+                    min-height: 20px; min-width: 16px; transition: background-color 140ms ease;
+                }}
+                #workspace-decoration button:hover {{ background: alpha({colors['accent']}, .16); }}
+                #workspace-decoration button:active {{ background: alpha({colors['accent']}, .28); }}
+                #workspace-decoration .brand {{ background: alpha({colors['accent']}, .09); }}
+                #workspace-decoration .title-button {{ padding: 1px 8px; }}
+                #workspace-decoration label, #workspace-decoration image {{
+                    font-family: "{family}"; font-size: {size}pt;
+                    color: {colors['foreground']}; text-shadow: none;
+                }}
+                #workspace-decoration .window-state {{
+                    font-size: {max(7, size - 1)}pt; color: alpha({colors['foreground']}, .6);
+                }}
+                #workspace-decoration button:hover label, #workspace-decoration button:hover image {{
+                    color: {colors['accent']};
+                }}
+                .decoration-menu {{
+                    background: {colors['background']}; color: {colors['foreground']};
+                    border: 1px solid alpha({colors['accent']}, .3); border-radius: 8px;
+                    padding: 6px; font-family: "{family}"; font-size: {size}pt;
+                }}
+                .decoration-menu menuitem {{ padding: 5px 12px; border-radius: 4px; }}
+                .decoration-menu menuitem:hover {{ background: alpha({colors['accent']}, .17); }}
+                .decoration-menu menuitem:disabled {{ color: alpha({colors['foreground']}, .55); }}
+                .decoration-menu separator {{ background: alpha({colors['foreground']}, .12); margin: 5px 8px; }}
+            '''.replace('#workspace-decoration', '#' + self.css_name).encode())
+            self.previous_style = (style, square)
+
+        def update(self, context, tree, style, placement, output_rect):
+            square = placement['square']
+            self.context = dict(context, edge=self.edge)
+            self.tree = tree
+            display_state = (tuple(context.get(key) for key in
+                             ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')), style, square,
+                             placement['rect']['width'], placement['rect']['height'])
+            if display_state == self.previous_display:
+                self.place(placement, output_rect)
+                return
+            self.restyle(style, square)
+            occupied = bool(context.get('id'))
+            app = context.get('app', '')
+            if app != self.icon_key:
+                self.icon_key = app
+                icon = None
+                try:
+                    info = Gio.DesktopAppInfo.new(app if app.endswith('.desktop') else app + '.desktop') if app else None
+                    icon = info.get_icon() if info else None
+                except (GLib.Error, AttributeError, TypeError):
+                    pass
+                if icon:
+                    self.image.set_from_gicon(icon, Gtk.IconSize.MENU)
+                else:
+                    terminal = terminal_source(context.get('node', {}))
+                    self.image.set_from_icon_name('utilities-terminal-symbolic' if terminal else
+                        ('application-x-executable-symbolic' if occupied else 'view-app-grid-symbolic'), Gtk.IconSize.MENU)
+            title = context.get('title') or 'Empty workspace · ' + context.get('workspace', '')
+            if self.edge == 'right':
+                layout = self.label.create_pango_layout('M')
+                family, size = style[:2]
+                layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
+                height = max(1, layout.get_pixel_size()[1])
+                span = (placement['rect']['height'] if self.attachment_mode == 'window'
+                        else self.monitor.get_workarea().height)
+                available = max(1, span - (110 if span < 240 else 260))
+                shown = vertical_title(title, available // height)
+            else:
+                shown = title
+            self.label.set_text(shown)
+            state = 'FULLSCREEN' if context.get('fullscreen') else ('FLOATING' if context.get('floating') else 'TILED')
+            self.state_label.set_text(state if occupied and self.edge == 'bottom' else '')
+            self.title_button.set_tooltip_text(title + '\n' + (context.get('app', '') + ' · ' + state if occupied else 'Choose an app to open')
+                + '\n\nLeft: choose window · Middle: float/tile\nRight: window actions · Shift+Right: strip appearance')
+            self.brand.set_tooltip_text((context.get('app') or 'Workspace') + ' · actions')
+            self.tile_button.set_label('▦' if context.get('floating') else '▱')
+            self.tile_button.set_tooltip_text('Tile this window' if context.get('floating') else 'Float this window')
+            self.tile_button.get_accessible().set_name(self.tile_button.get_tooltip_text())
+            self.full_button.set_label('⤡' if context.get('fullscreen') else '⛶')
+            self.full_button.set_tooltip_text('Leave fullscreen' if context.get('fullscreen') else 'Fullscreen')
+            self.full_button.get_accessible().set_name(self.full_button.get_tooltip_text())
+            # Measure the final visible controls and set attachment geometry
+            # before mapping the window's first buffer.
+            self.box.show_all()
+            self.empty_controls.set_visible(not occupied and self.edge == 'bottom')
+            attached = self.attachment_mode == 'window'
+            span = placement['rect']['width' if self.edge == 'bottom' else 'height']
+            compact = attached and span < (360 if self.edge == 'bottom' else 240)
+            self.tile_button.set_visible(occupied and not compact)
+            self.full_button.set_visible(occupied and not compact)
+            self.windows_button.set_visible(not compact)
+            self.more_button.set_visible(not attached or span >= 120)
+            self.title_button.set_visible(not attached or span >= 80)
+            self.state_label.set_visible(occupied and self.edge == 'bottom' and (not attached or span >= 520))
+            self.place(placement, output_rect)
+            self.window.show()
+            self.animate()
+            self.previous_display = display_state
+
+        def destroy(self):
+            if self.disposed:
+                return
+            self.disposed = True
+            retired.discard(self)
+            if self.tick_id:
+                self.window.remove_tick_callback(self.tick_id)
+                self.tick_id = 0
+            if self.menu:
+                self.menu.destroy()
+                self.menu = None
+            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+            self.window.destroy()
+
+    captions = {}
+    retired = set()
+    last_tree = {}
+    stop = threading.Event()
+    style = appearance()
+    pending_lock = threading.Lock()
+    pending_tree = None
+    tree_idle = False
+
+    def deliver_tree(tree):
+        nonlocal pending_tree, tree_idle
+        with pending_lock:
+            if stop.is_set():
+                return
+            pending_tree = tree
+            if not tree_idle:
+                tree_idle = True
+                GLib.idle_add(apply_pending_tree)
+
+    def apply_pending_tree():
+        nonlocal pending_tree, tree_idle
+        with pending_lock:
+            tree, pending_tree = pending_tree, None
+            tree_idle = False
+        return apply(tree)
+
+    def apply(tree):
+        nonlocal last_tree
+        if stop.is_set():
+            return False
+        if tree is not None:
+            last_tree = tree
+        contexts = output_contexts(last_tree)
+        placements = output_placements(last_tree, style[3]['position'])
+        watcher.set_attached(any(item['mode'] == 'window' for item in placements.values()))
+        output_rects = {node['name']: node['rect'] for node in last_tree.get('nodes', [])
+                        if node.get('type') == 'output' and 'rect' in node}
+        monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
+                    for i in range(display.get_n_monitors())}
+        immediate = set()
+        for name in list(captions):
+            placement = placements.get(name)
+            if (name not in monitors or placement is None or captions[name].edge != placement['edge']
+                    or captions[name].attachment_mode != placement['mode']
+                    or captions[name].monitor != monitors[name]):
+                previous = captions.pop(name)
+                for old in tuple(retired):
+                    if old.monitor == previous.monitor:
+                        old.destroy()
+                if placement is not None and previous.attachment_mode != placement['mode']:
+                    # Tile/float and fullscreen changes are discrete compositor
+                    # moves. Crossfading leaves the old strip behind while the
+                    # new caption catches up. Hand off like a focus change.
+                    previous.destroy()
+                    immediate.add(name)
+                else:
+                    previous.retire()
+        for name, monitor in monitors.items():
+            placement = placements.get(name)
+            if placement is None:
+                continue
+            caption = captions.get(name)
+            if (caption is not None and placement['mode'] == 'window'
+                    and caption.context.get('id') != placement['window_id']):
+                # A hover handoff needs the new position and buffer size in its
+                # first frame. Reusing GTK's mapped surface briefly displays
+                # the old width after its layer margins move. Start a complete
+                # surface here; keep the existing spring for same-window drags.
+                caption.destroy()
+                captions[name] = Caption(monitor, placement, animate_entry=False)
+            if name not in captions:
+                captions[name] = Caption(monitor, placement, animate_entry=name not in immediate)
+            captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
+                                  last_tree, style, placement, output_rects[name])
+        return False
+
+    def refresh_appearance():
+        nonlocal style
+        style = appearance()
+        apply(None)
+        return True
+
+    def quit_daemon():
+        stop.set()
+        Gtk.main_quit()
+        return False
+
+    watcher = TreeWatch(os.environ.get('SWAYSOCK', ''), deliver_tree)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
+    GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
+    GLib.timeout_add(750, refresh_appearance)
+    watcher.start()
+    try:
+        Gtk.main()
+    finally:
+        stop.set()
+        watcher.close()
+        for caption in captions.values():
+            caption.destroy()
+        for caption in tuple(retired):
+            caption.destroy()
+        guard.close()
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('mode', choices=('daemon', 'bottom', 'right', 'toggle', 'status',
+                                         'settings'))
+    args = parser.parse_args()
+    if args.mode == 'daemon':
+        return daemon()
+    if args.mode == 'status':
+        print(position())
+    elif args.mode == 'settings':
+        if not launch(action_command(3, shifted=True)):
+            print('Decoration settings are unavailable.', file=sys.stderr)
+            return 1
+    else:
+        value = args.mode if args.mode != 'toggle' else ('right' if position() == 'bottom' else 'bottom')
+        set_position(value)
+        print('Workspace decoration: ' + value)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

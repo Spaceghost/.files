@@ -35,12 +35,12 @@ from verify_decoration_attachment import build_pointer
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = Path('alpine/desktop/.local/bin/oldbook-decoration')
-LIBRARY = Path('alpine/desktop/.local/lib/oldbook')
+HELPER = Path('alpine/desktop/.local/bin/mbp-intel-decoration')
+LIBRARY = Path('alpine/desktop/.local/lib/mbp_intel')
 SOURCES = [HELPER, *(LIBRARY / name for name in (
     'decoration.py', 'decoration_actions.py', 'decoration_placement.py',
     'decoration_motion.py', 'decoration_watch.py', 'overlay_theme.py'))]
-BUS_MARKER = 'OLDBOOK_DECORATION_FRAMERATE_PRIVATE_BUS'
+BUS_MARKER = 'MBP_INTEL_DECORATION_FRAMERATE_PRIVATE_BUS'
 HEADER = struct.Struct('=6sII')
 
 
@@ -309,8 +309,8 @@ def run_case(output, source, rate, seconds, motion):
         env.update(WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
                    WLR_RENDERER='pixman', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
         config = base / 'config'
-        (config / 'oldbook').mkdir()
-        (config / 'oldbook/decoration.json').write_text(json.dumps({
+        (config / 'mbp-intel').mkdir()
+        (config / 'mbp-intel/decoration.json').write_text(json.dumps({
             'position': 'bottom', 'opacity': 0.67, 'corner_radius': 7}) + '\n')
         (config / 'foot').mkdir()
         foot_config = config / 'foot/foot.ini'
@@ -371,7 +371,7 @@ def run_case(output, source, rate, seconds, motion):
                 raw_path = output / 'frames.json'
                 decoration = spawn('decoration', [sys.executable, str(Path(__file__).resolve()),
                     '--observe-helper', str(source / HELPER), '--trace-output', str(raw_path)])
-                wait_for(lambda: any(item['namespace'] == 'oldbook-decoration'
+                wait_for(lambda: any(item['namespace'] == 'mbp-intel-decoration'
                          for item in ipc.request(3)[0].get('layer_shell_surfaces', [])),
                          'production decoration missing')
                 time.sleep(0.7)

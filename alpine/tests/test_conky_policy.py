@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import conky_layout
 
 
@@ -70,7 +70,7 @@ class QuietPanelTests(unittest.TestCase):
 
     def test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry(self):
         helper = importlib.machinery.SourceFileLoader(
-            'quiet_conky_helper', str(REPO / 'alpine/desktop/.local/bin/oldbook-conky')).load_module()
+            'quiet_conky_helper', str(REPO / 'alpine/desktop/.local/bin/mbp-intel-conky')).load_module()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             source = root / 'panels.json'

@@ -1,5 +1,5 @@
 #!/sbin/openrc-run
-description="OpenSnitch application firewall with the persistent Oldbook gate"
+description="OpenSnitch application firewall with the persistent MBP Intel gate"
 supervisor=supervise-daemon
 command=/usr/bin/opensnitchd
 command_args="-config-file /etc/opensnitchd/default-config.json"
@@ -9,7 +9,7 @@ export OPENSNITCH_EXTERNAL_OUTPUT_QUEUE=1
 umask 077
 
 depend() {
-    need localmount oldbook-firewall
+    need localmount mbp-intel-firewall
     after modules
     before net networking wpa_supplicant
     use logger
@@ -18,6 +18,6 @@ depend() {
 start_pre() {
     checkpath --directory --mode 0700 --owner root:root /etc/opensnitchd/rules
     # A missing persistent queue must never result in a permissive startup.
-    /usr/sbin/nft list chain inet oldbook output >/dev/null
+    /usr/sbin/nft list chain inet mbp-intel output >/dev/null
     checkpath --file --mode 0600 --owner root:root /var/log/opensnitchd.log
 }

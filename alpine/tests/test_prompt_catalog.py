@@ -97,7 +97,7 @@ class EnabledTests(unittest.TestCase):
 
 class HistoryTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-history-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-history-test-')
         self.addCleanup(self.temp.cleanup)
         self.path = Path(self.temp.name) / 'history.json'
 

@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory(prefix='workspace-chrome-') as directory:
     config.write_text('xwayland disable\noutput HEADLESS-1 mode 1440x900\noutput * bg #466780 solid_color\n'
                       'seat seat0 fallback true\ndefault_border pixel 0\ndefault_floating_border pixel 0\n'
                       'corner_radius 8\nsmart_corner_radius enable\n'
-                      'layer_effects "oldbook-decoration" {\n    corner_radius 7\n}\n')
+                      'layer_effects "mbp-intel-decoration" {\n    corner_radius 7\n}\n')
     log = (out / 'runtime.log').open('w')
     def start(argv):
         process = subprocess.Popen(argv, env=env, stdout=log, stderr=log)
@@ -56,22 +56,22 @@ with tempfile.TemporaryDirectory(prefix='workspace-chrome-') as directory:
             return json.loads(subprocess.check_output(argv, env=env))
         def surfaces():
             return {s['namespace']: s for o in ipc('get_outputs') for s in o.get('layer_shell_surfaces', [])}
-        helper = str(repo / 'alpine/desktop/.local/bin/oldbook-decoration')
+        helper = str(repo / 'alpine/desktop/.local/bin/mbp-intel-decoration')
         caption = start([helper, 'daemon'])
         terminal = start(['foot', '--config', str(config_home / 'foot/foot.ini'),
                           '--title', 'Codex | Workspace demo | Transparent background',
                           'sh', '-c', "printf '\033[48;2;19;9;31mWorkspace caption preview\nExplicit application background\n'; sleep 120"])
-        bottom = wait_for(lambda: (s := surfaces().get('oldbook-decoration')) and s['extent']['height'] > 0 and s)
+        bottom = wait_for(lambda: (s := surfaces().get('mbp-intel-decoration')) and s['extent']['height'] > 0 and s)
         time.sleep(1)
         subprocess.run(['grim', str(out / 'bottom.png')], env=env, check=True)
         assert 17 <= bottom['extent']['height'] <= 26, bottom
         assert bottom['effects']['corner_radius'] == 7, bottom
         subprocess.run([helper, 'right'], env=env, check=True, stdout=log)
-        right = wait_for(lambda: (s := surfaces().get('oldbook-decoration')) and 0 < s['extent']['width'] < 40 and s)
+        right = wait_for(lambda: (s := surfaces().get('mbp-intel-decoration')) and 0 < s['extent']['width'] < 40 and s)
         subprocess.run(['grim', str(out / 'right.png')], env=env, check=True)
         assert right['extent']['width'] >= 14, right
         subprocess.run([helper, 'bottom'], env=env, check=True, stdout=log)
-        wait_for(lambda: 0 < surfaces()['oldbook-decoration']['extent']['height'] < 30)
+        wait_for(lambda: 0 < surfaces()['mbp-intel-decoration']['extent']['height'] < 30)
         ipc('', 'fullscreen enable')
         time.sleep(1)
         subprocess.run(['grim', str(out / 'fullscreen.png')], env=env, check=True)

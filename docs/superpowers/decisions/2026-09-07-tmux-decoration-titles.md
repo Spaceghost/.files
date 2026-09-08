@@ -13,11 +13,11 @@ existing decoration. No extra process polling or title parser is introduced.
 
 Validation: all three configurations loaded in disposable tmux servers under
 private HOMEs. Expanded title strings followed two successive test pane titles.
-Both live oldbook-agent terminal titles changed from `Codex` to the full Codex
+Both live mbp-intel-agent terminal titles changed from `Codex` to the full Codex
 title; `output_contexts` returned that same full title for the focused output.
 Runtime JSON and a bottom-edge screenshot are saved locally at
-`~/.local/state/oldbook/tmux-title-{verification,live}.json` and
-`~/.local/state/oldbook/tmux-title-bar.png`. A full logout/login was not performed.
+`~/.local/state/mbp-intel/tmux-title-{verification,live}.json` and
+`~/.local/state/mbp-intel/tmux-title-bar.png`. A full logout/login was not performed.
 
 Recovery: remove the two settings from the three configurations and run
 `tmux set-option -g set-titles off` to stop forwarding terminal titles. Active

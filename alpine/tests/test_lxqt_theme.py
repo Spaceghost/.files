@@ -52,7 +52,7 @@ class LXQtThemeTests(unittest.TestCase):
         plugins = Path(QLibraryInfo.path(QLibraryInfo.LibraryPath.PluginsPath))
         if not (plugins / 'platformthemes/libqtlxqt.so').is_file():
             self.skipTest('LXQt platform theme plugin is not installed')
-        with tempfile.TemporaryDirectory(prefix='oldbook-lxqt-theme-') as work:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lxqt-theme-') as work:
             root = Path(work)
             config = root / 'config/lxqt/lxqt.conf'
             config.parent.mkdir(parents=True)
@@ -88,7 +88,7 @@ print(json.dumps({'initial':initial,'updated_window':app.palette().color(QPalett
                                     capture_output=True, text=True, timeout=8, check=True)
             actual = json.loads(result.stdout)
             self.assertEqual(actual['initial'], {'window': '#282828', 'font': 'Inter',
-                                                'size': 11.0, 'icon': 'Oldbook-Gruvbox'})
+                                                'size': 11.0, 'icon': 'MBP-Intel-Gruvbox'})
             self.assertEqual(actual['updated_window'], '#101010')
             self.assertEqual(actual['updated_font_size'], 13)
 

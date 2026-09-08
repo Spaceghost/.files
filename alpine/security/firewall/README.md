@@ -1,6 +1,6 @@
 # Application firewall
 
-The Oldbook policy combines a permanent nftables table with OpenSnitch process
+The MBP Intel policy combines a permanent nftables table with OpenSnitch process
 decisions. Installation alone does not start either service. The root controller
 must finish local recovery and bootstrap application rules before activation.
 
@@ -21,7 +21,7 @@ rolled-back trial remains recorded in
 - New outgoing application connections enter NFQUEUE 0 without bypass. Matching
   rules decide access; unmatched connections prompt in the GUI. Without a GUI,
   unmatched connections receive the daemon's default Deny.
-- The queue belongs to `inet oldbook`, independently of OpenSnitch's tables.
+- The queue belongs to `inet mbp-intel`, independently of OpenSnitch's tables.
   The gate remains after a crash or graceful daemon shutdown. Established
   output flows remain allowed by this table. OpenSnitch's separate DNS input
   queue can still drop UDP DNS replies after daemon death; the gate does not
@@ -90,13 +90,13 @@ four failed fixture runs with their diagnostics.
 Install the signed `opensnitch`, `opensnitch-ui` and `opensnitch-openrc` APKs after
 installing the accompanying public signing key. Packages supply:
 
-- `/etc/init.d/oldbook-firewall` and `/etc/init.d/opensnitchd`.
-- `/etc/oldbook/firewall.nft` and root-only `/etc/opensnitchd/` policy.
+- `/etc/init.d/mbp-intel-firewall` and `/etc/init.d/opensnitchd`.
+- `/etc/mbp-intel/firewall.nft` and root-only `/etc/opensnitchd/` policy.
 - GUI defaults at `/etc/xdg/opensnitch/settings.conf`.
 
-Enable and start `oldbook-firewall` before `opensnitchd` and before networking.
+Enable and start `mbp-intel-firewall` before `opensnitchd` and before networking.
 Do not also start a stock nftables service that flushes the complete ruleset.
-The service's reload replaces only the Oldbook table in one atomic transaction.
+The service's reload replaces only the MBP Intel table in one atomic transaction.
 The service's stop deliberately retains its rules.
 
 Run the GUI as Jack after creating `$XDG_RUNTIME_DIR/opensnitch` with mode 0700:
@@ -122,7 +122,7 @@ and current resolver addresses:
 alpine/security/firewall/bootstrap-rules \
     --uid 1000 --executable /opt/codex/0.153.4/cli/bin/codex \
     --resolver 75.75.75.75 --resolver 75.75.76.76 \
-    --output /tmp/oldbook-firewall-bootstrap
+    --output /tmp/mbp-intel-firewall-bootstrap
 ```
 
 Repeat `--executable` for another explicitly approved path and `--resolver` for
@@ -167,9 +167,9 @@ rules load. A timed-out, failed or explicitly rolled-back trial removes only its
 gate, daemon and new boot links; it never flushes unrelated tables or conntrack.
 
 ```sh
-doas install -Dm755 alpine/security/firewall/activate /usr/local/sbin/oldbook-firewall-activate
-firewall_trial=$(doas /usr/local/sbin/oldbook-firewall-activate start --timeout 600)
-doas /usr/local/sbin/oldbook-firewall-activate status "$firewall_trial"
+doas install -Dm755 alpine/security/firewall/activate /usr/local/sbin/mbp-intel-firewall-activate
+firewall_trial=$(doas /usr/local/sbin/mbp-intel-firewall-activate start --timeout 600)
+doas /usr/local/sbin/mbp-intel-firewall-activate status "$firewall_trial"
 ```
 
 Before confirming, check fresh permitted connections and an unapproved program.
@@ -189,16 +189,16 @@ does not by itself prove prompting. A user's Allow is valid test behavior.
 Screen locking can obscure an otherwise mapped popup; do not bypass the lock.
 Remove only the unique canary's rule after the check; keep every existing rule.
 The verification record includes the exact canary name, cleanup events and the
-private root-owned backup under `/var/lib/oldbook/firewall-backups/`.
+private root-owned backup under `/var/lib/mbp_intel/firewall-backups/`.
 
-After every check passes, `doas /usr/local/sbin/oldbook-firewall-activate confirm "$firewall_trial"`
+After every check passes, `doas /usr/local/sbin/mbp-intel-firewall-activate confirm "$firewall_trial"`
 enables both services in the **boot** runlevel, before networking. To abandon the
 trial use `rollback` with that token. A confirmed token cannot later shut down
 the firewall: ordinary post-confirmation recovery is the explicit procedure below.
 Review newly created interactive rules before confirming; an Allow for all root
 programs or all destination-port-443 traffic removes those application restrictions.
 
-The desktop's `oldbook-firewall-ui` quietly starts the GUI only when both service
+The desktop's `mbp-intel-firewall-ui` quietly starts the GUI only when both service
 links are enabled. It uses the private runtime socket and prevents duplicates
 across session reloads. A GUI already started manually on `/tmp/osui.sock` must
 be restarted with the documented runtime address before daemon integration.
@@ -231,10 +231,10 @@ For deliberate emergency recovery at a local TTY, after reviewing the impact:
 
 ```sh
 doas rc-service opensnitchd stop
-doas nft delete table inet oldbook
+doas nft delete table inet mbp-intel
 ```
 
 This explicitly removes packet/application protection. The ordinary daemon stop
-does not do so. Restart `oldbook-firewall` and `opensnitchd` to restore protection.
+does not do so. Restart `mbp-intel-firewall` and `opensnitchd` to restore protection.
 An application firewall is not a sandbox for malicious root processes or a
 proof of Wi-Fi/Bluetooth radio silence.

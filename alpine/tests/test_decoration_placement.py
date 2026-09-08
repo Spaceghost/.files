@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import unittest
 
-LIBRARY = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'
+LIBRARY = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel'
 sys.path.insert(0, str(LIBRARY))
 
 
@@ -45,7 +45,7 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_dropdown_focus_keeps_last_ordinary_window_context_and_geometry(self):
         import decoration_actions
-        for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+        for app_id in ('com.mbp-intel.dropdown', 'mbp-intel-dropdown', 'com.mbp-intel.monitor'):
             with self.subTest(app_id=app_id):
                 ordinary, console = view(7), view(8)
                 console['app_id'] = app_id
@@ -60,7 +60,7 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving(self):
         import decoration_actions
-        console = dict(view(8), app_id='com.oldbook.dropdown')
+        console = dict(view(8), app_id='com.mbp-intel.dropdown')
         wrapper = {'id': 18, 'type': 'floating_con', 'nodes': [console], 'focus': [8]}
         visible = workspace(2, tiled=[view(4)], floating=[view(7), wrapper], focus=[18, 7, 4])
         tree = {'nodes': [output('eDP-1', [visible])]}
@@ -72,7 +72,7 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_closed_last_ordinary_window_does_not_leave_stale_caption_target(self):
         import decoration_actions
-        console = dict(view(8), app_id='com.oldbook.dropdown')
+        console = dict(view(8), app_id='com.mbp-intel.dropdown')
         visible = workspace(2, floating=[console], focus=[8, 7])
         tree = {'nodes': [output('eDP-1', [visible])]}
         placement = self.model.output_placements(tree)['eDP-1']
@@ -82,7 +82,7 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_similarly_named_terminals_remain_caption_targets(self):
         import decoration_actions
-        for app_id in ('com.oldbook.monitor-notes', 'com.oldbook.dropdown-notes', 'ghostty'):
+        for app_id in ('com.mbp-intel.monitor-notes', 'com.mbp-intel.dropdown-notes', 'ghostty'):
             with self.subTest(app_id=app_id):
                 target = dict(view(8), app_id=app_id)
                 tree = {'nodes': [output('eDP-1', [workspace(2, floating=[target])])]}
@@ -91,7 +91,7 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_fullscreen_console_does_not_override_retained_floating_caption(self):
         for mode in (1, 2):
-            for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+            for app_id in ('com.mbp-intel.dropdown', 'mbp-intel-dropdown', 'com.mbp-intel.monitor'):
                 with self.subTest(mode=mode, app_id=app_id):
                     console = dict(view(8, fullscreen=mode), app_id=app_id)
                     tree = {'nodes': [output('eDP-1', [workspace(
@@ -101,7 +101,7 @@ class DecorationPlacementTests(unittest.TestCase):
                                      ('window', 'right', 7))
 
     def test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings(self):
-        console = dict(view(8), app_id='com.oldbook.dropdown')
+        console = dict(view(8), app_id='com.mbp-intel.dropdown')
         wrapper = {'id': 18, 'type': 'floating_con', 'fullscreen_mode': 2,
                    'nodes': [console], 'focus': [8]}
         ordinary = view(4)

@@ -37,7 +37,7 @@ def ensure_parents(path, root):
 
 @contextmanager
 def deployment_guard(target):
-    lock_path = target / '.local/state/oldbook/deployment.lock'
+    lock_path = target / '.local/state/mbp-intel/deployment.lock'
     ensure_parents(lock_path, target)
     descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
     with os.fdopen(descriptor, 'r+') as guard:
@@ -78,7 +78,7 @@ def write_journal(path, document):
 
 
 def reject_interrupted(target):
-    for path in sorted((target / '.local/state/oldbook/backups').glob('*/manifest.json')):
+    for path in sorted((target / '.local/state/mbp-intel/backups').glob('*/manifest.json')):
         if (path.parent / 'restored').exists():
             continue
         document = json.loads(path.read_text())
@@ -114,7 +114,7 @@ def deploy(target, overlay, wallpaper=None, *, only=None):
         # Both installed names edit the same versioned configuration.
         pairs.append((overlay / config, legacy))
     if wallpaper:
-        pairs.append((wallpaper, Path('.local/share/oldbook/wallpaper.png')))
+        pairs.append((wallpaper, Path('.local/share/mbp-intel/wallpaper.png')))
     if only is not None:
         if not only or isinstance(only, (str, bytes)):
             raise ValueError('Deployment selection must contain exact relative file paths')
@@ -146,7 +146,7 @@ def deploy(target, overlay, wallpaper=None, *, only=None):
                             'saved': original is not None, 'original': original})
         if not entries:
             return None
-        backup = target / '.local/state/oldbook/backups' / str(time.time_ns())
+        backup = target / '.local/state/mbp-intel/backups' / str(time.time_ns())
         ensure_parents(backup, target)
         backup.mkdir(mode=0o700)
         sync_directory(backup.parent)
@@ -182,7 +182,7 @@ def managed_link(path, source):
 def rollback(target, backup):
     target = target.resolve()
     backup = backup.resolve()
-    expected = target / '.local/state/oldbook/backups'
+    expected = target / '.local/state/mbp-intel/backups'
     if not backup.is_relative_to(expected):
         raise RuntimeError('Backup must belong to the target HOME')
     with deployment_guard(target):

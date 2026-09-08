@@ -1,6 +1,6 @@
 # Standalone interactive Superhold
 
-The standalone checkout is independent of the installed Oldbook overlay. Do not
+The standalone checkout is independent of the installed MBP Intel overlay. Do not
 install it, alter desktop startup, or restart the original service during this
 work. The intended remote is a dedicated Spaceghost/superhold repository.
 

@@ -570,7 +570,7 @@ def worker(fd):
         raise RuntimeError('private worker release token changed')
     # Read only public staged code/config before hiding /etc,/run,/tmp,/dev,/sys.
     config = (SCRIPT.parent / 'default-config.json').read_text()
-    gate = (SCRIPT.parent / 'oldbook.nft').read_text()
+    gate = (SCRIPT.parent / 'mbp-intel.nft').read_text()
     expected = guards.mount_private(host)
     # Also hide daemon cache/pid/log defaults, even though configured output is /run.
     guards.guard_private(host, expected)
@@ -672,7 +672,7 @@ def host_fingerprint():
 def controller(output):
     if os.geteuid() != 0 or not output.is_absolute() or output.exists():
         raise RuntimeError('controller requires root and a new absolute output directory')
-    source_paths = [SCRIPT, GUARD_FILE, *(SCRIPT.parent / name for name in ('oldbook.nft', 'default-config.json', 'system-fw.json')),
+    source_paths = [SCRIPT, GUARD_FILE, *(SCRIPT.parent / name for name in ('mbp-intel.nft', 'default-config.json', 'system-fw.json')),
                     Path(DAEMON), Path(NFT), Path('/bin/busybox'),
                     *(LIBRARY / 'privacyctl_runtime' / name for name in ('__init__.py', 'dhcp.py', 'lease.py', 'launch.py', 'hook.py')),
                     RADIO / 'root/usr/local/libexec/privacyctl-dhcp-launch', RADIO / 'root/usr/local/libexec/privacyctl-dhcp-event']

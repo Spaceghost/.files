@@ -4,8 +4,8 @@ Super+0 opens or focuses one dedicated Firefox profile running the local Fossil
 review UI at http://127.0.0.1:8766/timeline?r=alpine-oldbook&y=ci.
 The workspace naming service retains 10: STRATA and labels its browser Fossil.
 The launcher serializes concurrent calls and reuses its review window. The
-session starts `oldbook-strata --daemon` in the background; this service keeps
-only the dedicated `oldbook-strata` browser on workspace 10 and maintains one
+session starts `mbp-intel-strata --daemon` in the background; this service keeps
+only the dedicated `mbp-intel-strata` browser on workspace 10 and maintains one
 loopback-only Fossil UI server. It adopts an existing review window and server,
 restarts failed or closed children with bounded delays, and leaves the current
 workspace focused during background startup. Super+6 is an ordinary workspace
@@ -35,7 +35,7 @@ initial shared painting is the Space Ghost Yosemite landscape. Default app
 placement above remains active. The following records the earlier arrangement.
 
 Workspaces 1–6 retain independent artwork, pause flags, and rotation deadlines
-under ~/.local/state/oldbook/wallpaper/workspaces/. Workspace events restore
+under ~/.local/state/mbp-intel/wallpaper/workspaces/. Workspace events restore
 the selected image immediately. Automatic rotation avoids other workspaces'
 current selections when enough images exist. Explicit image selection may
 intentionally choose the same image. These six rotations use the entire gallery:
@@ -62,13 +62,13 @@ Concurrent finer Foot opacity/padding adjustments were retained.
   startup timeout; that test passed separately in 1.94 seconds.
 - Reboot persistence has not been exercised. A fresh browser profile's first
   startup may take longer on a heavily loaded machine; failures are logged
-  under ~/.local/state/oldbook/strata.log.
+  under ~/.local/state/mbp-intel/strata.log.
 
-To undo placement, remove the placement callback in oldbook-workspaces and
+To undo placement, remove the placement callback in mbp-intel-workspaces and
 restart that daemon; no manual window moves need reversing. Remove
-workspace_rotations from gallery.json and restart oldbook-wallpaper to restore
+workspace_rotations from gallery.json and restart mbp-intel-wallpaper to restore
 global rotation. To stop STRATA supervision, stop its `--daemon` process and
-remove its startup entry from `oldbook-session`. Restore the preceding launcher,
+remove its startup entry from `mbp-intel-session`. Restore the preceding launcher,
 Sway bindings and placement rules to move review launching back to 6; close the
 review browser and terminate its `--serve` helper to stop the local UI.
 The settings and scripts can also be restored from the preceding Fossil check-in.

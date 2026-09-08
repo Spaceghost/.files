@@ -17,7 +17,7 @@ from superhold.shortcut_sources import ShortcutProvider
 
 
 class PortabilityTests(unittest.TestCase):
-    def test_xdg_profile_is_loaded_without_reading_oldbook_configuration(self):
+    def test_xdg_profile_is_loaded_without_reading_mbp_intel_configuration(self):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory)
             (config / 'superhold').mkdir()

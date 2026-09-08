@@ -11,7 +11,7 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[2]
-BAR = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
+BAR = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-bar'
 PROBE = r'''
 import json
 from pathlib import Path

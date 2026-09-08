@@ -148,7 +148,7 @@ def render_profile(repo, theme):
     bar[0]['position'] = design['bar_position']
     bar[0]['spacing'] = max(2, spacing // 2)
     files['.config/waybar/config.jsonc'] = json.dumps(bar, indent=2) + '\n'
-    files['.config/waybar/waybar-state.css'] = '/* Refreshed by oldbook-waybar-dim. */\n'
+    files['.config/waybar/waybar-state.css'] = '/* Refreshed by mbp-intel-waybar-dim. */\n'
     files['.config/waybar/style.css'] += (
         f'\n/* {theme["id"]}: typography and panel shape */\n'
         f'* {{ font-family: "{font}", "Symbols Nerd Font", sans-serif; }}\n'

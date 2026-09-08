@@ -13,13 +13,13 @@ import runpy
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / 'alpine/desktop/.local/bin/oldbook-codex-notify'
+HELPER = REPO / 'alpine/desktop/.local/bin/mbp-intel-codex-notify'
 INSTALLER = REPO / 'alpine/bin/install-codex-notifications'
 
 
 class CodexNotifyTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-codex-notify-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-codex-notify-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.runtime = self.root / 'runtime'
@@ -58,7 +58,7 @@ class CodexNotifyTests(unittest.TestCase):
         return [json.loads(line) for line in self.calls.read_text().splitlines()]
 
     def records(self):
-        root = self.runtime / 'oldbook/codex-events'
+        root = self.runtime / 'mbp-intel/codex-events'
         return list(root.glob('*.json')) if root.exists() else []
 
     def test_controlling_tty_number_maps_without_inherited_standard_descriptors(self):
@@ -133,9 +133,9 @@ class CodexNotifyTests(unittest.TestCase):
         self.assertEqual(self.records(), [])
 
     def test_expired_record_is_removed_on_the_next_event(self):
-        oldbook = self.runtime / 'oldbook'
-        oldbook.mkdir(mode=0o700)
-        events = oldbook / 'codex-events'
+        mbp_intel = self.runtime / 'mbp-intel'
+        mbp_intel.mkdir(mode=0o700)
+        events = mbp_intel / 'codex-events'
         events.mkdir(mode=0o700)
         expired = events / ('a' * 64 + '.json')
         expired.write_text(json.dumps({'valid_until': int(time.time()) - 1}))
@@ -166,12 +166,12 @@ class CodexNotifyTests(unittest.TestCase):
 
 class CodexNotificationInstallerTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-codex-install-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-codex-install-')
         self.addCleanup(self.temp.cleanup)
         self.home = Path(self.temp.name) / 'home'
         self.codex = self.home / '.codex'
         self.codex.mkdir(parents=True)
-        self.helper = self.home / '.local/bin/oldbook-codex-notify'
+        self.helper = self.home / '.local/bin/mbp-intel-codex-notify'
         self.helper.parent.mkdir(parents=True)
         source_helper = Path(self.temp.name) / 'source-helper'
         source_helper.write_text('#!/bin/sh\n')

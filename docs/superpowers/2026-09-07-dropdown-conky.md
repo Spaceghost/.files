@@ -34,8 +34,8 @@ keyboard presses and reboot persistence remain unobserved.
 
 Recovery: remove ~/.config/sway/local.d/dropdown.conf and reload Sway to remove
 the bindings/rule; close the drop-down shell when no longer needed. Use
-oldbook-conky stop to stop panels, or oldbook-conky toggle to disable persistence.
-Edit ~/.config/conky/panels.json and run oldbook-conky restart to adjust cards.
+mbp-intel-conky stop to stop panels, or mbp-intel-conky toggle to disable persistence.
+Edit ~/.config/conky/panels.json and run mbp-intel-conky restart to adjust cards.
 The HOME files link to the versioned overlay.
 
 ## Glass appearance follow-up

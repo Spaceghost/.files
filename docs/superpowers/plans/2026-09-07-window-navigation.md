@@ -24,7 +24,7 @@ show-desktop helpers retain their responsibilities and expose focused actions.
 
 ## Selection model
 
-Files: desktop/.local/lib/oldbook/window_switching.py and
+Files: desktop/.local/lib/mbp_intel/window_switching.py and
 tests/test_window_switching.py under alpine/.
 
 - [x] Test mixed ordinary/agent candidates, interleaved global MRU, frozen
@@ -35,8 +35,8 @@ tests/test_window_switching.py under alpine/.
 
 ## Carousel controller and surface
 
-Files: desktop/.local/lib/oldbook/carousel.py, carousel_view.py,
-desktop/.local/bin/oldbook-carousel and tests/test_carousel.py under alpine/.
+Files: desktop/.local/lib/mbp_intel/carousel.py, carousel_view.py,
+desktop/.local/bin/mbp-intel-carousel and tests/test_carousel.py under alpine/.
 
 - [x] Implement one per-Sway control socket/lock and focus-event subscription.
 - [x] Share a frozen SwitchState between keyboard and persistent gestures.
@@ -51,19 +51,19 @@ desktop/.local/bin/oldbook-carousel and tests/test_carousel.py under alpine/.
 
 ## Expose recovery
 
-Files: showdesktop.py, oldbook-showdesktop, test_showdesktop.py and a private
+Files: showdesktop.py, mbp-intel-showdesktop, test_showdesktop.py and a private
 native recovery verifier.
 
 - [x] Reproduce stale hidden state on external workspace navigation.
 - [x] Track expected internal focus events, cancel active overlays on external
   navigation, and clear hidden state while keeping the chosen destination.
-- [x] Add restore-or-carousel; launch oldbook-carousel show only without a
+- [x] Add restore-or-carousel; launch mbp-intel-carousel show only without a
   valid hidden session. Keep ordinary restore a no-op when already restored.
 - [x] Test same-output and cross-output recovery and repeated gestures.
 
 ## Large floating size
 
-Files: oldbook-resize, its unit tests and verify_centered_resize.py.
+Files: mbp-intel-resize, its unit tests and verify_centered_resize.py.
 
 - [x] Reproduce missing near-full action; implement 90 percent usable geometry
   with 24 pixel minimum margins, fullscreen disable and floating enable.
@@ -74,8 +74,8 @@ Files: oldbook-resize, its unit tests and verify_centered_resize.py.
 
 - [x] Bind Super/Alt+Tab and Shift variants to the shared switcher; add its
   transient mode with Escape recovery and start its warm daemon at login.
-- [x] Bind Super+Shift+Space to oldbook-resize near-full and four-finger down
-  to oldbook-showdesktop restore-or-carousel. Update shortcut help.
+- [x] Bind Super+Shift+Space to mbp-intel-resize near-full and four-finger down
+  to mbp-intel-showdesktop restore-or-carousel. Update shortcut help.
 - [x] Run focused tests, private native checks and the Sway parser.
 - [x] Inspect synthetic screenshots and retain exact source/runtime evidence.
 - [x] Apply live bindings and restart only affected daemons; inspect Strata 10.

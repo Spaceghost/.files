@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import scripture
 import scripture_library as lib
 
@@ -64,7 +64,7 @@ class ConversionTests(unittest.TestCase):
 
 class WriteTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-library-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-library-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
 

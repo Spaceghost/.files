@@ -2,7 +2,7 @@ from pathlib import Path
 import runpy
 import unittest
 
-MODULE=Path(__file__).resolve().parents[1]/'desktop/.local/lib/oldbook/expo.py'
+MODULE=Path(__file__).resolve().parents[1]/'desktop/.local/lib/mbp_intel/expo.py'
 
 
 class ExpoTests(unittest.TestCase):

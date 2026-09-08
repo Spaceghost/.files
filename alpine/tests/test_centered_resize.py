@@ -9,8 +9,8 @@ import unittest
 from unittest.mock import patch
 
 
-HELPER = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-resize'
-loader = importlib.machinery.SourceFileLoader('oldbook_resize', str(HELPER))
+HELPER = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-resize'
+loader = importlib.machinery.SourceFileLoader('mbp_intel_resize', str(HELPER))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 resize_helper = importlib.util.module_from_spec(spec)
 loader.exec_module(resize_helper)

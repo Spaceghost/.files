@@ -42,7 +42,7 @@ class DeployTest(unittest.TestCase):
         self.assertFalse(old.is_symlink())
 
     def test_database_backup_manifest_does_not_block_deployment_or_rollback(self):
-        backup = self.home / '.local/state/oldbook/backups/scripture-hourly'
+        backup = self.home / '.local/state/mbp-intel/backups/scripture-hourly'
         backup.mkdir(parents=True)
         manifest = backup / 'manifest.json'
         body = json.dumps({'databases': ['history.sqlite3'],
@@ -66,7 +66,7 @@ class DeployTest(unittest.TestCase):
         self.assertEqual(database.read_bytes(), b'preserved database backup')
 
     def test_malformed_deployment_headers_block_before_replacing_user_files(self):
-        backup = self.home / '.local/state/oldbook/backups/1788840000000000000'
+        backup = self.home / '.local/state/mbp-intel/backups/1788840000000000000'
         backup.mkdir(parents=True)
         manifest = backup / 'manifest.json'
         original = self.home / '.config/app/config'
@@ -210,7 +210,7 @@ class DeployTest(unittest.TestCase):
         with mock.patch.object(m.os, 'replace', crash_after_move):
             with self.assertRaises(OSError):
                 m.deploy(self.home, self.overlay)
-        backups = list((self.home / '.local/state/oldbook/backups').iterdir())
+        backups = list((self.home / '.local/state/mbp-intel/backups').iterdir())
         self.assertEqual(len(backups), 1)
         self.assertTrue((backups[0] / 'manifest.json').is_file())
         with self.assertRaisesRegex(RuntimeError, 'Interrupted deployment'):
@@ -236,7 +236,7 @@ class DeployTest(unittest.TestCase):
         with mock.patch.object(Path, 'symlink_to', fail_second):
             with self.assertRaises(OSError):
                 m.deploy(self.home, self.overlay)
-        backup = next((self.home / '.local/state/oldbook/backups').iterdir())
+        backup = next((self.home / '.local/state/mbp-intel/backups').iterdir())
         m.rollback(self.home, backup)
         self.assertEqual(first.read_text(), 'first original')
         self.assertEqual(second.read_text(), 'second original')
@@ -286,7 +286,7 @@ class DeployTest(unittest.TestCase):
         dest.parent.mkdir(parents=True)
         source = self.overlay / '.config/app/config'
         dest.symlink_to(source)
-        backup = self.home / '.local/state/oldbook/backups/legacy'
+        backup = self.home / '.local/state/mbp-intel/backups/legacy'
         saved = backup / 'home/.config/app/config'
         saved.parent.mkdir(parents=True)
         saved.write_text('legacy original')
@@ -297,16 +297,16 @@ class DeployTest(unittest.TestCase):
 
 
 class WrapperMigrationTest(unittest.TestCase):
-    def test_portable_profiles_precede_oldbook_with_legacy_fallback(self):
+    def test_portable_profiles_precede_mbp_intel_with_legacy_fallback(self):
         wrapper_loader = importlib.machinery.SourceFileLoader('shortcut_wrapper',
-            str(Path(__file__).parents[1] / 'desktop/.local/bin/oldbook-shortcuts'))
+            str(Path(__file__).parents[1] / 'desktop/.local/bin/mbp-intel-shortcuts'))
         wrapper_spec = importlib.util.spec_from_loader(wrapper_loader.name, wrapper_loader)
         wrapper = importlib.util.module_from_spec(wrapper_spec)
         wrapper_loader.exec_module(wrapper)
         for portable in ('superhold', 'hold-to-help', 'dangling', None):
             with self.subTest(portable=portable), tempfile.TemporaryDirectory() as directory:
                 config = Path(directory)
-                legacy = config / 'oldbook/shortcuts.json'
+                legacy = config / 'mbp-intel/shortcuts.json'
                 legacy.parent.mkdir(parents=True)
                 legacy.write_text('{}')
                 if portable:
@@ -321,7 +321,7 @@ class WrapperMigrationTest(unittest.TestCase):
                         mock.patch.dict(sys.modules, {'superhold.cli': cli, 'hold_to_help.cli': cli}), \
                         mock.patch.object(sys, 'path', [str(Path(__file__).parents[2] /
                             'projects/superhold'), *sys.path]), \
-                        mock.patch.object(sys, 'argv', ['oldbook-shortcuts', 'status']):
+                        mock.patch.object(sys, 'argv', ['mbp-intel-shortcuts', 'status']):
                     expected = ['status'] if portable else ['--profiles', str(legacy), 'status']
                     self.assertEqual(wrapper.main(), expected)
 
@@ -338,7 +338,7 @@ class WrapperMigrationTest(unittest.TestCase):
                 lease = SessionLease(config, session)
                 lease.acquire()
                 try:
-                    result = subprocess.run([str(repo / 'alpine/desktop/.local/bin/oldbook-shortcuts'),
+                    result = subprocess.run([str(repo / 'alpine/desktop/.local/bin/mbp-intel-shortcuts'),
                         'status', '--socket', str(session)],
                         env={'PATH': os.environ['PATH'], 'HOME': directory,
                              'XDG_CONFIG_HOME': directory, 'XDG_RUNTIME_DIR': directory},

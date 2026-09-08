@@ -44,7 +44,7 @@ command is restored when returning to dev0. Personal settings are preserved.
 
 Screenshots: [dark](../../../alpine/verification/superhold-guide-dev1/guide-dark.png)
 and [light](../../../alpine/verification/superhold-guide-dev1/guide-light.png).
-Full local evidence: `/home/jack/.local/state/oldbook/verification/superhold-dev1-install`.
+Full local evidence: `/home/jack/.local/state/mbp-intel/verification/superhold-dev1-install`.
 
 Existing fullscreen/LXQt release limitations remain as documented by the project.
 The broader theme gaps in the earlier theme-following handoff remain separate

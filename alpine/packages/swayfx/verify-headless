@@ -16,7 +16,7 @@ parser.add_argument("--render-device", default="/dev/dri/renderD128")
 args = parser.parse_args()
 binary = args.binary.resolve(strict=True)
 wallpaper = args.wallpaper.resolve(strict=True)
-effects = Path(__file__).resolve().parent / "oldbook-effects.conf"
+effects = Path(__file__).resolve().parent / "mbp-intel-effects.conf"
 output = args.output.absolute()
 output.mkdir(parents=True, exist_ok=False)
 config = output / "sway.conf"

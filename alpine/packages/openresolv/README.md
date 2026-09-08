@@ -61,7 +61,7 @@ preserved live DNS, network, radio and DHCP state, as recorded in
 [`resolver-bridge-install-verification.json`](../../security/radio/resolver-bridge-install-verification.json).
 The APK has no install hooks, service startup or `/etc/resolv.conf` payload.
 WPA/DHCP migration, subscriber policy and DNS-provider activation remain staged.
-Both new APKs are cached in `~/.local/share/oldbook/apks`; the prior `3.17.4-r0`
+Both new APKs are cached in `~/.local/share/mbp-intel/apks`; the prior `3.17.4-r0`
 artifact remains available for a controlled package rollback.
 
 Upstream source:

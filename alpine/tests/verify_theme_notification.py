@@ -19,10 +19,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    if not os.environ.get('OLDBOOK_NOTIFICATION_PRIVATE_BUS'):
+    if not os.environ.get('MBP_INTEL_NOTIFICATION_PRIVATE_BUS'):
         # No service directories: private checks must not auto-start desktop
         # portals, mount a document filesystem, or inherit a live service.
-        with tempfile.TemporaryDirectory(prefix='oldbook-notification-bus-') as bus:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-notification-bus-') as bus:
             config = Path(bus) / 'session.conf'
             config.write_text('<busconfig><type>session</type><listen>unix:tmpdir=/tmp</listen>'
                               '<auth>EXTERNAL</auth><policy context="default">'
@@ -30,10 +30,10 @@ def main():
                               '<allow own="*"/></policy></busconfig>')
             return subprocess.call(['dbus-run-session', '--config-file=' + str(config), '--',
                                     sys.executable, __file__, *sys.argv[1:]],
-                                   env=dict(os.environ, OLDBOOK_NOTIFICATION_PRIVATE_BUS='1'))
+                                   env=dict(os.environ, MBP_INTEL_NOTIFICATION_PRIVATE_BUS='1'))
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    with tempfile.TemporaryDirectory(prefix='oldbook-theme-notification-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-theme-notification-') as temporary:
         base = Path(temporary)
         home, runtime = base / 'home', base / 'run'
         home.mkdir()

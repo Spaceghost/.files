@@ -24,7 +24,7 @@ class ThemeSwayReloadTests(unittest.TestCase):
         self.directory = tempfile.TemporaryDirectory(prefix='theme-sway-reload-')
         self.addCleanup(self.directory.cleanup)
         self.path = Path(self.directory.name) / 'sway.sock'
-        self.module = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'))
+        self.module = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'))
         self.enterContext(mock.patch.dict(os.environ, {'SWAYSOCK': str(self.path)}))
         self.requests = []
         self.errors = []
@@ -115,7 +115,7 @@ class ThemeSwayReloadTests(unittest.TestCase):
                 mock.patch.dict(self.module['refresh_session'].__globals__, {
                     'run': only_sway, 'owned_processes': lambda *args: iter([]),
                     'signal_processes': lambda *args: 0, 'tmux_reload': lambda: 0}), \
-                mock.patch.object(sys, 'argv', ['oldbook-theme', 'refresh']), \
+                mock.patch.object(sys, 'argv', ['mbp-intel-theme', 'refresh']), \
                 redirect_stdout(io.StringIO()):
             status = self.module['main']()
         self.assertEqual(status, 1)

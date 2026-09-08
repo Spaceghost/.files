@@ -1,0 +1,10 @@
+[Unit]
+Description=MBP Intel idle locking
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swayidle -w timeout 300 '%h/.local/bin/mbp-intel-lock' timeout 600 '/usr/bin/swaymsg "output * power off"' resume '/usr/bin/swaymsg "output * power on"' before-sleep '%h/.local/bin/mbp-intel-lock'
+Restart=on-failure
+RestartSec=2

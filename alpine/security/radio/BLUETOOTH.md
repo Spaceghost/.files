@@ -33,19 +33,19 @@ and [eudev 3.2.14 rule evaluator](https://github.com/eudev-project/eudev/blob/v3
 ## Install and verify
 
 After review, copy `install-bluetooth` as root:root, mode `0750`, to
-`/usr/local/libexec/oldbook-radio/install-bluetooth` and copy the reviewed rule
+`/usr/local/libexec/mbp-intel-radio/install-bluetooth` and copy the reviewed rule
 beside it as root:root, mode `0644`. It also requires the previously reviewed
 permissions installer named `install` in that root-owned directory. Every
 ancestor must be root-owned and unwritable by other users. Then run:
 
 ```sh
-doas /usr/local/libexec/oldbook-radio/install-bluetooth --prepare
+doas /usr/local/libexec/mbp-intel-radio/install-bluetooth --prepare
 ```
 
 Preparation refuses any preexisting target rule and rechecks for Bluetooth
 input, daemon, connection objects and audio before changing anything. It
 requires an observable existing Wi-Fi association. It creates a private journal
-under `/var/lib/oldbook/bluetooth-preparation`, installs only the Bluetooth rule,
+under `/var/lib/mbp_intel/bluetooth-preparation`, installs only the Bluetooth rule,
 reloads eudev and triggers only Bluetooth rfkill devices. It verifies their
 soft blocks, unchanged hard blocks, and unchanged WLAN radios, SSID, BSSID, IP
 addresses and routes. Route expiry countdowns are excluded from comparison.
@@ -57,7 +57,7 @@ Preparation errors automatically attempt rollback. For explicit later rollback
 within the same boot, use the exact token returned by preparation:
 
 ```sh
-doas /usr/local/libexec/oldbook-radio/install-bluetooth --rollback TOKEN
+doas /usr/local/libexec/mbp-intel-radio/install-bluetooth --rollback TOKEN
 ```
 
 Rollback first rejects changed device inventory. It removes only the installed

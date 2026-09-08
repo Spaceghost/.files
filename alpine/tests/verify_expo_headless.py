@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix='expo-check-') as temp:
                 client=subprocess.Popen(['foot','--title='+title,'-e','cat'],env=env,stdout=log,stderr=log);processes.append(client);time.sleep(.4)
             command('workspace number 1')
             def launch():
-                p=subprocess.Popen([str(repo/'alpine/desktop/.local/bin/oldbook-expo'),'show'],env=env,stdout=log,stderr=log);processes.append(p);time.sleep(1)
+                p=subprocess.Popen([str(repo/'alpine/desktop/.local/bin/mbp-intel-expo'),'show'],env=env,stdout=log,stderr=log);processes.append(p);time.sleep(1)
                 if p.poll() is not None:raise RuntimeError((base/'run.log').read_text())
                 return p
             # A headless seat needs a keyboard before GTK maps its exclusive layer.
@@ -38,12 +38,12 @@ with tempfile.TemporaryDirectory(prefix='expo-check-') as temp:
             workspaces=json.loads(subprocess.check_output(['swaymsg','-s',str(sockets[0]),'-t','get_workspaces','-r'],env=env))
             assert next(w['num'] for w in workspaces if w['focused'])==1
             expo=launch()
-            subprocess.run([str(repo/'alpine/desktop/.local/bin/oldbook-expo'),'close'],env=env,check=True)
+            subprocess.run([str(repo/'alpine/desktop/.local/bin/mbp-intel-expo'),'close'],env=env,check=True)
             expo.wait(timeout=5)
             expo=launch()
-            subprocess.run([str(repo/'alpine/desktop/.local/bin/oldbook-expo'),'show'],env=env,check=True)
+            subprocess.run([str(repo/'alpine/desktop/.local/bin/mbp-intel-expo'),'show'],env=env,check=True)
             assert expo.poll() is None
-            subprocess.run([str(repo/'alpine/desktop/.local/bin/oldbook-expo'),'toggle'],env=env,check=True)
+            subprocess.run([str(repo/'alpine/desktop/.local/bin/mbp-intel-expo'),'toggle'],env=env,check=True)
             expo.wait(timeout=5)
             expo=launch()
             subprocess.run(['wtype','-k','Escape'],env=env,check=True)

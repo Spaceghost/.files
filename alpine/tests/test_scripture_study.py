@@ -13,13 +13,13 @@ from unittest import mock
 
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import scripture_study as study
 
 
 class StudyStorageTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-study-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-study-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.assets = self.root / 'alpine/assets/scripture'

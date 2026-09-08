@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-LIBRARY = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'
+LIBRARY = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel'
 sys.path.insert(0, str(LIBRARY))
 import showdesktop
 import ui_command
@@ -27,10 +27,10 @@ class WarmHandoffTests(unittest.TestCase):
                 compositor.bind(str(sway))
                 for name, arguments, address, expected in (
                     ('carousel', ['next', '--modifier', 'alt'],
-                     runtime / 'oldbook' / ('carousel-' + token) / 'control.sock',
+                     runtime / 'mbp-intel' / ('carousel-' + token) / 'control.sock',
                      {'action': 'next', 'modifier': 'alt'}),
                     ('showdesktop', ['restore-or-carousel'],
-                     runtime / 'oldbook' / 'showdesktop' / ('control-' + token + '.sock'),
+                     runtime / 'mbp-intel' / 'showdesktop' / ('control-' + token + '.sock'),
                      b'restore-or-carousel'),
                 ):
                     with self.subTest(service=name):
@@ -38,7 +38,7 @@ class WarmHandoffTests(unittest.TestCase):
                         with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as receiver:
                             receiver.bind(str(address))
                             receiver.settimeout(.5)
-                            binary = LIBRARY.parent.parent / 'bin' / ('oldbook-' + name)
+                            binary = LIBRARY.parent.parent / 'bin' / ('mbp-intel-' + name)
                             result = subprocess.run([str(binary), *arguments], env=env,
                                                     capture_output=True, timeout=5)
                             self.assertEqual(result.returncode, 0, result.stderr.decode())
@@ -51,7 +51,7 @@ class WarmHandoffTests(unittest.TestCase):
             runtime = Path(temporary)
             sway = runtime / 'sway.sock'
             token = hashlib.sha256(str(sway).encode()).hexdigest()[:12]
-            directory = runtime / 'oldbook' / 'showdesktop'
+            directory = runtime / 'mbp-intel' / 'showdesktop'
             directory.mkdir(parents=True, mode=0o700)
             with socket.socket(socket.AF_UNIX) as compositor, \
                     socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as receiver:
@@ -75,7 +75,7 @@ class WarmHandoffTests(unittest.TestCase):
             runtime = Path(temporary)
             sway = runtime / 'sway.sock'
             token = hashlib.sha256(str(sway).encode()).hexdigest()[:12]
-            directory = runtime / 'oldbook' / ('carousel-' + token)
+            directory = runtime / 'mbp-intel' / ('carousel-' + token)
             directory.mkdir(parents=True, mode=0o700)
             with socket.socket(socket.AF_UNIX) as compositor, \
                     socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as carousel:

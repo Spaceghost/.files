@@ -24,7 +24,7 @@ Sway IPC, tmux, Python unittest, Fossil.
 
 ## Task 1: Hold detector
 
-Files: create `alpine/desktop/.local/lib/oldbook/shortcut_hold.py` and
+Files: create `alpine/desktop/.local/lib/mbp_intel/shortcut_hold.py` and
 `alpine/tests/test_shortcut_hold.py`.
 
 Interface: `HoldState.update(device, code, value, now)`, `visible(now) -> bool`,
@@ -42,7 +42,7 @@ Interface: `HoldState.update(device, code, value, now)`, `visible(now) -> bool`,
 
 ## Task 2: Shortcut discovery
 
-Files: create `alpine/desktop/.local/lib/oldbook/shortcut_sources.py`,
+Files: create `alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py`,
 `shortcut_profiles.py` and `alpine/tests/test_shortcut_sources.py`.
 
 Interface: `ShortcutProvider(socket_path, profiles_path=None).snapshot() -> dict`
@@ -60,8 +60,8 @@ rows have `{key, description}`. Snapshot failures are bounded and explicit.
 
 ## Task 3: Overlay, service lifecycle and deployment
 
-Files: create `alpine/desktop/.local/lib/oldbook/shortcut_overlay.py`,
-`alpine/desktop/.local/bin/oldbook-shortcuts`,
+Files: create `alpine/desktop/.local/lib/mbp_intel/shortcut_overlay.py`,
+`alpine/desktop/.local/bin/mbp-intel-shortcuts`,
 `alpine/desktop/.config/sway/local.d/shortcuts.conf`,
 `alpine/tests/test_shortcut_service.py` and runtime evidence under
 `alpine/verification/`. Document operation in a focused shortcut README.
@@ -72,7 +72,7 @@ Files: create `alpine/desktop/.local/lib/oldbook/shortcut_overlay.py`,
 - [x] Implement GTK layout with keyboard mode NONE, scrollable app/Sway/context
   sections, nonblocking provider worker and immediate cancellation. Bound the
   window to the focused monitor and add dump/preview CLI commands.
-- [x] Add startup snippet `exec_always --no-startup-id ~/.local/bin/oldbook-shortcuts daemon`.
+- [x] Add startup snippet `exec_always --no-startup-id ~/.local/bin/mbp-intel-shortcuts daemon`.
 - [x] Validate under isolated Sway, capture screenshot and evidence, and review
   the entire feature with an independent reviewer. Fix significant findings.
 - [x] Run complete unittest suite, Sway validation and disposable deployment.
@@ -117,7 +117,7 @@ Files: create `alpine/desktop/.local/lib/oldbook/shortcut_overlay.py`,
   62 shortcut tests. The concurrent shared checkout run had seven failures
   because another task removed its notification LED helper during development.
 - Stock Sway parser validation and disposable deployment pass. Live deployment
-  journal: `~/.local/state/oldbook/backups/1788782412724579771`; six links only.
+  journal: `~/.local/state/mbp-intel/backups/1788782412724579771`; six links only.
   Service is active with two keyboard devices; duplicate startup preserves PID.
 - Compositor shutdown exits the daemon. Native GTK may terminate before the
   final status write; kernel resources are released and stale identities are

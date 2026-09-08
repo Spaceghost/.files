@@ -7,8 +7,8 @@ import runpy
 import tempfile
 import unittest
 
-MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/decoration.py'
-SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-decoration'
+MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel/decoration.py'
+SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-decoration'
 
 
 class DecorationTests(unittest.TestCase):
@@ -62,22 +62,22 @@ class DecorationTests(unittest.TestCase):
     def test_pointer_actions_use_fixed_argv_without_a_shell(self):
         home = Path('/home/fixture')
         self.assertEqual(self.model.action_command(1, home),
-                         ['/home/fixture/.local/bin/oldbook-control', 'windows'])
+                         ['/home/fixture/.local/bin/mbp-intel-control', 'windows'])
         self.assertEqual(self.model.action_command(2, home),
                          ['swaymsg', 'floating', 'toggle'])
         self.assertIsNone(self.model.action_command(3, home))
         self.assertEqual(self.model.action_command(3, home, shifted=True),
-                         ['/home/fixture/.local/bin/oldbook-decoration-settings'])
+                         ['/home/fixture/.local/bin/mbp-intel-decoration-settings'])
 
     def test_appearance_combines_foot_font_with_validated_active_palette(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-decoration-theme-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-decoration-theme-') as directory:
             root = Path(directory)
             (root / 'foot').mkdir()
             (root / 'foot/foot.ini').write_text(
                 '[main]\nfont=Fixture Mono:size=9.5\n')
             script = runpy.run_path(str(SCRIPT))
             script['appearance'].__globals__['CONFIG'] = root
-            script['appearance'].__globals__['SETTINGS'] = root / 'oldbook/decoration.json'
+            script['appearance'].__globals__['SETTINGS'] = root / 'mbp-intel/decoration.json'
             script['appearance'].__globals__['STATE'] = root / 'state'
             script['appearance'].__globals__['read_palette'] = lambda: {
                 'background': '#13091f', 'surface': '#261631',
@@ -114,7 +114,7 @@ class DecorationTests(unittest.TestCase):
     def test_settings_migrate_legacy_position_and_save_through_symlink(self):
         self.assertTrue(hasattr(self.model, 'load_settings'))
         self.assertTrue(hasattr(self.model, 'save_settings'))
-        with tempfile.TemporaryDirectory(prefix='oldbook-decoration-settings-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-decoration-settings-') as directory:
             root = Path(directory)
             config = root / 'profile/decoration.json'
             target = root / 'theme/decoration.json'

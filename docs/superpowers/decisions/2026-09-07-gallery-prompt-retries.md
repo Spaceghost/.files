@@ -32,7 +32,7 @@ now creates that directory before writing the stylesheet. The live directory
 already existed, so this is not claimed as the cause of the reported exit.
 
 Validation: all 511 desktop/deployment unit tests passed; ShellCheck passed for
-`oldbook-session`. Retry tests cover success on the fourth attempt, exhaustion,
+`mbp-intel-session`. Retry tests cover success on the fourth attempt, exhaustion,
 theme reuse, malformed native responses, invalid PNGs, retained attempt logs,
 and checkpoint failures without repainting. Real Fuzzel renders were captured
 under an isolated Sway compositor:
@@ -42,12 +42,12 @@ under an isolated Sway compositor:
 - [Prompt entry](../../../alpine/verification/gallery-prompts/prompt.png)
 
 Private test logs and the live bar screenshots remain under
-`~/.local/state/oldbook/verification/theme-prompt-retries/`. No new model image
+`~/.local/state/mbp-intel/verification/theme-prompt-retries/`. No new model image
 request was made for verification; recovery was tested with injected failures.
 The installed gallery launcher is a symlink to this checkout, so the UI and
 generation changes apply on its next invocation.
 
-Recovery: restore the changed gallery scripts and `oldbook-session` from the
+Recovery: restore the changed gallery scripts and `mbp-intel-session` from the
 parent of this decision's Fossil check-in. Generated collections, images, and
 private attempt records remain usable and need not be removed. Nothing is
 published remotely by this change.

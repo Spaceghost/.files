@@ -8,10 +8,10 @@ their APK identities match the installed packages.
 The desktop helper accepts a local file or an explicit HTTPS URL:
 
 ```text
-oldbook-video-background ~/Videos/background.webm
-oldbook-video-background https://media.example/background.mp4
-oldbook-video-background picker
-oldbook-video-background stop
+mbp-intel-video-background ~/Videos/background.webm
+mbp-intel-video-background https://media.example/background.mp4
+mbp-intel-video-background picker
+mbp-intel-video-background stop
 ```
 
 Playback is muted and loops. Hardware decoding uses mpv's `auto-safe` mode,

@@ -24,7 +24,7 @@ def load(name, path):
     return module
 
 
-art = load('wallpapers', REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper')
+art = load('wallpapers', REPO / 'alpine/desktop/.local/bin/mbp-intel-wallpaper')
 generator = load('art_generator', REPO / 'alpine/wallpapers/generate.py')
 cron = load('art_cron', REPO / 'alpine/bin/install-wallpaper-schedule')
 

@@ -17,16 +17,16 @@ The gallery also offers **Generate new artwork & switch to it**. The same contro
 work from a terminal:
 
 ```sh
-oldbook-wallpaper next
-oldbook-wallpaper prev
-oldbook-wallpaper pick
-oldbook-wallpaper pause
-oldbook-wallpaper generate
-oldbook-wallpaper new-theme
-oldbook-wallpaper prompt-theme
-oldbook-wallpaper generate --theme none
-oldbook-wallpaper generate --theme gruvbox-dark
-oldbook-wallpaper edit-prompts
+mbp-intel-wallpaper next
+mbp-intel-wallpaper prev
+mbp-intel-wallpaper pick
+mbp-intel-wallpaper pause
+mbp-intel-wallpaper generate
+mbp-intel-wallpaper new-theme
+mbp-intel-wallpaper prompt-theme
+mbp-intel-wallpaper generate --theme none
+mbp-intel-wallpaper generate --theme gruvbox-dark
+mbp-intel-wallpaper edit-prompts
 ```
 
 When a new theme and its painting finish, Ghost Gallery sends a desktop
@@ -42,7 +42,7 @@ the laptop display. Scroll or type part of an action/title to find further entri
 editor offers **Save** and **Cancel**. Saving affects future paintings and new
 theme designs; it preserves scene IDs, generation settings and existing artwork.
 The previous prompt file is backed up under
-`~/.local/state/oldbook/prompt-backups/`. An editor opened before another change
+`~/.local/state/mbp-intel/prompt-backups/`. An editor opened before another change
 asks you to reopen the file instead of overwriting that newer version.
 
 The shared guidance reflects strong Christian faith, admiration for the
@@ -59,13 +59,13 @@ sidecars under `alpine/assets/gallery/`; each entry has `id`, `title`, `file`,
 `description`, and ideally `sha256`. Paths are relative to the checkout and must
 remain inside `alpine/assets/`. Generated entries are discovered recursively;
 symlink escapes and changed hashes are rejected.
-The active link is `~/.local/share/oldbook/current-wallpaper.png`; deployment's
-baseline `wallpaper.png` is separate. `oldbook-session` starts the rotation daemon
+The active link is `~/.local/share/mbp-intel/current-wallpaper.png`; deployment's
+baseline `wallpaper.png` is separate. `mbp-intel-session` starts the rotation daemon
 and refreshes the current artwork after Sway reload. A file lock prevents
 multiple daemons, including when no graphical session is available yet.
 `workspace_rotations: []` keeps selection, pause and the timer global; switching
 workspaces does not change the painting. Previous per-workspace selections remain
-saved but inactive under `~/.local/state/oldbook/wallpaper/workspaces/`.
+saved but inactive under `~/.local/state/mbp-intel/wallpaper/workspaces/`.
 
 ## Scenes, insertions, mediums and never painting the same thing
 
@@ -104,7 +104,7 @@ previous scene or art direction. A rejected proposal gets up to three text-only
 retries; failure leaves the current wallpaper in place. This checks prompt
 novelty; visual resemblance in model-generated images cannot be guaranteed.
 
-History lives in `~/.local/state/oldbook/wallpaper-generation/history.json` without
+History lives in `~/.local/state/mbp-intel/wallpaper-generation/history.json` without
 the former 2,000-record cutoff. Each request merges saved gallery sidecars,
 curated artwork and local generation records, so restoring an older history
 does not make saved scenes new again. Deleting a painting does not erase its
@@ -144,7 +144,7 @@ and its sidecar after asking for confirmation, moving the desktop on to the next
 artwork first so it never points at a missing file. Only generated artwork under
 `alpine/assets/gallery/` can be deleted; curated entries listed in
 `gallery.json` are refused. The removal is staged in Fossil and stays pending
-for review. The same operation without a prompt is `oldbook-wallpaper delete`.
+for review. The same operation without a prompt is `mbp-intel-wallpaper delete`.
 
 ## Theme collections
 
@@ -231,7 +231,7 @@ See [current model choices](https://developers.openai.com/codex/models) and
 [usage limits](https://learn.chatgpt.com/docs/pricing#image-generation-usage-limits).
 
 Logs, daily reservations and crontab backups stay in
-`~/.local/state/oldbook/wallpaper-generation/`. New images, exact prompts, hashes
+`~/.local/state/mbp-intel/wallpaper-generation/`. New images, exact prompts, hashes
 and model metadata land in the gallery and receive a local Fossil checkpoint
 containing exactly the new PNG and JSON pair. Other edits and added files remain
 pending. These checkpoints never sync or publish: the job requires `autosync off`,
@@ -272,7 +272,7 @@ A successful theme design is reused for all image retries. If painting still
 fails, the saved collection remains available in the existing-theme picker.
 If a checkpoint fails, files remain saved
 and the existing pending-checkpoint recovery applies. Private request logs are
-under `~/.local/state/oldbook/wallpaper-generation/manual/`.
+under `~/.local/state/mbp-intel/wallpaper-generation/manual/`.
 
 Command-line equivalents:
 

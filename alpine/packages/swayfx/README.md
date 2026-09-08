@@ -1,4 +1,4 @@
-# SwayFX for Oldbook
+# SwayFX for MBP Intel
 
 Native musl SwayFX 0.6 adds blur, rounded corners, shadows and window animations.
 It installs as `/usr/bin/swayfx` alongside stock `/usr/bin/sway`; the existing
@@ -15,7 +15,7 @@ Tabbed and stacked group headers keep their existing placement and controls.
 
 Only this patched SwayFX accepts the new command. Keep it out of the shared
 stock Sway configuration. `titlebar_position top` restores upstream placement;
-`OLDBOOK_STOCK_SWAY=1 sway` selects the retained stock compositor at login.
+`MBP_INTEL_STOCK_SWAY=1 sway` selects the retained stock compositor at login.
 
 ## Edit and enable
 
@@ -38,7 +38,7 @@ Keyboard focus alone never starts a timer. No background input reader is used.
 Set the include's runtime value to zero to disable this behavior persistently;
 `swaymsg 'mouse_raise_delay 0'` disables it in a patched running session.
 
-`oldbook-effects.conf` is the violet-glass example, also packaged under
+`mbp-intel-effects.conf` is the violet-glass example, also packaged under
 `/usr/share/swayfx/`. Include it only from a configuration loaded by SwayFX;
 stock Sway cannot parse these effects. A user configuration may symlink to this
 workspace file so visual edits take effect on a compositor reload.
@@ -64,7 +64,7 @@ alpine/packages/swayfx/build-offline --source /tmp/swayfx-0.6.tar.gz --work /tmp
 The helper requires a new work directory. It checks source SHA-256, disables
 networking with `unshare --net`, and runs abuild as the ordinary user. It neither
 installs dependencies nor changes the APK database. The resulting signed APK is
-under `WORK/apks/oldbook/x86_64/`. Installation is a separate `apk add` operation.
+under `WORK/apks/mbp-intel/x86_64/`. Installation is a separate `apk add` operation.
 
 Sources are pinned to upstream commit `fd71a6bdc061bd633b488ae7b83e8a6981d22f86`;
 `manifest.json` records source/package hashes and Fossil artifact names. When

@@ -6,11 +6,11 @@ currently emits `agent-turn-complete`. A user hook receives `PermissionRequest`
 on standard input when Codex is about to ask the user for approval. A
 `UserPromptSubmit` hook clears transient routing metadata at the next prompt.
 
-`oldbook-codex-notify` accepts only these invocations:
+`mbp-intel-codex-notify` accepts only these invocations:
 
 ```text
-oldbook-codex-notify --notify '<agent-turn-complete JSON>'
-oldbook-codex-notify --hook                 # hook JSON on standard input
+mbp-intel-codex-notify --notify '<agent-turn-complete JSON>'
+mbp-intel-codex-notify --hook                 # hook JSON on standard input
 ```
 
 Completion adds a normal `Codex • Done` notification. An approval request adds
@@ -30,7 +30,7 @@ For a supported event with a session identifier, the helper atomically writes a
 mode-0600 JSON file under this private directory:
 
 ```text
-$XDG_RUNTIME_DIR/oldbook/codex-events/<sha256-session-id>.json
+$XDG_RUNTIME_DIR/mbp-intel/codex-events/<sha256-session-id>.json
 ```
 
 Schema version 1 contains exactly:
@@ -83,12 +83,12 @@ It likewise refuses malformed files, non-regular config targets, and unsafe
 rollback state.
 
 An exact private backup is created under
-`~/.local/state/oldbook/codex-notifications/backups/`. The installer prints its
+`~/.local/state/mbp-intel/codex-notifications/backups/`. The installer prints its
 path. Roll back before making later Codex config changes:
 
 ```sh
 ~/.files/alpine/bin/install-codex-notifications \
-  --rollback ~/.local/state/oldbook/codex-notifications/backups/<timestamp>
+  --rollback ~/.local/state/mbp-intel/codex-notifications/backups/<timestamp>
 ```
 
 Rollback verifies that both installed files still match the recorded result,

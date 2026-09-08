@@ -6,7 +6,7 @@ exports GTK semantic colors through the user `gtk-3.0/gtk.css`. It updates GTK
 settings through its normal desktop integration, but changing the color palette
 can leave the GTK theme name unchanged.
 
-Use native GTK color symbols and inherited fonts, with no Oldbook source-tree
+Use native GTK color symbols and inherited fonts, with no MBP Intel source-tree
 dependency. Reload the user stylesheet on file changes so an existing guide and
 settings window update after atomic writes or symlink replacement. Preserve the
 last valid stylesheet during incomplete edits. Leave GTK settings under the

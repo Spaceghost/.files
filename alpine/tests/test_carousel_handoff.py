@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import Mock
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib/mbp_intel'))
 from carousel import Controller, EventFrames
 from carousel_view import Popup
 

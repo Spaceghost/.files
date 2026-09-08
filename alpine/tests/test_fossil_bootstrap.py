@@ -12,7 +12,7 @@ BOOTSTRAP = REPO / 'alpine/bin/bootstrap-fossil-from-github'
 
 class FossilBootstrapTests(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix='oldbook-fossil-bootstrap-')
+        self.temporary = tempfile.TemporaryDirectory(prefix='mbp-intel-fossil-bootstrap-')
         self.root = Path(self.temporary.name)
         self.source = self.root / 'source.git'
         self.repository = self.root / 'files.fossil'

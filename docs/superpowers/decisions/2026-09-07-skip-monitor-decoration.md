@@ -2,8 +2,8 @@
 
 The user wants the system-monitor drop-down to be skipped by window decoration
 just like the console. The launcher gives it the exact application ID
-`com.oldbook.monitor`, separate from `com.oldbook.dropdown` and the historical
-`oldbook-dropdown` console. Add the monitor to their shared caption exclusion.
+`com.mbp-intel.monitor`, separate from `com.mbp-intel.dropdown` and the historical
+`mbp-intel-dropdown` console. Add the monitor to their shared caption exclusion.
 
 Opening either drop-down keeps caption geometry, title and actions on the
 previous ordinary window from Sway's current focus history. Normal Ghostty
@@ -22,5 +22,5 @@ restarted with matching tested source hashes and preserved appearance settings.
 
 This updates the earlier console-only exclusion policy: the paired system
 monitor is now excluded as well. The console/monitor launchers and bindings need
-no changes. Recovery is to remove only `com.oldbook.monitor` from
+no changes. Recovery is to remove only `com.mbp-intel.monitor` from
 `IGNORED_CAPTION_APPS` in `decoration.py` and restart the decoration daemon.

@@ -40,9 +40,9 @@
     },
     "custom/ghost": {
       "format": "\udb80\udea0",
-      "tooltip-format": "<b>SPACE GHOST'S COMMAND DECK</b>\nBroadcasting live from the Oldbook. Zorak still does not have root.\n\nLeft: open command deck \u00b7 Right: launch applications",
-      "on-click": "~/.local/bin/oldbook-control",
-      "on-click-right": "~/.local/bin/oldbook-menu"
+      "tooltip-format": "<b>SPACE GHOST'S COMMAND DECK</b>\nBroadcasting live from the MBP Intel. Zorak still does not have root.\n\nLeft: open command deck \u00b7 Right: launch applications",
+      "on-click": "~/.local/bin/mbp-intel-control",
+      "on-click-right": "~/.local/bin/mbp-intel-menu"
     },
     "sway/workspaces": {
       "disable-scroll": false,
@@ -62,8 +62,8 @@
       "format-stopped": "\uf048",
       "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track\nRight: show/hide Pithos\nMiddle: tired of this song \u00b7 Super+middle: ban song",
       "on-click": "playerctl --player=io.github.Pithos previous",
-      "on-click-middle": "~/.local/bin/oldbook-pithos middle",
-      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
+      "on-click-middle": "~/.local/bin/mbp-intel-pithos middle",
+      "on-click-right": "~/.local/bin/mbp-intel-pithos toggle",
       "player": "io"
     },
     "mpris": {
@@ -88,9 +88,9 @@
       "on-scroll-down": "playerctl --player=io.github.Pithos position 5-",
       "smooth-scrolling-threshold": 2,
       "player": "io",
-      "on-click": "~/.local/bin/oldbook-pithos click",
-      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
-      "on-click-middle": "~/.local/bin/oldbook-pithos middle"
+      "on-click": "~/.local/bin/mbp-intel-pithos click",
+      "on-click-right": "~/.local/bin/mbp-intel-pithos toggle",
+      "on-click-middle": "~/.local/bin/mbp-intel-pithos middle"
     },
     "mpris#next": {
       "format": "\uf051",
@@ -98,8 +98,8 @@
       "format-stopped": "\uf051",
       "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track\nRight: show/hide Pithos\nMiddle: tired of this song \u00b7 Super+middle: ban song",
       "on-click": "playerctl --player=io.github.Pithos next",
-      "on-click-middle": "~/.local/bin/oldbook-pithos middle",
-      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
+      "on-click-middle": "~/.local/bin/mbp-intel-pithos middle",
+      "on-click-right": "~/.local/bin/mbp-intel-pithos toggle",
       "player": "io"
     },
     "group/telemetry": {
@@ -158,24 +158,24 @@
       ]
     },
     "custom/link": {
-      "exec": "~/.local/bin/oldbook-panel-status network",
+      "exec": "~/.local/bin/mbp-intel-panel-status network",
       "return-type": "json",
       "interval": 3,
-      "on-click": "~/.local/bin/oldbook-control network",
-      "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-control network-report",
+      "on-click": "~/.local/bin/mbp-intel-control network",
+      "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/mbp-intel-control network-report",
       "max-length": 14
     },
     "custom/radio": {
-      "exec": "~/.local/bin/oldbook-panel-status radio",
+      "exec": "~/.local/bin/mbp-intel-panel-status radio",
       "return-type": "json",
       "interval": 5,
-      "on-click": "~/.local/bin/oldbook-control network"
+      "on-click": "~/.local/bin/mbp-intel-control network"
     },
     "custom/firewall": {
-      "exec": "~/.local/bin/oldbook-panel-status firewall",
+      "exec": "~/.local/bin/mbp-intel-panel-status firewall",
       "return-type": "json",
       "interval": 5,
-      "on-click": "~/.local/bin/oldbook-control firewall"
+      "on-click": "~/.local/bin/mbp-intel-control firewall"
     },
     "group/sound": {
       "orientation": "horizontal",
@@ -205,7 +205,7 @@
       "scroll-step": 5,
       "max-volume": 100,
       "on-click": "pavucontrol",
-      "on-click-right": "~/.local/bin/oldbook-audio mute",
+      "on-click-right": "~/.local/bin/mbp-intel-audio mute",
       "smooth-scrolling-threshold": 1
     },
     "pulseaudio#mic": {
@@ -213,7 +213,7 @@
       "format-source": "\udb80\udf6c {volume}%",
       "format-source-muted": "\udb80\udf6d off",
       "tooltip-format": "<b>MICROPHONE CHANNEL</b>\nInput level: {volume}%\n\nClick: mute/unmute \u00b7 Scroll: adjust input level",
-      "on-click": "~/.local/bin/oldbook-audio mic-mute",
+      "on-click": "~/.local/bin/mbp-intel-audio mic-mute",
       "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%+",
       "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-",
       "smooth-scrolling-threshold": 1
@@ -250,13 +250,13 @@
         "\udb80\udc79"
       ],
       "tooltip-format": "<b>POWER RESERVE</b>\n{capacity}% \u00b7 {timeTo}\nPower draw: {power} W\n\nLeft: session controls\nHover for brightness and keep-awake.",
-      "on-click": "~/.local/bin/oldbook-control power"
+      "on-click": "~/.local/bin/mbp-intel-control power"
     },
     "backlight": {
       "format": "\udb80\udcdf {percent}%",
       "tooltip-format": "MOONLIGHT CONTROL\nDisplay brightness: {percent}%\n\nScroll: brighten/dim the display",
-      "on-scroll-up": "~/.local/bin/oldbook-brightness up",
-      "on-scroll-down": "~/.local/bin/oldbook-brightness down",
+      "on-scroll-up": "~/.local/bin/mbp-intel-brightness up",
+      "on-scroll-down": "~/.local/bin/mbp-intel-brightness down",
       "smooth-scrolling-threshold": 1
     },
     "idle_inhibitor": {
@@ -269,7 +269,7 @@
       "tooltip-format-deactivated": "<b>OFF AIR</b>\nAutomatic idle locking is enabled. Click to keep awake."
     },
     "custom/notifications": {
-      "exec": "~/.local/bin/oldbook-panel-status notifications",
+      "exec": "~/.local/bin/mbp-intel-panel-status notifications",
       "return-type": "json",
       "format": "{icon}",
       "format-icons": {
@@ -316,14 +316,14 @@
       "spacing": 8
     },
     "cffi/art": {
-      "module_path": "/usr/lib/waybar/oldbook-art.so"
+      "module_path": "/usr/lib/waybar/mbp-intel-art.so"
     },
     "custom/ai": {
-      "exec": "~/.local/bin/oldbook-workspaces status",
+      "exec": "~/.local/bin/mbp-intel-workspaces status",
       "return-type": "json",
       "interval": 2,
-      "on-click": "~/.local/bin/oldbook-workspaces ai-next",
-      "on-click-right": "~/.local/bin/oldbook-workspaces ai-menu"
+      "on-click": "~/.local/bin/mbp-intel-workspaces ai-next",
+      "on-click-right": "~/.local/bin/mbp-intel-workspaces ai-menu"
     },
     "expand-center": false
   }

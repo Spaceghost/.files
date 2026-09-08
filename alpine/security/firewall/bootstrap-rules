@@ -79,11 +79,11 @@ def make_rules(uid, executables, resolvers):
         identifier = hashlib.sha256(record["path"].encode()).hexdigest()
         identity = [operand("process.path", record["path"]), operand("user.id", uid),
                     operand("process.hash.md5", record["md5"])]
-        name = f"oldbook-bootstrap-{uid}-{identifier}-https"
+        name = f"mbp-intel-bootstrap-{uid}-{identifier}-https"
         rules[name + ".json"] = allow_rule(name, identity, [
             operand("protocol", "^tcp6?$", "regexp"), operand("dest.port", 443)])
         for index, resolver in enumerate(resolvers):
-            name = f"oldbook-bootstrap-{uid}-{identifier}-dns-{index}"
+            name = f"mbp-intel-bootstrap-{uid}-{identifier}-dns-{index}"
             rules[name + ".json"] = allow_rule(name, identity, [
                 operand("protocol", "^(tcp|udp)6?$", "regexp"), operand("dest.port", 53),
                 operand("dest.ip", resolver)])

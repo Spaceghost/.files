@@ -25,7 +25,7 @@ def main():
         parser.error('run as the ordinary build user; doas only isolates networking')
     work = args.work.absolute()
     work.mkdir(parents=True, exist_ok=False)
-    stage = work / 'oldbook/openresolv'
+    stage = work / 'mbp-intel/openresolv'
     stage.mkdir(parents=True)
     for name in ('APKBUILD', 'host-pid-lock.patch', 'detect_init-remove-irrelevant.patch',
                  'test-host-pid-lock.py'):
@@ -39,7 +39,7 @@ def main():
         result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=120)
     if result.returncode:
         raise SystemExit('build failed; see ' + str(work / 'build.log'))
-    packages = sorted((work / 'apks/oldbook').glob('*/*.apk'))
+    packages = sorted((work / 'apks/mbp-intel').glob('*/*.apk'))
     if not packages:
         raise SystemExit('build produced no APKs')
     for package in packages:

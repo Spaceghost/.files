@@ -13,7 +13,7 @@ from verify_decoration_attachment import build_pointer, pointer_reply
 
 
 ROOT = Path(__file__).resolve().parents[2]
-HELPER = ROOT / 'alpine/desktop/.local/bin/oldbook-center'
+HELPER = ROOT / 'alpine/desktop/.local/bin/mbp-intel-center'
 BINDINGS = ROOT / 'alpine/desktop/.config/sway/local.d/center.conf'
 
 

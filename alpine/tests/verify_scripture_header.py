@@ -12,7 +12,7 @@ import time
 
 REPO = Path(__file__).resolve().parents[2]
 BIN = REPO / 'alpine/desktop/.local/bin'
-LIB = REPO / 'alpine/desktop/.local/lib/oldbook'
+LIB = REPO / 'alpine/desktop/.local/lib/mbp_intel'
 sys.path.insert(0, str(LIB))
 import conky_layout
 from verify_conky_clicks import stop_private_clients, wait_for
@@ -41,9 +41,9 @@ def verify(output, scales=(1, 2)):
         runtime, home = root / 'run', root / 'home'
         runtime.mkdir(mode=0o700)
         home.mkdir()
-        target = home / '.local/bin/oldbook-conky-click'
+        target = home / '.local/bin/mbp-intel-conky-click'
         target.parent.mkdir(parents=True)
-        target.symlink_to(BIN / 'oldbook-conky-click')
+        target.symlink_to(BIN / 'mbp-intel-conky-click')
         env = dict(os.environ, HOME=str(home), XDG_RUNTIME_DIR=str(runtime),
                    XDG_CONFIG_HOME=str(home / '.config'),
                    XDG_DATA_HOME=str(home / '.local/share'),
@@ -56,7 +56,7 @@ def verify(output, scales=(1, 2)):
         config.write_text('output HEADLESS-1 mode 1600x1200\n'
                           'output * bg #202024 solid_color\nseat seat0 fallback true\n')
         pointer_binary = build_pointer(root)
-        state = home / '.local/state/oldbook/conky'
+        state = home / '.local/state/mbp-intel/conky'
         children = []
         with (output / 'native.log').open('w') as log:
             def spawn(arguments, pointer=False):
@@ -74,7 +74,7 @@ def verify(output, scales=(1, 2)):
                 return 'Scripture history' in command('swaymsg', '-r', '-t', 'get_tree')
 
             def selection():
-                return (home / '.local/state/oldbook/scripture/selection.json').read_bytes()
+                return (home / '.local/state/mbp-intel/scripture/selection.json').read_bytes()
 
             def pids():
                 return json.loads((state / 'pids.json').read_text())
@@ -106,7 +106,7 @@ def verify(output, scales=(1, 2)):
                     folder = output / f'scale-{scale}'
                     folder.mkdir()
                     command('swaymsg', 'output HEADLESS-1 scale ' + str(scale))
-                    command(str(BIN / 'oldbook-scripture'), 'select', 'John 3:16')
+                    command(str(BIN / 'mbp-intel-scripture'), 'select', 'John 3:16')
                     state.mkdir(parents=True, exist_ok=True)
                     placement = {'x': 30, 'y': 30, 'width': 430, 'height': 250,
                                  'background': [32, 32, 36]}
@@ -114,7 +114,7 @@ def verify(output, scales=(1, 2)):
                         conky_layout.resolve_palette({'palette': {'accent': accent}}))
                     panel = {'id': 'scripture', 'text':
                         '${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n'
-                        '${execpi 3600 ' + str(BIN / 'oldbook-scripture') + ' panel}'}
+                        '${execpi 3600 ' + str(BIN / 'mbp-intel-scripture') + ' panel}'}
                     rendered = conky_layout.render_config(panel, placement, colours,
                         {'font': 'JetBrainsMono Nerd Font:size=9', 'update_interval': 60,
                          'click_hook': str(LIB / 'conky_click.lua')})
@@ -122,7 +122,7 @@ def verify(output, scales=(1, 2)):
                     path.write_text(rendered)
                     (folder / 'scripture.conf').write_text(rendered)
                     assert 'History' in rendered
-                    match = re.search(r"lua_startup_hook\s*=\s*'oldbook_history (\d+) (\d+) (\d+)'",
+                    match = re.search(r"lua_startup_hook\s*=\s*'mbp_intel_history (\d+) (\d+) (\d+)'",
                                       rendered)
                     assert match, 'Generated header has no click rectangle'
                     box = dict(zip(('x', 'width', 'height'), map(int, match.groups())), y=0)

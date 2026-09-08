@@ -27,7 +27,7 @@ backup = load('backup_test', 'backup-repository')
 @unittest.skipUnless(shutil.which('git') and shutil.which('fossil'), 'needs git and fossil')
 class PublicationTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-publication-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-publication-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.checkout = self.root / 'checkout'

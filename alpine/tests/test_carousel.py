@@ -6,7 +6,7 @@ import sys
 import unittest
 from unittest.mock import Mock, patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel'))
 from carousel import Controller, EventFrames, PreviewStore, decode_preview, runtime_directory
 from window_switching import SwitchState
 
@@ -62,7 +62,7 @@ class CarouselTests(unittest.TestCase):
     def test_runtime_is_scoped_to_compositor(self):
         first = runtime_directory(Path('/run/user/1000'), '/one.sock')
         self.assertNotEqual(first, runtime_directory(Path('/run/user/1000'), '/two.sock'))
-        self.assertEqual(first.parent, Path('/run/user/1000/oldbook'))
+        self.assertEqual(first.parent, Path('/run/user/1000/mbp-intel'))
 
     def test_closed_gesture_discards_late_capture(self):
         executor = DeferredExecutor()

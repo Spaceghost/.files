@@ -100,9 +100,9 @@ for_window [app_id="theme-preview"] move position center
 
 
 if __name__ == '__main__':
-    if not os.environ.get('OLDBOOK_THEME_PRIVATE_BUS'):
+    if not os.environ.get('MBP_INTEL_THEME_PRIVATE_BUS'):
         raise SystemExit(subprocess.call(['dbus-run-session', sys.executable, __file__, *sys.argv[1:]],
-                         env=dict(os.environ, OLDBOOK_THEME_PRIVATE_BUS='1')))
+                         env=dict(os.environ, MBP_INTEL_THEME_PRIVATE_BUS='1')))
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('themes', nargs='+')

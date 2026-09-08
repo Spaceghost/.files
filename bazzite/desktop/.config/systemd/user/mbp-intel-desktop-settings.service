@@ -1,0 +1,9 @@
+[Unit]
+Description=Apply MBP Intel desktop toolkit settings
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/mbp-intel-gtk-settings
+

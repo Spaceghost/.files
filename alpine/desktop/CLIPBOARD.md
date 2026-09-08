@@ -16,19 +16,19 @@ copies while staying in copy mode, and Enter copies and exits. Mouse selection
 in tmux also copies. Neovim's unnamedplus clipboard uses wl-clipboard.
 Screenshots copy PNG data before opening the annotation tool.
 
-`oldbook-clipboard daemon` runs two wl-paste watchers for text and images and
+`mbp-intel-clipboard daemon` runs two wl-paste watchers for text and images and
 wl-clip-persist for the regular clipboard. A per-Wayland-display flock makes
 session reloads safe. The persistence service preserves all offered formats,
 including file-manager MIME types, and keeps a copy after the source app exits.
 It leaves the primary selection lifecycle alone. Incomplete reads and offers
 larger than 32 MiB remain with the source app. History stores up to 200 items,
 with an 8 MiB per-item limit, under
-`~/.local/state/oldbook/clipboard/history.db` (private directory and database).
+`~/.local/state/mbp-intel/clipboard/history.db` (private directory and database).
 Copies marked sensitive with the password-manager MIME hint are neither
 archived nor retained by the persistence service. Unmarked copies are ordinary
 history entries; delete them through the menu when necessary.
 
-CLI: `oldbook-clipboard list`, `pick`, `delete`, `clear`, `copy` (text on stdin),
+CLI: `mbp-intel-clipboard list`, `pick`, `delete`, `clear`, `copy` (text on stdin),
 and `paste` (text on stdout without an added newline). Plain `cliphist` uses
 its own default database; use this helper to manage the desktop history.
 
@@ -37,11 +37,11 @@ its own default database; use this helper to manage the desktop history.
 Install `cliphist@testing` and `wl-clip-persist@testing` from the tagged HTTPS
 Alpine testing repository. Their exact signed APKs are archived in Fossil;
 see `alpine/packages/clipboard/manifest.json` for identities and hashes.
-Deploy `.local/bin/oldbook-clipboard`, `.local/bin/oldbook-session`,
-`.local/bin/oldbook-screenshot`, `.config/tmux/oldbook.conf`, and
+Deploy `.local/bin/mbp-intel-clipboard`, `.local/bin/mbp-intel-session`,
+`.local/bin/mbp-intel-screenshot`, `.config/tmux/mbp-intel.conf`, and
 `.config/sway/local.d/clipboard.conf` using `alpine/bin/deploy-home --only`.
 The normal session starter owns the daemon. Existing tmux servers can source
-`~/.config/tmux/oldbook.conf` directly. Existing Foot windows keep their startup
+`~/.config/tmux/mbp-intel.conf` directly. Existing Foot windows keep their startup
 configuration: reopen standalone Foot windows to enable mouse auto-copy;
 explicit Ctrl+Shift+C and the live tmux fix work without closing them.
 
@@ -53,7 +53,7 @@ the active desktop clipboard.
 
 To recover, restore the exact files from the deployment journal and revert
 this change's shared/theme terminal options. Terminate only the
-`oldbook-clipboard daemon` process for the active display; it stops its children.
+`mbp-intel-clipboard daemon` process for the active display; it stops its children.
 Remove its session-start entry to keep it stopped, and reload the tmux controls
 and Sway shortcut configuration. Leave the private history database intact
 unless its removal is intended. Package removal is optional.

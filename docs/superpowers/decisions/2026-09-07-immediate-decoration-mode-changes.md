@@ -6,7 +6,7 @@ it kept the old surface for up to 220 ms and mapped the new caption at opacity
 zero. Hover focus handoffs already avoided this behavior.
 
 An isolated trace of the unmodified daemon reproduced the problem with both
-plain `floating enable` and `oldbook-resize shrink`. The window itself completed
+plain `floating enable` and `mbp-intel-resize shrink`. The window itself completed
 one geometry change, and the caption received only one target. The old and new
 caption surfaces overlapped throughout the fade; no extra resize/recenter jump
 was reproduced in those scenarios.
@@ -33,6 +33,6 @@ Activated by restarting only the live decoration daemon, with exactly one
 caption per active output afterward. Its source hash matches the measured fix.
 Saved bottom placement, 0.67 background opacity, and 7 px radius were preserved.
 
-Recovery: restore only `alpine/desktop/.local/bin/oldbook-decoration` from the
-parent of this check-in and restart only `oldbook-decoration daemon`. Saved
+Recovery: restore only `alpine/desktop/.local/bin/mbp-intel-decoration` from the
+parent of this check-in and restart only `mbp-intel-decoration daemon`. Saved
 placement, opacity and corner radius do not need restoration.

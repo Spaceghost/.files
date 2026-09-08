@@ -8,8 +8,8 @@ import shlex
 import subprocess
 
 REPO = Path(__file__).resolve().parents[2]
-BEGIN = '# BEGIN oldbook-wallpaper (managed by alpine/bin/install-wallpaper-schedule)'
-END = '# END oldbook-wallpaper'
+BEGIN = '# BEGIN mbp-intel-wallpaper (managed by alpine/bin/install-wallpaper-schedule)'
+END = '# END mbp-intel-wallpaper'
 
 
 def update_crontab(existing, command=None):
@@ -40,7 +40,7 @@ def main():
     parser.add_argument('--remove', action='store_true')
     parser.add_argument('--print', action='store_true', dest='print_only')
     args = parser.parse_args()
-    state = Path.home() / '.local/state/oldbook/wallpaper-generation'
+    state = Path.home() / '.local/state/mbp-intel/wallpaper-generation'
     # Cron treats unescaped percent as stdin even inside shell quotes.
     values = [str(Path.home()), str(REPO), str(state)]
     if any('\n' in value or '%' in value for value in values):

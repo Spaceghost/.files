@@ -2,7 +2,7 @@
 
 The guide is now the standalone **Hold to Help** project in
 `projects/hold-to-help/`, with a CMake source release and signed Alpine package.
-`oldbook-shortcuts` remains the compatibility command; the installed command is
+`mbp-intel-shortcuts` remains the compatibility command; the installed command is
 `hold-to-help`. The original GTK implementation remains available for rollback.
 
 Hold either **Super** key by itself for half a second. A scrollable overlay
@@ -35,7 +35,7 @@ The Codex CLI profile includes `/keymap, Enter`, which opens Codex's own current
 shortcut browser and remapping interface. Its baseline keys are versioned for
 the installed Codex CLI 0.153.4.
 
-Add or override app profiles in `~/.config/oldbook/shortcuts.json`:
+Add or override app profiles in `~/.config/mbp-intel/shortcuts.json`:
 
 ```json
 {
@@ -59,13 +59,13 @@ the built-in shortcuts.
 
 ## Operation
 
-`oldbook-shortcuts dump` prints the current contextual list as JSON.
-`oldbook-shortcuts preview --seconds 5` shows a temporary layout preview.
-`oldbook-shortcuts status` prints the current session's service record.
+`mbp-intel-shortcuts dump` prints the current contextual list as JSON.
+`mbp-intel-shortcuts preview --seconds 5` shows a temporary layout preview.
+`mbp-intel-shortcuts status` prints the current session's service record.
 These commands also accept `--socket PATH` for an explicit Sway session.
 
 The separate `~/.config/sway/local.d/shortcuts.conf` startup snippet launches
-`oldbook-shortcuts daemon`. A per-compositor lock prevents duplicates across
+`mbp-intel-shortcuts daemon`. A per-compositor lock prevents duplicates across
 reloads. Status files under `$XDG_RUNTIME_DIR/hold-to-help/` contain service
 metadata; key events and typed content are never written to them.
 
@@ -81,7 +81,7 @@ installation is required after restoring the recorded Hold to Help package snaps
 ## Theme and portable configuration
 
 Qt supplies the palette, fonts and style. The local qt6ct settings and the
-optional native LXQt configuration both use Gruvbox Dark, Inter and the Oldbook
+optional native LXQt configuration both use Gruvbox Dark, Inter and the MBP Intel
 icons. LXQt's named preset is `~/.local/share/lxqt/palettes/Gruvbox-Dark`.
 The guide follows application palette/font events; a platform plugin that only
 reads settings at startup requires restarting the guide after a theme change.
@@ -90,18 +90,18 @@ Edit `~/.config/hold-to-help/config.toml` (deployed from this workspace) to choo
 `trigger = "capslock"`, or change `hold_seconds`. The current default remains
 Super and Caps-to-Escape is preserved. Physical-trigger selection never remaps
 the key. The standalone profile path is `~/.config/hold-to-help/profiles.json`;
-the compatibility command keeps the existing Oldbook profile path usable.
+the compatibility command keeps the existing MBP Intel profile path usable.
 
 The compatibility launcher imports the workspace project when deployed through
 its repository symlink. Restart the shortcut daemon after editing Python files;
 rebuild the package after native bridge changes. Set
-`OLDBOOK_SHORTCUTS_LEGACY=1` when launching the compatibility command to use the
+`MBP_INTEL_SHORTCUTS_LEGACY=1` when launching the compatibility command to use the
 preserved GTK implementation during rollback. Stop the current guide first so
 two implementations do not observe the same hold.
 
 To disable the feature, comment out the startup command, read the PID from
-`oldbook-shortcuts status`, and send that process SIGTERM. Re-enable the command
-and run `oldbook-shortcuts daemon` to restore it. Deployment uses the normal
+`mbp-intel-shortcuts status`, and send that process SIGTERM. Re-enable the command
+and run `mbp-intel-shortcuts daemon` to restore it. Deployment uses the normal
 `deploy-home` recovery journal; its recorded backup can be rolled back with
 `alpine/bin/deploy-home --target "$HOME" --rollback BACKUP_DIRECTORY`.
 

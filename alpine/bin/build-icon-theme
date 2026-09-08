@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Oldbook folder icon overlay from the locked local Papirus package."""
+"""Build the MBP Intel folder icon overlay from the locked local Papirus package."""
 import argparse
 import configparser
 import hashlib
@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_SOURCE = Path('/usr/share/icons/Papirus')
-DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/icons/Oldbook-Gruvbox'
+DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/icons/MBP-Intel-Gruvbox'
 SOURCE_VERSION = '20250201-r0'
 RECOLORS = {
     '#f9bd30': '#fabd2f', '#e19d00': '#d79921', '#594411': '#665c54',
@@ -74,13 +74,13 @@ def build(source, output):
         manifest[f'{relative_dir}/inode-directory.svg'] = dict(manifest[folder])
     if not sections:
         raise RuntimeError('No Papirus folder icons found.')
-    index = '[Icon Theme]\nName=Oldbook Gruvbox\nComment=Warm Gruvbox folders with Papirus Dark application icons\nInherits=Papirus-Dark,hicolor\nExample=folder\nDirectories=' + ','.join(sections) + '\n'
+    index = '[Icon Theme]\nName=MBP Intel Gruvbox\nComment=Warm Gruvbox folders with Papirus Dark application icons\nInherits=Papirus-Dark,hicolor\nExample=folder\nDirectories=' + ','.join(sections) + '\n'
     for section in sections:
         index += f'\n[{section}]\nContext=Places\nSize={theme[section]["Size"]}\nType=Fixed\n'
     documents['index.theme'] = index.encode()
     documents['LICENSE'] = license_text
     documents['README.md'] = (
-        '# Oldbook Gruvbox folder icons\n\n'
+        '# MBP Intel Gruvbox folder icons\n\n'
         'Derived from PapirusDevelopmentTeam/papirus-icon-theme, release 20250201, GPL-3.0.\n'
         'Upstream: https://github.com/PapirusDevelopmentTeam/papirus-icon-theme\n\n'
         'Modified 2026-09-07: select yellow folder variants for standard aliases;\n'

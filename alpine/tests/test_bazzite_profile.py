@@ -10,7 +10,7 @@ from unittest import mock
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / 'bazzite/bin/oldbook-bazzite-profile'
+HELPER = REPO / 'bazzite/bin/mbp-intel-bazzite-profile'
 
 
 def load_helper():
@@ -38,8 +38,8 @@ class BazziteProfileTest(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn('add .config/sway/config', result.stdout)
-        self.assertIn('add .local/bin/oldbook-wallpaper', result.stdout)
-        self.assertFalse((self.home / '.local/state/oldbook').exists())
+        self.assertIn('add .local/bin/mbp-intel-wallpaper', result.stdout)
+        self.assertFalse((self.home / '.local/state/mbp-intel').exists())
 
     def test_override_bytecode_is_not_deployed(self):
         module = load_helper()
@@ -66,8 +66,8 @@ class BazziteProfileTest(unittest.TestCase):
         self.assertTrue(original.is_symlink())
         config = original.read_text()
         self.assertNotIn('output eDP-1 mode', config)
-        self.assertIn('~/.local/bin/oldbook-bazzite-session', config)
-        self.assertNotIn('oldbook-session\n', config)
+        self.assertIn('~/.local/bin/mbp-intel-bazzite-session', config)
+        self.assertNotIn('mbp-intel-session\n', config)
         backup = Path(applied.stdout.strip().split('Backup: ', 1)[1])
         manifest = json.loads((backup / 'manifest.json').read_text())
         self.assertEqual(manifest['status'], 'complete')
@@ -100,13 +100,13 @@ class BazziteProfileTest(unittest.TestCase):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
 
-        self.assertFalse((self.home / '.local/bin/oldbook-session').exists())
-        self.assertFalse((self.home / '.local/bin/oldbook-firewall-ui').exists())
-        self.assertFalse((self.home / '.local/bin/oldbook-panel-status').exists())
-        target = self.home / '.config/systemd/user/oldbook-session.target'
-        self.assertIn('oldbook-waybar.service', target.read_text())
-        for name in ('oldbook-waybar.service', 'oldbook-swaync.service',
-                     'oldbook-swayidle.service', 'oldbook-wallpaper.service'):
+        self.assertFalse((self.home / '.local/bin/mbp-intel-session').exists())
+        self.assertFalse((self.home / '.local/bin/mbp-intel-firewall-ui').exists())
+        self.assertFalse((self.home / '.local/bin/mbp-intel-panel-status').exists())
+        target = self.home / '.config/systemd/user/mbp-intel-session.target'
+        self.assertIn('mbp-intel-waybar.service', target.read_text())
+        for name in ('mbp-intel-waybar.service', 'mbp-intel-swaync.service',
+                     'mbp-intel-swayidle.service', 'mbp-intel-wallpaper.service'):
             self.assertTrue((target.parent / name).is_symlink(), name)
 
         joined = '\n'.join(path.read_text() for path in target.parent.iterdir())
@@ -134,13 +134,13 @@ class BazziteProfileTest(unittest.TestCase):
             'XDG_SESSION_TYPE': 'wayland',
         }
         result = subprocess.run(
-            [str(self.home / '.local/bin/oldbook-bazzite-session')],
+            [str(self.home / '.local/bin/mbp-intel-bazzite-session')],
             env=environment, text=True, capture_output=True, timeout=5)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(log.read_text().splitlines(), [
             'systemctl --user import-environment DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE',
             'dbus-update-activation-environment --systemd DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE',
-            'systemctl --user start oldbook-session.target',
+            'systemctl --user start mbp-intel-session.target',
         ])
 
     def test_waybar_uses_per_user_glibc_module_without_losing_art_controls(self):
@@ -152,9 +152,9 @@ class BazziteProfileTest(unittest.TestCase):
         self.assertIn('cffi/art', top['modules-left'])
         self.assertEqual(
             top['cffi/art']['module_path'],
-            str(self.home / '.local/lib/oldbook/oldbook-art.so'))
+            str(self.home / '.local/lib/mbp_intel/mbp-intel-art.so'))
         self.assertEqual(top['cffi/art'].get('command'),
-                         '~/.local/bin/oldbook-wallpaper')
+                         '~/.local/bin/mbp-intel-wallpaper')
         self.assertNotIn('custom/radio', top)
         self.assertNotIn('custom/firewall', top)
         self.assertNotIn('group/transmission', top['group/status']['modules'])
@@ -166,22 +166,22 @@ class BazziteProfileTest(unittest.TestCase):
         module = load_helper()
         overlay = module.overlay_directory(self.home)
         self.assertEqual((overlay.parent / 'repo').resolve(), REPO)
-        for name in ('oldbook-wallpaper', 'oldbook-gallery-prompts', 'oldbook-conky'):
+        for name in ('mbp-intel-wallpaper', 'mbp-intel-gallery-prompts', 'mbp-intel-conky'):
             text = (self.home / '.local/bin' / name).read_text()
             self.assertIn("parents[3] / 'repo'", text)
-        wallpaper = (self.home / '.local/bin/oldbook-wallpaper').read_text()
-        self.assertNotIn("REPO / 'alpine/desktop/.local/bin/oldbook-control'", wallpaper)
-        self.assertIn("Path(__file__).resolve().parent / 'oldbook-control'", wallpaper)
+        wallpaper = (self.home / '.local/bin/mbp-intel-wallpaper').read_text()
+        self.assertNotIn("REPO / 'alpine/desktop/.local/bin/mbp-intel-control'", wallpaper)
+        self.assertIn("Path(__file__).resolve().parent / 'mbp-intel-control'", wallpaper)
 
-    def test_every_retained_oldbook_sway_binding_has_a_deployed_helper(self):
+    def test_every_retained_mbp_intel_sway_binding_has_a_deployed_helper(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
 
         config = (self.home / '.config/sway/config').read_text()
         helpers = {token for token in config.replace("'", ' ').replace('"', ' ').split()
-                   if token.startswith('~/.local/bin/oldbook-')}
+                   if token.startswith('~/.local/bin/mbp-intel-')}
         self.assertTrue(helpers)
-        self.assertTrue((self.home / '.local/bin/oldbook-conky').is_symlink())
+        self.assertTrue((self.home / '.local/bin/mbp-intel-conky').is_symlink())
         for helper in helpers:
             name = helper.removeprefix('~/.local/bin/')
             self.assertTrue((self.home / '.local/bin' / name).exists(), name)
@@ -189,8 +189,8 @@ class BazziteProfileTest(unittest.TestCase):
     def test_gallery_and_media_helpers_have_their_fuzzel_wrapper(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
-        self.assertTrue((self.home / '.local/bin/oldbook-fuzzel').is_symlink())
-        self.assertTrue((self.home / '.local/bin/oldbook-scripture').is_symlink())
+        self.assertTrue((self.home / '.local/bin/mbp-intel-fuzzel').is_symlink())
+        self.assertTrue((self.home / '.local/bin/mbp-intel-scripture').is_symlink())
 
     def test_deployed_shortcut_wrapper_imports_checkout_project(self):
         applied = self.run_profile('apply')
@@ -200,7 +200,7 @@ class BazziteProfileTest(unittest.TestCase):
         (fake_bin / 'superhold').write_text('#!/bin/sh\nprintf "Superhold fixture %s\\n" "$*"\n')
         (fake_bin / 'superhold').chmod(0o755)
         result = subprocess.run(
-            [str(self.home / '.local/bin/oldbook-shortcuts'), '--help'],
+            [str(self.home / '.local/bin/mbp-intel-shortcuts'), '--help'],
             env={'PATH': str(fake_bin) + ':/usr/bin:/bin'},
             text=True, capture_output=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -209,7 +209,7 @@ class BazziteProfileTest(unittest.TestCase):
     def test_bazzite_lock_uses_stock_swaylock_supported_readiness_flags(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
-        path = self.home / '.local/bin/oldbook-lock'
+        path = self.home / '.local/bin/mbp-intel-lock'
         loader = importlib.machinery.SourceFileLoader('bazzite_lock', str(path))
         spec = importlib.util.spec_from_loader(loader.name, loader)
         lock = importlib.util.module_from_spec(spec)
@@ -227,7 +227,7 @@ class BazziteProfileTest(unittest.TestCase):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
 
-        path = self.home / '.local/lib/oldbook/overlay_theme.py'
+        path = self.home / '.local/lib/mbp_intel/overlay_theme.py'
         loader = importlib.machinery.SourceFileLoader('deployed_overlay_theme', str(path))
         spec = importlib.util.spec_from_loader(loader.name, loader)
         theme = importlib.util.module_from_spec(spec)
@@ -245,7 +245,7 @@ class BazziteProfileTest(unittest.TestCase):
 
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
-        module = self.home / '.local/lib/oldbook/oldbook-art.so'
+        module = self.home / '.local/lib/mbp_intel/mbp-intel-art.so'
         module.parent.mkdir(parents=True, exist_ok=True)
         module.write_bytes(b'not an ELF')
         after = self.run_profile('check', '--skip-runtime')
@@ -255,7 +255,7 @@ class BazziteProfileTest(unittest.TestCase):
     def test_check_reports_direct_menu_media_and_session_dependencies(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
-        module = self.home / '.local/lib/oldbook/oldbook-art.so'
+        module = self.home / '.local/lib/mbp_intel/mbp-intel-art.so'
         module.parent.mkdir(parents=True, exist_ok=True)
         module.write_bytes(b'\x7fELF\x02\x01Fedora fixture')
         fake_path = Path(self.tmp.name) / 'runtime-path'

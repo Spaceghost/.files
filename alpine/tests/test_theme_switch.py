@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
-THEME = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'))
+THEME = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'))
 
 FOOT = '''[main]
 term=xterm-256color
@@ -114,7 +114,7 @@ class ShippedProfiles(unittest.TestCase):
                 target = root / relative
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(REPO / relative, target)
-            theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/oldbook-theme'))
+            theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/mbp-intel-theme'))
             profile = root / 'alpine/themes/profiles/gruvbox-dark'
             foot = profile / '.config/foot/foot.ini'
             for font, expected_family, expected_size in (
@@ -129,14 +129,14 @@ class ShippedProfiles(unittest.TestCase):
                 self.assertIn(f'font-size = {expected_size}\n', deployed.read_text())
 
     def test_every_profile_with_foot_colours_has_a_matching_ghostty_config(self):
-        # `oldbook-theme sync` generates these; a profile that drifts fails here.
+        # `mbp-intel-theme sync` generates these; a profile that drifts fails here.
         for profile in sorted((REPO / 'alpine/themes/profiles').glob('*')):
             foot = profile / '.config/foot/foot.ini'
             if not foot.is_file():
                 continue
             with self.subTest(theme=profile.name):
                 ghostty = profile / '.config/ghostty/config'
-                self.assertTrue(ghostty.is_file(), 'run: oldbook-theme sync')
+                self.assertTrue(ghostty.is_file(), 'run: mbp-intel-theme sync')
                 body = ghostty.read_text()
                 self.assertIn('palette = 0=#', body)
                 foot_font = next(line.split('=', 1)[1] for line in foot.read_text().splitlines()

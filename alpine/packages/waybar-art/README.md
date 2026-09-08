@@ -11,7 +11,7 @@ the generator invents its name and creates a complete desktop design and first
 painting. Empty input or Escape cancels. Other right, middle and scroll actions
 keep their usual behavior. The
 widget displays the complete tooltip, icon and state classes from
-`oldbook-wallpaper status` without rewriting the help text. A bounded startup
+`mbp-intel-wallpaper status` without rewriting the help text. A bounded startup
 walk also adds contextual hover help to Waybar's workspace, focused-window,
 mode and CPU widgets, whose stock modules do not accept custom tooltip formats.
 It reads and escapes each widget's current label or native tooltip only while
@@ -22,7 +22,7 @@ name are bold and bright, inactive numbers stay bold with regular names, and
 process suffixes remain regular and subdued. Reserved empty names such as
 `4: Signal` and `10: Strata` retain those attributes in both Titlecase and
 legacy uppercase spelling. Named colors
-`oldbook_workspace_active` and `oldbook_workspace_secondary` come from the
+`mbp_intel_workspace_active` and `mbp_intel_workspace_secondary` come from the
 selected Waybar stylesheet. Labels remain plain text, including literal Unicode
 and markup characters, so workspace names and click commands stay intact.
 
@@ -45,12 +45,12 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r9.apk
+doas apk add --no-network /tmp/waybar-art-build/apks/mbp-intel/x86_64/mbp-intel-waybar-art-1.0.0-r9.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
 using the build user's private abuild key outside the checkout. The library is
-installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
+installed at `/usr/lib/waybar/mbp-intel-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
 `manifest.json` records the exact signed r9 APK identity and archived artifact.
@@ -62,7 +62,7 @@ with screenshots in both desktop themes:
 
 ```sh
 alpine/packages/waybar-art/verify-workspaces-headless \
-    --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-workspace-emphasis
+    --module /usr/lib/waybar/mbp-intel-art.so --output /tmp/waybar-workspace-emphasis
 ```
 
 This uses a private compositor and D-Bus with synthetic Foot windows. Its GTK
@@ -75,7 +75,7 @@ paused and generating states:
 
 ```sh
 alpine/packages/waybar-art/verify-tooltip-headless \
-    --helper "$HOME/.local/bin/oldbook-wallpaper" --output /tmp/waybar-art-tooltips
+    --helper "$HOME/.local/bin/mbp-intel-wallpaper" --output /tmp/waybar-art-tooltips
 ```
 
 This uses a private HOME and compositor, moves only a private virtual pointer,
@@ -84,7 +84,7 @@ tests also parse the complete tooltip with Pango: a raw ampersand in an
 instruction used to invalidate the entire popup despite passing text-only tests.
 
 ```sh
-alpine/packages/waybar-art/verify-headless --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-art-test
+alpine/packages/waybar-art/verify-headless --module /usr/lib/waybar/mbp-intel-art.so --output /tmp/waybar-art-test
 ```
 
 The test requires `sway waybar build-base pkgconf wayland-dev grim` and `doas` for a temporary
@@ -99,7 +99,7 @@ Render the contextual help against Waybar's real Sway and CPU modules:
 
 ```sh
 alpine/packages/waybar-art/verify-help-headless \
-    --module /usr/lib/waybar/oldbook-art.so --output /tmp/waybar-help-test
+    --module /usr/lib/waybar/mbp-intel-art.so --output /tmp/waybar-help-test
 ```
 
 This second private compositor uses only a synthetic window title, activates a

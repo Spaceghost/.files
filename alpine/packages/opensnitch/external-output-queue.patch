@@ -12,7 +12,7 @@
  // rules above this one to exclude a service/app from being intercepted.
  // nft insert rule ip mangle OUTPUT ct state new queue num 0 bypass
  func (n *Nft) QueueConnections(enable, logError bool) (error, error) {
-+	// Oldbook owns a permanent no-bypass output queue outside our tables.
++	// MBP Intel owns a permanent no-bypass output queue outside our tables.
 +	// Do not queue a connection twice or remove that gate during shutdown.
 +	if os.Getenv("OPENSNITCH_EXTERNAL_OUTPUT_QUEUE") == "1" {
 +		return nil, nil

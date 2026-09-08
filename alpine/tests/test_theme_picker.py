@@ -8,7 +8,7 @@ from unittest import mock
 from test_wallpapers import REPO, load
 
 
-art = load('theme_picker_wallpaper', REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper')
+art = load('theme_picker_wallpaper', REPO / 'alpine/desktop/.local/bin/mbp-intel-wallpaper')
 
 
 class ThemePickerTests(unittest.TestCase):
@@ -33,7 +33,7 @@ class ThemePickerTests(unittest.TestCase):
                 mock.patch.object(art.subprocess, 'Popen') as launch:
             self.assertEqual(art.switch_theme(), 0)
         launch.assert_called_once_with(
-            ['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'),
+            ['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'),
              'use', 'moon-books', '--notify'], start_new_session=True)
 
     def test_active_theme_can_be_reapplied_after_incomplete_refresh(self):
@@ -41,7 +41,7 @@ class ThemePickerTests(unittest.TestCase):
                 mock.patch.object(art.subprocess, 'Popen') as launch:
             self.assertEqual(art.switch_theme(), 0)
         launch.assert_called_once_with(
-            ['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'),
+            ['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'),
              'use', 'active-theme', '--notify'], start_new_session=True)
 
     def test_cancel_back_or_unknown_selection_never_launches(self):

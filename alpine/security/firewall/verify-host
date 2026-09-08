@@ -20,7 +20,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(b'OLDBOOK_PACKET_PROBE\n')
+        self.wfile.write(b'MBP_INTEL_PACKET_PROBE\n')
 
     def log_message(self, *args):
         pass
@@ -42,16 +42,16 @@ def curl(host, port, prefix=(), uid=None, executable='/usr/bin/curl', max_time=3
     url_host = f'[{host}]' if ':' in host else host
     result = subprocess.run([*prefix, executable, '--disable', '--noproxy', '*',
         '--silent', '--fail', '--max-time', str(max_time), '--write-out',
-        '\nOLDBOOK_CONNECTS:%{num_connects}', f'http://{url_host}:{port}/'],
+        '\nMBP_INTEL_CONNECTS:%{num_connects}', f'http://{url_host}:{port}/'],
         capture_output=True, text=True, timeout=max_time + 2,
         **({'user': uid, 'group': uid, 'extra_groups': ()} if uid is not None else {}))
     if result.returncode not in (0, 28):
         raise RuntimeError(f'Probe failed unexpectedly: curl exit {result.returncode}')
-    body, separator, connections = result.stdout.rpartition('\nOLDBOOK_CONNECTS:')
+    body, separator, connections = result.stdout.rpartition('\nMBP_INTEL_CONNECTS:')
     if not separator or not connections.isdecimal():
         raise RuntimeError('Missing curl connection-count evidence')
     if result.returncode == 0:
-        if int(connections) != 1 or body.strip() != 'OLDBOOK_PACKET_PROBE':
+        if int(connections) != 1 or body.strip() != 'MBP_INTEL_PACKET_PROBE':
             raise RuntimeError('HTTP succeeded but returned an unexpected probe body')
         return True
     if int(connections) != 0:
@@ -105,12 +105,12 @@ def main():
     created = False
     servers = []
     results = []
-    with tempfile.TemporaryDirectory(prefix='oldbook-host-packets-') as work:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-host-packets-') as work:
         # Use a new executable path so an existing interactive curl permission
         # cannot invalidate this unknown-application check. This directory has
         # only the probe executable and readiness markers, and stays root-writable.
         os.chmod(work, 0o755)
-        client = Path(work) / 'oldbook-unapproved-network-probe'
+        client = Path(work) / 'mbp-intel-unapproved-network-probe'
         shutil.copyfile('/usr/bin/curl', client)
         client.chmod(0o755)
         ready = Path(work) / 'ready'

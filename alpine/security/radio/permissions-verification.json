@@ -3,7 +3,7 @@
   "checked_at_utc": "2026-09-07T13:55:30Z",
   "scope": "Permission-only preparation; controller and network policy remain staged",
   "installed_helper": {
-    "path": "/usr/local/libexec/oldbook-radio/install",
+    "path": "/usr/local/libexec/mbp-intel-radio/install",
     "source": "alpine/security/radio/install",
     "uid": 0,
     "gid": 0,
@@ -14,7 +14,7 @@
   },
   "installed_rule": {
     "path": "/etc/udev/rules.d/72-privacy-rfkill.rules",
-    "adjacent_copy": "/usr/local/libexec/oldbook-radio/72-privacy-rfkill.rules",
+    "adjacent_copy": "/usr/local/libexec/mbp-intel-radio/72-privacy-rfkill.rules",
     "source": "alpine/security/radio/root/etc/udev/rules.d/72-privacy-rfkill.rules",
     "uid": 0,
     "gid": 0,
@@ -24,7 +24,7 @@
     "source_and_adjacent_sha256_match": true
   },
   "private_recovery_journal": {
-    "path": "/var/lib/oldbook/radio-permissions/attempt-0huvvd1q",
+    "path": "/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q",
     "mode": "0o700",
     "status": "prepared",
     "record_files_mode_0600": true,
@@ -50,7 +50,7 @@
     "radio_soft_and_hard_match_before": true,
     "wifi_identity_and_addresses_match_before": true,
     "routes": {
-      "private_baseline": "/var/lib/oldbook/radio-permissions/attempt-0huvvd1q/routes.json",
+      "private_baseline": "/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q/routes.json",
       "normalization": "Remove only expires fields; retain all route identities and attributes",
       "recorded_unchanged": true,
       "before_after_equal_after_normalization": true,

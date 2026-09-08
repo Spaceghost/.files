@@ -10,7 +10,7 @@ import unittest
 LIB = Path(__file__).resolve().parents[1] / 'desktop/.local/lib'
 sys.path.insert(0, str(LIB))
 
-from oldbook.app_identity import ApplicationResolver
+from mbp_intel.app_identity import ApplicationResolver
 
 
 class TmuxRunner:
@@ -30,7 +30,7 @@ class TmuxRunner:
 
 class ApplicationResolverTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-proc-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-proc-test-')
         self.addCleanup(self.temp.cleanup)
         self.proc = Path(self.temp.name)
 
@@ -71,7 +71,7 @@ class ApplicationResolverTests(unittest.TestCase):
             panes='$0\t@0\t0\t%2\t1002\t/dev/pts/2\tcodex\t120\t40\t1\t'
                   'jack | codex | ~ | Working | Context 42% left\n')
         result = self.resolver(runner).resolve_all([
-            {'id': 5, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'}])
+            {'id': 5, 'pid': 100, 'app_id': 'mbp-intel-agent', 'name': 'Codex'}])
         self.assertEqual(result[5], {
             'name': 'Codex', 'kind': 'codex', 'state': 'Working',
             'tmux_pane': '%2', 'tty': '/dev/pts/2'})
@@ -86,10 +86,10 @@ class ApplicationResolverTests(unittest.TestCase):
             clients='110\t$0\t@0\n',
             panes='$0\t@0\t0\t%2\t1002\t/dev/pts/2\tcodex\t120\t40\t1\tCodex\n')
         resolver = self.resolver(runner)
-        service = runpy.run_path(str(LIB.parent / 'bin/oldbook-workspaces'))
+        service = runpy.run_path(str(LIB.parent / 'bin/mbp-intel-workspaces'))
         windows = [
             {'id': 5, 'pid': 200, 'app_id': 'foot', 'name': 'Codex', 'focused': True},
-            {'id': 6, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'}]
+            {'id': 6, 'pid': 100, 'app_id': 'mbp-intel-agent', 'name': 'Codex'}]
         workspaces = []
         for i, window in enumerate(windows, 1):
             window.update(type='con', rect={'x': 0, 'y': 0, 'width': 100, 'height': 100},
@@ -123,8 +123,8 @@ class ApplicationResolverTests(unittest.TestCase):
         self.process(100, 'unrelated-app')
         runner = TmuxRunner()
         result = self.resolver(runner).resolve_all([
-            {'id': 5, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'},
-            {'id': 6, 'pid': 99999, 'app_id': 'oldbook-agent', 'name': 'Codex'}])
+            {'id': 5, 'pid': 100, 'app_id': 'mbp-intel-agent', 'name': 'Codex'},
+            {'id': 6, 'pid': 99999, 'app_id': 'mbp-intel-agent', 'name': 'Codex'}])
         self.assertEqual([value['kind'] for value in result.values()], ['app', 'app'])
         self.assertEqual(runner.calls, [])
 
@@ -135,7 +135,7 @@ class ApplicationResolverTests(unittest.TestCase):
         runner = TmuxRunner(
             clients='110\t$0\t@0\n',
             panes=(
-                '$0\t@0\t0\t%1\t1001\t/dev/pts/1\tnvim\t80\t40\t1\toldbook\n'
+                '$0\t@0\t0\t%1\t1001\t/dev/pts/1\tnvim\t80\t40\t1\tmbp-intel\n'
                 '$0\t@0\t0\t%2\t1002\t/dev/pts/2\tcodex\t120\t40\t0\t'
                 r'\⠸\ jack\ \|\ codex\ \|\ ~/.files\ \|\ Working\ \|\ Context\ 22\%\ left'
                 '\n'
@@ -168,7 +168,7 @@ class ApplicationResolverTests(unittest.TestCase):
         runner = TmuxRunner(
             clients='110\t$0\t@0\n',
             panes=(
-                '$0\t@0\t1\t%1\t1001\t/dev/pts/1\tnvim\t80\t30\t1\toldbook\n'
+                '$0\t@0\t1\t%1\t1001\t/dev/pts/1\tnvim\t80\t30\t1\tmbp-intel\n'
                 '$0\t@0\t1\t%2\t1002\t/dev/pts/2\tcodex\t200\t60\t0\t'
                 r'\⠸\ jack\ \|\ codex\ \|\ ~\ \|\ Working'
                 '\n'

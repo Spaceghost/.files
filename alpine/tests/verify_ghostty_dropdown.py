@@ -23,7 +23,7 @@ OUT = parser.parse_args().output_dir.resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 LOGS = OUT / 'logs'
 LOGS.mkdir(exist_ok=True)
-HELPER = ROOT / 'alpine/desktop/.local/bin/oldbook-dropdown'
+HELPER = ROOT / 'alpine/desktop/.local/bin/mbp-intel-dropdown'
 api = runpy.run_path(str(HELPER))
 
 
@@ -135,7 +135,7 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         env.update(SWAYSOCK=str(sock), WAYLAND_DISPLAY=display.name)
         cold = toggle()
         node, workspace = wait(find)
-        assert node['app_id'] == 'com.oldbook.dropdown' and node['visible']
+        assert node['app_id'] == 'com.mbp-intel.dropdown' and node['visible']
         first_id, first_pid = (node['id'], node['pid'])
         rect = node['rect']
         assert rect == dict(x=43, y=39, width=1354, height=468), rect

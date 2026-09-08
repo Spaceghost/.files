@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely install or roll back Oldbook's supported Claude Code hooks."""
+"""Safely install or roll back MBP Intel's supported Claude Code hooks."""
 import argparse
 import hashlib
 import json
@@ -89,7 +89,7 @@ def add_hook(document, event, handler, matcher=None):
 
 
 def make_backup(target, original, original_mode, replacement):
-    root = target / '.local/state/oldbook/claude-notifications/backups'
+    root = target / '.local/state/mbp-intel/claude-notifications/backups'
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(root, 0o700)
     backup = root / str(time.time_ns())
@@ -150,7 +150,7 @@ def install(target, helper):
 def rollback(target, backup):
     target = target.resolve()
     backup = backup.resolve()
-    allowed = target / '.local/state/oldbook/claude-notifications/backups'
+    allowed = target / '.local/state/mbp-intel/claude-notifications/backups'
     if not backup.is_relative_to(allowed):
         raise RuntimeError('backup must belong to the target HOME')
     try:
@@ -186,7 +186,7 @@ def main():
     if args.rollback:
         rollback(args.target, args.rollback)
         return
-    helper = args.helper or args.target / '.local/bin/oldbook-claude-notify'
+    helper = args.helper or args.target / '.local/bin/mbp-intel-claude-notify'
     print(install(args.target, helper))
 
 

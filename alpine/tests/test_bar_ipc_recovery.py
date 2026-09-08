@@ -105,7 +105,7 @@ class BarIpcRecoveryTests(unittest.TestCase):
             fixture = IpcFixture(runtime, failed_kind)
             env = dict(os.environ, HOME=str(root), XDG_RUNTIME_DIR=str(runtime),
                        XDG_CONFIG_HOME=str(root / '.config'), SWAYSOCK=str(fixture.path))
-            if helper == 'oldbook-workspaces':
+            if helper == 'mbp-intel-workspaces':
                 command = [str(BIN / helper), 'daemon']
             else:
                 # Keep native IPC/state behavior, but never signal the host bar.
@@ -115,8 +115,8 @@ class BarIpcRecoveryTests(unittest.TestCase):
             process = subprocess.Popen(command, env=env, stdout=subprocess.DEVNULL,
                                        stderr=subprocess.PIPE, text=True)
             try:
-                if helper == 'oldbook-workspaces':
-                    state = runtime / 'oldbook/workspaces/state.json'
+                if helper == 'mbp-intel-workspaces':
+                    state = runtime / 'mbp-intel/workspaces/state.json'
 
                     def recovered():
                         try:
@@ -129,7 +129,7 @@ class BarIpcRecoveryTests(unittest.TestCase):
                     self.wait(recovered, process)
                 else:
                     self.wait(lambda: len(fixture.subscriptions) == 1, process)
-                    self.assertIn('Written by oldbook-waybar-dim',
+                    self.assertIn('Written by mbp-intel-waybar-dim',
                                   (config / 'waybar-state.css').read_text())
                 self.assertEqual(fixture.failures, 1)
                 self.assertIsNone(process.poll())
@@ -148,13 +148,13 @@ class BarIpcRecoveryTests(unittest.TestCase):
                 fixture.close()
 
     def test_workspace_snapshot_disconnect_recovers_without_losing_custom_name(self):
-        self.exercise('oldbook-workspaces', 4)
+        self.exercise('mbp-intel-workspaces', 4)
 
     def test_workspace_subscription_disconnect_recovers(self):
-        self.exercise('oldbook-workspaces', 2)
+        self.exercise('mbp-intel-workspaces', 2)
 
     def test_bar_style_snapshot_disconnect_recovers(self):
-        self.exercise('oldbook-waybar-dim', 1)
+        self.exercise('mbp-intel-waybar-dim', 1)
 
 
 if __name__ == '__main__':

@@ -25,7 +25,7 @@ def main():
         parser.error("Run as your build user; doas only creates network isolation")
     work = args.work.absolute()
     work.mkdir(parents=True, exist_ok=False)
-    stage = work / "oldbook" / "superhold"
+    stage = work / "mbp-intel" / "superhold"
     stage.mkdir(parents=True)
     shutil.copy2(recipe / "APKBUILD", stage / "APKBUILD")
     shutil.copy2(source, stage / manifest["source"]["filename"])
@@ -37,7 +37,7 @@ def main():
         result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
     if result.returncode:
         raise SystemExit(f"Build failed; see {work / 'build.log'}")
-    packages = sorted((work / "apks" / "oldbook").glob("*/*.apk"))
+    packages = sorted((work / "apks" / "mbp-intel").glob("*/*.apk"))
     if not packages:
         raise SystemExit("Build produced no APKs")
     for package in packages:

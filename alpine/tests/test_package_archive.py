@@ -274,7 +274,7 @@ class PackageArchiveTest(unittest.TestCase):
         self.assertEqual((root / 'etc/apk/world').read_text(), self.manifest['world'])
         self.assertEqual((root / 'etc/apk/repositories').read_text(), self.manifest['repositories'])
         self.assertEqual((root / 'etc/private-config').read_text(), 'local machine configuration')
-        backups = list((root / 'var/backups/oldbook').iterdir())
+        backups = list((root / 'var/backups/mbp-intel').iterdir())
         self.assertEqual(len(backups), 1)
         self.assertEqual(backups[0].stat().st_mode & 0o777, 0o700)
         self.assertEqual((backups[0] / 'apk-db/installed').read_bytes(), db.read_bytes())
@@ -293,7 +293,7 @@ class PackageArchiveTest(unittest.TestCase):
         with self.host_patches(wrong_install):
             with self.assertRaisesRegex(RuntimeError, 'partial changes may remain.*Do not restore'):
                 m.install_host(self.manifest, self.cache, root)
-        self.assertEqual(len(list((root / 'var/backups/oldbook').iterdir())), 1)
+        self.assertEqual(len(list((root / 'var/backups/mbp-intel').iterdir())), 1)
         self.assertEqual((root / 'etc/apk/world').read_text(), 'original-world\n')
 
 

@@ -17,9 +17,9 @@ from verify_decoration_attachment import SwayIPC, walk
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / 'alpine/desktop/.local/bin/oldbook-showdesktop'
-BUS_MARKER = 'OLDBOOK_SHOWDESKTOP_PRIVATE_BUS'
-ROOT_MARKER = 'OLDBOOK_SHOWDESKTOP_PRIVATE_ROOT'
+HELPER = REPO / 'alpine/desktop/.local/bin/mbp-intel-showdesktop'
+BUS_MARKER = 'MBP_INTEL_SHOWDESKTOP_PRIVATE_BUS'
+ROOT_MARKER = 'MBP_INTEL_SHOWDESKTOP_PRIVATE_ROOT'
 
 
 def require(condition, message):
@@ -58,9 +58,9 @@ def cleanup_private(runtime):
 
 def run(output):
     output.mkdir(parents=True, exist_ok=False)
-    sources = [HELPER, REPO / 'alpine/desktop/.local/lib/oldbook/showdesktop.py',
-               REPO / 'alpine/desktop/.local/bin/oldbook-workspaces',
-               REPO / 'alpine/desktop/.local/lib/oldbook/workspace_model.py']
+    sources = [HELPER, REPO / 'alpine/desktop/.local/lib/mbp_intel/showdesktop.py',
+               REPO / 'alpine/desktop/.local/bin/mbp-intel-workspaces',
+               REPO / 'alpine/desktop/.local/lib/mbp_intel/workspace_model.py']
     snapshots = {str(path.relative_to(REPO)): path.read_bytes() for path in sources}
     hashes = {name: hashlib.sha256(data).hexdigest() for name, data in snapshots.items()}
     evidence = {'status': 'running', 'checks': [], 'source_sha256': hashes,
@@ -98,14 +98,14 @@ def run(output):
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(data)
             destination.chmod(0o755 if destination.parent == local_bin else 0o644)
-        helper = local_bin / 'oldbook-showdesktop'
+        helper = local_bin / 'mbp-intel-showdesktop'
         trace = base / 'carousel.jsonl'
-        carousel = local_bin / 'oldbook-carousel'
+        carousel = local_bin / 'mbp-intel-carousel'
         carousel.write_text('#!/usr/bin/env python3\nimport json,sys\n'
                             f'with open({str(trace)!r}, "a") as stream:\n'
                             '    stream.write(json.dumps(sys.argv[1:]) + "\\n")\n')
         carousel.chmod(0o755)
-        state_dir = Path(env['XDG_RUNTIME_DIR']) / 'oldbook/showdesktop'
+        state_dir = Path(env['XDG_RUNTIME_DIR']) / 'mbp-intel/showdesktop'
         log = (output / 'runtime.log').open('w')
 
         def spawn(command):
@@ -312,8 +312,8 @@ def run(output):
                 name: hashlib.sha256((REPO / name).read_bytes()).hexdigest() == digest
                 for name, digest in hashes.items()}
             require(all(evidence['source_unchanged_at_end'][name]
-                        for name in ('alpine/desktop/.local/bin/oldbook-showdesktop',
-                                     'alpine/desktop/.local/lib/oldbook/showdesktop.py')),
+                        for name in ('alpine/desktop/.local/bin/mbp-intel-showdesktop',
+                                     'alpine/desktop/.local/lib/mbp_intel/showdesktop.py')),
                     'owned showdesktop sources changed during verification')
             require(hashlib.sha256(Path(__file__).read_bytes()).hexdigest() == evidence['verifier_sha256'],
                     'verifier changed during verification')

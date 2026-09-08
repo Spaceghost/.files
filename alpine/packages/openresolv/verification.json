@@ -53,7 +53,7 @@
   "stock_negative_control": "Both live outer-PID lock theft and stale namespace-local PID 1 lock hang reproduced.",
   "native_evidence": [
     {
-      "evidence_path": "/home/jack/.local/state/oldbook/verification/resolver-bridge-review-first/evidence.json",
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/resolver-bridge-review-first/evidence.json",
       "evidence_sha256": "e0ea94367d678a30df70e45ac40db9ac97ff39b0d27c5804c018c744a195bd78",
       "host_state_unchanged": true,
       "source_unchanged": true,
@@ -77,7 +77,7 @@
       }
     },
     {
-      "evidence_path": "/home/jack/.local/state/oldbook/verification/network-applier-review-final/evidence.json",
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/network-applier-review-final/evidence.json",
       "evidence_sha256": "42dcc5faf69d0877ad94da5d918738984b09bc18a3aa1fb25a8d476dcf62f9f5",
       "host_state_unchanged": true,
       "source_unchanged": true,
@@ -101,7 +101,7 @@
       }
     },
     {
-      "evidence_path": "/home/jack/.local/state/oldbook/verification/resolver-pid-lock-final-negative/evidence.json",
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/resolver-pid-lock-final-negative/evidence.json",
       "evidence_sha256": "d633b288cf56898c52c1f61881b80cebcd6153dac46dbb341aa3a8c34ffb4188",
       "host_state_unchanged": true,
       "source_unchanged": true,
@@ -114,7 +114,7 @@
         "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
         "/usr/sbin/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0",
         "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f",
-        "/home/jack/.local/state/oldbook/verification/resolver-stock-3.17.4/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0"
+        "/home/jack/.local/state/mbp-intel/verification/resolver-stock-3.17.4/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0"
       }
     }
   ],

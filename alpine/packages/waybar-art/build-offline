@@ -17,7 +17,7 @@ if os.geteuid() == 0:
 recipe = Path(__file__).resolve().parent
 work = args.work.absolute()
 work.mkdir(parents=True, exist_ok=False)
-stage = work / 'oldbook' / 'oldbook-waybar-art'
+stage = work / 'mbp-intel' / 'mbp-intel-waybar-art'
 stage.mkdir(parents=True)
 for name in ('APKBUILD', 'art.c', 'help.c', 'help.h', 'waybar_cffi_module.h', 'LICENSE.Waybar'):
     shutil.copy2(recipe / name, stage / name)
@@ -29,6 +29,6 @@ with (work/'build.log').open('w') as log:
     result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
 if result.returncode:
     raise SystemExit(f'Build failed; see {work / "build.log"}')
-apk = next((work/'apks'/'oldbook').glob('*/oldbook-waybar-art-*.apk'))
+apk = next((work/'apks'/'mbp-intel').glob('*/mbp-intel-waybar-art-*.apk'))
 print(apk)
 print('SHA-256',hashlib.sha256(apk.read_bytes()).hexdigest())

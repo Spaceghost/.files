@@ -64,7 +64,7 @@ class FakeBackend:
     def start(self, name):
         state = self.read()
         state['calls'].append('start ' + name)
-        if name == 'oldbook-firewall':
+        if name == 'mbp-intel-firewall':
             state['table'] = True
             state['gate_service'] = True
         else:
@@ -83,7 +83,7 @@ class FakeBackend:
         state = self.read()
         state['table'] = False
         state['gate_service'] = False
-        state['calls'].append('delete inet oldbook')
+        state['calls'].append('delete inet mbp-intel')
         self.write(state)
 
     def add_boot(self, name):
@@ -144,7 +144,7 @@ class ActivationTests(unittest.TestCase):
         self.assertEqual(self.control.load(token)['status'], 'rolled-back')
         self.assertFalse(self.backend.table())
         self.assertFalse(self.backend.active())
-        self.assertEqual(self.backend.read()['calls'][-2:], ['stop opensnitchd', 'delete inet oldbook'])
+        self.assertEqual(self.backend.read()['calls'][-2:], ['stop opensnitchd', 'delete inet mbp-intel'])
 
     def test_partial_start_failure_rolls_back_only_attempted_resources(self):
         for service in activation.SERVICES:
@@ -156,7 +156,7 @@ class ActivationTests(unittest.TestCase):
                 self.assertFalse(self.backend.active())
                 calls = self.backend.read()['calls']
                 self.assertEqual('stop opensnitchd' in calls, service == 'opensnitchd')
-                self.assertEqual(calls[-1], 'delete inet oldbook')
+                self.assertEqual(calls[-1], 'delete inet mbp-intel')
 
     def test_confirm_installs_both_links_and_cancels_rollback(self):
         token = self.control.start(10)

@@ -7,9 +7,9 @@
         "alpine/themes/*",
         "alpine/wallpapers/desktop_theme.py",
         "alpine/wallpapers/theme_catalog.py",
-        "alpine/desktop/.local/bin/oldbook-theme",
-        "alpine/desktop/.local/bin/oldbook-gtk-settings",
-        "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
+        "alpine/desktop/.local/bin/mbp-intel-theme",
+        "alpine/desktop/.local/bin/mbp-intel-gtk-settings",
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py",
         "alpine/desktop/.config/gtk-*/*",
         "alpine/desktop/.config/qt6ct/*",
         "alpine/desktop/.local/share/lxqt/*",
@@ -49,9 +49,9 @@
       "id": "LOCK-THEME",
       "paths": [
         "alpine/themes/*",
-        "alpine/desktop/.local/bin/oldbook-lock",
+        "alpine/desktop/.local/bin/mbp-intel-lock",
         "alpine/desktop/.config/swaylock/*",
-        "alpine/desktop/.local/lib/oldbook/overlay_theme.py"
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py"
       ],
       "tests": [
         "test_lock.py"
@@ -61,7 +61,7 @@
     {
       "id": "GALLERY-ACTIONS",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-wallpaper",
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
         "alpine/desktop/.config/waybar/*",
         "alpine/themes/profiles/*/.config/waybar/*",
         "alpine/packages/waybar-art/*",
@@ -81,8 +81,8 @@
       "id": "GALLERY-ACTIVATION",
       "paths": [
         "alpine/wallpapers/*",
-        "alpine/desktop/.local/bin/oldbook-wallpaper",
-        "alpine/desktop/.local/bin/oldbook-theme",
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
+        "alpine/desktop/.local/bin/mbp-intel-theme",
         "alpine/bin/deploy-home",
         "alpine/wallpapers/generate.py"
       ],
@@ -103,8 +103,8 @@
         "alpine/desktop/.config/ghostty/*",
         "alpine/desktop/.config/ghostty/config",
         "alpine/desktop/.config/sway/local.d/terminal.conf",
-        "alpine/desktop/.local/bin/oldbook-console",
-        "alpine/desktop/.local/bin/oldbook-refresh-terminal-theme",
+        "alpine/desktop/.local/bin/mbp-intel-console",
+        "alpine/desktop/.local/bin/mbp-intel-refresh-terminal-theme",
         "alpine/packages/ghostty/*",
         "alpine/themes/profiles/*/.config/foot/*",
         "alpine/themes/profiles/*/.config/ghostty/*",
@@ -140,8 +140,8 @@
       "paths": [
         "alpine/desktop/.config/waybar/*",
         "alpine/desktop/.config/waybar/config.jsonc",
-        "alpine/desktop/.local/bin/oldbook-pithos",
-        "alpine/desktop/.local/bin/oldbook-waybar-dim",
+        "alpine/desktop/.local/bin/mbp-intel-pithos",
+        "alpine/desktop/.local/bin/mbp-intel-waybar-dim",
         "alpine/packages/waybar-art/*",
         "alpine/packages/waybar-art/art.c",
         "alpine/themes/profiles/*/.config/waybar/*",
@@ -159,14 +159,14 @@
     {
       "id": "WORKSPACE-IDENTITY",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-workspaces",
-        "alpine/desktop/.local/bin/oldbook-strata",
+        "alpine/desktop/.local/bin/mbp-intel-workspaces",
+        "alpine/desktop/.local/bin/mbp-intel-strata",
         "alpine/desktop/.config/sway/*",
         "alpine/desktop/.config/waybar/*",
         "alpine/themes/profiles/*/.config/waybar/*",
         "alpine/packages/waybar-art/*",
-        "alpine/desktop/.local/lib/oldbook/workspace_model.py",
-        "alpine/desktop/.local/lib/oldbook/workspace_defaults.py",
+        "alpine/desktop/.local/lib/mbp_intel/workspace_model.py",
+        "alpine/desktop/.local/lib/mbp_intel/workspace_defaults.py",
         "alpine/packages/waybar-art/help.c"
       ],
       "tests": [
@@ -185,11 +185,11 @@
       "paths": [
         "alpine/desktop/.config/sway/local.d/*switcher.conf",
         "alpine/desktop/.config/sway/local.d/apple-overview.conf",
-        "alpine/desktop/.local/bin/oldbook-carousel",
-        "alpine/desktop/.local/lib/oldbook/carousel*",
-        "alpine/desktop/.local/lib/oldbook/carousel.py",
-        "alpine/desktop/.local/lib/oldbook/ui_command.py",
-        "alpine/desktop/.local/lib/oldbook/window_switching.py"
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/desktop/.local/lib/mbp_intel/window_switching.py"
       ],
       "tests": [
         "test_carousel.py",
@@ -205,12 +205,12 @@
     {
       "id": "WINDOW-RESIZE",
       "paths": [
-        "alpine/desktop/.local/lib/oldbook/centered_resize.py",
-        "alpine/desktop/.local/bin/oldbook-window*",
+        "alpine/desktop/.local/lib/mbp_intel/centered_resize.py",
+        "alpine/desktop/.local/bin/mbp-intel-window*",
         "alpine/desktop/.config/sway/config",
         "alpine/desktop/.config/sway/local.d/*",
-        "alpine/desktop/.local/bin/oldbook-resize",
-        "alpine/desktop/.local/bin/oldbook-center",
+        "alpine/desktop/.local/bin/mbp-intel-resize",
+        "alpine/desktop/.local/bin/mbp-intel-center",
         "alpine/desktop/.config/sway/local.d/resize.conf"
       ],
       "tests": [
@@ -227,11 +227,11 @@
       "paths": [
         "alpine/desktop/.config/sway/*",
         "alpine/desktop/.config/sway/gestures.conf",
-        "alpine/desktop/.local/bin/oldbook-expo",
-        "alpine/desktop/.local/bin/oldbook-showdesktop",
-        "alpine/desktop/.local/lib/oldbook/showdesktop*",
-        "alpine/desktop/.local/lib/oldbook/showdesktop.py",
-        "alpine/desktop/.local/lib/oldbook/ui_command.py"
+        "alpine/desktop/.local/bin/mbp-intel-expo",
+        "alpine/desktop/.local/bin/mbp-intel-showdesktop",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop*",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py"
       ],
       "tests": [
         "test_expo.py",
@@ -245,12 +245,12 @@
     {
       "id": "CAROUSEL-STILLS",
       "paths": [
-        "alpine/desktop/.local/lib/oldbook/carousel*",
-        "alpine/desktop/.local/lib/oldbook/window_switching.py",
-        "alpine/desktop/.local/bin/oldbook-carousel",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/window_switching.py",
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
         "alpine/tests/verify_carousel.py",
-        "alpine/desktop/.local/lib/oldbook/carousel.py",
-        "alpine/desktop/.local/lib/oldbook/carousel_view.py"
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/carousel_view.py"
       ],
       "tests": [
         "test_carousel.py",
@@ -265,11 +265,11 @@
       "id": "APPLE-KEYS",
       "paths": [
         "alpine/desktop/.config/sway/*",
-        "alpine/desktop/.local/lib/oldbook/shortcut_sources.py",
-        "alpine/desktop/.local/lib/oldbook/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
         "alpine/desktop/.config/sway/config",
         "alpine/desktop/.config/sway/local.d/apple-overview.conf",
-        "alpine/desktop/.local/bin/oldbook-keyboard-backlight"
+        "alpine/desktop/.local/bin/mbp-intel-keyboard-backlight"
       ],
       "tests": [
         "test_apple_overview.py",
@@ -283,13 +283,13 @@
     {
       "id": "DECORATION-STYLE",
       "paths": [
-        "alpine/desktop/.local/lib/oldbook/decoration*",
-        "alpine/desktop/.local/bin/oldbook-decoration*",
-        "alpine/desktop/.config/oldbook/decoration.json",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/bin/mbp-intel-decoration*",
+        "alpine/desktop/.config/mbp-intel/decoration.json",
         "alpine/themes/*",
-        "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
-        "alpine/desktop/.local/bin/oldbook-decoration",
-        "alpine/desktop/.local/bin/oldbook-decoration-settings"
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py",
+        "alpine/desktop/.local/bin/mbp-intel-decoration",
+        "alpine/desktop/.local/bin/mbp-intel-decoration-settings"
       ],
       "tests": [
         "test_decoration.py",
@@ -303,12 +303,12 @@
     {
       "id": "DECORATION-PLACEMENT",
       "paths": [
-        "alpine/desktop/.config/oldbook/decoration.json",
+        "alpine/desktop/.config/mbp-intel/decoration.json",
         "alpine/desktop/.config/swayfx/effects.conf",
-        "alpine/desktop/.local/bin/oldbook-decoration*",
-        "alpine/desktop/.local/lib/oldbook/decoration*",
-        "alpine/desktop/.local/lib/oldbook/decoration.py",
-        "alpine/desktop/.local/lib/oldbook/decoration_placement.py",
+        "alpine/desktop/.local/bin/mbp-intel-decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_placement.py",
         "alpine/themes/profiles/*/.config/swayfx/effects.conf"
       ],
       "tests": [
@@ -324,12 +324,12 @@
       "id": "MOTION",
       "paths": [
         "alpine/desktop/.config/swayfx/effects.conf",
-        "alpine/desktop/.local/bin/oldbook-decoration",
-        "alpine/desktop/.local/lib/oldbook/carousel*",
-        "alpine/desktop/.local/lib/oldbook/carousel_view.py",
-        "alpine/desktop/.local/lib/oldbook/decoration*",
-        "alpine/desktop/.local/lib/oldbook/decoration_motion.py",
-        "alpine/desktop/.local/lib/oldbook/decoration_watch.py",
+        "alpine/desktop/.local/bin/mbp-intel-decoration",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/carousel_view.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_motion.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_watch.py",
         "alpine/themes/profiles/*/.config/swayfx/effects.conf"
       ],
       "tests": [
@@ -345,13 +345,13 @@
     {
       "id": "SHORTCUT-HELP",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-shortcuts",
-        "alpine/desktop/.local/lib/oldbook/shortcut*",
+        "alpine/desktop/.local/bin/mbp-intel-shortcuts",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut*",
         "alpine/desktop/.config/sway/*",
         "alpine/desktop/.config/waybar/*",
-        "alpine/desktop/.local/bin/oldbook-wallpaper",
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
         "alpine/desktop/.config/sway/local.d/shortcuts.conf",
-        "alpine/desktop/.local/lib/oldbook/shortcut_sources.py",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
         "alpine/packages/superhold-guide/manifest.json",
         "projects/superhold-guide/*",
         "projects/superhold/*"
@@ -368,15 +368,15 @@
       "id": "SESSION-OWNERSHIP",
       "paths": [
         "alpine/desktop/.config/sway/*",
-        "alpine/desktop/.local/bin/oldbook-carousel",
-        "alpine/desktop/.local/bin/oldbook-notification-led",
-        "alpine/desktop/.local/bin/oldbook-session",
-        "alpine/desktop/.local/bin/oldbook-showdesktop",
-        "alpine/desktop/.local/bin/oldbook-strata",
-        "alpine/desktop/.local/bin/oldbook-video-background",
-        "alpine/desktop/.local/lib/oldbook/carousel.py",
-        "alpine/desktop/.local/lib/oldbook/showdesktop.py",
-        "alpine/desktop/.local/lib/oldbook/ui_command.py"
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
+        "alpine/desktop/.local/bin/mbp-intel-notification-led",
+        "alpine/desktop/.local/bin/mbp-intel-session",
+        "alpine/desktop/.local/bin/mbp-intel-showdesktop",
+        "alpine/desktop/.local/bin/mbp-intel-strata",
+        "alpine/desktop/.local/bin/mbp-intel-video-background",
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py"
       ],
       "tests": [
         "test_ai_notification_stream.py",
@@ -427,13 +427,13 @@
       "id": "CONKY-READING",
       "paths": [
         "alpine/desktop/.config/conky/*",
-        "alpine/desktop/.local/lib/oldbook/conky*",
-        "alpine/desktop/.local/bin/oldbook-conky",
-        "alpine/desktop/.local/bin/oldbook-conky-click",
+        "alpine/desktop/.local/lib/mbp_intel/conky*",
+        "alpine/desktop/.local/bin/mbp-intel-conky",
+        "alpine/desktop/.local/bin/mbp-intel-conky-click",
         "alpine/themes/profiles/*/.config/conky/*",
         "alpine/wallpapers/desktop_theme.py",
-        "alpine/desktop/.local/lib/oldbook/conky_policy.py",
-        "alpine/desktop/.local/lib/oldbook/conky_layout.py",
+        "alpine/desktop/.local/lib/mbp_intel/conky_policy.py",
+        "alpine/desktop/.local/lib/mbp_intel/conky_layout.py",
         "alpine/desktop/.config/conky/panels.json"
       ],
       "tests": [
@@ -447,12 +447,12 @@
     {
       "id": "JOURNAL",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-journal",
-        "alpine/desktop/.local/lib/oldbook/journal*",
+        "alpine/desktop/.local/bin/mbp-intel-journal",
+        "alpine/desktop/.local/lib/mbp_intel/journal*",
         "alpine/assets/journal/*",
         "alpine/desktop/.config/conky/*",
         "alpine/themes/profiles/*/.config/conky/*",
-        "alpine/desktop/.local/lib/oldbook/desktop_journal.py"
+        "alpine/desktop/.local/lib/mbp_intel/desktop_journal.py"
       ],
       "tests": [
         "test_conky_policy.py",
@@ -463,18 +463,18 @@
     {
       "id": "SCRIPTURE",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-scripture*",
-        "alpine/desktop/.local/bin/oldbook-conky-click",
-        "alpine/desktop/.local/lib/oldbook/conky_click.lua",
-        "alpine/desktop/.local/lib/oldbook/conky_layout.py",
-        "alpine/desktop/.local/lib/oldbook/scripture*",
+        "alpine/desktop/.local/bin/mbp-intel-scripture*",
+        "alpine/desktop/.local/bin/mbp-intel-conky-click",
+        "alpine/desktop/.local/lib/mbp_intel/conky_click.lua",
+        "alpine/desktop/.local/lib/mbp_intel/conky_layout.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture*",
         "alpine/assets/scripture/*",
         "alpine/desktop/.config/conky/*",
         "alpine/themes/profiles/*/.config/conky/*",
         "alpine/desktop/.config/sway/*",
-        "alpine/desktop/.local/lib/oldbook/scripture.py",
-        "alpine/desktop/.local/lib/oldbook/scripture_history.py",
-        "alpine/desktop/.local/lib/oldbook/scripture_generation.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture_history.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture_generation.py",
         "alpine/tests/test_scripture*.py",
         "alpine/tests/verify_scripture_header.py",
         "alpine/verification/scripture-header/*",
@@ -504,8 +504,8 @@
         "alpine/desktop/.tmux.conf",
         "alpine/themes/profiles/*/.tmux.conf",
         "alpine/wallpapers/desktop_theme.py",
-        "alpine/desktop/.config/tmux/oldbook.conf",
-        "alpine/desktop/.local/lib/oldbook/app_identity.py"
+        "alpine/desktop/.config/tmux/mbp-intel.conf",
+        "alpine/desktop/.local/lib/mbp_intel/app_identity.py"
       ],
       "tests": [
         "test_agent_switcher.py",
@@ -516,9 +516,9 @@
     {
       "id": "DROPDOWN-WINDOWS",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-dropdown",
+        "alpine/desktop/.local/bin/mbp-intel-dropdown",
         "alpine/desktop/.config/sway/local.d/dropdown.conf",
-        "alpine/desktop/.local/lib/oldbook/decoration*"
+        "alpine/desktop/.local/lib/mbp_intel/decoration*"
       ],
       "tests": [
         "test_app_identity.py",
@@ -533,7 +533,7 @@
     {
       "id": "CLIPBOARD",
       "paths": [
-        "alpine/desktop/.local/bin/oldbook-clipboard",
+        "alpine/desktop/.local/bin/mbp-intel-clipboard",
         "alpine/desktop/.config/sway/local.d/clipboard.conf"
       ],
       "tests": [
@@ -591,7 +591,7 @@
       "id": "SCREEN-CORNERS",
       "paths": [
         "alpine/packages/swayfx/*",
-        "alpine/desktop/.local/bin/oldbook-sway"
+        "alpine/desktop/.local/bin/mbp-intel-sway"
       ],
       "tests": [],
       "evidence": [

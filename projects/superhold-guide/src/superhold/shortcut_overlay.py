@@ -177,7 +177,7 @@ class SessionLease:
 
 def screen_locked(runtime, wayland_socket):
     """Accept only the readiness record for this live compositor and process."""
-    record = Path(runtime) / 'oldbook-screen-lock/ready.json'
+    record = Path(runtime) / 'mbp-intel-screen-lock/ready.json'
     try:
         if record.is_symlink() or not record.is_file():
             return False

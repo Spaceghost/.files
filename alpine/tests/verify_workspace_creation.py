@@ -22,7 +22,7 @@ from verify_decoration_attachment import SwayIPC, walk
 REPO = Path(__file__).resolve().parents[2]
 CONFIG = REPO / "alpine/desktop/.config/sway/config"
 NAMES = {1: "Ghost", 2: "Orbit", 3: "Lab", 4: "Signal", 5: "Lounge", 10: "Strata"}
-BUS_MARKER = "OLDBOOK_WORKSPACE_CREATION_PRIVATE_BUS"
+BUS_MARKER = "MBP_INTEL_WORKSPACE_CREATION_PRIVATE_BUS"
 MAGIC = b"i3-ipc"
 
 
@@ -103,12 +103,12 @@ def run(output, source_config):
     source = source_config.read_bytes()
     commands = bindings(source.decode())
     rules = [line.strip() for line in source.decode().splitlines()
-             if line.strip().startswith(('assign [app_id="^oldbook-strata$"] ',
-                                         'no_focus [app_id="^oldbook-strata$"]'))]
+             if line.strip().startswith(('assign [app_id="^mbp-intel-strata$"] ',
+                                         'no_focus [app_id="^mbp-intel-strata$"]'))]
     require(len(rules) == 2, "missing exact STRATA assignment/focus rules")
-    library = REPO / "alpine/desktop/.local/lib/oldbook"
+    library = REPO / "alpine/desktop/.local/lib/mbp_intel"
     sources = [library / name for name in ("expo.py", "showdesktop.py", "workspace_model.py")]
-    workspace_service = REPO / "alpine/desktop/.local/bin/oldbook-workspaces"
+    workspace_service = REPO / "alpine/desktop/.local/bin/mbp-intel-workspaces"
     sources.append(workspace_service)
     sources.append(Path(__file__).with_name("verify_decoration_attachment.py"))
     hashes = {str(path.relative_to(REPO)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -259,10 +259,10 @@ def run(output, source_config):
                            env=env, check=True, timeout=5)
             command('move container to workspace number "99: Control"; workspace number "99: Control"')
             spawn(["/usr/bin/foot", "--config", str(base / "foot.ini"),
-                   "--app-id", "oldbook-strata", "--title", "Private STRATA assignment fixture",
+                   "--app-id", "mbp-intel-strata", "--title", "Private STRATA assignment fixture",
                    "sh", "-c", "sleep 120"])
             wait_for(lambda: next((item for item in walk(request())
-                     if item.get("app_id") == "oldbook-strata"), None), "private STRATA window did not map")
+                     if item.get("app_id") == "mbp-intel-strata"), None), "private STRATA window did not map")
             named_creation("strata-assignment-named-from-init", events.drain(), 10, False)
             workspaces = request(1)
             check("strata-background-assignment-preserves-control-focus",

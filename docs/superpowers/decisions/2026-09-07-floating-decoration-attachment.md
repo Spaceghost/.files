@@ -53,10 +53,10 @@ Simultaneous physical multi-output and mixed-refresh rendering remain untested.
 Activation deployed only the six decoration executable/module links and
 restarted only the live decoration helper. The live output has one caption;
 saved bottom placement, 67% opacity and radius 7 remain intact. The deployment
-backup is `~/.local/state/oldbook/backups/1788830210274135244`; the activation log
-is `~/.local/state/oldbook/decoration/attachment-activation.log`.
+backup is `~/.local/state/mbp-intel/backups/1788830210274135244`; the activation log
+is `~/.local/state/mbp-intel/decoration/attachment-activation.log`.
 
 Recovery: restore this change's decoration daemon, placement/watcher modules,
 action-context correction and editor text from the parent check-in, then restart
-only `oldbook-decoration daemon`. Saved placement, opacity and corner settings
+only `mbp-intel-decoration daemon`. Saved placement, opacity and corner settings
 do not need restoration.

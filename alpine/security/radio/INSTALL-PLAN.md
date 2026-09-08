@@ -4,10 +4,10 @@
 
 Permission preparation and Bluetooth-only soft blocking are installed on this
 host. The reviewed permission helper is
-installed at `/usr/local/libexec/oldbook-radio/install` (`root:root`, `0750`),
+installed at `/usr/local/libexec/mbp-intel-radio/install` (`root:root`, `0750`),
 with its matching `72-privacy-rfkill.rules` beside it and in `/etc/udev/rules.d/`
 (`0644`). The private journal is
-`/var/lib/oldbook/radio-permissions/attempt-0huvvd1q`.
+`/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q`.
 
 Independent verification confirmed `/dev/rfkill` mode `0644`, no ACL or
 `uaccess` tag, Jack read access with write-open denied, and root write access.
@@ -168,16 +168,16 @@ wpa_supplicant file or its PSK in terminal scrollback, Fossil, or this tree.
 
    The `install` helper automates only this permission step with exact private
    backups and automatic rollback on failure. Copy the reviewed helper as
-   `/usr/local/libexec/oldbook-radio/install` (root:root, `0750`) and the reviewed
+   `/usr/local/libexec/mbp-intel-radio/install` (root:root, `0750`) and the reviewed
    `72-privacy-rfkill.rules` beside it (`0644`); every ancestor must be root-owned
    and not writable by other users. Then run:
 
    ```sh
-   doas /usr/local/libexec/oldbook-radio/install --prepare-permissions
+   doas /usr/local/libexec/mbp-intel-radio/install --prepare-permissions
    ```
 
    It prints its `0700` journal directory under
-   `/var/lib/oldbook/radio-permissions`; `0600` JSON files contain the previous
+   `/var/lib/mbp_intel/radio-permissions`; `0600` JSON files contain the previous
    rule/device ACL and the pre/post Wi-Fi identity, without credentials. The
    helper requires an existing Wi-Fi association and refuses different existing
    rules. It verifies unchanged rfkill state, SSID/BSSID and IP addresses. It

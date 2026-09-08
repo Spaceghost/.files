@@ -28,7 +28,7 @@ class ThemeRefreshTests(unittest.TestCase):
             target = self.root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(REPO / relative, target)
-        self.namespace = runpy.run_path(str(self.root / 'alpine/desktop/.local/bin/oldbook-theme'))
+        self.namespace = runpy.run_path(str(self.root / 'alpine/desktop/.local/bin/mbp-intel-theme'))
         self.globals = self.namespace['use'].__globals__
         self.enterContext(mock.patch.object(Path, 'home', return_value=self.home))
 
@@ -37,7 +37,7 @@ class ThemeRefreshTests(unittest.TestCase):
         refreshed = []
 
         def load(path):
-            if str(path).endswith('/oldbook-wallpaper'):
+            if str(path).endswith('/mbp-intel-wallpaper'):
                 return {'load_gallery': lambda: ([{'theme': 'gruvbox-dark', 'id': 'painting'}], 60),
                         'update': lambda *args: (_ for _ in ()).throw(RuntimeError('display unavailable'))}
             return real_run_path(path)
@@ -58,7 +58,7 @@ class ThemeRefreshTests(unittest.TestCase):
         self.assertTrue(any('wallpaper' in note.lower() and 'FAILED' in note for note in notes))
 
     def test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection(self):
-        journal = self.home / '.local/state/oldbook/backups/123/manifest.json'
+        journal = self.home / '.local/state/mbp-intel/backups/123/manifest.json'
         journal.parent.mkdir(parents=True)
         journal.write_text('{"version": 2, "status": "in_progress", "entries": []}')
         delivered = []
@@ -68,7 +68,7 @@ class ThemeRefreshTests(unittest.TestCase):
             return True
 
         with mock.patch.dict(self.globals, run=run), \
-                mock.patch.object(sys, 'argv', ['oldbook-theme', 'use', 'gruvbox-dark',
+                mock.patch.object(sys, 'argv', ['mbp-intel-theme', 'use', 'gruvbox-dark',
                                               '--no-reload', '--notify']), \
                 contextlib.redirect_stderr(io.StringIO()):
             try:
@@ -89,7 +89,7 @@ class ThemeRefreshTests(unittest.TestCase):
         def run(command, timeout=20):
             if command[0] == 'notify-send':
                 delivered.append(command)
-            return not any(str(part).endswith('/oldbook-refresh-terminal-theme')
+            return not any(str(part).endswith('/mbp-intel-refresh-terminal-theme')
                            for part in command)
 
         with mock.patch.dict(self.globals, {
@@ -102,7 +102,7 @@ class ThemeRefreshTests(unittest.TestCase):
             with mock.patch.dict(self.globals, use=lambda *args, **kwargs: (
                     {'name': 'Fixture theme'}, None, None, notes)), \
                     mock.patch.object(sys, 'argv',
-                                      ['oldbook-theme', 'use', 'fixture', '--notify']), \
+                                      ['mbp-intel-theme', 'use', 'fixture', '--notify']), \
                     contextlib.redirect_stdout(io.StringIO()):
                 status = self.namespace['main']()
         self.assertEqual(status, 1)
@@ -118,7 +118,7 @@ class ThemeRefreshTests(unittest.TestCase):
                 'use': lambda *args, **kwargs: ({'name': 'Fixture theme'}, None, None, notes),
                 'run': lambda command, **kwargs: delivered.append(command) or True}), \
                 mock.patch.object(sys, 'argv',
-                                  ['oldbook-theme', 'use', 'fixture', '--notify']), \
+                                  ['mbp-intel-theme', 'use', 'fixture', '--notify']), \
                 contextlib.redirect_stdout(io.StringIO()):
             self.namespace['main']()
         self.assertEqual(len(delivered), 1)

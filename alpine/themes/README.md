@@ -3,15 +3,15 @@
 ## Complete desktop themes
 
 Every theme includes a desktop design and application profile. Run
-`oldbook-theme list` and `oldbook-theme use <id>` to switch. Generated collections
+`mbp-intel-theme list` and `mbp-intel-theme use <id>` to switch. Generated collections
 now specify typography, corner geometry, spacing, opacity, bar placement, widget
 placement and launcher width as well as colors and artwork. Switching applies
 the application files, selects an available matching painting and refreshes the
 session. Applications that cannot reload styling pick it up when reopened.
 
 `wallpapers/desktop_theme.py` renders missing profiles from the shared desktop
-configuration, preserving functional controls. `oldbook-theme sync` materializes
-all profiles; `oldbook-theme use <id> --no-reload` restores one into HOME without
+configuration, preserving functional controls. `mbp-intel-theme sync` materializes
+all profiles; `mbp-intel-theme use <id> --no-reload` restores one into HOME without
 reloading the session. Profiles use the deployment journal's backups and rollback.
 Generated profile files are derived locally; the descriptor and renderer are the
 rebuild inputs. Existing authored profile files remain editable.
@@ -31,8 +31,8 @@ application-native files retain their full settings and can be edited directly.
 cd ~/.files
 alpine/bin/deploy-home
 swaymsg reload
-oldbook-gtk-settings
-oldbook-refresh-terminal-theme
+mbp-intel-gtk-settings
+mbp-intel-refresh-terminal-theme
 tmux source-file ~/.tmux.conf
 swaync-client --reload-css
 ```
@@ -48,11 +48,11 @@ windows read all Foot settings; the refresh command recolors existing Foot
 sessions without sending input or closing applications. Other applications
 that load their theme only at startup use it when next opened.
 
-`oldbook-decoration` provides one caption at each workspace's bottom edge.
+`mbp-intel-decoration` provides one caption at each workspace's bottom edge.
 The right edge remains available through right-click or the desktop decoration
-editor (`oldbook-decoration-settings`, also Shift + right-click on the caption).
+editor (`mbp-intel-decoration-settings`, also Shift + right-click on the caption).
 The editor shows placement, opacity and corner radius alongside the editable
-`~/.config/oldbook/decoration.json`. Changes apply automatically. Both the editor
+`~/.config/mbp-intel/decoration.json`. Changes apply automatically. Both the editor
 and caption follow the active palette, including generated themes; the caption
 uses a translucent gradient without a pixel outline. Fullscreen tiled captions
 are square, while floating and ordinary windows keep the configured rounding.
@@ -102,13 +102,13 @@ using [the restore instructions](../packages/RESTORE.md).
 
 ## Expo and Super-hold palettes
 
-Ghost Expo and the Oldbook Super-hold launcher read the palette selected by
+Ghost Expo and the MBP Intel Super-hold launcher read the palette selected by
 `alpine/themes/current`. The Fuzzel workspace/window picker reads colors when it
 opens; Super-hold refreshes while running, within about one second. Gruvbox Dark
 supplies charcoal surfaces, cream text, muted brown labels, and amber highlights.
 Other descriptors use the same semantic roles.
 
-The shared adapter is `desktop/.local/lib/oldbook/overlay_theme.py`. The picker
+The shared adapter is `desktop/.local/lib/mbp_intel/overlay_theme.py`. The picker
 passes palette colors to Fuzzel while retaining its configured fonts and shape;
-the Oldbook launcher applies Qt palette roles locally to Hold to Help. The
+the MBP Intel launcher applies Qt palette roles locally to Hold to Help. The
 standalone Hold to Help project retains native platform theming.

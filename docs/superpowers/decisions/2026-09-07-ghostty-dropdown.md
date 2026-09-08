@@ -5,7 +5,7 @@ existing 94% output width, 52% output height and placement below the reserved
 workspace top edge. The installed Ghostty 1.3.2-dev supports native Wayland,
 a separate GTK application ID and command-line appearance overrides.
 
-The launcher uses `com.oldbook.dropdown` and disables GTK single-instance
+The launcher uses `com.mbp-intel.dropdown` and disables GTK single-instance
 forwarding, inheriting the active Ghostty theme and shell. Drop-down overrides
 provide 84% background opacity (including colored cells), balanced 20x16
 padding, a bar cursor and no decorations or resize overlay. Ctrl+Shift+N is
@@ -25,11 +25,11 @@ needed. The previous Foot process was preserved in the scratchpad. To recover
 that shell, run:
 
 ```sh
-swaymsg '[app_id="^oldbook-dropdown$"] scratchpad show'
+swaymsg '[app_id="^mbp-intel-dropdown$"] scratchpad show'
 ```
 
 For rollback, restore the earlier Fossil versions of
-`alpine/desktop/.local/bin/oldbook-dropdown` and
+`alpine/desktop/.local/bin/mbp-intel-dropdown` and
 `alpine/desktop/.config/sway/local.d/dropdown.conf`, then reload Sway. Close the
 Ghostty shell normally when finished; rolling back the launcher does not stop it.
 

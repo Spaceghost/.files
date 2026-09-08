@@ -5,7 +5,7 @@ scripture search bar sits on the desktop for choosing what to read.
 
 ## How the arrangement works
 
-`oldbook-conky layout` reduces the current wallpaper to two coarse grids: how
+`mbp-intel-conky layout` reduces the current wallpaper to two coarse grids: how
 much detail each cell holds and how bright it is. Panels are then seated
 greedily into the calmest cells, away from the middle of the picture where a
 painting normally puts its subject, and away from the Waybar strip, the screen
@@ -15,10 +15,10 @@ against the region each panel actually covers, so the same palette stays
 legible over a dark abbey and a bright snowfield alike.
 
 Every layout is paired to its wallpaper. The placement is cached under
-`~/.local/state/oldbook/conky/layouts/` against a key combining the image
+`~/.local/state/mbp-intel/conky/layouts/` against a key combining the image
 bytes, the screen geometry, the theme and the panel set, so one painting is
 always dressed the same way and is only re-analysed when one of those changes.
-`oldbook-wallpaper` refits the panels whenever the desktop image changes.
+`mbp-intel-wallpaper` refits the panels whenever the desktop image changes.
 
 Scripture search uses a 16-pixel margin when the bottom edge is free. A fullscreen
 window, tiled window reaching the bottom, or fixed edge bar moves it to a
@@ -72,10 +72,10 @@ These clicks refresh the affected card immediately. They use Conky's native
 mouse handling; application windows above a card keep their own pointer input.
 
 ```sh
-oldbook-conky layout      # refit to the current wallpaper
-oldbook-conky plan        # write configs without restarting the panels
-oldbook-conky status      # on, off or stopped
-oldbook-conky toggle
+mbp-intel-conky layout      # refit to the current wallpaper
+mbp-intel-conky plan        # write configs without restarting the panels
+mbp-intel-conky status      # on, off or stopped
+mbp-intel-conky toggle
 ```
 
 Panels are defined in `alpine/desktop/.config/conky/panels.json`. Each entry has
@@ -103,12 +103,12 @@ means, and one concrete practice to act on. Every anchor verse is resolved from
 the bundled text rather than quoted separately.
 
 ```sh
-oldbook-scripture panel                 # the desktop block
-oldbook-scripture show 'Isaiah 53:3-6'
-oldbook-scripture search Paul
-oldbook-scripture select 'Psalm 23'
-oldbook-scripture select-reflection job-answer
-oldbook-scripture figures
+mbp-intel-scripture panel                 # the desktop block
+mbp-intel-scripture show 'Isaiah 53:3-6'
+mbp-intel-scripture search Paul
+mbp-intel-scripture select 'Psalm 23'
+mbp-intel-scripture select-reflection job-answer
+mbp-intel-scripture figures
 ```
 
 References accept the usual spellings: `Isaiah 53`, `Isa 53:3-6`, `1 Cor 13:4`,
@@ -135,7 +135,7 @@ licenses and offline reproduction. The 33 curated reflections remain intact.
 ## Coast to Coast notebook
 
 The rotating card reads SQLite, not an in-memory random list. The database is
-`~/.local/share/oldbook/journal/entries.sqlite3` (or beneath `XDG_DATA_HOME`),
+`~/.local/share/mbp-intel/journal/entries.sqlite3` (or beneath `XDG_DATA_HOME`),
 with private file permissions. Initial setup imports eight original Coast to
 Coast lines and eight dated assistant-written notes about observed desktop work.
 Existing custom `ghost_lines` are imported once before removal from the template.
@@ -147,12 +147,12 @@ The panel shows up to four body lines, with dates on journal notes; the database
 the full text, source, creation time, enabled flag and last display time.
 
 ```sh
-oldbook-journal show
-oldbook-journal list
-oldbook-journal add --text 'Today I finished arranging the desktop.'
-oldbook-journal add --kind quip --text 'Moltar, bring the notebook.'
-oldbook-journal disable 3
-oldbook-journal backup ~/desktop-journal-backup.sqlite3
+mbp-intel-journal show
+mbp-intel-journal list
+mbp-intel-journal add --text 'Today I finished arranging the desktop.'
+mbp-intel-journal add --kind quip --text 'Moltar, bring the notebook.'
+mbp-intel-journal disable 3
+mbp-intel-journal backup ~/desktop-journal-backup.sqlite3
 ```
 
 `list` prints complete records as JSON. New notes default to today's local date;

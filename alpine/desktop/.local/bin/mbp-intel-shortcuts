@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+"""Keep the MBP Intel command and profile path while using standalone Superhold."""
+import os
+from pathlib import Path
+import sys
+
+
+def main():
+    launcher = Path(__file__).resolve()
+    arguments = sys.argv[1:]
+    if os.environ.get('MBP_INTEL_SHORTCUTS_LEGACY') == '1':
+        sys.path.insert(0, str(launcher.parents[1] / 'lib'))
+        from mbp_intel.shortcut_overlay import main as legacy_main
+        return legacy_main(arguments)
+    # The normal deployed symlink resolves inside the Fossil checkout, so
+    # Python edits become effective on the next service restart.
+    project = next((parent / 'projects/superhold' for parent in launcher.parents
+                    if (parent / 'projects/superhold/superhold/cli.py').is_file()), None)
+    if project is not None:
+        sys.path.insert(0, str(project))
+    else:
+        sys.path.insert(0, '/usr/share/superhold')
+    from superhold.cli import main as portable_main
+    from superhold.config import config_home, default_profiles_path
+    legacy_profiles = config_home() / 'mbp-intel/shortcuts.json'
+    portable_profiles = default_profiles_path()
+    if legacy_profiles.is_file() and not os.path.lexists(portable_profiles):
+        arguments = ['--profiles', str(legacy_profiles), *arguments]
+    # Preserve read-only inspection from a TTY using the existing owned Sway
+    # socket discovery. Graphical launches retain the actual session environment.
+    if (any(value in arguments for value in ('status', 'dump', '--dump'))
+            and not any(os.environ.get(key) for key in ('DISPLAY', 'WAYLAND_DISPLAY', 'SWAYSOCK'))
+            and not any(value == '--socket' or value.startswith('--socket=') for value in arguments)
+            and os.environ.get('XDG_RUNTIME_DIR')):
+        from superhold.service import find_sway_socket
+        socket = find_sway_socket(Path(os.environ['XDG_RUNTIME_DIR']))
+        arguments = ['--socket', str(socket), *arguments]
+    if os.environ.get('SWAYSOCK') or any(value == '--socket' or value.startswith('--socket=') for value in arguments):
+        os.environ.setdefault('QT_QPA_PLATFORMTHEME', 'qt6ct')
+    if not any(value in ('status', 'dump', '--dump', '--help', '-h') for value in arguments):
+        sys.path.insert(0, str(launcher.parents[1] / 'lib/mbp_intel'))
+        from overlay_theme import follow_qt_theme
+        from superhold.qt_overlay import create_application
+        follow_qt_theme(create_application([]))
+    return portable_main(arguments)
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (ConnectionError, ImportError, OSError, RuntimeError, ValueError) as error:
+        sys.exit(f'mbp-intel-shortcuts: {error}')

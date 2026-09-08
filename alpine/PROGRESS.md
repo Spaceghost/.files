@@ -1,4 +1,4 @@
-# Oldbook verification
+# MBP Intel verification
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
@@ -33,13 +33,13 @@ Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 ## Hold to Help and interactive firewall — 2026-09-07
 
 - **Hold to Help 0.1.0** is installed as signed main/doc APKs and runs locally
-  through the preserved `oldbook-shortcuts` command. The original GTK source
+  through the preserved `mbp-intel-shortcuts` command. The original GTK source
   remains for rollback. Workspace Python edits take effect on service restart.
 - Super remains the half-second hold trigger; physical Caps is configurable
   without changing Caps-to-Escape. Existing shortcut sections, custom profiles,
   pointer scrolling, release/chord cancellation and focus behavior are retained.
 - Qt supplies palette, fonts and style. Local qt6ct and native LXQt settings
-  both select Gruvbox Dark, Inter and Oldbook icons; LXQt palette/font changes
+  both select Gruvbox Dark, Inter and MBP Intel icons; LXQt palette/font changes
   reached a running test application. The app does not force a desktop theme.
 - All 108 package tests and three LXQt checks passed. Native private Sway/X11
   checks cover monitor changes, no keyboard focus, scroll, fast chords,
@@ -212,7 +212,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Sway uses inner gaps 3 and outer gaps 4; Foot uses padding 4×4 and opacity 0.78.
   Existing Foot colors/opacity were refreshed safely. Padding takes effect in
   newly opened Foot windows; existing terminals were not restarted.
-- Added `oldbook-video-background` and its command-deck picker. Playback loops
+- Added `mbp-intel-video-background` and its command-deck picker. Playback loops
   without audio on the bottom layer, visible through transparent terminals.
   Stop targets the recorded process group and reveals the existing painting.
   Four focused tests and actual isolated mpvpaper playback/stop passed using a
@@ -270,7 +270,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   `verification/square-bar/bar.png`.
 - Foot-only playlist playback is not implemented. Foot has no native video
   background option; the existing mpvpaper helper targets the whole desktop.
-  A terminal-scoped renderer/compositor design is required. Pending: oldbook
+  A terminal-scoped renderer/compositor design is required. Pending: mbp-intel
   and watchlist playlist URLs, whether Delete affects YouTube or a local queue,
   and approval of the end-of-video Delete/Rewatch/Keep & Next design.
 
@@ -287,7 +287,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   and real include handling pass. The shared checkout run hit seven unrelated
   notification tests while their helper was being removed by another task.
 - Live service is active with two read-only keyboard devices. Six files deployed
-  using journal `~/.local/state/oldbook/backups/1788782412724579771`; duplicate
+  using journal `~/.local/state/mbp-intel/backups/1788782412724579771`; duplicate
   startup preserves the daemon. Existing live Sway config was not reloaded.
 - Abrupt compositor shutdown can make native GTK exit before writing final
   status; the process exits, resources close, and stale identities are rejected.
@@ -366,7 +366,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - All 251 shared and isolated-checkout tests pass. Sixteen real native gesture checks pass
   inside isolated Sway, including both modifier keys, combined modifiers,
   non-keyboard Meta noise and original gestures. No test requested generation.
-- Signed oldbook-waybar-art 1.0.0-r1 builds twice identically with networking
+- Signed mbp-intel-waybar-art 1.0.0-r1 builds twice identically with networking
   disabled. The exact APK archive export, installed binary and live loaded
   library match. Waybar required a process restart to load the new library.
   Snapshot 7f91e56a66dca04fb8bb records 1007 installed APK identities; only the
@@ -439,7 +439,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - The unchanged `packages/locks/929661069218e44178e3.json` still matches all
   1,080 installed package identities, world, repositories and public keys.
   Portable snapshot target:
-  `~/.local/share/oldbook/backups/files-2026-09-07-radio-owner-service.fossil`;
+  `~/.local/share/mbp-intel/backups/files-2026-09-07-radio-owner-service.fossil`;
   its adjacent JSON records completion, check-in, SHA256 and archived input count.
 - Remaining: combined blocked-hook cancellation and guardian-death tests,
   OpenRC startup, packet-gate/OpenSnitch renewal policy, exact trusted SSIDs,
@@ -603,7 +603,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   `alpine/verification/launcher-themes/`.
 - Full suite: 343 tests, three concurrent Superhold migration failures (one
   deployment alias and two legacy shortcut status checks). These remain outside
-  this launcher change. Shared oldbook-wallpaper has concurrent panel edits and
+  this launcher change. Shared mbp-intel-wallpaper has concurrent panel edits and
   is excluded from the focused launcher commit; its two launcher calls are updated.
 
 ## Drop-down corner request — 2026-09-07
@@ -626,7 +626,7 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
 - Verified 11 gallery tests and nine wallpaper tests; inspected the real compact
   picker in isolated Sway. Screenshot: verification/launcher-themes/gallery-paged.png.
 - Changes are live through the existing HOME symlink. Left this edit uncommitted
-  because oldbook-wallpaper also contains concurrent desktop-panel changes;
+  because mbp-intel-wallpaper also contains concurrent desktop-panel changes;
   no unrelated work was included in a commit.
 
 
@@ -652,10 +652,10 @@ Keep changes reviewable and preserve unrelated work in this shared checkout.
   test assertion that depended on an uncommitted Conky key binding; every
   actually retained Sway helper binding remains checked.
 - The private full Fossil backup at
-  `~/.local/share/oldbook/backups/2026-09-07-before-github-publication/` passed
+  `~/.local/share/mbp-intel/backups/2026-09-07-before-github-publication/` passed
   SQLite integrity and SHA-256 verification and includes 1,155 archived inputs.
 - The separate scrubbed copy at
-  `~/.local/share/oldbook/backups/github-20260907/files-public.fossil` is verified
+  `~/.local/share/mbp-intel/backups/github-20260907/files-public.fossil` is verified
   and includes 1,206 archived inputs. Its SHA-256 is
   `dc2ea87a802f999af9bc6308daa4995b6683040197ee687aa412c9586f5228ea`.
   This is a prepared local snapshot; it has not been uploaded.
@@ -727,8 +727,8 @@ or establish physical-radio, OpenRC, surviving-writer or reboot acceptance.
 - Limits: previews cover two themes, not every application in every theme.
   Physical modifier snapshots have unit coverage; native pointer/D-Bus tests
   used fixture modifiers and a fake player. No actual songs were rated by tests.
-- Recovery: restore the source checkpoint with Fossil, run oldbook-theme sync,
-  then oldbook-theme use <id> --no-reload to rebuild HOME. Deployment backups
+- Recovery: restore the source checkpoint with Fossil, run mbp-intel-theme sync,
+  then mbp-intel-theme use <id> --no-reload to rebuild HOME. Deployment backups
   retain the previous configuration. Rendered profiles are local derived files.
   Unrelated pending desktop, security and publication edits are preserved.
 
@@ -867,7 +867,7 @@ ordered compositor events establish readiness at creation.
 ## Hourly Scripture history — 2026-09-07
 
 - Scripture rotates once per hour and preserves every observed selection as a
-  complete snapshot in private `~/.local/share/oldbook/scripture/history.sqlite3`.
+  complete snapshot in private `~/.local/share/mbp-intel/scripture/history.sqlite3`.
   Manual choices display immediately and reset the hour; concurrent checks share
   an atomic deadline and do not invent missed entries after sleep.
 - The History button opens full passages, study text, sources and provenance.
@@ -881,7 +881,7 @@ ordered compositor events establish readiness at creation.
   Final scoped activation preserved the database and all other Conky card PIDs.
   The current entry was rendered, and both live SQLite integrity checks passed.
   Evidence and recovery: `verification/scripture-history/README.md`.
-- Private backup: `~/.local/state/oldbook/backups/scripture-hourly-activation-20260908T041657Z`.
+- Private backup: `~/.local/state/mbp-intel/backups/scripture-hourly-activation-20260908T041657Z`.
   Earlier failed observations and concurrent rebuilds are retained. No physical
   one-hour wait was performed; hourly boundaries use controlled-clock checks.
   Restore application code independently of history; never commit the live DB.
@@ -967,3 +967,41 @@ cursor behavior, GPU-reset recovery and physical frame rate after the next
 login. No live compositor restart or fresh-machine boot is claimed. Evidence:
 `alpine/verification/screen-corners/`.
 
+
+## 2026-09-08 — desktop identity renamed to mbp-intel (source only)
+
+The `oldbook` identity became `mbp-intel` across the versioned source: 408 files
+rewritten and 903 paths renamed. This covers the 48 HOME helpers, the shared
+Python package (`.local/lib/mbp_intel`, imported as `mbp_intel` because a hyphen
+is not a legal identifier), the config, share and state directory names, the
+`MBP-Intel-Gruvbox` icon theme, the `MBP_INTEL_` environment variables, the
+`mbp_intel_workspace_*` Waybar colors, the `com.mbp-intel.*` drop-down
+application IDs, the `inet mbp-intel` firewall table, the `mbp-intel-waybar-art`
+package recipe, the Bazzite systemd units and the surrounding prose.
+
+Verified on a clean checkout of the branch tip: 856 unit tests with the same
+three pre-existing failures as the tip before the rename
+(`test_ghost_branding` error, `test_bazzite_profile` deployed-helper assertion,
+`test_desktop_space` hidden-fullscreen assertion). The rename introduced one
+regression, a Lua pattern in `test_conky_clicks` where the new name's hyphens
+were read as quantifiers; it was fixed and all 45 Conky checks now pass. Python
+and POSIX shell syntax, JSON parsing, every relative documentation link, the
+feature-check index and `sway --validate` all pass.
+
+Recorded evidence keeps the old name on purpose: `verification/`, `archive/`,
+`packages/locks/`, `packages/world`, `packages/current-lock` and the installed
+OpenSnitch rule copies describe artifacts that exist on disk under that name.
+The Fossil branch stays `alpine-oldbook` so the GitHub mirror and the other
+sessions committing to it are not orphaned.
+
+Pending, and deliberately not performed here: the running machine is untouched.
+The live HOME still carries `oldbook` symlinks and
+`~/.local/{state,share,config,lib}/oldbook` personal data, the icon-theme
+setting still reads `Oldbook-Gruvbox`, and the root `sway` wrapper, wayland
+session entry, `/etc/oldbook`, `/var/lib/oldbook`, the `inet oldbook` table, the
+installed `oldbook-waybar-art` and `oldbook-radio-runtime` packages and the
+`oldbook` hostname are unchanged. Activation needs a data move, a HOME redeploy,
+stale-symlink removal, `install-desktop-system`, a package rebuild and a
+firewall reactivation. That would restart the compositor under live agent
+sessions, so it is left for an authorized migration. No native, visual or
+physical verification is claimed for this check-in.

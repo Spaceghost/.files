@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-pithos'
+SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-pithos'
 
 
 class PithosControlsTests(unittest.TestCase):

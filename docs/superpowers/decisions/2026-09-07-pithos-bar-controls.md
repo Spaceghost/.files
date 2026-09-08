@@ -1,12 +1,12 @@
 # Pithos background startup and music-bar gestures
 
-Pithos starts automatically through `oldbook-session` and Sway sends newly mapped
+Pithos starts automatically through `mbp-intel-session` and Sway sends newly mapped
 Pithos windows to its scratchpad. The program stays alive for playback and
 scrobbling. Session reloads check the Gtk.Application D-Bus owner and do not raise
 or hide an existing instance. Both Alpine's lowercase `pithos` Wayland app ID and
 `io.github.Pithos` are recognized, with an XWayland class rule as a fallback.
 
-The center track title uses `oldbook-pithos click` for single/double-click
+The center track title uses `mbp-intel-pithos click` for single/double-click
 arbitration. A single left click toggles Pithos playback after 350 ms. A second
 press during that interval cancels the pending toggle and shows/focuses the
 window. This avoids Waybar MPRIS's ignored GDK double-click event and the unwanted
@@ -43,13 +43,13 @@ name `io` could compete for its display; none was present during validation.
 - Live helper show/toggle commands changed the user's actual Pithos window from
   visible to hidden. The bar was reloaded and the window left hidden.
 - Full desktop suite: 547 tests, 546 passed; unrelated Conky policy test errors
-  with `KeyError: origin_y` in `oldbook-conky.build`. No Conky files were changed.
+  with `KeyError: origin_y` in `mbp-intel-conky.build`. No Conky files were changed.
 - Full logout/login and physical XWayland behavior remain untested.
 
 ## Recovery
 
-Restore the preceding Sway, Waybar and `oldbook-session` configurations, remove
-`~/.local/bin/oldbook-pithos`, and reload Sway and Waybar. Bring a retained window
+Restore the preceding Sway, Waybar and `mbp-intel-session` configurations, remove
+`~/.local/bin/mbp-intel-pithos`, and reload Sway and Waybar. Bring a retained window
 back with `[app_id="pithos"] scratchpad show` through swaymsg, or launch Pithos
 again if its tray hid it. Existing Pithos account and Last.fm settings are intact.
 

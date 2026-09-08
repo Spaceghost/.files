@@ -17,6 +17,6 @@ failure evidence and live activation details are in
 [decoration-hover](../../../alpine/verification/decoration-hover/README.md).
 Only the live decoration daemon was restarted; saved appearance stayed intact.
 
-Recovery: restore only `alpine/desktop/.local/bin/oldbook-decoration` from this
-check-in's parent, then restart `oldbook-decoration daemon`. No compositor, bar
+Recovery: restore only `alpine/desktop/.local/bin/mbp-intel-decoration` from this
+check-in's parent, then restart `mbp-intel-decoration daemon`. No compositor, bar
 or saved-preference reset is needed.

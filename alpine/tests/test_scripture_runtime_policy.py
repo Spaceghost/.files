@@ -10,7 +10,7 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[2]
-COMMAND = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-local'
+COMMAND = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-local'
 
 
 class ScriptureRuntimePolicyTests(unittest.TestCase):
@@ -18,10 +18,10 @@ class ScriptureRuntimePolicyTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix='scripture-runtime-policy-')
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.config = self.root / 'config/oldbook/ollama.json'
-        self.runtime = self.root / 'data/oldbook/ollama/runtime-0.17.7-r1/usr/bin/ollama'
+        self.config = self.root / 'config/mbp-intel/ollama.json'
+        self.runtime = self.root / 'data/mbp-intel/ollama/runtime-0.17.7-r1/usr/bin/ollama'
         self.runtime.parent.mkdir(parents=True)
-        (self.root / 'data/oldbook/ollama/models').mkdir()
+        (self.root / 'data/mbp-intel/ollama/models').mkdir()
         self.marker = self.root / 'server-was-invoked'
         # A harmless canary makes accidental backend launch observable. It
         # neither loads a model nor opens a server.

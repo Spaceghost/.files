@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import conky_layout
 
 LIVE_PANELS = REPO / 'alpine/desktop/.config/conky/panels.json'
@@ -231,9 +231,9 @@ class ConfigTests(unittest.TestCase):
             with self.subTest(panel=identifier):
                 text = conky_layout.render_config(
                     {'id': identifier, 'text': 'Read me'}, placement, colours,
-                    {'click_hook': '/tmp/oldbook/conky_click.lua'})
-                self.assertIn("lua_load = '/tmp/oldbook/conky_click.lua'", text)
-                self.assertIn("lua_mouse_hook = 'oldbook_click'", text)
+                    {'click_hook': '/tmp/mbp-intel/conky_click.lua'})
+                self.assertIn("lua_load = '/tmp/mbp-intel/conky_click.lua'", text)
+                self.assertIn("lua_mouse_hook = 'mbp_intel_click'", text)
                 self.assertIn("own_window_type = 'desktop'", text)
 
     def test_static_cards_do_not_receive_a_mouse_hook(self):
@@ -244,7 +244,7 @@ class ConfigTests(unittest.TestCase):
             with self.subTest(panel=identifier):
                 text = conky_layout.render_config(
                     {'id': identifier, 'text': 'Static'}, placement, colours,
-                    {'click_hook': '/tmp/oldbook/conky_click.lua'})
+                    {'click_hook': '/tmp/mbp-intel/conky_click.lua'})
                 self.assertNotIn('lua_mouse_hook', text)
                 self.assertNotIn('lua_load', text)
 

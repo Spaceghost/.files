@@ -13,7 +13,7 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parents[2]
-if os.environ.get('OLDBOOK_RESIZE_PRIVATE_BUS') != '1':
+if os.environ.get('MBP_INTEL_RESIZE_PRIVATE_BUS') != '1':
     # D-Bus activation inherits its launch environment, so isolate it before
     # starting the bus as well as isolating the compositor and its clients.
     with tempfile.TemporaryDirectory(prefix='centered-resize-') as directory:
@@ -26,13 +26,13 @@ if os.environ.get('OLDBOOK_RESIZE_PRIVATE_BUS') != '1':
             path = Path(directory) / name
             path.mkdir(mode=0o700)
             private_env[key] = str(path)
-        private_env.update(OLDBOOK_RESIZE_PRIVATE_BUS='1',
-                           OLDBOOK_RESIZE_PRIVATE_BASE=directory,
+        private_env.update(MBP_INTEL_RESIZE_PRIVATE_BUS='1',
+                           MBP_INTEL_RESIZE_PRIVATE_BASE=directory,
                            NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
         result = subprocess.run(['dbus-run-session', '--', sys.executable,
             str(Path(__file__).resolve()), *sys.argv[1:]], env=private_env)
     raise SystemExit(result.returncode)
-HELPER = ROOT / 'alpine/desktop/.local/bin/oldbook-resize'
+HELPER = ROOT / 'alpine/desktop/.local/bin/mbp-intel-resize'
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--output', type=Path, default=ROOT / 'alpine/verification/centered-resize')
 parser.add_argument('--helper', type=Path, default=HELPER)
@@ -62,13 +62,13 @@ def center(rect):
     return [rect['x'] + rect['width'] / 2, rect['y'] + rect['height'] / 2]
 
 
-with contextlib.nullcontext(os.environ['OLDBOOK_RESIZE_PRIVATE_BASE']) as temporary:
+with contextlib.nullcontext(os.environ['MBP_INTEL_RESIZE_PRIVATE_BASE']) as temporary:
     base = Path(temporary)
     runtime = base / 'run'
     runtime.mkdir(mode=0o700, exist_ok=True)
     home = base / 'home'
     (home / '.local/bin').mkdir(parents=True)
-    (home / '.local/bin/oldbook-resize').symlink_to(HELPER)
+    (home / '.local/bin/mbp-intel-resize').symlink_to(HELPER)
     env = dict(os.environ, HOME=str(home), XDG_CONFIG_HOME=str(home / '.config'),
                XDG_RUNTIME_DIR=str(runtime), WLR_BACKENDS='headless',
                WLR_LIBINPUT_NO_DEVICES='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')

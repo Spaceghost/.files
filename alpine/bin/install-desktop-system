@@ -15,14 +15,14 @@ def main():
     backup = Path('/var/backups/alpine-rice') / ('desktop-' + str(time.time_ns()))
     wrapper = '''#!/bin/sh
 # The user overlay selects SwayFX; a user without it gets stock Sway.
-if [ -x "$HOME/.local/bin/oldbook-sway" ]; then
-    exec "$HOME/.local/bin/oldbook-sway" "$@"
+if [ -x "$HOME/.local/bin/mbp-intel-sway" ]; then
+    exec "$HOME/.local/bin/mbp-intel-sway" "$@"
 fi
 exec /usr/bin/sway "$@"
 '''
     desktop = '''[Desktop Entry]
 Name=Space Ghost
-Comment=The Oldbook desktop: SwayFX, Gruvbox Dark, and late-night transmissions
+Comment=The MBP Intel desktop: SwayFX, Gruvbox Dark, and late-night transmissions
 Exec=/usr/local/bin/sway
 Type=Application
 DesktopNames=sway
@@ -30,9 +30,9 @@ DesktopNames=sway
     backlight = '''# Desktop video-group access to kernel brightness; no privileged shell helper.
 ACTION=="add", SUBSYSTEM=="backlight", RUN+="/bin/chgrp video /sys/class/backlight/%k/brightness", RUN+="/bin/chmod g+w /sys/class/backlight/%k/brightness"
 '''
-    for dest, content, mode in [(Path('/etc/udev/rules.d/90-oldbook-backlight.rules'), backlight, 0o644),
+    for dest, content, mode in [(Path('/etc/udev/rules.d/90-mbp-intel-backlight.rules'), backlight, 0o644),
                                 (Path('/usr/local/bin/sway'), wrapper, 0o755),
-                                (Path('/usr/share/wayland-sessions/oldbook.desktop'), desktop, 0o644)]:
+                                (Path('/usr/share/wayland-sessions/mbp-intel.desktop'), desktop, 0o644)]:
         if dest.is_file() and not dest.is_symlink() and dest.read_bytes() == content.encode():
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)

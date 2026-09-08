@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[2]
 def native_reader(output):
     import hashlib
     import traceback
-    sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+    sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
     import scripture_history as history
     import overlay_theme
     from scripture_history_reader import run
@@ -40,7 +40,7 @@ def native_reader(output):
                         'provenance': {'method': 'fixture; no model or network'}}, database, now=number)
     original_database = database.read_bytes()
     result = {'checks': [], 'failures': [], 'source_sha256': hashlib.sha256(
-        (REPO / 'alpine/desktop/.local/lib/oldbook/scripture_history_reader.py').read_bytes()).hexdigest()}
+        (REPO / 'alpine/desktop/.local/lib/mbp_intel/scripture_history_reader.py').read_bytes()).hexdigest()}
 
     def walk(widget):
         yield widget
@@ -139,7 +139,7 @@ def native_reader(output):
 @unittest.skipUnless(shutil.which('Xvfb') and shutil.which('dbus-run-session'), 'Requires private GTK harness')
 class HistoryThemeTests(unittest.TestCase):
     def test_open_reader_rethemes_without_losing_scroll_or_unsaved_material(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-history-theme-') as temporary:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-history-theme-') as temporary:
             root = Path(temporary)
             env = dict(os.environ, GDK_BACKEND='x11', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0',
                        PYTHONDONTWRITEBYTECODE='1')
@@ -159,7 +159,7 @@ class HistoryThemeTests(unittest.TestCase):
                                   '<auth>EXTERNAL</auth><policy context="default">'
                                   '<allow send_destination="*" eavesdrop="true"/><allow eavesdrop="true"/>'
                                   '<allow own="*"/></policy></busconfig>')
-            output = Path(os.environ.get('OLDBOOK_HISTORY_THEME_OUTPUT', root / 'evidence'))
+            output = Path(os.environ.get('MBP_INTEL_HISTORY_THEME_OUTPUT', root / 'evidence'))
             output.mkdir(parents=True, exist_ok=False)
             read_fd, write_fd = os.pipe()
             with (output / 'xvfb.log').open('w') as log:

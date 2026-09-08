@@ -4,14 +4,14 @@ The themed configuration skipped the historical root `.tmux.conf` because it
 contains TPM declarations. A fresh tmux server therefore used Ctrl+B even though
 the historical config specifies Ctrl+A.
 
-Every theme now sources `~/.config/tmux/oldbook.conf`, deployed from the Alpine
+Every theme now sources `~/.config/tmux/mbp-intel.conf`, deployed from the Alpine
 desktop overlay. This file carries the historical native prefix, splits, Vim
 navigation/resizing and copy controls, numbering, scrollback, mouse, clipboard,
 focus and activity settings. Theme colors, status formats and pane-title
 forwarding remain in each theme. The renderer reads the desktop template, so
 future themes inherit the include. Existing generated local profiles were also
 updated. A base overlay deployment supplies the shared file; upgrading an
-existing home needs only `deploy-home --only .config/tmux/oldbook.conf`.
+existing home needs only `deploy-home --only .config/tmux/mbp-intel.conf`.
 
 The historical minus binding was assigned twice; the final action, resize down,
 is preserved. The `s` binding provides top/bottom splitting. Existing default
@@ -28,7 +28,7 @@ complete-theme tests passed. No shell scripts changed.
 Deployed the shared file and reloaded the running server. All three remaining
 live sessions report Ctrl+A; pane process IDs and status colors/formats match
 before and after reload. Runtime evidence is local in
-`~/.local/state/oldbook/tmux-preferences/{before,isolated,live}.json`.
+`~/.local/state/mbp-intel/tmux-preferences/{before,isolated,live}.json`.
 The scrollback limit applies to newly created panes. A logout/login and physical
 keyboard interaction were not exercised.
 
@@ -37,6 +37,6 @@ For immediate prefix recovery, run `tmux set-option -g prefix C-b`,
 For persistent rollback, restore the previous desktop and tracked theme tmux
 configs, update generated profiles from the restored template, and roll back
 the shared-file deployment with
-`alpine/bin/deploy-home --rollback ~/.local/state/oldbook/backups/1788832442599996146`.
+`alpine/bin/deploy-home --rollback ~/.local/state/mbp-intel/backups/1788832442599996146`.
 Already-running servers retain other loaded controls until explicitly reset or
 restarted after their sessions have been saved.

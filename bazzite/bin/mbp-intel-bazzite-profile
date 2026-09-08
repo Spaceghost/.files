@@ -1,0 +1,410 @@
+#!/usr/bin/env python3
+"""Preview, check, apply, or roll back the MBP Intel Bazzite HOME profile."""
+import argparse
+import hashlib
+import importlib.machinery
+import importlib.util
+import json
+import os
+from pathlib import Path
+import shutil
+import stat
+import sys
+
+
+REPO = Path(__file__).resolve().parents[2]
+SHARED = REPO / 'alpine/desktop'
+OVERRIDES = REPO / 'bazzite/desktop'
+DEPLOYER = REPO / 'alpine/bin/deploy-home'
+
+SOURCE_TREES = (
+    '.config/btop',
+    '.config/cava',
+    '.config/conky',
+    '.config/foot',
+    '.config/fuzzel',
+    '.config/ghostty',
+    '.config/gtk-3.0',
+    '.config/gtk-4.0',
+    '.config/lxqt',
+    '.config/nvim',
+    '.config/qt6ct',
+    '.config/swaync',
+    '.local/lib/mbp_intel',
+    '.local/share/applications',
+    '.local/share/icons/MBP-Intel-Gruvbox',
+    '.local/share/lxqt',
+)
+SOURCE_FILES = (
+    '.config/starship.toml',
+    '.config/sway/config',
+    '.config/sway/gestures.conf',
+    '.config/sway/local.d/shortcuts.conf',
+    '.config/sway/theme.conf',
+    '.config/waybar/config.jsonc',
+    '.config/waybar/style.css',
+    '.config/mbp-intel/agents.json',
+    '.local/bin/mbp-intel-agents',
+    '.local/bin/mbp-intel-ai-notification-stream',
+    '.local/bin/mbp-intel-audio',
+    '.local/bin/mbp-intel-brightness',
+    '.local/bin/mbp-intel-claude-notify',
+    '.local/bin/mbp-intel-codex-notify',
+    '.local/bin/mbp-intel-conky',
+    '.local/bin/mbp-intel-expo',
+    '.local/bin/mbp-intel-fuzzel',
+    '.local/bin/mbp-intel-gallery-prompts',
+    '.local/bin/mbp-intel-gtk-settings',
+    '.local/bin/mbp-intel-lock',
+    '.local/bin/mbp-intel-menu',
+    '.local/bin/mbp-intel-network',
+    '.local/bin/mbp-intel-notification-led',
+    '.local/bin/mbp-intel-refresh-terminal-theme',
+    '.local/bin/mbp-intel-screenshot',
+    '.local/bin/mbp-intel-scripture',
+    '.local/bin/mbp-intel-scripture-bar',
+    '.local/bin/mbp-intel-scripture-library',
+    '.local/bin/mbp-intel-strata',
+    '.local/bin/mbp-intel-video-background',
+    '.local/bin/mbp-intel-wallpaper',
+    '.local/bin/mbp-intel-workspaces',
+    '.local/bin/mbp-intel-youtube',
+    '.tmux.conf',
+    '.zshrc',
+)
+RUNTIME_COMMANDS = (
+    'brightnessctl', 'btop', 'conky', 'dbus-update-activation-environment',
+    'curl', 'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'ip', 'jq',
+    'less', 'loginctl', 'mpv',
+    'mpvpaper', 'nmcli', 'notify-send', 'pavucontrol', 'playerctl', 'python3',
+    'slurp', 'ssh', 'sway', 'swayidle', 'swaylock', 'swaymsg', 'swaync', 'swaync-client',
+    'superhold', 'systemctl', 'thunar', 'tmux', 'waybar', 'wl-copy', 'wpctl', 'yt-dlp',
+)
+
+
+def load_deployer():
+    loader = importlib.machinery.SourceFileLoader('mbp_intel_deploy_home', str(DEPLOYER))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+def source_paths():
+    paths = []
+    for name in SOURCE_FILES:
+        path = SHARED / name
+        if not path.is_file() or path.is_symlink():
+            raise RuntimeError(f'Missing shared profile source: {path}')
+        paths.append(path.relative_to(REPO))
+    for name in SOURCE_TREES:
+        root = SHARED / name
+        if not root.is_dir() or root.is_symlink():
+            raise RuntimeError(f'Missing shared profile source: {root}')
+        paths.extend(path.relative_to(REPO) for path in sorted(root.rglob('*'))
+                     if path.is_file() and not path.is_symlink()
+                     and '__pycache__' not in path.parts
+                     and path.suffix not in ('.pyc', '.pyo'))
+    return tuple(dict.fromkeys(paths))
+
+
+def _revision(desired):
+    digest = hashlib.sha256()
+    for relative, (content, mode) in sorted(desired.items()):
+        digest.update(str(relative).encode() + b'\0')
+        digest.update(str(mode).encode() + b'\0')
+        digest.update(content)
+    return digest.hexdigest()[:24]
+
+
+def overlay_directory(target, desired=None):
+    desired = desired if desired is not None else desired_files(target.resolve())
+    return (target.resolve() / '.local/state/mbp-intel/bazzite-profile/revisions'
+            / _revision(desired) / 'desktop')
+
+
+def transform(relative, content, target):
+    if relative == Path('.config/sway/config'):
+        text = content.decode()
+        text = text.replace(
+            '# Spaceghost / MBP Intel Sway session — MacBookPro11,5 internal panel (2880x1800, 2x).',
+            '# Spaceghost / MBP Intel Sway session — Bazzite hardware-neutral profile.')
+        text = '\n'.join(line for line in text.splitlines()
+                         if not line.startswith('output eDP-1 mode ')) + '\n'
+        text = text.replace(
+            'exec_always --no-startup-id ~/.local/bin/mbp-intel-session',
+            'exec_always --no-startup-id ~/.local/bin/mbp-intel-bazzite-session')
+        return text.encode()
+    if relative == Path('.config/sway/local.d/shortcuts.conf'):
+        return (b'# mbp-intel-shortcuts is owned by mbp-intel-shortcuts.service on Bazzite.\n')
+    if relative == Path('.config/waybar/config.jsonc'):
+        document = json.loads(content)
+        top = document[0]
+        top['group/status']['modules'] = [name for name in top['group/status']['modules']
+                                           if name != 'group/transmission']
+        for name in ('group/transmission', 'custom/link', 'custom/radio', 'custom/firewall'):
+            top.pop(name, None)
+        top['cffi/art']['module_path'] = str(target / '.local/lib/mbp_intel/mbp-intel-art.so')
+        top['cffi/art']['command'] = '~/.local/bin/mbp-intel-wallpaper'
+        return (json.dumps(document, ensure_ascii=False, indent=2) + '\n').encode()
+    if relative in (Path('.local/bin/mbp-intel-wallpaper'),
+                    Path('.local/bin/mbp-intel-gallery-prompts'),
+                    Path('.local/bin/mbp-intel-conky'),
+                    Path('.local/bin/mbp-intel-scripture'),
+                    Path('.local/bin/mbp-intel-scripture-bar')):
+        text = content.decode()
+        old = 'REPO = Path(__file__).resolve().parents[4]'
+        if old not in text:
+            raise RuntimeError(f'Cannot anchor repository path in {relative}')
+        text = text.replace(
+            old, "REPO = (Path(__file__).resolve().parents[3] / 'repo').resolve(strict=True)",
+            1)
+        if relative == Path('.local/bin/mbp-intel-wallpaper'):
+            old_control = "REPO / 'alpine/desktop/.local/bin/mbp-intel-control'"
+            if old_control not in text:
+                raise RuntimeError('Cannot route Bazzite command deck from mbp_intel-wallpaper')
+            text = text.replace(
+                old_control, "Path(__file__).resolve().parent / 'mbp-intel-control'", 1)
+        return text.encode()
+    if relative == Path('.local/lib/mbp_intel/overlay_theme.py'):
+        text = content.decode()
+        old = "THEMES = Path(__file__).resolve().parents[5] / 'alpine/themes'"
+        if old not in text:
+            raise RuntimeError('Cannot anchor repository path in overlay_theme.py')
+        return text.replace(
+            old,
+            "THEMES = (Path(__file__).resolve().parents[4] / 'repo/alpine/themes').resolve(strict=True)",
+            1).encode()
+    if relative == Path('.local/bin/mbp-intel-lock'):
+        text = content.decode()
+        if "command='swaylockd'" not in text:
+            raise RuntimeError('Cannot select stock swaylock in mbp-intel-lock')
+        return text.replace('swaylockd', 'swaylock').encode()
+    return content
+
+
+def desired_files(target):
+    desired = {}
+    for source_relative in source_paths():
+        source = REPO / source_relative
+        relative = source.relative_to(SHARED)
+        desired[relative] = (transform(relative, source.read_bytes(), target),
+                             stat.S_IMODE(source.stat().st_mode))
+    for source in sorted(OVERRIDES.rglob('*')):
+        if (source.is_file() and not source.is_symlink()
+                and '__pycache__' not in source.parts
+                and source.suffix not in ('.pyc', '.pyo')):
+            relative = source.relative_to(OVERRIDES)
+            desired[relative] = (source.read_bytes(), stat.S_IMODE(source.stat().st_mode))
+    wallpaper = REPO / 'alpine/assets/spaceghost.png'
+    if not wallpaper.is_file():
+        wallpaper = REPO / 'alpine/assets/violet-eclipse.png'
+    if wallpaper.is_file():
+        desired[Path('.local/share/mbp-intel/wallpaper.png')] = (
+            wallpaper.read_bytes(), stat.S_IMODE(wallpaper.stat().st_mode))
+    return desired
+
+
+def _ensure_private(path, target):
+    deployer = load_deployer()
+    deployer.ensure_parents(path, target)
+    path.mkdir(mode=0o700, exist_ok=True)
+    info = path.stat(follow_symlinks=False)
+    if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+            or stat.S_IMODE(info.st_mode) != 0o700):
+        raise RuntimeError(f'Unsafe profile state directory: {path}')
+
+
+def materialize(target):
+    target = target.resolve()
+    target.mkdir(parents=True, exist_ok=True)
+    desired = desired_files(target)
+    overlay = overlay_directory(target, desired)
+    profile = target / '.local/state/mbp-intel/bazzite-profile'
+    revisions = profile / 'revisions'
+    _ensure_private(profile, target)
+    _ensure_private(revisions, target)
+    revision = overlay.parent
+    if revision.exists():
+        expected = set(desired)
+        actual = {path.relative_to(overlay) for path in overlay.rglob('*')
+                  if path.is_file() or path.is_symlink()}
+        if actual != expected:
+            raise RuntimeError(f'Changed immutable profile revision: {revision}')
+        for relative, (content, mode) in desired.items():
+            path = overlay / relative
+            if (path.is_symlink() or path.read_bytes() != content
+                    or stat.S_IMODE(path.stat().st_mode) != mode):
+                raise RuntimeError(f'Changed immutable profile source: {path}')
+        repo_link = revision / 'repo'
+        if not repo_link.is_symlink() or repo_link.resolve() != REPO:
+            raise RuntimeError(f'Wrong profile source link: {repo_link}')
+        return overlay
+
+    staging = revisions / f'.{revision.name}.{os.getpid()}.tmp'
+    staging.mkdir(mode=0o700)
+    staging_overlay = staging / 'desktop'
+    staging_overlay.mkdir(mode=0o700)
+    (staging / 'repo').symlink_to(REPO, target_is_directory=True)
+    for relative, (content, mode) in desired.items():
+        destination = staging_overlay / relative
+        load_deployer().ensure_parents(destination, staging_overlay)
+        temporary = destination.with_name(destination.name + f'.{os.getpid()}.tmp')
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, mode)
+        try:
+            with os.fdopen(descriptor, 'wb') as stream:
+                stream.write(content)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.chmod(temporary, mode)
+            os.replace(temporary, destination)
+        finally:
+            temporary.unlink(missing_ok=True)
+    try:
+        os.replace(staging, revision)
+        load_deployer().sync_directory(revisions)
+    except OSError:
+        shutil.rmtree(staging, ignore_errors=True)
+        if revision.exists():
+            return materialize(target)
+        raise
+    return overlay
+
+
+def changes(target):
+    target = target.resolve()
+    desired = desired_files(target)
+    overlay = overlay_directory(target, desired)
+    result = []
+    for relative, (content, mode) in desired.items():
+        destination = target / relative
+        expected_source = overlay / relative
+        linked = destination.is_symlink() and os.readlink(destination) == str(expected_source)
+        try:
+            source_current = (expected_source.is_file() and not expected_source.is_symlink()
+                              and expected_source.read_bytes() == content
+                              and stat.S_IMODE(expected_source.stat().st_mode) == mode)
+        except OSError:
+            source_current = False
+        if linked and source_current:
+            state = 'current'
+        elif destination.exists() or destination.is_symlink():
+            state = 'update'
+        else:
+            state = 'add'
+        result.append((state, relative))
+    return result
+
+
+def preview(target):
+    for state, relative in changes(target):
+        print(f'{state} {relative}')
+
+
+def check_module(target):
+    module = target / '.local/lib/mbp_intel/mbp-intel-art.so'
+    if not module.exists():
+        return 'missing Fedora-built artwork module'
+    try:
+        content = module.read_bytes()
+    except OSError as error:
+        return f'cannot read artwork module: {error.strerror}'
+    if not content.startswith(b'\x7fELF'):
+        return 'artwork module is not an ELF shared object'
+    if b'ld-musl' in content or b'libc.musl' in content:
+        return 'artwork module was built for musl, not Fedora glibc'
+    return None
+
+
+def check_superhold_library(target):
+    configured = os.environ.get('SUPERHOLD_LAYER_SHELL_LIBRARY')
+    candidates = ([Path(configured)] if configured else []) + [
+        target / '.local/lib/superhold/libsuperhold-layer-shell.so',
+        Path('/usr/lib64/superhold/libsuperhold-layer-shell.so'),
+        Path('/usr/lib/superhold/libsuperhold-layer-shell.so'),
+    ]
+    return None if any(path.is_file() for path in candidates) else 'missing Fedora Superhold native bridge'
+
+
+def check(target, skip_runtime=False):
+    problems = []
+    pending = [(state, path) for state, path in changes(target) if state != 'current']
+    if pending:
+        problems.append(f'profile is not applied ({len(pending)} managed paths differ)')
+    module_problem = check_module(target)
+    if module_problem:
+        problems.append(module_problem)
+    superhold_problem = check_superhold_library(target)
+    if superhold_problem:
+        problems.append(superhold_problem)
+    if not skip_runtime:
+        missing = [name for name in RUNTIME_COMMANDS if shutil.which(name) is None]
+        if missing:
+            problems.append('missing runtime commands: ' + ', '.join(missing))
+        if not (target / '.local/share/fossil/files.fossil').is_file():
+            problems.append('missing Fossil repository database for Strata and gallery checkpoints')
+        try:
+            import gi
+            gi.require_version('Gtk', '3.0')
+            gi.require_version('GtkLayerShell', '0.1')
+            from gi.repository import Gtk  # noqa: F401
+            from gi.repository import GtkLayerShell  # noqa: F401
+        except (ImportError, ValueError):
+            problems.append('missing Python GTK 3 / GtkLayerShell bindings')
+        try:
+            import dbus  # noqa: F401
+        except ImportError:
+            problems.append('missing Python D-Bus bindings')
+        try:
+            import PyQt6  # noqa: F401
+        except ImportError:
+            problems.append('missing Python PyQt 6 bindings')
+    for problem in problems:
+        print('FAIL:', problem)
+    if not problems:
+        if skip_runtime:
+            print('Profile is applied; runtime prerequisites were not checked')
+        else:
+            print('Bazzite profile is applied and reported prerequisites are available')
+    return 1 if problems else 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    subparsers = parser.add_subparsers(dest='action', required=True)
+    def command(name):
+        child = subparsers.add_parser(name)
+        child.add_argument('--target', type=Path, default=Path.home())
+        return child
+
+    command('preview')
+    checker = command('check')
+    checker.add_argument('--skip-runtime', action='store_true',
+                         help=argparse.SUPPRESS)
+    command('apply')
+    rollback_parser = command('rollback')
+    rollback_parser.add_argument('backup', type=Path)
+    args = parser.parse_args(argv)
+    target = args.target.resolve()
+    if args.action == 'preview':
+        preview(target)
+        return 0
+    if args.action == 'check':
+        return check(target, args.skip_runtime)
+    deployer = load_deployer()
+    if args.action == 'rollback':
+        deployer.rollback(target, args.backup)
+        print('Restored files from', args.backup)
+        return 0
+    overlay = materialize(target)
+    result = deployer.deploy(target, overlay)
+    print('Already current' if result is None else f'Backup: {result}')
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (OSError, RuntimeError, ValueError) as error:
+        print(f'mbp-intel-bazzite-profile: {error}', file=sys.stderr)
+        raise SystemExit(1)

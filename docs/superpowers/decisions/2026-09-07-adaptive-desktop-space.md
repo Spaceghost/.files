@@ -40,7 +40,7 @@ shared palette changes. This fixes a startup-only palette that survived theme
 switches and ensures Gruvbox uses its actual gold accent.
 
 Recovery: restore these source files using the scoped deployment backup,
-restart Scripture search, and run `oldbook-conky layout`.
+restart Scripture search, and run `mbp-intel-conky layout`.
 Saved verses, journal entries, decoration preferences and artwork are retained.
 
 Validation: 43 Conky tests, 10 geometry tests, two real-GTK theme-switch tests,

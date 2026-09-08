@@ -7,7 +7,7 @@ import unittest
 
 
 MODULE = (Path(__file__).resolve().parents[1]
-          / 'desktop/.local/lib/oldbook/shortcut_hold.py')
+          / 'desktop/.local/lib/mbp_intel/shortcut_hold.py')
 EVENT = struct.Struct('@llHHi')
 
 

@@ -37,7 +37,7 @@ Shared controls, personal content, quiet-panel policy and saved decoration
 preferences survive. Selecting the current theme must permit reapplication;
 application failures must be visible instead of reporting an unqualified success.
 
-- Implementation: [oldbook-theme](desktop/.local/bin/oldbook-theme),
+- Implementation: [mbp-intel-theme](desktop/.local/bin/mbp-intel-theme),
   [desktop_theme.py](wallpapers/desktop_theme.py), [profiles](themes/profiles/).
 - Checks: [complete themes](tests/test_complete_themes.py),
   [theme switch](tests/test_theme_switch.py), [theme picker](tests/test_theme_picker.py),
@@ -66,7 +66,7 @@ Caps Lock indicators follow the active validated palette. Lock acquisition must
 wait for actual readiness, serialize concurrent requests and reject stale
 process/compositor identities; a matching process name is insufficient.
 
-- Implementation: [oldbook-lock](desktop/.local/bin/oldbook-lock).
+- Implementation: [mbp-intel-lock](desktop/.local/bin/mbp-intel-lock).
 - Checks: [lock regressions](tests/test_lock.py),
   [recorded settings/theme work](PROGRESS.md#2026-09-07--theme-aware-desktop-decoration-settings-and-native-tools).
   Theme argument and readiness checks do not constitute a physical live lock test.
@@ -81,7 +81,7 @@ player; Pithos supports delayed single-click playback, double-click open,
 right-click show/hide, middle-click tired and Super+middle-click ban.
 
 - Implementation: [Waybar config](desktop/.config/waybar/config.jsonc),
-  [Pithos controls](desktop/.local/bin/oldbook-pithos), [native artwork module](packages/waybar-art/art.c).
+  [Pithos controls](desktop/.local/bin/mbp-intel-pithos), [native artwork module](packages/waybar-art/art.c).
 - Checks: [Pithos tests](tests/test_pithos_controls.py),
   [music verifier](tests/verify_waybar_music.py), [bar recovery](tests/test_bar_ipc_recovery.py),
   [recorded bar interactions](verification/waybar-reactivity/README.md).
@@ -95,9 +95,9 @@ remains available. The preference editor exposes placement, opacity and corners
 beside editable JSON, validates changes and refuses stale overwrites. Preserve
 the user's saved values, currently bottom / 0.67 opacity / radius 7.
 
-- Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
-  [settings editor](desktop/.local/bin/oldbook-decoration-settings),
-  [preferences](desktop/.config/oldbook/decoration.json).
+- Implementation: [decoration helper](desktop/.local/bin/mbp-intel-decoration),
+  [settings editor](desktop/.local/bin/mbp-intel-decoration-settings),
+  [preferences](desktop/.config/mbp-intel/decoration.json).
 - Checks: [decoration tests](tests/test_decoration.py),
   [settings verifier](tests/verify_decoration_settings.py),
   [interactive strip evidence](verification/decoration-context/).
@@ -113,8 +113,8 @@ captions have square corners; ordinary/floating captions retain chosen rounding.
 Console and monitor drop-downs preserve the preceding ordinary caption. Tile/float
 handoffs are immediate and must not leave overlapping caption surfaces.
 
-- Implementation: [placement](desktop/.local/lib/oldbook/decoration_placement.py),
-  [caption model](desktop/.local/lib/oldbook/decoration.py).
+- Implementation: [placement](desktop/.local/lib/mbp_intel/decoration_placement.py),
+  [caption model](desktop/.local/lib/mbp_intel/decoration.py).
 - Checks: [placement tests](tests/test_decoration_placement.py),
   [attachment verifier](tests/verify_decoration_attachment.py),
   [immediate transitions](verification/decoration-transition/README.md),
@@ -128,9 +128,9 @@ settling without overshoot. Use display frame clocks; stop animation when idle.
 Avoid redundant resize/layout work and unbounded update queues. Honor disabled
 desktop animations. Do not trade away high-quality still previews silently.
 
-- Implementation: [decoration motion](desktop/.local/lib/oldbook/decoration_motion.py),
-  [watcher](desktop/.local/lib/oldbook/decoration_watch.py),
-  [carousel renderer](desktop/.local/lib/oldbook/carousel_view.py).
+- Implementation: [decoration motion](desktop/.local/lib/mbp_intel/decoration_motion.py),
+  [watcher](desktop/.local/lib/mbp_intel/decoration_watch.py),
+  [carousel renderer](desktop/.local/lib/mbp_intel/carousel_view.py).
 - Checks: [motion tests](tests/test_decoration_motion.py),
   [watcher tests](tests/test_decoration_watch.py),
   [frame-rate evidence](verification/decoration-framerate/README.md),
@@ -164,9 +164,9 @@ labels. Active number/name are bold and bright; inactive numbers remain bold,
 names regular, and process suffixes regular/subdued. Keep original application
 identities and prevent accumulating title suffixes.
 
-- Implementation: [workspace model](desktop/.local/lib/oldbook/workspace_model.py),
-  [defaults](desktop/.local/lib/oldbook/workspace_defaults.py),
-  [Strata](desktop/.local/bin/oldbook-strata), [native labels](packages/waybar-art/help.c).
+- Implementation: [workspace model](desktop/.local/lib/mbp_intel/workspace_model.py),
+  [defaults](desktop/.local/lib/mbp_intel/workspace_defaults.py),
+  [Strata](desktop/.local/bin/mbp-intel-strata), [native labels](packages/waybar-art/help.c).
 - Checks: [workspaces](tests/test_workspaces.py), [defaults](tests/test_workspace_defaults.py),
   [Strata](tests/test_strata.py), [creation evidence](verification/workspace-ready/README.md),
   [titlecase](verification/workspace-titlecase/README.md), [workspace ten](verification/workspace-ten/README.md).
@@ -180,8 +180,8 @@ Ordinary Tab/Ctrl+Tab remain application keys. Preserve native keyboard grabs,
 close-before-focus ordering, stale-command protection and single-owner recovery.
 Agent navigation remains separately available on Super+i / Super+Shift+i.
 
-- Implementation: [controller](desktop/.local/lib/oldbook/carousel.py),
-  [switching model](desktop/.local/lib/oldbook/window_switching.py).
+- Implementation: [controller](desktop/.local/lib/mbp_intel/carousel.py),
+  [switching model](desktop/.local/lib/mbp_intel/window_switching.py).
 - Checks: [selection](tests/test_window_switching.py), [controller](tests/test_carousel.py),
   [responsiveness](tests/test_carousel_responsiveness.py),
   [native navigation](verification/window-navigation/README.md).
@@ -196,8 +196,8 @@ revisiting a card do not refresh it. Reopening does. Keep all pixels supplied by
 the capture provider, use trilinear sampling and discard image memory on close.
 Capture failure has an honest fallback; input never waits for image generation.
 
-- Implementation: [capture/controller](desktop/.local/lib/oldbook/carousel.py),
-  [renderer](desktop/.local/lib/oldbook/carousel_view.py).
+- Implementation: [capture/controller](desktop/.local/lib/mbp_intel/carousel.py),
+  [renderer](desktop/.local/lib/mbp_intel/carousel_view.py).
 - Checks: [controller](tests/test_carousel.py), [geometry](tests/test_carousel_view.py),
   [quality evidence](verification/carousel-quality/README.md).
   Full provider resolution need not equal a Retina client's physical buffer;
@@ -211,7 +211,7 @@ supports arrows, Tab/Shift+Tab, scrolling, card clicks, Enter and Escape. Extern
 navigation ends expose safely, restores captured content where needed and
 preserves the destination the user chose. Do not replay stale geometry later.
 
-- Implementation: [showdesktop](desktop/.local/lib/oldbook/showdesktop.py),
+- Implementation: [showdesktop](desktop/.local/lib/mbp_intel/showdesktop.py),
   [gesture bindings](desktop/.config/sway/gestures.conf).
 - Checks: [lifecycle](tests/test_showdesktop_lifecycle.py),
   [showdesktop](tests/test_showdesktop.py), [native recovery](verification/showdesktop-recovery/README.md).
@@ -225,8 +225,8 @@ Repeated presses reapply the same size, not a toggle. Preserve existing centered
 plus/minus resize and center/raise controls. Pointer dwell raising waits one
 second on the same eligible floating window and cancels stale targets.
 
-- Implementation: [resize](desktop/.local/bin/oldbook-resize),
-  [center](desktop/.local/bin/oldbook-center), [bindings](desktop/.config/sway/local.d/resize.conf).
+- Implementation: [resize](desktop/.local/bin/mbp-intel-resize),
+  [center](desktop/.local/bin/mbp-intel-center), [bindings](desktop/.config/sway/local.d/resize.conf).
 - Checks: [resize tests](tests/test_centered_resize.py),
   [native geometry](verification/near-full-resize/README.md),
   [center](verification/center-window/README.md), [dwell](verification/hover-raise/README.md).
@@ -243,7 +243,7 @@ Sway reload does not reset them. Do not change hid_apple mode incidentally.
 
 - Implementation: [Sway input](desktop/.config/sway/config),
   [Apple overview bindings](desktop/.config/sway/local.d/apple-overview.conf),
-  [keyboard light](desktop/.local/bin/oldbook-keyboard-backlight).
+  [keyboard light](desktop/.local/bin/mbp-intel-keyboard-backlight).
 - Checks: [Apple mapping](tests/test_apple_overview.py),
   [native overview](verification/apple-overview/README.md),
   [keyboard-light evidence](verification/keyboard-backlight/README.md).
@@ -258,8 +258,8 @@ while locked/inactive; preserve personal trigger/settings and existing applicati
 profiles. Tooltips and help must describe the current controls, with character.
 
 - Implementation: [guide launch](desktop/.config/sway/local.d/shortcuts.conf),
-  [shortcut helper](desktop/.local/bin/oldbook-shortcuts),
-  [shortcut sources](desktop/.local/lib/oldbook/shortcut_sources.py),
+  [shortcut helper](desktop/.local/bin/mbp-intel-shortcuts),
+  [shortcut sources](desktop/.local/lib/mbp_intel/shortcut_sources.py),
   [local guide package](packages/superhold-guide/manifest.json).
 - Checks: [hold](tests/test_shortcut_hold.py), [service](tests/test_shortcut_service.py),
   [sources](tests/test_shortcut_sources.py).
@@ -272,7 +272,7 @@ Preserve Wayland clipboard integration and history, including copy/paste through
 the supported terminal/tmux workflow. Keep personal clipboard data out of the
 repository and package payloads; changing a theme must not erase it.
 
-- Implementation: [clipboard helper](desktop/.local/bin/oldbook-clipboard),
+- Implementation: [clipboard helper](desktop/.local/bin/mbp-intel-clipboard),
   [bindings](desktop/.config/sway/local.d/clipboard.conf).
 - Checks: [clipboard tests](tests/test_clipboard.py), [native verifier](tests/verify_clipboard.py).
 
@@ -288,7 +288,7 @@ shells, tmux sessions or running programs.
 
 - Implementation: [preferred terminal](desktop/.config/sway/local.d/terminal.conf),
   [Ghostty](desktop/.config/ghostty/config), [Foot](desktop/.config/foot/foot.ini),
-  [live terminal refresh](desktop/.local/bin/oldbook-refresh-terminal-theme).
+  [live terminal refresh](desktop/.local/bin/mbp-intel-refresh-terminal-theme).
 - Checks: [terminal theme](tests/test_terminal_theme.py), [theme derivation](tests/test_theme_switch.py),
   [transparency evidence](verification/workspace-chrome/).
   Saved font settings and runtime per-window font zoom are distinct.
@@ -302,7 +302,7 @@ identity through hide/show and separate lifecycle. Dock below the bar at 94%
 output width and 52% height, bounded by available space.
 Neither is pinned to Strata and neither takes over the ordinary caption.
 
-- Implementation: [drop-down helper](desktop/.local/bin/oldbook-dropdown),
+- Implementation: [drop-down helper](desktop/.local/bin/mbp-intel-dropdown),
   [bindings](desktop/.config/sway/local.d/dropdown.conf).
 - Checks: [native console/monitor](verification/console-monitor-foot/README.md),
   [cross-workspace recall](verification/dropdown-current-workspace/README.md),
@@ -316,8 +316,8 @@ prefix+0 for window 10, vi copy mode, mouse/clipboard/focus integration and 10,0
 scrollback lines. Preserve pane-title forwarding and discovery of agents inside
 custom-ID tmux terminals. Do not reintroduce a plugin manager to restore controls.
 
-- Implementation: [shared tmux config](desktop/.config/tmux/oldbook.conf),
-  [app identity](desktop/.local/lib/oldbook/app_identity.py).
+- Implementation: [shared tmux config](desktop/.config/tmux/mbp-intel.conf),
+  [app identity](desktop/.local/lib/mbp_intel/app_identity.py).
 - Checks: [app identity](tests/test_app_identity.py), [agent switcher](tests/test_agent_switcher.py),
   [tmux title decision](../docs/superpowers/decisions/2026-09-07-tmux-decoration-titles.md).
   Existing tmux panes retain their previous scrollback limit until recreated.
@@ -332,9 +332,9 @@ video background or inferred location/night-light policy. AI attention indicates
 only attributable, unvisited targets; ordinary or retained notices do not light
 Caps Lock, and clearing one target must not clear the others.
 
-- Implementation: [session](desktop/.local/bin/oldbook-session),
-  [notification LED](desktop/.local/bin/oldbook-notification-led),
-  [video helper](desktop/.local/bin/oldbook-video-background).
+- Implementation: [session](desktop/.local/bin/mbp-intel-session),
+  [notification LED](desktop/.local/bin/mbp-intel-notification-led),
+  [video helper](desktop/.local/bin/mbp-intel-video-background).
 - Checks: [session](tests/test_session.py), [notification stream](tests/test_ai_notification_stream.py),
   [LED](tests/test_notification_led.py), [video](tests/test_video_background.py).
   A reload test is not a fresh-login, suspend/resume or hardware-hotplug test.
@@ -350,7 +350,7 @@ Preserve the searchable existing-theme picker, prompt-created names, image
 paging, explicit deletion flow, help and command deck. New actions are additive;
 ordinary artwork selection remains distinct from choosing a desktop theme.
 
-- Implementation: [gallery](desktop/.local/bin/oldbook-wallpaper),
+- Implementation: [gallery](desktop/.local/bin/mbp-intel-wallpaper),
   [native click handling](packages/waybar-art/art.c).
 - Checks: [manual artwork](tests/test_manual_artwork.py), [picker](tests/test_gallery_picker.py),
   [new themes](tests/test_new_themes.py), [prompt editor](tests/test_gallery_prompts.py).
@@ -395,8 +395,8 @@ is welcome. No CPU, memory, processes, disk/network I/O or thermals: Waybar owns
 those. Background refresh is 60–300 seconds, except hourly Scripture. Preserve
 native reading-card click actions; Scripture search may adapt to free space.
 
-- Implementation: [runtime policy](desktop/.local/lib/oldbook/conky_policy.py),
-  [layout](desktop/.local/lib/oldbook/conky_layout.py), [panels](desktop/.config/conky/panels.json).
+- Implementation: [runtime policy](desktop/.local/lib/mbp_intel/conky_policy.py),
+  [layout](desktop/.local/lib/mbp_intel/conky_layout.py), [panels](desktop/.config/conky/panels.json).
 - Checks: [policy](tests/test_conky_policy.py), [layout](tests/test_conky_layout.py),
   [clicks](tests/test_conky_clicks.py), [desktop space](tests/test_desktop_space.py).
   [Persistent requirements](AGENTS.md) apply to every theme and rebuild.
@@ -409,8 +409,8 @@ four-minute rotation and one-time legacy import. Never replace it with JSON/rand
 lines, invent dated experiences or collect private activity automatically. The
 personal database is not a repository artifact.
 
-- Implementation: [journal](desktop/.local/lib/oldbook/desktop_journal.py),
-  [CLI](desktop/.local/bin/oldbook-journal).
+- Implementation: [journal](desktop/.local/lib/mbp_intel/desktop_journal.py),
+  [CLI](desktop/.local/bin/mbp-intel-journal).
 - Checks: [journal tests](tests/test_desktop_journal.py), [persistent policy](AGENTS.md).
 
 ### SCRIPTURE
@@ -429,9 +429,9 @@ card font and accent color. It opens saved reading without advancing the passage
 the passage itself keeps its click-to-advance action. This supersedes the separate
 History button beside the desktop search bar.
 
-- Implementation: [Scripture modules](desktop/.local/lib/oldbook/scripture.py),
-  [history](desktop/.local/lib/oldbook/scripture_history.py),
-  [generation](desktop/.local/lib/oldbook/scripture_generation.py).
+- Implementation: [Scripture modules](desktop/.local/lib/mbp_intel/scripture.py),
+  [history](desktop/.local/lib/mbp_intel/scripture_history.py),
+  [generation](desktop/.local/lib/mbp_intel/scripture_generation.py).
 - Checks: [selection](tests/test_scripture_selection.py), [history](tests/test_scripture_history.py),
   [study](tests/test_scripture_study.py), [local generation](tests/test_scripture_generation.py),
   [local runtime lifecycle](tests/test_scripture_local.py),
@@ -512,7 +512,7 @@ stock-Sway recovery entrypoint. Activation requires a new compositor session;
 never close the current desktop merely to load a new executable.
 
 - Implementation: [output mask patch](packages/swayfx/screen-corners.patch),
-  [desktop launcher](desktop/.local/bin/oldbook-sway).
+  [desktop launcher](desktop/.local/bin/mbp-intel-sway).
 - Native checks: [private compositor verifier](packages/swayfx/verify-screen-corners).
 - Evidence: [screen corner verification](verification/screen-corners/).
   Headless renderer proof does not establish physical frame rate or DRM scanout.
@@ -538,6 +538,7 @@ These replacements are already decided; do not ask the user to choose again.
 | JSON/random desktop notes, telemetry cards or lost old study text | Durable reading/journal contracts (`CONKY-READING`, `JOURNAL`, `SCRIPTURE`). |
 | npm Codex or partial CLI-only installation | Complete native APK and preserved tool/resource layout (`CODEX-PACKAGING`). |
 | Personal package named oldbook-desktop | spaceghost-desktop (`PERSONAL-DESKTOP`); old artifacts are recovery history. |
+| Desktop identity string `oldbook` | `mbp-intel` (`mbp_intel` for Python and CSS, `MBP_INTEL_` for environment); recorded evidence, package locks and the `alpine-oldbook` branch keep the old name. |
 
 The current requests do not establish an unresolved preference conflict. Actual
 limits remain explicit above: physical 60fps, physical input/hotplug/login,

@@ -3,7 +3,7 @@
 The user reported repetitive generation with Super+click and requested new
 scenes and mixes instead of more images of old scenes.
 
-The native Waybar gesture already reaches `oldbook-wallpaper generate`;
+The native Waybar gesture already reaches `mbp-intel-wallpaper generate`;
 Super+Shift+click reaches `new-theme`. The repetition came from generation:
 the selector only excluded identical scene/insertion/medium triples, so another
 medium or insertion made a previously painted scene eligible. Once those triples

@@ -9,7 +9,7 @@ workspaces remain visible when present.
 
 The workspace model, launch defaults, Sway assignment, STRATA service and
 native workspace strip all identify `10: STRATA`. The service pins the exact
-`oldbook-strata` app ID to 10, returns it there if moved, and reopens it there
+`mbp-intel-strata` app ID to 10, returns it there if moved, and reopens it there
 after closure. Background startup and recovery retain the ordinary browser's
 focus. Explicit launching remains a serialized focus/reuse operation with
 bounded retries when Sway IPC is busy. The private Firefox profile and

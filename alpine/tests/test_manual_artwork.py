@@ -218,16 +218,16 @@ class ManualArtworkTests(unittest.TestCase):
                 mock.patch.object(art, 'update') as update:
             art.pick()
         self.assertEqual(launch.call_args.args[0], ['/usr/bin/python3',
-                         str(art.REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts')])
+                         str(art.REPO / 'alpine/desktop/.local/bin/mbp-intel-gallery-prompts')])
         generate.assert_not_called()
         update.assert_not_called()
 
     def test_edit_prompts_command_opens_editor(self):
-        with mock.patch('sys.argv', ['oldbook-wallpaper', 'edit-prompts']), \
+        with mock.patch('sys.argv', ['mbp-intel-wallpaper', 'edit-prompts']), \
                 mock.patch.object(art.subprocess, 'Popen') as launch:
             art.main()
         self.assertEqual(launch.call_args.args[0][-1],
-                         str(art.REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts'))
+                         str(art.REPO / 'alpine/desktop/.local/bin/mbp-intel-gallery-prompts'))
 
     def test_select_resets_rotation_deadline_and_preserves_pause(self):
         state = self.root / 'wallpaper'

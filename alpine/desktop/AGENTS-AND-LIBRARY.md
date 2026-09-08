@@ -14,15 +14,15 @@ agent is the same thing with an ssh hop inside the tmux session, which means the
 session survives a dropped link rather than dying with it.
 
 ```sh
-oldbook-agents            # the picker
-oldbook-agents agents     # what can be launched
-oldbook-agents list       # running sessions
-oldbook-agents new codex --cwd ~/.files
-oldbook-agents attach agent-codex
-oldbook-agents kill agent-codex
+mbp-intel-agents            # the picker
+mbp-intel-agents agents     # what can be launched
+mbp-intel-agents list       # running sessions
+mbp-intel-agents new codex --cwd ~/.files
+mbp-intel-agents attach agent-codex
+mbp-intel-agents kill agent-codex
 ```
 
-Agents are defined in `alpine/desktop/.config/oldbook/agents.json`: an `id`, a
+Agents are defined in `alpine/desktop/.config/mbp-intel/agents.json`: an `id`, a
 `title`, a `command` array, an optional `host`, and an `enabled` switch. Local
 agents cover Codex, Claude Code and a plain shell. The `alienware` agents reach
 the tailnet box over ssh for Codex, Claude Code, Ollama and a login shell.
@@ -34,7 +34,7 @@ value deliberately left to expand on the far side.
 ### Reaching the tailnet box
 
 Tailscale is installed, enabled at boot and authenticated; this machine is
-`oldbook`. The `alienware` agents use **Tailscale SSH** rather than plain ssh,
+`mbp-intel`. The `alienware` agents use **Tailscale SSH** rather than plain ssh,
 because it needs no key on either side and authenticates with the tailnet
 identity instead.
 
@@ -68,7 +68,7 @@ box actually serves, `qwen3.5:27b-text` and `qwen3.5:9b`.
 ### What this laptop accepts
 
 Nothing that is not asked for. There is no sshd, Tailscale SSH is off here, and
-`table inet oldbook` drops unsolicited inbound on every interface including
+`table inet mbp-intel` drops unsolicited inbound on every interface including
 `tailscale0`, permitting only loopback, established or related traffic, DHCP
 replies and the ICMP and NDP types IPv6 needs. Tailscale still reaches peers
 directly because it initiates outbound and conntrack lets the replies home.
@@ -80,15 +80,15 @@ so no peer can quietly become a route for this machine's traffic.
 ## The offline library
 
 The complete King James text ships in the checkout. Everything else installs
-into `~/.local/share/oldbook/scripture/`, and the first desktop login after an
+into `~/.local/share/mbp-intel/scripture/`, and the first desktop login after an
 install fetches it automatically in the background.
 
 ```sh
-oldbook-scripture-library list       # what exists, and what is installed
-oldbook-scripture-library install --core   # public-domain Bibles and the Tanakh
-oldbook-scripture-library install --all    # adds the Talmud
-oldbook-scripture-library install ylt
-oldbook-scripture-library installed
+mbp-intel-scripture-library list       # what exists, and what is installed
+mbp-intel-scripture-library install --core   # public-domain Bibles and the Tanakh
+mbp-intel-scripture-library install --all    # adds the Talmud
+mbp-intel-scripture-library install ylt
+mbp-intel-scripture-library installed
 ```
 
 Christian Bibles, all public domain: the King James Version, the same with the
@@ -106,8 +106,8 @@ rather than quietly broken. Every text records its licence when it installs.
 The Davidson Talmud is CC-BY-NC: fine for personal study, not for anything
 commercial.
 
-Read any of them with `oldbook-scripture --translation <id> show 'Isaiah 53'`,
-or switch the desktop and the picker with `oldbook-scripture use <id>`. The
+Read any of them with `mbp-intel-scripture --translation <id> show 'Isaiah 53'`,
+or switch the desktop and the picker with `mbp-intel-scripture use <id>`. The
 scripture picker (**Super+/**) lists the other installed texts at the top, so
 one keystroke and a word of typing moves between translations.
 

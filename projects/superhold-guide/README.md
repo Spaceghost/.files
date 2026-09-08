@@ -24,7 +24,7 @@ unfocused guide dismisses after one second. This is a release blocker. License s
 [release preparation](docs/RELEASING.md) and [validation](docs/VALIDATION.md).
 
 The standalone checkout uses its own configuration and runtime paths. It does
-not replace or modify the original installed Oldbook shortcut service.
+not replace or modify the original installed MBP Intel shortcut service.
 
 ## Run on Alpine
 
@@ -184,7 +184,7 @@ no network requests. Native key events are sent only after explicit activation.
 Service metadata lives under `$XDG_RUNTIME_DIR/superhold/`.
 
 Active-session checks suppress the guide during session changes and when
-logind reports a locked session. The compatible Oldbook lock readiness record
+logind reports a locked session. The compatible MBP Intel lock readiness record
 is also recognized. Other lockers require their own session isolation checks
 before support is claimed.
 

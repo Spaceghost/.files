@@ -29,7 +29,7 @@ this checkpoint changes documentation only, with no live restarts or theme switc
   This implementation has NOT been validated or installed in this task.
   Existing design and tests: that project's
   `docs/superpowers/2026-09-07-desktop-themes.md` and `tests/test_theme.py`.
-- `alpine/desktop/.local/bin/oldbook-theme:197` refreshes several running clients,
+- `alpine/desktop/.local/bin/mbp-intel-theme:197` refreshes several running clients,
   but has no Superhold refresh. Lines 246-251 explicitly leave running Firefox,
   btop and Neovim on their previous styling. These are outstanding against the
   user's requirement that all things stay updated with the selected theme.
@@ -74,7 +74,7 @@ source/install drift is the leading cause to confirm with the live reproduction.
 - Existing profiles: `ensure_profile()` at `desktop_theme.py:168-180` fills missing
   files but keeps existing ones. Compare generated files against `render_profile()`
   after descriptor updates, while preserving intentional authored overrides.
-- Other GTK clients: `oldbook-gtk-settings` updates desktop settings, but arbitrary
+- Other GTK clients: `mbp-intel-gtk-settings` updates desktop settings, but arbitrary
   persistent GTK clients may retain loaded user CSS when its symlink changes.
   Scripture and decoration have their own polling; validate other consumers.
 - Expand integration coverage to check deployed selection and observed running

@@ -9,7 +9,7 @@ import unittest
 
 
 MODULE = (Path(__file__).resolve().parents[1]
-          / 'desktop/.local/lib/oldbook/agent_switcher.py')
+          / 'desktop/.local/lib/mbp_intel/agent_switcher.py')
 sys.path.insert(0, str(MODULE.parent))
 
 
@@ -50,7 +50,7 @@ class AgentSwitcherTests(unittest.TestCase):
         two = workspace(2, '2: ORBIT · Codex', [view(21, focused=True)])
         scratch = workspace(-1, '__i3_scratch', [view(99)])
         three = workspace(3, 'Research', [view(31, app_id='firefox')])
-        four = workspace(4, 'Remote', [view(41, app_id='oldbook-agent')])
+        four = workspace(4, 'Remote', [view(41, app_id='mbp-intel-agent')])
         output = {'id': 100, 'type': 'output', 'name': 'eDP-1',
                   'focus': [two['id'], one['id'], three['id'], four['id'], scratch['id']],
                   'nodes': [one, two, three, four, scratch], 'floating_nodes': []}
@@ -93,13 +93,13 @@ class AgentSwitcherTests(unittest.TestCase):
     def test_commit_requires_selected_container_to_remain_a_resolved_agent(self):
         state = self.api['SwitchState'](
             [{'id': 11, 'pid': 1011, 'app_id': 'foot', 'focused': True},
-             {'id': 21, 'pid': 1021, 'app_id': 'oldbook-agent', 'focused': False}],
+             {'id': 21, 'pid': 1021, 'app_id': 'mbp-intel-agent', 'focused': False}],
             'next')
         fresh = [{'id': 11, 'pid': 1011, 'app_id': 'foot', 'focused': True}]
         self.assertIsNone(state.commit_target(fresh))
-        fresh.append({'id': 21, 'pid': 9999, 'app_id': 'oldbook-agent', 'focused': False})
+        fresh.append({'id': 21, 'pid': 9999, 'app_id': 'mbp-intel-agent', 'focused': False})
         self.assertIsNone(state.commit_target(fresh))
-        fresh[-1] = {'id': 21, 'pid': 1021, 'app_id': 'oldbook-agent', 'focused': False}
+        fresh[-1] = {'id': 21, 'pid': 1021, 'app_id': 'mbp-intel-agent', 'focused': False}
         self.assertEqual(state.commit_target(fresh), 21)
 
     def test_empty_candidates_have_no_selection_or_commit(self):

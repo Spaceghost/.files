@@ -13,10 +13,10 @@ import sqlite3
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import scripture_generation as generation
 
-CLI = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-study'
+CLI = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-study'
 
 
 def source(identifier='kjv-john-3', text='John 3:16  Synthetic fixture verse.'):

@@ -10,8 +10,8 @@ copied into the project.
 The first extraction renamed the package and service to `superhold`, separated
 its XDG paths, added a version command and logind lock hint, removed the original
 machine's Neovim mappings from the baseline, and supplied Python packaging and
-optional LXQt/Sway integration. Oldbook lock readiness recognition remains an
-optional compatibility check. Human-readable Oldbook command labels are parser
+optional LXQt/Sway integration. MBP Intel lock readiness recognition remains an
+optional compatibility check. Human-readable MBP Intel command labels are parser
 rules; those helper programs are neither bundled nor required.
 
 The `0.2.0.dev0` work makes this a separate interactive application: a searchable

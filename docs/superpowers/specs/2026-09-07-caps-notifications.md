@@ -11,7 +11,7 @@ The user requested this after resuming the OpenSnitch package patch. The existin
 Sway keyboard/session configuration is extended with `caps:escape`; Caps Lock
 starts disabled. The original Escape key remains Escape.
 
-`oldbook-notification-led` subscribes to SwayNC's count events. The indicator is
+`mbp-intel-notification-led` subscribes to SwayNC's count events. The indicator is
 on whenever the notification center contains notifications, including retained
 notifications and Do Not Disturb. It is off when the count reaches zero. Opening
 the center does not acknowledge or delete notifications.

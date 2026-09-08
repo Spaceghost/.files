@@ -4,7 +4,7 @@ Alt+Tab opens a compact window picker for agent windows across workspaces.
 Keep Alt held and tap Tab to advance, add Shift to go backward, release the
 last held Alt key to accept, or press Escape to cancel. Window titles and
 workspace labels distinguish sessions. Ordinary terminals are excluded;
-Codex, ChatGPT, Claude and the Oldbook agent launchers are recognized through
+Codex, ChatGPT, Claude and the MBP Intel agent launchers are recognized through
 the existing application resolver. Scratchpad windows are excluded.
 
 Candidates follow Sway's focus-tree traversal order, frozen for each gesture.
@@ -13,7 +13,7 @@ application ID and agent identity are checked again, so closing a target while
 the popup is open cannot focus a replacement. This is a window switcher, so
 multiple agent panes inside one terminal remain one window.
 
-The transient GTK layer surface uses the active Oldbook palette and GTK font.
+The transient GTK layer surface uses the active MBP Intel palette and GTK font.
 It refreshes colors while visible, shows ordinary candidate sets together and
 scrolls larger sets. A dedicated Sway binding mode lets GTK receive Tab and
 Alt-release events in order; Escape also restores the default mode if the
@@ -23,9 +23,9 @@ the final focus command. No background switcher daemon is installed.
 ## Installation and checks
 
 The launcher, Python module and `sway/local.d/agent-switcher.conf` were deployed
-with `deploy-home`, first into `/tmp/oldbook-agent-switcher-preview`, then into
+with `deploy-home`, first into `/tmp/mbp-intel-agent-switcher-preview`, then into
 the live HOME. The live deployment backup is
-`~/.local/state/oldbook/backups/1788835183838710801`.
+`~/.local/state/mbp-intel/backups/1788835183838710801`.
 
 - 11 switcher unit tests pass; the focused identity/workspace suite totals
   53 passing tests. Python compilation and the complete SwayFX configuration
@@ -44,17 +44,17 @@ the live HOME. The live deployment backup is
 
 Structured evidence with source hashes is retained in
 `alpine/verification/agent-switcher/`. The native harness and detailed logs
-remain in `~/.local/state/oldbook/verification/agent-switcher/`.
+remain in `~/.local/state/mbp-intel/verification/agent-switcher/`.
 
 ## Recovery
 
-To dismiss a stuck popup, run `oldbook-agent-switcher cancel` and
+To dismiss a stuck popup, run `mbp-intel-agent-switcher cancel` and
 `swaymsg 'mode "default"'`. To remove this deployment, run:
 
 ```
-alpine/bin/deploy-home --rollback /home/jack/.local/state/oldbook/backups/1788835183838710801
+alpine/bin/deploy-home --rollback /home/jack/.local/state/mbp-intel/backups/1788835183838710801
 ```
 
 Reload Sway afterward. Ghostty's persistent Super+Enter preference is a separate
 `sway/local.d/terminal.conf` include; its installation backup is
-`~/.local/state/oldbook/backups/1788834887513148285`.
+`~/.local/state/mbp-intel/backups/1788834887513148285`.

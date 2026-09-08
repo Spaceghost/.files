@@ -35,7 +35,7 @@ struct Help {
     gboolean disposed;
 };
 
-static const char installed_key[] = "oldbook-hover-help-binding";
+static const char installed_key[] = "mbp-intel-hover-help-binding";
 
 static void widget_gone(gpointer data, GObject *where_widget_was) {
     (void)where_widget_was;
@@ -95,8 +95,8 @@ static void emphasize_workspace(Binding *binding) {
     GdkRGBA normal;
     gtk_style_context_get_color(context, gtk_style_context_get_state(context), &normal);
     GdkRGBA active = normal, secondary = normal;
-    gtk_style_context_lookup_color(context, "oldbook_workspace_active", &active);
-    gtk_style_context_lookup_color(context, "oldbook_workspace_secondary", &secondary);
+    gtk_style_context_lookup_color(context, "mbp_intel_workspace_active", &active);
+    gtk_style_context_lookup_color(context, "mbp_intel_workspace_secondary", &secondary);
     PangoAttrList *attributes = binding->original_attributes
         ? pango_attr_list_copy(binding->original_attributes) : pango_attr_list_new();
     attribute_range(attributes, pango_attr_weight_new(PANGO_WEIGHT_NORMAL), 0, G_MAXUINT);
@@ -213,7 +213,7 @@ static gboolean query_help(GtkWidget *widget, gint x, gint y, gboolean keyboard_
     }
     gtk_tooltip_set_markup(tooltip, markup);
     static const char *names[] = {"workspace", "window", "mode", "cpu"};
-    g_debug("oldbook-help: rendered %s tooltip", names[binding->kind]);
+    g_debug("mbp-intel-help: rendered %s tooltip", names[binding->kind]);
     g_free(markup);
     g_free(escaped);
     g_free(native);
@@ -330,7 +330,7 @@ static gboolean discover(gpointer data) {
     return G_SOURCE_REMOVE;
 }
 
-void *oldbook_help_init(GtkWidget *root) {
+void *mbp_intel_help_init(GtkWidget *root) {
     Help *help = g_new0(Help, 1);
     help->root = root;
     help->bindings = g_ptr_array_new();
@@ -338,7 +338,7 @@ void *oldbook_help_init(GtkWidget *root) {
     return help;
 }
 
-void oldbook_help_deinit(void *instance) {
+void mbp_intel_help_deinit(void *instance) {
     Help *help = instance;
     help->disposed = TRUE;
     if (help->discover_source) g_source_remove(help->discover_source);

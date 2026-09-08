@@ -4,8 +4,8 @@ Swiping four fingers away clears the focused workspace; swiping four fingers
 back returns every window to the position it left. Three-finger swipes keep the
 workspace and window picker, and four-finger left/right still change workspace.
 
-    bindgesture swipe:4:up   exec ~/.local/bin/oldbook-showdesktop show
-    bindgesture swipe:4:down exec ~/.local/bin/oldbook-showdesktop restore
+    bindgesture swipe:4:up   exec ~/.local/bin/mbp-intel-showdesktop show
+    bindgesture swipe:4:down exec ~/.local/bin/mbp-intel-showdesktop restore
 
 ## How the windows appear to leave
 
@@ -87,8 +87,8 @@ show no frame of bare desktop before the cards move.
 ## Why a background helper
 
 Importing GTK and initialising it costs about a third of a second, which put the
-first frame of movement roughly 800 ms after the swipe. `oldbook-showdesktop
-daemon` keeps that cost at login: `oldbook-session` starts one per Sway socket,
+first frame of movement roughly 800 ms after the swipe. `mbp-intel-showdesktop
+daemon` keeps that cost at login: `mbp-intel-session` starts one per Sway socket,
 it holds a per-session lock so a reload cannot stack copies, and it exits with
 Sway through a shutdown subscription. Gestures reach it over a private datagram
 socket; if none is listening the command still does the work itself. The
@@ -110,9 +110,9 @@ daemon renames workspaces live and a captured name goes stale.
 
 ## Implementation and validation
 
-- `alpine/desktop/.local/lib/oldbook/showdesktop.py` with the thin
-  `alpine/desktop/.local/bin/oldbook-showdesktop` entry point, reusing
-  `workspace_model` for view selection and `oldbook-workspaces` for Sway IPC.
+- `alpine/desktop/.local/lib/mbp_intel/showdesktop.py` with the thin
+  `alpine/desktop/.local/bin/mbp-intel-showdesktop` entry point, reusing
+  `workspace_model` for view selection and `mbp-intel-workspaces` for Sway IPC.
 - gtk4-layer-shell has to precede libwayland-client to interpose. Rather than
   re-exec under `LD_PRELOAD`, the module loads it with `ctypes.RTLD_GLOBAL`
   before importing `gi`, which is the in-process equivalent.
@@ -134,6 +134,6 @@ daemon renames workspaces live and a captured name goes stale.
 Remove the two `bindgesture swipe:4:up`/`swipe:4:down` lines from
 `sway/gestures.conf` and reload to disable the gesture; the earlier four-finger
 expo bindings are the previous behaviour. Stop the helper by terminating
-`oldbook-showdesktop daemon` and remove its block from `oldbook-session`. If a
+`mbp-intel-showdesktop daemon` and remove its block from `mbp-intel-session`. If a
 session is ever left on the bare desktop, any normal workspace shortcut returns
 to the windows, which were never moved.

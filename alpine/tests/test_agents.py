@@ -10,10 +10,10 @@ import unittest
 from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import agent_launcher as launcher
 
-LIVE = REPO / 'alpine/desktop/.config/oldbook/agents.json'
+LIVE = REPO / 'alpine/desktop/.config/mbp-intel/agents.json'
 
 
 def config(**extra):
@@ -93,7 +93,7 @@ class ConfigTests(unittest.TestCase):
 
 class WorkdirTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-agents-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-agents-test-')
         self.addCleanup(self.temp.cleanup)
         self.home = Path(self.temp.name)
         (self.home / 'src/one').mkdir(parents=True)
@@ -219,7 +219,7 @@ class PreflightTests(unittest.TestCase):
     """A remote agent explains itself instead of leaving a session that dies."""
 
     def module(self):
-        return runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-agents'))
+        return runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-agents'))
 
     def agent(self, **extra):
         return dict({'id': 'far', 'title': 'Far', 'host': 'alienware',

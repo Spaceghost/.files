@@ -5,7 +5,7 @@
 Extract the contextual shortcut guide into a standalone, publishable desktop
 utility. Preserve the existing hold/release, scroll, Sway, tmux, and application
 profile behavior. Use the active desktop's Qt palette, font, and style. This
-Oldbook uses Gruvbox Dark through qt6ct; the released application must not force
+MBP Intel uses Gruvbox Dark through qt6ct; the released application must not force
 that theme on LXQt or other desktops.
 
 ## Boundaries
@@ -26,7 +26,7 @@ that theme on LXQt or other desktops.
 - Pointer scrolling remains available. Context work runs outside the GUI thread;
   stale results cannot reopen the overlay after release.
 - Configuration lives under `$XDG_CONFIG_HOME/hold-to-help/`; a compatibility
-  wrapper preserves `oldbook-shortcuts` and existing custom profile paths.
+  wrapper preserves `mbp-intel-shortcuts` and existing custom profile paths.
 
 ## Architecture
 

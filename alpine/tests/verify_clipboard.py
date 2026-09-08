@@ -4,14 +4,14 @@ import base64,json,os,runpy,signal,subprocess,tempfile,time
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'alpine/verification/clipboard'
-HELPER=ROOT/'alpine/desktop/.local/bin/oldbook-clipboard'
+HELPER=ROOT/'alpine/desktop/.local/bin/mbp-intel-clipboard'
 results={}
 processes=[]
 temp=tempfile.TemporaryDirectory(prefix='clipboard-integration-')
 b=Path(temp.name); run=b/'run'; run.mkdir(mode=0o700)
 home=b/'home'; (home/'.local/bin').mkdir(parents=True); (home/'.config/tmux').mkdir(parents=True)
-(home/'.local/bin/oldbook-clipboard').symlink_to(HELPER)
-(home/'.config/tmux/oldbook.conf').symlink_to(ROOT/'alpine/desktop/.config/tmux/oldbook.conf')
+(home/'.local/bin/mbp-intel-clipboard').symlink_to(HELPER)
+(home/'.config/tmux/mbp-intel.conf').symlink_to(ROOT/'alpine/desktop/.config/tmux/mbp-intel.conf')
 env=dict(os.environ,HOME=str(home),XDG_RUNTIME_DIR=str(run),XDG_STATE_HOME=str(b/'state'),XDG_CACHE_HOME=str(b/'cache'),XDG_CONFIG_HOME=str(home/'.config'),WLR_BACKENDS='headless',WLR_RENDERER='pixman',WLR_HEADLESS_OUTPUTS='1')
 for k in ('SWAYSOCK','WAYLAND_DISPLAY','DISPLAY','TMUX','CLIPHIST_DB_PATH'): env.pop(k,None)
 log=(OUT/'runtime.log').open('w')
@@ -77,7 +77,7 @@ try:
     wait(lambda:b'binary' in listing())
     assert cmd(['wl-paste','-n','-t','image/png']).stdout==png
     # Restore the actual binary history entry using a deterministic picker.
-    picker=home/'.local/bin/oldbook-fuzzel'
+    picker=home/'.local/bin/mbp-intel-fuzzel'
     picker.write_text('#!/usr/bin/python3\nimport sys\nrows=sys.stdin.buffer.readlines()\nsys.stdout.buffer.write(next(r for r in rows if b"binary" in r))\n')
     picker.chmod(0o755)
     env['PATH']=str(home/'.local/bin')+':'+os.environ['PATH']
@@ -97,7 +97,7 @@ try:
     results['neovim_bidirectional']=True
     # Attached tmux: vi y and default Enter must use the pipe without relying on OSC52.
     conf=b/'tmux.conf'
-    conf.write_text(f'source-file "{ROOT}/alpine/desktop/.config/tmux/oldbook.conf"\nset -s set-clipboard off\n')
+    conf.write_text(f'source-file "{ROOT}/alpine/desktop/.config/tmux/mbp-intel.conf"\nset -s set-clipboard off\n')
     socket=str(b/'tmux.sock')
     t=lambda *args: cmd(['tmux','-S',socket,*args],check=True)
     t('-f',str(conf),'new-session','-d','-s','fixture','sh','-c',"printf 'tmux clipboard fixture\\n'; sleep 120")
@@ -181,12 +181,12 @@ Gtk.main()
     for name in ('swappy','notify-send'):
         stub=home/'.local/bin'/name;stub.write_text('#!/bin/sh\nexit 0\n');stub.chmod(0o755)
     env['XDG_PICTURES_DIR']=str(b/'pictures')
-    cmd([str(ROOT/'alpine/desktop/.local/bin/oldbook-screenshot'),'full'],check=True)
+    cmd([str(ROOT/'alpine/desktop/.local/bin/mbp-intel-screenshot'),'full'],check=True)
     screenshot=next((b/'pictures/Screenshots').glob('*.png'))
     assert cmd(['wl-paste','-n','-t','image/png']).stdout==screenshot.read_bytes()
     results['screenshot_copies_png']=True
     # Capture the production picker with synthetic history, then cancel it.
-    picker.unlink();picker.symlink_to(ROOT/'alpine/desktop/.local/bin/oldbook-fuzzel')
+    picker.unlink();picker.symlink_to(ROOT/'alpine/desktop/.local/bin/mbp-intel-fuzzel')
     copy(b'Synthetic clipboard demo: text, screenshots, terminal selections')
     wait(lambda:b'Synthetic clipboard demo' in listing())
     menu=start([str(HELPER),'pick'])

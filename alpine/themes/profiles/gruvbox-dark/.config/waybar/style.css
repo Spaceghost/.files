@@ -1,7 +1,7 @@
 /* Space Ghost × Gruvbox Dark control deck. GTK CSS, intentionally built for stock Waybar. */
-@import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
-@define-color oldbook_workspace_active #fbf1c7;
-@define-color oldbook_workspace_secondary #a89984;
+@import url("waybar-state.css");  /* fullscreen dimming, written by mbp-intel-waybar-dim */
+@define-color mbp_intel_workspace_active #fbf1c7;
+@define-color mbp_intel_workspace_secondary #a89984;
 * {
     border: none;
     border-radius: 0;
@@ -38,7 +38,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
 #workspaces button:hover { background: #504945; color: #fbf1c7; box-shadow: none; }
 #workspaces button.focused {
     background: linear-gradient(110deg, alpha(#fabd2f, .22), alpha(#fabd2f, .10));
-    color: @oldbook_workspace_active;
+    color: @mbp_intel_workspace_active;
     font-weight: 400;
     box-shadow: none;
 }
@@ -93,7 +93,7 @@ tooltip label { color: #ebdbb2; padding: 13px 15px; font-size: 11px; font-weight
 #custom-art.generating { color: #fabd2f; text-shadow: 0 0 7px #d79921; }
 
 /* While a window is fullscreen the bar fades back so it stops competing with
-   the content; oldbook-waybar-dim writes the opacity into waybar-state.css.
+   the content; mbp-intel-waybar-dim writes the opacity into waybar-state.css.
    GTK only sets the hover state on the module boxes, never on the window or
    the row that holds them, so each chrome block answers the pointer itself. */
 window#waybar.top .modules-left,

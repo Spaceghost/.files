@@ -8,19 +8,19 @@ import sys
 import traceback
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import scripture_history as history
 from scripture_history_reader import run
 
 
 def main():
-    if os.environ.get('OLDBOOK_STRATA_GTK_PRIVATE_BUS') != '1' or os.environ.get('GDK_BACKEND') != 'x11':
+    if os.environ.get('MBP_INTEL_STRATA_GTK_PRIVATE_BUS') != '1' or os.environ.get('GDK_BACKEND') != 'x11':
         raise RuntimeError('Run this fixture through the private Xvfb/D-Bus GTK harness')
     import gi
     gi.require_version('Gtk', '3.0')
     gi.require_version('Gdk', '3.0')
     from gi.repository import Gtk, Gdk, GLib
-    output = Path(os.environ['OLDBOOK_SCRIPTURE_HISTORY_VERIFY_OUTPUT'])
+    output = Path(os.environ['MBP_INTEL_SCRIPTURE_HISTORY_VERIFY_OUTPUT'])
     output.mkdir(parents=True, exist_ok=False)
     database = history.database_path()
     for number in (1, 2):
@@ -103,13 +103,13 @@ def main():
         return GLib.SOURCE_REMOVE
 
     GLib.timeout_add(500, verify)
-    result = run(REPO / 'alpine/desktop/.local/bin/oldbook-scripture', database)
+    result = run(REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture', database)
     record = {'status': 'failed' if failures else 'passed', 'checks': checks, 'failures': failures,
               'isolation': 'private Xvfb, D-Bus, HOME and XDG data; synthetic content only',
               'network_or_model_calls': 0,
               'source_sha256': {name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
-                                for name in ('alpine/desktop/.local/lib/oldbook/scripture_history.py',
-                                             'alpine/desktop/.local/lib/oldbook/scripture_history_reader.py')}}
+                                for name in ('alpine/desktop/.local/lib/mbp_intel/scripture_history.py',
+                                             'alpine/desktop/.local/lib/mbp_intel/scripture_history_reader.py')}}
     (output / 'evidence.json').write_text(json.dumps(record, indent=2) + '\n')
     print(json.dumps(record, indent=2))
     return 1 if failures else result

@@ -1,13 +1,13 @@
 # STRATA on workspace zero
 
 STRATA moves from workspace 6 to workspace 0. The desktop session starts
-`oldbook-strata --daemon`; Super+0 opens or focuses its dedicated review window.
+`mbp-intel-strata --daemon`; Super+0 opens or focuses its dedicated review window.
 Super+6 returns to ordinary workspace switching, and Super+Shift+0 moves the
 current window to zero. The overview includes zero even before its window maps
 and retains access to workspace 10. Workspace names and the native bar helper
 recognize `0: STRATA`, including an empty active workspace’s bold name.
 
-Sway assigns exact app ID `oldbook-strata` to zero and suppresses focus during
+Sway assigns exact app ID `mbp-intel-strata` to zero and suppresses focus during
 background mapping. The service adopts an existing review browser and Fossil
 server. It returns review windows moved elsewhere to zero and restarts a closed
 or failed browser/server with bounded backoff. Explicit launching remains a

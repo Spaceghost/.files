@@ -4,7 +4,7 @@ Hold Super alone for half a second to see a contextual shortcut guide. Release
 it or press another key to dismiss it. Scroll with the pointer wheel while the
 focused application keeps keyboard focus.
 
-Superhold is a standalone Linux desktop utility extracted from Oldbook. Version
+Superhold is a standalone Linux desktop utility extracted from MBP Intel. Version
 0.1.0 is a local release candidate, ready for packaging and review; it is not an
 official LXQt component.
 
@@ -101,7 +101,7 @@ instances are rejected. The package does not enable autostart automatically.
 The guide uses QPalette, QStyle and Qt's application fonts. It does not set
 `QT_QPA_PLATFORMTHEME`, choose Fusion, or embed Gruvbox colors. LXQt can supply
 its normal Qt platform theme; other desktops can use their own plugin or qt6ct.
-Oldbook's existing qt6ct palette supplies local Gruvbox Dark.
+MBP Intel's existing qt6ct palette supplies local Gruvbox Dark.
 
 Palette and font events update the visible guide. A desktop plugin that only
 loads settings at startup requires restarting the guide after a theme change.
@@ -145,6 +145,6 @@ window metadata, configuration, process identity, and live tmux key tables.
 
 Superhold is GPL-3.0-or-later; see LICENSE. Qt, PyQt6, layer-shell-qt and
 python-Xlib remain separately distributed dependencies under their respective
-licenses. The original contextual guide was developed for Spaceghost's Oldbook
+licenses. The original contextual guide was developed for Spaceghost's MBP Intel
 configuration; this project preserves that lineage without claiming LXQt
 endorsement.

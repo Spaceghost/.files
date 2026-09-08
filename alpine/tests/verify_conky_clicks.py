@@ -13,7 +13,7 @@ import time
 
 REPO = Path(__file__).resolve().parents[2]
 BIN = REPO / 'alpine/desktop/.local/bin'
-LIB = REPO / 'alpine/desktop/.local/lib/oldbook'
+LIB = REPO / 'alpine/desktop/.local/lib/mbp_intel'
 OUTPUT = REPO / 'alpine/verification/conky-clicks'
 sys.path.insert(0, str(LIB))
 import conky_layout
@@ -120,9 +120,9 @@ def verify():
         runtime.mkdir(mode=0o700)
         home = root / 'home'
         home.mkdir()
-        target = home / '.local/bin/oldbook-conky-click'
+        target = home / '.local/bin/mbp-intel-conky-click'
         target.parent.mkdir(parents=True)
-        target.symlink_to(BIN / 'oldbook-conky-click')
+        target.symlink_to(BIN / 'mbp-intel-conky-click')
         env = dict(os.environ, HOME=str(home), XDG_RUNTIME_DIR=str(runtime),
                    XDG_CONFIG_HOME=str(home / '.config'),
                    XDG_DATA_HOME=str(home / '.local/share'),
@@ -134,7 +134,7 @@ def verify():
                           'output * bg #282828 solid_color\nseat seat0 fallback true\n')
         pointer_binary = build_pointer(root)
         children = []
-        state = home / '.local/state/oldbook/conky'
+        state = home / '.local/state/mbp-intel/conky'
         with (OUTPUT / 'native.log').open('w') as log:
             def spawn(arguments, pointer=False):
                 process = subprocess.Popen(arguments, env=env,
@@ -153,12 +153,12 @@ def verify():
                 display = wait_for(lambda: [p for p in runtime.glob('wayland-*') if p.is_socket()],
                                    'Wayland display did not start')[0]
                 env.update(SWAYSOCK=str(next(runtime.glob('sway-ipc*.sock'))), WAYLAND_DISPLAY=display.name)
-                command(str(BIN / 'oldbook-scripture'), 'select', 'John 3:16')
+                command(str(BIN / 'mbp-intel-scripture'), 'select', 'John 3:16')
                 state.mkdir(parents=True)
                 panels = [
-                    ('scripture', 30, 30, '${execpi 60 ' + str(BIN / 'oldbook-scripture') + ' panel}'),
-                    ('witness', 520, 30, '${execpi 300 ' + str(BIN / 'oldbook-scripture') + ' witness}'),
-                    ('ghost', 30, 340, '${execi 240 ' + str(BIN / 'oldbook-journal') + ' show}'),
+                    ('scripture', 30, 30, '${execpi 60 ' + str(BIN / 'mbp-intel-scripture') + ' panel}'),
+                    ('witness', 520, 30, '${execpi 300 ' + str(BIN / 'mbp-intel-scripture') + ' witness}'),
+                    ('ghost', 30, 340, '${execi 240 ' + str(BIN / 'mbp-intel-journal') + ' show}'),
                 ]
                 pids = {}
                 for identifier, x, y, text in panels:
@@ -208,7 +208,7 @@ def verify():
                     before = current_pids()
                     before_pixels = pixels()
                     if identifier == 'ghost':
-                        with sqlite3.connect(home / '.local/share/oldbook/journal/entries.sqlite3') as db:
+                        with sqlite3.connect(home / '.local/share/mbp-intel/journal/entries.sqlite3') as db:
                             previous_entry = db.execute('SELECT entry_id FROM rotation').fetchone()[0]
                     started = time.monotonic()
                     click(x + 60, y + 50)
@@ -219,11 +219,11 @@ def verify():
                     wait_for(click_complete, f'{identifier} click did not finish replacing its card')
                     wait_for(lambda: pixels() != before_pixels, f'{identifier} did not draw its new text')
                     if identifier == 'ghost':
-                        with sqlite3.connect(home / '.local/share/oldbook/journal/entries.sqlite3') as db:
+                        with sqlite3.connect(home / '.local/share/mbp-intel/journal/entries.sqlite3') as db:
                             assert db.execute('SELECT entry_id FROM rotation').fetchone()[0] != previous_entry
                     durations[identifier] = round(time.monotonic() - started, 2)
                     time.sleep(.5)
-                selected = json.loads((home / '.local/state/oldbook/scripture/selection.json').read_text())
+                selected = json.loads((home / '.local/state/mbp-intel/scripture/selection.json').read_text())
                 assert selected['reference'] == 'John 3:17'
                 command('grim', str(OUTPUT / 'after.png'))
                 assert (OUTPUT / 'before.png').read_bytes() != (OUTPUT / 'after.png').read_bytes()

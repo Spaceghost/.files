@@ -27,7 +27,7 @@ not proof of radio silence or exclusive controller authority.
 
 Sanitized evidence is in [permissions-verification.json](permissions-verification.json).
 The exact private recovery journal is
-`/var/lib/oldbook/radio-permissions/attempt-0huvvd1q`; keep its association data
+`/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q`; keep its association data
 out of Fossil. Reboot and seat-change persistence remain unverified.
 
 ## Staged persistent controller

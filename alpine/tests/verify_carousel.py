@@ -24,8 +24,8 @@ from verify_decoration_attachment import SwayIPC, walk
 
 
 ROOT = Path(__file__).resolve().parents[2]
-HELPER = ROOT / 'alpine/desktop/.local/bin/oldbook-carousel'
-BUS_MARKER = 'OLDBOOK_CAROUSEL_VERIFY_BUS'
+HELPER = ROOT / 'alpine/desktop/.local/bin/mbp-intel-carousel'
+BUS_MARKER = 'MBP_INTEL_CAROUSEL_VERIFY_BUS'
 HEADER = struct.Struct('=6sII')
 
 
@@ -171,7 +171,7 @@ def stop_private(processes, marker, exclude=()):
 def run(arguments):
     output = arguments.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    base = Path(os.environ['OLDBOOK_CAROUSEL_VERIFY_BASE'])
+    base = Path(os.environ['MBP_INTEL_CAROUSEL_VERIFY_BASE'])
     runtime = Path(os.environ['XDG_RUNTIME_DIR'])
     env = dict(os.environ, WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
                WLR_LIBINPUT_NO_DEVICES='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
@@ -182,8 +182,8 @@ def run(arguments):
     sources = [bindings]
     if not arguments.baseline:
         require(HELPER.is_file(), 'carousel executable is not ready')
-        sources.extend([HELPER, HELPER.with_name('oldbook-workspaces')])
-        library = ROOT / 'alpine/desktop/.local/lib/oldbook'
+        sources.extend([HELPER, HELPER.with_name('mbp-intel-workspaces')])
+        library = ROOT / 'alpine/desktop/.local/lib/mbp_intel'
         sources.extend([library / 'window_switching.py', library / 'overlay_theme.py',
                         library / 'showdesktop.py', library / 'workspace_model.py',
                         library / 'ui_command.py', library / 'ui_priority.py'])
@@ -207,14 +207,14 @@ def run(arguments):
         if arguments.escape_handoff:
             # Make asynchronous cancel startup latency deterministic without
             # changing the real helper or the binding under test.
-            wrapper = local / 'oldbook-carousel'
+            wrapper = local / 'mbp-intel-carousel'
             wrapper.write_text('#!/bin/sh\n'
                                'if [ "$1" = cancel ]; then sleep 0.75; fi\n'
                                'exec ' + shlex.quote(str(HELPER)) + ' "$@"\n')
             wrapper.chmod(0o700)
             report['private_cancel_delay_seconds'] = .75
         else:
-            (local / 'oldbook-carousel').symlink_to(HELPER)
+            (local / 'mbp-intel-carousel').symlink_to(HELPER)
     config = output / 'sway.conf'
     captured_bindings = output / 'bindings.conf'
     captured_bindings.write_bytes(bindings.read_bytes())
@@ -317,7 +317,7 @@ while True:
 
     def layers():
         return [surface for item in ipc(3) for surface in item.get('layer_shell_surfaces', [])
-                if surface.get('namespace') == 'oldbook-carousel']
+                if surface.get('namespace') == 'mbp-intel-carousel']
 
     state_path = None
 
@@ -398,7 +398,7 @@ while True:
         report['compositor_readiness'] = {'attempts': readiness_attempts,
                                           'barrier': 'GET_VERSION response', 'version': version}
         env.update(SWAYSOCK=str(sway_socket), WAYLAND_DISPLAY=display)
-        priority = Path('/usr/local/sbin/oldbook-ui-priority')
+        priority = Path('/usr/local/sbin/mbp-intel-ui-priority')
         if priority.is_file():
             applied = subprocess.run(['/usr/bin/doas', '-n', str(priority), '--session',
                                       str(sway_socket)], env=env, capture_output=True,
@@ -412,7 +412,7 @@ while True:
         a = client(1, 'carousel-blue', '214eaa', 'Blue terminal A')
         b = client(1, 'firefox', '247742', 'Green browser B')
         c = client(2, 'carousel-orange', 'dd712b', 'Orange terminal C')
-        d = client(10, 'oldbook-strata', '1bd6cc', 'Cyan Strata D')
+        d = client(10, 'mbp-intel-strata', '1bd6cc', 'Cyan Strata D')
         ids = [item['id'] for item in (a, b, c, d)]
         report['fixture_ids'] = ids
         report['fixture_workspaces'] = [1, 1, 2, 10]
@@ -433,7 +433,7 @@ while True:
             return
 
         session = hashlib.sha256(str(sway_socket).encode()).hexdigest()[:12]
-        state_path = runtime / 'oldbook' / ('carousel-' + session) / 'state.json'
+        state_path = runtime / 'mbp-intel' / ('carousel-' + session) / 'state.json'
         daemon = spawn('carousel-daemon', [str(HELPER), 'daemon'])
         wait_for(lambda: state_path.is_file() or daemon.poll() is not None,
                  'carousel daemon did not initialize', seconds=30)
@@ -550,7 +550,7 @@ while True:
             # scale-2 output. Preserve those actual pixels; do not synthesize
             # a larger buffer with grim -s2. Check they cover the physical
             # pixels occupied by the renderer's centered, letterboxed image.
-            sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib/oldbook'))
+            sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib/mbp_intel'))
             from carousel_view import card_layout, letterbox
             output_rect = next(item['rect'] for item in ipc(3) if item['name'] == 'HEADLESS-1')
             card = next(item for item in card_layout(len(ids), 0, output_rect['width'], output_rect['height'])
@@ -855,7 +855,7 @@ def main():
                 path = Path(directory) / name
                 path.mkdir(mode=0o700)
                 env[key] = str(path)
-            env.update({BUS_MARKER: '1', 'OLDBOOK_CAROUSEL_VERIFY_BASE': directory,
+            env.update({BUS_MARKER: '1', 'MBP_INTEL_CAROUSEL_VERIFY_BASE': directory,
                         'NO_AT_BRIDGE': '1', 'GTK_USE_PORTAL': '0'})
             try:
                 child = subprocess.run(['dbus-run-session', '--', sys.executable,

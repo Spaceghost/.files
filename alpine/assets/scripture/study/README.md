@@ -6,21 +6,21 @@ Left-click and Super+/ search Bible verses; Super+Shift+/ searches all texts.
 Click the reading card to advance. To restore the daily reflection:
 
 ```sh
-oldbook-scripture daily
+mbp-intel-scripture daily
 ```
 
 Read the full library and complete entries, including source excerpts:
 
 ```sh
-oldbook-scripture-study list
-oldbook-scripture-study show jesus-compassion
-oldbook-scripture-study rebuild
+mbp-intel-scripture-study list
+mbp-intel-scripture-study show jesus-compassion
+mbp-intel-scripture-study rebuild
 ```
 
 ## SQLite and Fossil
 
-The reading SQLite is `~/.local/share/oldbook/scripture/study.sqlite3`, or
-`$XDG_DATA_HOME/oldbook/scripture/study.sqlite3`. It contains the complete
+The reading SQLite is `~/.local/share/mbp-intel/scripture/study.sqlite3`, or
+`$XDG_DATA_HOME/mbp-intel/scripture/study.sqlite3`. It contains the complete
 library. The unchanged `../reflections.json` and new `entries/*.json` files are
 canonical and are tracked in Fossil. The reader checks source hashes and
 refreshes SQLite when files change, including after pull and update.
@@ -38,7 +38,7 @@ After receiving commits on another checkout, update it and rebuild/read:
 ```sh
 fossil pull
 fossil update alpine-oldbook
-oldbook-scripture-study rebuild
+mbp-intel-scripture-study rebuild
 ```
 
 Fossil repository SQL tables are not the file-versioning interface. Custom
@@ -53,7 +53,7 @@ unavailable. It starts a private, local-only Ollama process for the request and
 stops that process afterward; the model stays on disk for the next request:
 
 ```sh
-oldbook-scripture-local '2 Corinthians 12:9' --kind study-note
+mbp-intel-scripture-local '2 Corinthians 12:9' --kind study-note
 ```
 
 The wrapper uses the signed Alpine CPU runtime and `qwen2.5:1.5b` without a
@@ -68,7 +68,7 @@ See [local runtime provenance and replay](../../../verification/scripture-local-
 Use an already installed model on a local Ollama server:
 
 ```sh
-oldbook-scripture-study generate 'John 13:14' --kind inspiration \
+mbp-intel-scripture-study generate 'John 13:14' --kind inspiration \
     --endpoint http://127.0.0.1:11434 --model qwen3.5:27b-text
 ```
 

@@ -1,7 +1,7 @@
 # Claude Code desktop notifications
 
 Claude Code 2.1.263 exposes supported lifecycle hooks for the local terminal
-session. `oldbook-claude-notify` reads one hook payload from standard input and
+session. `mbp-intel-claude-notify` reads one hook payload from standard input and
 emits only these content-free desktop notifications:
 
 | Hook | Accepted detail | Desktop notification |
@@ -56,12 +56,12 @@ Claude files. Existing exact handlers are not duplicated.
 
 Before replacement, it writes an exact mode-0600 copy and a hash manifest under
 the private directory
-`~/.local/state/oldbook/claude-notifications/backups/<timestamp>/`. The original
+`~/.local/state/mbp-intel/claude-notifications/backups/<timestamp>/`. The original
 settings mode is preserved. Roll back before making later settings changes:
 
 ```sh
 ~/.files/alpine/bin/install-claude-notifications \
-  --rollback ~/.local/state/oldbook/claude-notifications/backups/<timestamp>
+  --rollback ~/.local/state/mbp-intel/claude-notifications/backups/<timestamp>
 ```
 
 Rollback checks that the installed settings still match the manifest, restores

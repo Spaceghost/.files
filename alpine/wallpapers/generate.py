@@ -23,7 +23,7 @@ sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import has_symlink, load_theme, safe_theme_id
 import prompt_catalog
 
-STATE = Path.home() / '.local/state/oldbook/wallpaper-generation'
+STATE = Path.home() / '.local/state/mbp-intel/wallpaper-generation'
 SCHEMA = {'type': 'object', 'properties': {'image_path': {'type': 'string'}},
           'required': ['image_path'], 'additionalProperties': False}
 
@@ -309,7 +309,7 @@ def generate_native(config, prompt, env, log):
         'path returned by that tool under ~/.codex/generated_images. If native image generation '
         'is unavailable, return an empty image_path without attempting any substitute.\n\n' + prompt
     )
-    with tempfile.TemporaryDirectory(prefix='oldbook-art-') as directory:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-art-') as directory:
         work = Path(directory)
         (work / 'schema.json').write_text(json.dumps(SCHEMA))
         with log.open('w') as output:
@@ -343,12 +343,12 @@ def activate_artwork(record, metadata, entry):
         # Unthemed artwork has no desktop profile to apply.
         if entry.get('theme') not in (None, 'none'):
             response = subprocess.run(['/usr/bin/python3',
-                str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'), 'use', entry['theme']],
+                str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'), 'use', entry['theme']],
                 capture_output=True, text=True, timeout=120)
             if response.returncode:
                 raise RuntimeError(response.stderr.strip()[:1500] or 'Could not apply the complete theme')
         response = subprocess.run(['/usr/bin/python3',
-                                   str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'),
+                                   str(REPO / 'alpine/desktop/.local/bin/mbp-intel-wallpaper'),
                                    'select', entry['id']], capture_output=True, text=True, timeout=20)
         if response.returncode:
             raise RuntimeError(response.stderr.strip()[:1500] or 'Sway could not select the new artwork')

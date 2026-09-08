@@ -27,7 +27,7 @@ normal user; administrator steps explicitly use `doas`.
    This explicit command installs packages on the running machine.
 
    ```sh
-   doas alpine/bin/package-archive install-host --cache /var/cache/oldbook-apks
+   doas alpine/bin/package-archive install-host --cache /var/cache/mbp-intel-apks
    ```
 
 3. Restore Codex's complete musl bundles, install the desktop entrypoint, and
@@ -35,8 +35,8 @@ normal user; administrator steps explicitly use `doas`.
    up a local ChatGPT login with `codex login`.
 
    ```sh
-   alpine/bin/source-archive --kind codex --cache "$HOME/.local/share/oldbook/sources"
-   doas alpine/bin/install-codex --cache "$HOME/.local/share/oldbook/sources"
+   alpine/bin/source-archive --kind codex --cache "$HOME/.local/share/mbp-intel/sources"
+   doas alpine/bin/install-codex --cache "$HOME/.local/share/mbp-intel/sources"
    doas alpine/bin/install-desktop-system
    alpine/bin/deploy-home --target "$HOME"
    codex login
@@ -54,8 +54,8 @@ normal user; administrator steps explicitly use `doas`.
 
    The offline scripture library is not carried in the checkout beyond the
    bundled King James text. The first desktop login fetches the rest in the
-   background through `oldbook-scripture-library bootstrap`, which needs
-   working HTTPS; `oldbook-scripture-library install --all` does it on demand
+   background through `mbp-intel-scripture-library bootstrap`, which needs
+   working HTTPS; `mbp-intel-scripture-library install --all` does it on demand
    and adds the Talmud.
 
    Start `sway` from a TTY. For a first graphical session on fresh hardware,
@@ -82,7 +82,7 @@ must be configured locally.
 ## Recovery and verification
 
 Before installing, the command creates a private root-owned directory under
-`/var/backups/oldbook/install-host-*` with an `etc.tar` archive, the original APK
+`/var/backups/mbp-intel/install-host-*` with an `etc.tar` archive, the original APK
 database, selected lock, and simulated transaction output. The `/etc` backup may
 contain machine secrets. Keep it private and outside Fossil.
 
@@ -97,8 +97,8 @@ For a disposable offline package-closure test, use a new or empty root instead
 of `install-host`:
 
 ```sh
-doas alpine/bin/package-archive restore --cache /var/cache/oldbook-apks --root /var/tmp/oldbook-restore
-alpine/bin/package-archive verify-root --cache /var/cache/oldbook-apks --root /var/tmp/oldbook-restore
+doas alpine/bin/package-archive restore --cache /var/cache/mbp-intel-apks --root /var/tmp/mbp-intel-restore
+alpine/bin/package-archive verify-root --cache /var/cache/mbp-intel-apks --root /var/tmp/mbp-intel-restore
 ```
 
 The isolated restore publishes its root only after closure validation. Failed
@@ -116,7 +116,7 @@ Custom SwayFX and OpenSnitch source inputs are separately content-addressed in
 Fossil. Export and verify them without networking:
 
 ```sh
-alpine/bin/source-archive --cache "$HOME/.local/share/oldbook/sources"
+alpine/bin/source-archive --cache "$HOME/.local/share/mbp-intel/sources"
 ```
 
 Then follow [SwayFX's offline build instructions](swayfx/README.md) and

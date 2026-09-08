@@ -17,7 +17,7 @@ import time
 
 
 REPO = Path(__file__).resolve().parents[3]
-PRIVATE_BUS = "OLDBOOK_WORKSPACE_CHECK_PRIVATE_BUS"
+PRIVATE_BUS = "MBP_INTEL_WORKSPACE_CHECK_PRIVATE_BUS"
 INSPECTOR = r'''
 #include <gtk/gtk.h>
 #include <pango/pango.h>
@@ -48,9 +48,9 @@ static void visit(GtkWidget *widget, gpointer output) {
         if (font) pango_font_description_free(font);
         GdkRGBA fallback, active, secondary;
         gtk_style_context_get_color(style, gtk_style_context_get_state(style), &fallback);
-        if (!gtk_style_context_lookup_color(style, "oldbook_workspace_active", &active))
+        if (!gtk_style_context_lookup_color(style, "mbp_intel_workspace_active", &active))
             active = fallback;
-        if (!gtk_style_context_lookup_color(style, "oldbook_workspace_secondary", &secondary))
+        if (!gtk_style_context_lookup_color(style, "mbp_intel_workspace_secondary", &secondary))
             secondary = fallback;
         char *active_text = color_text(&active), *secondary_text = color_text(&secondary);
         g_string_append_printf(result,
@@ -91,7 +91,7 @@ static void visit(GtkWidget *widget, gpointer output) {
 
 static gboolean inspect(gpointer unused) {
     (void)unused;
-    const char *path = g_getenv("OLDBOOK_WORKSPACE_ATTRIBUTE_OUTPUT");
+    const char *path = g_getenv("MBP_INTEL_WORKSPACE_ATTRIBUTE_OUTPUT");
     if (!path) return G_SOURCE_REMOVE;
     GString *output = g_string_new(NULL);
     GList *windows = gtk_window_list_toplevels();
@@ -274,7 +274,7 @@ def run(args):
                 command("workspace " + json.dumps(names[0], ensure_ascii=False))
                 observations.unlink(missing_ok=True)
                 bar_env = dict(env, LD_PRELOAD=str(library),
-                               OLDBOOK_WORKSPACE_ATTRIBUTE_OUTPUT=str(observations))
+                               MBP_INTEL_WORKSPACE_ATTRIBUTE_OUTPUT=str(observations))
                 bar = subprocess.Popen(["waybar", "-c", str(waybar_config), "-s", str(style)],
                                        env=bar_env, stdout=log, stderr=log, start_new_session=True)
                 processes.append(bar)

@@ -11,14 +11,14 @@ import tempfile
 import unittest
 from unittest.mock import Mock, patch
 
-SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-strata'
+SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-strata'
 loader = importlib.machinery.SourceFileLoader('strata_service', str(SCRIPT))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 strata = importlib.util.module_from_spec(spec)
 loader.exec_module(strata)
 
 
-def tree(number=10, app='oldbook-strata'):
+def tree(number=10, app='mbp-intel-strata'):
     return {'nodes': [{'type': 'workspace', 'num': number, 'name': f'{number}: STRATA',
                       'nodes': [{'id': 17, 'app_id': app, 'type': 'con'}]}]}
 
@@ -286,8 +286,8 @@ class LifecycleTests(unittest.TestCase):
             service.start_browser()
         arguments = spawn.call_args.args[0]
         self.assertEqual(arguments[:3], ['firefox', '--no-remote', '--profile'])
-        self.assertEqual(arguments[3], str(self.directory / '.local/share/oldbook/strata-firefox'))
-        self.assertEqual(spawn.call_args.kwargs['env']['MOZ_APP_REMOTINGNAME'], 'oldbook-strata')
+        self.assertEqual(arguments[3], str(self.directory / '.local/share/mbp-intel/strata-firefox'))
+        self.assertEqual(spawn.call_args.kwargs['env']['MOZ_APP_REMOTINGNAME'], 'mbp-intel-strata')
         self.assertTrue(arguments[-1].startswith('http://127.0.0.1:'))
 
     def test_fossil_is_always_bound_to_loopback(self):

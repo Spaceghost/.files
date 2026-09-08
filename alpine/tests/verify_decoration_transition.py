@@ -79,20 +79,20 @@ output = args.output.resolve()
 output.mkdir(parents=True, exist_ok=False)
 source = output / 'source'
 for relative in (
-    'alpine/desktop/.local/bin/oldbook-decoration',
-    'alpine/desktop/.local/bin/oldbook-resize',
+    'alpine/desktop/.local/bin/mbp-intel-decoration',
+    'alpine/desktop/.local/bin/mbp-intel-resize',
 ):
     dest = source / relative
     dest.parent.mkdir(parents=True, exist_ok=True)
     if not dest.exists():
         shutil.copy2(origin / relative, dest)
-if not (source / 'alpine/desktop/.local/lib/oldbook').exists():
+if not (source / 'alpine/desktop/.local/lib/mbp_intel').exists():
     shutil.copytree(
-        origin / 'alpine/desktop/.local/lib/oldbook',
-        source / 'alpine/desktop/.local/lib/oldbook',
+        origin / 'alpine/desktop/.local/lib/mbp_intel',
+        source / 'alpine/desktop/.local/lib/mbp_intel',
         ignore=shutil.ignore_patterns('__pycache__'),
     )
-helper = source / 'alpine/desktop/.local/bin/oldbook-decoration'
+helper = source / 'alpine/desktop/.local/bin/mbp-intel-decoration'
 
 
 def wait(fn):
@@ -138,8 +138,8 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
         'background=382449\n'
         'foreground=eadff5\n'
     )
-    (base / 'config/oldbook').mkdir()
-    (base / 'config/oldbook/decoration.json').write_text(
+    (base / 'config/mbp-intel').mkdir()
+    (base / 'config/mbp-intel/decoration.json').write_text(
         '{"position":"bottom","opacity":0.78,"corner_radius":7}'
     )
     cfg = base / 'sway.conf'
@@ -189,7 +189,7 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
             )
             layers = [
                 s for o in outputs for s in o.get('layer_shell_surfaces', [])
-                if s['namespace'] == 'oldbook-decoration'
+                if s['namespace'] == 'mbp-intel-decoration'
             ]
             return dict(
                 t=time.monotonic(),
@@ -230,7 +230,7 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
         ipc(0, '[app_id="transition-fixture"] floating disable')
         time.sleep(0.6)
         runs.append(transition('centered-resize', [
-            'python3', str(source / 'alpine/desktop/.local/bin/oldbook-resize'),
+            'python3', str(source / 'alpine/desktop/.local/bin/mbp-intel-resize'),
             'shrink',
         ]))
         subprocess.run(['grim', str(output / 'settled.png')], env=env, check=True)

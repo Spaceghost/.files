@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 import unittest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel'))
 import showdesktop
 
 

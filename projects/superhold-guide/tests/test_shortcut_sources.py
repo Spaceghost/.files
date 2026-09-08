@@ -76,7 +76,7 @@ class FixtureProvider(ShortcutProvider):
 
 class ShortcutProviderTests(unittest.TestCase):
     def replies(self, config='', mode='default', tree=None,
-                config_path='/tmp/oldbook-test-sway.conf'):
+                config_path='/tmp/mbp-intel-test-sway.conf'):
         return {
             ShortcutProvider.GET_TREE: tree or focused_tree(),
             ShortcutProvider.GET_CONFIG: {'config': config},
@@ -153,7 +153,7 @@ bindsym $mod+x exec alt-action
         ])
 
     def test_current_nested_includes_apply_in_place_with_variables_globs_and_cycles(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-sway-includes-') as temp:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-sway-includes-') as temp:
             root = Path(temp)
             main = root / 'config'
             fragments = root / 'local.d'
@@ -181,7 +181,7 @@ include $parts/*.conf
             'Loaded main config + current included files · active mode; reload after edits')
 
     def test_home_include_is_expanded_without_running_shell_syntax(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-sway-home-') as temp:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-sway-home-') as temp:
             home = Path(temp)
             home.joinpath('safe.conf').write_text(
                 'bindsym F9 exec home-file\n', encoding='utf-8')
@@ -196,7 +196,7 @@ include $parts/*.conf
         self.assertFalse(marker.exists())
 
     def test_redefined_include_variable_selects_the_later_file(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-sway-redefined-') as temp:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-sway-redefined-') as temp:
             root = Path(temp)
             root.joinpath('first.conf').write_text(
                 'bindsym F8 exec first-file\n', encoding='utf-8')
@@ -217,7 +217,7 @@ include $inc
         ])
 
     def test_canonical_include_is_loaded_only_once_across_sibling_directives(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-sway-include-once-') as temp:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-sway-include-once-') as temp:
             root = Path(temp)
             shared = root / 'shared.conf'
             shared.write_text('bindsym F6 exec shared-file\n', encoding='utf-8')
@@ -248,24 +248,24 @@ bindsym Mod4+Shift+X exec uppercase-keysym
         rows = FixtureProvider(self.replies(config)).snapshot()['sections'][1]['rows']
         self.assertEqual([row['description'] for row in rows], ['exec numeric'])
 
-    def test_configured_oldbook_helpers_receive_readable_labels(self):
+    def test_configured_mbp_intel_helpers_receive_readable_labels(self):
         config = '''
-bindsym Mod4+g exec ~/.local/bin/oldbook-wallpaper pick
-bindsym Mod4+Right exec ~/.local/bin/oldbook-wallpaper next
-bindsym Mod4+Left exec ~/.local/bin/oldbook-wallpaper prev
-bindsym Mod4+p exec ~/.local/bin/oldbook-wallpaper pause
-bindsym Mod4+i exec ~/.local/bin/oldbook-workspaces ai-next
-bindsym Mod4+m exec ~/.local/bin/oldbook-workspaces ai-menu
+bindsym Mod4+g exec ~/.local/bin/mbp-intel-wallpaper pick
+bindsym Mod4+Right exec ~/.local/bin/mbp-intel-wallpaper next
+bindsym Mod4+Left exec ~/.local/bin/mbp-intel-wallpaper prev
+bindsym Mod4+p exec ~/.local/bin/mbp-intel-wallpaper pause
+bindsym Mod4+i exec ~/.local/bin/mbp-intel-workspaces ai-next
+bindsym Mod4+m exec ~/.local/bin/mbp-intel-workspaces ai-menu
 bindsym Mod4+n exec swaync-client -t
-bindsym Print exec ~/.local/bin/oldbook-screenshot full
-bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
-bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
-bindsym XF86AudioRaiseVolume exec ~/.local/bin/oldbook-audio up
-bindsym XF86AudioLowerVolume exec ~/.local/bin/oldbook-audio down
-bindsym XF86AudioMute exec ~/.local/bin/oldbook-audio mute
-bindsym XF86AudioMicMute exec ~/.local/bin/oldbook-audio mic-mute
-bindsym XF86MonBrightnessUp exec ~/.local/bin/oldbook-brightness up
-bindsym XF86MonBrightnessDown exec ~/.local/bin/oldbook-brightness down
+bindsym Print exec ~/.local/bin/mbp-intel-screenshot full
+bindsym Shift+Print exec ~/.local/bin/mbp-intel-screenshot area
+bindsym Ctrl+Print exec ~/.local/bin/mbp-intel-screenshot window
+bindsym XF86AudioRaiseVolume exec ~/.local/bin/mbp-intel-audio up
+bindsym XF86AudioLowerVolume exec ~/.local/bin/mbp-intel-audio down
+bindsym XF86AudioMute exec ~/.local/bin/mbp-intel-audio mute
+bindsym XF86AudioMicMute exec ~/.local/bin/mbp-intel-audio mic-mute
+bindsym XF86MonBrightnessUp exec ~/.local/bin/mbp-intel-brightness up
+bindsym XF86MonBrightnessDown exec ~/.local/bin/mbp-intel-brightness down
 bindsym Mod4+e exec swaynag -t warning -m "Leave?" -B "Log out" "swaymsg exit"
 '''
         snapshot = FixtureProvider(self.replies(config)).snapshot()

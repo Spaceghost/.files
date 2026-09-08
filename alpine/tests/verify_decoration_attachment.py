@@ -19,8 +19,8 @@ import traceback
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / "alpine/desktop/.local/bin/oldbook-decoration"
-PRIVATE_BUS_MARKER = "OLDBOOK_DECORATION_ATTACHMENT_PRIVATE_BUS"
+HELPER = REPO / "alpine/desktop/.local/bin/mbp-intel-decoration"
+PRIVATE_BUS_MARKER = "MBP_INTEL_DECORATION_ATTACHMENT_PRIVATE_BUS"
 WIDTH = 1440
 HEIGHT = 900
 TOP_ZONE = 32
@@ -181,7 +181,7 @@ def run_verifier(output):
         "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
         "host_config_changes": 0,
     }
-    sources = [HELPER, *(REPO / "alpine/desktop/.local/lib/oldbook" / name
+    sources = [HELPER, *(REPO / "alpine/desktop/.local/lib/mbp_intel" / name
                         for name in ("decoration.py", "decoration_actions.py",
                                      "decoration_placement.py", "decoration_motion.py",
                                      "decoration_watch.py", "overlay_theme.py"))]
@@ -213,8 +213,8 @@ def run_verifier(output):
             "[main]\nfont=monospace:size=11\npad=12x12\nresize-by-cells=no\n"
             "[colors-dark]\nbackground=33445b\nforeground=f3eaff\nalpha=1.0\n"
         )
-        (config_home / "oldbook").mkdir()
-        preferences = config_home / "oldbook/decoration.json"
+        (config_home / "mbp-intel").mkdir()
+        preferences = config_home / "mbp-intel/decoration.json"
         preferences.write_text(json.dumps({
             "position": "bottom", "opacity": 0.78, "corner_radius": 7
         }) + "\n")
@@ -231,7 +231,7 @@ def run_verifier(output):
             "default_floating_border pixel 0\n"
             "corner_radius 7\n"
             "smart_corner_radius enable\n"
-            'layer_effects "oldbook-decoration" {\n    corner_radius 0\n}\n'
+            'layer_effects "mbp-intel-decoration" {\n    corner_radius 0\n}\n'
             'for_window [app_id="attachment-floating"] floating enable, '
             "resize set 620 360, move absolute position 200 160\n"
             'for_window [app_id="attachment-hover"] floating enable, '
@@ -300,7 +300,7 @@ def run_verifier(output):
                 ])
                 active = next(item for item in outputs if item["name"] == "HEADLESS-1")
                 captions = [item for item in active.get("layer_shell_surfaces", [])
-                            if item["namespace"] == "oldbook-decoration"]
+                            if item["namespace"] == "mbp-intel-decoration"]
                 clients = {item["app_id"]: {key: item.get(key) for key in (
                     "id", "rect", "focused", "fullscreen_mode", "floating")}
                     for item in walk(tree) if item.get("app_id")}
@@ -431,9 +431,9 @@ def run_verifier(output):
                         and state["clients"]["attachment-tiled"]["rect"] == baseline,
                         "bottom caption did not attach flush without reserving workspace space")
 
-                for app_id, label in (("com.oldbook.dropdown", "ghostty"),
-                                      ("oldbook-dropdown", "legacy-foot"),
-                                      ("com.oldbook.monitor", "monitor")):
+                for app_id, label in (("com.mbp-intel.dropdown", "ghostty"),
+                                      ("mbp-intel-dropdown", "legacy-foot"),
+                                      ("com.mbp-intel.monitor", "monitor")):
                     terminal(app_id, "Private drop-down console")
                     console = wait_for(lambda: node(app_id), "drop-down client missing")
                     ipc(command=f'[con_id={console["id"]}] floating enable, '

@@ -9,7 +9,7 @@ from unittest import mock
 
 
 REPO = Path(__file__).resolve().parents[2]
-THEME = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'))
+THEME = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'))
 
 
 class ThemeSessionTests(unittest.TestCase):
@@ -23,7 +23,7 @@ class ThemeSessionTests(unittest.TestCase):
     def process(self, environment):
         # Real /proc command line and initial environment, with no compositor or
         # application launched and no signals sent through the code under test.
-        child = subprocess.Popen(['oldbook-theme-test-app', '-c',
+        child = subprocess.Popen(['mbp-intel-theme-test-app', '-c',
                                   'import time; time.sleep(30)'], executable='/usr/bin/python3',
                                  env=environment, stdin=subprocess.DEVNULL,
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -42,13 +42,13 @@ class ThemeSessionTests(unittest.TestCase):
         foreign_session = self.process({**self.session, 'SWAYSOCK': '/tmp/private-sway.sock'})
         no_session = self.process({'HOME': self.directory.name})
         children = {expected, foreign_home, foreign_session, no_session}
-        selected = set(THEME['owned_processes']('oldbook-theme-test-app'))
+        selected = set(THEME['owned_processes']('mbp-intel-theme-test-app'))
         self.assertEqual(selected & children, {expected})
 
     def test_unknown_caller_session_cannot_select_any_application(self):
         child = self.process(self.session)
         with mock.patch.dict(os.environ, {'HOME': self.directory.name}, clear=True):
-            selected = set(THEME['owned_processes']('oldbook-theme-test-app'))
+            selected = set(THEME['owned_processes']('mbp-intel-theme-test-app'))
         self.assertNotIn(child, selected)
 
 

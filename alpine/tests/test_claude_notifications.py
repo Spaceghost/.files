@@ -10,13 +10,13 @@ import unittest
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / 'alpine/desktop/.local/bin/oldbook-claude-notify'
+HELPER = REPO / 'alpine/desktop/.local/bin/mbp-intel-claude-notify'
 INSTALLER = REPO / 'alpine/bin/install-claude-notifications'
 
 
 class ClaudeNotifyTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-claude-notify-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-claude-notify-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.bin = self.root / 'bin'
@@ -149,12 +149,12 @@ class ClaudeNotifyTests(unittest.TestCase):
 
 class ClaudeNotificationInstallerTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-claude-install-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-claude-install-')
         self.addCleanup(self.temp.cleanup)
         self.home = Path(self.temp.name) / 'home'
         self.claude = self.home / '.claude'
         self.claude.mkdir(parents=True)
-        self.helper = self.home / '.local/bin/oldbook-claude-notify'
+        self.helper = self.home / '.local/bin/mbp-intel-claude-notify'
         self.helper.parent.mkdir(parents=True)
         source_helper = Path(self.temp.name) / 'source-helper'
         source_helper.write_text('#!/bin/sh\n')

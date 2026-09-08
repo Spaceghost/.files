@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = ROOT / 'alpine/desktop/.local/bin/oldbook-waybar-dim'
+SCRIPT = ROOT / 'alpine/desktop/.local/bin/mbp-intel-waybar-dim'
 EVENT = 1 << 31
 
 

@@ -1,0 +1,382 @@
+#!/usr/bin/env python3
+"""Keep STRATA, the local Fossil review workspace, available in workspace ten."""
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import runpy
+import select
+import signal
+import socket
+import stat
+import struct
+import subprocess
+import sys
+import threading
+import time
+import urllib.request
+
+BIN = Path(__file__).resolve().parent
+IPC = runpy.run_path(str(BIN / 'mbp-intel-workspaces'))
+APP = 'mbp-intel-strata'
+
+
+def port_number(value):
+    port = int(value)
+    if not 1 <= port <= 65535:
+        raise ValueError('STRATA port must be between 1 and 65535')
+    return port
+
+
+PORT = port_number(os.environ.get('MBP_INTEL_STRATA_PORT', '8766'))
+URL = f'http://127.0.0.1:{PORT}/timeline?r=alpine-oldbook&y=ci'
+
+
+def review_windows(tree, workspace=None):
+    if tree.get('type') == 'workspace':
+        workspace = tree.get('num')
+    result = [(tree, workspace)] if tree.get('app_id') == APP else []
+    for child in tree.get('nodes', []) + tree.get('floating_nodes', []):
+        result.extend(review_windows(child, workspace))
+    return result
+
+
+def review_window(tree):
+    windows = review_windows(tree)
+    return windows[0][0]['id'] if windows else None
+
+
+def stop_child(process, timeout=3):
+    if process is not None and process.poll() is None:
+        process.terminate()
+        try:
+            process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=3)
+
+
+def server_ready(directory):
+    """Accept an existing server only when its live command owns this endpoint."""
+    try:
+        process = Path('/proc') / str(int((directory / 'ready').read_text()))
+        arguments = (process / 'cmdline').read_bytes().split(b'\0')
+        return (process.stat().st_uid == os.getuid()
+                and os.fsencode(Path.home() / '.local/share/fossil/files.fossil') in arguments
+                and os.fsencode(f'127.0.0.1:{PORT}') in arguments
+                and any(Path(os.fsdecode(argument)).name == 'fossil' for argument in arguments))
+    except (OSError, ValueError):
+        return False
+
+
+class Backoff:
+    def __init__(self):
+        self.delay = 1
+        self.next_attempt = 0
+        self.stable_since = None
+
+    def failed(self, now):
+        self.next_attempt = now + self.delay
+        self.delay = min(30, self.delay * 2)
+        self.stable_since = None
+
+    def healthy(self, now):
+        if self.stable_since is None:
+            self.stable_since = now
+        elif now - self.stable_since >= 30:
+            self.delay = 1
+
+
+class StrataService:
+    def __init__(self, directory, sway_socket, log):
+        self.directory, self.sway_socket, self.log = directory, sway_socket, log
+        self.server = self.browser = None
+        self.server_retry, self.browser_retry = Backoff(), Backoff()
+        self.window_seen = False
+        self.browser_started = 0
+
+    def start_server(self):
+        environment = dict(os.environ, SWAYSOCK=str(self.sway_socket))
+        return subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--serve'],
+                                env=environment, stdin=subprocess.DEVNULL,
+                                stdout=self.log, stderr=self.log, start_new_session=True)
+
+    def start_browser(self):
+        profile = Path.home() / '.local/share/mbp-intel/strata-firefox'
+        profile.mkdir(parents=True, exist_ok=True, mode=0o700)
+        (profile / 'user.js').write_text(
+            'user_pref("browser.shell.checkDefaultBrowser", false);\n'
+            'user_pref("browser.aboutwelcome.enabled", false);\n'
+            'user_pref("browser.startup.homepage", ' + json.dumps(URL) + ');\n')
+        environment = dict(os.environ, MOZ_APP_REMOTINGNAME=APP, MOZ_ENABLE_WAYLAND='1')
+        runtime = Path(environment['XDG_RUNTIME_DIR'])
+        if not environment.get('DBUS_SESSION_BUS_ADDRESS') and (runtime / 'bus').is_socket():
+            environment['DBUS_SESSION_BUS_ADDRESS'] = f'unix:path={runtime}/bus'
+        return subprocess.Popen(['firefox', '--no-remote', '--profile', str(profile), URL],
+                                env=environment, stdin=subprocess.DEVNULL,
+                                stdout=self.log, stderr=self.log, start_new_session=True)
+
+    def tick(self, tree, now):
+        ready = server_ready(self.directory)
+        if self.server is not None and self.server.poll() is not None:
+            self.server = None
+            if not ready:
+                self.server_retry.failed(now)
+        if ready:
+            self.server_retry.healthy(now)
+        elif self.server is None and now >= self.server_retry.next_attempt:
+            try:
+                self.server = self.start_server()
+            except OSError as error:
+                self.server_retry.failed(now)
+                if self.log is not None:
+                    print(f'STRATA server restart: {error}', file=self.log, flush=True)
+
+        windows = review_windows(tree)
+        for window, workspace in windows:
+            if workspace != 10:
+                try:
+                    IPC['command'](self.sway_socket,
+                                   f'[con_id={window["id"]}] move container to workspace number '
+                                   + json.dumps(IPC['workspace_name'](10)))
+                except RuntimeError:
+                    # A window can close between GET_TREE and the move.
+                    pass
+        if windows:
+            self.window_seen = True
+            self.browser_retry.healthy(now)
+            return
+        if (self.window_seen or (self.browser is not None
+                and (self.browser.poll() is not None or now - self.browser_started >= 20))):
+            self.window_seen = False
+            stop_child(self.browser)
+            self.browser = None
+            self.browser_retry.failed(now)
+        if ready and self.browser is None and now >= self.browser_retry.next_attempt:
+            try:
+                self.browser = self.start_browser()
+                self.browser_started = now
+            except OSError as error:
+                self.browser_retry.failed(now)
+                if self.log is not None:
+                    print(f'STRATA browser restart: {error}', file=self.log, flush=True)
+
+    def stop(self):
+        try:
+            stop_child(self.browser)
+        finally:
+            # The supervisor needs time to terminate and reap its Fossil child
+            # before we would force the supervisor itself to exit.
+            stop_child(self.server, timeout=8)
+
+
+def serve(directory, sway_socket):
+    with (directory / 'server.lock').open('w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        ready = directory / 'ready'
+        ready.unlink(missing_ok=True)
+        repository = Path.home() / '.local/share/fossil/files.fossil'
+        running = True
+
+        def stop(signum, frame):
+            nonlocal running
+            running = False
+
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, stop)
+        process = subprocess.Popen(['fossil', 'ui', '--nobrowser', '--port',
+                                    f'127.0.0.1:{PORT}', str(repository)])
+        try:
+            # Confirm this child is alive and serving before advertising readiness.
+            deadline = time.monotonic() + 10
+            while running and time.monotonic() < deadline:
+                if process.poll() is not None:
+                    raise RuntimeError('Fossil server exited; check strata.log')
+                try:
+                    with urllib.request.urlopen(URL, timeout=.5) as response:
+                        if response.status == 200 and b'alpine-oldbook' in response.read():
+                            if process.poll() is None:
+                                ready.write_text(str(process.pid))
+                                break
+                except OSError:
+                    pass
+                time.sleep(.1)
+            else:
+                if not running:
+                    return
+                raise RuntimeError('Fossil did not become ready')
+            while running and Path(sway_socket).exists():
+                try:
+                    process.wait(timeout=.5)
+                    break
+                except subprocess.TimeoutExpired:
+                    pass
+        finally:
+            ready.unlink(missing_ok=True)
+            stop_child(process)
+
+
+def daemon_lock(directory, sway_socket):
+    session = hashlib.sha256(os.fsencode(sway_socket)).hexdigest()[:16]
+    return directory / f'daemon-{session}.lock'
+
+
+def daemon_running(directory, sway_socket):
+    with daemon_lock(directory, sway_socket).open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return True
+        return False
+
+
+def session_identity(sway_socket):
+    try:
+        info = sway_socket.stat()
+        if stat.S_ISSOCK(info.st_mode) and info.st_uid == os.getuid():
+            return info.st_dev, info.st_ino
+    except OSError:
+        pass
+    return None
+
+
+def peer_handle(subscription):
+    pid, uid, _ = struct.unpack('3i', subscription.getsockopt(socket.SOL_SOCKET, socket.SO_PEERCRED, 12))
+    if uid != os.getuid():
+        raise RuntimeError('STRATA IPC peer belongs to another user')
+    try:
+        return os.pidfd_open(pid)
+    except ProcessLookupError:
+        raise RuntimeError('STRATA compositor exited before its process could be pinned') from None
+
+
+def peer_alive(descriptor):
+    return descriptor is None or descriptor not in select.select([descriptor], [], [], 0)[0]
+
+
+def wait_retry(retry, sway_socket, identity, stopping, descriptor=None):
+    while (not stopping.is_set() and session_identity(sway_socket) == identity
+           and peer_alive(descriptor)):
+        remaining = retry.next_attempt - time.monotonic()
+        if remaining <= 0:
+            break
+        stopping.wait(min(.25, remaining))
+
+
+def daemon(directory, sway_socket, log):
+    with daemon_lock(directory, sway_socket).open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        identity = session_identity(sway_socket)
+        if identity is None:
+            return
+        service = StrataService(directory, sway_socket, log)
+        retry = Backoff()
+        stopping = threading.Event()
+        compositor = None
+
+        def stop(signum, frame):
+            stopping.set()
+
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, stop)
+        try:
+            while (not stopping.is_set() and session_identity(sway_socket) == identity
+                   and peer_alive(compositor)):
+                try:
+                    with socket.socket(socket.AF_UNIX) as subscription:
+                        subscription.settimeout(3)
+                        subscription.connect(str(sway_socket))
+                        if compositor is None:
+                            compositor = peer_handle(subscription)
+                        IPC['send'](subscription, 2, '["window","workspace","shutdown"]')
+                        _, accepted = IPC['receive'](subscription)
+                        if not accepted.get('success'):
+                            raise RuntimeError('Sway rejected STRATA subscription')
+                        while not stopping.is_set():
+                            service.tick(IPC['request'](sway_socket, 4), time.monotonic())
+                            retry.healthy(time.monotonic())
+                            watched = [subscription] + ([compositor] if compositor is not None else [])
+                            readable = select.select(watched, [], [], 1)[0]
+                            if compositor in readable:
+                                stopping.set()
+                            elif subscription in readable:
+                                kind, _ = IPC['receive'](subscription)
+                                if kind == (1 << 31) | 6:
+                                    stopping.set()
+                except (OSError, ValueError) as error:
+                    if compositor is None and isinstance(error, ConnectionRefusedError):
+                        break
+                    # A busy compositor can time out or drop one connection.
+                    # Keep healthy children and reconnect only to this session.
+                    retry.failed(time.monotonic())
+                    if log is not None:
+                        print(f'STRATA IPC retry: {error}', file=log, flush=True)
+                    wait_retry(retry, sway_socket, identity, stopping, compositor)
+        finally:
+            try:
+                service.stop()
+            finally:
+                if compositor is not None:
+                    os.close(compositor)
+
+
+def launch(directory, sway_socket, log):
+    with (directory / 'launch.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if not daemon_running(directory, sway_socket):
+            subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--daemon'],
+                             env=dict(os.environ, SWAYSOCK=str(sway_socket)),
+                             stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                             start_new_session=True)
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            try:
+                existing = review_window(IPC['request'](sway_socket, 4))
+                if existing is not None:
+                    IPC['command'](sway_socket,
+                                   f'[con_id={existing}] move container to workspace number '
+                                   + json.dumps(IPC['workspace_name'](10)))
+                    IPC['command'](sway_socket, f'[con_id={existing}] focus')
+                    return
+            except (OSError, RuntimeError):
+                # A busy compositor or closing window can invalidate one try.
+                pass
+            time.sleep(.1)
+        raise RuntimeError('STRATA did not open; see ~/.local/state/mbp-intel/strata.log')
+
+
+def main():
+    os.umask(0o077)
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    sway_socket = IPC['find_socket'](runtime)
+    directory = IPC['prepare_directory'](runtime).parent / 'strata'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    if directory.is_symlink() or directory.stat().st_uid != os.getuid():
+        raise RuntimeError('Unsafe STRATA runtime directory')
+    if sys.argv[1:] == ['--serve']:
+        serve(directory, sway_socket)
+        return
+    if sys.argv[1:] not in ([], ['--daemon']):
+        raise ValueError('Usage: mbp-intel-strata [--daemon|--serve]')
+    logs = Path.home() / '.local/state/mbp-intel'
+    logs.mkdir(parents=True, exist_ok=True)
+    with (logs / 'strata.log').open('a') as log:
+        if sys.argv[1:] == ['--daemon']:
+            daemon(directory, sway_socket, log)
+        else:
+            launch(directory, sway_socket, log)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, ValueError, KeyError) as error:
+        print(f'mbp-intel-strata: {error}', file=sys.stderr)
+        sys.exit(1)

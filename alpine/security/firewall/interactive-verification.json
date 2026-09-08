@@ -14,7 +14,7 @@
     "output_expectation": "allow",
     "output_port": 18443,
     "output_timeout_seconds": 3,
-    "probe_executable": "/tmp/oldbook-host-packets-rhkuvmsk/oldbook-unapproved-network-probe",
+    "probe_executable": "/tmp/mbp-intel-host-packets-rhkuvmsk/mbp-intel-unapproved-network-probe",
     "firewall_rules_modified": false,
     "external_network_used": false,
     "temporary_link_removed": true
@@ -30,7 +30,7 @@
     "output_expectation": "either",
     "output_port": 18443,
     "output_timeout_seconds": 30,
-    "probe_executable": "/tmp/oldbook-host-packets-n_bdkjcx/oldbook-unapproved-network-probe",
+    "probe_executable": "/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe",
     "firewall_rules_modified": false,
     "external_network_used": false,
     "temporary_link_removed": true
@@ -89,20 +89,20 @@
     "canary_file_absent": true
   },
   "rules_manifest_sha256": "9bacb44c243d5c514aba1a208baab2c7b32ea72a268a6d0b68b9b02922d5b4ac",
-  "private_backup": "/var/lib/oldbook/firewall-backups/interactive-20260907-24c3c9f84033",
+  "private_backup": "/var/lib/mbp_intel/firewall-backups/interactive-20260907-24c3c9f84033",
   "canary_cleanup": {
-    "name": "deny-12h-simple-tmp-oldbook-host-packets-n-bdkjcx-oldbook-unapproved-network-probe",
-    "path": "/tmp/oldbook-host-packets-n_bdkjcx/oldbook-unapproved-network-probe",
+    "name": "deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe",
+    "path": "/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe",
     "method": "Replace only unique temporary canary rule with disabled Always rule, then remove through observed daemon file watcher",
     "file_removed": true,
     "existing_rule_files_touched": false,
     "permissions_granted": false
   },
   "canary_daemon_log": [
-    "[2026-09-07 12:48:13]  IMP  Added new rule: deny if process.path is '/tmp/oldbook-host-packets-n_bdkjcx/oldbook-unapproved-network-probe'",
-    "[2026-09-07 12:51:37]  IMP  Ruleset changed due to deny-12h-simple-tmp-oldbook-host-packets-n-bdkjcx-oldbook-unapproved-network-probe.json, reloading ...",
-    "[2026-09-07 12:51:38]  IMP  Rule deleted deny-12h-simple-tmp-oldbook-host-packets-n-bdkjcx-oldbook-unapproved-network-probe.json",
-    "[2026-09-07 12:51:38]  INF  Delete() rule: [Disabled] deny-12h-simple-tmp-oldbook-host-packets-n-bdkjcx-oldbook-unapproved-network-probe: if(process.path is '/tmp/oldbook-host-packets-n_bdkjcx/oldbook-unapproved-network-probe'){ deny always }"
+    "[2026-09-07 12:48:13]  IMP  Added new rule: deny if process.path is '/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe'",
+    "[2026-09-07 12:51:37]  IMP  Ruleset changed due to deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe.json, reloading ...",
+    "[2026-09-07 12:51:38]  IMP  Rule deleted deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe.json",
+    "[2026-09-07 12:51:38]  INF  Delete() rule: [Disabled] deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe: if(process.path is '/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe'){ deny always }"
   ],
   "retained_policy_exceptions": [
     "user.id=0 allows root programs",

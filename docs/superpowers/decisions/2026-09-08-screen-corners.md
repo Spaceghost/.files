@@ -13,7 +13,7 @@ presentation fence follows the final pass, not the preceding scene pass.
 
 SPACEGHOST_SCREEN_CORNER_RADIUS is read at compositor startup (0 disables;
 integer range 0–100). The desktop launcher supplies 20.
-Stock Sway remains available through OLDBOOK_STOCK_SWAY=1. A running compositor
+Stock Sway remains available through MBP_INTEL_STOCK_SWAY=1. A running compositor
 cannot adopt a newly installed executable; activation requires a new session.
 Never terminate the user's current compositor to activate this change.
 

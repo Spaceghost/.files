@@ -149,7 +149,7 @@ with (out / 'runtime.log').open('w') as log:
             time.sleep(1.2)
             subprocess.run(['grim', str(out / f'{name}.png')], env=env, check=True)
             emitted = (out / 'runtime.log').read_text()[before:]
-            token = f'oldbook-help: rendered {name} tooltip'
+            token = f'mbp-intel-help: rendered {name} tooltip'
             if token not in emitted:
                 raise AssertionError(f'{name}: helper callback did not run')
             if 'Failed to set text' in emitted or 'Entity did not end' in emitted:

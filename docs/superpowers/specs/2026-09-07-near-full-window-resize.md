@@ -1,6 +1,6 @@
 # Near-full floating window shortcut
 
-Super+Shift+Space invokes `oldbook-resize near-full`. It exits fullscreen,
+Super+Shift+Space invokes `mbp-intel-resize near-full`. It exits fullscreen,
 enables floating, and centers the focused window in its containing workspace's
 usable rectangle. Each edge keeps five percent of the available dimension,
 with a minimum 24 logical pixels of breathing room. A second press reapplies

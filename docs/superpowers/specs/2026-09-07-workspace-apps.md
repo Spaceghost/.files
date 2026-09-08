@@ -40,16 +40,16 @@ response completion is not exposed by this integration.
 
 ## Lifecycle and recovery
 
-`oldbook-session` starts `oldbook-workspaces daemon` with its startup lock
+`mbp-intel-session` starts `mbp-intel-workspaces daemon` with its startup lock
 closed in the child. A per-runtime flock prevents duplicate services. Private
 runtime state contains workspace/app labels and routing IDs, not conversation
 content. Stale or malformed panel state falls back to an idle star.
 
 On SIGTERM the service restores original workspace names only when they still
 match its last applied names, preserving any external rename. To stop it, read
-`$XDG_RUNTIME_DIR/oldbook/workspaces/service.lock` and send SIGTERM to that PID.
-Remove its `oldbook-session` startup block to keep it disabled after reload;
-`oldbook-workspaces daemon` starts it again. Configuration and helper files are
+`$XDG_RUNTIME_DIR/mbp-intel/workspaces/service.lock` and send SIGTERM to that PID.
+Remove its `mbp-intel-session` startup block to keep it disabled after reload;
+`mbp-intel-workspaces daemon` starts it again. Configuration and helper files are
 versioned in Fossil and HOME deployment has a durable rollback journal.
 
 ## Verification plan

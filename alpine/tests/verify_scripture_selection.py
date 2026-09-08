@@ -8,7 +8,7 @@ import time
 
 REPO=Path(__file__).resolve().parents[2]
 OUTPUT=REPO/'alpine/verification/scripture-selection'
-HELPER=REPO/'alpine/desktop/.local/bin/oldbook-scripture'
+HELPER=REPO/'alpine/desktop/.local/bin/mbp-intel-scripture'
 OUTPUT.mkdir(parents=True,exist_ok=True)
 with tempfile.TemporaryDirectory(prefix='scripture-native-') as directory:
     root=Path(directory);runtime=root/'run';runtime.mkdir(mode=0o700)
@@ -35,7 +35,7 @@ with tempfile.TemporaryDirectory(prefix='scripture-native-') as directory:
             def command(*args):
                 return subprocess.run([str(HELPER),*args],env=env,capture_output=True,text=True,check=True,timeout=15)
             command('select','John 3:16')
-            state=home/'.local/state/oldbook/conky';state.mkdir(parents=True)
+            state=home/'.local/state/mbp-intel/conky';state.mkdir(parents=True)
             conky_config=state/'scripture.conf'
             conky_config.write_text("conky.config={out_to_wayland=true,out_to_x=false,own_window=true,own_window_type='desktop',own_window_colour='#00000000',alignment='top_left',gap_x=30,gap_y=30,minimum_width=650,maximum_width=650,minimum_height=250,update_interval=60,font='monospace:size=14',use_xft=true,default_color='#ebdbb2',color1='#d8a657',color2='#a89984',text_buffer_size=4096}\nconky.text=[[${execpi 120 "+str(HELPER)+" panel --width 60}]]\n")
             conky=subprocess.Popen(['conky','-c',str(conky_config)],env=env,stdout=log,stderr=log);children.append(conky)
@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory(prefix='scripture-native-') as directory:
             subprocess.run(['wtype','-d','20','Torah Genesis 1:1','-k','Return'],env=env,check=True,timeout=5)
             finder.wait(timeout=15)
             assert finder.returncode==0
-            saved=json.loads((home/'.local/state/oldbook/scripture/selection.json').read_text())
+            saved=json.loads((home/'.local/state/mbp-intel/scripture/selection.json').read_text())
             assert saved['reference']=='Torah Genesis 1:1',saved['reference']
             assert saved['edition']=='JPS 1917'
             time.sleep(3)
@@ -69,7 +69,7 @@ with tempfile.TemporaryDirectory(prefix='scripture-native-') as directory:
             print(json.dumps(report))
         finally:
             try:
-                new_pid=json.loads((home/'.local/state/oldbook/conky/pids.json').read_text())['scripture']
+                new_pid=json.loads((home/'.local/state/mbp-intel/conky/pids.json').read_text())['scripture']
                 if 'conky' in locals() and new_pid!=conky.pid:
                     os.kill(new_pid,15)
                     time.sleep(.2)

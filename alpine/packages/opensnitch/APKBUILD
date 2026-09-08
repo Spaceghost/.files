@@ -1,8 +1,8 @@
-# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
 pkgname=opensnitch
 pkgver=1.8.0
 pkgrel=1
-pkgdesc="Application firewall with an optional persistent Oldbook egress gate"
+pkgdesc="Application firewall with an optional persistent MBP Intel egress gate"
 url="https://github.com/evilsocket/opensnitch"
 arch="x86_64"
 license="GPL-3.0-or-later"
@@ -15,8 +15,8 @@ source="opensnitch-$pkgver.tar.gz
     external-output-queue.patch
     wheel-layout.patch
     opensnitchd.initd
-    oldbook-firewall.initd
-    oldbook.nft
+    mbp-intel-firewall.initd
+    mbp-intel.nft
     default-config.json
     system-fw.json
     settings.conf"
@@ -69,10 +69,10 @@ check() {
 package() {
     install -Dm755 daemon/opensnitchd "$pkgdir/usr/bin/opensnitchd"
     install -Dm755 "$srcdir/opensnitchd.initd" "$pkgdir/etc/init.d/opensnitchd"
-    install -Dm755 "$srcdir/oldbook-firewall.initd" "$pkgdir/etc/init.d/oldbook-firewall"
+    install -Dm755 "$srcdir/mbp-intel-firewall.initd" "$pkgdir/etc/init.d/mbp-intel-firewall"
     install -Dm600 "$srcdir/default-config.json" "$pkgdir/etc/opensnitchd/default-config.json"
     install -Dm600 "$srcdir/system-fw.json" "$pkgdir/etc/opensnitchd/system-fw.json"
-    install -Dm600 "$srcdir/oldbook.nft" "$pkgdir/etc/oldbook/firewall.nft"
+    install -Dm600 "$srcdir/mbp-intel.nft" "$pkgdir/etc/mbp-intel/firewall.nft"
     install -Dm644 daemon/data/network_aliases.json "$pkgdir/etc/opensnitchd/network_aliases.json"
     install -Dm600 daemon/data/tasks/tasks.json "$pkgdir/etc/opensnitchd/tasks/tasks.json"
     mkdir -p "$pkgdir/etc/opensnitchd/rules"

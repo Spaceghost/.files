@@ -28,9 +28,9 @@ for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'
 
 # The exact synthetic device is disabled in every existing owned compositor
 # BEFORE it exists. The compositor used below has no libinput backend.
-name = f'oldbook-art-test-{os.getpid()}'
+name = f'mbp-intel-art-test-{os.getpid()}'
 identifier = f'65261:49374:{name}'
-noise_name = f'oldbook-art-noise-test-{os.getpid()}'
+noise_name = f'mbp-intel-art-noise-test-{os.getpid()}'
 noise_identifier = f'65261:49374:{noise_name}'
 existing = list((Path('/run/user') / str(os.getuid())).glob('sway-ipc*.sock'))
 for socket in existing:

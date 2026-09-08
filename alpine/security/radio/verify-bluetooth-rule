@@ -54,7 +54,7 @@ def isolated(work, rule):
             ('inert', 'add', 'wlan', False),
             ('inert', 'change', 'wlan', False)):
         content = original if variant == 'exact' else original.replace(
-            ', ATTR{soft}="1"', ', ENV{OLDBOOK_BT_RULE_MATCH}="yes"')
+            ', ATTR{soft}="1"', ', ENV{MBP_INTEL_BT_RULE_MATCH}="yes"')
         tested.write_text(content)
         shutil.rmtree(runtime / 'data', ignore_errors=True)
         result = run(['/sbin/udevadm', 'test', '--action=' + action, str(radios[kind])])
@@ -62,7 +62,7 @@ def isolated(work, rule):
         (work / f'{variant}-{action}-{kind}.log').write_text(log)
         if any(marker in log.lower() for marker in ('invalid key', 'invalid rule', 'unknown key')):
             raise RuntimeError('eudev rejected the rule')
-        actual = 'OLDBOOK_BT_RULE_MATCH=yes' in log.splitlines()
+        actual = 'MBP_INTEL_BT_RULE_MATCH=yes' in log.splitlines()
         if actual != match:
             raise RuntimeError('unexpected rule matching result')
         checks.append({'variant': variant, 'action': action, 'type': kind, 'matched': actual})

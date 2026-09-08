@@ -5,7 +5,7 @@ import runpy
 import tempfile
 import unittest
 
-MODULE=Path(__file__).resolve().parents[1]/'desktop/.local/lib/oldbook/overlay_theme.py'
+MODULE=Path(__file__).resolve().parents[1]/'desktop/.local/lib/mbp_intel/overlay_theme.py'
 
 
 class OverlayThemeTests(unittest.TestCase):
@@ -61,9 +61,9 @@ class OverlayThemeTests(unittest.TestCase):
             function(app)
             self.assertEqual(app.palette().color(QPalette.ColorRole.Window).name(),'#282828')
             (self.themes/'warm.json').write_text(json.dumps({'palette':{'background':'#112233'}}))
-            app.oldbook_theme_timer.timeout.emit()
+            app.mbp_intel_theme_timer.timeout.emit()
             self.assertEqual(app.palette().color(QPalette.ColorRole.Window).name(),'#112233')
         finally:
-            app.oldbook_theme_timer.stop()
+            app.mbp_intel_theme_timer.stop()
             app.setPalette(original)
             globals_['read_palette']=reader

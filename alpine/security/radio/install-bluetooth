@@ -331,7 +331,7 @@ def main():
         parser.error('installed helpers and rule must be regular files')
     base = load_base(base_path)
     target = trusted(Path('/etc/udev/rules.d')) / RULE
-    parent = trusted(Path('/var/lib/oldbook'))
+    parent = trusted(Path('/var/lib/mbp_intel'))
     journal_root = parent / 'bluetooth-preparation'
     if args.prepare:
         journal_root.mkdir(mode=0o700, exist_ok=True)

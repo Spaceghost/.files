@@ -29,12 +29,12 @@ released version for different contents.
 
 ## Compatibility and integration
 
-`superhold` is the primary command. `hold-to-help` and `oldbook-shortcuts` remain
+`superhold` is the primary command. `hold-to-help` and `mbp-intel-shortcuts` remain
 compatibility commands. The new configuration directory is
 `~/.config/superhold`; existing `~/.config/hold-to-help` files remain fallbacks.
 The shared legacy runtime lock prevents a new and old daemon running together.
 Existing controls, application profiles, physical triggers and Qt theming stay
-available. Startup retains the Oldbook compatibility command.
+available. Startup retains the MBP Intel compatibility command.
 
 For an existing checksum-pinned Hold to Help installation, use the verified APKs
 to replace just those two pins; inspect APK's `--simulate` output first:

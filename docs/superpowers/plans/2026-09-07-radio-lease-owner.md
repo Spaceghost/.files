@@ -18,7 +18,7 @@ Lease parsing and network application are separate from process ownership.
 util-linux 2.42.3, iproute2, OpenRC, wpa_supplicant 2.11 and Fossil.
 
 **Spec:** `alpine/security/radio/NETWORK-MIGRATION.md`, the existing radio
-activation plan, and the user's full Oldbook privacy/rebuild objective.
+activation plan, and the user's full MBP Intel privacy/rebuild objective.
 
 ## Global constraints
 

@@ -1,6 +1,6 @@
 # YouTube in the launcher
 
-Open **Oldbook YouTube** from Super+D, or choose **YouTube · desktop player &
+Open **MBP Intel YouTube** from Super+D, or choose **YouTube · desktop player &
 PiP** in the command deck.
 
 - **Search YouTube…** searches public videos. Type again in the results popup
@@ -16,7 +16,7 @@ PiP** in the command deck.
   from local queue controls remain available. EOF waits for a review decision.
 
 The player reads the selected browser's current cookies through yt-dlp.
-`~/.config/oldbook/youtube-account.json` stores only the browser/profile reference,
+`~/.config/mbp-intel/youtube-account.json` stores only the browser/profile reference,
 with mode 0600. No cookie export, password, or OAuth client is needed. Public
 search does not use the browser session. Account cookies are used only for
 YouTube URLs, including video playback. Firefox profiles with an existing cookie
@@ -44,6 +44,6 @@ python3 alpine/tests/verify_youtube_headless.py
 ```
 
 To disconnect, select **Use without an account**. To revert the feature, restore
-`oldbook-youtube` from its parent check-in and restart its service after stopping
+`mbp-intel-youtube` from its parent check-in and restart its service after stopping
 playback. Saved local queues and named playlist links remain intact. See
 `alpine/verification/youtube/library.json` for the current live-check limits.

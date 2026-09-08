@@ -60,12 +60,12 @@ def run(output, real=False):
     sources.extend(Path(__file__).with_name(name)
                    for name in ('verify_decoration_attachment.py', 'verify_carousel.py'))
     if real:
-        library = ROOT / 'alpine/desktop/.local/lib/oldbook'
+        library = ROOT / 'alpine/desktop/.local/lib/mbp_intel'
         sources.extend(library / name for name in ('carousel.py', 'carousel_view.py',
                        'window_switching.py', 'showdesktop.py',
                        'overlay_theme.py', 'workspace_model.py'))
         sources.extend(ROOT / 'alpine/desktop/.local/bin' / name
-                       for name in ('oldbook-carousel', 'oldbook-workspaces'))
+                       for name in ('mbp-intel-carousel', 'mbp-intel-workspaces'))
     hashes = {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
               for path in sources}
     evidence = {'status': 'running', 'checks': [], 'source_sha256': hashes,
@@ -96,10 +96,10 @@ def run(output, real=False):
         keys.touch()
         binaries = Path(env['HOME']) / '.local/bin'
         binaries.mkdir(parents=True)
-        for name in ('oldbook-carousel', 'oldbook-menu'):
+        for name in ('mbp-intel-carousel', 'mbp-intel-menu'):
             helper = binaries / name
-            if real and name == 'oldbook-carousel':
-                helper.symlink_to(ROOT / 'alpine/desktop/.local/bin/oldbook-carousel')
+            if real and name == 'mbp-intel-carousel':
+                helper.symlink_to(ROOT / 'alpine/desktop/.local/bin/mbp-intel-carousel')
                 continue
             helper.write_text('#!/usr/bin/python3\nimport os, sys\n'
                               f'fd = os.open({str(calls)!r}, os.O_WRONLY | os.O_APPEND)\n'
@@ -165,7 +165,7 @@ def run(output, real=False):
         def real_flows():
             runtime = Path(env['XDG_RUNTIME_DIR'])
             token = hashlib.sha256(env['SWAYSOCK'].encode()).hexdigest()[:12]
-            state_path = runtime / 'oldbook' / ('carousel-' + token) / 'state.json'
+            state_path = runtime / 'mbp-intel' / ('carousel-' + token) / 'state.json'
 
             def state():
                 try:
@@ -184,12 +184,12 @@ def run(output, real=False):
             def opened():
                 current = state()
                 return (current.get('open')
-                        and mode() == 'window-switcher' and layers('oldbook-carousel'))
+                        and mode() == 'window-switcher' and layers('mbp-intel-carousel'))
 
             def closed():
-                return not state().get('open') and not layers('oldbook-carousel') and mode() == 'default'
+                return not state().get('open') and not layers('mbp-intel-carousel') and mode() == 'default'
 
-            spawn([str(binaries / 'oldbook-carousel'), 'daemon'])
+            spawn([str(binaries / 'mbp-intel-carousel'), 'daemon'])
             initial = wait_for(lambda: state() if state().get('ready') else None,
                                'real carousel daemon did not become ready')
             evidence['carousel_pid'] = initial['pid']
@@ -267,16 +267,16 @@ def run(output, real=False):
             if real:
                 real_flows()
             else:
-                press('XF86LaunchA', ['oldbook-carousel show'], held=True)
+                press('XF86LaunchA', ['mbp-intel-carousel show'], held=True)
                 check('held-mission-control-opens-once')
-                press('XF86LaunchB', ['oldbook-menu '])
+                press('XF86LaunchB', ['mbp-intel-menu '])
                 check('launchpad-opens-application-menu')
                 command('mode "window-switcher"')
                 press('XF86LaunchA', [], held=True)
                 require(mode() == 'default', 'Mission Control did not leave switcher mode')
                 check('held-mission-control-closes-once-and-restores-default-mode')
                 command('mode "window-switcher"')
-                press('XF86LaunchB', ['oldbook-menu '])
+                press('XF86LaunchB', ['mbp-intel-menu '])
                 require(mode() == 'default', 'Launchpad did not leave switcher mode')
                 check('launchpad-cancels-overview-opens-menu-and-restores-default-mode')
                 command('mode "window-switcher"')
@@ -306,7 +306,7 @@ def run(output, real=False):
                 try:
                     evidence['final_mode'] = mode()
                     evidence['final_carousel_state'] = [json.loads(path.read_text()) for path in
-                            Path(env['XDG_RUNTIME_DIR']).glob('oldbook/carousel-*/state.json')]
+                            Path(env['XDG_RUNTIME_DIR']).glob('mbp-intel/carousel-*/state.json')]
                     evidence['final_launcher_exit'] = ((base / 'launcher-exit').read_text()
                             if (base / 'launcher-exit').exists() else None)
                     evidence['dispatch_trace'] = recorded()

@@ -2,7 +2,7 @@ import runpy
 from pathlib import Path
 import unittest
 
-MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/workspace_defaults.py'
+MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel/workspace_defaults.py'
 
 
 class WorkspaceDefaultsTests(unittest.TestCase):

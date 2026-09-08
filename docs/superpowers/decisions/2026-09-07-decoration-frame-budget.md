@@ -56,6 +56,6 @@ Timing evidence and reproduction commands are in
 [decoration-framerate](../../../alpine/verification/decoration-framerate/README.md).
 
 Recovery: restore only the caption daemon and geometry watcher from this
-change’s parent, then restart `oldbook-decoration daemon`. Saved appearance and
+change’s parent, then restart `mbp-intel-decoration daemon`. Saved appearance and
 placement settings do not need restoration. No compositor or bar restart is
 required. Physical mixed-refresh/multiple-output scanout remains unmeasured.

@@ -23,7 +23,7 @@ if sys.argv[1] == 'field':
     print(f'{cream}Golden hour, with an unlicensed tour guide.{reset}\n')
     print(f'{blue}“Nature has excellent ratings.”  — Space Ghost{reset}')
 elif sys.argv[1] == 'desk':
-    print(f'{muted}OLDBOOK  /  RESEARCH DESK                         {green}● READY{reset}\n')
+    print(f'{muted}MBP_INTEL  /  RESEARCH DESK                         {green}● READY{reset}\n')
     print(f'{gold}{bold}Make room for a better view.{reset}\n')
     print(f'{cream}The mountains stay. The work keeps moving.{reset}\n')
     print(f'{muted}COLLECTION{reset}')

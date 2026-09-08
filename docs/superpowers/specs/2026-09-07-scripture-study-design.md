@@ -14,7 +14,7 @@ reflections/studies, then Bible order. Choosing entries and click-to-advance
 load the current record from SQLite. Concurrent reading-history work preserves
 the content of prior selections as private snapshots; choosing a catalog entry
 again uses its current content. Full entries and citations are readable through
-`oldbook-scripture-study show ID`.
+`mbp-intel-scripture-study show ID`.
 
 ## Durable content
 
@@ -25,7 +25,7 @@ source excerpts and their hashes, and local-model provenance. Saves add only
 their exact record path to Fossil and report the pending commit. Normal
 reviewed commits and the existing publication workflow carry this material.
 
-SQLite at `$XDG_DATA_HOME/oldbook/scripture/study.sqlite3` (defaulting to
+SQLite at `$XDG_DATA_HOME/mbp-intel/scripture/study.sqlite3` (defaulting to
 `~/.local/share`) is a materialized reading library. Hash the canonical source
 bytes and rebuild transactionally when they change, including after pull and
 update. Source validation must complete before replacing a good library.

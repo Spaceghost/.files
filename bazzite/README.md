@@ -1,4 +1,4 @@
-# Oldbook profile for Bazzite Sway
+# MBP Intel profile for Bazzite Sway
 
 This profile replays the portable desktop pieces from `alpine/desktop` onto a
 Bazzite HOME. It uses an explicit allowlist, Bazzite systemd user services and
@@ -10,16 +10,16 @@ Run these commands from a Git or Fossil checkout of the `alpine-oldbook`
 branch. Preview and check do not change desktop files:
 
 ```sh
-bazzite/bin/oldbook-bazzite-profile preview
-bazzite/bin/oldbook-bazzite-profile check
-bazzite/bin/oldbook-bazzite-profile apply
+bazzite/bin/mbp-intel-bazzite-profile preview
+bazzite/bin/mbp-intel-bazzite-profile check
+bazzite/bin/mbp-intel-bazzite-profile apply
 ```
 
 `apply` prints the exact backup directory. Restore it with:
 
 ```sh
-bazzite/bin/oldbook-bazzite-profile rollback \
-    "$HOME/.local/state/oldbook/backups/<printed-id>"
+bazzite/bin/mbp-intel-bazzite-profile rollback \
+    "$HOME/.local/state/mbp-intel/backups/<printed-id>"
 ```
 
 Re-run preview after pulling the mirror branch, inspect the changes, then run
@@ -54,7 +54,7 @@ as usable.
 
 Bazzite's systemd session owns D-Bus, PipeWire, WirePlumber and policy-kit. The
 profile never starts duplicate media/session daemons. The checked-in user units
-start the Oldbook panel, notification center, idle lock, workspace labels,
+start the MBP Intel panel, notification center, idle lock, workspace labels,
 shortcut overlay, attention indicator and wallpaper rotation with the Sway
 session. The fixed MacBook `eDP-1` mode is removed; put machine-specific output
 configuration in `~/.config/sway/local.d/` after applying.
@@ -66,7 +66,7 @@ leaves the key mapping itself unchanged.
 
 ## Native artwork button
 
-The Alpine `/usr/lib/waybar/oldbook-art.so` is a musl build and is deliberately
+The Alpine `/usr/lib/waybar/mbp-intel-art.so` is a musl build and is deliberately
 excluded. Do not run `dnf5 install` on the immutable host. Add the development
 packages and compilation below to the custom image build, or run the commands
 inside a matching Fedora toolbox/distrobox whose HOME is shared with the host.
@@ -74,17 +74,17 @@ The resulting library belongs at the per-user path materialized into Waybar:
 
 ```sh
 dnf5 install gcc pkgconf-pkg-config gtk3-devel json-glib-devel
-install -d -m 755 "$HOME/.local/lib/oldbook"
+install -d -m 755 "$HOME/.local/lib/mbp_intel"
 cc -shared -fPIC -O2 -Wall -Wextra -Werror \
   -Wl,-z,relro,-z,now \
   -I alpine/packages/waybar-art \
-  -o "$HOME/.local/lib/oldbook/oldbook-art.so" \
+  -o "$HOME/.local/lib/mbp_intel/mbp-intel-art.so" \
   alpine/packages/waybar-art/art.c \
   $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
 ```
 
 When building in a toolbox, confirm its Fedora release and architecture match
-the host. Run `oldbook-bazzite-profile check` afterward and exercise the module
+the host. Run `mbp-intel-bazzite-profile check` afterward and exercise the module
 with the installed host Waybar before restarting the live bar. The native
 module preserves left/right/middle/scroll gallery actions plus Super-click
 generation and Shift-click prompt editing. The source header targets Waybar's
@@ -105,5 +105,5 @@ profile at a pinned `Spaceghost/.files` `alpine-oldbook` commit. Fetch that
 public commit in the workflow with persisted checkout credentials disabled.
 Do not copy the whole checkout into the image and do not pass Codex, Claude,
 GitHub, SSH, Wi-Fi or registry credentials to the container build. Keep the
-profile application explicit through a `ujust oldbook-apply` wrapper so image
+profile application explicit through a `ujust mbp-intel-apply` wrapper so image
 updates cannot overwrite an existing HOME.

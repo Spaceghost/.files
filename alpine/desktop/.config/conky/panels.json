@@ -21,7 +21,7 @@
       "prefer": "top-right",
       "width": 420,
       "height": 204,
-      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
+      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/mbp-intel-scripture panel --width 52}"
     },
     {
       "id": "power",
@@ -51,7 +51,7 @@
       "prefer": "bottom-right",
       "width": 360,
       "height": 140,
-      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
+      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/mbp-intel-journal show}"
     },
     {
       "id": "witness",

@@ -9,12 +9,12 @@ import unittest
 
 
 HELPER = (Path(__file__).resolve().parents[1]
-          / 'desktop/.local/bin/oldbook-gallery-prompts')
+          / 'desktop/.local/bin/mbp-intel-gallery-prompts')
 
 
 class GalleryPromptDocumentTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-prompts-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-prompts-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.path = self.root / 'prompts.json'
@@ -94,7 +94,7 @@ class GalleryPromptBankTests(unittest.TestCase):
     """Scenes and insertions can be switched off and re-ordered without data loss."""
 
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-banks-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-banks-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.path = self.root / 'prompts.json'

@@ -66,7 +66,7 @@ for_window [app_id="^hover-"] floating enable
                     '-o', str(out / 'pointer'), str(BASE / 'tests/titlebar-pointer.c'),
                     str(out / 'pointer.c'), *flags], check=True)
 
-    with tempfile.TemporaryDirectory(prefix='oldbook-hover-runtime-') as runtime:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-hover-runtime-') as runtime:
         env = dict(os.environ, XDG_RUNTIME_DIR=runtime, WLR_BACKENDS='headless',
                    WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='gles2',
                    WLR_RENDERER_ALLOW_SOFTWARE='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')

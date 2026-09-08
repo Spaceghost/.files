@@ -4,7 +4,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]
-                     / 'desktop/.local/lib/oldbook'))
+                     / 'desktop/.local/lib/mbp_intel'))
 import window_switching as switching
 
 
@@ -30,9 +30,9 @@ class CandidateTests(unittest.TestCase):
     def tree(self):
         one = workspace(101, 1, [view(11), view(12)],
                         floating_nodes=[view(13, 'firefox')], focus=[13, 12, 11])
-        ten = workspace(110, 10, [view(21, 'oldbook-strata')], name='10: Strata')
+        ten = workspace(110, 10, [view(21, 'mbp-intel-strata')], name='10: Strata')
         scratch = workspace(199, -1, [view(99)], name='__i3_scratch')
-        named = workspace(120, -1, [view(31, 'oldbook-agent')], name='Research')
+        named = workspace(120, -1, [view(31, 'mbp-intel-agent')], name='Research')
         first = {'id': 201, 'type': 'output', 'name': 'eDP-1',
                  'nodes': [one, ten, scratch], 'focus': [110, 101, 199]}
         second = {'id': 202, 'type': 'output', 'name': 'HDMI-A-1', 'nodes': [named]}
@@ -51,9 +51,9 @@ class CandidateTests(unittest.TestCase):
     def test_excludes_scratch_and_exact_helper_ids_without_excluding_agent_apps(self):
         tree = self.tree()
         tree['nodes'][0]['nodes'][0]['nodes'].extend([
-            view(40, 'oldbook-carousel'), view(41, 'oldbook-showdesktop'),
-            view(42, 'oldbook-agent-switcher'), view(43, 'oldbook-shortcuts'),
-            view(44, 'oldbook-carousel-editor'),
+            view(40, 'mbp-intel-carousel'), view(41, 'mbp-intel-showdesktop'),
+            view(42, 'mbp-intel-agent-switcher'), view(43, 'mbp-intel-shortcuts'),
+            view(44, 'mbp-intel-carousel-editor'),
         ])
         ids = [item['id'] for item in switching.window_candidates(tree)]
         self.assertNotIn(99, ids)
@@ -69,8 +69,8 @@ class CandidateTests(unittest.TestCase):
                       foreign_toplevel_identifier='native-handle-21')
         item = switching.window_candidates(tree)[0]
         self.assertEqual(item['title'], source['name'])
-        self.assertEqual(item['app_id'], 'oldbook-strata')
-        self.assertEqual(item['application'], 'oldbook-strata')
+        self.assertEqual(item['app_id'], 'mbp-intel-strata')
+        self.assertEqual(item['application'], 'mbp-intel-strata')
         self.assertEqual(item['foreign_toplevel_identifier'], 'native-handle-21')
         self.assertIs(item['visible'], False)
         source['rect']['width'] = 1

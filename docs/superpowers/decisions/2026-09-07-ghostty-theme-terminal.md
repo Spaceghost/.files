@@ -6,7 +6,7 @@ changes do not replace this preference.
 
 Ghostty's font family and point size are derived from the selected profile's
 primary Foot font, alongside its terminal colors. The base fallback is
-JetBrainsMono Nerd Font at 9.5 pt, matching Foot. Both `oldbook-theme sync` and
+JetBrainsMono Nerd Font at 9.5 pt, matching Foot. Both `mbp-intel-theme sync` and
 selecting a theme refresh the derived Ghostty config. This keeps later changes
 to a profile's terminal font from requiring a separate manual sync.
 

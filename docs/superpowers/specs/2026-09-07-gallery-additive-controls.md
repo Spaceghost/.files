@@ -23,7 +23,7 @@ The prompt editor changes shared artwork guidance and existing scene titles and
 descriptions. It preserves IDs, unknown fields and generation settings. Cancel
 writes nothing. Save makes a private exact-byte backup, preserves file mode and
 atomically replaces valid JSON after checking that the source has not changed.
-It opens from Shift+click, the gallery menu or `oldbook-wallpaper edit-prompts`.
+It opens from Shift+click, the gallery menu or `mbp-intel-wallpaper edit-prompts`.
 Opening and saving the editor never request generation.
 
 Shared guidance now explicitly describes strong Christian faith, admiration for
@@ -39,8 +39,8 @@ of the prompt file; it saves no changes to the user's artwork during testing.
 The signed native APK is rebuilt twice offline and retained by exact hash.
 
 Recovery: the previous native package is
-`oldbook-waybar-art-1.0.0-r0.apk`, retained in the package archive. Reinstalling it
+`mbp-intel-waybar-art-1.0.0-r0.apk`, retained in the package archive. Reinstalling it
 restores the pre-Shift widget. Prompt backups live in
-`~/.local/state/oldbook/prompt-backups/`; copy a selected backup to
+`~/.local/state/mbp-intel/prompt-backups/`; copy a selected backup to
 `alpine/wallpapers/prompts.json` to recover earlier wording. Existing paintings
 and their recorded generation prompts are unchanged.

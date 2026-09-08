@@ -11,7 +11,7 @@ import tempfile
 import time
 import unittest
 
-STREAM = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-ai-notification-stream'
+STREAM = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-ai-notification-stream'
 
 
 class AINotificationAttributionTests(unittest.TestCase):
@@ -65,7 +65,7 @@ class AINotificationAttributionTests(unittest.TestCase):
 
 class AINotificationBusTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-ai-bus-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-ai-bus-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.processes = []
@@ -110,7 +110,7 @@ class Notifications(dbus.service.Object):
 
     @dbus.service.method('org.freedesktop.Notifications', in_signature='', out_signature='ssss')
     def GetServerInformation(self):
-        return ('oldbook-test', 'oldbook', '1', '1.3')
+        return ('mbp-intel-test', 'mbp-intel', '1', '1.3')
 
     @dbus.service.method('org.freedesktop.Notifications', in_signature='u', out_signature='')
     def CloseNotification(self, identifier):

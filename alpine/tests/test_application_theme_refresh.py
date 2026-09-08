@@ -18,12 +18,12 @@ from unittest import mock
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / 'alpine/desktop/.local/bin/oldbook-refresh-application-theme'
+HELPER = REPO / 'alpine/desktop/.local/bin/mbp-intel-refresh-application-theme'
 
 
 class ApplicationThemeRefresh(unittest.TestCase):
     def setUp(self):
-        self.directory = tempfile.TemporaryDirectory(prefix='oldbook-app-theme-')
+        self.directory = tempfile.TemporaryDirectory(prefix='mbp-intel-app-theme-')
         self.addCleanup(self.directory.cleanup)
         self.home = Path(self.directory.name)
         self.config = self.home / '.config'
@@ -141,7 +141,7 @@ class ApplicationThemeRefresh(unittest.TestCase):
         process = self.start_nvim()
         colors = self.config / 'nvim/colors/gruvbox-dark.lua'
         colors.write_text(colors.read_text().replace('#282828', '#234567'))
-        theme = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'))
+        theme = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-theme'))
         refresh = theme['refresh_session']
 
         def private_processes(*names):

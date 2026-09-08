@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import desktop_space
 
 
@@ -39,14 +39,14 @@ class DesktopSpaceTests(unittest.TestCase):
         self.assertEqual(desktop_space.search_rectangle(space)['y'], 820)
 
     def test_fixed_bottom_caption_uses_clearance_while_attached_caption_does_not(self):
-        caption = surface('oldbook-decoration', 5, 867, 1430, 28)
+        caption = surface('mbp-intel-decoration', 5, 867, 1430, 28)
         self.assertEqual(desktop_space.screen_space(output([caption]), tree())['bottom'], 60)
         caption['layer'] = 'top'
         space = desktop_space.screen_space(output([caption]), tree(floating=True))
         self.assertEqual(space['bottom'], 16)
 
     def test_right_caption_only_reserves_right_edge(self):
-        caption = surface('oldbook-decoration', 1390, 45, 45, 850)
+        caption = surface('mbp-intel-decoration', 1390, 45, 45, 850)
         space = desktop_space.screen_space(output([caption]), tree(floating=True))
         self.assertEqual((space['bottom'], space['right']), (16, 66))
 
@@ -65,7 +65,7 @@ class DesktopSpaceTests(unittest.TestCase):
         self.assertEqual(space['bottom'], 60)
 
     def test_own_desktop_surfaces_do_not_reserve_themselves(self):
-        surfaces = [surface('oldbook-scripture', 340, 845, 760, 39, 'bottom'),
+        surfaces = [surface('mbp-intel-scripture', 340, 845, 760, 39, 'bottom'),
                     surface('conky', 1080, 760, 340, 120, 'background')]
         self.assertEqual(desktop_space.screen_space(output(surfaces), tree(floating=True))['bottom'], 16)
 
@@ -86,7 +86,7 @@ class DesktopSpaceTests(unittest.TestCase):
 
     def test_conky_pairing_stays_stable_when_fullscreen_occupies_the_free_edge(self):
         helper = importlib.machinery.SourceFileLoader(
-            'adaptive_conky_test', str(REPO / 'alpine/desktop/.local/bin/oldbook-conky')).load_module()
+            'adaptive_conky_test', str(REPO / 'alpine/desktop/.local/bin/mbp-intel-conky')).load_module()
         with tempfile.TemporaryDirectory() as temporary:
             image = Path(temporary) / 'image'
             image.write_bytes(b'wallpaper')

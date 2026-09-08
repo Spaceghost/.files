@@ -21,7 +21,7 @@ def main():
     env = {key: value for key, value in os.environ.items() if key in {
         'HOME', 'USER', 'LOGNAME', 'PATH', 'SHELL', 'LANG', 'LC_ALL', 'TERM',
         'XDG_RUNTIME_DIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_STATE_HOME'}}
-    with tempfile.TemporaryDirectory(prefix='oldbook-codex-probe-') as work:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-codex-probe-') as work:
         command = [str(binary), '-a', 'never', 'exec', '--ignore-user-config',
             '--ephemeral', '--skip-git-repo-check', '--sandbox', 'read-only',
             '--cd', work, '--disable', 'plugins', '--disable', 'apps',
@@ -30,11 +30,11 @@ def main():
             '-c', 'model_reasoning_effort="low"', '-c', 'web_search="disabled"',
             '-c', 'project_doc_max_bytes=0', '-m', 'gpt-5.6-luna', '--color', 'never',
             '--output-last-message', str(output / 'response.txt'),
-            'Network connectivity test: reply exactly OLDBOOK_FIREWALL_OK. Do not use tools.']
+            'Network connectivity test: reply exactly MBP_INTEL_FIREWALL_OK. Do not use tools.']
         with (output / 'run.log').open('w') as log:
             result = subprocess.run(command, env=env, stdout=log, stderr=log, timeout=90)
     response = output / 'response.txt'
-    passed = result.returncode == 0 and response.exists() and response.read_text().strip() == 'OLDBOOK_FIREWALL_OK'
+    passed = result.returncode == 0 and response.exists() and response.read_text().strip() == 'MBP_INTEL_FIREWALL_OK'
     (output / 'evidence.json').write_text(json.dumps({
         'binary': str(binary), 'uid': os.getuid(), 'model': 'gpt-5.6-luna',
         'exit_code': result.returncode, 'authenticated_response': passed,

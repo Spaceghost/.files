@@ -5,7 +5,7 @@ window needs a visit and alternates every half second while one or more windows
 remain pending. The phase starts when the pending set changes from empty to
 nonempty. Later alerts add targets without resetting that phase.
 
-`oldbook-ai-notification-stream` passively observes freedesktop `Notify` method
+`mbp-intel-ai-notification-stream` passively observes freedesktop `Notify` method
 calls and emits only `attention` plus the attributed provider: `codex`, `claude`,
 or `chatgpt`. It does not log or forward notification summaries, bodies, actions,
 icons, or conversation text. Native attribution uses the notification's exact
@@ -22,7 +22,7 @@ hint. A page title or an open browser window never creates attention by itself.
 
 ## Pending windows and acknowledgement
 
-On each attributed notice, `oldbook-notification-led` takes a Sway tree snapshot
+On each attributed notice, `mbp-intel-notification-led` takes a Sway tree snapshot
 and resolves provider windows through the shared application resolver. A fresh,
 owned Codex runtime event record can select one exact window by terminal device
 or tmux pane. Otherwise, one candidate becomes the exact target; with multiple
@@ -77,7 +77,7 @@ pending-window behavior.
 ## Recovery
 
 To disable the indicator while preserving Caps-as-Escape, remove only the
-`oldbook-notification-led` startup block from `oldbook-session`, then terminate
-the PID recorded in `$XDG_RUNTIME_DIR/oldbook-notification-led.lock`. Shutdown
+`mbp-intel-notification-led` startup block from `mbp-intel-session`, then terminate
+the PID recorded in `$XDG_RUNTIME_DIR/mbp-intel-notification-led.lock`. Shutdown
 clears the light. Restore the startup block or run the helper from the Wayland
 session to re-enable it.

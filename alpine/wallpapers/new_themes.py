@@ -81,7 +81,7 @@ def save_theme(repo, definition, phrase):
 
 def request_design(config, env, log, prompt, schema, command_builder):
     """Use the existing login for a bounded text-only proposal before painting."""
-    with tempfile.TemporaryDirectory(prefix='oldbook-theme-') as directory:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-theme-') as directory:
         work = Path(directory)
         (work / 'schema.json').write_text(json.dumps(schema))
         command = command_builder(work, config['model'])

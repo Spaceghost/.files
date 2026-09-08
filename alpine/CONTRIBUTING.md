@@ -17,7 +17,7 @@ Run commands from `~/.files`:
 
 - `fossil status` and `fossil diff`: review pending changes.
 - `python3 -m unittest discover -s alpine/tests -v`: exercise deployment recovery.
-- `alpine/bin/deploy-home --target /tmp/oldbook-preview`: deploy into a disposable HOME.
+- `alpine/bin/deploy-home --target /tmp/mbp-intel-preview`: deploy into a disposable HOME.
 - `alpine/bin/package-archive --help`: inspect package snapshot and restore commands.
 - `sway --validate --config alpine/desktop/.config/sway/config`: validate desktop syntax.
 

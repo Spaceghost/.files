@@ -12,10 +12,10 @@ from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SCRIPT = ROOT / "alpine/desktop/.local/bin/oldbook-video-background"
+SCRIPT = ROOT / "alpine/desktop/.local/bin/mbp-intel-video-background"
 
 
-LOADER = importlib.machinery.SourceFileLoader("oldbook_video_background", str(SCRIPT))
+LOADER = importlib.machinery.SourceFileLoader("mbp_intel_video_background", str(SCRIPT))
 SPEC = importlib.util.spec_from_loader(LOADER.name, LOADER)
 VIDEO_BACKGROUND = importlib.util.module_from_spec(SPEC)
 LOADER.exec_module(VIDEO_BACKGROUND)
@@ -70,7 +70,7 @@ while True:
                 "XDG_RUNTIME_DIR": str(self.runtime),
                 "FAKE_MVPAPER_RECORD": str(self.record),
                 "FAKE_MVPAPER_QUERIES": str(self.queries),
-                "OLDBOOK_VIDEO_MPV_PAPER": str(self.mpvpaper),
+                "MBP_INTEL_VIDEO_MPV_PAPER": str(self.mpvpaper),
             }
         )
         Path(self.env["HOME"]).mkdir()
@@ -95,7 +95,7 @@ while True:
 
     def _state(self):
         return json.loads(
-            (self.runtime / "oldbook/video-background/state.json").read_text()
+            (self.runtime / "mbp-intel/video-background/state.json").read_text()
         )
 
     def _wait_dead(self, pid):
@@ -127,7 +127,7 @@ while True:
                 (
                     "config=no no-audio loop-file=inf hwdec=auto-safe "
                     "input-default-bindings=no input-cursor=no osc=no terminal=no "
-                    f"input-ipc-server={self.runtime}/oldbook/video-background/mpv.sock"
+                    f"input-ipc-server={self.runtime}/mbp-intel/video-background/mpv.sock"
                 ),
                 "ALL",
                 str(video.resolve()),
@@ -145,7 +145,7 @@ while True:
         self._wait_dead(pid)
         self.assertIsNone(unrelated.poll())
         self.assertFalse(
-            (self.runtime / "oldbook/video-background/state.json").exists()
+            (self.runtime / "mbp-intel/video-background/state.json").exists()
         )
 
     def test_replacement_stops_only_the_previously_recorded_group(self):
@@ -185,7 +185,7 @@ while True:
                 self.assertEqual(rejected.returncode, 2, rejected.stderr)
                 self.assertNotIn("Traceback", rejected.stderr)
                 self.assertFalse(
-                    (self.runtime / "oldbook/video-background/state.json").exists()
+                    (self.runtime / "mbp-intel/video-background/state.json").exists()
                 )
 
     def test_picker_passes_an_explicit_selection_through_validation(self):
@@ -209,7 +209,7 @@ print(os.environ['FAKE_FUZZEL_SELECTION'])
             {
                 "FAKE_FUZZEL_INPUT": str(fuzzel_input),
                 "FAKE_FUZZEL_SELECTION": str(selected),
-                "OLDBOOK_VIDEO_FUZZEL": str(fuzzel),
+                "MBP_INTEL_VIDEO_FUZZEL": str(fuzzel),
             }
         )
 

@@ -7,7 +7,7 @@ import tempfile
 import time
 
 REPO = Path(__file__).resolve().parents[2]
-COLORS = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/launcher_theme.py'))['color_arguments']
+COLORS = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/mbp_intel/launcher_theme.py'))['color_arguments']
 OUTPUT = REPO / 'alpine/verification/launcher-themes'
 
 
@@ -37,7 +37,7 @@ def main():
                     ('violet', dict(background='#13091f', foreground='#eaddf5', accent='#dca7ff')),
                     ('parchment', dict(background='#fff6df', foreground='#44392d', accent='#b98938')),
                 ):
-                    command = [str(REPO / 'alpine/desktop/.local/bin/oldbook-fuzzel'),
+                    command = [str(REPO / 'alpine/desktop/.local/bin/mbp-intel-fuzzel'),
                                '--dmenu', '--prompt', 'Ghost Gallery ❯ ', '--width', '48', '--lines', '6',
                                *COLORS(palette)]
                     menu = subprocess.Popen(command, env=env, stdin=subprocess.PIPE, stdout=log, stderr=log, text=True)
@@ -51,7 +51,7 @@ def main():
                     finally:
                         menu.terminate()
                         menu.wait(timeout=5)
-                menu = subprocess.Popen([str(REPO / 'alpine/desktop/.local/bin/oldbook-menu')],
+                menu = subprocess.Popen([str(REPO / 'alpine/desktop/.local/bin/mbp-intel-menu')],
                                         env=env, stdout=log, stderr=log)
                 try:
                     time.sleep(1)

@@ -26,7 +26,7 @@ def digest(path):
 def copy_fixture(destination, themes):
     for relative in ('alpine/desktop/.config', 'alpine/themes/profiles/gruvbox-dark'):
         shutil.copytree(REPO / relative, destination / relative)
-    files = ['alpine/bin/deploy-home', 'alpine/desktop/.local/bin/oldbook-theme',
+    files = ['alpine/bin/deploy-home', 'alpine/desktop/.local/bin/mbp-intel-theme',
              'alpine/wallpapers/theme_catalog.py', 'alpine/wallpapers/desktop_theme.py']
     files.extend('alpine/themes/' + identity + '.json' for identity in themes)
     for relative in files:
@@ -72,13 +72,13 @@ def screenshot_evidence(path, foreground):
 
 def verify(output, themes=THEMES):
     output.mkdir(parents=True, exist_ok=False)
-    with tempfile.TemporaryDirectory(prefix='oldbook-theme-switch-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-theme-switch-') as temporary:
         base = Path(temporary)
         home, runtime, checkout = base / 'home', base / 'run', base / 'repo'
         home.mkdir()
         runtime.mkdir(mode=0o700)
         sources = copy_fixture(checkout, themes)
-        foreign = home / '.local/state/oldbook/backups/scripture-fixture/manifest.json'
+        foreign = home / '.local/state/mbp-intel/backups/scripture-fixture/manifest.json'
         foreign.parent.mkdir(parents=True)
         foreign.write_text(json.dumps({'created_utc': '2000-01-01T00:00:00Z',
                                        'databases': [{'name': 'synthetic.sqlite3', 'bytes': 0}],
@@ -137,7 +137,7 @@ for_window [app_id="theme-switch-preview"] move position center
 
             try:
                 for index, identity in enumerate(themes):
-                    command = [sys.executable, str(checkout / 'alpine/desktop/.local/bin/oldbook-theme'),
+                    command = [sys.executable, str(checkout / 'alpine/desktop/.local/bin/mbp-intel-theme'),
                                'use', identity, '--no-reload']
                     result = subprocess.run(command, env=env, text=True, capture_output=True, timeout=30)
                     (output / (identity + '-deployment.log')).write_text(result.stdout + result.stderr)
@@ -185,7 +185,7 @@ for_window [app_id="theme-switch-preview"] move position center
                     sample = output / (identity + '-sample.txt')
                     sample.write_text('\n  ' + descriptor['name'] + '\n\n  ' + '\n  '.join(
                         f'{key}: {value}' for key, value in descriptor['design'].items())
-                        + '\n\n  Theme applied by oldbook-theme into a private HOME.\n'
+                        + '\n\n  Theme applied by mbp-intel-theme into a private HOME.\n'
                         + '  This Waybar process remains running across both themes.\n')
                     terminal = spawn(['foot', '--config', str(home / '.config/foot/foot.ini'),
                                       '--app-id=theme-switch-preview', '--title=Theme application preview',

@@ -91,7 +91,7 @@ def bootstrap(source, repository, checkout, branch):
     repository_created = False
     checkout_created = False
     try:
-        with tempfile.TemporaryDirectory(prefix='oldbook-fossil-bootstrap-') as temporary:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-fossil-bootstrap-') as temporary:
             temporary = Path(temporary)
             mirror = temporary / 'source.git'
             environment = dict(os.environ, GIT_TERMINAL_PROMPT='0')

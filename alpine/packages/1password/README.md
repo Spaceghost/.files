@@ -1,6 +1,6 @@
 # 1Password on Alpine
 
-Installed on oldbook, 2026-09-07:
+Installed on mbp-intel, 2026-09-07:
 
 | Component | Version | Installation |
 | --- | --- | --- |
@@ -109,4 +109,4 @@ remove those rules if these programs no longer need network access.
 
 Account authentication, vault operations, reboot persistence, and full offline
 Flatpak recovery remain untested. Private installation logs stay under
-`~/.local/share/oldbook/1password` and `~/.local/share/1password-install`.
+`~/.local/share/mbp-intel/1password` and `~/.local/share/1password-install`.

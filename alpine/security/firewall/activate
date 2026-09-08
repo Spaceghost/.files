@@ -2,7 +2,7 @@
 """Apply a first-time firewall trial with an independent rollback watchdog.
 
 Install this reviewed file as root, for example mode0755 at
-/usr/local/sbin/oldbook-firewall-activate; do not run a trial from a user-writable
+/usr/local/sbin/mbp-intel-firewall-activate; do not run a trial from a user-writable
 checkout. The detached watchdog verifies the same helper SHA256 before arming.
 Confirmation enables both services in OpenRC's boot runlevel, before networking.
 """
@@ -20,8 +20,8 @@ import subprocess
 import sys
 import time
 
-BASE = Path('/run/oldbook-firewall-activation')
-SERVICES = ('oldbook-firewall', 'opensnitchd')
+BASE = Path('/run/mbp-intel-firewall-activation')
+SERVICES = ('mbp-intel-firewall', 'opensnitchd')
 RUNLEVEL = 'boot'
 TERMINAL = ('confirmed', 'rolled-back')
 
@@ -52,13 +52,13 @@ class Backend:
     def table(self):
         data = json.loads(self.run(['/usr/sbin/nft', '-j', 'list', 'tables']).stdout)
         return any(item.get('table', {}).get('family') == 'inet' and
-                   item['table'].get('name') == 'oldbook' for item in data['nftables'])
+                   item['table'].get('name') == 'mbp-intel' for item in data['nftables'])
 
     def active(self):
         return self.run(['/sbin/rc-service', 'opensnitchd', 'status'], check=False).returncode == 0
 
     def gate_active(self):
-        return self.run(['/sbin/rc-service', 'oldbook-firewall', 'status'], check=False).returncode == 0
+        return self.run(['/sbin/rc-service', 'mbp-intel-firewall', 'status'], check=False).returncode == 0
 
     def queue(self):
         try:
@@ -84,7 +84,7 @@ class Backend:
         return matches[0]
 
     def gate(self):
-        data = json.loads(self.run(['/usr/sbin/nft', '-j', 'list', 'table', 'inet', 'oldbook']).stdout)
+        data = json.loads(self.run(['/usr/sbin/nft', '-j', 'list', 'table', 'inet', 'mbp-intel']).stdout)
         chains = [item['chain'] for item in data['nftables'] if 'chain' in item]
         for name in ('input', 'forward', 'output'):
             if not any(c.get('name') == name and c.get('hook') == name and c.get('policy') == 'drop'
@@ -118,10 +118,10 @@ class Backend:
 
     def delete_gate(self):
         if self.table():
-            self.run(['/usr/sbin/nft', 'delete', 'table', 'inet', 'oldbook'])
+            self.run(['/usr/sbin/nft', 'delete', 'table', 'inet', 'mbp-intel'])
         # The service's stop method intentionally retains rules. Mark only this
         # trial's OpenRC service stopped after explicitly deleting its table.
-        self.run(['/sbin/rc-service', 'oldbook-firewall', 'zap'])
+        self.run(['/sbin/rc-service', 'mbp-intel-firewall', 'zap'])
 
 
 class Activation:
@@ -208,7 +208,7 @@ class Activation:
                 self.deadline(state)
                 state['gate_requested'] = True
                 self.save(token, state)
-                b.start('oldbook-firewall')
+                b.start('mbp-intel-firewall')
                 state['daemon_requested'] = True
                 self.save(token, state)
                 b.start('opensnitchd')

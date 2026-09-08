@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""Generate a study entry with an explicitly enabled private Ollama runtime.
+
+Local inference is disabled by default. This MacBook uses the Alienware GPUs;
+an unavailable remote endpoint never enables a local CPU fallback.
+"""
+from contextlib import contextmanager
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+PORT = 11435
+MODEL = 'qwen2.5:1.5b'
+HELPER = Path(__file__).resolve().with_name('mbp-intel-scripture-study')
+
+
+def owns_listener(pid, port):
+    """Read only our child socket identities, never reuse an unrelated server."""
+    process = Path('/proc') / str(pid)
+    try:
+        sockets = {os.readlink(path) for path in (process / 'fd').iterdir()}
+        for line in (process / 'net/tcp').read_text().splitlines()[1:]:
+            fields = line.split()
+            if (fields[1] == f'0100007F:{port:04X}' and fields[3] == '0A'
+                    and 'socket:[' + fields[9] + ']' in sockets):
+                return True
+    except (FileNotFoundError, ProcessLookupError):
+        pass
+    return False
+
+
+def stop_owned(process, descriptor):
+    # A pidfd cannot ever target a recycled PID or another user's server.
+    try:
+        if process.poll() is None:
+            signal.pidfd_send_signal(descriptor, signal.SIGTERM)
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                signal.pidfd_send_signal(descriptor, signal.SIGKILL)
+                process.wait(timeout=5)
+    except ProcessLookupError:
+        process.wait(timeout=5)
+    finally:
+        os.close(descriptor)
+
+
+def run_generator(command):
+    """Interrupt the owned generator before its backend, without waiting on HTTP."""
+    process = subprocess.Popen(command, start_new_session=True)
+    descriptor = None
+    try:
+        descriptor = os.pidfd_open(process.pid)
+        return process.wait()
+    finally:
+        if descriptor is not None:
+            stop_owned(process, descriptor)
+        elif process.poll() is None:
+            # Only needed if acquiring the pidfd itself failed/interrupted.
+            # Popen still owns this unreaped child; no PID file is involved.
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait(timeout=5)
+
+
+@contextmanager
+def backend(data, state):
+    runtime = data / 'runtime-0.17.7-r1'
+    binary = runtime / 'usr/bin/ollama'
+    if not binary.is_file() or not os.access(binary, os.X_OK):
+        raise RuntimeError('Private Ollama runtime is missing: ' + str(binary))
+    models = data / 'models'
+    if not models.is_dir():
+        raise RuntimeError('Retained local model directory is missing: ' + str(models))
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if state.is_symlink():
+        raise RuntimeError('Local Ollama state must be a regular directory')
+    descriptor = os.open(state / 'generation.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, 'a+') as lock:
+        if not stat.S_ISREG(os.fstat(lock.fileno()).st_mode):
+            raise RuntimeError('Local Ollama lock must be a regular file')
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise RuntimeError('Another local Scripture generation is running') from None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as reservation:
+            try:
+                reservation.bind(('127.0.0.1', PORT))
+            except OSError:
+                raise RuntimeError(f'Local port {PORT} is occupied; existing server was left untouched') from None
+        profile = state / 'profile'
+        profile.mkdir(exist_ok=True, mode=0o700)
+        env = {key: os.environ[key] for key in ('LANG', 'LC_ALL', 'TZ', 'USER', 'LOGNAME')
+               if key in os.environ}
+        env.update(HOME=str(profile), PATH='/usr/local/bin:/usr/bin:/bin',
+                   LD_LIBRARY_PATH=str(runtime / 'usr/lib/ollama'),
+                   OLLAMA_HOST=f'127.0.0.1:{PORT}', OLLAMA_MODELS=str(models),
+                   OLLAMA_NO_CLOUD='1', OLLAMA_NUM_PARALLEL='1',
+                   OLLAMA_MAX_LOADED_MODELS='1', OLLAMA_CONTEXT_LENGTH='4096',
+                   OLLAMA_KEEP_ALIVE='0')
+        logfd = os.open(state / 'server.log', os.O_CREAT | os.O_APPEND | os.O_WRONLY | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(logfd, 'ab') as log:
+            process = subprocess.Popen(['nice', '-n', '10', str(binary), 'serve'], env=env,
+                                       stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+                                       start_new_session=True)
+            pidfd = None
+            try:
+                try:
+                    pidfd = os.pidfd_open(process.pid)
+                except ProcessLookupError:
+                    process.wait()
+                    raise RuntimeError('Private Ollama exited during startup; inspect ' + str(state / 'server.log'))
+                deadline = time.monotonic() + 30
+                while not owns_listener(process.pid, PORT):
+                    if process.poll() is not None:
+                        raise RuntimeError('Private Ollama failed to start; inspect ' + str(state / 'server.log'))
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError('Private Ollama did not open its loopback listener within 30 seconds')
+                    time.sleep(.05)
+                yield f'http://127.0.0.1:{PORT}'
+            finally:
+                if pidfd is not None:
+                    stop_owned(process, pidfd)
+                elif process.poll() is None:
+                    # The unreaped Popen child is still ours if acquiring its
+                    # pidfd failed or was interrupted before the backend yielded.
+                    process.terminate()
+                    try:
+                        process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        process.kill()
+                        process.wait(timeout=5)
+
+
+def require_local_runtime():
+    config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'mbp-intel/ollama.json'
+    try:
+        policy = json.loads(config.read_text())
+    except (OSError, ValueError):
+        policy = {}
+    if (not isinstance(policy, dict) or policy.get('local_server_enabled') is not True
+            or policy.get('inference_host') != 'local'):
+        raise RuntimeError('Local Ollama is disabled. Use the Alienware GPU runtime; '
+                           'this launcher will not fall back to the MacBook CPU.')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('reference')
+    parser.add_argument('--kind', choices=('study-note', 'inspiration', 'observation'), required=True)
+    parser.add_argument('--assets', type=Path)
+    parser.add_argument('--database', type=Path)
+    parser.add_argument('--no-track', action='store_true')
+    parser.add_argument('--model', default=MODEL)
+    parser.add_argument('--timeout', type=int, default=900,
+                        help='Local CPU request limit in seconds (default/max: 900, or 15 minutes)')
+    args = parser.parse_args()
+    if not 1 <= args.timeout <= 900:
+        parser.error('--timeout must be between 1 and 900 seconds')
+    if not args.model.strip() or 'cloud' in args.model.lower():
+        parser.error('--model must name an installed local model')
+    require_local_runtime()
+    data = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'mbp-intel/ollama'
+    state = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'mbp-intel/ollama'
+    command = [sys.executable, str(HELPER)]
+    for option in ('assets', 'database'):
+        value = getattr(args, option)
+        if value is not None:
+            command.extend(['--' + option, str(value)])
+    command.extend(['generate', args.reference, '--kind', args.kind, '--model', args.model,
+                    '--timeout', str(args.timeout)])
+    if args.no_track:
+        command.append('--no-track')
+    with backend(data, state) as endpoint:
+        duration = '15 minutes' if args.timeout == 900 else f'{args.timeout} seconds'
+        print(f'Local CPU generation can take up to {duration}.', file=sys.stderr, flush=True)
+        return run_generator([*command, '--endpoint', endpoint])
+
+
+def interrupted(signum, _frame):
+    raise SystemExit(128 + signum)
+
+
+if __name__ == '__main__':
+    signal.signal(signal.SIGHUP, interrupted)
+    signal.signal(signal.SIGTERM, interrupted)
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        print('mbp-intel-scripture-local: ' + str(error), file=sys.stderr)
+        raise SystemExit(1)

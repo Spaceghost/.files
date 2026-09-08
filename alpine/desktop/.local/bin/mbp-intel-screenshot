@@ -1,0 +1,33 @@
+#!/bin/sh
+set -eu
+
+mode=${1:-area}
+picture_root=${XDG_PICTURES_DIR:-"$HOME/Pictures"}
+target_dir="$picture_root/Screenshots"
+mkdir -p -- "$target_dir"
+target="$target_dir/spaceghost-$(date '+%Y-%m-%d_%H-%M-%S').png"
+
+case "$mode" in
+    full)
+        grim -- "$target"
+        ;;
+    area)
+        geometry=$(slurp) || exit 0
+        grim -g "$geometry" -- "$target"
+        ;;
+    window)
+        geometry=$(swaymsg -t get_tree | jq -r '.. | select(.focused? == true) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | head -n 1)
+        [ -n "$geometry" ] || exit 1
+        grim -g "$geometry" -- "$target"
+        ;;
+    *)
+        printf '%s\n' "usage: mbp-intel-screenshot {full|area|window}" >&2
+        exit 64
+        ;;
+esac
+
+wl-copy --type image/png < "$target"
+if command -v swappy >/dev/null 2>&1; then
+    swappy -f "$target" &
+fi
+notify-send -i camera-photo 'Screenshot saved' "$target"

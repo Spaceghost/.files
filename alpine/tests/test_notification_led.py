@@ -10,14 +10,14 @@ import tempfile
 import time
 import unittest
 
-HELPER = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-notification-led'
+HELPER = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-notification-led'
 
 
 class NotificationLedTests(unittest.TestCase):
     def setUp(self):
         self.assertTrue(HELPER.is_file(), 'notification LED helper is missing')
         self.module = runpy.run_path(str(HELPER))
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-led-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-led-test-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.leds = self.root / 'leds'
@@ -142,7 +142,7 @@ class NotificationLedTests(unittest.TestCase):
 
     def test_recent_owned_codex_record_supplies_exact_route(self):
         runtime = self.root / 'runtime-record'
-        events = runtime / 'oldbook/codex-events'
+        events = runtime / 'mbp-intel/codex-events'
         events.mkdir(parents=True)
         now = int(time.time())
         (events / 'event.json').write_text(json.dumps({
@@ -158,7 +158,7 @@ class NotificationLedTests(unittest.TestCase):
 
     def test_codex_route_ignores_malformed_types_and_handles_equal_ties(self):
         runtime = self.root / 'runtime-record-tie'
-        events = runtime / 'oldbook/codex-events'
+        events = runtime / 'mbp-intel/codex-events'
         events.mkdir(parents=True)
         now = int(time.time())
         base = {
@@ -291,7 +291,7 @@ class NotificationLedTests(unittest.TestCase):
                 self.wait_for(lambda: caps.read_text().strip() == '1')
                 duplicate = subprocess.run(args, capture_output=True, text=True, timeout=3)
                 self.assertEqual(duplicate.returncode, 0, duplicate.stderr)
-                self.assertEqual(int((runtime / 'oldbook-notification-led.lock').read_text()), proc.pid)
+                self.assertEqual(int((runtime / 'mbp-intel-notification-led.lock').read_text()), proc.pid)
                 # The off phase happens while notifications remain unread.
                 self.wait_for(lambda: caps.read_text().strip() == '0')
             # EOF forces a reconnect; the next subscriber must accept new events.

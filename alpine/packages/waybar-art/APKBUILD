@@ -1,5 +1,5 @@
-# Maintainer: Oldbook local package <oldbook@localhost.invalid>
-pkgname=oldbook-waybar-art
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
+pkgname=mbp-intel-waybar-art
 pkgver=1.0.0
 pkgrel=9
 pkgdesc="Space Ghost artwork controls and contextual hover help for Waybar"
@@ -17,11 +17,11 @@ build() {
     # Library paths and build timestamps never enter the output.
     # shellcheck disable=SC2086
     ${CC:-cc} $CFLAGS -std=c11 -D_GNU_SOURCE -Wall -Wextra -Werror -fPIC -shared \
-        -o oldbook-art.so art.c help.c $LDFLAGS $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
+        -o mbp-intel-art.so art.c help.c $LDFLAGS $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
 }
 
 package() {
-    install -Dm755 oldbook-art.so "$pkgdir/usr/lib/waybar/oldbook-art.so"
+    install -Dm755 mbp-intel-art.so "$pkgdir/usr/lib/waybar/mbp-intel-art.so"
     install -Dm644 LICENSE.Waybar "$pkgdir/usr/share/licenses/$pkgname/LICENSE.Waybar"
 }
 

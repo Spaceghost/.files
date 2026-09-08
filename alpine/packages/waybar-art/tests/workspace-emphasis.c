@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
     GtkCssProvider *css = gtk_css_provider_new();
     GError *error = NULL;
     g_assert_true(gtk_css_provider_load_from_data(css,
-        "@define-color oldbook_workspace_active #ffeeaa;"
-        "@define-color oldbook_workspace_secondary #887766;"
+        "@define-color mbp_intel_workspace_active #ffeeaa;"
+        "@define-color mbp_intel_workspace_secondary #887766;"
         "#workspaces button { color: #aaaaaa; font-weight: 400; background: #101010; }"
         "#workspaces button.focused { color: #ffeeaa; background: #303030; }", -1, &error));
     g_assert_no_error(error);
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
     gtk_label_set_attributes(first_label, original);
     gtk_style_context_add_class(gtk_widget_get_style_context(first), "focused");
     gtk_widget_show_all(window);
-    void *help = oldbook_help_init(window);
+    void *help = mbp_intel_help_init(window);
     settle();
     expect_weight(first_label, 0, PANGO_WEIGHT_BOLD);
     expect_weight(first_label, 3, PANGO_WEIGHT_BOLD);
@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
     gtk_label_set_text(third_label, "after workspace removal");
     settle();
     g_object_unref(third_label);
-    oldbook_help_deinit(help);
+    mbp_intel_help_deinit(help);
     g_assert_true(pango_attr_list_equal(gtk_label_get_attributes(first_label), original));
     g_assert_null(gtk_label_get_attributes(second_label));
     checks += 2;
@@ -213,8 +213,8 @@ int main(int argc, char **argv) {
     /* Cancel deferred discovery, and separately destroy all widgets before
      * cleanup, covering both ownership orders used by Waybar on shutdown. */
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    help = oldbook_help_init(window);
-    oldbook_help_deinit(help);
+    help = mbp_intel_help_init(window);
+    mbp_intel_help_deinit(help);
     gtk_widget_destroy(window);
     settle();
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -222,11 +222,11 @@ int main(int argc, char **argv) {
     gtk_widget_set_name(workspaces, "workspaces");
     gtk_container_add(GTK_CONTAINER(window), workspaces);
     add_workspace(workspaces, "1: GHOST");
-    help = oldbook_help_init(window);
+    help = mbp_intel_help_init(window);
     settle();
     gtk_widget_destroy(window);
     settle();
-    oldbook_help_deinit(help);
+    mbp_intel_help_deinit(help);
     settle();
     checks += 3;
     g_object_unref(css);

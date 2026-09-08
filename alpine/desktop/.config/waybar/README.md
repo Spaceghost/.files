@@ -1,6 +1,6 @@
 # Space Ghost Control Deck
 
-The floating panel is designed for the Oldbook's 1440×900 logical display. Edit
+The floating panel is designed for the MBP Intel's 1440×900 logical display. Edit
 `config.jsonc` or `style.css` here; deployment links them into `~/.config/waybar/`.
 CSS reloads automatically. After JSON edits, restart Waybar from the session
 or send `pkill -USR2 -u "$(id -u)" -x waybar` (Waybar 0.15 may print a harmless
@@ -25,14 +25,14 @@ after ` · ` stays regular and subdued in either state. Both desktop themes
 provide the emphasis colors; the native helper styles text ranges without
 putting markup into workspace names or changing their click commands.
 
-`oldbook-panel-status` reads local kernel counters and addresses. Neither the
+`mbp-intel-panel-status` reads local kernel counters and addresses. Neither the
 panel nor its tooltips initiate wireless scans. Radio status reports rfkill;
 firewall status reports the daemon process, without asserting that a ruleset
 has been audited or that hardware is physically silent. Radio-off uses the
 separately installed privacy controller. Session logout requires confirmation;
 suspend runs the lock helper successfully first.
 
-`oldbook-control` uses fixed argument lists, never shell evaluation of menu text.
+`mbp-intel-control` uses fixed argument lists, never shell evaluation of menu text.
 Window switching passes only numeric Sway container IDs. External titles,
 interface names, and addresses are escaped before being used as markup.
 

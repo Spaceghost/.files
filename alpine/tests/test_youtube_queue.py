@@ -4,7 +4,7 @@ import unittest
 from unittest import mock
 import subprocess
 
-MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/youtube_queue.py'
+MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel/youtube_queue.py'
 
 
 class YoutubeQueueTests(unittest.TestCase):
@@ -45,7 +45,7 @@ class YoutubeQueueTests(unittest.TestCase):
         self.assertEqual(target('desktop', workspaces), 'eDP-1')
 
     def test_empty_playlist_cannot_fall_back_to_mpv_playlist_autoplay(self):
-        player = runpy.run_path(str(MODEL.parents[2] / 'bin/oldbook-youtube'))
+        player = runpy.run_path(str(MODEL.parents[2] / 'bin/mbp-intel-youtube'))
         empty = subprocess.CompletedProcess([], 0, '{"entries":[],"webpage_url":"https://youtube.com/playlist?list=empty"}', '')
         with mock.patch.object(player['subprocess'], 'run', return_value=empty):
             with self.assertRaisesRegex(RuntimeError, 'No playable videos'):

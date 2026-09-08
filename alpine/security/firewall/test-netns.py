@@ -24,7 +24,7 @@ def serve():
         def do_GET(self):
             self.send_response(200)
             self.end_headers()
-            self.wfile.write(b"oldbook-firewall-test\n")
+            self.wfile.write(b"mbp-intel-firewall-test\n")
 
         def log_message(self, *args):
             pass
@@ -68,7 +68,7 @@ def probe(allowed, ipv6=False, port=18080, uid=None):
             ["curl", "--disable", "--noproxy", "*", "--silent", "--fail", "--max-time", "2",
              f"http://{host}:{port}/"], text=True, capture_output=True, timeout=3,
             **({"user": uid, "group": uid, "extra_groups": ()} if uid is not None else {}))
-        ok = result.returncode == 0 and "oldbook-firewall-test" in result.stdout
+        ok = result.returncode == 0 and "mbp-intel-firewall-test" in result.stdout
     except subprocess.TimeoutExpired:
         ok = False
     assert ok == allowed, f"curl expected {'allow' if allowed else 'deny'}: {result}"
@@ -87,7 +87,7 @@ def probe_udp(allowed, ipv6=False):
     code = ("import socket,sys; "
             "s=socket.socket(socket.AF_INET6 if ':' in sys.argv[1] else socket.AF_INET,socket.SOCK_DGRAM); "
             "s.settimeout(1); s.connect((sys.argv[1],18082)); "
-            "s.send(b'oldbook-udp'); assert s.recv(32)==b'oldbook-udp'")
+            "s.send(b'mbp-intel-udp'); assert s.recv(32)==b'mbp-intel-udp'")
     result = subprocess.run([sys.executable, "-c", code, host], capture_output=True, timeout=2)
     assert (result.returncode == 0) == allowed, f"UDP expected allow={allowed}, ipv6={ipv6}: {result.stderr!r}"
 
@@ -147,16 +147,16 @@ def main():
     args = parser.parse_args()
     if not args.isolated:
         assert os.geteuid() == 0, "run with doas; tests immediately enter a network namespace"
-        env = dict(os.environ, OLDBOOK_TEST_HOST_NET=os.readlink("/proc/self/ns/net"))
+        env = dict(os.environ, MBP_INTEL_TEST_HOST_NET=os.readlink("/proc/self/ns/net"))
         result = subprocess.run(
             ["unshare", "--net", sys.executable, __file__, "--isolated", "--daemon", str(args.daemon.resolve())],
             env=env)
         raise SystemExit(result.returncode)
-    assert os.environ["OLDBOOK_TEST_HOST_NET"] != os.readlink("/proc/self/ns/net"), "refusing host network"
+    assert os.environ["MBP_INTEL_TEST_HOST_NET"] != os.readlink("/proc/self/ns/net"), "refusing host network"
     base = Path(__file__).resolve().parent
     processes = []
     results = []
-    with tempfile.TemporaryDirectory(prefix="oldbook-firewall-test-") as name:
+    with tempfile.TemporaryDirectory(prefix="mbp-intel-firewall-test-") as name:
         work = Path(name)
         try:
             server = subprocess.Popen(["unshare", "--net", sys.executable, __file__, "serve", str(work / "ready")])
@@ -192,8 +192,8 @@ def main():
             probe(True, port=443, uid=65534)
             probe(True, port=443, uid=65534, ipv6=True)
             results.append("baseline namespace connectivity")
-            run("nft", "--check", "--file", str(base / "oldbook.nft"))
-            run("nft", "--file", str(base / "oldbook.nft"))
+            run("nft", "--check", "--file", str(base / "mbp-intel.nft"))
+            run("nft", "--file", str(base / "mbp-intel.nft"))
             probe(False)
             probe(False, ipv6=True)
             probe_udp(False)
@@ -279,7 +279,7 @@ def main():
             probe_udp(False)
             probe_udp(False, ipv6=True)
             results.append("persistent gate denies new egress after SIGKILL")
-            ruleset = json.loads(run("nft", "--json", "list", "chain", "inet", "oldbook", "output").stdout)
+            ruleset = json.loads(run("nft", "--json", "list", "chain", "inet", "mbp-intel", "output").stdout)
             queues = [expr["queue"] for item in ruleset["nftables"]
                       for expr in item.get("rule", {}).get("expr", []) if "queue" in expr]
             assert len(queues) == 2 and all(q["num"] == 0 and not q.get("flags") for q in queues), queues

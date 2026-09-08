@@ -13,8 +13,8 @@ import time
 import unittest
 from unittest import mock
 
-MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/workspace_model.py'
-SERVICE = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-workspaces'
+MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel/workspace_model.py'
+SERVICE = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-workspaces'
 
 
 def view(identifier, width, height, **extra):
@@ -205,10 +205,10 @@ class WorkspaceTests(unittest.TestCase):
 class WorkspaceServiceTests(unittest.TestCase):
     def setUp(self):
         self.module = runpy.run_path(str(SERVICE))
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-workspaces-test-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-workspaces-test-')
         self.addCleanup(self.temp.cleanup)
         self.runtime = Path(self.temp.name)
-        self.events = self.runtime / 'oldbook/codex-events'
+        self.events = self.runtime / 'mbp-intel/codex-events'
         self.events.mkdir(parents=True)
 
     def test_request_recovers_after_a_private_unix_socket_backlog_drains(self):
@@ -382,16 +382,16 @@ class WorkspaceServiceTests(unittest.TestCase):
         runtime = self.runtime / 'runtime'
         runtime.mkdir(mode=0o700)
         directory = self.module['prepare_directory'](runtime)
-        self.assertEqual(stat.S_IMODE((runtime / 'oldbook').stat().st_mode), 0o700)
+        self.assertEqual(stat.S_IMODE((runtime / 'mbp-intel').stat().st_mode), 0o700)
         self.assertEqual(stat.S_IMODE(directory.stat().st_mode), 0o700)
 
         unsafe = self.runtime / 'unsafe'
         unsafe.mkdir(mode=0o700)
-        (unsafe / 'oldbook').mkdir(mode=0o755)
+        (unsafe / 'mbp-intel').mkdir(mode=0o755)
         with self.assertRaises(RuntimeError):
             self.module['prepare_directory'](unsafe)
-        self.assertEqual(stat.S_IMODE((unsafe / 'oldbook').stat().st_mode), 0o755)
-        self.assertFalse((unsafe / 'oldbook/workspaces').exists())
+        self.assertEqual(stat.S_IMODE((unsafe / 'mbp-intel').stat().st_mode), 0o755)
+        self.assertFalse((unsafe / 'mbp-intel/workspaces').exists())
 
 
 if __name__ == '__main__':

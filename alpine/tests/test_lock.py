@@ -11,12 +11,12 @@ import time
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-LOCK = REPO / 'alpine/desktop/.local/bin/oldbook-lock'
+LOCK = REPO / 'alpine/desktop/.local/bin/mbp-intel-lock'
 
 
 class LockRegressionTests(unittest.TestCase):
     def test_indicator_palette_follows_the_selected_theme(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-lock-theme-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lock-theme-') as directory:
             themes = Path(directory)
             (themes / 'current').write_text('violet\n')
             (themes / 'violet.json').write_text(json.dumps({'palette': {
@@ -50,7 +50,7 @@ class LockRegressionTests(unittest.TestCase):
                     self.assertEqual(arguments[arguments.index(option) + 1], expected)
 
     def test_process_name_alone_never_proves_readiness(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lock-test-') as directory:
             root = Path(directory)
             wayland = socket.socket(socket.AF_UNIX)
             wayland.bind(str(root / 'wayland-test'))
@@ -75,7 +75,7 @@ class LockRegressionTests(unittest.TestCase):
                 fake.wait()
 
     def test_concurrent_calls_wait_for_one_real_readiness_event(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lock-test-') as directory:
             root = Path(directory)
             wayland = socket.socket(socket.AF_UNIX)
             wayland.bind(str(root / 'wayland-test'))
@@ -99,7 +99,7 @@ class LockRegressionTests(unittest.TestCase):
                     self.assertEqual(client.returncode, 0, error)
                 self.assertGreaterEqual(time.monotonic() - started, .3)
                 self.assertEqual(len((root / 'starts').read_text().splitlines()), 1)
-                ready = json.loads((root / 'oldbook-screen-lock/ready.json').read_text())
+                ready = json.loads((root / 'mbp-intel-screen-lock/ready.json').read_text())
                 # A fresh call reuses the proven, live process without another launch.
                 result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=2)
                 self.assertEqual(result.returncode, 0, result.stderr)
@@ -107,12 +107,12 @@ class LockRegressionTests(unittest.TestCase):
                 # A stale identity must never be accepted as proof of a current lock.
                 original = json.loads(json.dumps(ready))
                 ready['process']['start_time'] = 'invalid'
-                (root / 'oldbook-screen-lock/ready.json').write_text(json.dumps(ready))
+                (root / 'mbp-intel-screen-lock/ready.json').write_text(json.dumps(ready))
                 helper.write_text('#!/bin/sh\nexit 1\n')
                 result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=2)
                 self.assertNotEqual(result.returncode, 0)
                 # The still-live supervisor cannot authorize a different compositor.
-                (root / 'oldbook-screen-lock/ready.json').write_text(json.dumps(original))
+                (root / 'mbp-intel-screen-lock/ready.json').write_text(json.dumps(original))
                 wayland.close()
                 (root / 'wayland-test').unlink()
                 replacement = socket.socket(socket.AF_UNIX)
@@ -133,7 +133,7 @@ class LockRegressionTests(unittest.TestCase):
                             pass
 
     def test_unready_helper_is_killed_and_never_records_success(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lock-test-') as directory:
             root = Path(directory)
             wayland = socket.socket(socket.AF_UNIX)
             wayland.bind(str(root / 'wayland-test'))
@@ -149,12 +149,12 @@ class LockRegressionTests(unittest.TestCase):
             result = subprocess.run(['/usr/bin/python3', '-c', code], env=dict(os.environ, WAYLAND_DISPLAY='wayland-test'), capture_output=True, text=True, timeout=3)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn('did not report readiness', result.stderr)
-            self.assertFalse((root / 'oldbook-screen-lock/ready.json').exists())
+            self.assertFalse((root / 'mbp-intel-screen-lock/ready.json').exists())
             with self.assertRaises(ProcessLookupError):
                 os.kill(int((root / 'started').read_text()), 0)
 
     def test_nonprivate_runtime_is_rejected_before_launch(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-lock-test-') as directory:
             Path(directory).chmod(0o755)
             result = subprocess.run([str(LOCK)], env=dict(os.environ, XDG_RUNTIME_DIR=directory),
                                     capture_output=True, text=True, timeout=2)

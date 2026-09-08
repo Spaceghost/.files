@@ -4,7 +4,7 @@ Super+plus grows the focused window, and Super+minus shrinks it. Each step
 changes both dimensions by 40 logical pixels, normally moving each edge by 20.
 The unshifted equals key also grows; keypad Add/Subtract have matching bindings.
 
-`oldbook-resize` uses Sway's native `resize set` so both dimensions are handled
+`mbp-intel-resize` uses Sway's native `resize set` so both dimensions are handled
 in one operation, preserving the floating window center and respecting Sway's
 minimum/maximum sizes. Separate grow-width/grow-height commands can abort at
 one dimension's limit and leave the other unchanged. A nonblocking per-session

@@ -279,7 +279,7 @@ class RuntimeSafetyTests(unittest.TestCase):
     def setUp(self):
         if IMPORT_ERROR is not None:
             self.fail(f'shortcut service is unavailable: {IMPORT_ERROR}')
-        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-shortcuts-')
+        self.temp = tempfile.TemporaryDirectory(prefix='mbp-intel-shortcuts-')
         self.addCleanup(self.temp.cleanup)
         self.runtime = Path(self.temp.name)
         self.runtime.chmod(0o700)
@@ -355,7 +355,7 @@ class RuntimeSafetyTests(unittest.TestCase):
             'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
         }
         info = wayland_path.stat()
-        record = self.runtime / 'oldbook-screen-lock/ready.json'
+        record = self.runtime / 'mbp-intel-screen-lock/ready.json'
         record.parent.mkdir(mode=0o700)
         record.write_text(json.dumps({
             'process': identity,
@@ -369,7 +369,7 @@ class RuntimeSafetyTests(unittest.TestCase):
 
     def test_missing_wayland_socket_with_live_lock_record_fails_conservative(self):
         missing = self.runtime / 'wayland-gone'
-        record = self.runtime / 'oldbook-screen-lock/ready.json'
+        record = self.runtime / 'mbp-intel-screen-lock/ready.json'
         record.parent.mkdir(mode=0o700)
         record.write_text(json.dumps({
             'process': {'pid': os.getpid(), 'start_time': 'any', 'boot_id': 'any'},

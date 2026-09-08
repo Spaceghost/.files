@@ -88,7 +88,7 @@ blur disable
 animation_duration_ms 0
 ''')
     (out / 'client.py').write_text('''import sys,time
-print("\\033[1;33mGHOST\\033[0m  /  \\033[1mOLDBOOK\\033[0m\\n")
+print("\\033[1;33mGHOST\\033[0m  /  \\033[1mMBP_INTEL\\033[0m\\n")
 print("  Theme-matched / bottom titlebar preview\\n")
 print("\\033[32m  ●  Native Alpine + musl\\033[0m")
 print("\\033[34m  ●  Rebuildable SwayFX\\033[0m")

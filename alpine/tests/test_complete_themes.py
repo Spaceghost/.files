@@ -26,7 +26,7 @@ class CompleteThemes(unittest.TestCase):
                              '.config/btop/btop.conf', '.tmux.conf'):
                     self.assertIn(name, files)
                 bar = json.loads(files['.config/waybar/config.jsonc'])[0]
-                self.assertEqual(bar['mpris']['on-click-middle'], '~/.local/bin/oldbook-pithos middle')
+                self.assertEqual(bar['mpris']['on-click-middle'], '~/.local/bin/mbp-intel-pithos middle')
 
     def test_design_changes_geometry_and_typography_with_identical_colors(self):
         renderer = importlib.import_module('desktop_theme')

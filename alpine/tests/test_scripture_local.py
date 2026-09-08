@@ -17,7 +17,7 @@ from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[2]
 loader = importlib.machinery.SourceFileLoader('scripture_local_test',
-    str(REPO / 'alpine/desktop/.local/bin/oldbook-scripture-local'))
+    str(REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-local'))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 local = importlib.util.module_from_spec(spec)
 loader.exec_module(local)
@@ -28,11 +28,11 @@ class LocalScriptureTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix='scripture-local-test-')
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        config = self.root / 'config/oldbook/ollama.json'
+        config = self.root / 'config/mbp-intel/ollama.json'
         config.parent.mkdir(parents=True)
         config.write_text(json.dumps({'local_server_enabled': True, 'inference_host': 'local'}))
-        self.data = self.root / 'data/oldbook/ollama'
-        self.state = self.root / 'state/oldbook/ollama'
+        self.data = self.root / 'data/mbp-intel/ollama'
+        self.state = self.root / 'state/mbp-intel/ollama'
         binary = self.data / 'runtime-0.17.7-r1/usr/bin/ollama'
         binary.parent.mkdir(parents=True)
         (self.data / 'models').mkdir()
@@ -71,7 +71,7 @@ target.write_text(json.dumps(sys.argv[1:]))
             self.addCleanup(replacement.stop)
 
     def run_command(self, *arguments):
-        with patch.object(sys, 'argv', ['oldbook-scripture-local', 'John 1:1', '--kind',
+        with patch.object(sys, 'argv', ['mbp-intel-scripture-local', 'John 1:1', '--kind',
                                        'observation', *arguments]):
             return local.main()
 
@@ -185,14 +185,14 @@ target.write_text(json.dumps(sys.argv[1:]))
         self.assertFalse(self.state.exists())
 
     def test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others(self):
-        source = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-local'
-        wrapper = self.root / 'oldbook-scripture-local'
+        source = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture-local'
+        wrapper = self.root / 'mbp-intel-scripture-local'
         content = source.read_text()
         self.assertEqual(content.count('PORT = 11435'), 1)
         # Run the real entrypoint and signal handlers, changing only its port
         # so a live bootstrap server cannot be contacted by this fixture.
         wrapper.write_text(content.replace('PORT = 11435', f'PORT = {local.PORT}'))
-        wrapper.with_name('oldbook-scripture-study').write_text('''import os, time
+        wrapper.with_name('mbp-intel-scripture-study').write_text('''import os, time
 from pathlib import Path
 path = Path(os.environ['XDG_STATE_HOME'])/'generator.pid'
 path.write_text(str(os.getpid()))

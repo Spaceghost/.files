@@ -27,12 +27,12 @@ def verify():
         config = home / '.config'
         (config / 'waybar').mkdir(parents=True)
         (home / '.local/bin').mkdir(parents=True)
-        for name in ('oldbook-workspaces', 'oldbook-fuzzel'):
+        for name in ('mbp-intel-workspaces', 'mbp-intel-fuzzel'):
             (home / '.local/bin' / name).symlink_to(BIN / name)
         # Test the actual ordinary-click branch without reading physical modifiers.
-        launcher = home / '.local/bin/oldbook-agents'
+        launcher = home / '.local/bin/mbp-intel-agents'
         launcher.write_text('#!/usr/bin/python3\nimport runpy\n'
-                            f'm=runpy.run_path({str(BIN / "oldbook-agents")!r})\n'
+                            f'm=runpy.run_path({str(BIN / "mbp-intel-agents")!r})\n'
                             'm["launcher"].super_pressed=lambda:False\n'
                             'raise SystemExit(m["main"]())\n')
         launcher.chmod(0o755)
@@ -69,7 +69,7 @@ def verify():
             return json.loads(result.stdout)
 
         def status():
-            return json.loads(run([str(BIN / 'oldbook-workspaces'), 'status'], check=True).stdout)
+            return json.loads(run([str(BIN / 'mbp-intel-workspaces'), 'status'], check=True).stdout)
 
         def tree():
             return json.loads(run(['swaymsg', '-r', '-t', 'get_tree'], check=True).stdout)
@@ -101,7 +101,7 @@ def verify():
                 start(['foot', '-c', str(foot), '--app-id', f'foot-fixture-{index}',
                        '--title', f'Synthetic {kind}', 'python3', str(child), kind, str(base / f'tty{index}')])
             wait(lambda: len(list(views(tree()))) == 2 and (base / 'tty0').exists())
-            tracker = start([str(BIN / 'oldbook-workspaces'), 'daemon'])
+            tracker = start([str(BIN / 'mbp-intel-workspaces'), 'daemon'])
             wait(lambda: status()['text'] == '✦ 2')
             results['two_real_foreground_agents_detected'] = True
             bar = json.loads((ROOT / 'alpine/desktop/.config/waybar/config.jsonc').read_text())[0]
@@ -111,10 +111,10 @@ def verify():
             (config / 'waybar/config.jsonc').write_text(json.dumps([bar]))
             (config / 'waybar/style.css').write_text((ROOT / 'alpine/desktop/.config/waybar/style.css').read_text())
             state = config / 'waybar/waybar-state.css'
-            state.write_text('/* Written by oldbook-waybar-dim; edit style.css instead. */\n')
+            state.write_text('/* Written by mbp-intel-waybar-dim; edit style.css instead. */\n')
             waybar = start(['waybar'])
             wait(lambda: 'Bar configured' in (OUT / 'runtime.log').read_text())
-            dimmer = start([str(BIN / 'oldbook-waybar-dim')])
+            dimmer = start([str(BIN / 'mbp-intel-waybar-dim')])
             pointer_bin = runpy.run_path(str(ROOT / 'alpine/tests/verify_waybar_music.py'))['build_pointer'](base)
             pointer = subprocess.Popen([str(pointer_bin)], env=env, stdin=subprocess.PIPE,
                                        stdout=subprocess.PIPE, stderr=log, text=True)
@@ -140,7 +140,7 @@ def verify():
             click()
             wait(lambda: focused() == first)
             results['agent_bar_left_click_cycles_both_windows'] = True
-            events = runtime / 'oldbook/codex-events'
+            events = runtime / 'mbp-intel/codex-events'
             events.mkdir(exist_ok=True)
             now = time.time()
             (events / 'synthetic.json').write_text(json.dumps({

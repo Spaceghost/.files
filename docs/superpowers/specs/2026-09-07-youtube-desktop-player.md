@@ -10,7 +10,7 @@ mode resumes when workspace 1 becomes visible again; PiP follows workspaces.
 ## Controls
 
 Open **YouTube · desktop player & PiP** in the ghost command deck, or search
-**Oldbook YouTube** in Super+D. The menu can open a video/playlist URL, save
+**MBP Intel YouTube** in Super+D. The menu can open a video/playlist URL, save
 named playlist shortcuts, resume, play/pause, switch desktop/PiP modes, rewatch,
 keep and advance, remove from the local queue and advance, or stop playback.
 
@@ -21,7 +21,7 @@ Remove never modifies YouTube. Named playlist URLs and queue/progress live in
 private HOME configuration/state files, outside Fossil. Playback resumes only
 when requested after a fresh session; the launcher starts one serialized daemon.
 
-The user's oldbook/watchlist URLs were not provided. **Save a named playlist**
+The user's mbp-intel/watchlist URLs were not provided. **Save a named playlist**
 lets them add these and other sources directly from the launcher. No account
 cookies or credentials were imported. Private playlists requiring sign-in are
 not yet configured. The earlier terminal-background proposal is superseded by
@@ -53,8 +53,8 @@ but has no built-in YouTube video-background playback.
 Use Stop player in the launcher before removing the integration. Terminate only
 this helper's serve process to stop its controller; it cleans up its own renderer.
 Remove the dedicated Sway app rule and launcher/desktop entries to disable it.
-Keep ~/.local/state/oldbook/youtube/queue.json to retain progress and decisions;
-keep ~/.config/oldbook/youtube-playlists.json to retain named playlists.
+Keep ~/.local/state/mbp-intel/youtube/queue.json to retain progress and decisions;
+keep ~/.config/mbp-intel/youtube-playlists.json to retain named playlists.
 Package artifacts can be recovered through alpine/bin/package-archive using the
 saved lock. No remote playlist edits need to be reversed.
 

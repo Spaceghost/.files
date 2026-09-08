@@ -15,7 +15,7 @@ import traceback
 
 
 REPO = Path(__file__).resolve().parents[2]
-SOURCE = REPO / "alpine/desktop/.local/bin/oldbook-decoration-settings"
+SOURCE = REPO / "alpine/desktop/.local/bin/mbp-intel-decoration-settings"
 
 
 def require(condition, message):
@@ -29,13 +29,13 @@ def run_client(source, config_home, state_home, output):
     gi.require_version("Gtk", "3.0")
     from gi.repository import GLib, Gtk
 
-    GLib.set_prgname("oldbook-decoration-settings")
+    GLib.set_prgname("mbp-intel-decoration-settings")
     module = runpy.run_path(str(source), run_name="decoration_preferences")
     create_window = module["create_window"]
     create_window.__globals__["CONFIG"] = config_home
     create_window.__globals__["STATE"] = state_home
-    config = config_home / "oldbook/decoration.json"
-    legacy = state_home / "oldbook/decoration/position"
+    config = config_home / "mbp-intel/decoration.json"
+    legacy = state_home / "mbp-intel/decoration/position"
     save_settings = module["save_settings"]
 
     window = create_window(config)
@@ -207,8 +207,8 @@ def run_verifier(output):
         runtime.mkdir(mode=0o700)
         config_home = base / "config"
         state_home = base / "state"
-        config = config_home / "oldbook/decoration.json"
-        legacy = state_home / "oldbook/decoration/position"
+        config = config_home / "mbp-intel/decoration.json"
+        legacy = state_home / "mbp-intel/decoration/position"
         config.parent.mkdir(parents=True)
         legacy.parent.mkdir(parents=True)
         initial = {"position": "bottom", "opacity": 0.78, "corner_radius": 7}
@@ -220,7 +220,7 @@ def run_verifier(output):
             "output HEADLESS-1 mode 1440x900\n"
             "output * bg #13091f solid_color\n"
             "seat seat0 fallback true\n"
-            'for_window [app_id="oldbook-decoration-settings"] '
+            'for_window [app_id="mbp-intel-decoration-settings"] '
             "floating enable, resize set 1000 620\n"
         )
         env = dict(

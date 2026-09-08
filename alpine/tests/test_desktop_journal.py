@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import desktop_journal as journal
 
 
@@ -73,7 +73,7 @@ class JournalTests(unittest.TestCase):
         self.assertNotEqual(journal.choose(self.db, now=1001)['id'], first['id'])
 
     def test_seed_has_real_dated_journal_entries_and_the_original_quips(self):
-        records = json.loads((REPO / 'alpine/desktop/.local/share/oldbook/journal-seed.json').read_text())
+        records = json.loads((REPO / 'alpine/desktop/.local/share/mbp-intel/journal-seed.json').read_text())
         self.assertGreaterEqual(sum(r['kind']=='journal' for r in records), 6)
         self.assertGreaterEqual(sum(r['kind']=='quip' for r in records), 8)
         self.assertTrue(all(r['date']=='2026-09-07' for r in records))

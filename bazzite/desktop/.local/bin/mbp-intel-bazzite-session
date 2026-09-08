@@ -1,0 +1,10 @@
+#!/bin/sh
+# Import the live Sway environment before starting user-managed MBP Intel services.
+set -eu
+
+names='DISPLAY WAYLAND_DISPLAY SWAYSOCK XDG_CURRENT_DESKTOP XDG_SESSION_TYPE'
+# shellcheck disable=SC2086
+systemctl --user import-environment $names
+# shellcheck disable=SC2086
+dbus-update-activation-environment --systemd $names
+exec systemctl --user start mbp-intel-session.target

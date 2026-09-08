@@ -57,7 +57,7 @@ def packages(root='/'):
 def artifact_packages(paths):
     # Let apk compute its own identity. In particular, repository indexes may
     # rewrite noarch to the repository architecture; the APK retains noarch.
-    with tempfile.TemporaryDirectory(prefix='oldbook-index-') as td:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-index-') as td:
         index = Path(td)/'APKINDEX.tar.gz'
         run(['apk', 'index', '--no-warnings', '--output', index] + paths,
             stdout=subprocess.DEVNULL)
@@ -70,7 +70,7 @@ def fetch_missing(installed, cache, repositories):
                if not (cache/f"{x['name']}-{x['version']}.apk").is_file()]
     if not missing:
         return
-    with tempfile.TemporaryDirectory(prefix='oldbook-fetch-') as td:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-fetch-') as td:
         repos = Path(td)/'repositories'
         repos.write_text('\n'.join(line.split(maxsplit=1)[-1]
                                    if line.startswith('@') else line
@@ -286,7 +286,7 @@ def install_host(m, cache, root=Path('/')):
     paths = [cache / x['filename'] for x in m['packages']]
     # Validate all keys, signatures and APK identities before changing the
     # installed database or trusting new keys on the host.
-    with tempfile.TemporaryDirectory(prefix='oldbook-install-keys-') as td:
+    with tempfile.TemporaryDirectory(prefix='mbp-intel-install-keys-') as td:
         keys = Path(td)
         for key in m['keys']:
             if (Path(key['name']).name != key['name'] or not key['name'].endswith('.pub') or
@@ -309,7 +309,7 @@ def install_host(m, cache, root=Path('/')):
                                'resolve conflicts explicitly before retrying:\n'+simulation)
         if original != packages(root):
             raise RuntimeError('Installed packages changed during preflight; retry when apk is idle')
-        backup_parent = root / 'var/backups/oldbook'
+        backup_parent = root / 'var/backups/mbp-intel'
         backup_parent.mkdir(parents=True, exist_ok=True)
         backup = Path(tempfile.mkdtemp(prefix='install-host-', dir=backup_parent))
         # This local root-only backup may contain machine secrets. It never

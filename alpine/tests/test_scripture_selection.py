@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 
 REPO=Path(__file__).resolve().parents[2]
-helper=importlib.machinery.SourceFileLoader('scripture_command_test',str(REPO/'alpine/desktop/.local/bin/oldbook-scripture')).load_module()
+helper=importlib.machinery.SourceFileLoader('scripture_command_test',str(REPO/'alpine/desktop/.local/bin/mbp-intel-scripture')).load_module()
 
 
 class IsolatedSelectionTests(unittest.TestCase):

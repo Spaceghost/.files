@@ -33,7 +33,7 @@ alpine/packages/opensnitch/build /path/to/restored/sources /path/to/output
 The builder checks source SHA256s and stages the reviewed recipe and configuration
 in a temporary directory. It uses `GOPROXY=off`, `GOTOOLCHAIN=local`, vendored Go
 modules and `python3 -m build --no-isolation`. Output is under
-`OUTPUT/oldbook/x86_64/`. An abuild signing key is required (`abuild-keygen -a -n`).
+`OUTPUT/mbp-intel/x86_64/`. An abuild signing key is required (`abuild-keygen -a -n`).
 Do not run the upstream installation Makefiles.
 
 `prepare-inputs OUTPUT` is the separate online maintainer operation. It downloads
@@ -45,7 +45,7 @@ GNU tar, gzip, wget and protoc. Ordinary rebuilds do not run it.
 
 `external-output-queue.patch` adds an opt-in environment switch:
 `OPENSNITCH_EXTERNAL_OUTPUT_QUEUE=1`. The daemon then manages only its DNS
-interception rule; `oldbook-firewall` owns the permanent output queue. Both
+interception rule; `mbp-intel-firewall` owns the permanent output queue. Both
 native queue creation and the native rule-count monitor account for that mode.
 The monitor also rejects stale native output interception rules so they cannot
 mask a missing DNS interception rule. Without the switch, upstream behavior

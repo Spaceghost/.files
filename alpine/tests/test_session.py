@@ -8,12 +8,12 @@ import time
 import unittest
 
 REPO = Path(__file__).resolve().parents[2]
-SESSION = REPO / 'alpine/desktop/.local/bin/oldbook-session'
+SESSION = REPO / 'alpine/desktop/.local/bin/mbp-intel-session'
 
 
 class SessionTests(unittest.TestCase):
     def test_concurrent_reload_starts_services_once(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-session-test-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-session-test-') as directory:
             root = Path(directory)
             local_bin = root / '.local/bin'
             local_bin.mkdir(parents=True)
@@ -31,7 +31,7 @@ class SessionTests(unittest.TestCase):
                              'if "polkit-gnome" in name: sys.exit(0)\n'
                              f'sys.exit(0 if (Path({directory!r}) / name).exists() else 1)\n')
             pgrep.chmod(0o755)
-            for name in ['dbus-update-activation-environment', 'oldbook-wallpaper']:
+            for name in ['dbus-update-activation-environment', 'mbp-intel-wallpaper']:
                 (local_bin / name).write_text('#!/bin/sh\nexit 0\n')
                 (local_bin / name).chmod(0o755)
             (local_bin / 'dbus-update-activation-environment').write_text(

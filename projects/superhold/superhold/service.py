@@ -187,7 +187,7 @@ class SessionLease:
 
 def screen_locked(runtime, wayland_socket):
     """Accept only the readiness record for this live compositor and process."""
-    record = Path(runtime) / 'oldbook-screen-lock/ready.json'
+    record = Path(runtime) / 'mbp-intel-screen-lock/ready.json'
     try:
         if record.is_symlink() or not record.is_file():
             return False
@@ -338,7 +338,7 @@ class GraphicalSessionGuard:
         self._checked_at = float('-inf')
         self._future = None
         self._executor = ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix='oldbook-session-check')
+            max_workers=1, thread_name_prefix='mbp-intel-session-check')
         self.locked = False
         self.closed = False
 
@@ -512,13 +512,13 @@ class ServiceController:
         # replace the single queued request instead of filling every worker
         # with context that can no longer be rendered.
         self.executor = executor or ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix='oldbook-shortcuts')
+            max_workers=1, thread_name_prefix='mbp-intel-shortcuts')
         self._owns_executor = executor is None
         socket_path = getattr(liveness, 'path', None)
         self.loading_probe = loading_probe or (
             (lambda: _focused_output_context(socket_path)) if socket_path else None)
         self.metadata_executor = metadata_executor or ThreadPoolExecutor(
-            max_workers=1, thread_name_prefix='oldbook-output-check')
+            max_workers=1, thread_name_prefix='mbp-intel-output-check')
         self._owns_metadata_executor = metadata_executor is None
         self._metadata_future = None
         self._metadata_generation = None

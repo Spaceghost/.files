@@ -1,6 +1,6 @@
 # Discover agents behind custom terminal IDs
 
-The agent launcher gives Foot windows the Wayland app ID `oldbook-agent`.
+The agent launcher gives Foot windows the Wayland app ID `mbp-intel-agent`.
 ApplicationResolver recognized terminals only by Wayland/X11 application IDs,
 so these windows skipped its existing tmux-client and pane discovery and were
 classified as ordinary applications. The count and switcher share that resolver.
@@ -17,10 +17,10 @@ pass, including an integrated count/switch test that resolves a custom-ID tmux
 agent and selects its Sway container. Live preview and the restarted workspace
 daemon include both previously omitted agent containers, 86 and 156. The live
 bar reports four Codex windows and lists all four workspaces. Local evidence:
-`~/.local/state/oldbook/tmux-agent-bar-verification.json`.
+`~/.local/state/mbp-intel/tmux-agent-bar-verification.json`.
 
 Recovery: restore the preceding app_identity.py and restart only
-`oldbook-workspaces daemon`. Agent processes and tmux sessions need no restart.
+`mbp-intel-workspaces daemon`. Agent processes and tmux sessions need no restart.
 This change covers tmux clients attached to desktop terminal windows; it does not
 change the existing exclusion of detached sessions or hidden scratchpad windows
 from this window switcher.

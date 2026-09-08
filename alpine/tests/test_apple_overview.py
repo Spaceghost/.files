@@ -7,7 +7,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'alpine/desktop/.local/lib'))
-from oldbook.shortcut_sources import ShortcutProvider
+from mbp_intel.shortcut_sources import ShortcutProvider
 
 
 class AppleOverviewTests(unittest.TestCase):

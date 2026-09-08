@@ -75,7 +75,7 @@ the same private Waybar process and captures the changed colors and spacing.
 It never calls the physical-session refresh path.
 
 The broad desktop run completed 829 tests with six assertion failures and three
-timeouts: the Bazzite profile lacks `oldbook-resize`, one fullscreen-space
+timeouts: the Bazzite profile lacks `mbp-intel-resize`, one fullscreen-space
 expectation disagrees with current behavior, and badge tests overlapped another
 session's renderer edits. Two Bazzite timeout cases passed when rerun separately.
 The broad run is retained as evidence and is not described as a passing suite.
@@ -84,7 +84,7 @@ The current feature-contract runner passed all 280 tests across 27 check files.
 The badge tests passed on a later rerun after the concurrent renderer update;
 the fullscreen-space failure and a Bazzite overlay timeout remained reproducible.
 
-The final physical `oldbook-theme use the-bellows-intercept-b503d18336b4 --notify`
+The final physical `mbp-intel-theme use the-bellows-intercept-b503d18336b4 --notify`
 completed with exit zero. Sway, GTK settings, Waybar, Foot, Ghostty, SwayNC,
 Conky, tmux and btop reported refresh. The original bar, Ghostty, btop and
 Firefox processes remained. All original Foot processes survived the first
@@ -105,7 +105,7 @@ and font family.
 
 ## Recovery
 
-Run `oldbook-theme use <previous-id>` to restore a previous complete theme.
+Run `mbp-intel-theme use <previous-id>` to restore a previous complete theme.
 The deployment journal records configuration backups and remains responsible
 for actual interrupted deployment recovery. Never pass a Scripture database
 snapshot to `deploy-home --rollback`.

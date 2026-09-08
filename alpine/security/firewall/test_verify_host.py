@@ -16,7 +16,7 @@ class ProbeVerdictTests(unittest.TestCase):
     def result(self, code, body='', connections=None):
         if connections is None:
             connections = 1 if code == 0 else 0
-        output = body + f'\nOLDBOOK_CONNECTS:{connections}'
+        output = body + f'\nMBP_INTEL_CONNECTS:{connections}'
         with patch.object(probe.subprocess, 'run', return_value=subprocess.CompletedProcess([], code, output, '')):
             return probe.curl('192.0.2.2', 443, uid=1000)
 
@@ -25,7 +25,7 @@ class ProbeVerdictTests(unittest.TestCase):
             self.result(0, '<html>Another server</html>')
 
     def test_expected_response_is_allowed(self):
-        self.assertTrue(self.result(0, 'OLDBOOK_PACKET_PROBE\n'))
+        self.assertTrue(self.result(0, 'MBP_INTEL_PACKET_PROBE\n'))
 
     def test_timeout_is_denied(self):
         self.assertFalse(self.result(28))
@@ -39,7 +39,7 @@ class ProbeVerdictTests(unittest.TestCase):
             self.result(7)
 
     def test_prompt_wait_keeps_nonroot_identity_and_requested_port(self):
-        result = subprocess.CompletedProcess([], 28, '\nOLDBOOK_CONNECTS:0', '')
+        result = subprocess.CompletedProcess([], 28, '\nMBP_INTEL_CONNECTS:0', '')
         with patch.object(probe.subprocess, 'run', return_value=result) as run:
             self.assertFalse(probe.curl('192.0.2.2', 18443, uid=1000, max_time=30))
         command = run.call_args.args[0]

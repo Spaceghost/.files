@@ -18,7 +18,7 @@ WAYBAR_CONFIG = REPO / "alpine/desktop/.config/waybar/config.jsonc"
 WAYBAR_STYLE = REPO / "alpine/desktop/.config/waybar/style.css"
 POINTER_SOURCE = REPO / "alpine/packages/waybar-art/tests/pointer-input.c"
 POINTER_PROTOCOL = REPO / "alpine/packages/waybar-art/tests/pointer.xml"
-PRIVATE_BUS_MARKER = "OLDBOOK_WAYBAR_MUSIC_PRIVATE_BUS"
+PRIVATE_BUS_MARKER = "MBP_INTEL_WAYBAR_MUSIC_PRIVATE_BUS"
 EXPECTED_TITLE = "Selected Coast to Coast"
 EXPECTED_ACTIONS = [
     "io.github.Pithos:Previous",
@@ -88,13 +88,13 @@ def run_fake_mpris(actions, player_name, track_title):
                 "CanRaise": GLib.Variant("b", False),
                 "HasTrackList": GLib.Variant("b", False),
                 "Identity": GLib.Variant("s", f"{player_name} Radio"),
-                "DesktopEntry": GLib.Variant("s", "oldbook-test"),
+                "DesktopEntry": GLib.Variant("s", "mbp-intel-test"),
                 "SupportedUriSchemes": GLib.Variant("as", []),
                 "SupportedMimeTypes": GLib.Variant("as", []),
             }
         else:
             metadata = {
-                "mpris:trackid": GLib.Variant("o", "/org/oldbook/TestTrack"),
+                "mpris:trackid": GLib.Variant("o", "/org/mbp-intel/TestTrack"),
                 "mpris:length": GLib.Variant("x", 245000000),
                 "xesam:title": GLib.Variant("s", track_title),
                 "xesam:artist": GLib.Variant(
@@ -233,13 +233,13 @@ def run_verifier(output):
         modifiers.write_text('0')
         # Keep the private pointer test independent of keys held on the user's
         # physical keyboard. Run the production helper with a fixture snapshot.
-        (local_bin / 'oldbook-pithos').write_text(
+        (local_bin / 'mbp-intel-pithos').write_text(
             '#!/usr/bin/python3\nimport runpy\n'
             'from pathlib import Path\n'
-            'module = runpy.run_path(' + repr(str(REPO / 'alpine/desktop/.local/bin/oldbook-pithos')) + ')\n'
+            'module = runpy.run_path(' + repr(str(REPO / 'alpine/desktop/.local/bin/mbp-intel-pithos')) + ')\n'
             'module["middle_click"].__globals__["super_pressed"] = lambda: Path(' +
             repr(str(modifiers)) + ').read_text() == "1"\nmodule["main"]()\n')
-        (local_bin / 'oldbook-pithos').chmod(0o755)
+        (local_bin / 'mbp-intel-pithos').chmod(0o755)
         (local_bin / "pithos").write_text("#!/bin/sh\nexec gapplication launch io.github.Pithos\n")
         (local_bin / "pithos").chmod(0o755)
 
@@ -406,7 +406,7 @@ def run_verifier(output):
                     return node.get("visible", False)
 
                 require(not pithos_visible(), "Pithos did not start hidden")
-                subprocess.run([str(local_bin / "oldbook-pithos"), "start"],
+                subprocess.run([str(local_bin / "mbp-intel-pithos"), "start"],
                                env=env, check=True, timeout=12)
                 require(not pithos_visible(), "session reload raised Pithos")
 

@@ -3,7 +3,7 @@ import runpy
 from pathlib import Path
 import unittest
 
-MODULE = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/launcher_theme.py'
+MODULE = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/mbp_intel/launcher_theme.py'
 
 
 def contrast(a, b):

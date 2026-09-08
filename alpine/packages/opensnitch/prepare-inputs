@@ -4,7 +4,7 @@ set -eu
 out=${1:?usage: prepare-inputs OUTPUT_DIRECTORY}
 mkdir -p "$out"
 out=$(CDPATH='' cd -- "$out" && pwd)
-work=$(mktemp -d "${TMPDIR:-/tmp}/oldbook-opensnitch-inputs.XXXXXX")
+work=$(mktemp -d "${TMPDIR:-/tmp}/mbp-intel-opensnitch-inputs.XXXXXX")
 trap 'chmod -R u+w "$work"; rm -r -- "$work"' EXIT HUP INT TERM
 export GOTOOLCHAIN=local
 export GOMODCACHE="$work/modules"

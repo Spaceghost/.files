@@ -3,8 +3,8 @@
   "package_signature": "Both signed packages pass apk verify against the installed local public key",
   "network": "Both compilations ran in unshare --net using archived source and the versioned patch",
   "independent_builds": [
-    "swayfx-bottom-r1-a/oldbook/swayfx",
-    "swayfx-bottom-r1-b/oldbook/swayfx"
+    "swayfx-bottom-r1-a/mbp-intel/swayfx",
+    "swayfx-bottom-r1-b/mbp-intel/swayfx"
   ],
   "signed_apks_identical": true,
   "signed_apk_sha256": "a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4",

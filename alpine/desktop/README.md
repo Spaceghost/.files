@@ -1,15 +1,15 @@
 # Spaceghost desktop overlay
 
-This is the deployable HOME overlay for the Oldbook Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: Gruvbox Dark charcoal surfaces, cream text, and warm amber highlights with Space Ghost artwork. It contains no wallpaper, credential, network profile, or machine secret.
+This is the deployable HOME overlay for the MBP Intel Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: Gruvbox Dark charcoal surfaces, cream text, and warm amber highlights with Space Ghost artwork. It contains no wallpaper, credential, network profile, or machine secret.
 
-`~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then the active theme's solid background. Its ring, text and authentication states follow the same palette.
+`~/.local/share/mbp-intel/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then the active theme's solid background. Its ring, text and authentication states follow the same palette.
 
 All workspaces now share the same painting and gallery timer. Foot uses 78%
 opacity with 4-pixel padding; Sway keeps a small 4-pixel outer gap. Ghostty is
 also installed with matching colors and opacity: launch `ghostty` or select it
 in the command deck. To play a muted, looping video behind transparent windows,
-run `oldbook-video-background ~/Videos/example.webm`, or choose **Video background**
-in the command deck. `oldbook-video-background stop` reveals the shared painting.
+run `mbp-intel-video-background ~/Videos/example.webm`, or choose **Video background**
+in the command deck. `mbp-intel-video-background stop` reveals the shared painting.
 The video picker accepts local files and explicit HTTPS URLs. No video starts
 automatically. See the [video guide](../packages/mpvpaper/README.md) and
 [Ghostty notes](../packages/ghostty/README.md).
@@ -20,8 +20,8 @@ window is focused, its decoration attaches to that window and follows moves and
 resizes without reserving workspace space. Any fullscreen window on that visible
 workspace returns the decoration to the workspace bottom; leaving fullscreen
 restores the saved edge and attachment. Global fullscreen applies to all outputs.
-Open `oldbook-decoration-settings` to edit placement, opacity and corners beside
-the underlying `~/.config/oldbook/decoration.json`. The right edge remains an
+Open `mbp-intel-decoration-settings` to edit placement, opacity and corners beside
+the underlying `~/.config/mbp-intel/decoration.json`. The right edge remains an
 option; right-click the caption for placement controls or Shift + right-click to open the
 editor. Left-click chooses a window and middle-click toggles floating. The
 borderless caption follows the active theme, with square corners for fullscreen
@@ -35,9 +35,9 @@ The contextual guide uses the locally packaged `superhold` and its Qt 6,
 layer-shell-qt and keyboard-input dependencies. Its [portable guide](../../projects/superhold/README.md)
 documents desktop support and exact build requirements.
 
-`oldbook-session` deliberately owns session services once per current UID. On every Sway reload it checks the existing Waybar, SwayNC, Swayidle, PipeWire, WirePlumber, Pulse, and polkit-agent processes before starting anything. This avoids reliance on the release-dependent `/usr/libexec/pipewire-launcher` behavior and prevents duplicate panels, idle daemons, color processes, or authentication agents.
+`mbp-intel-session` deliberately owns session services once per current UID. On every Sway reload it checks the existing Waybar, SwayNC, Swayidle, PipeWire, WirePlumber, Pulse, and polkit-agent processes before starting anything. This avoids reliance on the release-dependent `/usr/libexec/pipewire-launcher` behavior and prevents duplicate panels, idle daemons, color processes, or authentication agents.
 
-Start a new session through `oldbook-sway`, which wraps Sway in `dbus-run-session` when no session bus is already present. For a pre-existing Sway process that lacks `DBUS_SESSION_BUS_ADDRESS`, `oldbook-session` uses the user runtime bus when available or starts a user-local bus and passes it to the desktop services it launches. It never uses the systemd-specific `dbus-update-activation-environment --systemd` path because this is an OpenRC setup.
+Start a new session through `mbp-intel-sway`, which wraps Sway in `dbus-run-session` when no session bus is already present. For a pre-existing Sway process that lacks `DBUS_SESSION_BUS_ADDRESS`, `mbp-intel-session` uses the user runtime bus when available or starts a user-local bus and passes it to the desktop services it launches. It never uses the systemd-specific `dbus-update-activation-environment --systemd` path because this is an OpenRC setup.
 
 ## Activation
 
@@ -47,7 +47,7 @@ Run the repository deployment tool after its package and wallpaper stages:
 ~/.files/alpine/bin/deploy-home --target "$HOME"
 ```
 
-Start a new session with `oldbook-sway`; reload a deployed session with `Super+Ctrl+Shift+C`. Verify the panel, launcher, notification popups and history card, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
+Start a new session with `mbp-intel-sway`; reload a deployed session with `Super+Ctrl+Shift+C`. Verify the panel, launcher, notification popups and history card, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
 
 The configured display mode is the native internal panel. Do not copy it to an external display until its supported modes have been inspected with `swaymsg -t get_outputs`.
 
@@ -81,7 +81,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 The shortcut guide starts through `sway/local.d/shortcuts.conf` and stays hidden
 while the session is locked or inactive. It combines Sway bindings with relevant
 application profiles; profiles are useful baselines, not exhaustive shortcut lists.
-`oldbook-shortcuts status` reports its state. The default trigger remains Super,
+`mbp-intel-shortcuts status` reports its state. The default trigger remains Super,
 so Caps Lock retains its Escape behavior and notification indicator.
 
 Window switching is shared by both Tab shortcuts. Hold the modifier to browse
@@ -98,22 +98,22 @@ the image until the carousel is reopened.
 
 Leaving an exposed desktop ends that expose session and restores the captured
 output where necessary, preserving the workspace you chose. The warm
-`oldbook-carousel daemon` and `oldbook-showdesktop daemon` start with Sway and
+`mbp-intel-carousel daemon` and `mbp-intel-showdesktop daemon` start with Sway and
 use per-session locks. For local recovery, Escape leaves the carousel mode;
-`oldbook-carousel cancel` and `oldbook-showdesktop restore` dismiss either view.
+`mbp-intel-carousel cancel` and `mbp-intel-showdesktop restore` dismiss either view.
 
 The MacBook keyboard light uses the kernel's `applesmc` LED device
 `smc::kbd_backlight`; the existing `brightnessctl` udev rule and `input` group
-allow control without root. `oldbook-keyboard-backlight` accepts `up`, `down`,
+allow control without root. `mbp-intel-keyboard-backlight` accepts `up`, `down`,
 `toggle` and `restore`. It saves the chosen brightness (including off) under
-`~/.local/state/oldbook/keyboard-backlight` and restores it at Sway login; first
+`~/.local/state/mbp-intel/keyboard-backlight` and restores it at Sway login; first
 use preserves an existing level or enables 25% brightness. Sway reloads do not
 reset it. With this MacBook's unchanged `hid_apple` setting `fnmode=3` (auto),
 `F5`/`F6` adjust the light and `Fn+F5`/`Fn+F6` remain application function keys.
 
 The artwork icon opens the gallery with left click, advances with right click,
 pauses with middle click, and scrolls previous/next. Its small
-`oldbook-waybar-art` package supplies native modifier handling; see the
+`mbp-intel-waybar-art` package supplies native modifier handling; see the
 [build and verification guide](../packages/waybar-art/README.md).
 
 Caps Lock still sends Escape. Its indicator is off normally and keeps flashing
@@ -121,7 +121,7 @@ while an attributable Codex, Claude, or ChatGPT window has not been visited
 since its alert. Focusing or closing one target clears only that window; other
 pending windows keep the flash active. Ordinary desktop notifications and old
 retained messages do not light it.
-`oldbook-notification-led` discovers Caps Lock LEDs when keyboards are connected
+`mbp-intel-notification-led` discovers Caps Lock LEDs when keyboards are connected
 and recovers their state if the compositor resets it. Reloading Sway reuses one
 helper; exiting the session turns the light off.
 
@@ -135,11 +135,11 @@ signals are described in the AI attention notes under `docs/superpowers/specs/`.
 `brightnessctl` supplies the udev rule granting group `input` write access to LED
 brightness, and the desktop user must belong to that group (Jack already does).
 It never changes key state to control the light. Diagnostics go to
-`~/.local/state/oldbook/notification-led.log`.
+`~/.local/state/mbp-intel/notification-led.log`.
 
 To disable the light integration, remove the notification helper launch from
-`oldbook-session` and terminate the PID in
-`$XDG_RUNTIME_DIR/oldbook-notification-led.lock`. Leave `caps:escape` configured
+`mbp-intel-session` and terminate the PID in
+`$XDG_RUNTIME_DIR/mbp-intel-notification-led.lock`. Leave `caps:escape` configured
 to retain the Escape mapping. A reboot or keyboard reconnect restores the
 kernel's default LED trigger; the helper detaches it again when it starts.
 
@@ -147,7 +147,7 @@ Screenshots are stored in `~/Pictures/Screenshots` and offered to Swappy for ann
 
 The overlay does not infer a geographic location. It leaves `wlsunset` disabled by default. Add an explicit, local `wlsunset` command in `~/.config/sway/local.d/` only after choosing the correct location or an intentional fixed schedule.
 
-Every tmux theme loads `~/.config/tmux/oldbook.conf` for the personal controls
+Every tmux theme loads `~/.config/tmux/mbp-intel.conf` for the personal controls
 carried over from the historical config: `Ctrl+A` prefix (twice to send a literal
 `Ctrl+A`), `v`/`|`/Enter for side-by-side splits, `s` for top/bottom splits,
 `h/j/k/l` for pane selection, `H/J/K/L` or `</+/-/>` for resizing, `Ctrl+h/l`
@@ -156,7 +156,7 @@ for previous/next window, and Tab for the last pane. Windows and panes start at
 to copy. Mouse, clipboard, focus events and 10,000 lines of scrollback are
 enabled. These controls survive theme switches; each theme supplies its colors
 and status line. Deploy the shared file with
-`alpine/bin/deploy-home --only .config/tmux/oldbook.conf`, then reload with
+`alpine/bin/deploy-home --only .config/tmux/mbp-intel.conf`, then reload with
 `tmux source-file ~/.tmux.conf`. The scrollback limit applies to newly created
 panes; existing panes retain their current limit.
 The overlay does not source the historical plugin bootstrap or install a plugin

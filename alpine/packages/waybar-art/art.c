@@ -192,7 +192,7 @@ static gboolean crossed(GtkWidget *widget, GdkEventCrossing *event, gpointer dat
 void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entries, size_t count) {
     Artwork *art = g_new0(Artwork, 1);
     art->refs = 1;
-    art->command = g_build_filename(g_get_home_dir(), ".local", "bin", "oldbook-wallpaper", NULL);
+    art->command = g_build_filename(g_get_home_dir(), ".local", "bin", "mbp-intel-wallpaper", NULL);
     for (size_t i = 0; i < count; ++i) {
         if (g_strcmp0(entries[i].key, "command") != 0) continue;
         JsonParser *parser = json_parser_new();
@@ -221,7 +221,7 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
     g_signal_connect(art->box, "enter-notify-event", G_CALLBACK(crossed), art);
     g_signal_connect(art->box, "leave-notify-event", G_CALLBACK(crossed), art);
     gtk_widget_show_all(art->box);
-    art->help = oldbook_help_init(GTK_WIDGET(info->get_root_widget(info->obj)));
+    art->help = mbp_intel_help_init(GTK_WIDGET(info->get_root_widget(info->obj)));
     art->timer = g_timeout_add_seconds(5, refresh_status, art);
     refresh_status(art);
     return art;
@@ -230,7 +230,7 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
 void wbcffi_deinit(void *instance) {
     Artwork *art = instance;
     art->disposed = TRUE;
-    oldbook_help_deinit(art->help);
+    mbp_intel_help_deinit(art->help);
     g_source_remove(art->timer);
     if (art->status) g_subprocess_force_exit(art->status);
     release(art);

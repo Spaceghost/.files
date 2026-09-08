@@ -18,9 +18,9 @@ from verify_decoration_attachment import SwayIPC, walk
 
 
 REPO = Path(__file__).resolve().parents[2]
-HELPER = REPO / "alpine/desktop/.local/bin/oldbook-strata"
-BUS_MARKER = "OLDBOOK_STRATA_VERIFY_BUS"
-APP = "oldbook-strata"
+HELPER = REPO / "alpine/desktop/.local/bin/mbp-intel-strata"
+BUS_MARKER = "MBP_INTEL_STRATA_VERIFY_BUS"
+APP = "mbp-intel-strata"
 
 
 def require(condition, message):
@@ -62,8 +62,8 @@ def run_verifier(output, abrupt_shutdown=False):
                 "isolation": "private HOME, XDG directories, D-Bus, Sway and HTTP port",
                 "external_fixtures": "Fossil HTTP fixture and Foot with exact browser app_id"}
     evidence["shutdown"] = "abrupt" if abrupt_shutdown else "graceful"
-    sources = [HELPER, HELPER.with_name("oldbook-workspaces"),
-               REPO / "alpine/desktop/.local/lib/oldbook/workspace_model.py"]
+    sources = [HELPER, HELPER.with_name("mbp-intel-workspaces"),
+               REPO / "alpine/desktop/.local/lib/mbp_intel/workspace_model.py"]
     hashes = {str(path.relative_to(REPO)): hashlib.sha256(path.read_bytes()).hexdigest()
               for path in sources}
     evidence["source_sha256"] = hashes
@@ -86,7 +86,7 @@ def run_verifier(output, abrupt_shutdown=False):
             port = reservation.getsockname()[1]
         require(port != 8766, "private port overlaps host STRATA")
         env.update(WLR_BACKENDS="headless", WLR_HEADLESS_OUTPUTS="1",
-                   OLDBOOK_STRATA_PORT=str(port), NO_AT_BRIDGE="1", GTK_USE_PORTAL="0",
+                   MBP_INTEL_STRATA_PORT=str(port), NO_AT_BRIDGE="1", GTK_USE_PORTAL="0",
                    STRATA_VERIFY_TRACE=str(output / "fixtures.jsonl"),
                    STRATA_VERIFY_FOOT=str(base / "foot.ini"))
         evidence["private_port"] = port
@@ -108,8 +108,8 @@ def run_verifier(output, abrupt_shutdown=False):
         config.write_text("xwayland disable\noutput HEADLESS-1 mode 1000x700\n"
                           "output * bg #13091f solid_color\nseat seat0 fallback true\n"
                           "focus_follows_mouse no\nworkspace 2\n"
-                          'assign [app_id="^oldbook-strata$"] workspace number 10\n'
-                          'no_focus [app_id="^oldbook-strata$"]\n')
+                          'assign [app_id="^mbp-intel-strata$"] workspace number 10\n'
+                          'no_focus [app_id="^mbp-intel-strata$"]\n')
         log = (output / "runtime.log").open("w")
 
         def spawn(name, command):
@@ -283,7 +283,7 @@ def run_verifier(output, abrupt_shutdown=False):
                         os.kill(identifier, signal.SIGKILL)
                 except (FileNotFoundError, ProcessLookupError):
                     pass
-            service_log = Path(env["HOME"]) / ".local/state/oldbook/strata.log"
+            service_log = Path(env["HOME"]) / ".local/state/mbp-intel/strata.log"
             if service_log.exists():
                 (output / "service.log").write_bytes(service_log.read_bytes())
             log.close()

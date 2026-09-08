@@ -45,7 +45,7 @@ Private headless SwayFX 0.6 (Sway 1.12.0) sessions verified:
 The integration controller used a synthetic input monitor. Real key delivery
 and pointer clicks went only to disposable compositor sockets; no physical
 keyboard was exercised or host input injected. No installed configuration,
-startup entry, or original Oldbook service was changed.
+startup entry, or original MBP Intel service was changed.
 
 Runtime evidence is in [interactive checks](runtime-interactive-validation.json),
 [native Sway checks](runtime-native-validation.json), and

@@ -30,7 +30,7 @@ Application actions are discovered asynchronously only when requested:
   window process, with available previous/play/pause/next actions. Other players
   are not selected as a fallback.
 
-Implementation lives in `oldbook-decoration` and `decoration_actions.py`.
+Implementation lives in `mbp-intel-decoration` and `decoration_actions.py`.
 Discovery and command execution run off the GTK thread. Each output has a
 separately scoped stylesheet; steady state does not redraw the strip every poll.
 Existing deployment symlinks load these files directly from the checkout.
@@ -44,10 +44,10 @@ notices remain. Menu behavior, tmux/media actions, and multiple outputs remain
 unverified at the user's request.
 
 The private activation log and screenshots are under
-`~/.local/state/oldbook/decoration-context/`. The [included screenshot](../../../alpine/verification/decoration-context/bottom-strip.png)
+`~/.local/state/mbp-intel/decoration-context/`. The [included screenshot](../../../alpine/verification/decoration-context/bottom-strip.png)
 records the empty-workspace launchers; no window actions were exercised.
 
 Recovery: restore the decoration helper and appearance-editor tooltip from the
-parent of this check-in, then restart only `oldbook-decoration daemon`. The new
+parent of this check-in, then restart only `mbp-intel-decoration daemon`. The new
 actions module can remain unused or be removed. Saved placement, opacity, and
 radius were not changed. Waybar and the other desktop services were not restarted.

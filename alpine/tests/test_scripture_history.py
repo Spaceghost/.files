@@ -14,7 +14,7 @@ from unittest.mock import patch
 from types import SimpleNamespace
 
 REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
 import scripture_history as history
 from scripture_history_reader import Reader
 
@@ -144,7 +144,7 @@ class CommandHistoryTests(unittest.TestCase):
         environment.start()
         self.addCleanup(environment.stop)
         self.helper = importlib.machinery.SourceFileLoader('scripture_history_command_test',
-            str(REPO / 'alpine/desktop/.local/bin/oldbook-scripture')).load_module()
+            str(REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture')).load_module()
         for key, value in [('STATE', self.root / 'state'), ('SELECTION', self.root / 'state/selection.json')]:
             replacement = patch.object(self.helper, key, value)
             replacement.start()
@@ -254,10 +254,10 @@ class CommandHistoryTests(unittest.TestCase):
 class CardRecoveryTests(unittest.TestCase):
     def test_missing_scripture_pid_revives_only_its_existing_layout(self):
         helper = importlib.machinery.SourceFileLoader('scripture_recovery_command_test',
-            str(REPO / 'alpine/desktop/.local/bin/oldbook-scripture')).load_module()
+            str(REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture')).load_module()
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            conky = home / '.local/state/oldbook/conky'
+            conky = home / '.local/state/mbp-intel/conky'
             conky.mkdir(parents=True)
             config = conky / 'scripture.conf'
             config.write_text('existing placement and theme')

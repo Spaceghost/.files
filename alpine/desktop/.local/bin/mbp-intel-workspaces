@@ -1,0 +1,400 @@
+#!/usr/bin/env python3
+"""Live application workspace names and a local Codex/ChatGPT window switcher."""
+import argparse
+import errno
+import fcntl
+import html
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import socket
+import stat
+import struct
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/mbp_intel'))
+from workspace_model import (WorkspaceNames, addressable_name, all_views, largest_view,
+                             safe_label, valid_record, workspace_name, workspace_nodes)
+
+HEADER = struct.Struct('=6sII')
+
+
+def receive(connection):
+    def read(size):
+        chunks = bytearray()
+        while len(chunks) < size:
+            chunk = connection.recv(size - len(chunks))
+            if not chunk:
+                raise ConnectionError('Sway disconnected')
+            chunks.extend(chunk)
+        return bytes(chunks)
+
+    magic, length, kind = HEADER.unpack(read(HEADER.size))
+    if magic != b'i3-ipc' or length > 32 * 1024 * 1024:
+        raise ValueError('invalid Sway IPC frame')
+    return kind, json.loads(read(length))
+
+
+def send(connection, kind, payload=''):
+    body = payload.encode('utf-8')
+    connection.sendall(HEADER.pack(b'i3-ipc', len(body), kind) + body)
+
+
+def request(path, kind, payload=''):
+    with socket.socket(socket.AF_UNIX) as connection:
+        deadline = time.monotonic() + 3
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError('Sway IPC connect timed out')
+            connection.settimeout(remaining)
+            try:
+                connection.connect(str(path))
+                break
+            except BlockingIOError as error:
+                if error.errno != errno.EAGAIN:
+                    raise
+                # AF_UNIX reports a full listen backlog immediately even with
+                # a socket timeout. Give Sway time to accept queued clients.
+                time.sleep(min(.01, max(0, deadline - time.monotonic())))
+        send(connection, kind, payload)
+        response_kind, response = receive(connection)
+        if response_kind != kind:
+            raise ValueError('unexpected Sway IPC response')
+        return response
+
+
+def command(path, text):
+    result = request(path, 0, text)
+    if not result or not all(item.get('success') for item in result):
+        raise RuntimeError('Sway rejected workspace command')
+
+
+def rename(path, old, new):
+    # This is Sway command quoting, passed through IPC without a shell.
+    if not addressable_name(old) or not addressable_name(new):
+        raise ValueError('workspace name cannot be represented losslessly for Sway IPC')
+    commands = []
+    if old != new and old.lower() == new.lower():
+        # Sway looks names up without case and treats a case-only rename as
+        # success without changing it. Finish both steps in one IPC command.
+        temporary = new + f' [rename-{os.getpid()}-{time.monotonic_ns()}]'
+        commands.append('rename workspace ' + json.dumps(old, ensure_ascii=False)
+                        + ' to ' + json.dumps(temporary, ensure_ascii=False))
+        old = temporary
+    commands.append('rename workspace ' + json.dumps(old, ensure_ascii=False)
+                    + ' to ' + json.dumps(new, ensure_ascii=False))
+    command(path, '; '.join(commands))
+
+
+def read_json(path, default):
+    try:
+        value = json.loads(path.read_text())
+        return value if isinstance(value, type(default)) else default
+    except (OSError, ValueError):
+        return default
+
+
+def write_json(path, data):
+    temporary = path.with_name(path.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(data, ensure_ascii=False) + '\n')
+    temporary.chmod(0o600)
+    temporary.replace(path)
+
+
+def prepare_directory(runtime):
+    def create_private(path):
+        path.mkdir(mode=0o700, exist_ok=True)
+        info = path.stat(follow_symlinks=False)
+        if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+                or stat.S_IMODE(info.st_mode) != 0o700):
+            raise RuntimeError(f'unsafe runtime directory: {path}')
+    mbp_intel = runtime / 'mbp-intel'
+    create_private(mbp_intel)
+    directory = mbp_intel / 'workspaces'
+    create_private(directory)
+    return directory
+
+
+def records_for_socket(snapshot, path):
+    records = snapshot.get('records', {}) if isinstance(snapshot, dict) else {}
+    return records if snapshot.get('socket') == str(path) and isinstance(records, dict) else {}
+
+
+def find_socket(runtime):
+    if os.environ.get('SWAYSOCK'):
+        candidates = [Path(os.environ['SWAYSOCK'])]
+    else:
+        candidates = sorted(runtime.glob(f'sway-ipc.{os.getuid()}.*.sock'),
+                            key=lambda path: path.stat().st_mtime, reverse=True)
+    for path in candidates:
+        if path.is_socket() and path.stat().st_uid == os.getuid():
+            return path
+    raise RuntimeError('no owned Sway session socket')
+
+
+def events_for_apps(runtime, apps):
+    now = time.time()
+    records = []
+    for path in (runtime / 'mbp-intel/codex-events').glob('*.json'):
+        if path.is_symlink():
+            continue
+        event = read_json(path, {})
+        try:
+            if (path.stat().st_uid == os.getuid() and event.get('version') == 1
+                    and event.get('event') in ('turn-complete', 'approval-requested')
+                    and now - 300 <= event['observed_at'] <= now + 5
+                    and now < event['valid_until'] <= event['observed_at'] + 300):
+                records.append(event)
+        except (OSError, KeyError, TypeError):
+            continue
+    for app in apps.values():
+        app.pop('event', None)
+        if app.get('kind') != 'codex':
+            continue
+        matches = [record for record in records
+                   if ((record.get('tty') and app.get('tty') == record['tty'])
+                       or (not record.get('tty') and record.get('tmux_pane')
+                           and app.get('tmux_pane') == record['tmux_pane']))]
+        if matches:
+            app['event'] = max(matches, key=lambda record: record['observed_at'])['event']
+
+
+def collect(tree, resolver, runtime, names, placement=None):
+    workspaces = workspace_nodes(tree)
+    windows = [view for ws in workspaces for view in all_views(ws)]
+    apps = resolver.resolve_all(windows)
+    if placement is not None:
+        placement(windows, apps)
+    events_for_apps(runtime, apps)
+    plans, ai = [], []
+    for ws in workspaces:
+        largest = largest_view(ws)
+        app = apps.get(largest['id']) if largest else None
+        plan = names.plan(ws, app)
+        plan['largest_id'] = largest['id'] if largest else None
+        plans.append(plan)
+        for view in all_views(ws):
+            identity = apps.get(view['id'], {})
+            if identity.get('kind') in ('codex', 'chatgpt', 'claude'):
+                ai.append({'id': view['id'], 'workspace': plan['base'],
+                           'name': safe_label(identity['name'], 28) + (' (tmux)' if identity.get('tmux_pane') else ''),
+                           'kind': identity['kind'],
+                           'event': identity.get('event'), 'focused': bool(view.get('focused'))})
+    return plans, ai
+
+
+def restore(path, records):
+    if not isinstance(records, dict):
+        return
+    for ws in workspace_nodes(request(path, 4)):
+        record = records.get(str(ws['id']), {})
+        if (valid_record(record) and addressable_name(record['original'])
+                and ws['name'] == record['rendered'] and ws['name'] != record['original']):
+            rename(path, ws['name'], record['original'])
+
+
+def daemon(runtime, directory, path):
+    from app_identity import ApplicationResolver
+    from workspace_defaults import Placement
+
+    fd = os.open(directory / 'service.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        lock.truncate(0)
+        lock.write(str(os.getpid()) + '\n')
+        lock.flush()
+        state_path = directory / 'state.json'
+        previous = read_json(state_path, {})
+        names = WorkspaceNames(records_for_socket(previous, path))
+        same_session = previous.get('socket') == str(path)
+        placement = Placement(previous.get('placement') if same_session else None)
+        adopt = not (same_session and 'placement' in previous)
+
+        def place(windows, apps):
+            nonlocal adopt
+            candidates = [(view['id'], apps.get(view['id'], {}).get('name')) for view in windows]
+            stay = {view['id'] for view in windows
+                    if view.get('app_id') == 'mbp-intel-agent-quick'}
+            for identifier, number in placement.plan(candidates, adopt=adopt, stay=stay):
+                try:
+                    command(path, f'[con_id={identifier}] move container to workspace number '
+                            + json.dumps(workspace_name(number)))
+                except RuntimeError:
+                    # A window may close between inspection and placement.
+                    pass
+            adopt = False
+        resolver = ApplicationResolver()
+        running = True
+
+        def stop(signum, frame):
+            nonlocal running
+            running = False
+
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, stop)
+        try:
+            while running:
+                try:
+                    with socket.socket(socket.AF_UNIX) as subscription:
+                        subscription.settimeout(3)
+                        subscription.connect(str(path))
+                        send(subscription, 2, '["workspace","window","output","shutdown"]')
+                        _, accepted = receive(subscription)
+                        if not accepted.get('success'):
+                            raise RuntimeError('Sway rejected workspace subscription')
+                        while running:
+                            plans, ai = collect(request(path, 4), resolver, runtime, names, place)
+                            for plan in plans:
+                                if plan['old'] != plan['new']:
+                                    try:
+                                        rename(path, plan['old'], plan['new'])
+                                    except (ValueError, RuntimeError):
+                                        # A window/workspace can close or be renamed
+                                        # after GET_TREE; retry from the next snapshot.
+                                        continue
+                                names.accept(plan)
+                            live_ids = {str(plan['id']) for plan in plans}
+                            names.records = {key: value for key, value in names.records.items() if key in live_ids}
+                            write_json(state_path, {'socket': str(path), 'updated_at': time.time(),
+                                                   'records': names.records, 'workspaces': plans, 'ai': ai,
+                                                   'placement': placement.state()})
+                            # Sway events detect logout immediately; a one-second refresh
+                            # also follows tmux foreground changes with an unchanged title.
+                            deadline = time.monotonic() + 1
+                            while running and time.monotonic() < deadline:
+                                ready, _, _ = select.select([subscription], [], [],
+                                                            max(0, deadline - time.monotonic()))
+                                if ready:
+                                    kind, _ = receive(subscription)
+                                    if kind == (1 << 31) | 6:
+                                        running = False
+                except (OSError, ValueError, RuntimeError) as error:
+                    # A busy compositor or a partial IPC frame must not stop
+                    # workspace labels and the agent indicator until next login.
+                    # Reconnect with a fresh stream; retain accepted name state.
+                    if (not running or not path.exists()
+                            or getattr(error, 'errno', None) in (errno.ENOENT, errno.ECONNREFUSED)):
+                        break
+                    print(f'mbp-intel-workspaces: {error}; reconnecting', file=sys.stderr)
+                    retry_at = time.monotonic() + 1
+                    while running and time.monotonic() < retry_at:
+                        time.sleep(min(.1, max(0, retry_at - time.monotonic())))
+        finally:
+            try:
+                restore(path, names.records)
+            except (OSError, ValueError, RuntimeError):
+                pass
+            write_json(state_path, {'socket': str(path), 'updated_at': 0,
+                                   'records': names.records, 'workspaces': [], 'ai': [],
+                                   'placement': placement.state()})
+
+
+def status(directory):
+    snapshot = read_json(directory / 'state.json', {})
+    updated_at = snapshot.get('updated_at', 0)
+    fresh = isinstance(updated_at, (int, float)) and 0 <= time.time() - updated_at < 5
+    if not fresh:
+        print(json.dumps({'text': '✦ ?', 'class': 'disconnected',
+                          'tooltip': '<b>AI SESSIONS</b>\nAgent tracking is unavailable; '
+                                     'waiting for a fresh snapshot.\n\n'
+                                     'Left: next AI window · Right: sessions and launchers'}))
+        return
+    candidates = snapshot.get('ai', [])
+    windows = []
+    if fresh and isinstance(candidates, list):
+        for window in candidates:
+            if (isinstance(window, dict)
+                    and isinstance(window.get('workspace'), str)
+                    and isinstance(window.get('name'), str)
+                    and window.get('event') in (None, 'turn-complete', 'approval-requested')):
+                windows.append(window)
+    lines = ['<b>AI SESSIONS</b>']
+    for window in windows:
+        suffix = {'turn-complete': ' · recent completion', 'approval-requested': ' · needs attention'}.get(window.get('event'), '')
+        lines.append(html.escape(window['workspace'] + ' · ' + window['name'] + suffix))
+    if not windows:
+        lines.append('No open Codex, ChatGPT or Claude windows')
+    lines.append('\nLeft: next AI window · Right: sessions and launchers')
+    lines.append('Super+left / Super+Ctrl+N: new uncontained Codex · Astra ultra · tmux')
+    css_class = ('attention' if any(w.get('event') == 'approval-requested' for w in windows)
+                 else 'complete' if any(w.get('event') == 'turn-complete' for w in windows)
+                 else 'active' if windows else 'idle')
+    print(json.dumps({'text': f'✦ {len(windows)}' if windows else '✦',
+                      'tooltip': '\n'.join(lines), 'class': css_class}))
+
+
+def switch_ai(path, runtime, menu=False):
+    from app_identity import ApplicationResolver
+
+    previous = read_json(runtime / 'mbp-intel/workspaces/state.json', {})
+    records = records_for_socket(previous, path)
+    _, windows = collect(request(path, 4), ApplicationResolver(), runtime, WorkspaceNames(records))
+    if menu or not windows:
+        choices = {f'{window["workspace"]} · {window["name"]} [{window["id"]}]': window['id'] for window in windows}
+        choices.update({'✦ Launch a new agent…': 'agents',
+                        '✦ Open Codex in a terminal': 'codex', '✦ Open ChatGPT': 'chatgpt'})
+        selected = subprocess.run([str(Path(__file__).resolve().parent / 'mbp-intel-fuzzel'), '--dmenu', '--prompt', 'AI sessions › '],
+                                  input='\n'.join(choices) + '\n', text=True, capture_output=True)
+        if selected.returncode:
+            return
+        target = choices.get(selected.stdout.strip())
+        if target == 'agents':
+            subprocess.Popen([str(Path(__file__).resolve().parent / 'mbp-intel-agents')],
+                             start_new_session=True, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL)
+            return
+        if target == 'codex':
+            subprocess.Popen(['foot', '--app-id=codex', '--title=Codex', '-e', 'codex'],
+                             start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return
+        if target == 'chatgpt':
+            subprocess.Popen(['xdg-open', 'https://chatgpt.com/'], start_new_session=True,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            return
+    else:
+        current = next((index for index, window in enumerate(windows) if window['focused']), -1)
+        target = windows[(current + 1) % len(windows)]['id']
+    if type(target) is int:
+        command(path, f'[con_id={target}] focus')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('daemon', 'status', 'preview', 'restore', 'ai-next', 'ai-menu'))
+    args = parser.parse_args()
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    if runtime.stat().st_uid != os.getuid() or runtime.stat().st_mode & 0o077:
+        raise RuntimeError('XDG_RUNTIME_DIR must be an owned private directory')
+    directory = runtime / 'mbp-intel/workspaces'
+    if args.action == 'status':
+        status(directory)
+        return
+    path = find_socket(runtime)
+    if args.action == 'daemon':
+        directory = prepare_directory(runtime)
+        daemon(runtime, directory, path)
+    elif args.action == 'restore':
+        restore(path, read_json(directory / 'state.json', {}).get('records', {}))
+    elif args.action == 'preview':
+        from app_identity import ApplicationResolver
+        previous = read_json(directory / 'state.json', {})
+        plans, ai = collect(request(path, 4), ApplicationResolver(), runtime,
+                           WorkspaceNames(records_for_socket(previous, path)))
+        print(json.dumps({'workspaces': plans, 'ai': ai}, ensure_ascii=False, indent=2))
+    else:
+        switch_ai(path, runtime, menu=args.action == 'ai-menu')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (KeyError, OSError, ValueError, RuntimeError) as error:
+        sys.exit(f'mbp-intel-workspaces: {error}')

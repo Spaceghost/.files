@@ -3,5 +3,5 @@
 
 #include <gtk/gtk.h>
 
-void *oldbook_help_init(GtkWidget *root);
-void oldbook_help_deinit(void *instance);
+void *mbp_intel_help_init(GtkWidget *root);
+void mbp_intel_help_deinit(void *instance);

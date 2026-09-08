@@ -4,7 +4,7 @@
 Install a reviewed copy and the adjacent 72-privacy-rfkill.rules as root-owned
 regular files in a root-owned directory before running --prepare-permissions.
 Only that udev rule and /dev/rfkill permissions are changed. An exact private
-journal is retained under /var/lib/oldbook/radio-permissions; failures restore
+journal is retained under /var/lib/mbp_intel/radio-permissions; failures restore
 the previous rule, device mode and access ACL. No services are started.
 """
 import argparse
@@ -225,7 +225,7 @@ def main():
     owned_path(target.parent)
     if target.exists() or target.is_symlink():
         owned_path(target)
-    parent = owned_path(Path('/var/lib/oldbook'))
+    parent = owned_path(Path('/var/lib/mbp_intel'))
     journal_root = parent / 'radio-permissions'
     journal_root.mkdir(mode=0o700, exist_ok=True)
     owned_path(journal_root)

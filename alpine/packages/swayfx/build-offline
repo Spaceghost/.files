@@ -23,9 +23,9 @@ if os.geteuid() == 0:
     parser.error("Run as your ordinary build user; doas is used only to isolate networking")
 work = args.work.absolute()
 work.mkdir(parents=True, exist_ok=False)
-stage = work / "oldbook" / "swayfx"
+stage = work / "mbp-intel" / "swayfx"
 stage.mkdir(parents=True)
-for name in ["APKBUILD", "bottom-titlebar.patch", "hover-raise.patch", "screen-corners.patch", "swayfx.desktop", "oldbook-effects.conf"]:
+for name in ["APKBUILD", "bottom-titlebar.patch", "hover-raise.patch", "screen-corners.patch", "swayfx.desktop", "mbp-intel-effects.conf"]:
     shutil.copy2(recipe / name, stage / name)
 shutil.copy2(source, stage / manifest["source"]["filename"])
 user = pwd.getpwuid(os.getuid()).pw_name
@@ -38,6 +38,6 @@ with (work / "build.log").open("w") as log:
     result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
 if result.returncode:
     raise SystemExit(f"Build failed; see {work / 'build.log'}")
-apk = next((work / "apks" / "oldbook" / "x86_64").glob("swayfx-*.apk"))
+apk = next((work / "apks" / "mbp-intel" / "x86_64").glob("swayfx-*.apk"))
 print(apk)
 print("SHA-256", hashlib.sha256(apk.read_bytes()).hexdigest())

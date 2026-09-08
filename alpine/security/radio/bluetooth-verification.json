@@ -4,7 +4,7 @@
   "scope": "Independent read-only verification after root performed Bluetooth-only preparation; WLAN controller remains staged.",
   "installed": {
     "bluetooth_helper": {
-      "path": "/usr/local/libexec/oldbook-radio/install-bluetooth",
+      "path": "/usr/local/libexec/mbp-intel-radio/install-bluetooth",
       "source": "alpine/security/radio/install-bluetooth",
       "sha256": "023821a459fce6824867157b16f184c3015c0e110f1990f5b1010a72b170b683",
       "matches_source": true,
@@ -14,7 +14,7 @@
       "regular": true
     },
     "permissions_helper": {
-      "path": "/usr/local/libexec/oldbook-radio/install",
+      "path": "/usr/local/libexec/mbp-intel-radio/install",
       "source": "alpine/security/radio/install",
       "sha256": "43e6edb11577727a140f52783ec2d8bb1bcca1fc4292fa1e0b6e753463f01749",
       "matches_source": true,
@@ -34,7 +34,7 @@
       "regular": true
     },
     "adjacent_bluetooth_rule": {
-      "path": "/usr/local/libexec/oldbook-radio/71-privacy-bluetooth-off.rules",
+      "path": "/usr/local/libexec/mbp-intel-radio/71-privacy-bluetooth-off.rules",
       "source": "alpine/security/radio/root/etc/udev/rules.d/71-privacy-bluetooth-off.rules",
       "sha256": "b1352ec1bfe61a8ffa8efed0e4016112b33d27369cc7e3e26a8f9d6e7135d1af",
       "matches_source": true,
@@ -104,7 +104,7 @@
     "module_reports_kernel_state_not_physical_rf_silence": true
   },
   "private_journal": {
-    "path": "/var/lib/oldbook/bluetooth-preparation/16bcbeeda28aaafe89ed04c6e5952cc6",
+    "path": "/var/lib/mbp_intel/bluetooth-preparation/16bcbeeda28aaafe89ed04c6e5952cc6",
     "uid": 0,
     "gid": 0,
     "mode": "0o700",
@@ -170,7 +170,7 @@
     ]
   },
   "parser_verification": {
-    "path": "/home/jack/.local/state/oldbook/verification/bluetooth-rule-parser-final/evidence.json",
+    "path": "/home/jack/.local/state/mbp-intel/verification/bluetooth-rule-parser-final/evidence.json",
     "sha256": "8d441fb3e6045318313b7139658e37452c4a911fc020def0a2ce78b5914ff636",
     "evidence": {
       "status": "passed",

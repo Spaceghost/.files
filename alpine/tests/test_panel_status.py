@@ -11,12 +11,12 @@ import time
 import unittest
 
 
-SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-panel-status'
+SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/mbp-intel-panel-status'
 
 
 class PanelStatusTests(unittest.TestCase):
     def test_notification_reader_is_terminated_and_reaped_with_parent(self):
-        with tempfile.TemporaryDirectory(prefix='oldbook-panel-reader-') as directory:
+        with tempfile.TemporaryDirectory(prefix='mbp-intel-panel-reader-') as directory:
             root = Path(directory)
             child_pid = root / 'child.pid'
             stopped = root / 'child.stopped'

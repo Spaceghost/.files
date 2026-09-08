@@ -6,7 +6,7 @@ the installed, themed btop system monitor. Each window retains its process when
 hidden, has its own application identity and launch lock, and uses the existing
 drop-down geometry on the focused output.
 
-Use the existing `oldbook-dropdown` helper with an optional `monitor` profile.
+Use the existing `mbp-intel-dropdown` helper with an optional `monitor` profile.
 Keep no-argument callers and the console's application identity unchanged so
 the running shell remains usable. The legacy Foot scratchpad rule is retained.
 The shortcut guide describes the two actions separately.

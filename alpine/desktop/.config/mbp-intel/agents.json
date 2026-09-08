@@ -1,0 +1,149 @@
+{
+  "session_prefix": "agent",
+  "terminal": [
+    "foot",
+    "--app-id=mbp-intel-agent",
+    "--title={title}",
+    "-e"
+  ],
+  "workdirs": [
+    "~",
+    "~/.files",
+    "~/src/*",
+    "~/go"
+  ],
+  "agents": [
+    {
+      "id": "codex-ultra",
+      "title": "Codex · Astra ultra",
+      "subtitle": "GPT-6 Astra · ultra reasoning · uncontained",
+      "enabled": true,
+      "command": [
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "--model",
+        "gpt-6-astra",
+        "-c",
+        "model_reasoning_effort=\"ultra\""
+      ]
+    },
+    {
+      "id": "claude-max",
+      "title": "Claude · best max",
+      "subtitle": "Best available Claude · max effort · uncontained",
+      "enabled": true,
+      "command": [
+        "claude",
+        "--model",
+        "best",
+        "--effort",
+        "max",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
+      ]
+    },
+    {
+      "id": "codex",
+      "title": "Codex",
+      "subtitle": "OpenAI Codex CLI, here",
+      "enabled": true,
+      "command": [
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "-s",
+        "danger-full-access"
+      ]
+    },
+    {
+      "id": "claude",
+      "title": "Claude Code",
+      "subtitle": "Anthropic Claude Code, here",
+      "enabled": true,
+      "command": [
+        "claude",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
+      ]
+    },
+    {
+      "id": "shell",
+      "title": "Shell",
+      "subtitle": "A plain tmux shell, here",
+      "enabled": true,
+      "command": [
+        "zsh"
+      ]
+    },
+    {
+      "id": "alienware-codex",
+      "title": "Codex on alienware",
+      "subtitle": "Codex CLI over Tailscale SSH",
+      "enabled": true,
+      "host": "alienware",
+      "command": [
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "-s",
+        "danger-full-access"
+      ],
+      "transport": "tailscale-ssh"
+    },
+    {
+      "id": "alienware-claude",
+      "title": "Claude Code on alienware",
+      "subtitle": "Claude Code over Tailscale SSH",
+      "enabled": true,
+      "host": "alienware",
+      "command": [
+        "claude",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
+      ],
+      "transport": "tailscale-ssh"
+    },
+    {
+      "id": "alienware-ollama",
+      "title": "Local model on alienware",
+      "subtitle": "Qwen3.5 27B on the box with the GPU",
+      "enabled": true,
+      "host": "alienware",
+      "command": [
+        "ollama",
+        "run",
+        "qwen3.5:27b-text"
+      ],
+      "transport": "tailscale-ssh"
+    },
+    {
+      "id": "alienware-ollama-small",
+      "title": "Local model on alienware (9B)",
+      "subtitle": "Qwen3.5 9B, quicker to load",
+      "enabled": true,
+      "host": "alienware",
+      "transport": "tailscale-ssh",
+      "command": [
+        "ollama",
+        "run",
+        "qwen3.5:9b"
+      ]
+    },
+    {
+      "id": "alienware-shell",
+      "title": "Shell on alienware",
+      "subtitle": "A plain login shell over Tailscale SSH",
+      "enabled": true,
+      "host": "alienware",
+      "command": [
+        "$SHELL",
+        "-l"
+      ],
+      "transport": "tailscale-ssh"
+    }
+  ]
+}

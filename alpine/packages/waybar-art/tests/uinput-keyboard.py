@@ -9,7 +9,7 @@ import time
 
 name = sys.argv[1]
 mode = sys.argv[2] if len(sys.argv) > 2 else 'keyboard'
-if (not name.startswith(('oldbook-art-test-', 'oldbook-art-noise-test-')) or
+if (not name.startswith(('mbp-intel-art-test-', 'mbp-intel-art-noise-test-')) or
         len(name) > 60 or mode not in ('keyboard', 'modifier-only')):
     raise SystemExit('Invalid test device name')
 fd = os.open('/dev/uinput', os.O_WRONLY | os.O_NONBLOCK)

@@ -48,7 +48,7 @@ mailbox source is configured. Periodic refreshes must be 60–300 seconds, excep
 Scripture: select and display a new passage once per hour (3600 seconds).
 
 Do not restore historical reactor, memory, storage or transmission panels.
-Keep the runtime guard in `desktop/.local/lib/oldbook/conky_policy.py` and its
+Keep the runtime guard in `desktop/.local/lib/mbp_intel/conky_policy.py` and its
 integration in `conky_layout.load_panels`. Run
 `python3 -m unittest discover -s alpine/tests -p 'test_conky*.py' -v` from the
 repository root for changes touching these templates, layout or refresh logic.
@@ -56,7 +56,7 @@ Explicit new user preferences may change this policy; incidental artwork or
 layout work must not.
 
 Rotating desktop text lives in the user's SQLite journal at
-`~/.local/share/oldbook/journal/entries.sqlite3`, accessed through `oldbook-journal`.
+`~/.local/share/mbp-intel/journal/entries.sqlite3`, accessed through `mbp-intel-journal`.
 Do not restore JSON/random-line rotation. Preserve the original Coast to Coast
 voice: three quips for each journal note.
 Preserve all eight original lines and the four-minute interval,

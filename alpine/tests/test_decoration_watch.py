@@ -12,7 +12,7 @@ import unittest
 
 
 MODEL = (Path(__file__).resolve().parents[1]
-         / 'desktop/.local/lib/oldbook/decoration_watch.py')
+         / 'desktop/.local/lib/mbp_intel/decoration_watch.py')
 SPEC = importlib.util.spec_from_file_location('decoration_watch', MODEL)
 watch = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(watch)

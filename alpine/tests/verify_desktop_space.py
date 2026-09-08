@@ -23,7 +23,7 @@ from gi.repository import Gtk, GtkLayerShell
 window = Gtk.Window()
 GtkLayerShell.init_for_window(window)
 top = sys.argv[1] == 'top'
-GtkLayerShell.set_namespace(window, 'top' if top else 'oldbook-decoration')
+GtkLayerShell.set_namespace(window, 'top' if top else 'mbp-intel-decoration')
 GtkLayerShell.set_layer(window, GtkLayerShell.Layer.TOP if top else GtkLayerShell.Layer.OVERLAY)
 GtkLayerShell.set_keyboard_mode(window, GtkLayerShell.KeyboardMode.NONE)
 GtkLayerShell.set_exclusive_zone(window, 40 if top else -1)
@@ -116,10 +116,10 @@ def main():
             env.pop(name, None)
         conky = home / '.local/bin/conky'
         conky.parent.mkdir(parents=True)
-        conky.write_text('#!/bin/sh\nexec /usr/bin/conky -D "$@" 2>>"$OLDBOOK_GEOMETRY_CONKY_LOG"\n')
+        conky.write_text('#!/bin/sh\nexec /usr/bin/conky -D "$@" 2>>"$MBP_INTEL_GEOMETRY_CONKY_LOG"\n')
         conky.chmod(0o755)
         env['PATH'] = str(conky.parent) + os.pathsep + env['PATH']
-        env['OLDBOOK_GEOMETRY_CONKY_LOG'] = str(OUTPUT / 'conky.log')
+        env['MBP_INTEL_GEOMETRY_CONKY_LOG'] = str(OUTPUT / 'conky.log')
         (OUTPUT / 'conky.log').write_text('')
         panel_config = home / '.config/conky/panels.json'
         panel_config.parent.mkdir(parents=True)
@@ -129,14 +129,14 @@ def main():
                  'priority': 100, 'text': '${color1}TOP CARD ${time %H:%M}\n${color}Origin follows the top bar'},
                 {'id': 'ghost', 'width': 220, 'height': 120, 'prefer': 'bottom-right',
                  'priority': 90, 'text': '${color1}BOTTOM CARD ${time %H:%M}\n${color}Room at the free edge'}]}))
-        wallpaper = home / '.local/share/oldbook/current-wallpaper.png'
+        wallpaper = home / '.local/share/mbp-intel/current-wallpaper.png'
         wallpaper.parent.mkdir(parents=True)
         write_wallpaper(wallpaper)
         config = root / 'sway.conf'
         config.write_text('output HEADLESS-1 mode 1440x900\n'
                           'output * bg #1d2021 solid_color\nseat seat0 fallback true\n'
                           'gaps inner 0\ngaps outer 0\ndefault_border pixel 2\n')
-        state = home / '.local/state/oldbook/conky'
+        state = home / '.local/state/mbp-intel/conky'
         processes = []
         with (OUTPUT / 'native.log').open('w') as log:
             def start(command):
@@ -175,7 +175,7 @@ def main():
                     native = output()
                     surfaces = native.get('layer_shell_surfaces', [])
                     bars = [item['extent'] for item in surfaces
-                            if item['namespace'] == 'oldbook-scripture']
+                            if item['namespace'] == 'mbp-intel-scripture']
                     cards = [item['extent'] for item in surfaces if item['namespace'] == 'conky']
                     if fullscreen:
                         if bars or cards:
@@ -227,8 +227,8 @@ def main():
                     (OUTPUT / 'top-failure.json').write_text(json.dumps(output(), indent=2))
                     raise
                 bar_process = start([sys.executable, '-c', BAR_OBSERVER,
-                                     str(BIN / 'oldbook-scripture-bar'), str(root / 'bar-status.json')])
-                command(str(BIN / 'oldbook-conky'), 'start')
+                                     str(BIN / 'mbp-intel-scripture-bar'), str(root / 'bar-status.json')])
+                command(str(BIN / 'mbp-intel-conky'), 'start')
                 first = snapshot('01-free', 16)
                 assert first['screen']['origin_y'] == 40, first['screen']
 
@@ -268,10 +268,10 @@ def main():
                                       'percent_of_one_core': round(100 * cpu_seconds / duration, 3)}
 
                 # An explicit user opt-out must survive future edge changes.
-                command(str(BIN / 'oldbook-conky'), 'toggle')
+                command(str(BIN / 'mbp-intel-conky'), 'toggle')
                 before = (state / 'layout.json').read_bytes()
                 caption = start([sys.executable, '-c', SURFACE, 'caption'])
-                wait_for(lambda: any(item['namespace'] == 'oldbook-decoration'
+                wait_for(lambda: any(item['namespace'] == 'mbp-intel-decoration'
                                      for item in output().get('layer_shell_surfaces', [])), 'disabled caption')
                 time.sleep(2.2)
                 assert (state / 'disabled').is_file()
@@ -285,7 +285,7 @@ def main():
                 report['status'] = 'passed'
             finally:
                 if state.exists():
-                    subprocess.run([str(BIN / 'oldbook-conky'), 'stop'], env=env,
+                    subprocess.run([str(BIN / 'mbp-intel-conky'), 'stop'], env=env,
                                    stdout=log, stderr=log, timeout=10)
                 for process in reversed(processes):
                     terminate(process)

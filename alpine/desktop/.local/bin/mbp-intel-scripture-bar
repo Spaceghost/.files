@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+"""A search affordance resting on the desktop next to the scripture panel.
+
+Layer-shell surfaces only hold the keyboard while the compositor gives it to
+them, which made an in-place text entry unreliable. The bar is therefore a
+button: clicking it, or pressing Super+slash, opens the scripture picker, which
+grabs focus properly over any window.
+"""
+import fcntl
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkLayerShell', '0.1')
+from gi.repository import Gtk, Gdk, GLib, GtkLayerShell
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
+from overlay_theme import gtk_css, read_palette
+from desktop_space import read_screen, search_rectangle
+
+STATE = Path.home() / '.local/state/mbp-intel/scripture'
+FINDER = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture'
+WIDTH = 760
+
+
+class SearchBar:
+    def __init__(self):
+        self.window = Gtk.Window()
+        self.window.set_name('scripture-bar')
+        GtkLayerShell.init_for_window(self.window)
+        GtkLayerShell.set_namespace(self.window, 'mbp-intel-scripture')
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        # Match the planner’s absolute screen coordinates, independent of bars.
+        GtkLayerShell.set_exclusive_zone(self.window, -1)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.LEFT, True)
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+        self.window.set_size_request(WIDTH, -1)
+        self.geometry = None
+        self.refresh_geometry()
+        self.geometry_timer = GLib.timeout_add_seconds(1, self.refresh_geometry)
+        self.window.connect('destroy', self.cleanup_geometry)
+
+        button = Gtk.EventBox()
+        button.get_style_context().add_class('bar')
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        row.get_style_context().add_class('entry-row')
+        icon = Gtk.Label(label='')
+        icon.get_style_context().add_class('icon')
+        row.pack_start(icon, False, False, 0)
+        self.label = Gtk.Label(
+            label='Search Bible · right-click for reflections & study')
+        self.label.get_style_context().add_class('hint')
+        self.label.set_xalign(0)
+        row.pack_start(self.label, True, True, 0)
+        shortcut = Gtk.Label(label='Super + /')
+        shortcut.get_style_context().add_class('shortcut')
+        row.pack_start(shortcut, False, False, 0)
+        button.add(row)
+        button.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.ENTER_NOTIFY_MASK
+                          | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+        button.connect('button-press-event', self.open_finder)
+        button.connect('enter-notify-event', lambda *_: self._hover(True))
+        button.connect('leave-notify-event', lambda *_: self._hover(False))
+        self.button = button
+        self.window.add(button)
+
+        self.palette = None
+        self.provider = Gtk.CssProvider()
+        Gtk.StyleContext.add_provider_for_screen(
+            self.window.get_screen(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.refresh_theme()
+        self.theme_timer = GLib.timeout_add_seconds(1, self.refresh_theme)
+        self.window.connect('destroy', self.cleanup_theme)
+        # Conky can restart its cache after a layout/theme change. The saved
+        # hourly deadline remains authoritative; tick only redraws a due entry.
+        self.clock_process = None
+        self.clock_timer = GLib.timeout_add_seconds(60, self.refresh_selection)
+        self.window.connect('destroy', self.cleanup_clock)
+        self.refresh_selection()
+        self.window.show_all()
+        STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+        (STATE / 'bar.pid').write_text(f'{os.getpid()}\n')
+        # Super+slash may still signal an older bar; opening the picker is harmless.
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.open_finder)
+
+    def _hover(self, inside):
+        style = self.button.get_style_context()
+        (style.add_class if inside else style.remove_class)('hover')
+        return False
+
+    def refresh_geometry(self):
+        try:
+            screen = read_screen()
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
+            return GLib.SOURCE_CONTINUE
+        if screen == self.geometry:
+            return GLib.SOURCE_CONTINUE
+        display = Gdk.Display.get_default()
+        for index in range(display.get_n_monitors()):
+            if Gdk.Screen.get_default().get_monitor_plug_name(index) == screen['name']:
+                GtkLayerShell.set_monitor(self.window, display.get_monitor(index))
+                break
+        rectangle = search_rectangle(screen)
+        self.window.set_size_request(rectangle['width'], -1)
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, screen['bottom'])
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rectangle['x'])
+        self.geometry = screen
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_geometry(self, *_arguments):
+        GLib.source_remove(self.geometry_timer)
+
+    def refresh_theme(self):
+        palette = read_palette()
+        if palette == self.palette:
+            return GLib.SOURCE_CONTINUE
+        self.provider.load_from_data(gtk_css('''
+        #scripture-bar { background: transparent; }
+        .bar {
+            background: alpha(@theme_background, 0.72);
+            border: 1px solid alpha(@theme_accent, 0.40);
+            border-radius: 10px;
+        }
+        .bar.hover { border-color: alpha(@theme_accent, 0.85); }
+        .entry-row { padding: 11px 16px; }
+        .icon { color: @theme_accent; font-size: 13px; }
+        .hint {
+            color: @theme_muted;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 12px;
+        }
+        .shortcut {
+            color: @theme_accent;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 11px;
+        }
+        ''', palette))
+        self.palette = palette
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_theme(self, _window):
+        GLib.source_remove(self.theme_timer)
+        Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+
+    def refresh_selection(self):
+        if self.clock_process is None or self.clock_process.poll() is not None:
+            try:
+                self.clock_process = subprocess.Popen(['/usr/bin/python3', str(FINDER), 'tick'],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, start_new_session=True)
+            except OSError:
+                pass
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_clock(self, _window):
+        GLib.source_remove(self.clock_timer)
+
+    def open_finder(self, _widget=None, event=None):
+        action = 'reflections' if getattr(event, 'button', None) == 3 else 'find'
+        try:
+            subprocess.Popen(['/usr/bin/python3', str(FINDER), action],
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+        except OSError:
+            pass
+        return GLib.SOURCE_CONTINUE
+
+
+def claim_single_instance():
+    """Hold a lock for this bar's lifetime so a reload cannot stack copies."""
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    handle = (STATE / 'bar.lock').open('a+')
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.close()
+        return None
+    return handle
+
+
+def main():
+    guard = claim_single_instance()
+    if guard is None:
+        return 0
+    bar = SearchBar()
+    bar.window.connect('destroy', lambda *_: Gtk.main_quit())
+    Gtk.main()
+    guard.close()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

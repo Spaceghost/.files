@@ -1,4 +1,4 @@
-# Space Ghost / Oldbook
+# Space Ghost / MBP Intel
 
 A Gruvbox Dark Alpine edge desktop, maintained in Fossil. Warm charcoal and
 cream surfaces use amber accents with no window outlines. SwayFX adds soft blur,
@@ -12,7 +12,7 @@ attempt per day through the existing Codex login and extra paintings on request.
 ## Edit the desktop
 
 `alpine/desktop/` mirrors your HOME. The deployment tool links each file into
-place and preserves conflicting files in `~/.local/state/oldbook/backups/`.
+place and preserves conflicting files in `~/.local/state/mbp-intel/backups/`.
 Edit the workspace or its installed symlink; both refer to the same source.
 Stow is unnecessary for this overlay. Re-run deployment when adding files:
 
@@ -42,7 +42,7 @@ while backing up their newer files.
 
 From a TTY, `sway` selects the installed Space Ghost session. SwayFX takes over
 at the next login; an already-running stock Sway session cannot gain compositor
-effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
+effects from a config reload. `MBP_INTEL_STOCK_SWAY=1 sway` is the fallback.
 
 ## Useful controls
 

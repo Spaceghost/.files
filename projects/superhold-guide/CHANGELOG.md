@@ -16,7 +16,7 @@
 - Wait for physical keys to be released and verify the original target before replay.
 - Add a settings screen, versioned JSON configuration and idle reload.
 - Provide guide and settings application-menu entries for LXQt with Sway.
-- Preserve the installed Oldbook overlay while preparing a dedicated repository.
+- Preserve the installed MBP Intel overlay while preparing a dedicated repository.
 
 ## 0.1.0.dev0 — release preparation
 

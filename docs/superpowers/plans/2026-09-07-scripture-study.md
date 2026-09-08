@@ -27,7 +27,7 @@ Ollama writer saves and stages only its generated record.
 
 ## Task 1: Store and canonical records
 
-Files: new `alpine/desktop/.local/lib/oldbook/scripture_study.py` and
+Files: new `alpine/desktop/.local/lib/mbp_intel/scripture_study.py` and
 `alpine/tests/test_scripture_study.py`.
 
 Interfaces: `load_entries(assets, database=None)` returns dictionaries retaining
@@ -45,7 +45,7 @@ returns the saved artifact Path. Generated kinds are `study-note`,
 
 ## Task 2: Local generator and full reader
 
-Files: new `scripture_generation.py`, `oldbook-scripture-study`, and
+Files: new `scripture_generation.py`, `mbp-intel-scripture-study`, and
 `alpine/tests/test_scripture_generation.py`; verified source packs if available.
 
 - [x] Write failing tests using a disposable local HTTP server for valid
@@ -58,7 +58,7 @@ Files: new `scripture_generation.py`, `oldbook-scripture-study`, and
 
 ## Task 3: Scripture integration
 
-Files: `oldbook-scripture`, `oldbook-scripture-bar`,
+Files: `mbp-intel-scripture`, `mbp-intel-scripture-bar`,
 `alpine/tests/test_scripture_selection.py`, and focused picker tests.
 
 - [x] Write failing tests showing a selected study renders its body and that
