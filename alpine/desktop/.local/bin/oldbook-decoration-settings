@@ -52,7 +52,7 @@ def create_window(config_path):
             self.position = Gtk.ComboBoxText()
             self.position.append('bottom', 'Bottom edge')
             self.position.append('right', 'Right edge')
-            self.position.set_tooltip_text('Low orbit or the starboard side: both placements are always available. Right-click the caption to swap edges.')
+            self.position.set_tooltip_text('Choose the bottom or right edge. Right-click the strip for window actions and placement controls.')
             controls.pack_start(self.field('_Placement', self.position), False, False, 0)
 
             self.opacity = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 20, 100, 1)

@@ -4,13 +4,15 @@ The workspace has one caption per output, showing the selected workspace's
 focused window. Normal windows use zero-width pixel borders. The caption starts
 at the bottom; `oldbook-decoration right`, `bottom`, or `toggle` changes its edge
 and saves the choice in `~/.config/oldbook/decoration.json`. The legacy state
-position is migrated and synchronized. Right-click does the same; Shift +
+position is migrated and synchronized. The window menu includes placement; Shift +
 right-click opens `oldbook-decoration-settings`, which shows the controls and
 editable JSON together. Opacity and radius changes apply on the next poll.
 The right edge spells the title vertically, replacing `|` with an em dash and
 keeping combining accents together. Long vertical titles are shortened to the
 available height; hovering shows the full title. Left-click opens the window
-picker, and middle-click toggles the focused window's floating state.
+picker, and middle-click toggles that window's floating state. Right-click opens
+window actions. See [the contextual strip decision](2026-09-07-contextual-workspace-strip.md)
+for the newer quick controls and application actions, including their untested status.
 
 Font family and point size follow Foot's configured font (currently JetBrains
 Mono Nerd Font, 9.5 pt). The active palette supplies the borderless gradient.
