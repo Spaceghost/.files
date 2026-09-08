@@ -4,8 +4,9 @@
 
 **Super+N** opens the agent picker; it also appears in the AI menu
 (**Super+Shift+I**) as *Launch a new agent…*. Type to filter, choose an agent,
-then choose a working directory. Running sessions are listed first so the same
-picker reattaches as well as launches.
+then choose a working directory. Home (`~`) is first and selected by default.
+New Codex Astra ultra and Claude best/max entries lead the picker, followed by
+running sessions for reattachment and the remaining agent presets.
 
 Every agent runs inside its own **tmux** session, so closing the terminal never
 kills the work and the same session can be picked up again later. A remote
