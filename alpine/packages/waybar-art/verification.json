@@ -1,15 +1,16 @@
 {
-  "version": "1.0.0-r9",
-  "sha256": "46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060",
-  "binary_sha256": "2e9075cf0ca82d4ad182f82f286cbe1732bdcb45fbaa2f24c3440e318a4f8795",
+  "version": "1.0.0-r10",
+  "sha256": "0987095737e6179bf278b106b0701c982ffff72120d7ae0aa2b7a3e411537c7a",
+  "binary_sha256": "208b770dd86d3a9769b4ff1c693fb73ea027f06691b967fca80e54ed1a154d11",
   "byte_identical_signed_apks": true,
   "network": "both builds isolated with unshare --net",
-  "evidence": "alpine/verification/waybar-reactivity",
-  "native_click_checks": 23,
+  "evidence": "alpine/verification/gallery-thumbnails",
+  "native_click_checks": "r9 evidence retained in alpine/verification/waybar-reactivity; r10 changes only the badge widget tree, not the pointer callbacks",
   "paid_generation_calls": 0,
-  "activation": {
-    "waybar_pid": 26230,
-    "evidence": "alpine/verification/waybar-reactivity/activation.json",
-    "installed_library_mapped": true
+  "badge": {
+    "thumbnail_states_rendered": ["rotating", "paused", "generating", "no-thumbnail"],
+    "evidence": "alpine/verification/gallery-thumbnails/badge.png",
+    "headless": true,
+    "live_visual_check": "pending display wake"
   }
 }

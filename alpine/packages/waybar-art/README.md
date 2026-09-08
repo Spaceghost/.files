@@ -1,5 +1,14 @@
 # Artwork button for Waybar
 
+The badge itself is a small rounded thumbnail of the painting on screen. The
+status helper renders it once per painting into the user's thumbnail cache
+(`oldbook-wallpaper status --thumbnail-height`), sized for the panel's scale
+factor so it stays crisp on the Retina display; the widget watches the
+`current-wallpaper.png` link and refreshes within a moment of a change instead
+of waiting for the five-second poll. Pausing rotation dims the picture, and while
+Space Ghost is painting the amber hourglass glyph takes its place; without a
+thumbnail the original gallery glyph is shown.
+
 This small native musl CFFI widget adds three actions to the original artwork
 button: **Command/Super + left click** generates and switches, **Shift +
 left click** opens the prompt editor, and **Command/Super + Shift + left click**
@@ -45,7 +54,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r9.apk
+doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r10.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -53,7 +62,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r9 APK identity and archived artifact.
+`manifest.json` records the exact signed r10 APK identity and archived artifact.
 
 ## Verify
 

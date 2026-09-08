@@ -11,10 +11,20 @@
 
 const size_t wbcffi_version = 2;
 
+/* Logical height of the painting badge inside the 32px bar. */
+#define THUMBNAIL_HEIGHT 22
+#define CURRENT_WALLPAPER "current-wallpaper.png"
+
 typedef struct {
     GtkWidget *box;
+    GtkWidget *content;
     GtkWidget *label;
+    GtkWidget *image;
     char *command;
+    char *thumbnail;
+    gboolean generating;
+    GFileMonitor *monitor;
+    guint monitor_timer;
     guint timer;
     guint refs;
     gboolean disposed;
@@ -27,6 +37,7 @@ typedef struct {
 static void release(Artwork *art) {
     if (--art->refs == 0) {
         g_free(art->command);
+        g_free(art->thumbnail);
         g_free(art);
     }
 }
@@ -84,6 +95,44 @@ static const char *string_member(JsonObject *object, const char *name) {
         ? json_node_get_string(node) : NULL;
 }
 
+static int thumbnail_scale(Artwork *art) {
+    int scale = gtk_widget_get_scale_factor(art->content);
+    return scale > 0 ? scale : 1;
+}
+
+static void clear_thumbnail(Artwork *art) {
+    g_clear_pointer(&art->thumbnail, g_free);
+    gtk_image_clear(GTK_IMAGE(art->image));
+}
+
+/* The status helper hands back a small cached PNG already scaled for this
+ * panel's scale factor; the surface keeps it crisp on a HiDPI bar. Decoding a
+ * thumbnail is trivial, so it happens inline unlike the painting itself. */
+static void load_thumbnail(Artwork *art, const char *path) {
+    if (g_strcmp0(path, art->thumbnail) == 0) return;
+    GError *error = NULL;
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(path, &error);
+    if (!pixbuf) {
+        g_debug("Artwork thumbnail unavailable: %s", error ? error->message : path);
+        g_clear_error(&error);
+        clear_thumbnail(art);
+        return;
+    }
+    cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(
+        pixbuf, thumbnail_scale(art), gtk_widget_get_window(art->image));
+    gtk_image_set_from_surface(GTK_IMAGE(art->image), surface);
+    cairo_surface_destroy(surface);
+    g_object_unref(pixbuf);
+    g_free(art->thumbnail);
+    art->thumbnail = g_strdup(path);
+}
+
+static void show_badge(Artwork *art) {
+    gboolean picture = art->thumbnail != NULL && !art->generating;
+    gtk_widget_set_visible(art->image, picture);
+    gtk_widget_set_visible(art->label, !picture);
+}
+
 static void display_status(Artwork *art, const char *output) {
     JsonParser *parser = json_parser_new();
     if (json_parser_load_from_data(parser, output, -1, NULL) &&
@@ -92,14 +141,19 @@ static void display_status(Artwork *art, const char *output) {
         const char *text = string_member(object, "text");
         const char *tooltip = string_member(object, "tooltip");
         const char *state = string_member(object, "class");
+        const char *thumbnail = string_member(object, "thumbnail");
         if (text) gtk_label_set_text(GTK_LABEL(art->label), text);
         if (tooltip) gtk_widget_set_tooltip_markup(art->box, tooltip);
-        GtkStyleContext *style = gtk_widget_get_style_context(art->label);
+        GtkStyleContext *style = gtk_widget_get_style_context(art->content);
         const char *classes[] = {"rotating", "paused", "generating"};
         for (size_t i = 0; i < G_N_ELEMENTS(classes); ++i) {
             gtk_style_context_remove_class(style, classes[i]);
             if (g_strcmp0(state, classes[i]) == 0) gtk_style_context_add_class(style, classes[i]);
         }
+        art->generating = g_strcmp0(state, "generating") == 0;
+        if (thumbnail && *thumbnail) load_thumbnail(art, thumbnail);
+        else clear_thumbnail(art);
+        show_badge(art);
     }
     g_object_unref(parser);
 }
@@ -123,14 +177,53 @@ static gboolean refresh_status(gpointer data) {
             g_subprocess_force_exit(art->status);
         return G_SOURCE_CONTINUE;
     }
+    char height[16];
+    g_snprintf(height, sizeof height, "%d", THUMBNAIL_HEIGHT * thumbnail_scale(art));
     art->status = g_subprocess_new(G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_SILENCE,
-                                  NULL, art->command, "status", NULL);
+                                  NULL, art->command, "status", "--thumbnail-height", height, NULL);
     if (art->status) {
         art->started = g_get_monotonic_time();
         ++art->refs;
         g_subprocess_communicate_utf8_async(art->status, NULL, NULL, status_ready, art);
     }
     return G_SOURCE_CONTINUE;
+}
+
+static gboolean refresh_soon(gpointer data) {
+    Artwork *art = data;
+    art->monitor_timer = 0;
+    refresh_status(art);
+    return G_SOURCE_REMOVE;
+}
+
+/* The gallery replaces the current-wallpaper link atomically; coalesce the
+ * burst of directory events into one status refresh so the badge follows a
+ * painting change without waiting for the periodic poll. */
+static void wallpaper_changed(GFileMonitor *monitor, GFile *file, GFile *other, GFileMonitorEvent event,
+                              gpointer data) {
+    (void)monitor;
+    (void)event;
+    Artwork *art = data;
+    gboolean relevant = FALSE;
+    GFile *candidates[] = {file, other};
+    for (size_t i = 0; i < G_N_ELEMENTS(candidates) && !relevant; ++i) {
+        if (!candidates[i]) continue;
+        char *name = g_file_get_basename(candidates[i]);
+        relevant = g_strcmp0(name, CURRENT_WALLPAPER) == 0;
+        g_free(name);
+    }
+    if (!relevant || art->disposed) return;
+    if (art->monitor_timer) g_source_remove(art->monitor_timer);
+    art->monitor_timer = g_timeout_add(150, refresh_soon, art);
+}
+
+static void scale_changed(GObject *object, GParamSpec *spec, gpointer data) {
+    (void)object;
+    (void)spec;
+    Artwork *art = data;
+    /* A new scale needs a differently sized thumbnail; forget the current one. */
+    g_clear_pointer(&art->thumbnail, g_free);
+    refresh_status(art);
 }
 
 static void action(Artwork *art, const char *name) {
@@ -183,9 +276,9 @@ static gboolean crossed(GtkWidget *widget, GdkEventCrossing *event, gpointer dat
     (void)widget;
     Artwork *art = data;
     if (event->type == GDK_ENTER_NOTIFY)
-        gtk_widget_set_state_flags(art->label, GTK_STATE_FLAG_PRELIGHT, FALSE);
+        gtk_widget_set_state_flags(art->content, GTK_STATE_FLAG_PRELIGHT, FALSE);
     else
-        gtk_widget_unset_state_flags(art->label, GTK_STATE_FLAG_PRELIGHT);
+        gtk_widget_unset_state_flags(art->content, GTK_STATE_FLAG_PRELIGHT);
     return FALSE;
 }
 
@@ -209,10 +302,19 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
         g_object_unref(parser);
     }
     art->box = gtk_event_box_new();
+    /* The badge is a box so the glyph and the painting thumbnail share one
+     * styled #custom-art surface; only one of them is visible at a time. */
+    art->content = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_name(art->content, "custom-art");
+    gtk_style_context_add_class(gtk_widget_get_style_context(art->content), "module");
     art->label = gtk_label_new("󰸉");
-    gtk_widget_set_name(art->label, "custom-art");
-    gtk_style_context_add_class(gtk_widget_get_style_context(art->label), "module");
-    gtk_container_add(GTK_CONTAINER(art->box), art->label);
+    art->image = gtk_image_new();
+    gtk_style_context_add_class(gtk_widget_get_style_context(art->image), "thumbnail");
+    gtk_widget_set_valign(art->image, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(art->label, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_BOX(art->content), art->label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(art->content), art->image, FALSE, FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(art->box), art->content);
     gtk_container_add(info->get_root_widget(info->obj), art->box);
     gtk_widget_add_events(art->box, GDK_BUTTON_PRESS_MASK | GDK_SCROLL_MASK | GDK_SMOOTH_SCROLL_MASK |
                                   GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK);
@@ -220,7 +322,15 @@ void *wbcffi_init(const wbcffi_init_info *info, const wbcffi_config_entry *entri
     g_signal_connect(art->box, "scroll-event", G_CALLBACK(scrolled), art);
     g_signal_connect(art->box, "enter-notify-event", G_CALLBACK(crossed), art);
     g_signal_connect(art->box, "leave-notify-event", G_CALLBACK(crossed), art);
+    g_signal_connect(art->content, "notify::scale-factor", G_CALLBACK(scale_changed), art);
     gtk_widget_show_all(art->box);
+    gtk_widget_hide(art->image);
+    char *share = g_build_filename(g_get_home_dir(), ".local", "share", "oldbook", NULL);
+    GFile *directory = g_file_new_for_path(share);
+    art->monitor = g_file_monitor_directory(directory, G_FILE_MONITOR_WATCH_MOVES, NULL, NULL);
+    if (art->monitor) g_signal_connect(art->monitor, "changed", G_CALLBACK(wallpaper_changed), art);
+    g_object_unref(directory);
+    g_free(share);
     art->help = oldbook_help_init(GTK_WIDGET(info->get_root_widget(info->obj)));
     art->timer = g_timeout_add_seconds(5, refresh_status, art);
     refresh_status(art);
@@ -232,6 +342,11 @@ void wbcffi_deinit(void *instance) {
     art->disposed = TRUE;
     oldbook_help_deinit(art->help);
     g_source_remove(art->timer);
+    if (art->monitor_timer) g_source_remove(art->monitor_timer);
+    if (art->monitor) {
+        g_file_monitor_cancel(art->monitor);
+        g_clear_object(&art->monitor);
+    }
     if (art->status) g_subprocess_force_exit(art->status);
     release(art);
 }

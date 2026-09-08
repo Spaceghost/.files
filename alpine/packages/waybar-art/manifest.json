@@ -3,15 +3,15 @@
   "arch": "x86_64",
   "packages": [
     {
-      "apk_identity": "Q1jUHKE8y3Lf4FWmn5SpSovYmMQ0w=",
+      "apk_identity": "Q10jJgmKVNyCMkAOUQAFwM8vaTIL4=",
       "name": "oldbook-waybar-art",
-      "version": "1.0.0-r9",
+      "version": "1.0.0-r10",
       "arch": "x86_64",
-      "filename": "oldbook-waybar-art-1.0.0-r9.apk",
-      "sha256": "46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060",
-      "artifact": "sha256/46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060/oldbook-waybar-art-1.0.0-r9.apk",
+      "filename": "oldbook-waybar-art-1.0.0-r10.apk",
+      "sha256": "0987095737e6179bf278b106b0701c982ffff72120d7ae0aa2b7a3e411537c7a",
+      "artifact": "sha256/0987095737e6179bf278b106b0701c982ffff72120d7ae0aa2b7a3e411537c7a/oldbook-waybar-art-1.0.0-r10.apk",
       "artifact_arch": "x86_64",
-      "binary_sha256": "2e9075cf0ca82d4ad182f82f286cbe1732bdcb45fbaa2f24c3440e318a4f8795"
+      "binary_sha256": "208b770dd86d3a9769b4ff1c693fb73ea027f06691b967fca80e54ed1a154d11"
     }
   ],
   "schema": 1,
@@ -19,7 +19,7 @@
     "two byte-identical signed network-isolated builds",
     "apk verify for both APKs",
     "Fossil unversioned archive readback",
-    "23 native modifier and mouse regression checks",
-    "complete theme and prompt cancellation tests"
+    "headless Waybar render of the badge in rotating, paused, generating and no-thumbnail states",
+    "r9 native modifier and mouse regression checks retained; pointer callbacks unchanged in r10"
   ]
 }
