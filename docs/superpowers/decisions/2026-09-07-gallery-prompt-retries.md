@@ -20,8 +20,11 @@ The reported missing desktop bar was absent during the initial process check
 and subsequently reappeared while another Waybar maintenance task was active.
 A later live check found the regular bar replaced by a diagnostic process using
 `probe.jsonc` and `probe.css`. That exact diagnostic process was stopped and
-the normal config/style restarted under the existing session lock. Its original
-exit cause was not established. Separately, the session regression test reproduced an early exit
+restoration attempted under the existing session lock. A subsequent probe used
+`probe2.css` from another Claude session's scratchpad, replacing the normal bar
+again. Concurrent reloads also produced a GLib D-Bus assertion in the recovery
+log. Stable restoration must wait for that session's live probes to stop; the
+original exit cause was not established. Separately, the session regression test reproduced an early exit
 when `.config/waybar` did not exist: writing `waybar-state.css` failed. Startup
 now creates that directory before writing the stylesheet. The live directory
 already existed, so this is not claimed as the cause of the reported exit.
