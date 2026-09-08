@@ -53,3 +53,13 @@ do not infer taste from the active theme or generation history.
 No theme descriptor, application profile, artwork or active selection was
 changed for this review. Preserve the originals while deciding what to keep,
 adjust or archive.
+
+## 2026-09-08 — archived pending review
+
+The 18 unreviewed themes (descriptors, application profiles and paintings)
+were moved on disk into `alpine/archive/` while Gruvbox Dark stayed the only
+active theme. The user directed that the move be recorded in Fossil as it
+stands ("fossil mv them"), so the originals are preserved there, unchanged,
+rather than deleted. Their review decisions above are still open; restoring a
+theme means moving its files back out of `alpine/archive/`.
+

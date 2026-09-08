@@ -1,0 +1,160 @@
+/* Space Ghost × Gruvbox Dark control deck. GTK CSS, intentionally built for stock Waybar. */
+@import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
+@define-color oldbook_workspace_active #ede3ce;
+@define-color oldbook_workspace_secondary #958a80;
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
+    font-size: 10px;
+    font-weight: 500;
+    min-height: 0;
+}
+window#waybar { background: transparent; color: #E9DCC2; }
+window#waybar.top .modules-left, #status {
+    background: linear-gradient(180deg, rgba(43, 36, 46, 0.98), rgba(16, 11, 21, 0.98));
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 0;
+}
+window#waybar.top .modules-left { border-radius: 0 8px 8px 0; }
+window#waybar.top .modules-center,
+window#waybar.top .modules-right { background: transparent; padding: 0; }
+#status {
+    border-radius: 8px 0 0 8px;
+    padding: 0 5px;
+}
+#custom-ghost {
+    font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 21px;
+    min-width: 36px;
+    color: #fff6ff;
+    background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
+    text-shadow: 0 0 5px #e3baff;
+    border-radius: 0;
+    margin: 3px 5px 3px 3px;
+    padding: 0;
+}
+#custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
+#workspaces { margin: 3px 5px 3px 0; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 0; color: #958a80; transition: all 180ms ease-in-out; }
+#workspaces button.empty { color: #958a80; }
+#workspaces button:hover { background: #443c41; color: #ede3ce; box-shadow: none; }
+#workspaces button.focused {
+    background: linear-gradient(110deg, alpha(#2FA7A0, .22), alpha(#2FA7A0, .10));
+    color: @oldbook_workspace_active;
+    font-weight: 400;
+    box-shadow: none;
+}
+#workspaces button.urgent { background: #bd857f; color: #ede3ce; }
+#custom-ai { color: #2FA7A0; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 0; }
+#custom-ai:hover { background: #443c41; color: #ede3ce; }
+#custom-ai.idle { color: #958a80; }
+#custom-ai.complete { color: #81d07f; background: #221a26; }
+#custom-ai.attention { color: #ede3ce; background: #443c41; }
+#mode { color: #bda27f; padding: 0 9px; }
+#mpris { color: #6dd0bc; padding: 0 7px; font-size: 10px; }
+#mpris.paused { color: #958a80; }
+#mpris.previous, #mpris.next { font-size: 15px; padding: 0 8px; }
+#mpris:hover { background: rgba(109, 208, 188, 0.16); }
+#cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
+#pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
+    padding: 0 8px;
+    margin: 4px 0;
+    border-radius: 0;
+}
+#cpu { color: #a380cf; }
+#memory, #disk { color: #958a80; }
+#temperature { color: #bda27f; }
+#temperature.critical { color: #bd857f; background: #221a26; }
+#custom-link { color: #6dafcf; }
+#custom-link.offline, #custom-radio.blocked { color: #958a80; }
+#custom-radio { color: #6dd0bc; }
+#custom-firewall.staged { color: #2FA7A0; }
+#custom-firewall.running { color: #81d07f; }
+#pulseaudio { color: #E9DCC2; }
+#pulseaudio.muted { color: #958a80; }
+#battery { color: #E9DCC2; }
+#battery.charging, #battery.plugged { color: #81d07f; }
+#battery.warning { color: #2FA7A0; }
+#battery.critical { color: #ede3ce; background: #443c41; animation: distress 1s ease-in-out infinite alternate; }
+#backlight { color: #2FA7A0; }
+#idle_inhibitor { color: #958a80; }
+#idle_inhibitor.activated { color: #2FA7A0; background: #2b242e; }
+#custom-notifications { color: #a380cf; padding: 0 9px; }
+#clock { background: rgba(68, 60, 65, 0.72); color: #E9DCC2; padding: 0 11px; margin-left: 3px; }
+#tray { margin-right: 2px; padding: 0 5px; }
+#cpu:hover, #memory:hover, #custom-link:hover, #custom-radio:hover, #custom-firewall:hover,
+#pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
+    background: rgba(149, 138, 128, 0.22);
+}
+tooltip { background: rgba(16, 11, 21, 0.99); border: none; border-radius: 0; box-shadow: 0 5px 16px rgba(16, 11, 21, 0.46); }
+tooltip label { color: #E9DCC2; padding: 13px 15px; font-size: 11px; font-weight: 500; }
+@keyframes distress { to { background: #bd857f; } }
+#custom-art { color: #958a80; font-size: 15px; padding: 0 7px 0 4px; }
+#custom-art:hover { color: #ede3ce; }
+#custom-art.paused { color: #958a80; }
+#custom-art.generating { color: #2FA7A0; text-shadow: 0 0 7px #81d07f; }
+
+/* Click-through system monitor: bottom layer, visible through transparent terminals. */
+window#waybar.monitor { background: transparent; color: #E9DCC2; }
+window#waybar.monitor .modules-left {
+    background: linear-gradient(145deg, rgba(16, 11, 21, 0.68), rgba(43, 36, 46, 0.48));
+    border: 1px solid rgba(149, 138, 128, 0.25);
+    border-radius: 11px;
+    padding: 7px 7px 8px;
+}
+window#waybar.monitor #custom-conky-title,
+window#waybar.monitor #custom-conky-footer,
+window#waybar.monitor #cpu,
+window#waybar.monitor #memory,
+window#waybar.monitor #temperature,
+window#waybar.monitor #network,
+window#waybar.monitor #disk,
+window#waybar.monitor #custom-uptime {
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 3px 5px;
+    font-size: 10px;
+}
+window#waybar.monitor #custom-conky-title,
+window#waybar.monitor #custom-conky-footer { color: #958a80; }
+window#waybar.monitor #custom-conky-title {
+    color: #2FA7A0;
+    font-weight: 800;
+    padding-bottom: 5px;
+}
+window#waybar.monitor #custom-conky-footer { padding-top: 5px; }
+window#waybar.monitor #cpu { color: #a380cf; }
+window#waybar.monitor #memory { color: #6dd0bc; }
+window#waybar.monitor #temperature { color: #bda27f; }
+window#waybar.monitor #network { color: #6dafcf; }
+window#waybar.monitor #network.disconnected { color: #958a80; }
+window#waybar.monitor #disk { color: #a380cf; }
+window#waybar.monitor #custom-uptime { color: #E9DCC2; }
+
+/* While a window is fullscreen the bar fades back so it stops competing with
+   the content; oldbook-waybar-dim writes the opacity into waybar-state.css.
+   GTK only sets the hover state on the module boxes, never on the window or
+   the row that holds them, so each chrome block answers the pointer itself. */
+window#waybar.top .modules-left,
+window#waybar.top .modules-center,
+window#waybar #status {
+    transition: opacity 130ms ease-out;
+}
+window#waybar.top .modules-left:hover,
+window#waybar.top .modules-center:hover,
+window#waybar #status:hover {
+    opacity: 1;
+    transition: opacity 90ms ease-out;
+}
+
+/* Music controls occupy the center naturally, without a surrounding island. */
+window#waybar.top .modules-center { margin: 0 8px; padding: 0; }
+
+/* the-falconer-s-comet-3e46b19483f2: typography and panel shape */
+* { font-family: "DejaVu Serif", "Symbols Nerd Font", sans-serif; }
+window#waybar.top .modules-left, #status { border-radius: 7px; }
+#workspaces button { padding: 0 9px; }
