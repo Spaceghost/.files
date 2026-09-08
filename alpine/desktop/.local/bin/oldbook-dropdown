@@ -12,7 +12,7 @@ import time
 APP_ID = 'com.oldbook.dropdown'
 PROFILES = {
     'terminal': (APP_ID, 'Drop-down terminal', []),
-    'monitor': ('com.oldbook.monitor', 'System monitor', ['-e', 'btop']),
+    'monitor': ('com.oldbook.monitor', 'System monitor', ['btop']),
 }
 
 
@@ -59,13 +59,17 @@ def toggle(profile='terminal'):
         fcntl.flock(lock, fcntl.LOCK_EX)
         found = terminal(ipc('get_tree'), app_id=app_id)
         if not found:
-            subprocess.Popen(['ghostty', '--class=' + app_id,
+            if profile == 'monitor':
+                launcher = ['foot', '--app-id=' + app_id, '--title=' + title, *command]
+            else:
+                launcher = ['ghostty', '--class=' + app_id,
                               '--gtk-single-instance=false', '--title=' + title,
                               '--window-decoration=none', '--resize-overlay=never',
                               '--background-opacity=0.84', '--background-opacity-cells=true',
                               '--window-padding-x=20', '--window-padding-y=16',
                               '--window-padding-balance=true', '--cursor-style=bar',
-                              '--keybind=ctrl+shift+n=unbind', *command],
+                            '--keybind=ctrl+shift+n=unbind']
+            subprocess.Popen(launcher,
                              stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                              stderr=subprocess.DEVNULL, start_new_session=True)
             # GTK, font and renderer initialization can take longer after login.
@@ -76,7 +80,7 @@ def toggle(profile='terminal'):
                     break
                 time.sleep(0.05)
             if not found:
-                raise RuntimeError('Ghostty did not open within fifteen seconds')
+                raise RuntimeError(f'{title} did not open within fifteen seconds')
             # The for_window rule may already have hidden the new window.
             # Sway rejects floating enable on a hidden scratchpad container.
             if found[1] != '__i3_scratch':

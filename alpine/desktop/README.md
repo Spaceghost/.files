@@ -57,7 +57,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | --- | --- |
 | `Super+Enter`, `Super+D` | Ghostty terminal, Spaceghost application menu |
 | Super + backtick (\`) | Toggle the persistent drop-down console |
-| `Super+~` (`Super+Shift+grave`) | Toggle a separate persistent btop system monitor |
+| `Super+~` (`Super+Shift+grave`) | Toggle a separate persistent btop system monitor in Foot |
 | `Super+C`, `Super+Shift+C` | Center the active window and bring it forward |
 | `Super+Ctrl+Shift+C` | Reload Sway configuration |
 | `Super+Tab` or `Alt+Tab` | Browse all windows in recent-use order; add Shift to reverse, release Super/Alt to select, or Escape to cancel. |
