@@ -1,0 +1,77 @@
+# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+# shellcheck shell=sh disable=SC2034,SC2154
+pkgname=codex
+pkgver=0.153.4
+pkgrel=0
+pkgdesc="Native OpenAI Codex CLI, app server, helpers and responses proxy"
+url="https://github.com/openai/codex"
+arch="x86_64"
+license="Apache-2.0"
+depends="ca-certificates-bundle git zsh"
+checkdepends="python3"
+_target="x86_64-unknown-linux-musl"
+_cli="codex-package-$_target.tar.gz"
+_app="codex-app-server-package-$_target.tar.gz"
+_proxy="codex-responses-api-proxy-$_target.tar.gz"
+_proxy_bin="${_proxy%.tar.gz}"
+source="
+    https://github.com/openai/codex/releases/download/rust-v$pkgver/$_cli
+    https://github.com/openai/codex/releases/download/rust-v$pkgver/$_app
+    https://github.com/openai/codex/releases/download/rust-v$pkgver/$_proxy
+    alpine-adaptations.json
+    verify-install
+    "
+options="!net !strip !tracedeps"
+builddir="$srcdir/$pkgname-$pkgver"
+export SOURCE_DATE_EPOCH=1788564289
+
+unpack() {
+    mkdir -p "$builddir/cli" "$builddir/app-server" "$builddir/proxy"
+    tar -xzf "$srcdir/$_cli" -C "$builddir/cli"
+    tar -xzf "$srcdir/$_app" -C "$builddir/app-server"
+    tar -xzf "$srcdir/$_proxy" -C "$builddir/proxy"
+}
+
+build() {
+    _runtime="$builddir/stage/usr/lib/codex/$pkgver"
+    mkdir -p "$_runtime" "$builddir/stage/usr/bin"
+    cp -a "$builddir/cli" "$_runtime/cli"
+    cp -a "$builddir/app-server" "$_runtime/app-server"
+    cp -a "$builddir/proxy" "$_runtime/proxy"
+
+    mv "$_runtime/proxy/$_proxy_bin" \
+        "$_runtime/proxy/codex-responses-api-proxy"
+    for _part in cli app-server; do
+        _shell="$_runtime/$_part/codex-resources/zsh/bin/zsh"
+        mv "$_shell" "$_shell.upstream-gnu"
+        ln -s /bin/zsh "$_shell"
+    done
+    install -Dm0644 "$srcdir/alpine-adaptations.json" \
+        "$_runtime/alpine-adaptations.json"
+
+    ln -s "../lib/codex/$pkgver/cli/bin/codex" \
+        "$builddir/stage/usr/bin/codex"
+    ln -s "../lib/codex/$pkgver/cli/bin/codex-code-mode-host" \
+        "$builddir/stage/usr/bin/codex-code-mode-host"
+    ln -s "../lib/codex/$pkgver/app-server/bin/codex-app-server" \
+        "$builddir/stage/usr/bin/codex-app-server"
+    ln -s "../lib/codex/$pkgver/proxy/codex-responses-api-proxy" \
+        "$builddir/stage/usr/bin/codex-responses-api-proxy"
+}
+
+check() {
+    python3 "$srcdir/verify-install" "$builddir/stage"
+}
+
+package() {
+    mkdir -p "$pkgdir"
+    cp -a "$builddir/stage/." "$pkgdir/"
+}
+
+sha512sums="
+e983cc7f240c4332561a242074863b83f9f3764ca7d5c07184c6331d65f79ed3928c7a8ca5be8d62eeef71a03bbf59e03bef9b2bdeee3dbba216a7930b3ecdff  codex-package-x86_64-unknown-linux-musl.tar.gz
+e3ddb78db5b36c091d7e23c1433dd367fcd8f0c3679ec22f96b2bec69cb4905a3e59577ed920166f201f2b38cab01371d643ad1d07b3a9281d3aa0aec7fff638  codex-app-server-package-x86_64-unknown-linux-musl.tar.gz
+ea0dc146d39b248fb44603657d9581308d84b9bd7b716cc232b419cff51c352ea2830fc19a859d54d3041f07d440cb44ac5a51e0b3eaafe36b9fe6331d399b10  codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz
+d1733c6bad6304aaa36db6406337bfdb9856946492ea0ee3b1694a8443eaab8f16485c9314103333c1e1a315693d63442b07d2fa6786d4dc8906860f81f572f3  alpine-adaptations.json
+bf81590e4ed4f82fbb6dd88110033b71fe6a3623ff384a1c00ee9bc9e3cca764fe9d8c99f2bdbfd8e7d9205a2cfad03d89df8d5d0930644dc1178508a2be7bb9  verify-install
+"

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "package": {
+    "name": "codex",
+    "version": "0.153.4-r0",
+    "arch": "x86_64",
+    "target": "x86_64-unknown-linux-musl",
+    "repository": "cascadia/testing"
+  },
+  "sources": [
+    {
+      "role": "complete CLI bundle",
+      "name": "codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "a822187e1a2420c61c5926721bfbd878701ed95547c9bb0d4de4498a16ba1821",
+      "sha512": "e983cc7f240c4332561a242074863b83f9f3764ca7d5c07184c6331d65f79ed3928c7a8ca5be8d62eeef71a03bbf59e03bef9b2bdeee3dbba216a7930b3ecdff",
+      "fossil_uv": "sha256/a822187e1a2420c61c5926721bfbd878701ed95547c9bb0d4de4498a16ba1821/codex-package-x86_64-unknown-linux-musl.tar.gz"
+    },
+    {
+      "role": "complete app-server bundle",
+      "name": "codex-app-server-package-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-app-server-package-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "a5d37ff1fa6953ee6d317b7e69bfafd39f5f53350b631d790fa7531159f22420",
+      "sha512": "e3ddb78db5b36c091d7e23c1433dd367fcd8f0c3679ec22f96b2bec69cb4905a3e59577ed920166f201f2b38cab01371d643ad1d07b3a9281d3aa0aec7fff638",
+      "fossil_uv": "sha256/a5d37ff1fa6953ee6d317b7e69bfafd39f5f53350b631d790fa7531159f22420/codex-app-server-package-x86_64-unknown-linux-musl.tar.gz"
+    },
+    {
+      "role": "responses API proxy",
+      "name": "codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "1ccd604cb0865daae1de80087d7bebfa300da69e9f0fc0e9c72b92335ab5c295",
+      "sha512": "ea0dc146d39b248fb44603657d9581308d84b9bd7b716cc232b419cff51c352ea2830fc19a859d54d3041f07d440cb44ac5a51e0b3eaafe36b9fe6331d399b10",
+      "fossil_uv": "sha256/1ccd604cb0865daae1de80087d7bebfa300da69e9f0fc0e9c72b92335ab5c295/codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz"
+    }
+  ],
+  "built_package": {
+    "name": "codex-0.153.4-r0.apk",
+    "size": 236344857,
+    "sha256": "34b271059ead05a6c8ac502451615c73dd846874b295d28625d8ec17549be848",
+    "sha512": "b7ffbe65ac458456b1a00384bf3d66401937c55b33c30a464748d2ecec874a6dbd13e85f9014aa01fb877593c474c7bf6c090eb5cec3b9cc6b13fa8e099dc87d",
+    "fossil_uv": "sha256/34b271059ead05a6c8ac502451615c73dd846874b295d28625d8ec17549be848/codex-0.153.4-r0.apk"
+  }
+}
