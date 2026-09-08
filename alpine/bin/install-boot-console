@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Install the Gruvbox boot console, preserving the stock boot path.
+
+Root actions, each backed up under /var/backups/alpine-rice/boot-console-*:
+
+1. Append the Gruvbox VT palette, default attribute and kernel console font to
+   GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub (idempotent: the managed
+   tokens are replaced, every other token and line is kept).
+2. Install the versioned /etc/issue banner for the rescue gettys.
+3. Regenerate /boot/grub/grub.cfg into a temporary file, check it with
+   grub-script-check, prove the stock entry still boots the same kernel,
+   initramfs, root and crypt parameters plus exactly the managed tokens, and
+   only then move it into place. Any mismatch restores this run's backups.
+
+`--dry-run` shows the planned edits without root. `--rollback DIR` restores the
+files recorded in a backup directory. A reboot is never performed here.
+"""
+import argparse
+import difflib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/system/boot'))
+import boot_console  # noqa: E402
+
+PALETTE = REPO / 'alpine/system/boot/console-palette.json'
+ISSUE_TEMPLATE = REPO / 'alpine/system/boot/issue.template'
+BACKUP_ROOT = Path('/var/backups/alpine-rice')
+GRUB_DEFAULT = Path('/etc/default/grub')
+GRUB_CFG = Path('/boot/grub/grub.cfg')
+ISSUE = Path('/etc/issue')
+
+
+class Installer:
+    """Backed-up, reversible file writes for one run."""
+
+    def __init__(self, backup, dry_run=False):
+        self.backup = backup
+        self.dry_run = dry_run
+        self.manifest = {'backed_up': [], 'created': []}
+        self.changes = []
+
+    def announce(self, path, before, after):
+        if before is None:
+            self.changes.append('create %s' % path)
+            return
+        try:
+            old_text = before.decode()
+            new_text = after.decode()
+        except UnicodeDecodeError:
+            self.changes.append('replace %s (binary)' % path)
+            return
+        diff = difflib.unified_diff(old_text.splitlines(keepends=True), new_text.splitlines(keepends=True),
+                                    str(path), str(path) + ' (new)')
+        self.changes.append(''.join(diff) or 'replace %s' % path)
+
+    def write(self, path, data, mode):
+        path = Path(path)
+        before = path.read_bytes() if path.is_file() else None
+        if before == data:
+            return False
+        self.announce(path, before, data)
+        if self.dry_run:
+            return True
+        if before is not None:
+            saved = self.backup / path.relative_to('/')
+            saved.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(path, saved)
+            self.manifest['backed_up'].append(str(path))
+        else:
+            self.manifest['created'].append(str(path))
+        temporary = path.with_name(path.name + '.oldbook-new')
+        temporary.write_bytes(data)
+        try:
+            os.chmod(temporary, mode)
+        except OSError:
+            pass  # FAT boot partitions ignore modes
+        os.replace(temporary, path)
+        return True
+
+    def restore_all(self):
+        """Undo this run's writes from the backup copies."""
+        for value in self.manifest['backed_up']:
+            path = Path(value)
+            shutil.copy2(self.backup / path.relative_to('/'), path)
+        for value in self.manifest['created']:
+            Path(value).unlink(missing_ok=True)
+
+    def save_manifest(self):
+        if self.dry_run or not (self.manifest['backed_up'] or self.manifest['created']):
+            return
+        self.backup.mkdir(parents=True, exist_ok=True)
+        (self.backup / 'manifest.json').write_text(json.dumps(self.manifest, indent=2) + '\n')
+
+
+def kernel_config(release):
+    for candidate in (Path('/boot/config-' + release), Path('/proc/config.gz')):
+        if candidate.is_file():
+            if candidate.suffix == '.gz':
+                import gzip
+                return gzip.open(candidate, 'rt').read()
+            return candidate.read_text()
+    return ''
+
+
+def run(command, **kwargs):
+    return subprocess.run(command, check=True, text=True, capture_output=True, **kwargs)
+
+
+def generate_grub_cfg(temporary):
+    temporary.unlink(missing_ok=True)
+    run(['grub-mkconfig', '-o', str(temporary)])
+    run(['grub-script-check', str(temporary)])
+    return temporary.read_text()
+
+
+def rollback(directory):
+    manifest = json.loads((directory / 'manifest.json').read_text())
+    for value in manifest['backed_up']:
+        path = Path(value)
+        shutil.copy2(directory / path.relative_to('/'), path)
+        print('restored', path)
+    for value in manifest['created']:
+        Path(value).unlink(missing_ok=True)
+        print('removed', value)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--dry-run', action='store_true', help='print the planned edits; write nothing')
+    parser.add_argument('--rollback', type=Path, metavar='DIR', help='restore the files recorded in DIR')
+    parser.add_argument('--kernel', default=os.uname().release, help='kernel release to check the font against')
+    args = parser.parse_args(argv)
+    if not args.dry_run and os.geteuid() != 0:
+        raise SystemExit('Run with doas to change the boot console (or use --dry-run).')
+    if args.rollback:
+        rollback(args.rollback)
+        return 0
+
+    palette = boot_console.load_palette(PALETTE.read_text())
+    parameters = boot_console.kernel_parameters(palette)
+    symbol = palette.get('font_config_symbol')
+    if symbol and symbol + '=y' not in kernel_config(args.kernel):
+        print('warning: %s is not built into kernel %s; fbcon keeps its default font'
+              % (symbol, args.kernel), file=sys.stderr)
+
+    backup = BACKUP_ROOT / ('boot-console-' + str(time.time_ns()))
+    installer = Installer(backup, dry_run=args.dry_run)
+    previous_cfg = GRUB_CFG.read_text() if GRUB_CFG.is_file() else None
+    temporary_cfg = GRUB_CFG.with_name('grub.cfg.oldbook-new')
+    try:
+        grub_default = boot_console.rewrite_grub_default(GRUB_DEFAULT.read_text(), parameters)
+        installer.write(GRUB_DEFAULT, grub_default.encode(), 0o644)
+        installer.write(ISSUE, boot_console.render_issue(ISSUE_TEMPLATE.read_text()), 0o644)
+        if args.dry_run:
+            print('Kernel parameters:', ' '.join(parameters))
+            print('\n'.join(installer.changes) or 'Nothing to change.')
+            print('grub.cfg regeneration and validation happen only in a real run.')
+            return 0
+        if previous_cfg is None:
+            raise RuntimeError('no existing /boot/grub/grub.cfg to compare against')
+        generated = generate_grub_cfg(temporary_cfg)
+        boot_console.validate_generated_cfg(previous_cfg, generated, parameters)
+        installer.write(GRUB_CFG, generated.encode(), 0o755)
+    except BaseException:
+        temporary_cfg.unlink(missing_ok=True)
+        installer.restore_all()
+        print('install-boot-console: no change was kept; this run was rolled back', file=sys.stderr)
+        raise
+    finally:
+        temporary_cfg.unlink(missing_ok=True)
+        installer.save_manifest()
+    print('Kernel parameters:', ' '.join(parameters))
+    print('\n'.join(installer.changes) or 'Boot console already installed; nothing changed.')
+    if installer.manifest['backed_up'] or installer.manifest['created']:
+        print('Backup:', backup)
+    print('The palette and font take effect at the next boot; nothing was rebooted.')
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError) as error:
+        detail = getattr(error, 'stderr', '') or ''
+        print('install-boot-console: %s %s' % (error, detail.strip()), file=sys.stderr)
+        sys.exit(1)

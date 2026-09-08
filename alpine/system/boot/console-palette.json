@@ -1,0 +1,26 @@
+{
+  "theme": "gruvbox-dark",
+  "description": "Linux console (VT) palette for every text-mode screen: the initramfs LUKS prompt, kernel messages and the rescue gettys. Indices follow the ANSI order: black, red, green, yellow, blue, magenta, cyan, white, then the bright variants. The values are the Gruvbox Dark terminal colors shared with Foot and Ghostty.",
+  "font": "TER16x32",
+  "font_config_symbol": "CONFIG_FONT_TER16x32",
+  "default_foreground": 15,
+  "default_background": 0,
+  "colors": [
+    "#282828",
+    "#cc241d",
+    "#98971a",
+    "#d79921",
+    "#458588",
+    "#b16286",
+    "#689d6a",
+    "#a89984",
+    "#928374",
+    "#fb4934",
+    "#b8bb26",
+    "#fabd2f",
+    "#83a598",
+    "#d3869b",
+    "#8ec07c",
+    "#ebdbb2"
+  ]
+}
