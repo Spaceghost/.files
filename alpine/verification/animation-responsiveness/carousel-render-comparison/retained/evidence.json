@@ -1,0 +1,28 @@
+{
+  "status": "failed",
+  "isolation": "private HOME/XDG/D-Bus/SwayFX and synthetic pixels",
+  "scale": 2,
+  "source_sha256": {
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/carousel_view.py": "5d0377514fde7221901a9a9c7a322783cbd65523ff2086193c239a28c3a093de",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-render-comparison/source/showdesktop.py": "e443fd1b766d60d34e90088ba556e749147e5bc7d5d91fa5f7eb0ee97b44e66d",
+    "/home/jack/.files/alpine/tests/verify_carousel_rendering.py": "62378dbb126c2244b9b08b5839f2f3271d307735c5995fd090af42dbff1b9c82"
+  },
+  "load_before": [
+    43.94873046875,
+    39.00732421875,
+    28.8955078125
+  ],
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel_rendering.py\", line 242, in private_compositor\n    raise TimeoutError('private SwayFX did not answer GET_VERSION within 15 seconds')\nTimeoutError: private SwayFX did not answer GET_VERSION within 15 seconds\n",
+  "load_after": [
+    44.6318359375,
+    39.38671875,
+    29.181640625
+  ],
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

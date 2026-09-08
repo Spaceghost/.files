@@ -1,0 +1,30 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:36:17 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:617: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:618: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:567: DeprecationWarning: Gdk.Screen.get_monitor_plug_name is deprecated
+  monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:108: DeprecationWarning: Gtk.Window.set_opacity is deprecated
+  self.window.set_opacity(self.alpha)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:440: PyGIDeprecationWarning: Gio.DesktopAppInfo is deprecated; use GioUnix.DesktopAppInfo instead
+  info = Gio.DesktopAppInfo.new(app if app.endswith('.desktop') else app + '.desktop') if app else None
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f67092d4c00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f67092d4c00
+Workspace decoration: right
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:440: PyGIDeprecationWarning: Gio.DesktopAppInfo is deprecated; use GioUnix.DesktopAppInfo instead
+  info = Gio.DesktopAppInfo.new(app if app.endswith('.desktop') else app + '.desktop') if app else None
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: input.c:2580: compositor sent pointer_leave event without a pointer_enter event: surface=0x7fb24fb8cc00
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

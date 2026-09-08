@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "alpine/tests",
+    "-p",
+    "test_shortcut_sources.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "6b26ccdbaba976c8f5d7c922ddd8a25d6e4968c14ffa6cdeb38e81df27b0c6cd",
+    "alpine/tests/test_shortcut_sources.py": "9625050d7dc1a459ff5683bdab450a9bab77ab77edced61925ad37e9d943b459"
+  }
+}

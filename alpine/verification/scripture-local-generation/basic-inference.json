@@ -1,0 +1,19 @@
+{
+  "started_utc": "2026-09-08T05:40:09.546917+00:00",
+  "prompt": "Return exactly OK.",
+  "num_predict": 8,
+  "stream": true,
+  "schema": null,
+  "request_limit_seconds": 120,
+  "model": "qwen2.5:1.5b",
+  "cloud_disabled": true,
+  "source_sha256": "3367be0cc8c5be4f469a702a3aaf387c4d6d21211f159431f345d072f5c4632d",
+  "study_saved": false,
+  "endpoint": "http://127.0.0.1:11435",
+  "verified_model_digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+  "request_started_utc": "2026-09-08T05:40:18.188829+00:00",
+  "error": "TimeoutError: 120-second diagnostic request deadline",
+  "elapsed_seconds": 133.57,
+  "completed_utc": "2026-09-08T05:42:23.117528+00:00",
+  "stream_events": 0
+}

@@ -1,0 +1,12 @@
+[Unit]
+Description=MBP Intel gallery rotation
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStartPre=-%h/.local/bin/mbp-intel-wallpaper refresh
+ExecStart=%h/.local/bin/mbp-intel-wallpaper daemon
+Restart=on-failure
+RestartSec=2
+

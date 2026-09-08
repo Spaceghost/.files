@@ -1,0 +1,357 @@
+#!/usr/bin/env python3
+"""Place transparent Conky panels around the current wallpaper and keep them running."""
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import random
+import signal
+import stat
+import subprocess
+import sys
+import textwrap
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+import conky_layout
+from desktop_space import conky_space, read_screen, search_rectangle
+from theme_catalog import load_theme
+
+STATE = Path.home() / '.local/state/mbp-intel/conky'
+PANELS = Path.home() / '.config/conky/panels.json'
+WALLPAPER = Path.home() / '.local/share/mbp-intel/current-wallpaper.png'
+FALLBACK_WALLPAPER = Path.home() / '.local/share/mbp-intel/wallpaper.png'
+GALLERY_STATE = Path.home() / '.local/state/mbp-intel/wallpaper/state.json'
+GRID_COLUMNS, GRID_ROWS = 72, 45
+LAYOUT_VERSION = 2
+
+GHOST_LINES = [
+    'Zorak is not the administrator. Zorak has never been the administrator.',
+    'Moltar, roll the telemetry. Moltar, that is the wrong telemetry.',
+    'This desktop is broadcasting live from the Ghost Planet.',
+    'Brak asked what a kernel is. We are not taking further questions.',
+    'The interview will continue after these system metrics.',
+    'Everything is nominal. That is the most suspicious reading of all.',
+    'Space Ghost does not read logs. Space Ghost is read by logs.',
+    'Tonight on Coast to Coast: this laptop, and its feelings.',
+]
+
+
+def state_directory():
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if STATE.is_symlink() or STATE.stat().st_uid != os.getuid():
+        raise RuntimeError('Conky state directory must be an owned regular directory')
+    os.chmod(STATE, 0o700)
+    return STATE
+
+
+def sway_socket():
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', str(Path('/run/user') / str(os.getuid()))))
+    candidates = []
+    if os.environ.get('SWAYSOCK'):
+        candidates.append(Path(os.environ['SWAYSOCK']))
+    candidates.extend(sorted(runtime.glob(f'sway-ipc.{os.getuid()}.*.sock'),
+                             key=lambda path: path.stat().st_mtime, reverse=True))
+    for path in dict.fromkeys(candidates):
+        try:
+            info = path.lstat()
+            if path.parent != runtime or info.st_uid != os.getuid() or not stat.S_ISSOCK(info.st_mode):
+                continue
+            probe = subprocess.run(['swaymsg', '-s', str(path), '-r', '-t', 'get_outputs'],
+                                   capture_output=True, text=True, timeout=3)
+            if probe.returncode == 0 and json.loads(probe.stdout):
+                return str(path)
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            continue
+    raise RuntimeError('No owned active Sway session found')
+
+
+def screen_rectangle():
+    """Logical size of the output the panels are drawn on."""
+    return conky_space(read_screen(sway_socket()))
+
+
+def wallpaper_path():
+    for candidate in (WALLPAPER, FALLBACK_WALLPAPER):
+        try:
+            resolved = candidate.resolve(strict=True)
+        except OSError:
+            continue
+        if resolved.is_file():
+            return resolved
+    raise RuntimeError('No current wallpaper is available to analyse')
+
+
+def hardware():
+    """Values the panel templates need but cannot discover for themselves."""
+    here = Path(__file__).resolve()
+    values = {'bin': str(here), 'scripture': str(here.parent / 'mbp-intel-scripture'),
+              'iface': 'wlan0', 'battery': 'BAT0', 'hwmon': '0'}
+    try:
+        route = subprocess.run(['ip', 'route', 'show', 'default'],
+                               capture_output=True, text=True, timeout=3)
+        fields = route.stdout.split()
+        if 'dev' in fields:
+            values['iface'] = fields[fields.index('dev') + 1]
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        pass
+    batteries = sorted(path.name for path in Path('/sys/class/power_supply').glob('BAT*'))
+    if batteries:
+        values['battery'] = batteries[0]
+    for monitor in sorted(Path('/sys/class/hwmon').glob('hwmon*')):
+        try:
+            if (monitor / 'name').read_text().strip() == 'coretemp':
+                values['hwmon'] = monitor.name.removeprefix('hwmon')
+                break
+        except OSError:
+            continue
+    return values
+
+
+def expand(text, values):
+    for key, value in values.items():
+        text = text.replace('{{' + key + '}}', str(value))
+    return text
+
+
+def enabled_panels(document):
+    return [panel for panel in document['panels'] if panel.get('enabled', True)]
+
+
+def running(directory):
+    try:
+        recorded = json.loads((directory / 'pids.json').read_text())
+    except (OSError, ValueError):
+        return {}
+    live = {}
+    for identifier, pid in recorded.items():
+        try:
+            command = Path(f'/proc/{int(pid)}/cmdline').read_bytes().decode(errors='replace')
+        except (OSError, ValueError):
+            continue
+        # Only reap processes this tool started, identified by their config path.
+        if str(directory / f'{identifier}.conf') in command:
+            live[identifier] = int(pid)
+    return live
+
+
+def stop(directory=None):
+    directory = directory or state_directory()
+    live = running(directory)
+    for pid in live.values():
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            continue
+    deadline = time.time() + 5
+    while time.time() < deadline and running(directory):
+        time.sleep(0.1)
+    for pid in running(directory).values():
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except OSError:
+            continue
+    (directory / 'pids.json').unlink(missing_ok=True)
+    return len(live)
+
+
+def launch(directory, identifiers):
+    pids = {}
+    for identifier in identifiers:
+        config = directory / f'{identifier}.conf'
+        process = subprocess.Popen(['conky', '-c', str(config)], stdin=subprocess.DEVNULL,
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                   start_new_session=True)
+        pids[identifier] = process.pid
+    (directory / 'pids.json').write_text(json.dumps(pids, indent=2) + '\n')
+    return pids
+
+
+def pairing_key(image, screen, theme, panels):
+    """Identity of a layout: this wallpaper, on this screen, with these panels."""
+    digest = hashlib.sha256()
+    digest.update(Path(image).read_bytes())
+    signature = json.dumps({'screen': screen, 'version': LAYOUT_VERSION,
+                            'theme': theme, 'search_bar': search_rectangle(screen),
+                            'panels': [[panel['id'], panel['width'], panel['height'],
+                                        panel.get('prefer'), panel.get('priority', 0)]
+                                       for panel in panels]}, sort_keys=True)
+    digest.update(signature.encode())
+    return digest.hexdigest()
+
+
+def search_bar_rectangle(screen):
+    return search_rectangle(screen)
+
+
+def build(directory):
+    """Analyse the wallpaper and write one Conky config per placed panel.
+
+    Each wallpaper keeps its own layout: the placement is cached against the
+    image, screen and panel set, so the same painting is always dressed the
+    same way and is only re-analysed when something it depends on changes.
+    """
+    document = conky_layout.load_panels(PANELS)
+    panels = enabled_panels(document)
+    if not panels:
+        raise RuntimeError('Every panel is disabled; nothing to place')
+    values = hardware()
+    panels = [dict(panel, text=expand(panel['text'], values)) for panel in panels]
+    image = wallpaper_path()
+    screen = screen_rectangle()
+    theme = load_theme(REPO)
+    palette = conky_layout.resolve_palette(theme)
+    options = {'font': document.get('font', 'JetBrainsMono Nerd Font:size=9'),
+               'update_interval': document.get('update_interval', 60.0),
+               'gap': document.get('gap', 1), 'origin_y': screen['origin_y'],
+               'click_hook': str(REPO / 'alpine/desktop/.local/lib/mbp_intel/conky_click.lua')}
+    key = pairing_key(image, screen, theme['id'], panels)
+    cache = directory / 'layouts' / f'{key}.json'
+    placements = None
+    if cache.is_file():
+        try:
+            placements = json.loads(cache.read_text())['placements']
+        except (OSError, ValueError, KeyError):
+            placements = None
+    if placements is None:
+        grid = conky_layout.analyze_image(image, GRID_COLUMNS, GRID_ROWS)
+        area = screen
+        placements = conky_layout.place_panels(panels, grid, area, gap=options['gap'],
+                                               reserved=[search_bar_rectangle(screen)])
+    by_id = {panel['id']: panel for panel in panels}
+    plans = []
+    for placement in placements:
+        panel = by_id.get(placement['id'])
+        if panel is None:
+            continue
+        colours = conky_layout.panel_colours(placement, palette)
+        plans.append({'panel': panel, 'placement': placement,
+                      'config': conky_layout.render_config(panel, placement, colours, options)})
+    for stale in directory.glob('*.conf'):
+        stale.unlink()
+    for entry in plans:
+        (directory / f'{entry["panel"]["id"]}.conf').write_text(entry['config'])
+    summary = {'wallpaper': str(image), 'pairing': key, 'output': screen['name'],
+               'screen': screen,
+               'theme': theme['id'],
+               'generated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+               'placements': [entry['placement'] for entry in plans]}
+    (directory / 'layout.json').write_text(json.dumps(summary, indent=2) + '\n')
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps({'wallpaper': str(image), 'placements': placements},
+                                indent=2) + '\n')
+    return [entry['panel']['id'] for entry in plans]
+
+
+
+
+def layout(restart=True):
+    directory = state_directory()
+    with (directory / 'layout.lock').open('a+') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return 0
+        if (directory / 'disabled').exists():
+            stop(directory)
+            return 0
+        identifiers = build(directory)
+        if restart:
+            stop(directory)
+            launch(directory, identifiers)
+        print('Placed ' + ', '.join(identifiers))
+        return 0
+
+
+def toggle():
+    directory = state_directory()
+    marker = directory / 'disabled'
+    if marker.exists():
+        marker.unlink()
+        return layout()
+    marker.write_text('Desktop panels are switched off.\n')
+    stop(directory)
+    print('Desktop panels off')
+    return 0
+
+
+def status():
+    directory = state_directory()
+    live = running(directory)
+    if (directory / 'disabled').exists():
+        print('off')
+    elif live:
+        print('on: ' + ', '.join(sorted(live)))
+    else:
+        print('stopped')
+    return 0
+
+
+def gallery_text():
+    """Body of the gallery panel, wrapped to fit its column."""
+    try:
+        state = json.loads(GALLERY_STATE.read_text())
+    except (OSError, ValueError):
+        print('No artwork selected yet.')
+        return 0
+    lines = [state.get('title', 'Ghost Gallery')]
+    lines += textwrap.wrap(state.get('description', ''), 46)[:2]
+    if state.get('theme_name'):
+        lines.append('collection · ' + state['theme_name'])
+    if state.get('paused'):
+        lines.append('rotation paused')
+    elif state.get('next_at'):
+        remaining = max(0, int(state['next_at'] - time.time()))
+        lines.append(f'next painting in {(remaining + 59) // 60}m')
+    print('\n'.join(lines))
+    return 0
+
+
+def ghost_line():
+    document = {}
+    try:
+        document = json.loads(PANELS.read_text())
+    except (OSError, ValueError):
+        pass
+    lines = document.get('ghost_lines') or GHOST_LINES
+    print('\n'.join(textwrap.wrap(random.choice(lines), 46)[:3]))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='layout',
+                        choices=['layout', 'plan', 'start', 'stop', 'restart', 'toggle',
+                                 'status', 'gallery-text', 'ghost-line'])
+    arguments = parser.parse_args()
+    if arguments.action in ('layout', 'restart'):
+        return layout()
+    if arguments.action == 'plan':
+        return layout(restart=False)
+    if arguments.action == 'start':
+        directory = state_directory()
+        if (directory / 'disabled').exists() or running(directory):
+            return 0
+        return layout()
+    if arguments.action == 'stop':
+        stop()
+        return 0
+    if arguments.action == 'toggle':
+        return toggle()
+    if arguments.action == 'status':
+        return status()
+    if arguments.action == 'gallery-text':
+        return gallery_text()
+    return ghost_line()
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f'mbp-intel-conky: {error}', file=sys.stderr)
+        sys.exit(1)

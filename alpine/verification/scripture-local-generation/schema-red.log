@@ -1,0 +1,44 @@
+test_native_grammar_repetition_limit_does_not_reject_the_schema (test_scripture_generation.GenerationTests.test_native_grammar_repetition_limit_does_not_reject_the_schema) ... ERROR
+/usr/lib/python3.14/tempfile.py:484: ResourceWarning: Implicitly cleaning up <HTTPError 400: 'Bad Request'>
+  _warnings.warn(self.warn_message, ResourceWarning)
+
+======================================================================
+ERROR: test_native_grammar_repetition_limit_does_not_reject_the_schema (test_scripture_generation.GenerationTests.test_native_grammar_repetition_limit_does_not_reject_the_schema)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/scripture_generation.py", line 83, in _request
+    with opener.open(request, timeout=timeout) as response:
+         ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 493, in open
+    response = meth(req, response)
+  File "/usr/lib/python3.14/urllib/request.py", line 602, in http_response
+    response = self.parent.error(
+        'http', request, response, code, msg, hdrs)
+  File "/usr/lib/python3.14/urllib/request.py", line 531, in error
+    return self._call_chain(*args)
+           ~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib/python3.14/urllib/request.py", line 464, in _call_chain
+    result = func(*args)
+  File "/usr/lib/python3.14/urllib/request.py", line 611, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_generation.py", line 117, in test_native_grammar_repetition_limit_does_not_reject_the_schema
+    entry = generation.generate_entry('John 3:16', 'study-note', [source()],
+                                       endpoint=ollama.endpoint)
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/scripture_generation.py", line 247, in generate_entry
+    response = _request(opener, endpoint, '/api/generate', {
+        'model': model, 'prompt': prompt, 'stream': False, 'format': OUTPUT_SCHEMA,
+        'options': {'num_predict': 768, 'temperature': 0.2},
+    }, timeout=timeout, max_bytes=max_bytes)
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/scripture_generation.py", line 91, in _request
+    raise RuntimeError(f'Ollama request failed with HTTP {error.code}') from error
+RuntimeError: Ollama request failed with HTTP 400
+
+----------------------------------------------------------------------
+Ran 1 test in 0.668s
+
+FAILED (errors=1)

@@ -1,0 +1,622 @@
+test_codex_launcher_uses_resolver_recognized_app_id (test_workspaces.WorkspaceServiceTests.test_codex_launcher_uses_resolver_recognized_app_id) ... ok
+test_event_tty_takes_precedence_over_inherited_tmux_pane (test_workspaces.WorkspaceServiceTests.test_event_tty_takes_precedence_over_inherited_tmux_pane) ... ok
+test_events_match_exact_panes_and_disappear_when_cleared (test_workspaces.WorkspaceServiceTests.test_events_match_exact_panes_and_disappear_when_cleared) ... ok
+test_malformed_or_expired_events_do_not_crash_or_set_badges (test_workspaces.WorkspaceServiceTests.test_malformed_or_expired_events_do_not_crash_or_set_badges) ... ok
+test_records_are_reused_only_for_the_current_sway_socket (test_workspaces.WorkspaceServiceTests.test_records_are_reused_only_for_the_current_sway_socket) ... ok
+test_rename_refuses_names_sway_cannot_address_losslessly (test_workspaces.WorkspaceServiceTests.test_rename_refuses_names_sway_cannot_address_losslessly) ... ok
+test_restore_ignores_malformed_record_collections_and_entries (test_workspaces.WorkspaceServiceTests.test_restore_ignores_malformed_record_collections_and_entries) ... ok
+test_status_falls_back_to_idle_for_bad_or_stale_state (test_workspaces.WorkspaceServiceTests.test_status_falls_back_to_idle_for_bad_or_stale_state) ... ok
+test_status_falls_back_to_idle_for_fresh_malformed_ai_state (test_workspaces.WorkspaceServiceTests.test_status_falls_back_to_idle_for_fresh_malformed_ai_state) ... ok
+test_workspace_runtime_directories_are_private_or_rejected (test_workspaces.WorkspaceServiceTests.test_workspace_runtime_directories_are_private_or_rejected) ... ok
+test_application_text_cannot_inject_commands_or_markup (test_workspaces.WorkspaceTests.test_application_text_cannot_inject_commands_or_markup) ... ok
+test_claude_window_is_named_and_available_in_ai_switcher (test_workspaces.WorkspaceTests.test_claude_window_is_named_and_available_in_ai_switcher) ... FAIL
+test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) ... 
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST · ✦ Codex · stale app') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT · ✦ Codex · stale app') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB · ✦ Codex · stale app') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL · ✦ Codex · stale app') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE · ✦ Codex · stale app') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA · Foot') ... FAIL
+  test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA · ✦ Codex · stale app') ... FAIL
+test_floating_window_and_focus_tie_are_accounted_for (test_workspaces.WorkspaceTests.test_floating_window_and_focus_tie_are_accounted_for) ... ok
+test_fullscreen_subtree_wins_even_with_stale_small_geometry (test_workspaces.WorkspaceTests.test_fullscreen_subtree_wins_even_with_stale_small_geometry) ... ok
+test_graceful_restart_retains_custom_base (test_workspaces.WorkspaceTests.test_graceful_restart_retains_custom_base) ... ok
+test_inactive_tab_cannot_supply_the_workspace_label (test_workspaces.WorkspaceTests.test_inactive_tab_cannot_supply_the_workspace_label) ... ok
+test_inactive_workspace_still_gets_its_largest_app (test_workspaces.WorkspaceTests.test_inactive_workspace_still_gets_its_largest_app) ... ok
+test_largest_app_wins_over_small_focused_window (test_workspaces.WorkspaceTests.test_largest_app_wins_over_small_focused_window) ... ok
+test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) ... 
+  test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record={'rendered': '1'}) ... FAIL
+  test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record=[]) ... FAIL
+  test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record={'rendered': '1', 'original': '1'}) ... FAIL
+test_manual_workspace_rename_becomes_the_new_base (test_workspaces.WorkspaceTests.test_manual_workspace_rename_becomes_the_new_base) ... ok
+test_migration_preserves_custom_names_and_manual_case (test_workspaces.WorkspaceTests.test_migration_preserves_custom_names_and_manual_case) ... ok
+test_missing_state_recovers_generated_workspace_name (test_workspaces.WorkspaceTests.test_missing_state_recovers_generated_workspace_name) ... FAIL
+test_names_keep_numbers_and_do_not_accumulate_suffixes (test_workspaces.WorkspaceTests.test_names_keep_numbers_and_do_not_accumulate_suffixes) ... FAIL
+test_polluted_saved_base_is_repaired (test_workspaces.WorkspaceTests.test_polluted_saved_base_is_repaired) ... FAIL
+test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) ... 
+  test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4') ... FAIL
+  test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4: SIGNAL') ... FAIL
+  test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4: SIGNAL · stale app') ... FAIL
+test_scratchpad_is_excluded_from_workspace_scan (test_workspaces.WorkspaceTests.test_scratchpad_is_excluded_from_workspace_scan) ... ok
+test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) ... 
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=1) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='1') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=2) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='2') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=3) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='3') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=4) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='4') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=5) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='5') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=10) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='10') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=0) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=6) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=7) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=11) ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown='04') ... ERROR
+  test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown='Writing') ... ERROR
+test_unaddressable_manual_workspace_name_is_left_unchanged (test_workspaces.WorkspaceTests.test_unaddressable_manual_workspace_name_is_left_unchanged) ... ok
+test_workspace_six_is_available_for_ordinary_applications (test_workspaces.WorkspaceTests.test_workspace_six_is_available_for_ordinary_applications) ... ok
+test_workspace_ten_keeps_strata_when_browser_changes (test_workspaces.WorkspaceTests.test_workspace_ten_keeps_strata_when_browser_changes) ... FAIL
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='2')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=3)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='3')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=4)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='4')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=5)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='5')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value=10)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (value='10')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 140, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), name)
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=6)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown=11)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown='04')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+ERROR: test_shared_workspace_names_are_complete_before_the_first_window (test_workspaces.WorkspaceTests.test_shared_workspace_names_are_complete_before_the_first_window) (unknown='Writing')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 145, in test_shared_workspace_names_are_complete_before_the_first_window
+    self.assertEqual(self.model['workspace_name'](value), str(value))
+                     ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'workspace_name'
+
+======================================================================
+FAIL: test_claude_window_is_named_and_available_in_ai_switcher (test_workspaces.WorkspaceTests.test_claude_window_is_named_and_available_in_ai_switcher)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 66, in test_claude_window_is_named_and_available_in_ai_switcher
+    self.assertEqual(plans[0]['new'], '3: Lab · ✦ Claude')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '3: LAB · ✦ Claude' != '3: Lab · ✦ Claude'
+- 3: LAB · ✦ Claude
+?     ^^
++ 3: Lab · ✦ Claude
+?     ^^
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST' != '1: Ghost'
+- 1: GHOST
++ 1: Ghost
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST' != '1: Ghost'
+- 1: GHOST
++ 1: Ghost
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='1: GHOST · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST' != '1: Ghost'
+- 1: GHOST
++ 1: Ghost
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '2: ORBIT' != '2: Orbit'
+- 2: ORBIT
++ 2: Orbit
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '2: ORBIT' != '2: Orbit'
+- 2: ORBIT
++ 2: Orbit
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='2: ORBIT · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '2: ORBIT' != '2: Orbit'
+- 2: ORBIT
++ 2: Orbit
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '3: LAB' != '3: Lab'
+- 3: LAB
++ 3: Lab
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '3: LAB' != '3: Lab'
+- 3: LAB
++ 3: Lab
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='3: LAB · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '3: LAB' != '3: Lab'
+- 3: LAB
++ 3: Lab
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '4: SIGNAL' != '4: Signal'
+- 4: SIGNAL
++ 4: Signal
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '4: SIGNAL' != '4: Signal'
+- 4: SIGNAL
++ 4: Signal
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='4: SIGNAL · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '4: SIGNAL' != '4: Signal'
+- 4: SIGNAL
++ 4: Signal
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '5: LOUNGE' != '5: Lounge'
+- 5: LOUNGE
++ 5: Lounge
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '5: LOUNGE' != '5: Lounge'
+- 5: LOUNGE
++ 5: Lounge
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='5: LOUNGE · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '5: LOUNGE' != '5: Lounge'
+- 5: LOUNGE
++ 5: Lounge
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '10: STRATA' != '10: Strata'
+- 10: STRATA
++ 10: Strata
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA · Foot')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '10: STRATA' != '10: Strata'
+- 10: STRATA
++ 10: Strata
+
+
+======================================================================
+FAIL: test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes (test_workspaces.WorkspaceTests.test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes) (original='10: STRATA · ✦ Codex · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 156, in test_exact_legacy_uppercase_names_migrate_with_or_without_app_suffixes
+    self.assertEqual(plan['new'], canonical)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '10: STRATA' != '10: Strata'
+- 10: STRATA
++ 10: Strata
+
+
+======================================================================
+FAIL: test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record={'rendered': '1'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 131, in test_malformed_persisted_name_record_is_ignored
+    self.assertEqual(plan['new'], '1: Ghost · Firefox')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · Firefox' != '1: Ghost · Firefox'
+- 1: GHOST · Firefox
+?     ^^^^
++ 1: Ghost · Firefox
+?     ^^^^
+
+
+======================================================================
+FAIL: test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 131, in test_malformed_persisted_name_record_is_ignored
+    self.assertEqual(plan['new'], '1: Ghost · Firefox')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · Firefox' != '1: Ghost · Firefox'
+- 1: GHOST · Firefox
+?     ^^^^
++ 1: Ghost · Firefox
+?     ^^^^
+
+
+======================================================================
+FAIL: test_malformed_persisted_name_record_is_ignored (test_workspaces.WorkspaceTests.test_malformed_persisted_name_record_is_ignored) (record={'rendered': '1', 'original': '1'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 131, in test_malformed_persisted_name_record_is_ignored
+    self.assertEqual(plan['new'], '1: Ghost · Firefox')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · Firefox' != '1: Ghost · Firefox'
+- 1: GHOST · Firefox
+?     ^^^^
++ 1: Ghost · Firefox
+?     ^^^^
+
+
+======================================================================
+FAIL: test_missing_state_recovers_generated_workspace_name (test_workspaces.WorkspaceTests.test_missing_state_recovers_generated_workspace_name)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 87, in test_missing_state_recovers_generated_workspace_name
+    self.assertEqual(plan['new'], '1: Ghost · Firefox')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · Firefox' != '1: Ghost · Firefox'
+- 1: GHOST · Firefox
+?     ^^^^
++ 1: Ghost · Firefox
+?     ^^^^
+
+
+======================================================================
+FAIL: test_names_keep_numbers_and_do_not_accumulate_suffixes (test_workspaces.WorkspaceTests.test_names_keep_numbers_and_do_not_accumulate_suffixes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 73, in test_names_keep_numbers_and_do_not_accumulate_suffixes
+    self.assertEqual(first['new'], '1: Ghost · ✦ Codex')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · ✦ Codex' != '1: Ghost · ✦ Codex'
+- 1: GHOST · ✦ Codex
+?     ^^^^
++ 1: Ghost · ✦ Codex
+?     ^^^^
+
+
+======================================================================
+FAIL: test_polluted_saved_base_is_repaired (test_workspaces.WorkspaceTests.test_polluted_saved_base_is_repaired)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 95, in test_polluted_saved_base_is_repaired
+    self.assertEqual(plan['new'], '1: Ghost · ✦ Codex')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '1: GHOST · ✦ Codex' != '1: Ghost · ✦ Codex'
+- 1: GHOST · ✦ Codex
+?     ^^^^
++ 1: Ghost · ✦ Codex
+?     ^^^^
+
+
+======================================================================
+FAIL: test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 165, in test_saved_uppercase_and_numeric_originals_restore_complete_names
+    self.assertEqual((plan['new'], plan['base'], plan['original']),
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ('4: Signal', '4: Signal', '4: Signal'))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: ('4: SIGNAL', '4: SIGNAL', '4') != ('4: Signal', '4: Signal', '4: Signal')
+
+First differing element 0:
+'4: SIGNAL'
+'4: Signal'
+
+- ('4: SIGNAL', '4: SIGNAL', '4')
++ ('4: Signal', '4: Signal', '4: Signal')
+
+======================================================================
+FAIL: test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4: SIGNAL')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 165, in test_saved_uppercase_and_numeric_originals_restore_complete_names
+    self.assertEqual((plan['new'], plan['base'], plan['original']),
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ('4: Signal', '4: Signal', '4: Signal'))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: ('4: SIGNAL', '4: SIGNAL', '4: SIGNAL') != ('4: Signal', '4: Signal', '4: Signal')
+
+First differing element 0:
+'4: SIGNAL'
+'4: Signal'
+
+- ('4: SIGNAL', '4: SIGNAL', '4: SIGNAL')
++ ('4: Signal', '4: Signal', '4: Signal')
+
+======================================================================
+FAIL: test_saved_uppercase_and_numeric_originals_restore_complete_names (test_workspaces.WorkspaceTests.test_saved_uppercase_and_numeric_originals_restore_complete_names) (original='4: SIGNAL · stale app')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 165, in test_saved_uppercase_and_numeric_originals_restore_complete_names
+    self.assertEqual((plan['new'], plan['base'], plan['original']),
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     ('4: Signal', '4: Signal', '4: Signal'))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Tuples differ: ('4: SIGNAL', '4: SIGNAL', '4: SIGNAL') != ('4: Signal', '4: Signal', '4: Signal')
+
+First differing element 0:
+'4: SIGNAL'
+'4: Signal'
+
+- ('4: SIGNAL', '4: SIGNAL', '4: SIGNAL')
++ ('4: Signal', '4: Signal', '4: Signal')
+
+======================================================================
+FAIL: test_workspace_ten_keeps_strata_when_browser_changes (test_workspaces.WorkspaceTests.test_workspace_ten_keeps_strata_when_browser_changes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_workspaces.py", line 109, in test_workspace_ten_keeps_strata_when_browser_changes
+    self.assertEqual(first['new'], '10: Strata · Fossil')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '10: STRATA · Fossil' != '10: Strata · Fossil'
+- 10: STRATA · Fossil
+?      ^^^^^
++ 10: Strata · Fossil
+?      ^^^^^
+
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.167s
+
+FAILED (failures=29, errors=18)

@@ -1,0 +1,14 @@
+{
+  "source_run": "workspace-ready-ipc-final-20260907",
+  "artifacts_sha256": {
+    "evidence.json": "7a31061d03f555a14eae8f14642121b1caae799055f193cfd102a2b9df5ecc54",
+    "runtime.log": "7f9d430da6505cf40a932e1369e0bcdd095a6cb97d3b09d9c8e46f407d6acaa3",
+    "sway.conf": "b63937f4d36c6bb1a89fc9811b38cda29c2cbfe087513bebf2fd96cbad969d6f",
+    "workspace-creation.png": "62093782745c7a3754bd6f8bdab5df882ea417a1b6ae1058071ae79f73c4f284"
+  },
+  "sanitization": "Private synthetic data only; files copied unchanged after review.",
+  "check_count": 17,
+  "passed_checks": 17,
+  "measurement": "Ordered native Sway workspace IPC events; screenshot shows synthetic Foot only.",
+  "scope": "Direct commands from config and production command builders, plus production case-only rename; no physical key events or naming daemon."
+}

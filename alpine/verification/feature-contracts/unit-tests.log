@@ -1,0 +1,14 @@
+test_all_checks_are_existing_files_and_ids_are_unique (test_feature_contracts.FeatureImpact.test_all_checks_are_existing_files_and_ids_are_unique) ... ok
+test_deleted_profile_still_has_impact_without_an_existing_file (test_feature_contracts.FeatureImpact.test_deleted_profile_still_has_impact_without_an_existing_file) ... ok
+test_installed_guide_source_is_in_scope_across_project_directories (test_feature_contracts.FeatureImpact.test_installed_guide_source_is_in_scope_across_project_directories) ... ok
+test_mode_binding_change_reviews_keys_and_window_switching_together (test_feature_contracts.FeatureImpact.test_mode_binding_change_reviews_keys_and_window_switching_together) ... ok
+test_path_normalization_keeps_hidden_files_and_rejects_escape (test_feature_contracts.FeatureImpact.test_path_normalization_keeps_hidden_files_and_rejects_escape) ... ok
+test_shared_checks_run_once_and_a_failure_fails_the_review (test_feature_contracts.FeatureImpact.test_shared_checks_run_once_and_a_failure_fails_the_review) ... ok
+test_theme_template_change_reviews_brand_lock_and_caption_contracts (test_feature_contracts.FeatureImpact.test_theme_template_change_reviews_brand_lock_and_caption_contracts) ... ok
+test_unknown_feature_is_rejected_instead_of_running_nothing (test_feature_contracts.FeatureImpact.test_unknown_feature_is_rejected_instead_of_running_nothing) ... ok
+test_unmapped_change_is_reported_without_claiming_coverage (test_feature_contracts.FeatureImpact.test_unmapped_change_is_reported_without_claiming_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 5.189s
+
+OK

@@ -1,0 +1,51 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 21:48:12 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.3' (uid=1000 pid=17596 comm="python3 /tmp/apple-overview-7qf__xlp/home/.local/b")
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.4' (uid=1000 pid=17639 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.portal.Documents' requested by ':1.4' (uid=1000 pid=17639 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Successfully activated service 'org.freedesktop.portal.Documents'
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.4' (uid=1000 pid=17639 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.330: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.336: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.337: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.409: Failed to connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.4' (uid=1000 pid=17639 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 21:48:14 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 21:48:14 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.474: Failed to create screenshot proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.4' (uid=1000 pid=17639 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 21:48:14 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 21:48:14 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:17639): xdg-desktop-portal-WARNING **: 21:48:14.549: Failed to create screen cast proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[17483]: [session uid=1000 pid=17483 pidfd=4] Successfully activated service 'org.freedesktop.portal.Desktop'
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7fa8a4a63d00
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+Gdk-Message: 21:48:24.161: Error reading events from display: Broken pipe

@@ -1,0 +1,272 @@
+#!/usr/bin/env python3
+"""Deploy the versioned HOME overlay with a durable, recoverable per-file journal."""
+import argparse
+from contextlib import contextmanager
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import stat
+import time
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def sync_directory(path):
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def ensure_parents(path, root):
+    relative = path.relative_to(root)
+    current = root
+    for part in relative.parts[:-1]:
+        current /= part
+        if current.is_symlink():
+            raise RuntimeError(f'Refusing symlink directory: {current}')
+        if current.exists() and not current.is_dir():
+            raise RuntimeError(f'Parent is not a directory: {current}')
+        if not current.exists():
+            current.mkdir()
+            sync_directory(current.parent)
+
+
+@contextmanager
+def deployment_guard(target):
+    lock_path = target / '.local/state/mbp-intel/deployment.lock'
+    ensure_parents(lock_path, target)
+    descriptor = os.open(lock_path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, 'r+') as guard:
+        fcntl.flock(guard, fcntl.LOCK_EX)
+        yield
+
+
+def file_identity(path):
+    if path.is_symlink():
+        return {'kind': 'symlink', 'target': os.readlink(path)}
+    if not path.exists():
+        return None
+    before = path.stat()
+    if not stat.S_ISREG(before.st_mode):
+        raise RuntimeError(f'Refusing to replace non-file: {path}')
+    with path.open('rb') as stream:
+        digest = hashlib.file_digest(stream, 'sha256').hexdigest()
+    after = path.stat()
+    if (before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (
+            after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+        raise RuntimeError(f'File changed while preparing deployment: {path}')
+    return {'kind': 'file', 'sha256': digest, 'mode': stat.S_IMODE(after.st_mode)}
+
+
+def write_journal(path, document):
+    temporary = path.with_name(f'{path.name}.{os.getpid()}.tmp')
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            json.dump(document, stream, indent=2)
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        sync_directory(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def reject_interrupted(target):
+    for path in sorted((target / '.local/state/mbp-intel/backups').glob('*/manifest.json')):
+        if (path.parent / 'restored').exists():
+            continue
+        document = json.loads(path.read_text())
+        # The backup directory also holds database snapshots. Their manifests
+        # are not deployment journals and must never be sent through rollback.
+        if isinstance(document, list):
+            continue
+        if (not path.parent.name.isdigit()
+                and (not isinstance(document, dict)
+                     or not {'version', 'status', 'entries'} & document.keys())):
+            continue
+        # A partial journal header is still ours: do not silently skip damaged
+        # recovery information merely because its version or status is missing.
+        # Timestamp-named deployment directories also identify an empty header.
+        if (not isinstance(document, dict)
+                or document.get('version') != 2
+                or not isinstance(document.get('entries'), list)
+                or document.get('status') not in ('in_progress', 'complete')):
+            raise RuntimeError(f'Invalid deployment journal: {path}; inspect before deploying')
+        if document['status'] != 'complete':
+            raise RuntimeError(f'Interrupted deployment: run deploy-home --target {target} --rollback {path.parent}')
+
+
+def deploy(target, overlay, wallpaper=None, *, only=None):
+    pairs = [(p, p.relative_to(overlay)) for p in sorted(overlay.rglob('*'))
+             if p.is_file() and not p.is_symlink()
+             and p.relative_to(overlay).parts[0] != 'README.md'
+             and '__pycache__' not in p.relative_to(overlay).parts
+             and p.suffix not in ('.pyc', '.pyo')]
+    config = Path('.config/superhold/config.toml')
+    legacy = Path('.config/hold-to-help/config.toml')
+    if any(relative == config for _, relative in pairs) and not os.path.lexists(overlay / legacy):
+        # Both installed names edit the same versioned configuration.
+        pairs.append((overlay / config, legacy))
+    if wallpaper:
+        pairs.append((wallpaper, Path('.local/share/mbp-intel/wallpaper.png')))
+    if only is not None:
+        if not only or isinstance(only, (str, bytes)):
+            raise ValueError('Deployment selection must contain exact relative file paths')
+        selected = set()
+        for value in only:
+            relative = Path(value)
+            if (relative.is_absolute() or '..' in relative.parts or not relative.parts
+                    or str(relative) != os.fspath(value)):
+                raise ValueError(f'Unsafe deployment selection: {value}')
+            selected.add(relative)
+        available = {relative for _, relative in pairs}
+        missing = selected - available
+        if missing:
+            raise ValueError('Unavailable deployment selection: ' + ', '.join(map(str, sorted(missing))))
+        pairs = [(source, relative) for source, relative in pairs if relative in selected]
+    target = target.resolve()
+    target.mkdir(parents=True, exist_ok=True)
+    with deployment_guard(target):
+        reject_interrupted(target)
+        entries = []
+        for source, relative in pairs:
+            source = source.resolve()
+            dest = target / relative
+            ensure_parents(dest, target)
+            if dest.is_symlink() and os.readlink(dest) == str(source):
+                continue
+            original = file_identity(dest)
+            entries.append({'path': str(relative), 'source': str(source),
+                            'saved': original is not None, 'original': original})
+        if not entries:
+            return None
+        backup = target / '.local/state/mbp-intel/backups' / str(time.time_ns())
+        ensure_parents(backup, target)
+        backup.mkdir(mode=0o700)
+        sync_directory(backup.parent)
+        for entry in entries:
+            ensure_parents(backup / 'home' / entry['path'], target)
+        document = {'version': 2, 'status': 'in_progress', 'entries': entries}
+        # This full plan is durable before the first user file is moved. Recovery
+        # examines actual source/backup files, so no per-operation progress write
+        # is needed in the vulnerable interval between rename and link creation.
+        write_journal(backup / 'manifest.json', document)
+        for entry in entries:
+            dest = target / entry['path']
+            saved = backup / 'home' / entry['path']
+            if file_identity(dest) != entry['original']:
+                raise RuntimeError(f'Changed since deployment preflight: {dest}; rollback {backup}')
+            if entry['saved']:
+                # Atomic rename only: do not turn a cross-filesystem move into a
+                # partially copied backup. EXDEV leaves the original untouched.
+                os.replace(dest, saved)
+                sync_directory(dest.parent)
+                sync_directory(saved.parent)
+            dest.symlink_to(entry['source'])
+            sync_directory(dest.parent)
+        document['status'] = 'complete'
+        write_journal(backup / 'manifest.json', document)
+        return backup
+
+
+def managed_link(path, source):
+    return path.is_symlink() and os.readlink(path) == source
+
+
+def rollback(target, backup):
+    target = target.resolve()
+    backup = backup.resolve()
+    expected = target / '.local/state/mbp-intel/backups'
+    if not backup.is_relative_to(expected):
+        raise RuntimeError('Backup must belong to the target HOME')
+    with deployment_guard(target):
+        if (backup / 'restored').exists():
+            return
+        document = json.loads((backup / 'manifest.json').read_text())
+        legacy = isinstance(document, list)
+        if not legacy and document.get('version') != 2:
+            raise RuntimeError('Unsupported deployment journal version')
+        entries = document if legacy else document['entries']
+        actions, seen = [], set()
+        # Preflight every entry before changing anything during rollback.
+        for entry in entries:
+            relative = Path(entry['path'])
+            if relative.is_absolute() or '..' in relative.parts or relative in seen:
+                raise RuntimeError('Unsafe backup entry')
+            seen.add(relative)
+            dest = target / relative
+            saved = backup / 'home' / relative
+            ensure_parents(dest, target)
+            ensure_parents(saved, target)
+            current = file_identity(dest)
+            stored = file_identity(saved)
+            managed = managed_link(dest, entry['source'])
+            if legacy:
+                if current is not None and not managed:
+                    raise RuntimeError(f'Changed since deployment: {dest}')
+                if entry['saved'] and stored is None:
+                    raise RuntimeError(f'Missing saved file: {saved}')
+                actions.append((dest, saved, bool(entry['saved'])))
+                continue
+            original = entry['original']
+            if stored is not None:
+                if original is None or stored != original:
+                    raise RuntimeError(f'Saved original changed: {saved}')
+                if current is not None and not managed:
+                    raise RuntimeError(f'Changed since deployment: {dest}')
+                actions.append((dest, saved, True))
+            elif original is not None:
+                # Not reached during deployment, or already restored by an
+                # interrupted rollback. Preserve that exact original in place.
+                if current != original:
+                    raise RuntimeError(f'Missing saved original or changed destination: {dest}')
+            elif current is not None:
+                if not managed:
+                    raise RuntimeError(f'Changed since deployment: {dest}')
+                actions.append((dest, saved, False))
+        for dest, saved, restore in reversed(actions):
+            if dest.is_symlink():
+                dest.unlink()
+                sync_directory(dest.parent)
+            if restore:
+                os.replace(saved, dest)
+                sync_directory(saved.parent)
+                sync_directory(dest.parent)
+        restored = backup / 'restored'
+        descriptor = os.open(restored, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+        sync_directory(backup)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--target', type=Path, default=Path.home())
+    parser.add_argument('--rollback', type=Path)
+    parser.add_argument('--only', action='append', metavar='PATH',
+                        help='deploy only this exact HOME-relative file (repeatable)')
+    args = parser.parse_args()
+    if args.rollback and args.only is not None:
+        parser.error('--only cannot be combined with --rollback')
+    if args.rollback:
+        rollback(args.target, args.rollback)
+        print('Restored files from', args.rollback)
+    else:
+        wallpaper = REPO / 'alpine/assets/spaceghost.png'
+        if not wallpaper.is_file():
+            wallpaper = REPO / 'alpine/assets/violet-eclipse.png'
+        result = deploy(args.target, REPO / 'alpine/desktop',
+                        wallpaper if wallpaper.is_file() else None, only=args.only)
+        print('Already current' if result is None else f'Backup: {result}')
+
+
+if __name__ == '__main__':
+    main()

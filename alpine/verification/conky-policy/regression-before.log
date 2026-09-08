@@ -1,0 +1,252 @@
+test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) ... 
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=None) ... ERROR
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value='invalid') ... ERROR
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=-2) ... FAIL
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=nan) ... FAIL
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=inf) ... FAIL
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=1) ... FAIL
+  test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=999) ... FAIL
+test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) ... 
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${cpu cpu1}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='$mem') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${top cpu 1}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${diskio}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${downspeed wlan0}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${hwmon 0 temp 1}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${uptime}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${fs_used /}') ... FAIL
+  test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${wireless_essid wlan0}') ... FAIL
+test_shipped_source_cannot_restore_stats_or_subminute_refresh (test_conky_policy.QuietPanelTests.test_shipped_source_cannot_restore_stats_or_subminute_refresh) ... FAIL
+test_useful_cards_and_mail_survive_with_slow_refresh (test_conky_policy.QuietPanelTests.test_useful_cards_and_mail_survive_with_slow_refresh) ... FAIL
+
+======================================================================
+ERROR: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+                    ^^^^^^^^^^^^^^^^^^^^^
+TypeError: '<=' not supported between instances of 'int' and 'NoneType'
+
+======================================================================
+ERROR: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value='invalid')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+                    ^^^^^^^^^^^^^^^^^^^^^
+TypeError: '<=' not supported between instances of 'int' and 'str'
+
+======================================================================
+FAIL: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=-2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=nan)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=inf)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) (value=999)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 57, in test_missing_invalid_and_excessive_intervals_are_safe
+    self.assertTrue(60 <= interval <= 300)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${cpu cpu1}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='$mem')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${top cpu 1}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${diskio}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${downspeed wlan0}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${hwmon 0 temp 1}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${uptime}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${fs_used /}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) (variable='${wireless_essid wlan0}')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 30, in test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name
+    self.assertEqual([p['id'] for p in document['panels']], ['date'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['date', 'card'] != ['date']
+
+First list contains 1 additional elements.
+First extra element 1:
+'card'
+
+- ['date', 'card']
++ ['date']
+
+======================================================================
+FAIL: test_shipped_source_cannot_restore_stats_or_subminute_refresh (test_conky_policy.QuietPanelTests.test_shipped_source_cannot_restore_stats_or_subminute_refresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 48, in test_shipped_source_cannot_restore_stats_or_subminute_refresh
+    self.assertFalse({'reactor','memory','storage','transmission'} &
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                     {p['id'] for p in source['panels']})
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'transmission', 'memory', 'reactor', 'storage'} is not false
+
+======================================================================
+FAIL: test_useful_cards_and_mail_survive_with_slow_refresh (test_conky_policy.QuietPanelTests.test_useful_cards_and_mail_survive_with_slow_refresh)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_policy.py", line 37, in test_useful_cards_and_mail_survive_with_slow_refresh
+    self.assertEqual(document['update_interval'], 60)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 60
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.016s
+
+FAILED (failures=16, errors=2)

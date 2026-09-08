@@ -1,0 +1,165 @@
+{
+  "isolation": "private HOME, XDG directories, headless SwayFX, nonfunctional private bus address",
+  "observer": "passive GTK map/unmap and production tick callbacks; persistent Sway IPC sampled about every 5ms",
+  "limitations": "Headless timings and layer metadata, not physical panel scanout; source snapshots were measured separately.",
+  "before": {
+    "helper_sha256": "c13495763064296552dc73ef9e5e83bfe1818e934c7e288ec0f7af7357f20665",
+    "runs": [
+      {
+        "name": "plain-floating",
+        "window_geometry_changes": [
+          {
+            "ms": 3.06,
+            "rect": {
+              "x": 420,
+              "y": 233,
+              "width": 600,
+              "height": 400
+            }
+          }
+        ],
+        "first_top_ms": 16.58,
+        "overlap_samples": 34,
+        "overlap_until_ms": 224.21,
+        "stable_attachment_ms": 230.68,
+        "maps": [
+          {
+            "ms": 12.8,
+            "alpha": 0.0
+          }
+        ],
+        "opaque_ms": 234.3,
+        "motion_targets": [
+          {
+            "ms": 15.82,
+            "target": {
+              "x": 420,
+              "y": 633,
+              "width": 600,
+              "height": 28
+            }
+          }
+        ]
+      },
+      {
+        "name": "centered-resize",
+        "window_geometry_changes": [
+          {
+            "ms": 86.88,
+            "rect": {
+              "x": 20,
+              "y": 20,
+              "width": 1400,
+              "height": 827
+            }
+          }
+        ],
+        "first_top_ms": 92.65,
+        "overlap_samples": 35,
+        "overlap_until_ms": 299.57,
+        "stable_attachment_ms": 305.3,
+        "maps": [
+          {
+            "ms": 89.1,
+            "alpha": 0.0
+          }
+        ],
+        "opaque_ms": 312.4,
+        "motion_targets": [
+          {
+            "ms": 91.27,
+            "target": {
+              "x": 20,
+              "y": 847,
+              "width": 1400,
+              "height": 28
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "after": {
+    "helper_sha256": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+    "runs": [
+      {
+        "name": "plain-floating",
+        "window_geometry_changes": [
+          {
+            "ms": 4.1,
+            "rect": {
+              "x": 420,
+              "y": 233,
+              "width": 600,
+              "height": 400
+            }
+          }
+        ],
+        "first_top_ms": 22.03,
+        "overlap_samples": 0,
+        "overlap_until_ms": 0,
+        "stable_attachment_ms": 22.03,
+        "maps": [
+          {
+            "ms": 18.2,
+            "alpha": 1.0
+          }
+        ],
+        "opaque_ms": 19.06,
+        "motion_targets": [
+          {
+            "ms": 19.06,
+            "target": {
+              "x": 420,
+              "y": 633,
+              "width": 600,
+              "height": 28
+            }
+          }
+        ]
+      },
+      {
+        "name": "centered-resize",
+        "window_geometry_changes": [
+          {
+            "ms": 79.52,
+            "rect": {
+              "x": 20,
+              "y": 20,
+              "width": 1400,
+              "height": 827
+            }
+          }
+        ],
+        "first_top_ms": 91.27,
+        "overlap_samples": 0,
+        "overlap_until_ms": 0,
+        "stable_attachment_ms": 91.27,
+        "maps": [
+          {
+            "ms": 85.2,
+            "alpha": 1.0
+          }
+        ],
+        "opaque_ms": 85.91,
+        "motion_targets": [
+          {
+            "ms": 85.91,
+            "target": {
+              "x": 20,
+              "y": 847,
+              "width": 1400,
+              "height": 28
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "checks": {
+    "no_caption_overlap_after": true,
+    "replacement_fully_opaque_on_map": true,
+    "final_flush_attachment": true,
+    "single_window_geometry_change_per_transition": true
+  }
+}

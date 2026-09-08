@@ -1,0 +1,50 @@
+{
+  "action": "allow",
+  "duration": "always",
+  "enabled": true,
+  "name": "oldbook-bootstrap-1000-12bcde99245f7f4a4a46ee726d7070628521f706eb43b4b3335c77d8d5696109-dns-1",
+  "nolog": false,
+  "operator": {
+    "list": [
+      {
+        "data": "/usr/bin/op",
+        "operand": "process.path",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "1000",
+        "operand": "user.id",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "de8eb54ac847bcaeb80219d9936ff91c",
+        "operand": "process.hash.md5",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "^(tcp|udp)6?$",
+        "operand": "protocol",
+        "sensitive": true,
+        "type": "regexp"
+      },
+      {
+        "data": "53",
+        "operand": "dest.port",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "75.75.76.76",
+        "operand": "dest.ip",
+        "sensitive": true,
+        "type": "simple"
+      }
+    ],
+    "operand": "list",
+    "type": "list"
+  },
+  "precedence": false
+}

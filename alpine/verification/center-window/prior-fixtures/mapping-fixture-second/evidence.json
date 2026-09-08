@@ -1,0 +1,46 @@
+{
+  "status": "failed",
+  "host_changes": 0,
+  "isolation": "private HOME/XDG directories, headless Sway, nonexistent session bus",
+  "keyboard": "wtype virtual keyboard with explicit Mod4 and Shift modifiers",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-center": "c52e08d118f34300dd68523c00d35a4bce8d835dd9659f69b4d1a9510c5260fb",
+    "alpine/desktop/.config/sway/local.d/center.conf": "05d49c93d8835283785d852f14f3777f54a8608930196d7876c9318b98d6ce4c",
+    "alpine/tests/verify_center_window.py": "53bd2e141e165f509f5f73e3ecde4cb6c9d5ed78c4bd013703d14ac4b1328c21",
+    "alpine/packages/waybar-art/tests/pointer-input.c": "e2743cbd289ab8ee699f7f25d87fad690154b7663916ad1948a046ef51342ac7",
+    "alpine/packages/waybar-art/tests/pointer.xml": "3ff6d540be0bc5228195bf072bde42117ea17945a5c2061add5d3cf97d6bb524"
+  },
+  "checks": [
+    "focused-target-starts-below-overlapping-control"
+  ],
+  "states": [
+    {
+      "after": "focused-target-starts-below-overlapping-control",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 27169,
+        "rect": {
+          "x": 120,
+          "y": 160,
+          "width": 1440,
+          "height": 860
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    }
+  ],
+  "error": ""
+}

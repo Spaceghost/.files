@@ -1,0 +1,21 @@
+{
+  "name": "waybar",
+  "version": "0.15.0",
+  "revision": 4,
+  "upstream_commit": "90b209add8937514d0a987aa842e701bd8f1232e",
+  "source_date_epoch": 1770408903,
+  "source": {
+    "url": "https://github.com/Alexays/Waybar/archive/0.15.0/Waybar-0.15.0.tar.gz",
+    "filename": "Waybar-0.15.0.tar.gz",
+    "sha256": "21c2bbef88c40473c355003582f9331d2f9b8a01efdcce0935edfc5f6b023a3e"
+  },
+  "base_recipe": {
+    "repository": "https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/community/waybar",
+    "version": "0.15.0-r3"
+  },
+  "backport": {
+    "upstream_commit": "b0b46ec039199d99c36a0d6637e13e292d66fbdc",
+    "url": "https://github.com/Alexays/Waybar/commit/b0b46ec039199d99c36a0d6637e13e292d66fbdc",
+    "patch_sha256": "b7599913a305ea4390111250005ed5728b0dffdec58572a43e41e7843fc7b6f2"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "before_owner_exit_loses_clipboard": true,
+  "daemon_reload_single_instance": true,
+  "wayland_text_and_history": true,
+  "after_owner_exit_preserves_clipboard": true,
+  "image_history_restores_exact_png": true,
+  "neovim_bidirectional": true,
+  "tmux_vi_y_and_enter_copy": true,
+  "wayland_gtk_bidirectional": true,
+  "x11_gtk_bidirectional": true,
+  "foot_mouse_selection_both_clipboards": true,
+  "screenshot_copies_png": true,
+  "real_history_menu_cancel_preserves_clipboard": true
+}

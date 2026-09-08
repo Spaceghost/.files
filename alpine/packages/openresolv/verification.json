@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "verified_date": "2026-09-07",
+  "package_version": "3.17.4-r1",
+  "private_fixture_tests": 6,
+  "unpatched_fixture_failed_assertions": 13,
+  "offline_builds": 2,
+  "byte_identical_signed_apks": true,
+  "signature_verified": true,
+  "build_network": "unshare --net; ordinary-user abuild -d",
+  "build_directories": [
+    "/home/jack/.local/state/alpine-rice/build/openresolv-host-pid-a",
+    "/home/jack/.local/state/alpine-rice/build/openresolv-host-pid-b"
+  ],
+  "build_logs": [
+    {
+      "filename": "openresolv-build-a.log",
+      "sha256": "b38779680941548a4f4f1c7c2d81a480aa2a3abd8b990d16fa805365697a3225",
+      "size": 8972,
+      "artifact": "sha256/b38779680941548a4f4f1c7c2d81a480aa2a3abd8b990d16fa805365697a3225/openresolv-build-a.log"
+    },
+    {
+      "filename": "openresolv-build-b.log",
+      "sha256": "4ae5f58f2821ea293435d18b48e3810d21c760b9000e040ec67724bd343879c0",
+      "size": 8972,
+      "artifact": "sha256/4ae5f58f2821ea293435d18b48e3810d21c760b9000e040ec67724bd343879c0/openresolv-build-b.log"
+    }
+  ],
+  "tested_platform": "Alpine edge x86_64",
+  "package_arch": "noarch",
+  "source_date_epoch": 1766616122,
+  "build_tool_versions": {
+    "abuild": "3.18.0_rc5-r1",
+    "apk-tools": "3.0.8-r0",
+    "busybox": "1.38.0-r4",
+    "doas": "6.8.2-r8",
+    "fakeroot": "1.37.2-r0",
+    "fossil": "2.28-r0",
+    "make": "4.4.1-r4",
+    "openssl": "3.5.8-r0",
+    "patch": "2.8-r0",
+    "python3": "3.14.7-r0",
+    "tar": "1.35-r5",
+    "util-linux-misc": "2.42.3-r1",
+    "xz": "5.8.3-r0"
+  },
+  "resolver_sha256": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3",
+  "main_package_install_hooks": [],
+  "main_package_contains_resolv_conf": false,
+  "native_concurrency_groups": 6,
+  "native_invalid_context_checks": 10,
+  "native_lease_application_cases": 7,
+  "stock_negative_control": "Both live outer-PID lock theft and stale namespace-local PID 1 lock hang reproduced.",
+  "native_evidence": [
+    {
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/resolver-bridge-review-first/evidence.json",
+      "evidence_sha256": "e0ea94367d678a30df70e45ac40db9ac97ff39b0d27c5804c018c744a195bd78",
+      "host_state_unchanged": true,
+      "source_unchanged": true,
+      "remaining_namespace_members": [],
+      "cases": [
+        "nested_writer_preserves_live_ordinary_lock",
+        "nested_writer_recovers_stale_ordinary_lock",
+        "ordinary_writer_respects_nested_host_pid_lock",
+        "ordinary_writer_recovers_killed_nested_host_pid",
+        "nested_writer_recovers_killed_nested_host_pid",
+        "invalid_bridge_context_refused_before_mutation"
+      ],
+      "elapsed_seconds": 1.4408636990010564,
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_resolver_bridge.py": "80d48308406d34944a29d3f24e5fad397d22dd6d2756903eb7f340e6866b305a",
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/tmp/openresolv-source-p3nhpf7n/patched/resolvconf": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "da097760b763e1a8bd3c70866caca1532b29131c1304f925d6a658712b41b67f",
+        "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f"
+      }
+    },
+    {
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/network-applier-review-final/evidence.json",
+      "evidence_sha256": "42dcc5faf69d0877ad94da5d918738984b09bc18a3aa1fb25a8d476dcf62f9f5",
+      "host_state_unchanged": true,
+      "source_unchanged": true,
+      "remaining_namespace_members": [],
+      "cases": [
+        "initial_ipv4_and_native_dns",
+        "same_address_renewal",
+        "home_static_ipv6",
+        "hotspot_removes_only_owned_ipv6",
+        "home_restores_static_ipv6",
+        "removal_preserves_other_address_routes_and_dns",
+        "host_lease_off_prefix_gateway"
+      ],
+      "elapsed_seconds": 12.189343375001044,
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "da097760b763e1a8bd3c70866caca1532b29131c1304f925d6a658712b41b67f",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+        "/tmp/openresolv-source-p3nhpf7n/patched/resolvconf": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3"
+      }
+    },
+    {
+      "evidence_path": "/home/jack/.local/state/mbp-intel/verification/resolver-pid-lock-final-negative/evidence.json",
+      "evidence_sha256": "d633b288cf56898c52c1f61881b80cebcd6153dac46dbb341aa3a8c34ffb4188",
+      "host_state_unchanged": true,
+      "source_unchanged": true,
+      "remaining_namespace_members": [],
+      "cases": [],
+      "elapsed_seconds": null,
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_resolver_pid_lock.py": "dedc9438fe0f3190333febd208bf4412fb579a9eed04ba2538bee00918eb5131",
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/usr/sbin/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0",
+        "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f",
+        "/home/jack/.local/state/mbp-intel/verification/resolver-stock-3.17.4/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0"
+      }
+    }
+  ],
+  "source_build_inputs_and_apks_export_verified": true,
+  "apk_cache_verified": true,
+  "deployment_scope": "No package installation, resolver takeover, live DNS, network, WPA or service mutation by this builder.",
+  "signature_verification_command": "apk --keys-dir /home/jack/.files/alpine/packages/openresolv verify <main.apk> <doc.apk>",
+  "installation": {
+    "installed": true,
+    "packages": [
+      "openresolv-3.17.4-r1"
+    ],
+    "documentation_apk_installed": false,
+    "evidence_path": "alpine/security/radio/resolver-bridge-install-verification.json",
+    "evidence_sha256": "6095f48cc2965ed06fa6b2c121c80317f2be35ff4a6713241c0159d9ad694675",
+    "installed_resolver_matches_proven_script": true,
+    "installed_capability_version": 1,
+    "resolver_takeover": false,
+    "hook_configuration_changed": false
+  }
+}

@@ -1,0 +1,307 @@
+#!/usr/bin/env python3
+"""Export Fossil incrementally and publish one branch without rewriting GitHub."""
+import argparse
+import contextlib
+import datetime as dt
+import fcntl
+import json
+import os
+from pathlib import Path
+import selectors
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+from urllib.parse import urlsplit
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_REMOTE = 'https://github.com/Spaceghost/.files.git'
+COMMAND_TIMEOUT = 180
+COMMAND_OUTPUT_LIMIT = 64 * 1024
+LOG_LIMIT = 1024 * 1024
+TRUNCATION_NOTE = '[earlier output truncated]\n'
+
+
+def bounded_text(value, limit, truncated=False):
+    encoded = value.encode('utf-8', errors='replace')
+    if truncated or len(encoded) > limit:
+        tail = encoded[-(limit - len(TRUNCATION_NOTE)):]
+        return TRUNCATION_NOTE + tail.decode('utf-8', errors='ignore')
+    return value
+
+
+def run(args, cwd, capture=False):
+    command = [str(arg) for arg in args]
+    environment = dict(os.environ, GIT_TERMINAL_PROMPT='0',
+                       GIT_ASKPASS='/bin/false', SSH_ASKPASS='/bin/false')
+    environment.setdefault('GIT_SSH_COMMAND', 'ssh -oBatchMode=yes -oConnectTimeout=15')
+    process = subprocess.Popen(command, cwd=cwd, env=environment,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               start_new_session=True)
+    tails = [bytearray(), bytearray()]
+    truncated = [False, False]
+    deadline = time.monotonic() + COMMAND_TIMEOUT
+    timed_out = False
+    try:
+        with process.stdout, process.stderr, selectors.DefaultSelector() as selector:
+            selector.register(process.stdout, selectors.EVENT_READ, 0)
+            selector.register(process.stderr, selectors.EVENT_READ, 1)
+            try:
+                while selector.get_map():
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise subprocess.TimeoutExpired(command, COMMAND_TIMEOUT)
+                    for key, _ in selector.select(remaining):
+                        data = os.read(key.fileobj.fileno(), 8192)
+                        if not data:
+                            selector.unregister(key.fileobj)
+                            continue
+                        tail = tails[key.data]
+                        tail.extend(data)
+                        if len(tail) > COMMAND_OUTPUT_LIMIT:
+                            del tail[:-COMMAND_OUTPUT_LIMIT]
+                            truncated[key.data] = True
+                process.wait(timeout=max(0, deadline - time.monotonic()))
+            except BaseException:
+                # Fossil/Git helpers share this group. Stop them before releasing
+                # the publication lock, without collecting unbounded pipe data.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait()
+                raise
+    except subprocess.TimeoutExpired:
+        timed_out = True
+    output, error = [bounded_text(tail.decode('utf-8', errors='replace'),
+                                  COMMAND_OUTPUT_LIMIT, was_truncated)
+                     for tail, was_truncated in zip(tails, truncated)]
+    if not capture:
+        print(output, end='')
+    if error:
+        print(error, end='', file=sys.stderr)
+    if timed_out:
+        raise subprocess.TimeoutExpired(command, COMMAND_TIMEOUT, output, error)
+    if process.returncode:
+        raise subprocess.CalledProcessError(process.returncode, command, output, error)
+    if capture and truncated[0]:
+        raise RuntimeError('captured stdout was truncated; refusing partial command data')
+    return subprocess.CompletedProcess(command, process.returncode, output, error)
+
+
+class RotatingLog:
+    """Keep the current log and one previous log at most LOG_LIMIT bytes each."""
+
+    def __init__(self, path):
+        self.path = path
+        self.previous = path.with_name(path.name + '.1')
+        self.stream = None
+
+    @staticmethod
+    def trim(stream):
+        if os.fstat(stream.fileno()).st_size > LOG_LIMIT:
+            stream.seek(-LOG_LIMIT, os.SEEK_END)
+            tail = stream.read(LOG_LIMIT).decode('utf-8', errors='ignore').encode('utf-8')
+            stream.seek(0)
+            stream.truncate()
+            stream.write(tail)
+            stream.flush()
+        return os.fstat(stream.fileno()).st_size
+
+    def open(self):
+        descriptor = os.open(self.path, os.O_CREAT | os.O_APPEND | os.O_RDWR | os.O_NOFOLLOW,
+                             0o600)
+        self.stream = os.fdopen(descriptor, 'a+b')
+        self.size = self.trim(self.stream)
+
+    def rotate(self):
+        self.stream.close()
+        self.path.replace(self.previous)
+        self.open()
+
+    def __enter__(self):
+        try:
+            descriptor = os.open(self.previous, os.O_RDWR | os.O_NOFOLLOW)
+        except FileNotFoundError:
+            pass
+        else:
+            with os.fdopen(descriptor, 'r+b') as stream:
+                self.trim(stream)
+        try:
+            self.open()
+            if self.size >= LOG_LIMIT:
+                self.rotate()
+            return self
+        except BaseException:
+            if self.stream is not None:
+                self.stream.close()
+            raise
+
+    def __exit__(self, *args):
+        self.stream.close()
+
+    def flush(self):
+        self.stream.flush()
+
+    def write(self, text):
+        # Encode small pieces so even one large write does not duplicate its
+        # complete contents. Keep UTF-8 characters intact across rotations.
+        for offset in range(0, len(text), 16384):
+            data = text[offset:offset + 16384].encode('utf-8', errors='replace')
+            while data:
+                room = LOG_LIMIT - self.size
+                piece = data[:room]
+                if len(piece) < len(data):
+                    piece = piece.decode('utf-8', errors='ignore').encode('utf-8')
+                if not piece:
+                    self.rotate()
+                    continue
+                self.stream.write(piece)
+                self.size += len(piece)
+                data = data[len(piece):]
+        self.flush()
+        return len(text)
+
+
+@contextlib.contextmanager
+def exclusive_lock(path):
+    descriptor = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, 'a') as stream:
+        try:
+            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        yield True
+
+
+def write_json(path, value):
+    descriptor, temporary = tempfile.mkstemp(prefix='.' + path.name, dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            json.dump(value, stream, indent=2)
+            stream.write('\n')
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def read_json(path):
+    try:
+        value = json.loads(path.read_text())
+        return value if isinstance(value, dict) else {}
+    except (FileNotFoundError, ValueError):
+        return {}
+
+
+def publish(checkout, mirror, remote, branch, export_only=False, only_if_changed=False):
+    checkout = Path(checkout).resolve()
+    mirror = Path(mirror).expanduser().resolve()
+    if mirror == checkout or checkout in mirror.parents or mirror in checkout.parents:
+        raise ValueError('Keep the Git mirror separate from the Fossil checkout and its ancestors.')
+    parsed = urlsplit(remote)
+    if parsed.scheme in ('http', 'https') and (parsed.username or parsed.password):
+        raise ValueError('Use a credential helper, not credentials in an HTTP remote URL.')
+    mirror.parent.mkdir(parents=True, exist_ok=True)
+    with exclusive_lock(mirror.parent / ('.' + mirror.name + '.publish.lock')) as acquired:
+        if not acquired:
+            print('Another publisher holds the mirror lock; retry on the next run.')
+            return None
+        return publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed)
+
+
+def publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed):
+    run(['git', 'check-ref-format', '--branch', branch], checkout, capture=True)
+    # Fossil updates this mirror and its private incremental-export state.
+    run(['fossil', 'git', 'export', mirror, '--autopush', 'off',
+         '--mainbranch', 'base'], checkout)
+    current = run(['git', 'remote'], mirror, capture=True).stdout.splitlines()
+    if 'github' in current:
+        url = run(['git', 'remote', 'get-url', 'github'], mirror, capture=True).stdout.strip()
+        if url != remote:
+            raise ValueError('Existing github remote differs; inspect it before publishing.')
+    else:
+        run(['git', 'remote', 'add', 'github', remote], mirror)
+    # Git allows a separate push URL (and pushInsteadOf rewrites). Verify the
+    # effective destinations, not merely the URL used to fetch/verify the branch.
+    push_urls = run(['git', 'remote', 'get-url', '--all', '--push', 'github'],
+                    mirror, capture=True).stdout.splitlines()
+    if push_urls != [remote]:
+        raise ValueError('Effective Git push destination differs; inspect github push URLs.')
+    ref = 'refs/heads/' + branch
+    # Explicit refspec also avoids touching old branches with translated SHAs.
+    run(['git', 'config', '--replace-all', 'remote.github.push', ref + ':' + ref], mirror)
+    run(['git', 'config', 'push.default', 'nothing'], mirror)
+    local = run(['git', 'rev-parse', ref], mirror, capture=True).stdout.strip()
+    if export_only:
+        print(f'Exported {branch}: {local}; not pushed')
+        return local
+    receipt = mirror / '.git/mbp-intel-published.json'
+    identity = {'remote': remote, 'branch': branch, 'commit': local}
+    if only_if_changed and read_json(receipt) == identity:
+        print(f'Already published {branch}: {local}')
+        return local
+    run(['git', 'push', '--no-follow-tags', 'github', ref + ':' + ref], mirror)
+    published = run(['git', 'ls-remote', '--heads', 'github', ref], mirror,
+                    capture=True).stdout.split()
+    if len(published) != 2 or published != [local, ref]:
+        raise RuntimeError('Remote branch changed or could not be verified after push.')
+    write_json(receipt, identity)
+    print(f'Published {branch}: {local}')
+    return local
+
+
+def scheduled(checkout, mirror, remote, branch, state):
+    state = Path(state).expanduser()
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    with exclusive_lock(state / 'schedule.lock') as acquired:
+        if not acquired:
+            return 0
+        log = state / 'sync.log'
+        with RotatingLog(log) as stream, \
+                contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
+            now = dt.datetime.now(dt.timezone.utc).isoformat()
+            status = {'checked_at': now, 'branch': branch}
+            print(f'\n[{now}] Check committed changes')
+            try:
+                commit = publish(checkout, mirror, remote, branch, only_if_changed=True)
+                status.update(status='ok' if commit else 'busy', commit=commit)
+            except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+                detail = bounded_text(str(error), 4096)
+                print(f'Error: {detail}. Will retry on the next minute.')
+                status.update(status='error', error=detail)
+            write_json(state / 'status.json', status)
+            return 1 if status['status'] == 'error' else 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--checkout', type=Path, default=REPO)
+    parser.add_argument('--mirror', type=Path, default=Path(
+        os.environ.get('XDG_DATA_HOME', str(Path.home() / '.local/share'))
+    ) / 'fossil/files-git-mirror')
+    parser.add_argument('--remote', default=DEFAULT_REMOTE)
+    parser.add_argument('--branch', default='alpine-oldbook')
+    parser.add_argument('--export-only', action='store_true',
+                        help='configure/update the local mirror without pushing')
+    parser.add_argument('--scheduled', action='store_true',
+                        help='publish changed commits with bounded logs and retry status')
+    parser.add_argument('--state-dir', type=Path, default=Path(
+        os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))
+    ) / 'mbp-intel/git-mirror')
+    args = parser.parse_args()
+    if args.scheduled and args.export_only:
+        parser.error('--scheduled and --export-only cannot be combined')
+    try:
+        if args.scheduled:
+            raise SystemExit(scheduled(args.checkout, args.mirror, args.remote,
+                                       args.branch, args.state_dir))
+        publish(args.checkout, args.mirror, args.remote, args.branch, args.export_only)
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        parser.exit(1, f'publish-git-mirror: {error}\n')
+
+
+if __name__ == '__main__':
+    main()

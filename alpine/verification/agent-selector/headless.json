@@ -1,0 +1,71 @@
+{
+  "isolation": "Private HOME and XDG directories, headless Sway, synthetic current sessions; launch and attach dispatch stubbed. No live tmux sessions or agents launched.",
+  "entry": "alpine/desktop/.local/bin/oldbook-agents",
+  "menu_backend": "native /usr/bin/fuzzel via oldbook-fuzzel --dmenu --no-sort",
+  "expected_order": [
+    "codex-ultra",
+    "claude-max",
+    "agent-review-current",
+    "agent-review-detached",
+    "codex",
+    "claude",
+    "shell",
+    "alienware-codex",
+    "alienware-claude",
+    "alienware-ollama",
+    "alienware-ollama-small",
+    "alienware-shell",
+    "close"
+  ],
+  "submitted_options": [
+    "✦  New Codex · Astra ultra — GPT-6 Astra · ultra reasoning · uncontained",
+    "✦  New Claude · best max — Best available Claude · max effort · uncontained",
+    "󰆍  agent-review-current — /tmp/selector-review · 2w · attached",
+    "󰆍  agent-review-detached — /tmp/selector-notes · 1w",
+    "✦  New Codex — OpenAI Codex CLI, here",
+    "✦  New Claude Code — Anthropic Claude Code, here",
+    "✦  New Shell — A plain tmux shell, here",
+    "✦  New Codex on alienware · alienware — Codex CLI over Tailscale SSH",
+    "✦  New Claude Code on alienware · alienware — Claude Code over Tailscale SSH",
+    "✦  New Local model on alienware · alienware — Qwen3.5 27B on the box with the GPU",
+    "✦  New Local model on alienware (9B) · alienware — Qwen3.5 9B, quicker to load",
+    "✦  New Shell on alienware · alienware — A plain login shell over Tailscale SSH",
+    "󰅖  Close a session…"
+  ],
+  "checks": {
+    "preferred_codex_then_claude": true,
+    "current_sessions_follow_preferred": true,
+    "remaining_presets_follow_current": true,
+    "close_is_last": true,
+    "disabled_preferred_hidden": true,
+    "preferred_order_independent_of_config_order": true,
+    "native_keyboard_selection_preserves_dispatch": true
+  },
+  "native_selections": [
+    {
+      "index": 0,
+      "selected": "✦  New Codex · Astra ultra — GPT-6 Astra · ultra reasoning · uncontained",
+      "action": "new",
+      "target": "codex-ultra"
+    },
+    {
+      "index": 1,
+      "selected": "✦  New Claude · best max — Best available Claude · max effort · uncontained",
+      "action": "new",
+      "target": "claude-max"
+    },
+    {
+      "index": 2,
+      "selected": "󰆍  agent-review-current — /tmp/selector-review · 2w · attached",
+      "action": "attach",
+      "target": "agent-review-current"
+    },
+    {
+      "index": 4,
+      "selected": "✦  New Codex — OpenAI Codex CLI, here",
+      "action": "new",
+      "target": "codex"
+    }
+  ],
+  "screenshot": "alpine/verification/agent-selector/headless.png"
+}

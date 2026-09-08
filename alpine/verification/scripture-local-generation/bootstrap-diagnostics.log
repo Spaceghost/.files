@@ -1,0 +1,6 @@
+time=2026-09-07T21:35:12.992-07:00 level=INFO source=routes.go:1660 msg="Ollama cloud disabled: true"
+time=2026-09-07T21:35:12.992-07:00 level=INFO source=routes.go:1713 msg="Listening on 127.0.0.1:11435 (version 0.0.0)"
+time=2026-09-07T21:35:13.008-07:00 level=INFO source=types.go:60 msg="inference compute" id=cpu library=cpu compute="" name=cpu description=cpu libdirs=ollama driver="" pci_id="" type="" total="15.5 GiB" available="7.3 GiB"
+time=2026-09-07T21:37:49.638-07:00 level=INFO source=runner.go:1001 msg="Server listening on 127.0.0.1:33041"
+parse: error parsing grammar: number of repetitions exceeds sane defaults, please reduce the number of repetitions
+llama_grammar_init_impl: failed to parse grammar

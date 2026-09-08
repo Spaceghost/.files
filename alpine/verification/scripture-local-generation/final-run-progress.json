@@ -1,0 +1,49 @@
+{
+  "utc": "2026-09-08T05:09:22.468067+00:00",
+  "monotonic_elapsed_seconds": 3.0116163630009396,
+  "clock_ticks_per_second": 100,
+  "before": [
+    {
+      "pid": 15130,
+      "start_ticks": 2256462,
+      "cpu_ticks": 44,
+      "state": "S"
+    },
+    {
+      "pid": 15160,
+      "start_ticks": 2256505,
+      "cpu_ticks": 528,
+      "state": "S"
+    },
+    {
+      "pid": 15351,
+      "start_ticks": 2257292,
+      "cpu_ticks": 28447,
+      "state": "S"
+    }
+  ],
+  "after": [
+    {
+      "pid": 15130,
+      "start_ticks": 2256462,
+      "cpu_ticks": 44,
+      "state": "S"
+    },
+    {
+      "pid": 15160,
+      "start_ticks": 2256505,
+      "cpu_ticks": 528,
+      "state": "S"
+    },
+    {
+      "pid": 15351,
+      "start_ticks": 2257292,
+      "cpu_ticks": 29092,
+      "state": "S"
+    }
+  ],
+  "partial_output_available": false,
+  "request_stream": false,
+  "selected_cpu_backend": "haswell",
+  "cloud_disabled": true
+}

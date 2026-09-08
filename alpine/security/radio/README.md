@@ -1,0 +1,135 @@
+# Radio privacy controller
+
+## Current activation state
+
+On 2026-09-07, the reviewed permission helper and
+`72-privacy-rfkill.rules` were installed. `/dev/rfkill` is now `root:root`,
+`0644`, without an access ACL or `uaccess` tag: Jack can read status but cannot
+open it for writing. Root retains write access. Independent checks matched the
+installed helper/rule hashes to this repository, preserved Wi-Fi identity and
+addresses, and confirmed unchanged routes after excluding only `expires`
+fields. Both radios remained unblocked during this initial permission-only step.
+
+Subsequent Bluetooth-only preparation installed
+`71-privacy-bluetooth-off.rules`. Bluetooth is now software-blocked; WLAN radio
+state, association, addresses and routes remain unchanged. Independent checks
+verified the same device registrations and exact installed rule instance.
+Waybar's radio tooltip data reports Bluetooth blocked and WLAN enabled. See
+[bluetooth-verification.json](bluetooth-verification.json) and
+[BLUETOOTH.md](BLUETOOTH.md) for the separate policy and token-based recovery.
+
+The inert `mbp-intel-radio-runtime=0.1.0-r0` APK is now installed. It owns the
+privileged CLI, fourteen Python runtime modules and two DHCP helpers. The
+transaction added only this package; all nine before/after host-network
+comparison sections matched, including the same WPA/DHCP process identities.
+See the [runtime package instructions](../../packages/privacyctl-runtime/README.md)
+for its file-only installation and recovery boundary.
+
+Trusted profiles, exact doas grants, OpenRC services, the sleep hook, WPA/DHCP
+ownership changes and resolver policy remain unactivated. The supervisor has
+not been started. Waybar still reports radio state correctly; its
+existing rfkill handle and both wpa_supplicant handles are read-only. Permission
+changes do not revoke previously opened handles or remove the existing
+unrestricted wheel `nopass` doas authority. This is a direct-access restriction,
+not proof of radio silence or exclusive controller authority.
+
+Sanitized evidence is in [permissions-verification.json](permissions-verification.json).
+The exact private recovery journal is
+`/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q`; keep its association data
+out of Fossil. Reboot and seat-change persistence remain unverified.
+
+## Installed runtime, pending service activation
+
+When explicitly activated, `privacyctl supervise` runs the persistent owner and its process guardian.
+`connect PROFILE` and `scan` use its root-only command socket; they cannot
+fall back to one-shot DHCP. The existing `status [--json]` output remains
+read-only and available without that socket. `off` requests cancellation and
+retains a direct emergency blocking path when the service is unavailable.
+
+A scan disables saved networks while blocked, requests a native scan ID, and
+requires the matching completion event before reading results. It re-blocks
+when finished or on failure. A connection verifies the selected saved ID and
+exact SSID before unblocking, then retains one DHCP client through renewal.
+The native lease applier verifies generation-owned addresses, routes and DNS;
+healthy connections persist until off, disconnection or an authorization failure.
+
+Off invalidates older queued requests as well as current work. Cancellation
+blocks before child teardown and owned-state cleanup. An unresolved cleanup
+prevents another connection. Startup now holds guardian, owner and DHCP lifetime
+locks, blocks radios and recovers the durable journal before opening IPC
+readiness. Native commands, lease application and DHCP share one coordinator;
+writer identities are persisted before execution gates open. Same-boot recovery
+checks writer death and the link cookie before exact lease cleanup and prior
+alias restoration. It never reconnects or adopts the orphaned lease.
+
+See [OWNER-SERVICE.md](OWNER-SERVICE.md) for commands, deadlines, process death,
+private IPv6 settings and recovery boundaries. The historical seven fault checks
+in [fault-verification.json](fault-verification.json), recorded on 2026-09-07,
+cover cancellation, guardian/owner death and marker-based orphan rejection
+against their listed source hashes. The historical 57-test
+[primitive record](orphan-primitives-verification.json) predates integration.
+The source-stable non-root discovery recorded in
+[checkpoint-verification.json](checkpoint-verification.json) passed 270 tests
+and skipped 95 root-only cases. Separately, native run 07 passed nine cases in
+118.3246 seconds with 50 ms injected per journal write: recorded host comparisons
+matched, no fixture namespace members survived and sources were unchanged.
+See [orphan-integration-verification.json](orphan-integration-verification.json)
+and [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md) for exact scope. Runs 01–06 remain
+preserved failures, including the old four-second apply cap, a 0.75-second command
+timeout under load and an unexplained pre-existing DHCP-client delta in run 02.
+
+The passing fixture uses a private tmpfs journal with artificial delay. Full
+integrated real-persistent-disk timing, a surviving-writer drain from a new
+observer, OpenRC and live activation remain unproved. Current staged limits
+allow ten-second apply and twelve-second removal/hook acknowledgment, with
+five-second readiness; measured maxima and other limits are in
+[OWNER-SERVICE.md](OWNER-SERVICE.md). The dual-stack fixture uses six
+address/route selectors (K=6); completion for maximum accepted K=22 is not
+guaranteed. Different-boot DNS-only retirement is implemented in the installed
+inert runtime; its synthetic tests and separate native/reboot acceptance boundary are
+documented in [DIFFERENT-BOOT-RECOVERY.md](DIFFERENT-BOOT-RECOVERY.md). Live
+activation is unchanged.
+
+## Trusted policy and display contract
+
+The root policy maps `shmecklebucket` and an explicitly enabled
+`iphone-hotspot` profile to existing numeric WPA network IDs and exact SSIDs.
+The command names are stable aliases; each exact SSID comes from the private
+allowlist, with no hard-coded home spelling. The parser rejects malformed,
+duplicate, oversized or non-private policy files. The controller never reads
+or changes a PSK. Neither profile is activated:
+the saved home spelling differs from the requested name, and the exact hotspot
+name is unresolved. Do not substitute a guessed name or hostname.
+
+The status contract remains suitable for Waybar and a small GUI:
+
+```json
+{"wifi":{"interface":"wlan0","soft_blocked":true,"hard_blocked":false,"wpa_state":"UNAVAILABLE"},"bluetooth":{"soft_blocked":true,"hard_blocked":false}}
+```
+
+Software and hardware blocks are independent booleans, or `null` when their
+state cannot be read. Status does not query WPA and omits SSIDs and credentials.
+This example describes the schema, not the current host's state.
+
+## Activation boundary
+
+The WPA fragment uses `passive_scan=1`, `p2p_disabled=1` and per-network
+`scan_ssid=0`; it remains merge-only. The active WPA instance has no control
+socket, and creating one requires a controlled disruptive migration. Keep the
+live WPA and DHCP owners until the remaining migration and exact-profile
+checks are complete. The [isolated packet-policy checks](../firewall/radio-policy-verification.json)
+now verify renewal and controlled OpenSnitch DNS permissions; existing live
+grants and OpenRC startup still require the documented handoff.
+
+The installed, reproducibly patched openresolv dependency adds PID-namespace
+lock compatibility. It has not taken ownership of live DNS or changed subscriber
+configuration. See [RESOLVER-LOCKING.md](RESOLVER-LOCKING.md) and
+[LEASE-OWNER.md](LEASE-OWNER.md) for the validated component contracts.
+
+The historical one-shot Controller helpers remain only for their regression
+checks; production CLI routing no longer calls them. Earlier component evidence
+retains the exact source hashes exercised then. Follow
+[NETWORK-MIGRATION.md](NETWORK-MIGRATION.md) for remaining work and
+[INSTALL-PLAN.md](INSTALL-PLAN.md) for the remaining policy/service installation
+and ownership handoff. The migration installer is not yet complete; the inert
+runtime APK performs none of that handoff.

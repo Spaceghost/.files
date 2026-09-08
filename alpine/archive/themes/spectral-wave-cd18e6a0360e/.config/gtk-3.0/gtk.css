@@ -1,0 +1,58 @@
+/* Gruvbox Dark: shared GTK 3/4 semantic palette. */
+@define-color accent_bg_color #42C7C5;
+@define-color accent_fg_color #07121d;
+@define-color accent_color #42C7C5;
+@define-color window_bg_color #091827;
+@define-color window_fg_color #E8DFC8;
+@define-color view_bg_color #07121d;
+@define-color view_fg_color #E8DFC8;
+@define-color headerbar_bg_color #152330;
+@define-color headerbar_fg_color #E8DFC8;
+@define-color headerbar_border_color #3a444a;
+@define-color headerbar_backdrop_color #091827;
+@define-color headerbar_shade_color rgba(7, 18, 29, 0.36);
+@define-color headerbar_darker_shade_color rgba(7, 18, 29, 0.9);
+@define-color card_bg_color #1f2c37;
+@define-color card_fg_color #E8DFC8;
+@define-color card_shade_color rgba(7, 18, 29, 0.36);
+@define-color popover_bg_color #152330;
+@define-color popover_fg_color #E8DFC8;
+@define-color popover_shade_color rgba(7, 18, 29, 0.25);
+@define-color dialog_bg_color #152330;
+@define-color dialog_fg_color #E8DFC8;
+@define-color sidebar_bg_color #152330;
+@define-color sidebar_fg_color #E8DFC8;
+@define-color sidebar_backdrop_color #091827;
+@define-color sidebar_shade_color rgba(7, 18, 29, 0.25);
+@define-color sidebar_border_color #3a444a;
+@define-color thumbnail_bg_color #1f2c37;
+@define-color thumbnail_fg_color #E8DFC8;
+@define-color destructive_bg_color #c08a85;
+@define-color destructive_fg_color #07121d;
+@define-color destructive_color #c08a85;
+@define-color success_bg_color #84d585;
+@define-color success_fg_color #07121d;
+@define-color success_color #84d585;
+@define-color warning_bg_color #42C7C5;
+@define-color warning_fg_color #07121d;
+@define-color warning_color #42C7C5;
+@define-color error_bg_color #c08a85;
+@define-color error_fg_color #07121d;
+@define-color error_color #c08a85;
+@define-color shade_color rgba(7, 18, 29, 0.25);
+@define-color scrollbar_outline_color #07121d;
+@define-color panel_bg_color #07121d;
+@define-color panel_fg_color #E8DFC8;
+/* GTK applications that use the traditional theme color names. */
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+@define-color insensitive_fg_color #8f8f88;
+@define-color borders #3a444a;
+selection { background-color: #3a444a; color: #ede5d3; }
+
+button, entry, popover > contents { border-radius: 14px; }
+button { padding: 3px 7px; }

@@ -1,0 +1,38 @@
+{
+  "status": "expected-failure-reproduced",
+  "baseline": true,
+  "host_changes": 0,
+  "source_sha256": {
+    "/tmp/carousel-original-bindings.conf": "4b304842394f1b745a321e501037f9ffda5faeac803eafbb5433ec8fa182ef7c"
+  },
+  "checks": [
+    "super-tab-bounces-workspaces-instead-of-cycling-windows"
+  ],
+  "states": {
+    "super-tab-bounces-workspaces-instead-of-cycling-windows": {
+      "origin": 8,
+      "first": 5,
+      "second": 8,
+      "omitted_window_ids": [
+        6,
+        10
+      ]
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "verifier_sha256": "9523c9ec154d5305439fa7e6279f75e0e1585048d5d8e38b4b68392b2283b273",
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "cleanup": "private process identities stopped before compositor teardown"
+}

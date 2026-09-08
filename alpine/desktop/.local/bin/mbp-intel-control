@@ -1,0 +1,194 @@
+#!/usr/bin/env python3
+"""Space Ghost command deck. Fixed actions; menu text is never evaluated as shell."""
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+HOME = Path.home()
+BIN = HOME / ".local/bin"
+PRIVACYCTL = Path("/usr/local/sbin/privacyctl")
+
+
+def run(args, **kwargs):
+    return subprocess.run([str(arg) for arg in args], check=False, **kwargs)
+
+
+def notify(title, body):
+    run(["notify-send", title, body])
+
+
+def choose(title, options):
+    answer = run([BIN / "mbp-intel-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(12, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
+    return answer.stdout.strip() if answer.returncode == 0 else ""
+
+
+def launch(args):
+    if not shutil.which(str(args[0])):
+        notify("Transmission unavailable", f"{args[0]} is not installed.")
+        return
+    subprocess.Popen([str(arg) for arg in args], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def windows():
+    answer = run(["swaymsg", "-t", "get_tree", "-r"], capture_output=True, text=True)
+    if answer.returncode:
+        return
+    options = {}
+    def walk(node, workspace=""):
+        if node.get("type") == "workspace":
+            workspace = node.get("name", "")
+        app = node.get("app_id") or node.get("window_properties", {}).get("class")
+        if app:
+            title = " ".join(str(node.get("name", app)).split())[:70]
+            label = f"{workspace}  ·  {app}  ·  {title}  [{node['id']}]"
+            options[label] = int(node["id"])
+        for child in node.get("nodes", []) + node.get("floating_nodes", []):
+            walk(child, workspace)
+    walk(json.loads(answer.stdout))
+    if not options:
+        notify("Transmission standby", "No open windows. Super+Enter opens a terminal.")
+        return
+    selected = choose("SWITCH TRANSMISSION", list(options))
+    if selected in options:
+        run(["swaymsg", f"[con_id={options[selected]}] focus"])
+
+
+def firewall():
+    if not shutil.which("opensnitch-ui"):
+        notify("Application firewall", "OpenSnitch is still being installed. No security state is inferred from this menu.")
+        return
+    if run(["pgrep", "-u", str(os.getuid()), "-f", "(^|/)opensnitch-ui( |$)"], stdout=subprocess.DEVNULL).returncode == 0:
+        run(["swaymsg", '[app_id=".*opensnitch.*"] focus'])
+        notify("Application firewall", "OpenSnitch is already running. Open its window from the tray if hidden.")
+        return
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "opensnitch"
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    os.chmod(runtime, 0o700)
+    launch(["opensnitch-ui", "--socket", f"unix://{runtime / 'osui.sock'}"])
+
+
+def network_report():
+    print("\033[1;35mSPACE GHOST · TRANSMISSION REPORT\033[0m\n")
+    print("Read-only interface and route information. No Wi-Fi scan is requested.\n")
+    run(["ip", "-brief", "address"])
+    print("\nRoutes:")
+    run(["ip", "route"])
+    print("\nRadio state:")
+    run([BIN / "mbp-intel-panel-status", "radio"])
+    print("\nPress Enter to return to the control room.")
+    try:
+        input()
+    except EOFError:
+        pass
+
+
+def radio_off():
+    if PRIVACYCTL.is_file():
+        result = run(["doas", "-n", PRIVACYCTL, "off"])
+        if result.returncode:
+            notify("Radio controls", "The radio controller could not complete the request. Inspect its output in a terminal.")
+    else:
+        notify("Radio controls", "The audited radio controller is not installed yet.")
+
+
+def power():
+    options = {"󰌾  Lock the Ghost Planet": lambda: launch([BIN / "mbp-intel-lock"]), "󰒲  Lock and suspend": suspend, "󰍃  End Sway session…": logout}
+    selected = choose("SESSION CONTROL", list(options))
+    if selected in options:
+        options[selected]()
+
+
+def keyboard():
+    result = run([BIN / "mbp-intel-keyboard-backlight", "status"],
+                 capture_output=True, text=True)
+    try:
+        state = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        notify("Keyboard glow", "The keyboard light could not report its status.")
+        return
+    if result.returncode or not state.get("available"):
+        notify("Keyboard glow", "This machine does not expose the Apple keyboard light.")
+        return
+    breathing = state.get("mode") == "breathing"
+    typing = state.get("mode") == "typing"
+    typing_dark = state.get("mode") == "typing-dark"
+    typing_wpm = state.get("mode") == "typing-wpm"
+    typing_dark_wpm = state.get("mode") == "typing-dark-wpm"
+    peak = round(state["level"] * 100 / state["maximum"])
+    options = {
+        ("◉  Hold that glow · stop breathing" if breathing else
+         "◌  Let the keys breathe · a slow six-second glow"): "breathe",
+        ("◉  Let your fingers wake the light" if typing else
+         "◌  Typing pulse · brighten with each keypress"): "typing",
+        ("◉  Let your fingers dim the glow" if typing_dark else
+         "◌  Typing shadow · start bright, darken with each keypress"): "typing-dark",
+        ("◉  Keep the glow tied to sustained typing" if typing_wpm else
+         "◌  Typing WPM gate · no glow from slow typing"): "typing-wpm",
+        ("◉  Keep it bright until fast typing drives it down" if typing_dark_wpm else
+         "◌  Typing WPM inverse · only fast typing causes dimming"): "typing-dark-wpm",
+        "☀  Steady light · keep your chosen brightness": "steady",
+        "＋  Brighter · adjust the breathing peak too": "up",
+        "−  Dimmer · all the way down switches it off": "down",
+        "◐  Lights on / off": "toggle",
+    }
+    mode = "BREATHING" if breathing else "STEADY"
+    selected = choose(f"KEYBOARD GLOW · {mode} {peak}% · ALL KEYS TOGETHER", list(options))
+    if selected in options:
+        run([BIN / "mbp-intel-keyboard-backlight", options[selected]])
+
+
+def suspend():
+    if run([BIN / "mbp-intel-lock"]).returncode == 0:
+        run(["loginctl", "suspend"])
+
+
+def logout():
+    if choose("LEAVE THE GHOST PLANET?", ["Stay on air", "End this Sway session"]) == "End this Sway session":
+        run(["swaymsg", "exit"])
+
+
+def menu(section="main"):
+    items = {
+        "main": {
+            "󰊠  Applications                              Super+D": lambda: launch([BIN / "mbp-intel-menu"]),
+            "▦  Expo · all workspaces                  Super+E": lambda: launch([BIN / "mbp-intel-expo"]),
+            "󰖯  Switch window": windows,
+            "↓  Bottom decoration                       Super+Ctrl+B": lambda: launch([BIN / "mbp-intel-decoration", "bottom"]),
+            "󰸉  Artwork gallery": lambda: launch([BIN / "mbp-intel-wallpaper", "pick"]),
+            "▶  YouTube · desktop player & PiP": lambda: launch([BIN / "mbp-intel-youtube", "menu"]),
+            "▷  Video background · choose or stop": lambda: launch([BIN / "mbp-intel-video-background", "picker"]),
+            "◈  Ghostty terminal": lambda: launch(["ghostty"]),
+            "󰍛  Reactor · CPU, memory, processes": lambda: launch(["foot", "--title=Ghost Reactor", "-e", "btop"]),
+            "󰤨  Transmissions · network and privacy": lambda: menu("network"),
+            "󰕾  Sound studio · mixer and microphone": lambda: launch(["pavucontrol"]),
+            "☀  Keyboard glow · breathing and brightness": keyboard,
+            "󰒃  Application firewall": firewall,
+            "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
+            "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),
+            "󰌾  Session · lock, suspend, logout": power,
+            "?  Help · desktop commands and shortcuts": lambda: launch(["foot", "--title=Ghost Planet Help", "-e", "less", HOME / ".files/alpine/desktop/README.md"]),
+        },
+        "network": {
+            "󰤨  Connection report · no scanning": lambda: launch(["foot", "--title=Transmission Status", "-e", BIN / "mbp-intel-control", "network-report"]),
+            "󰒃  Application firewall": firewall,
+            "󰤭  Turn radios off": radio_off,
+            "󰏪  Privacy controller guide": lambda: launch(["foot", "--title=Radio Controls", "-e", "less", HOME / ".files/alpine/security/radio/README.md"]),
+        },
+    }
+    options = items[section]
+    selected = choose("SPACE GHOST · CONTROL DECK" if section == "main" else "TRANSMISSION CONTROL", list(options))
+    if selected in options:
+        options[selected]()
+
+
+if __name__ == "__main__":
+    action = sys.argv[1] if len(sys.argv) > 1 else "main"
+    if action in ("main", "network"):
+        menu(action)
+    elif action in ("windows", "firewall", "network-report", "power", "keyboard"):
+        {"windows": windows, "firewall": firewall, "network-report": network_report, "power": power, "keyboard": keyboard}[action]()
+    else:
+        raise SystemExit("usage: mbp-intel-control [windows|network|network-report|firewall|power|keyboard]")

@@ -1,0 +1,44 @@
+{
+  "action": "allow",
+  "duration": "always",
+  "enabled": true,
+  "name": "oldbook-bootstrap-1000-a14670f2dc8f9aa385ad79048604f578a459b1604dc11a00def44534e8926acf-https",
+  "nolog": false,
+  "operator": {
+    "list": [
+      {
+        "data": "/usr/bin/flatpak",
+        "operand": "process.path",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "1000",
+        "operand": "user.id",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "331f776980bbd0b2a9dda21d6003150b",
+        "operand": "process.hash.md5",
+        "sensitive": true,
+        "type": "simple"
+      },
+      {
+        "data": "^tcp6?$",
+        "operand": "protocol",
+        "sensitive": true,
+        "type": "regexp"
+      },
+      {
+        "data": "443",
+        "operand": "dest.port",
+        "sensitive": true,
+        "type": "simple"
+      }
+    ],
+    "operand": "list",
+    "type": "list"
+  },
+  "precedence": false
+}

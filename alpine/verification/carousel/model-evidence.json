@@ -1,0 +1,11 @@
+{
+  "scope": "pure carousel selection model; no runtime or compositor changes",
+  "tests": 18,
+  "result": "PASS",
+  "red_log": "/tmp/window-switching-red.log",
+  "green_log": "/tmp/window-switching-green.log",
+  "sha256": {
+    "alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "alpine/tests/test_window_switching.py": "86a090dcf4d92e7b3409cc9ea024eb1645d202ebc9b94095107fd8f582766759"
+  }
+}

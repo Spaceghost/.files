@@ -1,0 +1,17 @@
+test_cancelled_phrase_menu_does_not_launch (test_new_themes.NewThemeTests.test_cancelled_phrase_menu_does_not_launch) ... ok
+test_existing_themes_are_selected_in_a_separate_picker (test_new_themes.NewThemeTests.test_existing_themes_are_selected_in_a_separate_picker) ... ok
+test_generated_name_matching_an_action_still_paints_that_theme (test_new_themes.NewThemeTests.test_generated_name_matching_an_action_still_paints_that_theme) ... ok
+test_invalid_model_output_never_writes_descriptor (test_new_themes.NewThemeTests.test_invalid_model_output_never_writes_descriptor) ... ok
+test_new_theme_command_launches_random_theme_and_activates_debut_art (test_new_themes.NewThemeTests.test_new_theme_command_launches_random_theme_and_activates_debut_art) ... ok
+test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline) ... ok
+test_phrase_menu_passes_literal_text_to_background_job (test_new_themes.NewThemeTests.test_phrase_menu_passes_literal_text_to_background_job) ... ok
+test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) ... ok
+test_random_and_phrase_prompts (test_new_themes.NewThemeTests.test_random_and_phrase_prompts) ... ok
+test_save_unique_discoverable_collection_without_replacing_existing (test_new_themes.NewThemeTests.test_save_unique_discoverable_collection_without_replacing_existing) ... ok
+test_symlink_theme_directory_is_rejected (test_new_themes.NewThemeTests.test_symlink_theme_directory_is_rejected) ... ok
+test_theme_design_receives_saved_artwork_guidance (test_new_themes.NewThemeTests.test_theme_design_receives_saved_artwork_guidance) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.046s
+
+OK

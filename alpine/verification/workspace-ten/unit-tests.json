@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "alpine/tests",
+    "-p",
+    "test_strata.py",
+    "-v"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 0.178,
+  "source_sha256": {
+    "alpine/tests/test_strata.py": "021eb1c07759b2bfe84467f9f8853413c6523ef52473ab09a8595b2880d33c37",
+    "alpine/desktop/.local/bin/oldbook-strata": "e8cd439dd00f6e36f4a3f39a81f62884303975585bb65107f625f364b4297095",
+    "alpine/desktop/.local/bin/oldbook-workspaces": "5b1877cb5d80f1515992ce528d86f38e8c59aa473d4881696af60953340e0a9f",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "907f98cdf0b46b0695b742c72838eb65f96c56abdd85f1a5134f2ba90847b6a4"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "before": {
+    "alpine/wallpapers/generate.py": "de3e984a93a9754302bb9460b77744e61bcb014a68aefca2cca0dc8d8ccf728d",
+    "alpine/tests/test_themed_artwork.py": "1f52c8f2f1788d9b36ac27899b9191e26b876842ba0e2e23ad4cd0df88b6939a",
+    "alpine/tests/test_new_themes.py": "9cca0f26bd260ea95e99de7fe98a8a0fa641985bc0c35dfea678b91830ff79e3"
+  },
+  "after": {
+    "alpine/wallpapers/generate.py": "9dfd7f55d652b7f258a363fc5401442bb3017f365c2c40334e34a214d4df6220",
+    "alpine/tests/test_themed_artwork.py": "1f3bb3e053403bc20d73308fa824af07abb77f493cfe859eb4955d87b5e19f0f",
+    "alpine/tests/test_new_themes.py": "46f947b689c82e311f4befed63a92edab6164c23302e0c27147610caaf3e09ca"
+  },
+  "production_change": "Only activate_artwork condition: every saved themed artwork applies its exact theme before image selection; unthemed images retain desktop theme. Existing generation, retries, completion notifications and checkpoints preserved.",
+  "verification": "31 focused generation/theme/notification tests pass. Before fix, 24 tests reproduced 3 expected regression failures. Broader 60-test run passes every case except a pre-existing tooltip assertion (4 subcases) expecting the old combined Super+Shift wording; root notified. No provider generation, host theme changes, or compositor actions."
+}

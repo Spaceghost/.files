@@ -1,0 +1,49 @@
+{
+  "old_pid": 18733,
+  "new_pid": 24615,
+  "helper_sha256": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+  "library_sha256": {
+    "decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230"
+  },
+  "checks": {
+    "one_live_daemon": true,
+    "one_caption_per_active_output": true,
+    "appearance_settings_preserved": true
+  },
+  "settings": {
+    "position": "bottom",
+    "opacity": 0.67,
+    "corner_radius": 7
+  },
+  "captions": {
+    "eDP-1": [
+      {
+        "namespace": "oldbook-decoration",
+        "layer": "top",
+        "extent": {
+          "width": 800,
+          "height": 28,
+          "x": 320,
+          "y": 673
+        },
+        "effects": {
+          "blur": false,
+          "blur_xray": false,
+          "blur_ignore_transparent": false,
+          "shadows": false,
+          "corner_radius": 0
+        }
+      }
+    ]
+  },
+  "activation_log": "/home/jack/.local/state/oldbook/decoration/monitor-activation.log",
+  "context_checks": {
+    "eDP-1": {
+      "id": 19,
+      "placement_id": 19,
+      "target_is_ordinary_window": true
+    }
+  }
+}

@@ -1,0 +1,204 @@
+#!/usr/bin/env python3
+"""Render production artwork tooltips in an isolated headless Sway session."""
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import signal
+import subprocess
+import time
+
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--module', default='/usr/lib/waybar/mbp-intel-art.so', type=Path)
+parser.add_argument('--helper', required=True, type=Path)
+parser.add_argument('--output', required=True, type=Path)
+args = parser.parse_args()
+module = args.module.resolve(strict=True)
+helper = args.helper.resolve(strict=True)
+base = Path(__file__).resolve().parent
+out = args.output.absolute()
+out.mkdir(parents=True, exist_ok=False)
+runtime = out / 'runtime'
+runtime.mkdir(mode=0o700)
+home = out / 'home'
+state = home / '.local/state/mbp-intel/wallpaper/state.json'
+state.parent.mkdir(parents=True)
+generation = home / '.local/state/mbp-intel/wallpaper-generation/generation.lock'
+generation.parent.mkdir(parents=True)
+env = dict(os.environ, HOME=str(home), XDG_RUNTIME_DIR=str(runtime),
+           WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
+           WLR_RENDERER='pixman', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
+for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+    env.pop(key, None)
+
+for mode in ('client-header', 'private-code'):
+    destination = out / ('pointer.h' if mode == 'client-header' else 'pointer.c')
+    subprocess.run(['wayland-scanner', mode, str(base / 'tests/pointer.xml'),
+                    str(destination)], check=True)
+flags = shlex.split(subprocess.check_output(
+    ['pkg-config', '--cflags', '--libs', 'wayland-client'], text=True))
+subprocess.run(['cc', '-I' + str(out), '-o', str(out / 'pointer-input'),
+                str(base / 'tests/pointer-input.c'), str(out / 'pointer.c'), *flags],
+               check=True)
+(out / 'sway.conf').write_text(
+    'xwayland disable\noutput HEADLESS-1 mode 1440x900\nseat seat0 fallback true\n')
+config = {
+    'layer': 'top', 'position': 'top', 'height': 48,
+    'modules-left': ['cffi/art'],
+    'cffi/art': {'module_path': str(module), 'command': str(helper)},
+}
+(out / 'waybar.json').write_text(json.dumps(config))
+(out / 'style.css').write_text(
+    '* { font: 16px monospace; }\n'
+    '#custom-art { min-width: 64px; min-height: 48px; '
+    'background: #250a40; color: #f2e5bc; }\n'
+    'tooltip { background: #1d2021; color: #f2e5bc; }\n')
+
+
+def stop_group(process):
+    if process is None or process.poll() is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=5)
+    except ProcessLookupError:
+        pass
+    except subprocess.TimeoutExpired:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.wait(timeout=5)
+
+
+def send(process, command):
+    process.stdin.write(command + '\n')
+    process.stdin.flush()
+    if process.stdout.readline().strip() != 'ok':
+        raise RuntimeError('Virtual pointer stopped')
+
+
+def hold_generation(log):
+    code = (
+        'import fcntl,json,pathlib,time; '
+        f'p=pathlib.Path({str(generation)!r}); '
+        'f=p.open("w+"); json.dump({"title":"A requested painting"},f); '
+        'f.flush(); fcntl.flock(f,fcntl.LOCK_EX); print("ready",flush=True); '
+        'time.sleep(300)')
+    process = subprocess.Popen(['python3', '-c', code], env=env,
+                               stdout=subprocess.PIPE, stderr=log, text=True,
+                               start_new_session=True)
+    if process.stdout.readline().strip() != 'ready':
+        raise RuntimeError('Could not hold the private generation lock')
+    return process
+
+
+variants = (
+    ('rotating', False, False),
+    ('paused', True, False),
+    ('generating', False, True),
+)
+processes = []
+pointer = None
+evidence = {'module': str(module), 'module_sha256': hashlib.sha256(module.read_bytes()).hexdigest(),
+            'helper': str(helper), 'variants': []}
+with (out / 'runtime.log').open('w') as log:
+    try:
+        sway = subprocess.Popen(['/usr/bin/sway', '--debug', '-c', str(out / 'sway.conf')],
+                                env=env, stdout=log, stderr=log, start_new_session=True)
+        processes.append(sway)
+        for _ in range(100):
+            sockets = list(runtime.glob('sway-ipc*.sock'))
+            displays = [path for path in runtime.glob('wayland-*') if path.suffix != '.lock']
+            if sockets and displays:
+                env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                break
+            if sway.poll() is not None:
+                raise RuntimeError('Headless compositor exited')
+            time.sleep(.05)
+        else:
+            raise RuntimeError('No headless compositor socket')
+        pointer = subprocess.Popen([str(out / 'pointer-input')], env=env,
+                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                   stderr=log, text=True, start_new_session=True)
+        processes.append(pointer)
+        if pointer.stdout.readline().strip() != 'ready':
+            raise RuntimeError('Virtual pointer failed to start')
+
+        for name, paused, busy in variants:
+            state.write_text(json.dumps({
+                'title': 'The Ampersand & Observatory',
+                'description': 'A production story with Space Ghost & Zorak in painted starlight.',
+                'interval_seconds': 1200,
+                'paused': paused,
+                'theme_name': 'Gallery & History',
+            }))
+            locker = hold_generation(log) if busy else None
+            bar = None
+            try:
+                send(pointer, 'move 720 450')
+                payload = json.loads(subprocess.check_output(
+                    [str(helper), 'status'], env=env, text=True))
+                required = ('The Ampersand &amp; Observatory',
+                            'Space Ghost &amp; Zorak', 'Left: gallery &amp; themes',
+                            'Right: next artwork', 'Middle: pause',
+                            'Command/Super+click', 'Shift+click: edit prompts',
+                            'Gallery &amp; History')
+                if not all(text in payload.get('tooltip', '') for text in required):
+                    raise AssertionError(f'{name}: production tooltip lost required content')
+                if payload.get('class') != name:
+                    raise AssertionError(
+                        f'{name}: expected class {name!r}, got {payload.get("class")!r}')
+                marker = (out / 'runtime.log').stat().st_size
+                bar = subprocess.Popen(
+                    ['dbus-run-session', '--', 'waybar', '-c', str(out / 'waybar.json'),
+                     '-s', str(out / 'style.css')], env=env, stdout=log, stderr=log,
+                    start_new_session=True)
+                processes.append(bar)
+                for _ in range(100):
+                    if 'Bar configured' in (out / 'runtime.log').read_text()[marker:]:
+                        break
+                    if bar.poll() is not None:
+                        raise RuntimeError(f'{name}: Waybar exited')
+                    time.sleep(.05)
+                else:
+                    raise RuntimeError(f'{name}: Waybar did not initialize')
+                # Let the asynchronous native status subprocess finish before
+                # entering the widget, so GTK opens the complete tooltip.
+                time.sleep(.8)
+                send(pointer, 'move 32 24')
+                time.sleep(1.2)
+                subprocess.run(['grim', str(out / f'{name}.png')], env=env, check=True)
+                new_log = (out / 'runtime.log').read_text()[marker:]
+                markup_failed = ('Failed to set text' in new_log or
+                                 'Entity did not end with a semicolon' in new_log)
+                if markup_failed:
+                    raise AssertionError(f'{name}: GTK rejected production tooltip markup')
+                evidence['variants'].append({
+                    'name': name,
+                    'class': payload['class'],
+                    'tooltip_sha256': hashlib.sha256(
+                        payload['tooltip'].encode()).hexdigest(),
+                    'screenshot': f'{name}.png',
+                    'screenshot_sha256': hashlib.sha256(
+                        (out / f'{name}.png').read_bytes()).hexdigest(),
+                    'markup_warning': False,
+                })
+            finally:
+                stop_group(bar)
+                stop_group(locker)
+                send(pointer, 'move 720 450')
+                time.sleep(.2)
+        (out / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+        print(json.dumps(evidence, indent=2))
+    finally:
+        for process in reversed(processes):
+            if process is pointer and process.poll() is None:
+                process.stdin.close()
+                process.wait(timeout=5)
+            else:
+                stop_group(process)

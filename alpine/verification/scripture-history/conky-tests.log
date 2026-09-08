@@ -1,0 +1,60 @@
+test_click_advances_reflection_and_persists_it (test_conky_clicks.ClickCommandsTests.test_click_advances_reflection_and_persists_it) ... ok
+test_click_advances_witness_without_changing_scripture (test_conky_clicks.ClickCommandsTests.test_click_advances_witness_without_changing_scripture) ... ok
+test_click_continues_after_the_selected_passage (test_conky_clicks.ClickCommandsTests.test_click_continues_after_the_selected_passage) ... ok
+test_click_continues_torah_with_its_attribution (test_conky_clicks.ClickCommandsTests.test_click_continues_torah_with_its_attribution) ... ok
+test_disabled_desktop_does_not_advance_from_stale_click (test_conky_clicks.ClickCommandsTests.test_disabled_desktop_does_not_advance_from_stale_click) ... ok
+test_lua_click_dispatches_once_and_ignores_other_events (test_conky_clicks.ClickCommandsTests.test_lua_click_dispatches_once_and_ignores_other_events) ... ok
+test_explicit_advance_keeps_rotation_ratio_and_four_minute_slot (test_conky_clicks.JournalClickTests.test_explicit_advance_keeps_rotation_ratio_and_four_minute_slot) ... ok
+test_a_theme_without_a_palette_still_resolves (test_conky_layout.ColourTests.test_a_theme_without_a_palette_still_resolves) ... ok
+test_contrast_ratio_spans_black_to_white (test_conky_layout.ColourTests.test_contrast_ratio_spans_black_to_white) ... ok
+test_palette_keeps_supplied_colours_and_derives_the_missing_series (test_conky_layout.ColourTests.test_palette_keeps_supplied_colours_and_derives_the_missing_series) ... ok
+test_parses_and_formats_colours (test_conky_layout.ColourTests.test_parses_and_formats_colours) ... ok
+test_readable_darkens_a_pale_colour_on_a_bright_region (test_conky_layout.ColourTests.test_readable_darkens_a_pale_colour_on_a_bright_region) ... ok
+test_readable_lifts_a_dim_colour_off_a_dark_region (test_conky_layout.ColourTests.test_readable_lifts_a_dim_colour_off_a_dark_region) ... ok
+test_rejects_a_colour_that_is_not_six_hex_digits (test_conky_layout.ColourTests.test_rejects_a_colour_that_is_not_six_hex_digits) ... ok
+test_text_colours_adapt_to_a_bright_region (test_conky_layout.ColoursForRegionTests.test_text_colours_adapt_to_a_bright_region) ... ok
+test_text_colours_reach_the_contrast_floor_over_a_dark_region (test_conky_layout.ColoursForRegionTests.test_text_colours_reach_the_contrast_floor_over_a_dark_region) ... ok
+test_config_is_transparent_and_wayland_native (test_conky_layout.ConfigTests.test_config_is_transparent_and_wayland_native) ... ok
+test_config_pins_the_computed_rectangle_and_body (test_conky_layout.ConfigTests.test_config_pins_the_computed_rectangle_and_body) ... ok
+test_lua_strings_escape_quotes (test_conky_layout.ConfigTests.test_lua_strings_escape_quotes) ... ok
+test_reading_cards_receive_the_native_mouse_hook (test_conky_layout.ConfigTests.test_reading_cards_receive_the_native_mouse_hook) ... ok
+test_static_cards_do_not_receive_a_mouse_hook (test_conky_layout.ConfigTests.test_static_cards_do_not_receive_a_mouse_hook) ... ok
+test_waybar_reservation_does_not_shift_wallpaper_coordinates (test_conky_layout.ConfigTests.test_waybar_reservation_does_not_shift_wallpaper_coordinates) ... ok
+test_live_panel_file_is_valid (test_conky_layout.PanelFileTests.test_live_panel_file_is_valid) ... ok
+test_rejects_a_panel_without_text_or_size (test_conky_layout.PanelFileTests.test_rejects_a_panel_without_text_or_size) ... ok
+test_rejects_duplicate_panel_identifiers (test_conky_layout.PanelFileTests.test_rejects_duplicate_panel_identifiers) ... ok
+test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced (test_conky_layout.PlacementTests.test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced) ... ok
+test_bottom_right_preference_seats_a_card_in_the_lower_right (test_conky_layout.PlacementTests.test_bottom_right_preference_seats_a_card_in_the_lower_right) ... ok
+test_cards_sharing_a_corner_preference_keep_their_gap (test_conky_layout.PlacementTests.test_cards_sharing_a_corner_preference_keep_their_gap) ... ok
+test_corner_preference_respects_a_reserved_lower_right (test_conky_layout.PlacementTests.test_corner_preference_respects_a_reserved_lower_right) ... ok
+test_corner_preference_yields_to_a_busy_right_side (test_conky_layout.PlacementTests.test_corner_preference_yields_to_a_busy_right_side) ... ok
+test_default_slow_text_fills_the_lower_right_beside_the_subject (test_conky_layout.PlacementTests.test_default_slow_text_fills_the_lower_right_beside_the_subject) ... ok
+test_detail_and_brightness_keep_the_same_ranked_free_regions (test_conky_layout.PlacementTests.test_detail_and_brightness_keep_the_same_ranked_free_regions) ... ok
+test_higher_priority_panels_choose_first (test_conky_layout.PlacementTests.test_higher_priority_panels_choose_first) ... ok
+test_panel_avoids_the_busy_centre_of_the_painting (test_conky_layout.PlacementTests.test_panel_avoids_the_busy_centre_of_the_painting) ... ok
+test_panels_never_overlap_each_other (test_conky_layout.PlacementTests.test_panels_never_overlap_each_other) ... ok
+test_placement_respects_the_bar_and_edge_insets (test_conky_layout.PlacementTests.test_placement_respects_the_bar_and_edge_insets) ... ok
+test_top_right_preference_leaves_the_lower_right_free (test_conky_layout.PlacementTests.test_top_right_preference_leaves_the_lower_right_free) ... ok
+test_plan_produces_one_config_per_placed_panel (test_conky_layout.PlanTests.test_plan_produces_one_config_per_placed_panel) ... ok
+test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) ... ok
+test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) ... oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+ok
+test_scripture_alone_keeps_the_explicit_hourly_interval (test_conky_policy.QuietPanelTests.test_scripture_alone_keeps_the_explicit_hourly_interval) ... ok
+test_shipped_source_cannot_restore_stats_or_subminute_refresh (test_conky_policy.QuietPanelTests.test_shipped_source_cannot_restore_stats_or_subminute_refresh) ... ok
+test_useful_cards_and_mail_survive_with_slow_refresh (test_conky_policy.QuietPanelTests.test_useful_cards_and_mail_survive_with_slow_refresh) ... ok
+test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry (test_conky_policy.QuietPanelTests.test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry) ... <frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+oldbook-conky: omitted telemetry panel reactor; system stats belong in Waybar
+ok
+
+----------------------------------------------------------------------
+Ran 44 tests in 84.584s
+
+OK

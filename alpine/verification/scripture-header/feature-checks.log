@@ -1,0 +1,405 @@
+Review alpine/FEATURES.md for these pinned behaviors:
+  DEPLOY-RECOVERY — 2 check files
+  CONKY-READING — 4 check files
+  SCRIPTURE — 9 check files
+13 unique check files. Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.
+test_click_advances_reflection_and_persists_it (test_conky_clicks.ClickCommandsTests.test_click_advances_reflection_and_persists_it) ... ERROR
+test_click_advances_witness_without_changing_scripture (test_conky_clicks.ClickCommandsTests.test_click_advances_witness_without_changing_scripture) ... ERROR
+test_click_continues_after_the_selected_passage (test_conky_clicks.ClickCommandsTests.test_click_continues_after_the_selected_passage) ... ERROR
+test_click_continues_torah_with_its_attribution (test_conky_clicks.ClickCommandsTests.test_click_continues_torah_with_its_attribution) ... ERROR
+test_disabled_desktop_does_not_advance_from_stale_click (test_conky_clicks.ClickCommandsTests.test_disabled_desktop_does_not_advance_from_stale_click) ... ok
+test_header_history_hit_target_does_not_advance_the_passage (test_conky_clicks.ClickCommandsTests.test_header_history_hit_target_does_not_advance_the_passage) ... ok
+test_lua_click_dispatches_once_and_ignores_other_events (test_conky_clicks.ClickCommandsTests.test_lua_click_dispatches_once_and_ignores_other_events) ... FAIL
+test_explicit_advance_keeps_rotation_ratio_and_four_minute_slot (test_conky_clicks.JournalClickTests.test_explicit_advance_keeps_rotation_ratio_and_four_minute_slot) ... ok
+
+======================================================================
+ERROR: test_click_advances_reflection_and_persists_it (test_conky_clicks.ClickCommandsTests.test_click_advances_reflection_and_persists_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 48, in test_click_advances_reflection_and_persists_it
+    self.command('oldbook-scripture', 'daily')
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 27, in command
+    result = subprocess.run([str(BIN / name), *arguments], env=self.env,
+                            capture_output=True, text=True, timeout=20)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture', 'daily']' timed out after 20 seconds
+
+======================================================================
+ERROR: test_click_advances_witness_without_changing_scripture (test_conky_clicks.ClickCommandsTests.test_click_advances_witness_without_changing_scripture)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 57, in test_click_advances_witness_without_changing_scripture
+    self.command('oldbook-scripture', 'select', 'John 3:16')
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 27, in command
+    result = subprocess.run([str(BIN / name), *arguments], env=self.env,
+                            capture_output=True, text=True, timeout=20)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture', 'select', 'John 3:16']' timed out after 20 seconds
+
+======================================================================
+ERROR: test_click_continues_after_the_selected_passage (test_conky_clicks.ClickCommandsTests.test_click_continues_after_the_selected_passage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 36, in test_click_continues_after_the_selected_passage
+    self.command('oldbook-scripture', 'select', 'John 3:16-17')
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 27, in command
+    result = subprocess.run([str(BIN / name), *arguments], env=self.env,
+                            capture_output=True, text=True, timeout=20)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture', 'select', 'John 3:16-17']' timed out after 20 seconds
+
+======================================================================
+ERROR: test_click_continues_torah_with_its_attribution (test_conky_clicks.ClickCommandsTests.test_click_continues_torah_with_its_attribution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 41, in test_click_continues_torah_with_its_attribution
+    self.command('oldbook-scripture', 'select', 'Torah Genesis 1:1')
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 27, in command
+    result = subprocess.run([str(BIN / name), *arguments], env=self.env,
+                            capture_output=True, text=True, timeout=20)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture', 'select', 'Torah Genesis 1:1']' timed out after 20 seconds
+
+======================================================================
+FAIL: test_lua_click_dispatches_once_and_ignores_other_events (test_conky_clicks.ClickCommandsTests.test_lua_click_dispatches_once_and_ignores_other_events)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_clicks.py", line 88, in test_lua_click_dispatches_once_and_ignores_other_events
+    self.assertEqual(self.selection()['reference'], 'John 3:17')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'John 3:16' != 'John 3:17'
+- John 3:16
+?         ^
++ John 3:17
+?         ^
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 111.126s
+
+FAILED (failures=1, errors=4)
+test_a_theme_without_a_palette_still_resolves (test_conky_layout.ColourTests.test_a_theme_without_a_palette_still_resolves) ... ok
+test_contrast_ratio_spans_black_to_white (test_conky_layout.ColourTests.test_contrast_ratio_spans_black_to_white) ... ok
+test_palette_keeps_supplied_colours_and_derives_the_missing_series (test_conky_layout.ColourTests.test_palette_keeps_supplied_colours_and_derives_the_missing_series) ... ok
+test_parses_and_formats_colours (test_conky_layout.ColourTests.test_parses_and_formats_colours) ... ok
+test_readable_darkens_a_pale_colour_on_a_bright_region (test_conky_layout.ColourTests.test_readable_darkens_a_pale_colour_on_a_bright_region) ... ok
+test_readable_lifts_a_dim_colour_off_a_dark_region (test_conky_layout.ColourTests.test_readable_lifts_a_dim_colour_off_a_dark_region) ... ok
+test_rejects_a_colour_that_is_not_six_hex_digits (test_conky_layout.ColourTests.test_rejects_a_colour_that_is_not_six_hex_digits) ... ok
+test_text_colours_adapt_to_a_bright_region (test_conky_layout.ColoursForRegionTests.test_text_colours_adapt_to_a_bright_region) ... ok
+test_text_colours_reach_the_contrast_floor_over_a_dark_region (test_conky_layout.ColoursForRegionTests.test_text_colours_reach_the_contrast_floor_over_a_dark_region) ... ok
+test_config_is_transparent_and_wayland_native (test_conky_layout.ConfigTests.test_config_is_transparent_and_wayland_native) ... ok
+test_config_pins_the_computed_rectangle_and_body (test_conky_layout.ConfigTests.test_config_pins_the_computed_rectangle_and_body) ... ok
+test_lua_strings_escape_quotes (test_conky_layout.ConfigTests.test_lua_strings_escape_quotes) ... ok
+test_reading_cards_receive_the_native_mouse_hook (test_conky_layout.ConfigTests.test_reading_cards_receive_the_native_mouse_hook) ... ok
+test_static_cards_do_not_receive_a_mouse_hook (test_conky_layout.ConfigTests.test_static_cards_do_not_receive_a_mouse_hook) ... ok
+test_waybar_reservation_does_not_shift_wallpaper_coordinates (test_conky_layout.ConfigTests.test_waybar_reservation_does_not_shift_wallpaper_coordinates) ... ok
+test_live_panel_file_is_valid (test_conky_layout.PanelFileTests.test_live_panel_file_is_valid) ... ok
+test_rejects_a_panel_without_text_or_size (test_conky_layout.PanelFileTests.test_rejects_a_panel_without_text_or_size) ... ok
+test_rejects_duplicate_panel_identifiers (test_conky_layout.PanelFileTests.test_rejects_duplicate_panel_identifiers) ... ok
+test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced (test_conky_layout.PlacementTests.test_a_panel_too_large_for_the_area_is_dropped_rather_than_misplaced) ... ok
+test_bottom_right_preference_seats_a_card_in_the_lower_right (test_conky_layout.PlacementTests.test_bottom_right_preference_seats_a_card_in_the_lower_right) ... ok
+test_cards_sharing_a_corner_preference_keep_their_gap (test_conky_layout.PlacementTests.test_cards_sharing_a_corner_preference_keep_their_gap) ... ok
+test_corner_preference_respects_a_reserved_lower_right (test_conky_layout.PlacementTests.test_corner_preference_respects_a_reserved_lower_right) ... ok
+test_corner_preference_yields_to_a_busy_right_side (test_conky_layout.PlacementTests.test_corner_preference_yields_to_a_busy_right_side) ... ok
+test_default_slow_text_fills_the_lower_right_beside_the_subject (test_conky_layout.PlacementTests.test_default_slow_text_fills_the_lower_right_beside_the_subject) ... ok
+test_detail_and_brightness_keep_the_same_ranked_free_regions (test_conky_layout.PlacementTests.test_detail_and_brightness_keep_the_same_ranked_free_regions) ... ok
+test_higher_priority_panels_choose_first (test_conky_layout.PlacementTests.test_higher_priority_panels_choose_first) ... ok
+test_panel_avoids_the_busy_centre_of_the_painting (test_conky_layout.PlacementTests.test_panel_avoids_the_busy_centre_of_the_painting) ... ok
+test_panels_never_overlap_each_other (test_conky_layout.PlacementTests.test_panels_never_overlap_each_other) ... ok
+test_placement_respects_the_bar_and_edge_insets (test_conky_layout.PlacementTests.test_placement_respects_the_bar_and_edge_insets) ... ok
+test_top_right_preference_leaves_the_lower_right_free (test_conky_layout.PlacementTests.test_top_right_preference_leaves_the_lower_right_free) ... ok
+test_plan_produces_one_config_per_placed_panel (test_conky_layout.PlanTests.test_plan_produces_one_config_per_placed_panel) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 1.382s
+
+OK
+test_missing_invalid_and_excessive_intervals_are_safe (test_conky_policy.QuietPanelTests.test_missing_invalid_and_excessive_intervals_are_safe) ... ok
+test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name (test_conky_policy.QuietPanelTests.test_restored_telemetry_is_filtered_even_under_an_unfamiliar_name) ... oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+oldbook-conky: omitted telemetry panel card; system stats belong in Waybar
+ok
+test_scripture_alone_keeps_the_explicit_hourly_interval (test_conky_policy.QuietPanelTests.test_scripture_alone_keeps_the_explicit_hourly_interval) ... ok
+test_shipped_source_cannot_restore_stats_or_subminute_refresh (test_conky_policy.QuietPanelTests.test_shipped_source_cannot_restore_stats_or_subminute_refresh) ... ok
+test_useful_cards_and_mail_survive_with_slow_refresh (test_conky_policy.QuietPanelTests.test_useful_cards_and_mail_survive_with_slow_refresh) ... ok
+test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry (test_conky_policy.QuietPanelTests.test_wallpaper_rebuild_and_cached_layout_cannot_restore_telemetry) ... <frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+oldbook-conky: omitted telemetry panel reactor; system stats belong in Waybar
+ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.468s
+
+OK
+test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback (test_deploy.DeployTest.test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_database_backup_manifest_does_not_block_deployment_or_rollback (test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... ok
+test_existing_legacy_overlay_symlink_does_not_create_alias (test_deploy.DeployTest.test_existing_legacy_overlay_symlink_does_not_create_alias) ... ok
+test_explicit_legacy_overlay_config_is_not_replaced_by_alias (test_deploy.DeployTest.test_explicit_legacy_overlay_config_is_not_replaced_by_alias) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_malformed_deployment_headers_block_before_replacing_user_files (test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... ok
+test_only_rejects_missing_and_unsafe_selections_before_target_changes (test_deploy.DeployTest.test_only_rejects_missing_and_unsafe_selections_before_target_changes) ... ok
+test_only_selects_exact_config_pair_and_excludes_unrelated_files (test_deploy.DeployTest.test_only_selects_exact_config_pair_and_excludes_unrelated_files) ... ok
+test_partial_deployment_rolls_back_all_originals (test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_superhold_config_alias_shares_edits_and_restores_legacy_file (test_deploy.DeployTest.test_superhold_config_alias_shares_edits_and_restores_legacy_file) ... ok
+test_portable_profiles_precede_oldbook_with_legacy_fallback (test_deploy.WrapperMigrationTest.test_portable_profiles_precede_oldbook_with_legacy_fallback) ... ok
+test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display) ... ERROR
+
+======================================================================
+ERROR: test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 341, in test_wrapper_reads_superhold_runtime_status_without_a_display
+    result = subprocess.run([str(repo / 'alpine/desktop/.local/bin/oldbook-shortcuts'),
+        'status', '--socket', str(session)],
+        env={'PATH': os.environ['PATH'], 'HOME': directory,
+             'XDG_CONFIG_HOME': directory, 'XDG_RUNTIME_DIR': directory},
+        capture_output=True, text=True, timeout=3)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-shortcuts', 'status', '--socket', '/tmp/tmpb6m291jn/sway-ipc.test.sock']' timed out after 3 seconds
+
+----------------------------------------------------------------------
+Ran 20 tests in 5.098s
+
+FAILED (errors=1)
+test_actual_fullscreen_reserves_bottom_even_for_a_floating_window (test_desktop_space.DesktopSpaceTests.test_actual_fullscreen_reserves_bottom_even_for_a_floating_window) ... ok
+test_bottom_waybar_does_not_displace_cards_by_an_entire_screen (test_desktop_space.DesktopSpaceTests.test_bottom_waybar_does_not_displace_cards_by_an_entire_screen) ... ok
+test_conky_pairing_stays_stable_when_fullscreen_occupies_the_free_edge (test_desktop_space.DesktopSpaceTests.test_conky_pairing_stays_stable_when_fullscreen_occupies_the_free_edge) ... <frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+ok
+test_fixed_bottom_caption_uses_clearance_while_attached_caption_does_not (test_desktop_space.DesktopSpaceTests.test_fixed_bottom_caption_uses_clearance_while_attached_caption_does_not) ... ok
+test_free_edges_reclaim_bottom_and_right_despite_workspace_fullscreen_marker (test_desktop_space.DesktopSpaceTests.test_free_edges_reclaim_bottom_and_right_despite_workspace_fullscreen_marker) ... ok
+test_hidden_local_fullscreen_does_not_reserve_but_global_does (test_desktop_space.DesktopSpaceTests.test_hidden_local_fullscreen_does_not_reserve_but_global_does) ... FAIL
+test_other_fixed_bottom_surface_and_top_bar_are_respected (test_desktop_space.DesktopSpaceTests.test_other_fixed_bottom_surface_and_top_bar_are_respected) ... ok
+test_own_desktop_surfaces_do_not_reserve_themselves (test_desktop_space.DesktopSpaceTests.test_own_desktop_surfaces_do_not_reserve_themselves) ... ok
+test_right_caption_only_reserves_right_edge (test_desktop_space.DesktopSpaceTests.test_right_caption_only_reserves_right_edge) ... ok
+test_tiled_window_reaching_bottom_reserves_but_float_does_not (test_desktop_space.DesktopSpaceTests.test_tiled_window_reaching_bottom_reserves_but_float_does_not) ... ok
+
+======================================================================
+FAIL: test_hidden_local_fullscreen_does_not_reserve_but_global_does (test_desktop_space.DesktopSpaceTests.test_hidden_local_fullscreen_does_not_reserve_but_global_does)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_desktop_space.py", line 77, in test_hidden_local_fullscreen_does_not_reserve_but_global_does
+    self.assertEqual(desktop_space.screen_space(output(), tree(floating=True, hidden_fullscreen=mode))['bottom'], bottom)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 16 != 60
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.151s
+
+FAILED (failures=1)
+test_all_checks_are_existing_files_and_ids_are_unique (test_feature_contracts.FeatureImpact.test_all_checks_are_existing_files_and_ids_are_unique) ... ok
+test_deleted_profile_still_has_impact_without_an_existing_file (test_feature_contracts.FeatureImpact.test_deleted_profile_still_has_impact_without_an_existing_file) ... ok
+test_installed_guide_source_is_in_scope_across_project_directories (test_feature_contracts.FeatureImpact.test_installed_guide_source_is_in_scope_across_project_directories) ... ok
+test_mode_binding_change_reviews_keys_and_window_switching_together (test_feature_contracts.FeatureImpact.test_mode_binding_change_reviews_keys_and_window_switching_together) ... ok
+test_path_normalization_keeps_hidden_files_and_rejects_escape (test_feature_contracts.FeatureImpact.test_path_normalization_keeps_hidden_files_and_rejects_escape) ... ok
+test_shared_checks_run_once_and_a_failure_fails_the_review (test_feature_contracts.FeatureImpact.test_shared_checks_run_once_and_a_failure_fails_the_review) ... ok
+test_theme_template_change_reviews_brand_lock_and_caption_contracts (test_feature_contracts.FeatureImpact.test_theme_template_change_reviews_brand_lock_and_caption_contracts) ... ok
+test_unknown_feature_is_rejected_instead_of_running_nothing (test_feature_contracts.FeatureImpact.test_unknown_feature_is_rejected_instead_of_running_nothing) ... ok
+test_unmapped_change_is_reported_without_claiming_coverage (test_feature_contracts.FeatureImpact.test_unmapped_change_is_reported_without_claiming_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 8.966s
+
+OK
+test_gruvbox_uses_the_active_background_text_and_gold_accent (test_scripture_bar_theme.ScriptureBarThemeTests.test_gruvbox_uses_the_active_background_text_and_gold_accent) ... ok
+test_running_bar_follows_theme_switch_and_descriptor_edits (test_scripture_bar_theme.ScriptureBarThemeTests.test_running_bar_follows_theme_switch_and_descriptor_edits) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 20.340s
+
+OK
+test_generate_rejects_a_reference_outside_the_bundled_bible (test_scripture_generation.CommandTests.test_generate_rejects_a_reference_outside_the_bundled_bible) ... ok
+test_generate_saves_a_grounded_artifact_then_list_show_and_rebuild_read_it (test_scripture_generation.CommandTests.test_generate_saves_a_grounded_artifact_then_list_show_and_rebuild_read_it) ... ok
+test_rebuild_preserves_a_foreign_sqlite_database (test_scripture_generation.CommandTests.test_rebuild_preserves_a_foreign_sqlite_database) ... ok
+test_an_installed_model_needs_digest_weights_and_local_model_info (test_scripture_generation.GenerationTests.test_an_installed_model_needs_digest_weights_and_local_model_info) ... ok
+test_cloud_model_names_are_rejected_before_network_access (test_scripture_generation.GenerationTests.test_cloud_model_names_are_rejected_before_network_access) ... ok
+test_dns_names_are_rejected_and_literal_localhost_is_pinned (test_scripture_generation.GenerationTests.test_dns_names_are_rejected_and_literal_localhost_is_pinned) ... ok
+test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes (test_scripture_generation.GenerationTests.test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes) ... ok
+test_generated_text_keeps_application_length_limits (test_scripture_generation.GenerationTests.test_generated_text_keeps_application_length_limits) ... ok
+test_incomplete_or_different_model_responses_are_rejected (test_scripture_generation.GenerationTests.test_incomplete_or_different_model_responses_are_rejected) ... ok
+test_invalid_sources_are_rejected_before_ollama_receives_them (test_scripture_generation.GenerationTests.test_invalid_sources_are_rejected_before_ollama_receives_them) ... ok
+test_local_ollama_is_preflighted_and_receives_a_json_schema (test_scripture_generation.GenerationTests.test_local_ollama_is_preflighted_and_receives_a_json_schema) ... ok
+test_model_text_cannot_inject_conky_interpolation (test_scripture_generation.GenerationTests.test_model_text_cannot_inject_conky_interpolation) ... ok
+test_native_grammar_repetition_limit_does_not_reject_the_schema (test_scripture_generation.GenerationTests.test_native_grammar_repetition_limit_does_not_reject_the_schema) ... ok
+test_output_must_cite_only_supplied_sources (test_scripture_generation.GenerationTests.test_output_must_cite_only_supplied_sources) ... ok
+test_public_and_cloud_endpoints_are_rejected_before_network_access (test_scripture_generation.GenerationTests.test_public_and_cloud_endpoints_are_rejected_before_network_access) ... ok
+test_redirects_are_not_followed (test_scripture_generation.GenerationTests.test_redirects_are_not_followed) ... ok
+test_remote_model_metadata_is_rejected_before_generation (test_scripture_generation.GenerationTests.test_remote_model_metadata_is_rejected_before_generation) ... ok
+test_request_timeout_is_bounded (test_scripture_generation.GenerationTests.test_request_timeout_is_bounded) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 37.708s
+
+OK
+test_missing_scripture_pid_revives_only_its_existing_layout (test_scripture_history.CardRecoveryTests.test_missing_scripture_pid_revives_only_its_existing_layout) ... <frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+ok
+test_clock_refreshes_only_due_card_independently_of_conky_cache (test_scripture_history.CommandHistoryTests.test_clock_refreshes_only_due_card_independently_of_conky_cache) ... ok
+test_clock_retries_an_absent_card_without_changing_selected_passage (test_scripture_history.CommandHistoryTests.test_clock_retries_an_absent_card_without_changing_selected_passage) ... ok
+test_delayed_json_mirror_cannot_restore_older_selection (test_scripture_history.CommandHistoryTests.test_delayed_json_mirror_cannot_restore_older_selection) ... ok
+test_explicit_next_at_hour_boundary_advances_once (test_scripture_history.CommandHistoryTests.test_explicit_next_at_hour_boundary_advances_once) ... ok
+test_failed_hourly_render_retries_without_advancing_history_again (test_scripture_history.CommandHistoryTests.test_failed_hourly_render_retries_without_advancing_history_again) ... ok
+test_legacy_timestamp_is_retained_without_backdating_observation (test_scripture_history.CommandHistoryTests.test_legacy_timestamp_is_retained_without_backdating_observation) ... ok
+test_manual_selection_then_hourly_panel_keeps_full_history (test_scripture_history.CommandHistoryTests.test_manual_selection_then_hourly_panel_keeps_full_history) ... ok
+test_study_snapshot_keeps_sources_and_generated_provenance (test_scripture_history.CommandHistoryTests.test_study_snapshot_keeps_sources_and_generated_provenance) ... ok
+test_backup_is_consistent_independent_and_never_overwritten (test_scripture_history.HistoryTests.test_backup_is_consistent_independent_and_never_overwritten) ... ok
+test_concurrent_hourly_refreshes_advance_only_once (test_scripture_history.HistoryTests.test_concurrent_hourly_refreshes_advance_only_once) ... ok
+test_foreign_or_corrupt_databases_are_preserved_and_rejected (test_scripture_history.HistoryTests.test_foreign_or_corrupt_databases_are_preserved_and_rejected) ... ok
+test_history_navigation_preserves_notes_and_full_text (test_scripture_history.HistoryTests.test_history_navigation_preserves_notes_and_full_text) ... ok
+test_hourly_advance_is_not_a_repaint_and_does_not_backfill_sleep (test_scripture_history.HistoryTests.test_hourly_advance_is_not_a_repaint_and_does_not_backfill_sleep) ... ok
+test_manual_selection_resets_hour_and_duplicate_replays_keep_one_record (test_scripture_history.HistoryTests.test_manual_selection_resets_hour_and_duplicate_replays_keep_one_record) ... ok
+test_reading_view_uses_attribution_without_duplicate_verse_records_or_internal_hashes (test_scripture_history.HistoryTests.test_reading_view_uses_attribution_without_duplicate_verse_records_or_internal_hashes) ... ok
+test_snapshot_and_additions_survive_catalog_cache_rebuild (test_scripture_history.HistoryTests.test_snapshot_and_additions_survive_catalog_cache_rebuild) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 3.571s
+
+OK
+test_strips_footnote_markup_that_both_sources_ship (test_scripture_library.CleanTests.test_strips_footnote_markup_that_both_sources_ship) ... ok
+test_unescapes_entities_and_flattens_whitespace (test_scripture_library.CleanTests.test_unescapes_entities_and_flattens_whitespace) ... ok
+test_getbible_rejects_a_document_without_books (test_scripture_library.ConversionTests.test_getbible_rejects_a_document_without_books) ... ok
+test_getbible_rows_drop_empty_verses (test_scripture_library.ConversionTests.test_getbible_rows_drop_empty_verses) ... ok
+test_sefaria_joins_a_nested_segment (test_scripture_library.ConversionTests.test_sefaria_joins_a_nested_segment) ... ok
+test_sefaria_rejects_a_response_with_no_version (test_scripture_library.ConversionTests.test_sefaria_rejects_a_response_with_no_version) ... ok
+test_sefaria_rows_number_chapters_and_verses_in_order (test_scripture_library.ConversionTests.test_sefaria_rows_number_chapters_and_verses_in_order) ... ok
+test_talmud_sections_are_numbered_by_daf (test_scripture_library.ConversionTests.test_talmud_sections_are_numbered_by_daf) ... ok
+test_live_manifest_is_valid_and_states_every_licence (test_scripture_library.ManifestTests.test_live_manifest_is_valid_and_states_every_licence) ... ok
+test_manifest_excludes_translations_that_cannot_be_redistributed (test_scripture_library.ManifestTests.test_manifest_excludes_translations_that_cannot_be_redistributed) ... ok
+test_rejects_a_source_it_cannot_fetch (test_scripture_library.ManifestTests.test_rejects_a_source_it_cannot_fetch) ... ok
+test_a_missing_translation_says_how_to_install_it (test_scripture_library.ReaderTests.test_a_missing_translation_says_how_to_install_it) ... ok
+test_an_unsafe_identifier_is_refused (test_scripture_library.ReaderTests.test_an_unsafe_identifier_is_refused) ... ok
+test_available_translations_always_offer_the_bundled_text (test_scripture_library.ReaderTests.test_available_translations_always_offer_the_bundled_text) ... ok
+test_bundled_text_resolves_without_an_install (test_scripture_library.ReaderTests.test_bundled_text_resolves_without_an_install) ... ok
+test_a_disputed_attribution_says_so (test_scripture_library.WitnessTests.test_a_disputed_attribution_says_so) ... ok
+test_every_quote_is_complete_and_attributed (test_scripture_library.WitnessTests.test_every_quote_is_complete_and_attributed) ... ok
+test_rejects_a_quote_missing_its_source (test_scripture_library.WitnessTests.test_rejects_a_quote_missing_its_source) ... ok
+test_the_daily_quote_walks_the_whole_set (test_scripture_library.WitnessTests.test_the_daily_quote_walks_the_whole_set) ... ok
+test_installed_texts_needs_both_the_data_and_its_record (test_scripture_library.WriteTests.test_installed_texts_needs_both_the_data_and_its_record) ... ok
+test_refuses_a_record_containing_a_tab (test_scripture_library.WriteTests.test_refuses_a_record_containing_a_tab) ... ok
+test_refuses_to_write_nothing (test_scripture_library.WriteTests.test_refuses_to_write_nothing) ... ok
+test_the_same_rows_always_produce_the_same_bytes (test_scripture_library.WriteTests.test_the_same_rows_always_produce_the_same_bytes) ... ok
+test_written_text_round_trips_through_the_reader (test_scripture_library.WriteTests.test_written_text_round_trips_through_the_reader) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.102s
+
+OK
+test_exception_during_generation_stops_owned_backend (test_scripture_local.LocalScriptureTests.test_exception_during_generation_stops_owned_backend) ... ok
+test_explicit_timeout_boundaries_reach_generator (test_scripture_local.LocalScriptureTests.test_explicit_timeout_boundaries_reach_generator) ... ok
+test_failed_generation_propagates_exit_code_and_stops_only_owned_backend (test_scripture_local.LocalScriptureTests.test_failed_generation_propagates_exit_code_and_stops_only_owned_backend) ... Local CPU generation can take up to 15 minutes.
+ok
+test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server (test_scripture_local.LocalScriptureTests.test_failed_or_interrupted_pidfd_acquisition_reaps_only_new_server) ... ok
+test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others (test_scripture_local.LocalScriptureTests.test_hangup_and_termination_promptly_stop_owned_children_and_preserve_others) ... ok
+test_missing_runtime_fails_without_download_or_new_server (test_scripture_local.LocalScriptureTests.test_missing_runtime_fails_without_download_or_new_server) ... ok
+test_occupied_port_does_not_reuse_or_stop_existing_listener (test_scripture_local.LocalScriptureTests.test_occupied_port_does_not_reuse_or_stop_existing_listener) ... ok
+test_owned_server_is_loopback_only_and_staging_arguments_reach_study_cli (test_scripture_local.LocalScriptureTests.test_owned_server_is_loopback_only_and_staging_arguments_reach_study_cli) ... ok
+test_parallel_invocation_reports_busy_and_preserves_first_owned_server (test_scripture_local.LocalScriptureTests.test_parallel_invocation_reports_busy_and_preserves_first_owned_server) ... ok
+test_timeout_outside_bounds_is_rejected_before_starting_server (test_scripture_local.LocalScriptureTests.test_timeout_outside_bounds_is_rejected_before_starting_server) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 59.121s
+
+OK
+test_talmud_daf_reference_and_optional_collection_prefix (test_scripture_selection.LibraryTests.test_talmud_daf_reference_and_optional_collection_prefix) ... ok
+test_torah_and_kjv_are_distinct_and_selection_keeps_attribution (test_scripture_selection.LibraryTests.test_torah_and_kjv_are_distinct_and_selection_keeps_attribution) ... ok
+test_all_picker_preserves_lower_priority_for_bible_matches (test_scripture_selection.PickerScopeTests.test_all_picker_preserves_lower_priority_for_bible_matches) ... ok
+test_default_picker_contains_only_bible_verses (test_scripture_selection.PickerScopeTests.test_default_picker_contains_only_bible_verses) ... ok
+test_enter_saves_selection_then_requests_immediate_panel_refresh (test_scripture_selection.SelectionTests.test_enter_saves_selection_then_requests_immediate_panel_refresh) ... ok
+test_picker_enter_uses_the_chosen_row_reference (test_scripture_selection.SelectionTests.test_picker_enter_uses_the_chosen_row_reference) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.860s
+
+OK
+John 3:16
+test_concurrent_initial_reads_return_the_same_complete_catalog (test_scripture_study.StudyStorageTests.test_concurrent_initial_reads_return_the_same_complete_catalog) ... ok
+test_corrupt_changed_source_leaves_the_last_good_database_intact (test_scripture_study.StudyStorageTests.test_corrupt_changed_source_leaves_the_last_good_database_intact) ... ok
+test_database_symlink_is_refused_without_touching_its_target (test_scripture_study.StudyStorageTests.test_database_symlink_is_refused_without_touching_its_target) ... ok
+test_deleting_a_canonical_entry_rebuilds_the_database (test_scripture_study.StudyStorageTests.test_deleting_a_canonical_entry_rebuilds_the_database) ... ok
+test_foreign_sqlite_database_is_refused_without_replacement (test_scripture_study.StudyStorageTests.test_foreign_sqlite_database_is_refused_without_replacement) ... ok
+test_generated_entries_require_provenance_and_verified_https_sources (test_scripture_study.StudyStorageTests.test_generated_entries_require_provenance_and_verified_https_sources) ... ok
+test_load_preserves_legacy_order_and_materializes_valid_generated_entries (test_scripture_study.StudyStorageTests.test_load_preserves_legacy_order_and_materializes_valid_generated_entries) ... ok
+test_save_creates_an_immutable_entry_and_stages_only_its_exact_path (test_scripture_study.StudyStorageTests.test_save_creates_an_immutable_entry_and_stages_only_its_exact_path) ... ok
+test_tracking_failure_reports_saved_path_and_keeps_the_entry (test_scripture_study.StudyStorageTests.test_tracking_failure_reports_saved_path_and_keeps_the_entry) ... ok
+test_unchanged_sources_are_read_without_rewriting_the_database (test_scripture_study.StudyStorageTests.test_unchanged_sources_are_read_without_rewriting_the_database) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 4.531s
+
+OK
+Failed feature checks: test_conky_clicks.py, test_deploy.py, test_desktop_space.py

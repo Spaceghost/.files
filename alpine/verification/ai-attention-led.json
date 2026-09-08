@@ -1,0 +1,64 @@
+{
+  "version": 2,
+  "captured_at": "2026-09-07T12:12:15Z",
+  "behavior": "flash while attributable AI windows remain unvisited",
+  "focused_tests": {
+    "command": "python3 -m unittest alpine.tests.test_notification_led alpine.tests.test_ai_notification_stream alpine.tests.test_app_identity -v",
+    "passed": 30,
+    "control_subscriber_reconnect_resets_stale_visibility": true
+  },
+  "private_headless_sway": {
+    "fake_caps_leds": true,
+    "real_terminal_windows": 3,
+    "initial_two_pending_flashes": true,
+    "focus_one_keeps_other_flashing": true,
+    "focus_all_clears": true,
+    "close_one_keeps_other_flashing": true,
+    "close_all_clears": true,
+    "shutdown_turns_led_off": true
+  },
+  "isolated_dbus_stream": {
+    "notification_delivery_intact": true,
+    "emitted_records_are_content_free": true,
+    "unattributed_notifications_are_ignored": true
+  },
+  "host_read_only": {
+    "keymap": "CAPS=Escape",
+    "caps_led_brightness": {
+      "input0::capslock": 0,
+      "input2::capslock": 0
+    },
+    "notification_center_visible": false,
+    "window_focus_changed": false
+  },
+  "browser_limit": "Current SwayNC does not expose a validated browser origin, so generic browser notices remain deliberately unattributed.",
+  "live_upgrade_at_capture": false,
+  "physical_led_observation": false,
+  "live_upgrade": {
+    "activated_at": "2026-09-07T12:14:08.521921+00:00",
+    "led": {
+      "old_pid": 17845,
+      "new_pid": 14732,
+      "old_exited": true,
+      "new_lock_verified": true,
+      "shutdown_caps_readback": {
+        "input2::capslock": 0,
+        "input0::capslock": 0
+      }
+    },
+    "workspaces": {
+      "old_pid": 2065,
+      "new_pid": 14813,
+      "old_exited": true,
+      "new_lock_verified": true,
+      "shutdown_caps_readback": null
+    },
+    "focus_before": 5,
+    "focus_after": null,
+    "keymap": "CAPS=Escape",
+    "caps_after_restart": {
+      "input2::capslock": 0,
+      "input0::capslock": 0
+    }
+  }
+}

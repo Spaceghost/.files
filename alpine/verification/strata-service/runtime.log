@@ -1,0 +1,9 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 19:36:26 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+ err: wayland.c:1769: failed to read events from the Wayland socket: Broken pipe
+ err: wayland.c:2477: failed to roundtrip Wayland display: Broken pipe
+ err: wayland.c:2477: failed to roundtrip Wayland display: Broken pipe
+ err: wayland.c:2477: failed to roundtrip Wayland display: Broken pipe
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Broken pipe

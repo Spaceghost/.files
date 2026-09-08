@@ -1,0 +1,164 @@
+{
+  "status": "passed",
+  "installed_prefix": "/home/jack/.local/share/superhold/versions/0.2.0.dev1-2c5a0afe5578",
+  "installed_version": "0.2.0.dev1",
+  "private_runtime": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/runtime.dEpeoF",
+  "disposable_xdg_config_home": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/xdg-config",
+  "theme_symlink_final_target": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/light.css",
+  "same_process_across_each_dark_light_pair": true,
+  "guide_focus_probe_note": "Headless compositor has no input seat; expected focus warning was neutralized only in fixture via a no-op dismiss callback. The guide remained mapped for both captures.",
+  "host_desktop_changes": 0,
+  "active_desktop_css_reference": "path=/home/jack/.config/gtk-3.0/gtk.css\\nresolved='/home/jack/.config/gtk-3.0/gtk.css' -> '/home/jack/.files/alpine/themes/profiles/vespersteel-archive-968881e8a08a/.config/gtk-3.0/gtk.css'\\nsize=97\\nmode=777\n",
+  "active_desktop_css_sha256": "3c93ebab93c76ac91329c0fcbe1d1e4fd7c6fe2cad8a4fa3509a0b03becd3f76  /home/jack/.files/alpine/themes/profiles/vespersteel-archive-968881e8a08a/.config/gtk-3.0/gtk.css",
+  "screenshots": {
+    "guide-dark.png": {
+      "sha256": "bcf93b26b5603a480a0e426d3c2c3e0b4cfcd6411e96483ccfbabc15a6554d9e",
+      "bytes": 34753
+    },
+    "guide-light.png": {
+      "sha256": "e6dfd8ab04b04bb9046931aa6815c0162050634919773ae38a50603f0ca608f9",
+      "bytes": 34398
+    },
+    "release-dark.png": {
+      "sha256": "2a23491d67067577e6b7acca0bd6689a2a1dc570cd196e003a7198cf11e93591",
+      "bytes": 38585
+    },
+    "release-light.png": {
+      "sha256": "a430cf4ac89e3f164fc1cb78beba95ddb0546cf2f10bb19f0db7e0793b77fefa",
+      "bytes": 38496
+    },
+    "settings-dark.png": {
+      "sha256": "066009bfbed42ac7c79d9b4b2cb6062cfb4e6e1f84f9975387cf9fa95757a298",
+      "bytes": 42243
+    },
+    "settings-light.png": {
+      "sha256": "6afb1b224b5ef153fe8313177c1e2e9dfd88e935918809c5b00723211b324189",
+      "bytes": 42412
+    }
+  },
+  "rendered_colors": {
+    "screenshots": {
+      "guide-dark.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#20182c",
+          "base": "#17111f",
+          "selected": "#8f5fbd"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 147995,
+          "base": 448120,
+          "selected": 67879
+        }
+      },
+      "guide-light.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#f4eedf",
+          "base": "#fffaf0",
+          "selected": "#b2385b"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 147995,
+          "base": 448120,
+          "selected": 67879
+        }
+      },
+      "release-dark.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#20182c",
+          "base": "#17111f",
+          "selected": "#8f5fbd"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 448987,
+          "base": 0,
+          "selected": 7119
+        }
+      },
+      "release-light.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#f4eedf",
+          "base": "#fffaf0",
+          "selected": "#b2385b"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 448985,
+          "base": 0,
+          "selected": 7119
+        }
+      },
+      "settings-dark.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#20182c",
+          "base": "#17111f",
+          "selected": "#8f5fbd"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 312115,
+          "base": 29334,
+          "selected": 1455
+        }
+      },
+      "settings-light.png": {
+        "size": [
+          1280,
+          900
+        ],
+        "expected": {
+          "background": "#f4eedf",
+          "base": "#fffaf0",
+          "selected": "#b2385b"
+        },
+        "exact_rgb_sequence_counts": {
+          "background": 312115,
+          "base": 29346,
+          "selected": 1455
+        }
+      }
+    },
+    "status": "passed",
+    "failures": []
+  },
+  "processes": {
+    "guide-process": {
+      "mode": "guide",
+      "pid": 20249,
+      "module": "/home/jack/.local/share/superhold/versions/0.2.0.dev1-2c5a0afe5578/lib/python3.14/site-packages/superhold/__init__.py",
+      "theme_css": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/dark.css"
+    },
+    "release-process": {
+      "mode": "release",
+      "pid": 20651,
+      "module": "/home/jack/.local/share/superhold/versions/0.2.0.dev1-2c5a0afe5578/lib/python3.14/site-packages/superhold/__init__.py",
+      "theme_css": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/dark.css"
+    },
+    "settings-process": {
+      "pid": 20455
+    }
+  },
+  "active_desktop_css_fixture": {
+    "copy": "/home/jack/.local/state/oldbook/verification/superhold-dev1-install/active-theme.css",
+    "source": "/home/jack/.files/alpine/themes/profiles/vespersteel-archive-968881e8a08a/.config/gtk-3.0/gtk.css",
+    "sha256": "3c93ebab93c76ac91329c0fcbe1d1e4fd7c6fe2cad8a4fa3509a0b03becd3f76",
+    "identical_at_capture": true
+  }
+}

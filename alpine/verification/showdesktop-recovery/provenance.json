@@ -1,0 +1,37 @@
+{
+  "source_run": "showdesktop-recovery-native-guarded-20260907",
+  "artifacts": [
+    {
+      "path": "evidence.json",
+      "source_sha256": "6a59f43ab96249d066f764a957bf045b46022948bcb8aae6cfb69afba46f55ef",
+      "saved_sha256": "6a59f43ab96249d066f764a957bf045b46022948bcb8aae6cfb69afba46f55ef",
+      "sanitized": false
+    },
+    {
+      "path": "runtime.log",
+      "source_sha256": "30ec0da4d75b604fbdd53f0a680626352e2b3ace79cbc69c4bacda3371a4491f",
+      "saved_sha256": "30ec0da4d75b604fbdd53f0a680626352e2b3ace79cbc69c4bacda3371a4491f",
+      "sanitized": false
+    },
+    {
+      "path": "bus.log",
+      "source_sha256": "53991bcb46a9f31ab7f8678d09521fdfdbc0c7372a18af00dd7537441b612cd3",
+      "saved_sha256": "38b845c97fe5c909a33d4fc3e0112936dd22b97672175697895a58e00cbc9436",
+      "sanitized": true
+    },
+    {
+      "path": "sway.conf",
+      "source_sha256": "53870b1b7f7ae75f032ac697598174cb2c346ca5337658eff262a238da4b3741",
+      "saved_sha256": "53870b1b7f7ae75f032ac697598174cb2c346ca5337658eff262a238da4b3741",
+      "sanitized": false
+    },
+    {
+      "path": "recovered-windows.png",
+      "source_sha256": "4c000090b36df0868d64e79117692453148a2b05e6fe8a898206e4a5b9e8dadd",
+      "saved_sha256": "4c000090b36df0868d64e79117692453148a2b05e6fe8a898206e4a5b9e8dadd",
+      "sanitized": false
+    }
+  ],
+  "scope": "Private compositor and synthetic windows; carousel dispatch uses a private recorder, not its GUI.",
+  "dependency_snapshots": "Recorded source bytes were copied into private HOME and used by every helper instance."
+}

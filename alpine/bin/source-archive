@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Export and verify preserved build sources and Codex bundles from Fossil."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import tempfile
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def checksum(path):
+    if path.is_symlink() or not path.is_file():
+        raise RuntimeError(f'Archive must be a regular non-symlink file: {path}')
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def load_manifest(path):
+    data = json.loads(path.read_text())
+    if data.get('schema') != 1 or not data.get('artifacts'):
+        raise RuntimeError('Unsupported or empty source manifest')
+    names = set()
+    for entry in data['artifacts']:
+        name, digest = entry['name'], entry['sha256']
+        if (not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._+-]*', name)
+                or name in names):
+            raise RuntimeError('Unsafe or duplicate archive basename')
+        if not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest):
+            raise RuntimeError('Invalid SHA256')
+        if entry['artifact'] != f'sha256/{digest}/{name}':
+            raise RuntimeError('Artifact does not match immutable digest identity')
+        if entry['kind'] not in ('codex', 'opensnitch', 'swayfx'):
+            raise RuntimeError('Unknown source kind')
+        names.add(name)
+    return data['artifacts']
+
+
+def prepare_cache(path):
+    path = path.absolute()
+    for ancestor in reversed([path, *path.parents]):
+        if ancestor.is_symlink():
+            raise RuntimeError(f'Cache directory cannot contain symlinks: {ancestor}')
+        if ancestor.exists() and not ancestor.is_dir():
+            raise RuntimeError(f'Cache parent is not a directory: {ancestor}')
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
+def export(entries, cache, repository=REPO):
+    cache = prepare_cache(cache)
+    for entry in entries:
+        destination = cache / entry['name']
+        if destination.is_symlink():
+            raise RuntimeError(f'Refusing cache symlink: {destination}')
+        if not destination.exists():
+            with tempfile.TemporaryDirectory(prefix='.source-export-', dir=cache) as directory:
+                temporary = Path(directory) / entry['name']
+                subprocess.run(['fossil', 'uv', 'export', entry['artifact'], str(temporary)],
+                               cwd=repository, check=True)
+                if checksum(temporary) != entry['sha256']:
+                    raise RuntimeError(f'Corrupt Fossil artifact: {entry["artifact"]}')
+                # Atomic publication without overwriting a concurrently created file.
+                try:
+                    os.link(temporary, destination, follow_symlinks=False)
+                except FileExistsError:
+                    pass
+        if checksum(destination) != entry['sha256']:
+            raise RuntimeError(f'Checksum mismatch; preserving evidence: {destination}')
+    print(f'Verified {len(entries)} source/binary archives in {cache}')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--cache', type=Path, required=True)
+    parser.add_argument('--kind', choices=['codex', 'opensnitch', 'swayfx'])
+    args = parser.parse_args()
+    entries = load_manifest(REPO / 'alpine/packages/sources.json')
+    if args.kind:
+        entries = [entry for entry in entries if entry['kind'] == args.kind]
+    export(entries, args.cache)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (RuntimeError, OSError, ValueError, subprocess.CalledProcessError) as error:
+        raise SystemExit(f'source-archive: {error}')

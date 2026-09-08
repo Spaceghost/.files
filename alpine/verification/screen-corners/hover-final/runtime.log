@@ -1,0 +1,832 @@
+00:00:00.000 [INFO] [sway/main.c:308] swayfx version 0.6 (based on sway version 1.12.0)
+00:00:00.000 [INFO] [sway/main.c:309] wlroots version 0.20.2
+00:00:00.000 [INFO] [sway/main.c:310] scenefx version 0.5.0
+00:00:00.030 [INFO] [sway/main.c:78] Linux oldbook 6.18.49-0-lts #1-Alpine SMP PREEMPT_DYNAMIC 2026-09-07 07:20:48 x86_64 Linux
+00:00:00.030 [INFO] [sway/main.c:94] Contents of /etc/os-release:
+00:00:00.030 [INFO] [sway/main.c:78] NAME="Alpine Linux"
+00:00:00.030 [INFO] [sway/main.c:78] ID=alpine
+00:00:00.030 [INFO] [sway/main.c:78] VERSION_ID=3.25.0_alpha20260805
+00:00:00.030 [INFO] [sway/main.c:78] PRETTY_NAME="Alpine Linux edge"
+00:00:00.030 [INFO] [sway/main.c:78] HOME_URL="https://alpinelinux.org/"
+00:00:00.031 [INFO] [sway/main.c:78] BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
+00:00:00.031 [INFO] [sway/main.c:66] LD_LIBRARY_PATH=
+00:00:00.031 [INFO] [sway/main.c:66] LD_PRELOAD=
+00:00:00.031 [INFO] [sway/main.c:66] PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+00:00:00.031 [INFO] [sway/main.c:66] SWAYSOCK=
+00:00:00.031 [INFO] [sway/main.c:339] Starting swayfx version 0.6 (based on sway version 1.12.0
+00:00:00.031 [DEBUG] [sway/server.c:248] Initializing Wayland server
+00:00:00.031 [INFO] [wlr] [backend/backend.c:342] Loading user-specified backends due to WLR_BACKENDS: headless
+00:00:00.031 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.040 [DEBUG] [wlr] [render/fx_renderer/util.c:34] Opening DRM render node '/dev/dri/renderD128'
+00:00:00.040 [INFO] [wlr] [render/egl.c:205] Supported EGL client extensions: EGL_EXT_client_extensions EGL_EXT_device_base EGL_EXT_device_enumeration EGL_EXT_device_query EGL_EXT_platform_base EGL_KHR_client_get_all_proc_addresses EGL_KHR_debug EGL_EXT_platform_device EGL_EXT_explicit_device EGL_EXT_platform_wayland EGL_KHR_platform_wayland EGL_EXT_platform_x11 EGL_KHR_platform_x11 EGL_EXT_platform_xcb EGL_MESA_platform_gbm EGL_KHR_platform_gbm EGL_MESA_platform_surfaceless
+00:00:00.065 [DEBUG] [wlr] [render/egl.c:526] Using EGL device /dev/dri/card0
+ac_compute_device_uuid's output is based on invalid pci bus info.
+00:00:00.338 [INFO] [wlr] [render/egl.c:369] Using EGL 1.5
+00:00:00.338 [INFO] [wlr] [render/egl.c:370] Supported EGL display extensions: EGL_ANDROID_blob_cache EGL_EXT_config_select_group EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_query_reset_notification_strategy EGL_EXT_surface_compression EGL_KHR_cl_event2 EGL_KHR_config_attribs EGL_KHR_context_flush_control EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_gl_interop EGL_MESA_image_dma_buf_export EGL_MESA_query_driver EGL_MESA_x11_native_visual_id 
+00:00:00.338 [INFO] [wlr] [render/egl.c:372] Supported EGL device extensions: EGL_EXT_device_drm EGL_EXT_device_drm_render_node EGL_EXT_device_query_name EGL_EXT_device_persistent_id
+00:00:00.338 [INFO] [wlr] [render/egl.c:374] EGL vendor: Mesa Project
+00:00:00.338 [INFO] [wlr] [render/egl.c:376] EGL driver name: radeonsi
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:120] Supported DMA-BUF formats:
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:169]   AB4H (0x48344241)
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:169]   XB4H (0x48344258)
+00:00:00.338 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   AB48 (0x38344241)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   XB48 (0x38344258)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   AR30 (0x30335241)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   XR30 (0x30335258)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   AB30 (0x30334241)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   XB30 (0x30334258)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   AR24 (0x34325241)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:169]   AB24 (0x34324241)
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.339 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   XR24 (0x34325258)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   XB24 (0x34324258)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   AR15 (0x35315241)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   AB15 (0x35314241)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   AR12 (0x32315241)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   AB12 (0x32314241)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   RG16 (0x36314752)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   R8 (0x20203852)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:169]   R16 (0x20363152)
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.340 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   GR88 (0x38385247)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   GR32 (0x32335247)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   R  H (0x48202052)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   R  F (0x46202052)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   GR H (0x48205247)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   GR F (0x46205247)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   AB8F (0x46384241)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   YUV9 (0x39565559)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   YU11 (0x31315559)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:169]   YU12 (0x32315559)
+00:00:00.341 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YU16 (0x36315559)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YU24 (0x34325559)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YVU9 (0x39555659)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YV11 (0x31315659)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YV12 (0x32315659)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YV16 (0x36315659)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   YV24 (0x34325659)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   S010 (0x30313053)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:169]   S210 (0x30313253)
+00:00:00.342 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S410 (0x30313453)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S012 (0x32313053)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S212 (0x32313253)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S412 (0x32313453)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S016 (0x36313053)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S216 (0x36313253)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   S416 (0x36313453)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   NV12 (0x3231564E)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:169]   NV21 (0x3132564E)
+00:00:00.343 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   P010 (0x30313050)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   P012 (0x32313050)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   P016 (0x36313050)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   P030 (0x30333050)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   NV16 (0x3631564E)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   NV61 (0x3136564E)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:169]   NV24 (0x3432564E)
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.344 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   NV42 (0x3234564E)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   AYUV (0x56555941)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   XYUV (0x56555958)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   Y410 (0x30313459)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   Y412 (0x32313459)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   Y416 (0x36313459)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   YUYV (0x56595559)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   YVYU (0x55595659)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   UYVY (0x59565955)
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.345 [DEBUG] [wlr] [render/egl.c:169]   VYUY (0x59555956)
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:169]   Y210 (0x30313259)
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:169]   Y212 (0x32313259)
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:169]   Y216 (0x36313259)
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.346 [DEBUG] [wlr] [render/egl.c:189] EGL DMA-BUF format modifiers unsupported
+00:00:00.360 [DEBUG] [wlr] [render/egl.c:439] Created EGL context using OpenGL ES 2.0
+00:00:00.364 [DEBUG] [wlr] [render/egl.c:578] Using EGL_PLATFORM_DEVICE_EXT
+00:00:00.365 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:473] Creating scenefx FX renderer
+00:00:00.365 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:474] Using OpenGL ES 3.2 Mesa 26.1.6
+00:00:00.365 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:475] GL vendor: AMD
+00:00:00.365 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:476] GL renderer:  (radeonsi, verde, ACO, DRM 2.51, 6.18.49-0-lts)
+00:00:00.365 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:477] Supported FX extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_draw_instanced GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_NV_conditional_render GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_texture_storage GL_NV_pack_subimage GL_NV_texture_barrier GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_pack_reverse_row_order GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_occlusion_query_boolean GL_EXT_robustness GL_EXT_sRGB GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_APPLE_sync GL_EXT_draw_buffers GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_shadow_samplers GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_generate_mipmap_sRGB GL_NV_pixel_buffer_object GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_debug_label GL_EXT_sRGB_write_control GL_EXT_separate_shader_objects GL_EXT_shader_group_vote GL_EXT_shader_implicit_conversions GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_multi_draw_indirect GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_EXT_texture_view GL_KHR_blend_equation_advanced GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_NV_shader_noperspective_interpolation GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_float_blend GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_EXT_texture_sRGB_R8 GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clear_texture GL_EXT_clip_cull_distance GL_EXT_conservative_depth GL_EXT_disjoint_timer_query GL_EXT_texture_compression_s3tc_srgb GL_EXT_window_rectangles GL_MESA_shader_integer_functions GL_EXT_clip_control GL_EXT_color_buffer_half_float GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_texture_compression_bptc GL_EXT_texture_mirror_clamp_to_edge GL_KHR_parallel_shader_compile GL_NV_alpha_to_coverage_dither_control GL_EXT_EGL_image_storage GL_EXT_texture_shadow_lod GL_INTEL_blackhole_render GL_MESA_framebuffer_flip_y GL_NV_compute_shader_derivatives GL_EXT_demote_to_helper_invocation GL_EXT_depth_clamp GL_EXT_texture_query_lod GL_KHR_shader_subgroup GL_MESA_sampler_objects GL_EXT_EGL_image_storage_compression GL_EXT_texture_storage_compression GL_MESA_bgra GL_MESA_texture_const_bandwidth GL_EXT_shader_clock 
+00:00:00.365 [DEBUG] [wlr] [render/fx_renderer/fx_renderer.c:533] GPU reset notifications are enabled
+00:00:00.771 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:585] FX RENDERER: Shaders Initialized Successfully
+00:00:00.783 [DEBUG] [wlr] [render/allocator/allocator.c:115] Trying to create gbm allocator
+00:00:00.990 [DEBUG] [wlr] [render/allocator/gbm.c:188] Created GBM allocator with backend drm
+00:00:00.990 [DEBUG] [wlr] [render/allocator/gbm.c:191] Using DRM node /dev/dri/renderD128
+00:00:00.990 [DEBUG] [wlr] [types/wlr_drm_lease_v1.c:679] No DRM backend supplied, failed to create wlr_drm_lease_v1_manager
+00:00:00.990 [DEBUG] [sway/server.c:499] Failed to create wlr_drm_lease_device_v1
+00:00:00.990 [INFO] [sway/server.c:500] VR will not be available
+00:00:00.990 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:01.054 [INFO] [sway/config.c:460] Loading config from /tmp/spaceghost-screen-corners/hover-final/sway.conf
+00:00:01.054 [DEBUG] [sway/config.c:819] Read line 1: xwayland disable
+00:00:01.054 [INFO] [sway/commands.c:407] Config command: xwayland disable
+00:00:01.054 [INFO] [sway/commands.c:430] After replacement: xwayland disable
+00:00:01.054 [DEBUG] [sway/config.c:819] Read line 2: output HEADLESS-1 mode 1280x800
+00:00:01.054 [INFO] [sway/commands.c:407] Config command: output HEADLESS-1 mode 1280x800
+00:00:01.054 [INFO] [sway/commands.c:430] After replacement: output HEADLESS-1 mode 1280x800
+00:00:01.054 [DEBUG] [sway/commands.c:462] Subcommand: mode 1280x800
+00:00:01.054 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (1280x800@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:01.054 [DEBUG] [sway/config.c:819] Read line 3: output * bg #292336 solid_color
+00:00:01.055 [INFO] [sway/commands.c:407] Config command: output * bg #292336 solid_color
+00:00:01.055 [INFO] [sway/commands.c:430] After replacement: output * bg #292336 solid_color
+00:00:01.055 [DEBUG] [sway/commands.c:462] Subcommand: bg #292336 solid_color
+00:00:01.055 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg #292336 solid_color) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:01.055 [DEBUG] [sway/config.c:819] Read line 4: seat seat0 fallback true
+00:00:01.055 [INFO] [sway/commands.c:407] Config command: seat seat0 fallback true
+00:00:01.055 [INFO] [sway/commands.c:430] After replacement: seat seat0 fallback true
+00:00:01.057 [DEBUG] [sway/commands.c:462] Subcommand: fallback true
+00:00:01.057 [DEBUG] [sway/config/seat.c:65] Adding non-wildcard seat config
+00:00:01.057 [DEBUG] [sway/config/seat.c:82] Config stored for seat seat0
+00:00:01.057 [DEBUG] [sway/config.c:819] Read line 5: focus_follows_mouse yes
+00:00:01.057 [INFO] [sway/commands.c:407] Config command: focus_follows_mouse yes
+00:00:01.057 [INFO] [sway/commands.c:430] After replacement: focus_follows_mouse yes
+00:00:01.057 [DEBUG] [sway/config.c:819] Read line 6: mouse_warping none
+00:00:01.057 [INFO] [sway/commands.c:407] Config command: mouse_warping none
+00:00:01.057 [INFO] [sway/commands.c:430] After replacement: mouse_warping none
+00:00:01.057 [DEBUG] [sway/config.c:819] Read line 7: default_border normal 2
+00:00:01.057 [INFO] [sway/commands.c:407] Config command: default_border normal 2
+00:00:01.057 [INFO] [sway/commands.c:430] After replacement: default_border normal 2
+00:00:01.057 [DEBUG] [sway/config.c:819] Read line 8: default_floating_border normal 2
+00:00:01.057 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 2
+00:00:01.057 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 2
+00:00:01.057 [DEBUG] [sway/config.c:819] Read line 9: font monospace 12
+00:00:01.057 [INFO] [sway/commands.c:407] Config command: font monospace 12
+00:00:01.057 [INFO] [sway/commands.c:430] After replacement: font monospace 12
+00:00:01.165 [DEBUG] [sway/config.c:819] Read line 10: corner_radius 0
+00:00:01.165 [INFO] [sway/commands.c:407] Config command: corner_radius 0
+00:00:01.165 [INFO] [sway/commands.c:430] After replacement: corner_radius 0
+00:00:01.165 [DEBUG] [sway/config.c:819] Read line 11: shadows disable
+00:00:01.165 [INFO] [sway/commands.c:407] Config command: shadows disable
+00:00:01.165 [INFO] [sway/commands.c:430] After replacement: shadows disable
+00:00:01.166 [DEBUG] [sway/config.c:819] Read line 12: blur disable
+00:00:01.166 [INFO] [sway/commands.c:407] Config command: blur disable
+00:00:01.166 [INFO] [sway/commands.c:430] After replacement: blur disable
+00:00:01.166 [DEBUG] [sway/config.c:819] Read line 13: animation_duration_ms 0
+00:00:01.166 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 0
+00:00:01.166 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 0
+00:00:01.166 [DEBUG] [sway/config.c:819] Read line 14: for_window [app_id="^hover-"] floating enable
+00:00:01.166 [INFO] [sway/commands.c:407] Config command: for_window [app_id="^hover-"] floating enable
+00:00:01.166 [INFO] [sway/commands.c:430] After replacement: for_window [app_id="^hover-"] floating enable
+00:00:01.166 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^hover-
+00:00:01.166 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="^hover-"]' -> 'floating enable' added
+00:00:01.169 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat seat0
+00:00:01.169 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[0] = swaybg
+00:00:01.169 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[1] = -o
+00:00:01.169 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[2] = *
+00:00:01.169 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[3] = -c
+00:00:01.170 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[4] = #292336
+00:00:01.178 [INFO] [sway/realtime.c:35] Failed to set scheduling priority to 1
+00:00:01.178 [INFO] [sway/server.c:791] Starting backend on wayland display 'wayland-1'
+00:00:01.178 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:01.178 [DEBUG] [sway/desktop/output.c:754] New output 0x7f20f8518360: HEADLESS-1 (non-desktop: 0)
+00:00:01.178 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:01.178 [DEBUG] [wlr] [types/output/cursor.c:67] Disabling hardware cursors on output 'HEADLESS-1' (locks: 1)
+00:00:01.178 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:01.179 [DEBUG] [sway/config/output.c:1008] Committing 1 outputs
+00:00:01.179 [DEBUG] [sway/config/output.c:769] Output state for HEADLESS-1
+00:00:01.179 [DEBUG] [sway/config/output.c:771]     enabled:       yes
+00:00:01.179 [DEBUG] [sway/config/output.c:775]     render_format: XR24
+00:00:01.179 [DEBUG] [sway/config/output.c:780]     custom mode:   1280x800@0mHz
+00:00:01.179 [DEBUG] [sway/config/output.c:793]     scale:         1.000000
+00:00:01.179 [DEBUG] [sway/config/output.c:796]     subpixel:      unknown
+00:00:01.179 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:164] Preparing test commit for 1 outputs with explicit modifiers
+00:00:01.179 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:01.186 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XR24 (0x34325258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.186 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:185] Test commit for 1 outputs succeeded
+00:00:01.187 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.213 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.213 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.226 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.226 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.227 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.228 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.229 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.229 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.236 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1280x800 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.237 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1280x800
+00:00:01.356 [DEBUG] [sway/config/output.c:1071] Commit of 1 outputs succeeded
+00:00:01.356 [DEBUG] [sway/config/output.c:1086] Finalizing config for HEADLESS-1
+00:00:01.356 [DEBUG] [sway/tree/workspace.c:444] Workspace: Generating new workspace name for output HEADLESS-1
+00:00:01.356 [DEBUG] [sway/tree/output.c:170] Creating default workspace 1
+00:00:01.356 [DEBUG] [sway/tree/workspace.c:185] Adding workspace 1 for output HEADLESS-1
+00:00:01.356 [DEBUG] [sway/desktop/layer_shell.c:148] Usable area changed, rearranging output
+00:00:01.356 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:01.356 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.356 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:01.356 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.356 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20e69e5df0 committing with 2 instructions
+00:00:01.356 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20e69e5df0
+00:00:01.357 [DEBUG] [wlr] [xcursor/wlr_xcursor.c:233] Loaded cursor theme 'default' at size 24 (26 available cursors)
+00:00:01.357 [INFO] [sway/server.c:803] Running compositor on wayland display 'wayland-1'
+00:00:01.363 [DEBUG] [sway/input/input-manager.c:421] adding virtual pointer: '0:0:wlr_virtual_pointer_v1'
+00:00:01.363 [DEBUG] [sway/input/seat.c:946] adding device 0:0:wlr_virtual_pointer_v1 to seat seat0
+00:00:01.363 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:01.376 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:01.412 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+2026-09-07 22:34:40 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+00:00:01.416 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e661f7b0 (res 0x7f20e77b27f0)
+00:00:01.416 [DEBUG] [wlr] [types/wlr_layer_shell_v1.c:502] new layer_surface 0x7f20e6607010 (res 0x7f20e77b2c70)
+00:00:01.416 [DEBUG] [sway/desktop/layer_shell.c:504] new layer surface: namespace wallpaper layer 0 anchor 0 size 0x0 margin 0,0,0,0,
+00:00:01.427 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.503 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.516 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.586 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.594 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.655 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.666 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.734 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.746 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:01.816 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:01.832 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:01.897 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:01.910 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:01.982 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:01.999 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e661ffa0 (res 0x7f20e73766d0)
+00:00:01.999 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e6620770 (res 0x7f20e7376b50)
+00:00:01.999 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f20e69527a0 (res 0x7f20e7375010)
+00:00:01.999 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:01.999 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f20e66333c0 (res 0x7f20e7375910)
+00:00:01.999 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e6620b80 (res 0x7f20e7375a30)
+00:00:02.001 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.052 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:02.052 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:02.052 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7fff879cdbe8 horizontally
+00:00:02.052 [DEBUG] [sway/tree/view.c:578] Checking criteria [app_id="^hover-"]
+00:00:02.052 [DEBUG] [sway/tree/view.c:583] for_window '[app_id="^hover-"]' matches view 0x7f20e7843340, cmd: 'floating enable'
+00:00:02.052 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:02.052 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:02.052 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:02.052 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20e69ebc70 committing with 3 instructions
+00:00:02.057 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f20e69ebc70 is ready
+00:00:02.057 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20e69ebc70
+00:00:02.097 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20e69ebcb0 committing with 1 instructions
+00:00:02.098 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20e69ebcb0
+00:00:02.102 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.109 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.291 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.300 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.349 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.369 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.471 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.485 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.583 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.610 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.694 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.711 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.787 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.822 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.894 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.913 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:02.995 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:03.019 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:03.091 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e66226f0 (res 0x7f20e712a5b0)
+00:00:03.091 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e6622b00 (res 0x7f20e712aa30)
+00:00:03.091 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f20e69522e0 (res 0x7f20e712aeb0)
+00:00:03.091 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:03.092 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f20e6633d20 (res 0x7f20e71287f0)
+00:00:03.092 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f20e6622ee0 (res 0x7f20e7128880)
+00:00:03.113 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:03.137 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:03.151 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:03.151 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:03.151 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7fff879cdbe8 horizontally
+00:00:03.151 [DEBUG] [sway/tree/view.c:578] Checking criteria [app_id="^hover-"]
+00:00:03.151 [DEBUG] [sway/tree/view.c:583] for_window '[app_id="^hover-"]' matches view 0x7f20e7844920, cmd: 'floating enable'
+00:00:03.151 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:03.151 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:03.151 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:03.152 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64035e0 committing with 4 instructions
+00:00:03.171 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f20c64035e0 is ready
+00:00:03.171 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64035e0
+00:00:03.195 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64047b0 committing with 1 instructions
+00:00:03.195 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64047b0
+00:00:03.220 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:03.255 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:03.418 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:03.435 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:03.455 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:03.455 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:03.456 [INFO] [sway/commands.c:287] Handling command 'resize set width 600 px height 450 px'
+00:00:03.456 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:03.456 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64033e0 committing with 2 instructions
+00:00:03.473 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:03.528 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f20c64033e0 is ready
+00:00:03.528 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64033e0
+00:00:03.542 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:03.542 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404870 committing with 1 instructions
+00:00:03.543 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404870
+00:00:03.607 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.608 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:03.608 [INFO] [sway/commands.c:287] Handling command 'resize set width 600 px height 450 px'
+00:00:03.608 [INFO] [sway/commands.c:287] Handling command 'move position 450 px 200 px'
+00:00:03.608 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64049b0 committing with 1 instructions
+00:00:03.647 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.687 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f20c64049b0 is ready
+00:00:03.687 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64049b0
+00:00:03.706 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:03.706 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404c70 committing with 1 instructions
+00:00:03.707 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404c70
+00:00:03.781 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:03.782 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:03.782 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:03.782 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404a30 committing with 1 instructions
+00:00:03.782 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404a30
+00:00:03.796 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:03.903 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:03.903 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:03.903 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:03.903 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403560 committing with 1 instructions
+00:00:03.903 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403560
+00:00:03.915 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:04.033 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:04.062 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:04.088 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:04.179 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:04.200 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404970 committing with 4 instructions
+00:00:04.200 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404970
+00:00:04.262 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:04.275 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:04.276 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:04.290 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:04.304 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:05.463 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:05.472 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:05.509 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 2)
+00:00:06.932 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:06.952 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:06.952 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:06.956 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:06.957 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404eb0 committing with 1 instructions
+00:00:06.957 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404eb0
+00:00:06.968 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.080 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.098 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.122 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.141 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.151 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.164 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.175 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.179 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000'
+00:00:07.180 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.286 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:07.323 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.323 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:07.323 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:07.323 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404a30 committing with 1 instructions
+00:00:07.324 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404a30
+00:00:07.347 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.481 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.481 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:07.481 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:07.482 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64033e0 committing with 4 instructions
+00:00:07.483 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64033e0
+00:00:07.517 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.631 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.640 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.691 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.715 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.719 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404930 committing with 4 instructions
+00:00:07.719 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404930
+00:00:07.744 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:07.769 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.789 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.810 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.829 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.374 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.397 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.423 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.448 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.479 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.491 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.527 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.552 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.578 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.601 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.642 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.660 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.719 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.727 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404e30 committing with 1 instructions
+00:00:08.727 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404e30
+00:00:08.739 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.777 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.815 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.842 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.866 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.887 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.906 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.938 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:08.961 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:08.997 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 2)
+00:00:10.620 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:10.641 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:10.676 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:10.683 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:10.683 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:10.683 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404a70 committing with 1 instructions
+00:00:10.684 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404a70
+00:00:10.697 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:10.811 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:10.817 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:10.817 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:10.818 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64033e0 committing with 4 instructions
+00:00:10.818 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64033e0
+00:00:10.853 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:10.967 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:10.982 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:10.992 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:11.014 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:11.019 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404930 committing with 4 instructions
+00:00:11.019 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404930
+00:00:11.055 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:11.058 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:11.083 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:11.128 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:11.149 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:11.408 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:12.490 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.503 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.544 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.570 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.594 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.612 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.632 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.632 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:12.633 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:12.633 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403060 committing with 1 instructions
+00:00:12.633 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403060
+00:00:12.669 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.776 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.778 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:12.779 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:12.779 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64048f0 committing with 4 instructions
+00:00:12.779 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64048f0
+00:00:12.808 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.921 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.929 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.944 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.965 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.965 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64035e0 committing with 4 instructions
+00:00:12.966 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64035e0
+00:00:12.999 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:13.008 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.028 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:13.055 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.074 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:13.342 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.342 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:13.343 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:13.343 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64048b0 committing with 4 instructions
+00:00:13.344 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64048b0
+00:00:13.380 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.547 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.573 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.584 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.597 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.612 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.628 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.632 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:14.654 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.657 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:14.658 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:14.658 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404830 committing with 1 instructions
+00:00:14.658 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404830
+00:00:14.678 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.789 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.789 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:14.790 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:14.790 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404ab0 committing with 1 instructions
+00:00:14.790 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404ab0
+00:00:14.790 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.903 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.923 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.945 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.972 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.973 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64034e0 committing with 4 instructions
+00:00:14.973 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64034e0
+00:00:15.026 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:15.044 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.060 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.087 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.126 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.405 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.405 [INFO] [sway/commands.c:287] Handling command 'workspace number 2'
+00:00:15.405 [DEBUG] [sway/tree/workspace.c:185] Adding workspace 2 for output HEADLESS-1
+00:00:15.405 [DEBUG] [sway/tree/workspace.c:741] Switching to workspace 0x7f20e6952c40:2
+00:00:15.405 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:15.405 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '2' at 0.000000, 0.000000
+00:00:15.406 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403460 committing with 4 instructions
+00:00:15.406 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403460
+00:00:15.408 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:15.421 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.532 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.533 [INFO] [sway/commands.c:287] Handling command 'workspace number 1'
+00:00:15.533 [DEBUG] [sway/tree/workspace.c:741] Switching to workspace 0x7f20e6951980:1
+00:00:15.533 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace '2'
+00:00:15.533 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:15.533 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:15.533 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404a70 committing with 5 instructions
+00:00:15.533 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404a70
+00:00:15.547 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:15.548 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:16.727 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:16.767 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:16.803 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:16.835 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:16.847 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:16.858 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:16.881 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:16.898 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:16.898 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:16.898 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:16.898 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64047f0 committing with 1 instructions
+00:00:16.899 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64047f0
+00:00:16.907 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.022 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.022 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:17.023 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:17.023 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404bf0 committing with 4 instructions
+00:00:17.023 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404bf0
+00:00:17.057 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.174 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.187 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.199 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.211 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.212 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403460 committing with 4 instructions
+00:00:17.212 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403460
+00:00:17.263 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.271 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.304 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.327 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.348 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.612 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.614 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:17.615 [INFO] [sway/commands.c:287] Handling command 'move position 120 px 100 px'
+00:00:17.615 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64047f0 committing with 1 instructions
+00:00:17.615 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64047f0
+00:00:17.623 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:18.784 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:18.792 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:18.812 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:18.830 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:18.837 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:18.859 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:18.859 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:18.859 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:18.859 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64047f0 committing with 1 instructions
+00:00:18.860 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64047f0
+00:00:18.867 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:18.989 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:18.990 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:18.990 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:18.990 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403460 committing with 4 instructions
+00:00:18.991 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403460
+00:00:19.053 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:19.171 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:19.188 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:19.200 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:19.219 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:19.223 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64035e0 committing with 4 instructions
+00:00:19.223 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64035e0
+00:00:19.260 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:19.283 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:19.291 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:19.312 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:19.343 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:19.620 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:19.620 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 0'
+00:00:19.620 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.797 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.830 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.848 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.878 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.902 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.906 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay'
+00:00:20.907 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.919 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.923 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay -1'
+00:00:20.925 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.941 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.941 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 60001'
+00:00:20.942 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.952 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.952 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000x'
+00:00:20.959 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:20.985 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:20.985 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1 2'
+00:00:20.989 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.009 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.019 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 9999999999999999999999999999999'
+00:00:21.019 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.051 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.054 [INFO] [sway/commands.c:287] Handling command 'mouse_raise_delay 1000'
+00:00:21.059 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.171 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:21.200 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.201 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:21.201 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:21.201 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404c70 committing with 1 instructions
+00:00:21.201 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404c70
+00:00:21.215 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.332 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.332 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:21.332 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:21.332 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403060 committing with 4 instructions
+00:00:21.333 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403060
+00:00:21.366 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.492 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.517 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.566 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.580 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.580 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6403060 committing with 3 instructions
+00:00:21.580 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6403060
+00:00:21.615 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404970 committing with 3 instructions
+00:00:21.615 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404970
+00:00:21.624 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:21.642 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.652 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.662 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.695 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:22.857 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:22.867 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:22.888 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:22.914 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:22.914 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:22.914 [INFO] [sway/commands.c:287] Handling command 'move position 100 px 100 px'
+00:00:22.915 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404ab0 committing with 1 instructions
+00:00:22.915 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404ab0
+00:00:22.919 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.043 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.044 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-b
+00:00:23.044 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:23.044 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c6404eb0 committing with 4 instructions
+00:00:23.044 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c6404eb0
+00:00:23.068 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.186 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.220 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.235 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.254 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.255 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64035e0 committing with 4 instructions
+00:00:23.255 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64035e0
+00:00:23.289 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:23.308 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.320 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.337 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.354 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.615 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:23.615 [DEBUG] [sway/criteria.c:841] Found pair: app_id=hover-a
+00:00:23.616 [INFO] [sway/commands.c:287] Handling command 'kill'
+00:00:23.617 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:23.617 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:23.617 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:23.617 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64035e0 committing with 4 instructions
+00:00:23.618 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64035e0
+00:00:23.624 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+00:00:24.830 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:24.844 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:24.850 [DEBUG] [sway/input/input-manager.c:208] removing device: '0:0:wlr_virtual_pointer_v1'
+00:00:24.850 [DEBUG] [sway/input/seat.c:966] removing device 0:0:wlr_virtual_pointer_v1 from seat seat0
+00:00:24.850 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:24.855 [INFO] [sway/main.c:401] Shutting down sway
+00:00:24.856 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1280x800@0,0
+00:00:24.856 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:24.856 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f20c64047b0 committing with 2 instructions
+00:00:24.856 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f20c64047b0
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+00:00:24.859 [DEBUG] [sway/tree/output.c:293] Disabling output 'HEADLESS-1'
+00:00:24.859 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace '1'
+00:00:24.860 [DEBUG] [sway/tree/output.c:310] Destroying output 'HEADLESS-1'
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer

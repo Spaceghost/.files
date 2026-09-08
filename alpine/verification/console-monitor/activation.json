@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "live_binding_installation": [
+    [
+      {
+        "success": true
+      }
+    ],
+    [
+      {
+        "success": true
+      }
+    ],
+    [
+      {
+        "success": true
+      },
+      {
+        "success": true
+      },
+      {
+        "success": true
+      }
+    ]
+  ],
+  "monitor_checks": [
+    {
+      "action": "show",
+      "view": {
+        "id": 371,
+        "pid": 16816,
+        "app_id": "com.oldbook.monitor",
+        "focused": true,
+        "visible": true,
+        "workspace": "3: Lab \u00b7 \u2726 Codex"
+      }
+    },
+    {
+      "action": "hide",
+      "view": {
+        "id": 371,
+        "pid": 16816,
+        "app_id": "com.oldbook.monitor",
+        "focused": false,
+        "visible": false,
+        "workspace": "__i3_scratch"
+      }
+    }
+  ],
+  "existing_console_windows_preserved": [
+    132,
+    319
+  ],
+  "keyboard_validation": "isolated actual US XKB keymap; no live synthetic keypress",
+  "activation": "targeted live binding and monitor rule; source include already linked for future reload/login"
+}

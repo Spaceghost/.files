@@ -1,0 +1,62 @@
+[
+  {
+    "attempt": "ghost-badge-native-20260907",
+    "error": "private Waybar did not map",
+    "checks": [],
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    }
+  },
+  {
+    "attempt": "ghost-badge-native-final-20260907",
+    "error": "previous private Waybar did not close",
+    "checks": [
+      {
+        "name": "base-renders-original-purple-badge",
+        "passed": true,
+        "purple_pixels": 752,
+        "layers": [
+          {
+            "namespace": "wallpaper",
+            "layer": "background",
+            "extent": {
+              "width": 500,
+              "height": 160,
+              "x": 0,
+              "y": 0
+            },
+            "effects": {
+              "blur": false,
+              "blur_xray": false,
+              "blur_ignore_transparent": false,
+              "shadows": false,
+              "corner_radius": 0
+            }
+          },
+          {
+            "namespace": "top",
+            "layer": "overlay",
+            "extent": {
+              "width": 500,
+              "height": 35,
+              "x": 0,
+              "y": 0
+            },
+            "effects": {
+              "blur": false,
+              "blur_xray": false,
+              "blur_ignore_transparent": false,
+              "shadows": false,
+              "corner_radius": 0
+            }
+          }
+        ]
+      }
+    ],
+    "cleanup": {
+      "matched_processes": 0,
+      "remaining_processes": 0
+    }
+  }
+]

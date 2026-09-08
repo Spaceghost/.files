@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "waybar_version": "0.15.0",
+  "configuration": {
+    "bar_count": 2,
+    "context_modules": [
+      "sway/window",
+      "mpris"
+    ],
+    "top_capsule_radii": {
+      "left": "0 8px 8px 0",
+      "context": "8px",
+      "right": "8px 0 0 8px"
+    },
+    "monitor_layer": "bottom",
+    "monitor_position": "right",
+    "monitor_width_px": 208,
+    "monitor_exclusive": false,
+    "monitor_passthrough": true,
+    "stats": [
+      "cpu-per-core",
+      "memory",
+      "temperature",
+      "network-throughput",
+      "root-disk",
+      "uptime"
+    ]
+  },
+  "isolated_render": {
+    "backend": "headless",
+    "output": "HEADLESS-1",
+    "output_size_px": [
+      800,
+      600
+    ],
+    "reported_bar_size_px": [
+      208,
+      540
+    ],
+    "config_parse_clean": true,
+    "css_parse_clean": true,
+    "module_updates_clean": true,
+    "widget_capture": "alpine/verification/waybar-monitor.png",
+    "widget_capture_size_px": [
+      216,
+      190
+    ],
+    "top_capture": "alpine/verification/waybar-top.png",
+    "top_capture_size_px": [
+      1440,
+      36
+    ],
+    "top_capture_uses_sanitized_static_status": true
+  },
+  "live_reload": {
+    "waybar_pid": 12511,
+    "signal": "SIGUSR2",
+    "process_survived": true,
+    "focus_id_before": 5,
+    "focus_id_after": 5,
+    "active_output": "eDP-1",
+    "active_output_rect_px": [
+      0,
+      0,
+      1440,
+      900
+    ],
+    "focused_workspace_rect_px": [
+      7,
+      39,
+      1426,
+      854
+    ],
+    "active_output_rect_unchanged": true,
+    "monitor_reserved_right_column": false
+  }
+}

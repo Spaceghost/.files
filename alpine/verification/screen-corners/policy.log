@@ -1,0 +1,7 @@
+spaceghost-desktop policy:
+  2026.09.07-r1:
+    @personal /var/lib/cascadia/repositories/apk/edge/personal
+swayfx policy:
+  0.6-r3:
+    lib/apk/db/installed
+    @personal /var/lib/cascadia/repositories/apk/edge/personal

@@ -1,0 +1,33 @@
+{
+  "unit_tests": 6,
+  "unit_result": "passed",
+  "unit_red_failures": 4,
+  "native_checks": 28,
+  "native_result": "passed",
+  "old_resize_checks": 14,
+  "new_near_full_checks": 14,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-resize": "33bee77e57a0d14a168ba45f7fad6145699db7ae7b5dcd37303760988d0152c8",
+    "alpine/tests/test_centered_resize.py": "31e69717784405856562f369966c986dbd118181c82ece27ab36775eeb452b40",
+    "alpine/tests/verify_centered_resize.py": "6903a60a3cc0678ce1612e74802c6670ce8ea9b87bfba2dc387385a46daf30d6"
+  },
+  "baseline_helper_sha256": "b23f7951dbed9d8ce0131d35f0512f876ea0902268bc02bf7f178ba00a44a235",
+  "isolation": "private HOME/XDG/runtime, headless Sway and private D-Bus",
+  "host_window_resizes": 0,
+  "live_session_restarts": 0,
+  "native_command": [
+    "python3",
+    "alpine/tests/verify_centered_resize.py",
+    "--output",
+    "/home/jack/.local/state/oldbook/verify/near-full-resize/native-final"
+  ],
+  "keyboard_scope": "Native synthetic key checks retain six grow/shrink key mappings. Near-full is invoked through the actual helper; Super+Shift+Space binding validation belongs to the root agent.",
+  "earlier_fixture_failures": [
+    "The initial fixture used a nonexistent session bus and timed out waiting for the temporary GTK bar to reserve space; a later real-private-bus run succeeded.",
+    "A separate retry timed out during initial Sway IPC startup.",
+    "The first complete near-full run passed all 14 new checks but exposed an existing initial 600x400 setup race in two legacy checks. The final verifier waits for exact setup geometry without changing the assertions."
+  ],
+  "screenshot_visually_verified": true,
+  "screenshot": "alpine/verification/near-full-resize/near-full.png",
+  "remaining_private_fixture_processes": 0
+}

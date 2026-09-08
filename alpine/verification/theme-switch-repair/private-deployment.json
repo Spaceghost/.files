@@ -1,0 +1,57 @@
+{
+  "recorded_utc": "2026-09-08T04:56:21.762104+00:00",
+  "status": "passed",
+  "scope": "Actual oldbook-theme CLI with --no-reload, entirely copied repository and disposable HOME. Real unrelated manifest copied byte-for-byte; synthetic database payload only. No live application reload or theme change.",
+  "source_sha256": {
+    "alpine/bin/deploy-home": "d870b58987b54e4aa7237ba62917f972dde84cc72a894160ece5da18996b1e49",
+    "alpine/desktop/.local/bin/oldbook-theme": "e0b35db1dae61cccd1b55ecb65c99c10f975b8df5affd8e84cc8f8a2af26fe0a",
+    "alpine/wallpapers/theme_catalog.py": "82e57aca73bf23afa3a272e371383c9068b8ff756610cf12dcd8c6a05a93d5de",
+    "alpine/wallpapers/desktop_theme.py": "5bc53369adcdaf67117de77b6add1b9cff2d42b9e60450f2d8b2897364dbcf57"
+  },
+  "source_still_matches": {
+    "alpine/bin/deploy-home": true,
+    "alpine/desktop/.local/bin/oldbook-theme": true,
+    "alpine/wallpapers/theme_catalog.py": true,
+    "alpine/wallpapers/desktop_theme.py": true
+  },
+  "unrelated_manifest_sha256": "1c8cc283149d3ec82c7a499f250fc53501669bf5a6169d5ad78d1392d8f4f7d2",
+  "unrelated_manifest_and_fixture_unchanged": true,
+  "runs": [
+    {
+      "theme": "waxen-meridian-373c11cb12f0",
+      "command": [
+        "/usr/bin/python3",
+        "/tmp/theme-deployment-guard-proof-_ftpamns/repo/alpine/desktop/.local/bin/oldbook-theme",
+        "use",
+        "waxen-meridian-373c11cb12f0",
+        "--no-reload"
+      ],
+      "returncode": 0,
+      "stdout": "Switched to Waxen Meridian\n  Previous configuration backed up to /tmp/theme-deployment-guard-proof-_ftpamns/home/.local/state/oldbook/backups/1788843378655103658\n",
+      "stderr": "",
+      "profile_files": 25,
+      "current": "waxen-meridian-373c11cb12f0",
+      "foot_background": "171B1D",
+      "foot_foreground": "D9E1D5",
+      "style_sha256": "9af3853970c1d480e5b714c8c5454fd1de9899d6ff44b1e843b591f7a306baf3"
+    },
+    {
+      "theme": "the-bellows-intercept-b503d18336b4",
+      "command": [
+        "/usr/bin/python3",
+        "/tmp/theme-deployment-guard-proof-_ftpamns/repo/alpine/desktop/.local/bin/oldbook-theme",
+        "use",
+        "the-bellows-intercept-b503d18336b4",
+        "--no-reload"
+      ],
+      "returncode": 0,
+      "stdout": "Switched to The Bellows Intercept\n  Previous configuration backed up to /tmp/theme-deployment-guard-proof-_ftpamns/home/.local/state/oldbook/backups/1788843381185963489\n",
+      "stderr": "",
+      "profile_files": 25,
+      "current": "the-bellows-intercept-b503d18336b4",
+      "foot_background": "11191C",
+      "foot_foreground": "E9E0C9",
+      "style_sha256": "387ac6e8c4232180de0617bfd35c7bbdfb657d13d6b3ae39756d022f6ae37f56"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "starting_hashes": {
+    "alpine/desktop/.local/bin/oldbook-workspaces": "039cd40c5e9254607991f18e1d209105087e25459b3a0bcecdca235359cdaed1",
+    "alpine/tests/test_workspaces.py": "89b5d95eef5cd912d83ed588f6df73fd0f90ba758a988d48b821143286a434b5"
+  },
+  "final_hashes": {
+    "alpine/desktop/.local/bin/oldbook-workspaces": "73744fe640941243d8752507eeccf95192cd853db38ab61a9654bf6145700a06",
+    "alpine/tests/test_workspaces.py": "a0156ba93b08253f2edf0d4f83d8dc47b7707e8654b234cd08c55206edaeda65"
+  },
+  "tests": 32,
+  "real_unix_socket_backlog_regression": "red EAGAIN; green after private backlog drained at 50ms",
+  "logs": [
+    "/tmp/workspace-ipc-retry-red.log",
+    "/tmp/workspace-ipc-retry-green.log"
+  ]
+}

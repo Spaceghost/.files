@@ -1,0 +1,103 @@
+{
+  "status": "passed",
+  "previous_pid": 4752,
+  "pid": 18733,
+  "singleton_count": 1,
+  "sway_socket": "/run/user/1000/sway-ipc.1000.3175.sock",
+  "desktop_environment_keys_preserved": [
+    "DBUS_SESSION_BUS_ADDRESS",
+    "DISPLAY",
+    "GTK_THEME",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_COLLATE",
+    "LC_CTYPE",
+    "LOGNAME",
+    "PATH",
+    "SHELL",
+    "SWAYSOCK",
+    "USER",
+    "WAYLAND_DISPLAY",
+    "XDG_CONFIG_HOME",
+    "XDG_CURRENT_DESKTOP",
+    "XDG_DATA_DIRS",
+    "XDG_RUNTIME_DIR",
+    "XDG_SEAT",
+    "XDG_SESSION_ID",
+    "XDG_SESSION_TYPE",
+    "XDG_VTNR"
+  ],
+  "original_argv": [
+    "python3",
+    "/home/jack/.local/bin/oldbook-decoration",
+    "daemon"
+  ],
+  "original_cwd": "/home/jack",
+  "settings_sha256_before": {
+    "/home/jack/.config/oldbook/decoration.json": "c133fe76d8938bd1486348fe6b218a909f02871f0c613197b025eed49ce098e9",
+    "/home/jack/.local/state/oldbook/decoration/position": "dbbe8ac2e23d8c06dc3734be139408017714660f20b94a886b525c4378590f9b"
+  },
+  "settings_sha256_after": {
+    "/home/jack/.config/oldbook/decoration.json": "c133fe76d8938bd1486348fe6b218a909f02871f0c613197b025eed49ce098e9",
+    "/home/jack/.local/state/oldbook/decoration/position": "dbbe8ac2e23d8c06dc3734be139408017714660f20b94a886b525c4378590f9b"
+  },
+  "settings_unchanged": true,
+  "activation_attempts": [
+    {
+      "attempt": 1,
+      "pid": 18733,
+      "adopted_concurrent_session_start": false
+    }
+  ],
+  "native_caption_surfaces": [
+    {
+      "output": "eDP-1",
+      "namespace": "oldbook-decoration",
+      "layer": "top",
+      "extent": {
+        "width": 1100,
+        "height": 28,
+        "x": 170,
+        "y": 816
+      },
+      "effects": {
+        "blur": false,
+        "blur_xray": false,
+        "blur_ignore_transparent": false,
+        "shadows": false,
+        "corner_radius": 0
+      }
+    }
+  ],
+  "live_targets": {
+    "eDP-1": {
+      "window_id": 303,
+      "app_id": "oldbook-agent",
+      "floating": true,
+      "fullscreen": false,
+      "placement": {
+        "mode": "window",
+        "edge": "bottom",
+        "rect": {
+          "x": 170,
+          "y": 116,
+          "width": 1100,
+          "height": 700
+        },
+        "square": false,
+        "window_id": 303
+      }
+    }
+  },
+  "targets_match_context_and_placement": true,
+  "console_not_selected": true,
+  "window_or_focus_commands_sent": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "c13495763064296552dc73ef9e5e83bfe1818e934c7e288ec0f7af7357f20665",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "5c463bb465dcf0f87717c986d5f5da1809a9d08ad34ec420807b84f80f195831",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230"
+  },
+  "private_log": "/home/jack/.local/state/oldbook/decoration-dropdown-activation.log"
+}

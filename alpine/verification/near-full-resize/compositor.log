@@ -1,0 +1,32 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 20:42:35 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f7e0d366b80
+[2026-09-07 20:42:40.802] [info] Using configuration file /tmp/centered-resize-z5kqk12a/waybar.json
+[2026-09-07 20:42:40.992] [info] Unable to receive desktop appearance: GDBus.Error:org.freedesktop.DBus.Error.UnknownMethod: No such interface “org.freedesktop.portal.Settings” on object at path /org/freedesktop/portal/desktop
+[2026-09-07 20:42:40.992] [info] Using CSS file /tmp/centered-resize-z5kqk12a/waybar.css
+[2026-09-07 20:42:40.999] [info] Bar configured (width: 1440, height: 40) for output: HEADLESS-1
+[2026-09-07 20:42:42.392] [info] Bar configured (width: 1440, height: 40) for output: HEADLESS-1
+[2026-09-07 20:42:42.393] [info] Bar configured (width: 1152, height: 40) for output: HEADLESS-1
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+ err: wayland.c:2477: failed to roundtrip Wayland display: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+ err: wayland.c:2442: failed to flush wayland socket: Connection reset by peer

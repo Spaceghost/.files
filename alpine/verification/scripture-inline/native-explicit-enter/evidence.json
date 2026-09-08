@@ -1,0 +1,157 @@
+{
+  "scenarios": [],
+  "isolation": "private HOME, XDG data, runtime, compositor",
+  "sources": {
+    "alpine/desktop/.local/bin/oldbook-scripture-bar": "2aca1a576517e5c703a3fbedf2bf59efe736121e40b8266ec8ace9fa7cb8aec2",
+    "alpine/desktop/.local/bin/oldbook-scripture": "63c08023ffc8a4412b753391d33351a366e5c647f0566cc7c15ceee522c01442",
+    "alpine/desktop/.local/lib/oldbook/scripture_search.py": "bf232db9b3add31a9e85370699d1de2f17d64c3ecc4b7085338bec2701d94aba",
+    "alpine/desktop/.local/lib/oldbook/scripture_bar_ipc.py": "f921491b10fccc8f6f1e3ac6cf1224121ad8dcc8e2f20b286fcd4ae553a8a9af",
+    "alpine/tests/verify_scripture_inline.py": "6f3d8e534ec6d1514d164978b4288a25991c2e6f8fdeafd4d38b5aa5dd9fa50f"
+  },
+  "passed": false,
+  "error": "AssertionError('Timed out waiting for Torah before Bible results')",
+  "last_bar": {
+    "editing": true,
+    "focus_received": true,
+    "active": true,
+    "entry_focus": true,
+    "text": "Genesis 1:1",
+    "scope": "all",
+    "results": [],
+    "selected": null,
+    "layer": 2,
+    "keyboard": 1,
+    "gtk_windows": 2,
+    "window_identity": 140265842396208,
+    "pid": 6211,
+    "input_events": [
+      {
+        "key": 58,
+        "state": 0
+      },
+      {
+        "key": 49,
+        "state": 0
+      },
+      {
+        "key": 55,
+        "state": 0
+      },
+      {
+        "key": 65293,
+        "state": 0
+      },
+      {
+        "activate": true
+      },
+      {
+        "key": 110,
+        "state": 0
+      },
+      {
+        "key": 111,
+        "state": 0
+      },
+      {
+        "key": 116,
+        "state": 0
+      },
+      {
+        "key": 45,
+        "state": 0
+      },
+      {
+        "key": 115,
+        "state": 0
+      },
+      {
+        "key": 97,
+        "state": 0
+      },
+      {
+        "key": 118,
+        "state": 0
+      },
+      {
+        "key": 101,
+        "state": 0
+      },
+      {
+        "key": 100,
+        "state": 0
+      },
+      {
+        "key": 65307,
+        "state": 0
+      },
+      {
+        "key": 108,
+        "state": 0
+      },
+      {
+        "key": 111,
+        "state": 0
+      },
+      {
+        "key": 118,
+        "state": 0
+      },
+      {
+        "key": 101,
+        "state": 0
+      },
+      {
+        "key": 71,
+        "state": 0
+      },
+      {
+        "key": 101,
+        "state": 0
+      },
+      {
+        "key": 110,
+        "state": 0
+      },
+      {
+        "key": 101,
+        "state": 0
+      },
+      {
+        "key": 115,
+        "state": 0
+      },
+      {
+        "key": 105,
+        "state": 0
+      },
+      {
+        "key": 115,
+        "state": 0
+      },
+      {
+        "key": 32,
+        "state": 0
+      },
+      {
+        "key": 49,
+        "state": 0
+      },
+      {
+        "key": 58,
+        "state": 0
+      },
+      {
+        "key": 49,
+        "state": 0
+      }
+    ],
+    "label": "Search Bible \u00b7 right-click for reflections & study",
+    "width": 760,
+    "height": 70
+  },
+  "cleanup": {
+    "private_clients_stopped": 7,
+    "forced_clients": 0
+  },
+  "private_survivors": []
+}

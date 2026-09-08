@@ -1,0 +1,38 @@
+#!/bin/sh
+# Build entirely from previously preserved source archives. No downloads.
+set -eu
+recipe=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+sources=${1:?usage: build SOURCE_ARCHIVE_DIRECTORY [OUTPUT_DIRECTORY]}
+sources=$(CDPATH='' cd -- "$sources" && pwd)
+output=${2:-"$HOME/.local/state/alpine-rice/build/opensnitch/apks"}
+mkdir -p "$output"
+output=$(CDPATH='' cd -- "$output" && pwd)
+work=$(mktemp -d "${TMPDIR:-/tmp}/mbp-intel-opensnitch-build.XXXXXX")
+trap 'rm -r -- "$work"' EXIT HUP INT TERM
+(
+    cd "$sources"
+    sha256sum -c "$recipe/SHA256SUMS"
+)
+mkdir -p "$work/mbp-intel/opensnitch"
+mkdir -p "$work/keys"
+for key in /etc/apk/keys/*.pub "$recipe"/*.pub \
+    "${ABUILD_USERDIR:-${XDG_CONFIG_HOME:-$HOME/.config}/abuild}"/*.pub; do
+    test ! -f "$key" || cp "$key" "$work/keys/"
+done
+export APK="apk --keys-dir $work/keys"
+cp "$recipe/APKBUILD" "$recipe"/*.patch "$recipe/opensnitchd.initd" "$work/mbp-intel/opensnitch/"
+cp "$recipe/../../security/firewall/mbp-intel-firewall.initd" \
+    "$recipe/../../security/firewall/mbp-intel.nft" \
+    "$recipe/../../security/firewall/default-config.json" \
+    "$recipe/../../security/firewall/system-fw.json" \
+    "$recipe/../../security/firewall/settings.conf" "$work/mbp-intel/opensnitch/"
+cp "$sources/opensnitch-1.8.0.tar.gz" "$sources/opensnitch-inputs-1.8.0.tar.gz" "$work/mbp-intel/opensnitch/"
+cd "$work/mbp-intel/opensnitch"
+export SOURCE_DATE_EPOCH=1765715806
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+export CLEANUP='' ERROR_CLEANUP=''
+# Generate checksums for the reviewed recipe-local configuration and patches;
+# the two source archives were verified against the committed SHA256SUMS above.
+abuild checksum
+abuild -d -K -P "$output"
+printf '%s\n' "APKs: $output/mbp-intel/x86_64"

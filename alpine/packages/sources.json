@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "artifacts": [
+    {
+      "kind": "opensnitch",
+      "category": "source",
+      "role": "upstream source",
+      "name": "opensnitch-1.8.0.tar.gz",
+      "sha256": "bddcfff04202f3ef7713944a69ca8ebaab19ee32e8f01e5a55995bff54f412b7",
+      "artifact": "sha256/bddcfff04202f3ef7713944a69ca8ebaab19ee32e8f01e5a55995bff54f412b7/opensnitch-1.8.0.tar.gz"
+    },
+    {
+      "kind": "opensnitch",
+      "category": "source",
+      "role": "vendored build inputs and protocol generator sources",
+      "name": "opensnitch-inputs-1.8.0.tar.gz",
+      "sha256": "ef7b01bcd637c07ebb11522fb52fac490af4f6ae64da779fa235753074e3818a",
+      "artifact": "sha256/ef7b01bcd637c07ebb11522fb52fac490af4f6ae64da779fa235753074e3818a/opensnitch-inputs-1.8.0.tar.gz"
+    },
+    {
+      "kind": "swayfx",
+      "category": "source",
+      "role": "pinned compositor source",
+      "name": "swayfx-0.6.tar.gz",
+      "sha256": "ec382be4afc7daeb7cb988a02abba6b1e4af26108c0dcc7a8fbb69c2bb15589b",
+      "artifact": "sha256/ec382be4afc7daeb7cb988a02abba6b1e4af26108c0dcc7a8fbb69c2bb15589b/swayfx-0.6.tar.gz",
+      "url": "https://github.com/wlrfx/swayfx/archive/fd71a6bdc061bd633b488ae7b83e8a6981d22f86.tar.gz"
+    },
+    {
+      "kind": "codex",
+      "category": "binary",
+      "role": "cli",
+      "name": "codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "a822187e1a2420c61c5926721bfbd878701ed95547c9bb0d4de4498a16ba1821",
+      "artifact": "sha256/a822187e1a2420c61c5926721bfbd878701ed95547c9bb0d4de4498a16ba1821/codex-package-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-package-x86_64-unknown-linux-musl.tar.gz"
+    },
+    {
+      "kind": "codex",
+      "category": "binary",
+      "role": "app-server",
+      "name": "codex-app-server-package-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "a5d37ff1fa6953ee6d317b7e69bfafd39f5f53350b631d790fa7531159f22420",
+      "artifact": "sha256/a5d37ff1fa6953ee6d317b7e69bfafd39f5f53350b631d790fa7531159f22420/codex-app-server-package-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-app-server-package-x86_64-unknown-linux-musl.tar.gz"
+    },
+    {
+      "kind": "codex",
+      "category": "binary",
+      "role": "proxy",
+      "name": "codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz",
+      "sha256": "1ccd604cb0865daae1de80087d7bebfa300da69e9f0fc0e9c72b92335ab5c295",
+      "artifact": "sha256/1ccd604cb0865daae1de80087d7bebfa300da69e9f0fc0e9c72b92335ab5c295/codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz",
+      "url": "https://github.com/openai/codex/releases/download/rust-v0.153.4/codex-responses-api-proxy-x86_64-unknown-linux-musl.tar.gz"
+    }
+  ],
+  "rebuild_notes": [
+    "Restore exact archived signed APKs to reproduce their signatures. Rebuilding with a new private key changes the package signature even when the payload matches.",
+    "Private signing keys and account authentication are deliberately excluded.",
+    "Codex entries preserve official executable bundles, not a claim of a local source build."
+  ]
+}

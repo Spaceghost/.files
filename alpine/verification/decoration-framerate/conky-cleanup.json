@@ -1,0 +1,16 @@
+{
+  "verifier": "alpine/tests/verify_conky_clicks.py",
+  "checks": [
+    "TERM grace",
+    "KILL escalation",
+    "detached restart rescan",
+    "compositor preserved",
+    "different private environment preserved",
+    "idempotent cleanup"
+  ],
+  "result": {
+    "private_clients_stopped": 4,
+    "forced_clients": 2
+  },
+  "native_conky_or_compositor_started": false
+}

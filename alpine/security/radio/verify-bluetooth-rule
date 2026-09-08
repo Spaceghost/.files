@@ -1,0 +1,94 @@
+#!/usr/bin/python3 -I
+"""Check eudev parsing/matches in private namespaces with read-only live sysfs.
+
+The exact rule is parsed only for a remove event, which cannot match. Add/change
+matching uses an inert ENV assignment in place of the Bluetooth sysfs write.
+All rule directories and /run/udev are private; no live daemon is reloaded.
+"""
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+
+
+def run(arguments):
+    return subprocess.run(arguments, check=True, capture_output=True, text=True, timeout=15)
+
+
+def isolated(work, rule):
+    namespaces = {kind: {'self': os.readlink('/proc/self/ns/' + kind),
+                         'init': os.readlink('/proc/1/ns/' + kind)} for kind in ('mnt', 'net')}
+    if any(value['self'] == value['init'] for value in namespaces.values()):
+        raise RuntimeError('private mount and network namespaces are required before mounting')
+    run(['/bin/mount', '--make-rprivate', '/'])
+    run(['/bin/mount', '--bind', '/sys', '/sys'])
+    run(['/bin/mount', '-o', 'remount,bind,ro', '/sys'])
+    runtime = work / 'runtime'
+    runtime.mkdir()
+    run(['/bin/mount', '--bind', str(runtime), '/run/udev'])
+    rules = work / 'rules'
+    rules.mkdir()
+    for name in ('/etc/udev/rules.d', '/usr/lib/udev/rules.d', '/lib/udev/rules.d',
+                 '/usr/local/lib/udev/rules.d'):
+        if Path(name).is_dir():
+            run(['/bin/mount', '--bind', str(rules), name])
+    original = rule.read_text()
+    tested = rules / rule.name
+    radios = {}
+    for path in Path('/sys/class/rfkill').glob('rfkill*'):
+        radios.setdefault((path / 'type').read_text().strip(), path)
+    if not {'bluetooth', 'wlan'} <= set(radios):
+        raise RuntimeError('both existing Bluetooth and WLAN sysfs devices are required')
+    if (radios['bluetooth'] / 'soft').read_text().strip() != '0':
+        raise RuntimeError('inert positive matcher check requires currently unblocked Bluetooth')
+    checks = []
+    for variant, action, kind, match in (
+            ('exact', 'remove', 'bluetooth', False),
+            ('inert', 'add', 'bluetooth', True),
+            ('inert', 'change', 'bluetooth', True),
+            ('inert', 'remove', 'bluetooth', False),
+            ('inert', 'add', 'wlan', False),
+            ('inert', 'change', 'wlan', False)):
+        content = original if variant == 'exact' else original.replace(
+            ', ATTR{soft}="1"', ', ENV{MBP_INTEL_BT_RULE_MATCH}="yes"')
+        tested.write_text(content)
+        shutil.rmtree(runtime / 'data', ignore_errors=True)
+        result = run(['/sbin/udevadm', 'test', '--action=' + action, str(radios[kind])])
+        log = result.stdout + result.stderr
+        (work / f'{variant}-{action}-{kind}.log').write_text(log)
+        if any(marker in log.lower() for marker in ('invalid key', 'invalid rule', 'unknown key')):
+            raise RuntimeError('eudev rejected the rule')
+        actual = 'MBP_INTEL_BT_RULE_MATCH=yes' in log.splitlines()
+        if actual != match:
+            raise RuntimeError('unexpected rule matching result')
+        checks.append({'variant': variant, 'action': action, 'type': kind, 'matched': actual})
+    (work / 'evidence.json').write_text(json.dumps({
+        'status': 'passed', 'sysfs_read_only': True, 'private_rules_and_database': True,
+        'live_rule_assignment_executed': False, 'namespaces': namespaces, 'checks': checks,
+    }, indent=2) + '\n')
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--isolated', action='store_true', help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    rule = Path(__file__).resolve().parent / 'root/etc/udev/rules.d/71-privacy-bluetooth-off.rules'
+    if args.isolated:
+        if os.geteuid() != 0:
+            parser.error('private namespace setup requires root')
+        isolated(args.output, rule)
+        return
+    args.output.mkdir(parents=True, exist_ok=False)
+    subprocess.run(['doas', '-n', 'unshare', '--mount', '--net', '--', sys.executable,
+                    '-I', str(Path(__file__).resolve()), '--isolated', '--output',
+                    str(args.output.resolve())], check=True, timeout=45)
+    print(args.output / 'evidence.json')
+
+
+if __name__ == '__main__':
+    main()

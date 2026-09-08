@@ -1,0 +1,10 @@
+# Shared desktop plus the effects supported by SwayFX.
+include ~/.config/sway/config
+include ~/.config/swayfx/effects.conf
+
+# Workspace captions are provided by mbp-intel-decoration at the screen edge.
+titlebar_position bottom
+default_border pixel 0
+default_floating_border pixel 0
+
+for_window [all] border pixel 0

@@ -1,0 +1,133 @@
+test_candidates_use_resolved_agent_identity_mru_and_exclude_scratch (test_agent_switcher.AgentSwitcherTests.test_candidates_use_resolved_agent_identity_mru_and_exclude_scratch) ... ok
+test_commit_is_allowed_only_while_switcher_mode_still_owns_gesture (test_agent_switcher.AgentSwitcherTests.test_commit_is_allowed_only_while_switcher_mode_still_owns_gesture) ... ok
+test_commit_requires_selected_container_to_remain_a_resolved_agent (test_agent_switcher.AgentSwitcherTests.test_commit_requires_selected_container_to_remain_a_resolved_agent) ... ok
+test_empty_candidates_have_no_selection_or_commit (test_agent_switcher.AgentSwitcherTests.test_empty_candidates_have_no_selection_or_commit) ... ok
+test_final_alt_release_commits_only_after_both_alt_keys_are_up (test_agent_switcher.AgentSwitcherTests.test_final_alt_release_commits_only_after_both_alt_keys_are_up) ... ok
+test_first_step_starts_after_focused_agent_and_wraps_both_directions (test_agent_switcher.AgentSwitcherTests.test_first_step_starts_after_focused_agent_and_wraps_both_directions) ... ok
+test_popup_routes_tab_and_shift_tab_without_async_relay (test_agent_switcher.AgentSwitcherTests.test_popup_routes_tab_and_shift_tab_without_async_relay) ... ok
+test_popup_shows_a_small_agent_set_and_caps_large_sets (test_agent_switcher.AgentSwitcherTests.test_popup_shows_a_small_agent_set_and_caps_large_sets) ... ok
+test_reverse_first_step_selects_last_when_no_agent_is_focused (test_agent_switcher.AgentSwitcherTests.test_reverse_first_step_selects_last_when_no_agent_is_focused) ... ok
+test_scrolling_reveals_highlight_only_when_it_leaves_viewport (test_agent_switcher.AgentSwitcherTests.test_scrolling_reveals_highlight_only_when_it_leaves_viewport) ... ok
+test_waiting_gesture_claims_server_lock_after_predecessor_exits (test_agent_switcher.AgentSwitcherTests.test_waiting_gesture_claims_server_lock_after_predecessor_exits) ... ok
+test_a_hostile_directory_cannot_break_out_of_the_remote_command (test_agents.CommandTests.test_a_hostile_directory_cannot_break_out_of_the_remote_command) ... ok
+test_a_shell_variable_still_expands_on_the_far_side (test_agents.CommandTests.test_a_shell_variable_still_expands_on_the_far_side) ... ok
+test_an_unreachable_host_is_explained_rather_than_retried (test_agents.CommandTests.test_an_unreachable_host_is_explained_rather_than_retried) ... ok
+test_attach_command_opens_the_terminal_on_the_session (test_agents.CommandTests.test_attach_command_opens_the_terminal_on_the_session) ... ok
+test_local_agent_runs_in_tmux_with_its_working_directory (test_agents.CommandTests.test_local_agent_runs_in_tmux_with_its_working_directory) ... ok
+test_remote_agent_keeps_tmux_local_and_ssh_inside_it (test_agents.CommandTests.test_remote_agent_keeps_tmux_local_and_ssh_inside_it) ... ok
+test_session_names_do_not_collide (test_agents.CommandTests.test_session_names_do_not_collide) ... ok
+test_tailscale_ssh_replaces_the_plain_ssh_hop (test_agents.CommandTests.test_tailscale_ssh_replaces_the_plain_ssh_hop) ... ok
+test_a_transport_without_a_host_is_refused (test_agents.ConfigTests.test_a_transport_without_a_host_is_refused) ... ok
+test_disabled_agents_are_hidden (test_agents.ConfigTests.test_disabled_agents_are_hidden) ... ok
+test_live_configuration_is_valid (test_agents.ConfigTests.test_live_configuration_is_valid) ... ok
+test_rejects_a_command_that_is_not_a_list_of_strings (test_agents.ConfigTests.test_rejects_a_command_that_is_not_a_list_of_strings) ... ok
+test_rejects_an_unknown_transport (test_agents.ConfigTests.test_rejects_an_unknown_transport) ... ok
+test_rejects_an_unusable_host (test_agents.ConfigTests.test_rejects_an_unusable_host) ... ok
+test_rejects_duplicate_identifiers (test_agents.ConfigTests.test_rejects_duplicate_identifiers) ... ok
+test_the_tailnet_agents_need_no_ssh_keys (test_agents.ConfigTests.test_the_tailnet_agents_need_no_ssh_keys) ... ok
+test_a_local_agent_needs_no_preflight (test_agents.PreflightTests.test_a_local_agent_needs_no_preflight) ... ok
+test_a_permitted_host_passes_preflight (test_agents.PreflightTests.test_a_permitted_host_passes_preflight) ... ok
+test_a_policy_refusal_is_reported_rather_than_the_open_port (test_agents.PreflightTests.test_a_policy_refusal_is_reported_rather_than_the_open_port) ... ok
+test_an_unreachable_host_reports_before_any_session_is_made (test_agents.PreflightTests.test_an_unreachable_host_reports_before_any_session_is_made) ... ok
+test_only_real_keyboards_with_either_super_key_trigger_launch (test_agents.QuickLaunchTests.test_only_real_keyboards_with_either_super_key_trigger_launch) ... ok
+test_quick_launch_starts_a_fresh_uncontained_ultra_session (test_agents.QuickLaunchTests.test_quick_launch_starts_a_fresh_uncontained_ultra_session) ... ok
+test_ignores_malformed_rows (test_agents.SessionListingTests.test_ignores_malformed_rows) ... ok
+test_parses_the_tab_separated_listing (test_agents.SessionListingTests.test_parses_the_tab_separated_listing) ... ok
+test_globs_expand_to_directories_only (test_agents.WorkdirTests.test_globs_expand_to_directories_only) ... ok
+test_missing_directories_are_skipped_without_error (test_agents.WorkdirTests.test_missing_directories_are_skipped_without_error) ... ok
+test_short_path_uses_a_tilde (test_agents.WorkdirTests.test_short_path_uses_a_tilde) ... ok
+test_browser_requires_an_exact_identity_and_validated_origin_hint (test_ai_notification_stream.AINotificationAttributionTests.test_browser_requires_an_exact_identity_and_validated_origin_hint) ... ok
+test_exact_native_names_and_desktop_entries_are_attributed (test_ai_notification_stream.AINotificationAttributionTests.test_exact_native_names_and_desktop_entries_are_attributed) ... ok
+test_stream_is_passive_content_free_and_preserves_normal_delivery (test_ai_notification_stream.AINotificationBusTests.test_stream_is_passive_content_free_and_preserves_normal_delivery) ... ok
+test_browser_chatgpt_requires_a_clear_app_or_title_signal (test_app_identity.ApplicationResolverTests.test_browser_chatgpt_requires_a_clear_app_or_title_signal) ... ok
+test_browser_claude_requires_a_clear_title_signal (test_app_identity.ApplicationResolverTests.test_browser_claude_requires_a_clear_title_signal) ... ok
+test_codex_launcher_app_id_uses_foreground_descendant_tty (test_app_identity.ApplicationResolverTests.test_codex_launcher_app_id_uses_foreground_descendant_tty) ... ok
+test_control_characters_are_removed_and_missing_pids_are_harmless (test_app_identity.ApplicationResolverTests.test_control_characters_are_removed_and_missing_pids_are_harmless) ... ok
+test_custom_agent_name_without_terminal_process_is_not_an_agent (test_app_identity.ApplicationResolverTests.test_custom_agent_name_without_terminal_process_is_not_an_agent) ... ok
+test_custom_terminal_id_resolves_direct_foreground_agent (test_app_identity.ApplicationResolverTests.test_custom_terminal_id_resolves_direct_foreground_agent) ... ok
+test_custom_terminal_id_resolves_tmux_agent_from_process_snapshot (test_app_identity.ApplicationResolverTests.test_custom_terminal_id_resolves_tmux_agent_from_process_snapshot) ... ok
+test_custom_tmux_agent_is_counted_and_reached_by_switcher (test_app_identity.ApplicationResolverTests.test_custom_tmux_agent_is_counted_and_reached_by_switcher) ... ok
+test_ghostty_resolves_foreground_codex_and_claude (test_app_identity.ApplicationResolverTests.test_ghostty_resolves_foreground_codex_and_claude) ... ok
+test_native_codex_title_supplies_state_but_process_name_alone_does_not (test_app_identity.ApplicationResolverTests.test_native_codex_title_supplies_state_but_process_name_alone_does_not) ... ok
+test_terminal_uses_foreground_process_and_ignores_background_codex (test_app_identity.ApplicationResolverTests.test_terminal_uses_foreground_process_and_ignores_background_codex) ... ok
+test_tmux_is_queried_once_per_snapshot_instead_of_per_terminal (test_app_identity.ApplicationResolverTests.test_tmux_is_queried_once_per_snapshot_instead_of_per_terminal) ... ok
+test_tmux_title_with_encoded_newline_cannot_inject_codex_state (test_app_identity.ApplicationResolverTests.test_tmux_title_with_encoded_newline_cannot_inject_codex_state) ... ok
+test_tmux_uses_largest_pane_in_clients_displayed_window (test_app_identity.ApplicationResolverTests.test_tmux_uses_largest_pane_in_clients_displayed_window) ... ok
+test_tmux_zoom_uses_active_pane_even_if_fixture_reports_smaller_geometry (test_app_identity.ApplicationResolverTests.test_tmux_zoom_uses_active_pane_even_if_fixture_reports_smaller_geometry) ... ok
+test_allowlist_rejects_native_and_private_source_paths (test_bazzite_profile.BazziteProfileTest.test_allowlist_rejects_native_and_private_source_paths) ... ok
+test_apply_uses_safe_journal_and_rollback_restores_original (test_bazzite_profile.BazziteProfileTest.test_apply_uses_safe_journal_and_rollback_restores_original) ... ok
+test_bazzite_lock_uses_stock_swaylock_supported_readiness_flags (test_bazzite_profile.BazziteProfileTest.test_bazzite_lock_uses_stock_swaylock_supported_readiness_flags) ... ok
+test_changed_profile_gets_new_immutable_overlay_and_can_rollback (test_bazzite_profile.BazziteProfileTest.test_changed_profile_gets_new_immutable_overlay_and_can_rollback) ... ok
+test_check_detects_target_drift_and_missing_native_module (test_bazzite_profile.BazziteProfileTest.test_check_detects_target_drift_and_missing_native_module) ... ok
+test_check_rejects_content_changed_through_a_managed_link (test_bazzite_profile.BazziteProfileTest.test_check_rejects_content_changed_through_a_managed_link) ... ok
+test_check_reports_direct_menu_media_and_session_dependencies (test_bazzite_profile.BazziteProfileTest.test_check_reports_direct_menu_media_and_session_dependencies) ... ok
+test_deployed_overlay_theme_reads_the_checkout_palette (test_bazzite_profile.BazziteProfileTest.test_deployed_overlay_theme_reads_the_checkout_palette) ... ok
+test_deployed_shortcut_wrapper_imports_checkout_project (test_bazzite_profile.BazziteProfileTest.test_deployed_shortcut_wrapper_imports_checkout_project) ... ok
+test_every_retained_oldbook_sway_binding_has_a_deployed_helper (test_bazzite_profile.BazziteProfileTest.test_every_retained_oldbook_sway_binding_has_a_deployed_helper) ... ok
+test_gallery_and_media_helpers_have_their_fuzzel_wrapper (test_bazzite_profile.BazziteProfileTest.test_gallery_and_media_helpers_have_their_fuzzel_wrapper) ... ok
+test_override_bytecode_is_not_deployed (test_bazzite_profile.BazziteProfileTest.test_override_bytecode_is_not_deployed) ... ok
+test_preview_is_read_only_and_reports_managed_changes (test_bazzite_profile.BazziteProfileTest.test_preview_is_read_only_and_reports_managed_changes) ... ok
+test_profile_excludes_alpine_services_and_uses_user_systemd (test_bazzite_profile.BazziteProfileTest.test_profile_excludes_alpine_services_and_uses_user_systemd) ... ok
+test_repo_dependent_gallery_helpers_keep_the_source_checkout (test_bazzite_profile.BazziteProfileTest.test_repo_dependent_gallery_helpers_keep_the_source_checkout) ... ok
+test_session_bootstrap_imports_sway_environment_before_target (test_bazzite_profile.BazziteProfileTest.test_session_bootstrap_imports_sway_environment_before_target) ... ok
+test_waybar_uses_per_user_glibc_module_without_losing_art_controls (test_bazzite_profile.BazziteProfileTest.test_waybar_uses_per_user_glibc_module_without_losing_art_controls) ... Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/lib/python3.14/unittest/__main__.py", line 18, in <module>
+    main(module=None)
+    ~~~~^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/main.py", line 104, in __init__
+    self.runTests()
+    ~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/unittest/main.py", line 270, in runTests
+    self.result = testRunner.run(self.test)
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/runner.py", line 257, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/usr/lib/python3.14/unittest/case.py", line 725, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/case.py", line 669, in run
+    self._callTestMethod(testMethod)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/case.py", line 615, in _callTestMethod
+    result = method()
+  File "/home/jack/.files/alpine/tests/test_bazzite_profile.py", line 147, in test_waybar_uses_per_user_glibc_module_without_losing_art_controls
+    applied = self.run_profile('apply')
+  File "/home/jack/.files/alpine/tests/test_bazzite_profile.py", line 32, in run_profile
+    return subprocess.run(
+           ~~~~~~~~~~~~~~^
+        [str(HELPER), *arguments, '--target', str(self.home)],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        cwd=REPO, text=True, capture_output=True, timeout=20)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2153, in _communicate
+    ready = selector.select(timeout)
+  File "/usr/lib/python3.14/selectors.py", line 398, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt

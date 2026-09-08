@@ -1,0 +1,101 @@
+test_database_backup_manifest_does_not_block_deployment_or_rollback (alpine.tests.test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... FAIL
+test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... 
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'status': 'complete'}) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2}) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'entries': []}) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 3, 'status': 'complete', 'entries': []}) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2, 'status': 'complete', 'entries': None}) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2, 'status': 'unexpected', 'entries': []}) ... FAIL
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (alpine.tests.test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+
+======================================================================
+FAIL: test_database_backup_manifest_does_not_block_deployment_or_rollback (alpine.tests.test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 58, in test_database_backup_manifest_does_not_block_deployment_or_rollback
+    deployed = m.deploy(self.home, self.overlay)
+  File "/home/jack/.files/alpine/bin/deploy-home", line 120, in deploy
+    reject_interrupted(target)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/jack/.files/alpine/bin/deploy-home", line 86, in reject_interrupted
+    raise RuntimeError(f'Interrupted deployment: run deploy-home --target {target} --rollback {path.parent}')
+RuntimeError: Interrupted deployment: run deploy-home --target /tmp/tmpc9atme9e/home --rollback /tmp/tmpc9atme9e/home/.local/state/oldbook/backups/scripture-hourly
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 60, in test_database_backup_manifest_does_not_block_deployment_or_rollback
+    self.fail(f'An unrelated database backup blocked deployment: {error}')
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: An unrelated database backup blocked deployment: Interrupted deployment: run deploy-home --target /tmp/tmpc9atme9e/home --rollback /tmp/tmpc9atme9e/home/.local/state/oldbook/backups/scripture-hourly
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'status': 'complete'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2})
+----------------------------------------------------------------------
+RuntimeError: Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "deployment journal" does not match "Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000"
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'entries': []})
+----------------------------------------------------------------------
+RuntimeError: Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "deployment journal" does not match "Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000"
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 3, 'status': 'complete', 'entries': []})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2, 'status': 'complete', 'entries': None})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document={'version': 2, 'status': 'unexpected', 'entries': []})
+----------------------------------------------------------------------
+RuntimeError: Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 84, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "deployment journal" does not match "Interrupted deployment: run deploy-home --target /tmp/tmplxerqngg/home --rollback /tmp/tmplxerqngg/home/.local/state/oldbook/backups/1788840000000000000"
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.142s
+
+FAILED (failures=7)

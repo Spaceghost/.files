@@ -1,0 +1,913 @@
+{
+  "check": true,
+  "uid": 1000,
+  "processes": [
+    {
+      "pid": 2337,
+      "name": "oldbook-carousel",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 2337,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2343,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2344,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2345,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2346,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9314,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9315,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9316,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9317,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9328,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9329,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9330,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9333,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9334,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9335,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9341,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9342,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9377,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9386,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9392,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 23344,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23369,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23370,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23371,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 2342,
+      "name": "oldbook-showdesktop",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 2342,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2354,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2355,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2356,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 2357,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8927,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8928,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8929,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8930,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8931,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8932,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8933,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8934,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8935,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8936,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8947,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 8948,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8949,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8950,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 3175,
+      "name": "swayfx",
+      "target_nice": -10,
+      "threads": [
+        {
+          "tid": 3175,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3178,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3180,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3181,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3182,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3183,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3184,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3185,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3186,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3187,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3188,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3189,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3190,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3191,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3192,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3193,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3194,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3195,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3196,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3197,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3198,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3199,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 3202,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3644,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8802,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9332,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 3291,
+      "name": "swaync",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 3291,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3351,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3352,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3353,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3354,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 3427,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9318,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9319,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9320,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9321,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9322,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9323,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9324,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9325,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 9326,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 9327,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 11761,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 12304,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 15825,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 15826,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 21828,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 30744,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30745,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 30746,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 29645,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 29646,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 8427,
+      "name": "waybar",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 8427,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8438,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8439,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8440,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8441,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8443,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8444,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8557,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8588,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 8589,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 12687,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13147,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13148,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13151,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13160,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13161,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13162,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13164,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13165,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13167,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13169,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13172,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13173,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13174,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13175,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13176,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13177,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13180,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 13182,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 23237,
+      "name": "superhold",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 23237,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23250,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23251,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23253,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23254,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23259,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 23262,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 26484,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 26493,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 26494,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    },
+    {
+      "pid": 28213,
+      "name": "oldbook-decoration",
+      "target_nice": -5,
+      "threads": [
+        {
+          "tid": 28213,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28231,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28232,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28235,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28236,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28252,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28253,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28261,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        },
+        {
+          "tid": 28262,
+          "nice": 0,
+          "policy": 0,
+          "applied": false
+        }
+      ]
+    }
+  ]
+}

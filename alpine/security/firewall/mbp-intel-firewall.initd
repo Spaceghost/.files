@@ -1,0 +1,35 @@
+#!/sbin/openrc-run
+description="Persistent default-deny MBP Intel network and application gate"
+extra_commands="check"
+extra_started_commands="reload"
+
+depend() {
+    need localmount
+    after modules
+    before net networking wpa_supplicant opensnitchd
+}
+
+check() {
+    /usr/sbin/nft --check --file /etc/mbp-intel/firewall.nft
+}
+
+start() {
+    ebegin "Loading persistent MBP Intel firewall"
+    if /usr/sbin/nft list table inet mbp-intel >/dev/null 2>&1; then
+        reload
+    else
+        /usr/sbin/nft --file /etc/mbp-intel/firewall.nft
+    fi
+    eend $?
+}
+
+reload() {
+    # Delete and rebuild only our table in one atomic nft transaction.
+    { printf '%s\n' 'delete table inet mbp-intel'; cat /etc/mbp-intel/firewall.nft; } |
+        /usr/sbin/nft --file -
+}
+
+stop() {
+    ewarn "Firewall rules retained; stopping a service must not open the network."
+    return 0
+}

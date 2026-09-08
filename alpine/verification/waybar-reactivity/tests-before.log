@@ -1,0 +1,40 @@
+test_reload_candidates_belong_to_current_wayland_session (test_waybar_dim.WaybarDimTests.test_reload_candidates_belong_to_current_wayland_session) ... FAIL
+test_title_traffic_does_not_trigger_desktop_queries (test_waybar_dim.WaybarDimTests.test_title_traffic_does_not_trigger_desktop_queries) ... /home/jack/.files/alpine/tests/test_waybar_dim.py:83: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmp6ph62hm6/oldbook/waybar-dim-77746eb6d1c1.lock' mode='a' encoding='UTF-8'>
+  self.module.main()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+FAIL
+test_transient_snapshot_failure_reconnects_and_updates_state (test_waybar_dim.WaybarDimTests.test_transient_snapshot_failure_reconnects_and_updates_state) ... oldbook-waybar-dim: synthetic busy compositor; reconnecting
+/home/jack/.files/alpine/tests/test_waybar_dim.py:83: ResourceWarning: unclosed file <_io.TextIOWrapper name='/tmp/tmpnt9ag1r6/oldbook/waybar-dim-46ac9f2f4d63.lock' mode='a' encoding='UTF-8'>
+  self.module.main()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+
+======================================================================
+FAIL: test_reload_candidates_belong_to_current_wayland_session (test_waybar_dim.WaybarDimTests.test_reload_candidates_belong_to_current_wayland_session)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_waybar_dim.py", line 114, in test_reload_candidates_belong_to_current_wayland_session
+    self.assertEqual(list(self.module.waybar_processes()), [101])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [26778] != [101]
+
+First differing element 0:
+26778
+101
+
+- [26778]
++ [101]
+
+======================================================================
+FAIL: test_title_traffic_does_not_trigger_desktop_queries (test_waybar_dim.WaybarDimTests.test_title_traffic_does_not_trigger_desktop_queries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_waybar_dim.py", line 93, in test_title_traffic_does_not_trigger_desktop_queries
+    self.assertEqual(state['requests'], 4)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 64 != 4
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.104s
+
+FAILED (failures=2)

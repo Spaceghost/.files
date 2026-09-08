@@ -1,0 +1,89 @@
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
+pkgname=opensnitch
+pkgver=1.8.0
+pkgrel=1
+pkgdesc="Application firewall with an optional persistent MBP Intel egress gate"
+url="https://github.com/evilsocket/opensnitch"
+arch="x86_64"
+license="GPL-3.0-or-later"
+depends="nftables"
+makedepends="go libnetfilter_queue-dev libnfnetlink-dev protoc python3
+    py3-build py3-installer py3-wheel py3-setuptools py3-grpcio-tools"
+subpackages="$pkgname-ui:ui:noarch $pkgname-openrc"
+source="opensnitch-$pkgver.tar.gz
+    opensnitch-inputs-$pkgver.tar.gz
+    external-output-queue.patch
+    wheel-layout.patch
+    opensnitchd.initd
+    mbp-intel-firewall.initd
+    mbp-intel.nft
+    default-config.json
+    system-fw.json
+    settings.conf"
+builddir="$srcdir/opensnitch-$pkgver"
+options="!net"
+export SOURCE_DATE_EPOCH=1765715806
+export GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off
+
+prepare() {
+    default_prepare
+    cp -a "$srcdir/inputs/daemon/vendor" "$builddir/daemon/"
+}
+
+build() {
+    mkdir -p "$builddir/tools"
+    (
+        cd "$srcdir/inputs/tools/protoc-gen-go"
+        go build -mod=vendor -trimpath -buildvcs=false -o "$builddir/tools/protoc-gen-go" ./cmd/protoc-gen-go
+    )
+    (
+        cd "$srcdir/inputs/tools/protoc-gen-go-grpc"
+        go build -mod=vendor -trimpath -buildvcs=false -o "$builddir/tools/protoc-gen-go-grpc" .
+    )
+    PATH="$builddir/tools:$PATH" protoc -I proto proto/ui.proto \
+        --go_out=daemon/ui/protocol --go-grpc_out=daemon/ui/protocol \
+        --go_opt=paths=source_relative --go-grpc_opt=paths=source_relative
+    (
+        cd daemon
+        go build -mod=vendor -trimpath -buildvcs=false -ldflags='-s -w' -o opensnitchd .
+    )
+    python3 -m grpc_tools.protoc -I proto proto/ui.proto \
+        --python_out=ui/opensnitch/proto --grpc_python_out=ui/opensnitch/proto
+    sed -i 's/^import ui_pb2/from . import ui_pb2/' ui/opensnitch/proto/ui_pb2_grpc.py
+    (
+        cd ui
+        python3 -m build --wheel --no-isolation
+    )
+}
+
+check() {
+    ./daemon/opensnitchd -version | grep -Fx "$pkgver"
+    (
+        cd daemon
+        go test -mod=vendor ./rule ./netfilter ./firewall/nftables/exprs
+        go test -mod=vendor ./firewall/nftables -run '^TestExternalOutputQueueSkipsNativeQueue$'
+    )
+    python3 -m compileall -q ui/opensnitch
+}
+
+package() {
+    install -Dm755 daemon/opensnitchd "$pkgdir/usr/bin/opensnitchd"
+    install -Dm755 "$srcdir/opensnitchd.initd" "$pkgdir/etc/init.d/opensnitchd"
+    install -Dm755 "$srcdir/mbp-intel-firewall.initd" "$pkgdir/etc/init.d/mbp-intel-firewall"
+    install -Dm600 "$srcdir/default-config.json" "$pkgdir/etc/opensnitchd/default-config.json"
+    install -Dm600 "$srcdir/system-fw.json" "$pkgdir/etc/opensnitchd/system-fw.json"
+    install -Dm600 "$srcdir/mbp-intel.nft" "$pkgdir/etc/mbp-intel/firewall.nft"
+    install -Dm644 daemon/data/network_aliases.json "$pkgdir/etc/opensnitchd/network_aliases.json"
+    install -Dm600 daemon/data/tasks/tasks.json "$pkgdir/etc/opensnitchd/tasks/tasks.json"
+    mkdir -p "$pkgdir/etc/opensnitchd/rules"
+    chmod 700 "$pkgdir/etc/opensnitchd/rules"
+    install -m600 daemon/data/rules/*.json "$pkgdir/etc/opensnitchd/rules/"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+ui() {
+    pkgdesc="OpenSnitch Qt6 connection prompts and network activity viewer"
+    depends="python3 py3-qt6 py3-grpcio py3-protobuf py3-slugify py3-inotify py3-notify2 qt6-qtwayland qt6-qtbase-sqlite"
+    python3 -m installer --destdir="$subpkgdir" "$builddir"/ui/dist/*.whl
+    install -Dm644 "$srcdir/settings.conf" "$subpkgdir/etc/xdg/opensnitch/settings.conf"
+}

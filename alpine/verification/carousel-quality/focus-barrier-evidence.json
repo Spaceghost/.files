@@ -1,0 +1,23 @@
+{
+  "status": "unit-passed-native-not-reached",
+  "unit_tests": 34,
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/carousel.py": "3295ea8291eab9e71ef372fa599503aa31c18a022a6cae3d36920f12bf1df778",
+    "alpine/desktop/.local/lib/oldbook/carousel_view.py": "5d0377514fde7221901a9a9c7a322783cbd65523ff2086193c239a28c3a093de",
+    "alpine/desktop/.local/bin/oldbook-carousel": "6cdbc16e29a685b3ba50cc6f971e2d71d17fa2c44cfc3006b43bb9be3e13aa29",
+    "alpine/desktop/.local/lib/oldbook/ui_command.py": "e94a420d2c5beb0e842abdbabd926c05872fc4b0b5fc93f542108130ed79486f",
+    "alpine/desktop/.local/lib/oldbook/ui_priority.py": "dc192c23e33fcfb63863c2d8078963355fe14e2cbac68c3f8ce560510adc044b",
+    "alpine/tests/test_carousel_handoff.py": "64a6f4f02db1e6ff6518b673079025c0de50727a22e6f6319a2a31f99b885219",
+    "alpine/tests/verify_carousel.py": "7dfd199e915203e03142eb6d453a6ff5e92a4c5dfa2d90983eb959b60ae765fe"
+  },
+  "native_limit": "The three focused attempts stopped in compositor or daemon readiness before any modifier gesture. All private processes stopped.",
+  "load_observed": {
+    "cpus": 8,
+    "load_average": [
+      49.05,
+      45.74,
+      34.4
+    ]
+  },
+  "barrier": "Actual GtkWindow.is_active keyboard entry, one Wayland sync, final idle after queued focus events, then active/epoch/lifetime check."
+}

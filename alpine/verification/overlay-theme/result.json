@@ -1,0 +1,22 @@
+{
+  "active_theme": "gruvbox-dark",
+  "expo_rendered_with_active_palette": true,
+  "superhold_rendered_with_active_palette": true,
+  "live_superhold_restarted": true,
+  "theme_refresh_seconds": 1,
+  "shared_theme_tests_passed": 4,
+  "hold_to_help_tests_passed": 108,
+  "expo_headless_interactions": "passed",
+  "disposable_home_deployment": "passed",
+  "full_alpine_suite": {
+    "total": 284,
+    "passed": 276,
+    "unrelated_failures": 2,
+    "unrelated_errors": 6,
+    "details": "Two existing shortcut status failures and six new Bazzite helper execution errors in concurrent work"
+  },
+  "screenshots": [
+    "../gestures/expo.png",
+    "superhold.png"
+  ]
+}

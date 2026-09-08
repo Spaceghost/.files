@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "status": "seven combined failure cases verified; controller remains staged",
+  "verified_at_utc": "2026-09-07T17:10:27Z",
+  "command": "python3 -B alpine/security/radio/tests/verify_radio_owner_failures.py --output /absolute/new/evidence-directory",
+  "harness_sha256": "51513739b83834c4d204cc819e8c9f9fc50f82111c1232e793992f3289f685a9",
+  "evidence": {
+    "artifact": "sha256/af3099d4a7456ca02e333653b6d23f460e4809ffff99a35e26eb9f18c2ab3aca/radio-owner-faults-verified.json",
+    "sha256": "af3099d4a7456ca02e333653b6d23f460e4809ffff99a35e26eb9f18c2ab3aca"
+  },
+  "raw_worker_output": {
+    "artifact": "sha256/ebc8598446841346068938272294d8f4f33232f6ab499f478379588d4bc4d443/radio-owner-faults-worker-result.json",
+    "sha256": "ebc8598446841346068938272294d8f4f33232f6ab499f478379588d4bc4d443"
+  },
+  "snapshot_comparison": {
+    "artifact": "sha256/5b2a803daf2644819229dc6a58fe33556f159aa888f680d471dac1b89f208d21/radio-owner-faults-snapshot-comparison.json",
+    "sha256": "5b2a803daf2644819229dc6a58fe33556f159aa888f680d471dac1b89f208d21"
+  },
+  "cases": [
+    {
+      "elapsed_seconds": 0.24663993200010736,
+      "name": "off_during_unanswered_wpa",
+      "observed_reason": "radio authorization cancelled"
+    },
+    {
+      "elapsed_seconds": 0.16197884999928647,
+      "name": "requester_death_before_commit",
+      "observed_reason": "requesting client disconnected"
+    },
+    {
+      "blocked_before_command_and_dhcp_teardown": true,
+      "elapsed_seconds": 4.420574928997667,
+      "name": "off_during_native_apply",
+      "native_partial_state_removed": true,
+      "observed_reason": "radio authorization cancelled",
+      "real_command_and_hook_dead": true
+    },
+    {
+      "blocked_before_command_and_dhcp_teardown": true,
+      "elapsed_seconds": 4.360219625999889,
+      "name": "hook_death_during_native_apply",
+      "native_partial_state_removed": true,
+      "observed_reason": "DHCP hook exited or sent extra data before acknowledgment",
+      "real_command_and_hook_dead": true
+    },
+    {
+      "elapsed_seconds": 0.16540643999906024,
+      "name": "second_guardian_cannot_create_overlapping_owner_or_client"
+    },
+    {
+      "dirty_marker_removed": true,
+      "elapsed_seconds": 1.400328340001579,
+      "name": "guardian_sigkill_causes_owner_pdeath_cleanup",
+      "owner_and_dhcp_dead": true
+    },
+    {
+      "elapsed_seconds": 0.2775007430027472,
+      "name": "owner_sigkill_guardian_block_and_orphan_restart_refusal",
+      "orphan_marker_preserved": true,
+      "previous_dhcp_dead": true,
+      "replacement_client_started": false
+    }
+  ],
+  "elapsed_seconds": 19.19565208899803,
+  "host_checks": {
+    "addresses_digest": true,
+    "dhcp_clients": true,
+    "dns_digest": true,
+    "ipv6_routes_digest": true,
+    "namespaces": true,
+    "radio_states": true,
+    "routes_digest": true
+  },
+  "remaining_namespace_members": [],
+  "production_source_changed": false,
+  "earlier_seven_case_harness_changed": false,
+  "historical_failed_run": {
+    "artifact": "sha256/c980ed8898d98d41ce312b22f4c30c9023c5adabea940390e6b9aad3e96beda6/radio-owner-faults-first-reporting-failure.json",
+    "sha256": "c980ed8898d98d41ce312b22f4c30c9023c5adabea940390e6b9aad3e96beda6",
+    "reason": "Parent parser assumed list-shaped namespace messages; worker results were not retained, so no case or host-equality pass is claimed."
+  },
+  "package_lock": {
+    "artifact": "sha256/b2d28cffd48c815b584945c2139dd717158a0d4c00377b495b0c6f2af4f3c5af/radio-owner-faults-package-lock-check.json",
+    "sha256": "b2d28cffd48c815b584945c2139dd717158a0d4c00377b495b0c6f2af4f3c5af"
+  },
+  "limitations": [
+    "WPA is a synthetic Unix-datagram responder; rfkill is simulated by a private veth.",
+    "The native-apply pause is a fixed synthetic command run through the unchanged real contained runner.",
+    "No physical radio, real trusted association, packet gate, OpenSnitch or OpenRC startup is exercised.",
+    "Owner SIGKILL intentionally leaves a private orphan marker and lease state; replacement authorization must refuse it."
+  ],
+  "recovery_design": "ORPHAN-RECOVERY.md"
+}

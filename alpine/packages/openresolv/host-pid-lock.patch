@@ -1,0 +1,96 @@
+--- a/resolvconf.in
++++ b/resolvconf.in
+@@ -32,6 +32,12 @@
+ RCDIR=@RCDIR@
+ RESTARTCMD=@RESTARTCMD@
+ 
++# Local, read-only capability for callers which preserve the original proc view.
++if [ "$1" = "--host-pid-lock-version" ]; then
++	echo 1
++	exit 0
++fi
++
+ if [ "$1" = "--version" ]; then
+ 	echo "openresolv $OPENRESOLV_VERSION"
+ 	echo "Copyright (c) 2007-2025 Roy Marples"
+@@ -111,6 +117,49 @@
+ {
+ 	warn "$*"
+ 	exit 1
++}
++
++# A contained caller may share this state directory with ordinary host callers.
++# Namespace-local $$ and kill -0 cannot identify those other lock owners.
++# Never silently fall back if a bridge was requested but cannot be verified.
++host_proc=
++lock_pid=$$
++if [ "${OPENRESOLV_HOST_PID+x}${OPENRESOLV_HOST_PROC_FD+x}" ]; then
++	for value in "$OPENRESOLV_HOST_PID" "$OPENRESOLV_HOST_PROC_FD"; do
++		case "$value" in
++		''|0*|*[!0-9]*) error_exit "invalid host PID lock context";;
++		esac
++		[ "${#value}" -le 10 ] && [ "$value" -le 2147483647 ] ||
++			error_exit "host PID lock context outside supported range"
++	done
++	[ "$OPENRESOLV_HOST_PROC_FD" -ge 3 ] ||
++		error_exit "invalid original proc descriptor"
++	host_proc="/proc/self/fd/$OPENRESOLV_HOST_PROC_FD"
++	[ -d "$host_proc" ] && [ -r "$host_proc/self/stat" ] &&
++	    [ "$(stat -f -c %t "$host_proc" 2>/dev/null)" = 9fa0 ] ||
++		error_exit "original proc view is unavailable or invalid"
++fi
++
++host_pid_lock_validate()
++{
++	[ -n "$host_proc" ] || return 0
++	# Use builtin read: spawning cat would inspect the child's /proc/self.
++	read -r current_pid rest <"$host_proc/self/stat" ||
++		error_exit "cannot identify current process through original proc"
++	[ "$current_pid" = "$OPENRESOLV_HOST_PID" ] ||
++		error_exit "host PID lock context does not identify this process"
++	lock_pid=$OPENRESOLV_HOST_PID
++}
++
++lock_pid_alive()
++{
++	if [ -n "$host_proc" ]; then
++		[ -r "$host_proc/self/stat" ] ||
++			error_exit "original proc view became unavailable"
++		[ -d "$host_proc/$1" ]
++	else
++		kill -0 "$1"
++	fi
+ }
+ 
+ usage()
+@@ -1090,6 +1139,12 @@
+ 	fi
+ fi
+ 
++# Read-only subscriber children inherit the bridge but have their own PIDs.
++# Require exact shell identity only before paths which can change system state.
++case "$cmd" in
++a|d|C|c|I|u|D|r) host_pid_lock_validate;;
++esac
++
+ # -D ensures that the listed config file base dirs exist
+ if [ "$cmd" = D ]; then
+ 	config_mkdirs "$@"
+@@ -1228,7 +1283,7 @@
+ 	if mkdir "$LOCKDIR" 2>/dev/null; then
+ 		trap 'rm -rf "$LOCKDIR";' EXIT
+ 		trap 'rm -rf "$LOCKDIR"; exit 1' INT QUIT ABRT SEGV ALRM TERM
+-		echo $$ >"$LOCKDIR/pid"
++		echo "$lock_pid" >"$LOCKDIR/pid"
+ 		break
+ 	fi
+ 	pid=$(cat "$LOCKDIR/pid" 2>/dev/null)
+@@ -1247,7 +1302,7 @@
+ 		fi
+ 		continue
+ 	fi
+-	if $have_pid && ! kill -0 "$pid"; then
++	if $have_pid && ! lock_pid_alive "$pid"; then
+ 		warn "clearing stale lock pid $pid"
+ 		rm -rf "$LOCKDIR"
+ 		continue

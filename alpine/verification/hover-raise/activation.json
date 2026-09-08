@@ -1,0 +1,30 @@
+{
+  "installed_binary_sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9",
+  "running_pid": 3175,
+  "running_binary_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
+  "old_runtime_command_exit_status": 2,
+  "old_runtime_command_stdout": "",
+  "old_runtime_command_stderr": "",
+  "old_running_config_validation_exit_status": 0,
+  "swaynag_processes": [],
+  "deployed_fragment": "/home/jack/.files/alpine/desktop/.config/sway/local.d/hover-raise.conf",
+  "deployment_backup": "/home/jack/.local/state/oldbook/backups/1788839554794457799",
+  "live_feature_active": false,
+  "new_graphical_login_required": true,
+  "compositor_restarted": false,
+  "before_lock": "alpine/packages/locks/368a9c51ce0830f4e791.json",
+  "after_lock": "alpine/packages/locks/fec17adaeaa5972078b8.json",
+  "locked_package_count": 1121,
+  "changed_from_previous_lock": [
+    "cliphist",
+    "swayfx",
+    "wl-clip-persist"
+  ],
+  "this_install_upgraded": [
+    "swayfx"
+  ],
+  "preserved_preexisting_additions": [
+    "cliphist",
+    "wl-clip-persist"
+  ]
+}

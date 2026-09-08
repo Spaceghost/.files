@@ -1,0 +1,435 @@
+>>> swayfx: Building oldbook/swayfx 0.6-r2 (using abuild 3.18.0_rc5-r1) started Mon, 07 Sep 2026 20:47:13 -0700
+>>> swayfx: Validating /tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/APKBUILD...
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/swayfx-0.6.tar.gz: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/bottom-titlebar.patch: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/hover-raise.patch: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/swayfx.desktop: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/oldbook-effects.conf: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/swayfx-0.6.tar.gz: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/bottom-titlebar.patch: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/hover-raise.patch: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/swayfx.desktop: OK
+/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/oldbook-effects.conf: OK
+>>> swayfx: Unpacking /tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/swayfx-0.6.tar.gz...
+>>> swayfx: bottom-titlebar.patch
+patching file include/sway/commands.h
+patching file include/sway/config.h
+patching file include/sway/tree/container.h
+patching file sway/commands/titlebar_position.c
+patching file sway/commands.c
+patching file sway/config.c
+patching file sway/desktop/output.c
+patching file sway/desktop/transaction.c
+patching file sway/input/seatop_default.c
+patching file sway/input/seatop_move_tiling.c
+patching file sway/ipc-json.c
+patching file sway/meson.build
+patching file sway/sway.5.scd
+patching file sway/tree/container.c
+patching file sway/tree/view.c
+>>> swayfx: hover-raise.patch
+patching file include/sway/commands.h
+patching file include/sway/config.h
+patching file sway/commands.c
+patching file sway/commands/mouse_raise_delay.c
+patching file sway/config.c
+patching file sway/input/seat.c
+patching file sway/input/seatop_default.c
+patching file sway/meson.build
+patching file sway/sway.5.scd
+The Meson build system
+Version: 1.12.0
+Source dir: /tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/src/swayfx-fd71a6bdc061bd633b488ae7b83e8a6981d22f86
+Build dir: /tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/src/swayfx-fd71a6bdc061bd633b488ae7b83e8a6981d22f86/output
+Build type: native build
+Project name: sway
+Project version: 0.6
+C compiler for the host machine: cc (gcc 15.2.0 "cc (Alpine 15.2.0) 15.2.0")
+C linker for the host machine: cc ld.bfd 2.45.1
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Attempted to resolve subproject without subprojects directory present.
+Subproject scenefx is buildable: NO (disabling)
+Found pkg-config: YES (/usr/bin/pkg-config) 3.0.7
+Run-time dependency scenefx-0.5 found: YES 0.5.0
+Attempted to resolve subproject without subprojects directory present.
+Subproject wlroots is buildable: NO (disabling)
+Run-time dependency wlroots-0.20 found: YES 0.20.2
+Run-time dependency json-c found: YES 0.19
+Run-time dependency libpcre2-8 found: YES 10.48
+Run-time dependency wayland-server found: YES 1.26.0
+Run-time dependency wayland-client found: YES 1.26.0
+Run-time dependency wayland-cursor found: YES 1.26.0
+Run-time dependency wayland-protocols found: YES 1.49
+Run-time dependency xkbcommon found: YES 1.13.2
+Run-time dependency cairo found: YES 1.18.4
+Run-time dependency pango found: YES 1.57.1
+Run-time dependency pangocairo found: YES 1.57.1
+Dependency gdk-pixbuf-2.0 for host machine skipped: feature gdk-pixbuf disabled
+Run-time dependency pixman-1 found: YES 0.46.4
+Run-time dependency libevdev found: YES 1.13.6
+Run-time dependency libinput found: YES 1.31.3
+Run-time dependency xcb found: YES 1.17.0
+Run-time dependency libdrm found: YES 2.4.134
+Run-time dependency libudev found: YES 251
+Library m found: YES
+Library rt found: YES
+Run-time dependency xcb-icccm found: YES 0.4.2
+Run-time dependency threads found: YES
+Run-time dependency libsystemd found: YES 255.24
+Header "libinput.h" has symbol "LIBINPUT_CONFIG_ACCEL_PROFILE_CUSTOM" with dependency libinput: YES 
+Header "libinput.h" has symbol "LIBINPUT_CONFIG_DRAG_LOCK_ENABLED_STICKY" with dependency libinput: YES 
+Header "libinput.h" has symbol "LIBINPUT_SWITCH_KEYPAD_SLIDE" with dependency libinput: YES 
+Dependency scdoc for host machine skipped: feature man-pages disabled
+Program git found: YES (/usr/bin/git)
+Compiler for C supports arguments -fmacro-prefix-map=/prefix/to/hide=: YES 
+Configuring config.h using configuration
+Run-time dependency wayland-scanner found: YES 1.26.0
+Program /usr/bin/wayland-scanner found: YES (/usr/bin/wayland-scanner)
+Configuring config using configuration
+Build targets in project: 21
+
+sway 0.6
+
+    gdk-pixbuf       : NO
+    tray             : NO
+    man-pages        : NO
+
+  Subprojects (for host machine)
+    scenefx          : NO
+                       Attempted to resolve subproject without subprojects directory present.
+    wlroots          : NO
+                       Attempted to resolve subproject without subprojects directory present.
+
+  User defined options
+    bash-completions : false
+    buildtype        : plain
+    default-wallpaper: false
+    fish-completions : false
+    gdk-pixbuf       : disabled
+    libdir           : lib
+    man-pages        : disabled
+    prefix           : /usr
+    swaybar          : false
+    swaynag          : false
+    sysconfdir       : /etc
+    tray             : disabled
+    wrap_mode        : nodownload
+    zsh-completions  : false
+
+Found ninja-1.9.0 at /usr/bin/ninja
+ninja: entering directory '/tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/src/swayfx-fd71a6bdc061bd633b488ae7b83e8a6981d22f86/output'
+[1/275] Compiling C object swaymsg/swaymsg.p/main.c.o
+[2/275] Generating protocols/wlr_output_power_management_unstable_v1_xml_c with a custom command
+[3/275] Generating protocols/wlr_layer_shell_unstable_v1_xml_c with a custom command
+[4/275] Generating protocols/_usr_share_wayland_protocols_unstable_xdg_output_xdg_output_unstable_v1_xml_c with a custom command
+[5/275] Generating protocols/_usr_share_wayland_protocols_staging_cursor_shape_cursor_shape_v1_xml_c with a custom command
+[6/275] Generating protocols/_usr_share_wayland_protocols_stable_xdg_shell_xdg_shell_xml_c with a custom command
+[7/275] Generating protocols/_usr_share_wayland_protocols_stable_xdg_shell_xdg_shell_xml_server_h with a custom command
+[8/275] Generating protocols/_usr_share_wayland_protocols_stable_xdg_shell_xdg_shell_xml_client_h with a custom command
+[9/275] Generating protocols/_usr_share_wayland_protocols_unstable_xdg_output_xdg_output_unstable_v1_xml_server_h with a custom command
+[10/275] Generating protocols/_usr_share_wayland_protocols_unstable_xdg_output_xdg_output_unstable_v1_xml_client_h with a custom command
+[11/275] Generating protocols/wlr_output_power_management_unstable_v1_xml_server_h with a custom command
+[12/275] Generating protocols/wlr_output_power_management_unstable_v1_xml_client_h with a custom command
+[13/275] Generating protocols/wlr_layer_shell_unstable_v1_xml_server_h with a custom command
+[14/275] Generating protocols/wlr_layer_shell_unstable_v1_xml_client_h with a custom command
+[15/275] Generating protocols/_usr_share_wayland_protocols_stable_tablet_tablet_v2_xml_server_h with a custom command
+[16/275] Generating protocols/_usr_share_wayland_protocols_stable_tablet_tablet_v2_xml_client_h with a custom command
+[17/275] Generating protocols/_usr_share_wayland_protocols_staging_cursor_shape_cursor_shape_v1_xml_server_h with a custom command
+[18/275] Generating protocols/_usr_share_wayland_protocols_staging_cursor_shape_cursor_shape_v1_xml_client_h with a custom command
+[19/275] Generating protocols/_usr_share_wayland_protocols_stable_tablet_tablet_v2_xml_c with a custom command
+[20/275] Compiling C object common/libsway-common.a.p/util.c.o
+[21/275] Compiling C object common/libsway-common.a.p/stringop.c.o
+[22/275] Compiling C object common/libsway-common.a.p/pango.c.o
+[23/275] Compiling C object common/libsway-common.a.p/list.c.o
+[24/275] Compiling C object common/libsway-common.a.p/loop.c.o
+[25/275] Compiling C object sway/sway.p/input_libinput.c.o
+[26/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_tablet-v2-protocol.c.o
+[27/275] Compiling C object sway/sway.p/desktop_xwayland.c.o
+[28/275] Compiling C object sway/sway.p/tree_output.c.o
+[29/275] Compiling C object sway/sway.p/tree_workspace.c.o
+[30/275] Compiling C object sway/sway.p/tree_view.c.o
+[31/275] Compiling C object sway/sway.p/tree_root.c.o
+[32/275] Compiling C object sway/sway.p/tree_node.c.o
+[33/275] Compiling C object sway/sway.p/tree_container.c.o
+[34/275] Compiling C object sway/sway.p/tree_arrange.c.o
+[35/275] Compiling C object sway/sway.p/commands_output_color_profile.c.o
+[36/275] Compiling C object sway/sway.p/commands_output_unplug.c.o
+[37/275] Compiling C object sway/sway.p/commands_output_transform.c.o
+[38/275] Compiling C object sway/sway.p/commands_output_toggle.c.o
+[39/275] Compiling C object sway/sway.p/commands_output_subpixel.c.o
+[40/275] Compiling C object sway/sway.p/commands_output_scale_filter.c.o
+[41/275] Compiling C object sway/sway.p/commands_output_scale.c.o
+[42/275] Compiling C object sway/sway.p/commands_output_render_bit_depth.c.o
+[43/275] Compiling C object sway/sway.p/commands_output_power.c.o
+[44/275] Compiling C object sway/sway.p/commands_output_position.c.o
+[45/275] Compiling C object sway/sway.p/commands_output_mode.c.o
+[46/275] Compiling C object sway/sway.p/commands_output_max_render_time.c.o
+[47/275] Compiling C object sway/sway.p/commands_output_hdr.c.o
+[48/275] Compiling C object sway/sway.p/commands_output_enable.c.o
+[49/275] Compiling C object sway/sway.p/commands_output_dpms.c.o
+[50/275] Compiling C object sway/sway.p/commands_output_disable.c.o
+[51/275] Compiling C object sway/sway.p/commands_output_background.c.o
+[52/275] Compiling C object sway/sway.p/commands_output_allow_tearing.c.o
+[53/275] Compiling C object sway/sway.p/commands_output_adaptive_sync.c.o
+[54/275] Compiling C object sway/sway.p/commands_input_xkb_variant.c.o
+[55/275] Compiling C object sway/sway.p/commands_input_xkb_switch_layout.c.o
+[56/275] Compiling C object sway/sway.p/commands_input_xkb_rules.c.o
+[57/275] Compiling C object sway/sway.p/commands_input_xkb_options.c.o
+[58/275] Compiling C object sway/sway.p/commands_input_xkb_numlock.c.o
+[59/275] Compiling C object sway/sway.p/commands_input_xkb_model.c.o
+[60/275] Compiling C object sway/sway.p/commands_input_xkb_layout.c.o
+[61/275] Compiling C object sway/sway.p/commands_input_xkb_file.c.o
+[62/275] Compiling C object sway/sway.p/commands_input_xkb_capslock.c.o
+[63/275] Compiling C object sway/sway.p/commands_input_tool_mode.c.o
+[64/275] Compiling C object sway/sway.p/commands_input_tap_button_map.c.o
+[65/275] Compiling C object sway/sway.p/commands_input_tap.c.o
+[66/275] Compiling C object sway/sway.p/commands_input_scroll_method.c.o
+[67/275] Compiling C object sway/sway.p/commands_input_scroll_factor.c.o
+[68/275] Compiling C object sway/sway.p/commands_input_scroll_button_lock.c.o
+[69/275] Compiling C object sway/sway.p/commands_input_scroll_button.c.o
+[70/275] Compiling C object sway/sway.p/commands_input_repeat_rate.c.o
+[71/275] Compiling C object sway/sway.p/commands_input_repeat_delay.c.o
+[72/275] Compiling C object sway/sway.p/commands_input_rotation_angle.c.o
+[73/275] Compiling C object sway/sway.p/commands_input_pointer_accel.c.o
+[74/275] Compiling C object sway/sway.p/commands_input_natural_scroll.c.o
+[75/275] Compiling C object sway/sway.p/commands_input_middle_emulation.c.o
+[76/275] Compiling C object sway/sway.p/commands_input_map_to_region.c.o
+[77/275] Compiling C object sway/sway.p/commands_input_map_to_output.c.o
+[78/275] Compiling C object sway/sway.p/commands_input_map_from_region.c.o
+[79/275] Compiling C object sway/sway.p/commands_input_left_handed.c.o
+[80/275] Compiling C object sway/sway.p/commands_input_events.c.o
+[81/275] Compiling C object sway/sway.p/commands_input_dwtp.c.o
+[82/275] Compiling C object sway/sway.p/commands_input_dwt.c.o
+[83/275] Compiling C object sway/sway.p/commands_input_drag_lock.c.o
+[84/275] Compiling C object sway/sway.p/commands_input_drag.c.o
+[85/275] Compiling C object sway/sway.p/commands_input_clickfinger_button_map.c.o
+[86/275] Compiling C object sway/sway.p/commands_input_click_method.c.o
+[87/275] Compiling C object sway/sway.p/commands_input_calibration_matrix.c.o
+[88/275] Compiling C object sway/sway.p/commands_input_accel_profile.c.o
+[89/275] Compiling C object sway/sway.p/commands_bar_wrap_scroll.c.o
+[90/275] Compiling C object sway/sway.p/commands_bar_workspace_min_width.c.o
+[91/275] Compiling C object sway/sway.p/commands_bar_workspace_buttons.c.o
+[92/275] Compiling C object sway/sway.p/commands_bar_tray_padding.c.o
+[93/275] Compiling C object sway/sway.p/commands_bar_tray_output.c.o
+[94/275] Compiling C object sway/sway.p/commands_bar_tray_bind.c.o
+[95/275] Compiling C object sway/sway.p/commands_bar_swaybar_command.c.o
+[96/275] Compiling C object sway/sway.p/commands_bar_strip_workspace_name.c.o
+[97/275] Compiling C object sway/sway.p/commands_bar_strip_workspace_numbers.c.o
+[98/275] Compiling C object sway/sway.p/commands_bar_status_padding.c.o
+[99/275] Compiling C object sway/sway.p/commands_bar_status_edge_padding.c.o
+[100/275] Compiling C object sway/sway.p/commands_bar_status_command.c.o
+[101/275] Compiling C object sway/sway.p/commands_bar_separator_symbol.c.o
+[102/275] Compiling C object sway/sway.p/commands_bar_position.c.o
+[103/275] Compiling C object sway/sway.p/commands_bar_pango_markup.c.o
+[104/275] Compiling C object sway/sway.p/commands_bar_output.c.o
+[105/275] Compiling C object sway/sway.p/commands_bar_modifier.c.o
+[106/275] Compiling C object sway/sway.p/commands_bar_mode.c.o
+[107/275] Compiling C object sway/sway.p/commands_bar_id.c.o
+[108/275] Compiling C object sway/sway.p/commands_bar_icon_theme.c.o
+[109/275] Compiling C object sway/sway.p/commands_bar_hidden_state.c.o
+[110/275] Compiling C object sway/sway.p/commands_bar_height.c.o
+[111/275] Compiling C object sway/sway.p/commands_bar_gaps.c.o
+[112/275] Compiling C object sway/sway.p/commands_bar_font.c.o
+[113/275] Compiling C object sway/sway.p/commands_bar_colors.c.o
+[114/275] Compiling C object sway/sway.p/commands_bar_binding_mode_indicator.c.o
+[115/275] Compiling C object sway/sway.p/commands_bar_bind.c.o
+[116/275] Compiling C object sway/sway.p/commands_xwayland.c.o
+[117/275] Compiling C object sway/sway.p/commands_ws_auto_back_and_forth.c.o
+[118/275] Compiling C object sway/sway.p/commands_workspace_layout.c.o
+[119/275] Compiling C object sway/sway.p/commands_workspace.c.o
+[120/275] Compiling C object sway/sway.p/commands_urgent.c.o
+[121/275] Compiling C object sway/sway.p/commands_unmark.c.o
+[122/275] Compiling C object sway/sway.p/commands_titlebar_separator.c.o
+[123/275] Compiling C object sway/sway.p/commands_titlebar_position.c.o
+[124/275] Compiling C object sway/sway.p/commands_titlebar_padding.c.o
+[125/275] Compiling C object sway/sway.p/commands_titlebar_border_thickness.c.o
+[126/275] Compiling C object sway/sway.p/commands_title_format.c.o
+[127/275] Compiling C object sway/sway.p/commands_title_align.c.o
+[128/275] Compiling C object sway/sway.p/commands_tiling_drag_threshold.c.o
+[129/275] Compiling C object sway/sway.p/commands_tiling_drag.c.o
+[130/275] Compiling C object sway/sway.p/commands_swap.c.o
+[131/275] Compiling C object sway/sway.p/commands_swaynag_command.c.o
+[132/275] Compiling C object sway/sway.p/commands_swaybg_command.c.o
+[133/275] Compiling C object sway/sway.p/commands_sticky.c.o
+[134/275] Compiling C object sway/sway.p/commands_split.c.o
+[135/275] Compiling C object sway/sway.p/commands_smart_gaps.c.o
+[136/275] Compiling C object sway/sway.p/commands_smart_corner_radius.c.o
+[137/275] Compiling C object sway/sway.p/commands_smart_borders.c.o
+[138/275] Compiling C object sway/sway.p/commands_shortcuts_inhibitor.c.o
+[139/275] Compiling C object sway/sway.p/commands_show_marks.c.o
+[140/275] Compiling C object sway/sway.p/commands_shadows_on_csd.c.o
+[141/275] Compiling C object sway/sway.p/commands_shadows.c.o
+[142/275] Compiling C object sway/sway.p/commands_shadow_offset.c.o
+[143/275] Compiling C object sway/sway.p/commands_shadow_inactive_color.c.o
+[144/275] Compiling C object sway/sway.p/commands_shadow_color.c.o
+[145/275] Compiling C object sway/sway.p/commands_shadow_blur_radius.c.o
+[146/275] Compiling C object sway/sway.p/commands_set.c.o
+[147/275] Compiling C object sway/sway.p/commands_seat_xcursor_theme.c.o
+[148/275] Compiling C object sway/sway.p/commands_seat_shortcuts_inhibitor.c.o
+[149/275] Compiling C object sway/sway.p/commands_seat_pointer_constraint.c.o
+[150/275] Compiling C object sway/sway.p/commands_seat_keyboard_grouping.c.o
+[151/275] Compiling C object sway/sway.p/commands_seat_idle.c.o
+[152/275] Compiling C object sway/sway.p/commands_seat_hide_cursor.c.o
+[153/275] Compiling C object sway/sway.p/commands_seat_fallback.c.o
+[154/275] Compiling C object sway/sway.p/commands_seat_cursor.c.o
+[155/275] Compiling C object sway/sway.p/commands_seat_attach.c.o
+[156/275] Compiling C object sway/sway.p/commands_seat.c.o
+[157/275] Compiling C object sway/sway.p/commands_scratchpad_minimize.c.o
+[158/275] Compiling C object sway/sway.p/commands_scratchpad.c.o
+[159/275] Compiling C object sway/sway.p/commands_resize.c.o
+[160/275] Compiling C object sway/sway.p/commands_rename.c.o
+[161/275] Compiling C object sway/sway.p/commands_reload.c.o
+[162/275] Compiling C object sway/sway.p/commands_primary_selection.c.o
+[163/275] Compiling C object sway/sway.p/commands_popup_during_fullscreen.c.o
+[164/275] Compiling C object sway/sway.p/commands_output.c.o
+[165/275] Compiling C object sway/sway.p/commands_nop.c.o
+[166/275] Compiling C object sway/sway.p/commands_no_focus.c.o
+[167/275] Compiling C object sway/sway.p/commands_new_window.c.o
+[168/275] Compiling C object sway/sway.p/commands_new_float.c.o
+[169/275] Compiling C object sway/sway.p/commands_move.c.o
+[170/275] Compiling C object sway/sway.p/commands_mouse_warping.c.o
+[171/275] Compiling C object sway/sway.p/commands_mouse_raise_delay.c.o
+[172/275] Compiling C object sway/sway.p/commands_mode.c.o
+[173/275] Compiling C object sway/sway.p/commands_layer_effects.c.o
+[174/275] Compiling C object sway/sway.p/commands_layout.c.o
+[175/275] Compiling C object sway/sway.p/commands_input.c.o
+[176/275] Compiling C object sway/sway.p/commands_include.c.o
+[177/275] Compiling C object sway/sway.p/commands_opacity.c.o
+[178/275] Compiling C object sway/sway.p/commands_max_render_time.c.o
+[179/275] Compiling C object sway/sway.p/commands_mark.c.o
+[180/275] Compiling C object sway/sway.p/commands_kill.c.o
+[181/275] Compiling C object sway/sway.p/commands_inhibit_idle.c.o
+[182/275] Compiling C object sway/sway.p/commands_hide_edge_borders.c.o
+[183/275] Compiling C object sway/sway.p/commands_gesture.c.o
+[184/275] Compiling C object sway/sway.p/commands_gaps.c.o
+[185/275] Compiling C object sway/sway.p/commands_fullscreen.c.o
+[186/275] Compiling C object sway/sway.p/commands_force_focus_wrapping.c.o
+[187/275] Compiling C object sway/sway.p/commands_force_display_urgency_hint.c.o
+[188/275] Compiling C object sway/sway.p/commands_for_window.c.o
+[189/275] Compiling C object sway/sway.p/commands_font.c.o
+[190/275] Compiling C object sway/sway.p/commands_focus_wrapping.c.o
+[191/275] Compiling C object sway/sway.p/commands_focus_on_window_activation.c.o
+[192/275] Compiling C object sway/sway.p/commands_focus_follows_mouse.c.o
+[193/275] Compiling C object sway/sway.p/commands_focus.c.o
+[194/275] Compiling C object sway/sway.p/commands_floating_modifier.c.o
+[195/275] Compiling C object sway/sway.p/commands_floating_minmax_size.c.o
+[196/275] Compiling C object sway/sway.p/commands_floating.c.o
+[197/275] Compiling C object sway/sway.p/commands_exec_always.c.o
+[198/275] Compiling C object sway/sway.p/commands_exec.c.o
+[199/275] Compiling C object sway/sway.p/commands_exit.c.o
+[200/275] Compiling C object sway/sway.p/commands_dim_inactive_colors.c.o
+[201/275] Compiling C object sway/sway.p/commands_dim_inactive.c.o
+[202/275] Compiling C object sway/sway.p/commands_default_orientation.c.o
+[203/275] Compiling C object sway/sway.p/commands_default_floating_border.c.o
+[204/275] Compiling C object sway/sway.p/commands_default_dim_inactive.c.o
+[205/275] Compiling C object sway/sway.p/commands_default_border.c.o
+[206/275] Compiling C object sway/sway.p/commands_create_output.c.o
+[207/275] Compiling C object sway/sway.p/commands_corner_radius.c.o
+[208/275] Compiling C object sway/sway.p/commands_client.c.o
+[209/275] Compiling C object sway/sway.p/commands_border.c.o
+[210/275] Compiling C object sway/sway.p/commands_blur_saturation.c.o
+[211/275] Compiling C object sway/sway.p/commands_blur_noise.c.o
+[212/275] Compiling C object sway/sway.p/commands_blur_xray.c.o
+[213/275] Compiling C object sway/sway.p/commands_blur_radius.c.o
+[214/275] Compiling C object sway/sway.p/commands_blur_passes.c.o
+[215/275] Compiling C object sway/sway.p/commands_blur_contrast.c.o
+[216/275] Compiling C object sway/sway.p/commands_blur_brightness.c.o
+[217/275] Compiling C object sway/sway.p/commands_blur.c.o
+[218/275] Compiling C object sway/sway.p/commands_bind.c.o
+[219/275] Compiling C object sway/sway.p/commands_bar.c.o
+[220/275] Compiling C object sway/sway.p/commands_assign.c.o
+[221/275] Compiling C object sway/sway.p/commands_allow_tearing.c.o
+[222/275] Compiling C object sway/sway.p/commands_animation_duration_ms.c.o
+[223/275] Compiling C object sway/sway.p/config_input.c.o
+[224/275] Compiling C object sway/sway.p/config_seat.c.o
+[225/275] Compiling C object sway/sway.p/config_output.c.o
+[226/275] Compiling C object sway/sway.p/config_bar.c.o
+[227/275] Compiling C object sway/sway.p/input_text_input.c.o
+[228/275] Compiling C object sway/sway.p/input_tablet.c.o
+[229/275] Compiling C object sway/sway.p/input_switch.c.o
+[230/275] Compiling C object sway/sway.p/input_seatop_resize_tiling.c.o
+[231/275] Compiling C object sway/sway.p/input_seatop_resize_floating.c.o
+[232/275] Compiling C object sway/sway.p/input_seatop_move_tiling.c.o
+[233/275] Compiling C object sway/sway.p/input_seatop_move_floating.c.o
+[234/275] Compiling C object sway/sway.p/input_seatop_down.c.o
+[235/275] Compiling C object sway/sway.p/input_seatop_default.c.o
+[236/275] Compiling C object sway/sway.p/input_seat.c.o
+[237/275] Compiling C object sway/sway.p/input_keyboard.c.o
+[238/275] Compiling C object sway/sway.p/input_cursor.c.o
+[239/275] Compiling C object sway/sway.p/input_input-manager.c.o
+[240/275] Compiling C object sway/sway.p/desktop_launcher.c.o
+[241/275] Compiling C object sway/sway.p/desktop_xdg_shell.c.o
+[242/275] Compiling C object sway/sway.p/desktop_transaction.c.o
+[243/275] Compiling C object sway/sway.p/desktop_tearing.c.o
+[244/275] Compiling C object sway/sway.p/desktop_output.c.o
+[245/275] Compiling C object sway/sway.p/desktop_layer_shell.c.o
+[246/275] Compiling C object sway/sway.p/desktop_idle_inhibit_v1.c.o
+[247/275] Compiling C object sway/sway.p/xdg_decoration.c.o
+[248/275] Compiling C object sway/sway.p/xdg_activation_v1.c.o
+[249/275] Compiling C object sway/sway.p/swaynag.c.o
+[250/275] Compiling C object sway/sway.p/sway_text_node.c.o
+[251/275] Compiling C object sway/sway.p/server.c.o
+[252/275] Compiling C object sway/sway.p/scene_descriptor.c.o
+[253/275] Compiling C object sway/sway.p/realtime.c.o
+[254/275] Compiling C object sway/sway.p/main.c.o
+[255/275] Compiling C object sway/sway.p/lock.c.o
+[256/275] Compiling C object sway/sway.p/layer_criteria.c.o
+[257/275] Compiling C object sway/sway.p/ipc-server.c.o
+[258/275] Compiling C object sway/sway.p/ipc-json.c.o
+[259/275] Compiling C object sway/sway.p/decoration.c.o
+[260/275] Compiling C object sway/sway.p/criteria.c.o
+[261/275] Compiling C object sway/sway.p/config.c.o
+[262/275] Compiling C object sway/sway.p/commands.c.o
+[263/275] Compiling C object sway/sway.p/animation_manager.c.o
+[264/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_wlr-output-power-management-unstable-v1-protocol.c.o
+[265/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_wlr-layer-shell-unstable-v1-protocol.c.o
+[266/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_xdg-output-unstable-v1-protocol.c.o
+[267/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_cursor-shape-v1-protocol.c.o
+[268/275] Compiling C object sway/sway.p/meson-generated_.._.._protocols_xdg-shell-protocol.c.o
+[269/275] Compiling C object common/libsway-common.a.p/log.c.o
+[270/275] Compiling C object common/libsway-common.a.p/ipc-client.c.o
+[271/275] Compiling C object common/libsway-common.a.p/gesture.c.o
+[272/275] Compiling C object common/libsway-common.a.p/cairo.c.o
+[273/275] Linking static target common/libsway-common.a
+[274/275] Linking target swaymsg/swaymsg
+[275/275] Linking target sway/sway
+INFO: autodetecting backend as ninja
+INFO: calculating backend command to run: /usr/bin/ninja -C /tmp/oldbook-hover-raise-package-r2-verified/oldbook/swayfx/src/swayfx-fd71a6bdc061bd633b488ae7b83e8a6981d22f86/output
+swayfx version 0.6 (based on sway 1.12.0)
+ninja: nothing to do
+No tests defined.
+>>> swayfx: Entering fakeroot...
+>>> swayfx*: Running postcheck for swayfx
+>>> WARNING: swayfx*: Found /usr/share/doc but package name doesn't end with -doc
+>>> swayfx*: Preparing package swayfx...
+>>> swayfx*: Stripping binaries
+>>> swayfx*: Scanning shared objects
+>>> swayfx*: Tracing dependencies...
+	sway
+	so:libc.musl-x86_64.so.1
+	so:libcairo.so.2
+	so:libdrm.so.2
+	so:libevdev.so.2
+	so:libglib-2.0.so.0
+	so:libgobject-2.0.so.0
+	so:libinput.so.10
+	so:libjson-c.so.5
+	so:libpango-1.0.so.0
+	so:libpangocairo-1.0.so.0
+	so:libpcre2-8.so.0
+	so:libpixman-1.so.0
+	so:libscenefx-0.5.so
+	so:libudev.so.1
+	so:libwayland-server.so.0
+	so:libwlroots-0.20.so
+	so:libxcb-icccm.so.4
+	so:libxcb.so.1
+	so:libxkbcommon.so.0
+>>> swayfx*: Package size: 557.8 KB
+>>> swayfx*: Compressing data...
+>>> swayfx*: Create checksum...
+>>> swayfx*: Create swayfx-0.6-r2.apk
+>>> swayfx: Build complete at Mon, 07 Sep 2026 20:49:13 -0700 elapsed time 0h 2m 0s
+>>> swayfx: Updating the oldbook/x86_64 repository index...
+>>> swayfx: Signing the index...

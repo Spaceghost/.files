@@ -1,0 +1,33 @@
+{
+  "id": "2026-09-07-gruvbox-dark-yosemite-f85591f638bd",
+  "title": "The Sublime, Sponsored by Ghost Planet",
+  "description": "A monumental nineteenth-century American landscape painting: Yosemite cliffs rise into a vast dramatic storm and golden sunset, with an absurdly tiny Space Ghost giving a solemn guided tour to three unimpressed woodland animals on the foreground overlook. A little folding director's chair has been set down next to a majestic waterfall. Beautiful painterly detail and epic atmospheric depth.",
+  "file": "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f85591f638bd.png",
+  "sha256": "f85591f638bd465bc5c9b98254ed7999df281d47bcdfa32615dbc173d4a4b65a",
+  "width": 1586,
+  "height": 992,
+  "prompt": "Create exactly one beautiful 16:10 landscape desktop wallpaper, preferably 2560x1600. It is an affectionate, funny Space Ghost parody in a painterly style with extraordinary detail, rich atmospheric depth, luminous highlights and beautiful canvas texture. Space Ghost is the recognizable animated superhero: muscular, white costume, black hood/mask, yellow cape, red power bands. Make the visual joke readable and charming without explanatory text. Preserve a spacious, quieter upper edge for a desktop panel. If a theme is supplied, follow its palette throughout; otherwise choose colors that suit the scene naturally. No UI, words, logos, watermarks or picture frames. Deliver the actual raster image using built-in native image generation; do not substitute code, SVG or a text description.\n\nTheme: Gruvbox Dark. Gruvbox Dark color direction: warm charcoal and soot-black shadows (#282828, #1d2021), aged cream and parchment (#ebdbb2), glowing amber (#fabd2f), burnt orange (#fe8019), muted olive (#b8bb26), and restrained blue-grey (#83a598). Rich painterly canvas texture, cinematic chiaroscuro, luminous focal detail against calm dark negative space. Match a sophisticated warm dark desktop. Let Space Ghost's white suit read as aged ivory. Keep the scene funny, beautifully composed and legible at desktop scale. Avoid dominant purple or neon pink.\n\nScene: A monumental nineteenth-century American landscape painting: Yosemite cliffs rise into a vast dramatic storm and golden sunset, with an absurdly tiny Space Ghost giving a solemn guided tour to three unimpressed woodland animals on the foreground overlook. A little folding director's chair has been set down next to a majestic waterfall. Beautiful painterly detail and epic atmospheric depth.",
+  "theme": "gruvbox-dark",
+  "theme_name": "Gruvbox Dark",
+  "theme_style": "Gruvbox Dark color direction: warm charcoal and soot-black shadows (#282828, #1d2021), aged cream and parchment (#ebdbb2), glowing amber (#fabd2f), burnt orange (#fe8019), muted olive (#b8bb26), and restrained blue-grey (#83a598). Rich painterly canvas texture, cinematic chiaroscuro, luminous focal detail against calm dark negative space. Match a sophisticated warm dark desktop. Let Space Ghost's white suit read as aged ivory. Keep the scene funny, beautifully composed and legible at desktop scale. Avoid dominant purple or neon pink.",
+  "theme_palette": {
+    "background": "#282828",
+    "background_hard": "#1d2021",
+    "surface": "#3c3836",
+    "border": "#504945",
+    "foreground": "#ebdbb2",
+    "muted": "#928374",
+    "red": "#fb4934",
+    "green": "#b8bb26",
+    "yellow": "#fabd2f",
+    "blue": "#83a598",
+    "purple": "#d3869b",
+    "aqua": "#8ec07c",
+    "orange": "#fe8019"
+  },
+  "generator": "Codex CLI native image_generation",
+  "orchestrator_model": "gpt-5.6-luna",
+  "image_model": "gpt-image-2",
+  "generated_utc": "2026-09-07T12:28:06.960082+00:00",
+  "rebuild": "Restore this exact hashed bitmap; new generations are not deterministic."
+}

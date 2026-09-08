@@ -1,0 +1,27 @@
+* { font-family: "JetBrainsMono Nerd Font", sans-serif; font-size: 12px; }
+.control-center, .notification, .widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid {
+  background: rgba(40, 40, 40, 0.97);
+  color: #ebdbb2;
+  border: none;
+  border-radius: 14px;
+}
+.control-center { padding: 12px; box-shadow: 0 10px 32px rgba(29, 32, 33, 0.65); }
+.notification { margin: 8px; padding: 12px; }
+.notification-row:focus, .notification-row:hover { background: #504945; }
+.control-center .control-center-list,
+.control-center .control-center-list > row,
+.control-center .notification-group,
+.control-center .notification-row,
+.control-center .notification-background { background: transparent; box-shadow: none; }
+.control-center .notification-row:hover { background: rgba(80, 73, 69, 0.65); }
+.widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid { margin: 6px 0; padding: 10px; }
+.widget-title > button, .widget-dnd > switch slider, .widget-buttons-grid > flowbox > flowboxchild > button { background: #3c3836; color: #ebdbb2; border-radius: 10px; }
+.widget-title > button:hover, .widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #665c54; }
+progressbar, scale highlight { background: #fabd2f; border-radius: 8px; }
+scale trough { background: #504945; border-radius: 8px; min-height: 9px; }
+
+.notification.critical { border-color: #fb4934; }
+.notification .summary { color: #fbf1c7; font-weight: bold; }
+.notification .time, .notification .app-name { color: #a89984; }
+.widget-title > label { color: #fabd2f; font-weight: bold; }
+.widget-dnd > switch:checked { background: #d79921; }

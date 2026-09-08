@@ -1,0 +1,42 @@
+{
+  "utc": "2026-09-08T05:56:30.783557+00:00",
+  "artifacts": [
+    {
+      "artifact": "sha256/8f653ca9f344b64b3526796166ae78c8b338d5a539501e17fdbe836533639385/llama-completion-0.4.0-r0.apk",
+      "sha256": "8f653ca9f344b64b3526796166ae78c8b338d5a539501e17fdbe836533639385",
+      "bytes": 3130,
+      "restore_hash_matches": true,
+      "restored_apk_signature_verified": true
+    },
+    {
+      "artifact": "sha256/a58a90b7224f4e48abc29bfa0a56d3923d3e2036fd858ccb4c664d0f3c2f0fcd/llama.cpp-libs-0.4.0-r0.apk",
+      "sha256": "a58a90b7224f4e48abc29bfa0a56d3923d3e2036fd858ccb4c664d0f3c2f0fcd",
+      "bytes": 4245654,
+      "restore_hash_matches": true,
+      "restored_apk_signature_verified": true
+    },
+    {
+      "artifact": "sha256/5a354d4d4f4178254ebd6a8bb7ab874aba6b2cc4e03add3a4698316c544be307/llama.cpp-0.4.0-r0.apk",
+      "sha256": "5a354d4d4f4178254ebd6a8bb7ab874aba6b2cc4e03add3a4698316c544be307",
+      "bytes": 2317730,
+      "restore_hash_matches": true,
+      "restored_apk_signature_verified": true
+    },
+    {
+      "artifact": "sha256/e87905c164bde4df890a3cd4d3e1ab9d57126202d372b9265b714aa91709fd54/libggml-0.23.0-r0.apk",
+      "sha256": "e87905c164bde4df890a3cd4d3e1ab9d57126202d372b9265b714aa91709fd54",
+      "bytes": 486484,
+      "restore_hash_matches": true,
+      "restored_apk_signature_verified": true
+    },
+    {
+      "artifact": "sha256/40527c3f18a3799b5645103b819189b3f9a9f501da18cdd33088dbbab01192f6/libggml-cpu-0.23.0-r0.apk",
+      "sha256": "40527c3f18a3799b5645103b819189b3f9a9f501da18cdd33088dbbab01192f6",
+      "bytes": 6040356,
+      "restore_hash_matches": true,
+      "restored_apk_signature_verified": true
+    }
+  ],
+  "network_publish": false,
+  "global_package_install": false
+}

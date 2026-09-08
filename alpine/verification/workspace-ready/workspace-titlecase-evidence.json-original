@@ -1,0 +1,16 @@
+{
+  "starting_hashes": {
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "907f98cdf0b46b0695b742c72838eb65f96c56abdd85f1a5134f2ba90847b6a4",
+    "alpine/tests/test_workspaces.py": "bd6d90cbea6af66d0887f8c99d75d614750c343bb07fca566ccc26a5e0d66430"
+  },
+  "final_hashes": {
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "alpine/tests/test_workspaces.py": "89b5d95eef5cd912d83ed588f6df73fd0f90ba758a988d48b821143286a434b5"
+  },
+  "tests": {
+    "command": "python3 -m unittest discover -s alpine/tests -p test_workspaces.py -v",
+    "count": 31,
+    "result": "passed",
+    "log": "/tmp/workspace-titlecase-green.log"
+  }
+}

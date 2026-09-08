@@ -1,0 +1,11 @@
+test_floating_window_uses_its_workspace_not_its_old_center (test_centered_resize.NearFullResize.test_floating_window_uses_its_workspace_not_its_old_center) ... ok
+test_fullscreen_tiled_window_floats_and_centers_constrained_size (test_centered_resize.NearFullResize.test_fullscreen_tiled_window_floats_and_centers_constrained_size) ... ok
+test_grow_still_uses_the_existing_centered_step (test_centered_resize.NearFullResize.test_grow_still_uses_the_existing_centered_step) ... ok
+test_no_focused_window_does_nothing (test_centered_resize.NearFullResize.test_no_focused_window_does_nothing) ... ok
+test_small_workspace_keeps_twenty_four_pixel_margins (test_centered_resize.NearFullResize.test_small_workspace_keeps_twenty_four_pixel_margins) ... ok
+test_tiny_workspace_never_requests_zero_or_negative_dimensions (test_centered_resize.NearFullResize.test_tiny_workspace_never_requests_zero_or_negative_dimensions) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.035s
+
+OK

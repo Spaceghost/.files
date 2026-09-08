@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Fade the bar back while a window is fullscreen, and bring it up on hover.
+
+Waybar already sits on the overlay layer, so it stays above a fullscreen window
+rather than being covered by it.  What it cannot do by itself is notice the
+fullscreen: its sway/window module offers floating, solo, stacked, tabbed and
+tiled classes and nothing for fullscreen, and GTK has no selector that reaches
+the bar from a module's class.  So this watches Sway directly and rewrites one
+small stylesheet that the bar imports, which costs a style reload only on the
+rare frames where the fullscreen state actually changes.  The hover rule itself
+is static in style.css and needs no help from here.
+"""
+import errno
+import fcntl
+import hashlib
+import os
+from pathlib import Path
+import runpy
+import signal
+import socket
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/mbp_intel'))
+from workspace_model import fullscreen_nodes, workspace_nodes
+
+# Enough to read as deliberately out of the way without losing the clock.
+DIMMED = 0.3
+STATE_NAME = 'waybar-state.css'
+HEADER = '/* Written by mbp-intel-waybar-dim; edit style.css instead. */\n'
+PROC_ROOT = Path('/proc')
+DIM_RULES = HEADER + '''window#waybar.top .modules-left,
+window#waybar.top .modules-center,
+window#waybar #status {
+    opacity: %s;
+}
+''' % DIMMED
+
+
+def style_directory():
+    """Where Waybar resolves a relative @import: beside the style it loaded."""
+    return Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'waybar'
+
+
+def write_state(path, dimmed):
+    body = DIM_RULES if dimmed else HEADER
+    if path.exists() and path.read_text() == body:
+        return False
+    temporary = path.with_name(path.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(body)
+    temporary.replace(path)
+    return True
+
+
+def waybar_processes():
+    session = {key: os.environ.get(key) for key in ('XDG_RUNTIME_DIR', 'WAYLAND_DISPLAY')}
+    if not all(session.values()):
+        return
+    for entry in os.listdir(PROC_ROOT):
+        if not entry.isdigit():
+            continue
+        try:
+            process = PROC_ROOT / entry
+            if process.stat().st_uid != os.getuid():
+                continue
+            argv = (process / 'cmdline').read_bytes().split(b'\0')
+            environment = dict(item.split(b'=', 1) for item in
+                               (process / 'environ').read_bytes().split(b'\0') if b'=' in item)
+        except OSError:
+            continue
+        if (argv and argv[0].split(b'/')[-1] == b'waybar'
+                and all(environment.get(key.encode()) == value.encode()
+                        for key, value in session.items())):
+            yield int(entry)
+
+
+def reload_style():
+    # Waybar rereads its configuration and stylesheet on SIGUSR2.
+    for pid in waybar_processes():
+        try:
+            os.kill(pid, signal.SIGUSR2)
+        except OSError:
+            continue
+
+
+def fullscreen_present(ipc, sway):
+    """Whether any workspace on screen right now is showing a fullscreen view.
+
+    GET_TREE does not mark which workspaces are on screen, so the visible set
+    comes from GET_WORKSPACES and only those are inspected.  A fullscreen window
+    on a workspace nobody is looking at must not fade the bar.
+    """
+    visible = {workspace['name'] for workspace in ipc['request'](sway, 1)
+               if workspace.get('visible')}
+    return any(fullscreen_nodes(workspace)
+               for workspace in workspace_nodes(ipc['request'](sway, 4))
+               if workspace.get('name') in visible)
+
+
+def changes_fullscreen(kind, event):
+    if kind == (1 << 31) | 3:
+        return event.get('change') in ('new', 'close', 'move', 'fullscreen_mode')
+    if kind == (1 << 31):
+        return event.get('change') in ('focus', 'init', 'empty', 'move', 'reload')
+    return False
+
+
+def main():
+    ipc = runpy.run_path(str(Path(__file__).resolve().parent / 'mbp-intel-workspaces'))
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    sway = ipc['find_socket'](runtime)
+    # One watcher per Sway socket: exec_always runs this again on every reload.
+    lock_directory = runtime / 'mbp-intel'
+    lock_directory.mkdir(mode=0o700, exist_ok=True)
+    identity = hashlib.sha256(str(sway).encode()).hexdigest()[:12]
+    with (lock_directory / ('waybar-dim-' + identity + '.lock')).open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        directory = style_directory()
+        if not directory.is_dir():
+            raise RuntimeError(f'no Waybar configuration directory: {directory}')
+        state = directory / STATE_NAME
+        while True:
+            try:
+                write_state(state, fullscreen_present(ipc, sway))
+                with socket.socket(socket.AF_UNIX) as subscription:
+                    subscription.settimeout(3)
+                    subscription.connect(str(sway))
+                    ipc['send'](subscription, 2, '["window","workspace","shutdown"]')
+                    kind, accepted = ipc['receive'](subscription)
+                    if not accepted.get('success'):
+                        raise RuntimeError('Sway rejected the bar subscription')
+                    subscription.settimeout(None)
+                    while True:
+                        kind, event = ipc['receive'](subscription)
+                        if kind == (1 << 31) | 6:
+                            return
+                        if changes_fullscreen(kind, event):
+                            write_state(state, fullscreen_present(ipc, sway))
+            except (OSError, ValueError, RuntimeError) as error:
+                if (not sway.exists()
+                        or getattr(error, 'errno', None) in (errno.ENOENT, errno.ECONNREFUSED)):
+                    return
+                print(f'mbp-intel-waybar-dim: {error}; reconnecting', file=sys.stderr)
+                time.sleep(1)
+
+
+if __name__ == '__main__':
+    os.umask(0o022)
+    try:
+        main()
+    except (KeyError, OSError, ValueError, RuntimeError, ConnectionError) as error:
+        sys.exit(f'mbp-intel-waybar-dim: {error}')

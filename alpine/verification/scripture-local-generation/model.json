@@ -1,0 +1,95 @@
+{
+  "model": "qwen2.5:1.5b",
+  "registry": "https://ollama.com/library/qwen2.5:1.5b",
+  "manifest_sha256": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+  "layers": [
+    {
+      "mediaType": "application/vnd.docker.container.image.v1+json",
+      "digest": "sha256:377ac4d7aeefd5b870c9fccff9a6d4df36901d99fe3277c2f755bc401601ba1c",
+      "size": 487,
+      "verified_sha256": true
+    },
+    {
+      "mediaType": "application/vnd.ollama.image.model",
+      "digest": "sha256:183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4",
+      "size": 986048512,
+      "verified_sha256": true
+    },
+    {
+      "mediaType": "application/vnd.ollama.image.system",
+      "digest": "sha256:66b9ea09bd5b7099cbb4fc820f31b575c0366fa439b08245566692c6784e281e",
+      "size": 68,
+      "verified_sha256": true
+    },
+    {
+      "mediaType": "application/vnd.ollama.image.template",
+      "digest": "sha256:eb4402837c7829a690fa845de4d7f3fd842c2adee476d5341da8a46ea9255175",
+      "size": 1482,
+      "verified_sha256": true
+    },
+    {
+      "mediaType": "application/vnd.ollama.image.license",
+      "digest": "sha256:832dd9e00a68dd83b3c3fb9f5588dad7dcf337a0db50f7d9483f310cd292e92e",
+      "size": 11343,
+      "verified_sha256": true
+    }
+  ],
+  "api_tags": {
+    "models": [
+      {
+        "name": "qwen2.5:1.5b",
+        "model": "qwen2.5:1.5b",
+        "modified_at": "2026-09-07T21:36:24.344575592-07:00",
+        "size": 986061892,
+        "digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "qwen2",
+          "families": [
+            "qwen2"
+          ],
+          "parameter_size": "1.5B",
+          "quantization_level": "Q4_K_M"
+        }
+      }
+    ]
+  },
+  "model_info": {
+    "general.architecture": "qwen2",
+    "general.base_model.0.name": "Qwen2.5 1.5B",
+    "general.base_model.0.organization": "Qwen",
+    "general.base_model.0.repo_url": "https://huggingface.co/Qwen/Qwen2.5-1.5B",
+    "general.base_model.count": 1,
+    "general.basename": "Qwen2.5",
+    "general.file_type": 15,
+    "general.finetune": "Instruct",
+    "general.languages": null,
+    "general.license": "apache-2.0",
+    "general.license.link": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct/blob/main/LICENSE",
+    "general.parameter_count": 1543714304,
+    "general.quantization_version": 2,
+    "general.size_label": "1.5B",
+    "general.tags": null,
+    "general.type": "model",
+    "qwen2.attention.head_count": 12,
+    "qwen2.attention.head_count_kv": 2,
+    "qwen2.attention.layer_norm_rms_epsilon": 1e-06,
+    "qwen2.block_count": 28,
+    "qwen2.context_length": 32768,
+    "qwen2.embedding_length": 1536,
+    "qwen2.feed_forward_length": 8960,
+    "qwen2.rope.freq_base": 1000000,
+    "tokenizer.ggml.add_bos_token": false,
+    "tokenizer.ggml.bos_token_id": 151643,
+    "tokenizer.ggml.eos_token_id": 151645,
+    "tokenizer.ggml.merges": null,
+    "tokenizer.ggml.model": "gpt2",
+    "tokenizer.ggml.padding_token_id": 151643,
+    "tokenizer.ggml.pre": "qwen2",
+    "tokenizer.ggml.token_type": null,
+    "tokenizer.ggml.tokens": null
+  },
+  "license": "Apache-2.0",
+  "no_remote_metadata": true
+}

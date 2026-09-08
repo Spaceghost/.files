@@ -1,0 +1,21 @@
+test_window_switching (unittest.loader._FailedTest.test_window_switching) ... ERROR
+
+======================================================================
+ERROR: test_window_switching (unittest.loader._FailedTest.test_window_switching)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_window_switching
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/unittest/loader.py", line 433, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/usr/lib/python3.14/unittest/loader.py", line 374, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/home/jack/.files/alpine/tests/test_window_switching.py", line 8, in <module>
+    import window_switching as switching
+ModuleNotFoundError: No module named 'window_switching'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.001s
+
+FAILED (errors=1)

@@ -1,0 +1,25 @@
+{
+  "alpine_release": "3.25.0_alpha20260805",
+  "arch": "x86_64",
+  "packages": [
+    {
+      "apk_identity": "Q1jUHKE8y3Lf4FWmn5SpSovYmMQ0w=",
+      "name": "mbp-intel-waybar-art",
+      "version": "1.0.0-r9",
+      "arch": "x86_64",
+      "filename": "mbp-intel-waybar-art-1.0.0-r9.apk",
+      "sha256": "46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060",
+      "artifact": "sha256/46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060/mbp-intel-waybar-art-1.0.0-r9.apk",
+      "artifact_arch": "x86_64",
+      "binary_sha256": "2e9075cf0ca82d4ad182f82f286cbe1732bdcb45fbaa2f24c3440e318a4f8795"
+    }
+  ],
+  "schema": 1,
+  "verification": [
+    "two byte-identical signed network-isolated builds",
+    "apk verify for both APKs",
+    "Fossil unversioned archive readback",
+    "23 native modifier and mouse regression checks",
+    "complete theme and prompt cancellation tests"
+  ]
+}

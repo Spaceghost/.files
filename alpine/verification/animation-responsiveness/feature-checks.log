@@ -1,0 +1,392 @@
+Review alpine/FEATURES.md for these pinned behaviors:
+  WINDOW-SWITCHING — 5 check files
+  EXPOSE-LIFECYCLE — 3 check files
+  CAROUSEL-STILLS — 3 check files
+  DECORATION-STYLE — 4 check files
+  DECORATION-PLACEMENT — 3 check files
+  MOTION — 7 check files
+  SESSION-OWNERSHIP — 8 check files
+  DEPLOY-RECOVERY — 2 check files
+23 unique check files. Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.
+test_browser_requires_an_exact_identity_and_validated_origin_hint (test_ai_notification_stream.AINotificationAttributionTests.test_browser_requires_an_exact_identity_and_validated_origin_hint) ... ok
+test_exact_native_names_and_desktop_entries_are_attributed (test_ai_notification_stream.AINotificationAttributionTests.test_exact_native_names_and_desktop_entries_are_attributed) ... ok
+test_stream_is_passive_content_free_and_preserves_normal_delivery (test_ai_notification_stream.AINotificationBusTests.test_stream_is_passive_content_free_and_preserves_normal_delivery) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 9.745s
+
+OK
+test_capture_failure_has_no_foreground_screenshot_fallback (test_carousel.CarouselTests.test_capture_failure_has_no_foreground_screenshot_fallback) ... ok
+test_capture_uses_native_scale_without_a_thumbnail_override (test_carousel.CarouselTests.test_capture_uses_native_scale_without_a_thumbnail_override) ... ok
+test_closed_gesture_discards_late_capture (test_carousel.CarouselTests.test_closed_gesture_discards_late_capture) ... ok
+test_commit_dismisses_before_focus_and_records_selected_window (test_carousel.CarouselTests.test_commit_dismisses_before_focus_and_records_selected_window) ... ok
+test_completed_rgb_payload_is_released_without_live_recapture (test_carousel.CarouselTests.test_completed_rgb_payload_is_released_without_live_recapture) ... ok
+test_each_identity_captured_once_and_reuse_is_distinct (test_carousel.CarouselTests.test_each_identity_captured_once_and_reuse_is_distinct) ... ok
+test_failed_preview_does_not_retry_during_the_same_opening (test_carousel.CarouselTests.test_failed_preview_does_not_retry_during_the_same_opening) ... ok
+test_ipc_handles_partial_and_coalesced_frames (test_carousel.CarouselTests.test_ipc_handles_partial_and_coalesced_frames) ... ok
+test_ipc_rejects_corrupt_or_oversized_frames (test_carousel.CarouselTests.test_ipc_rejects_corrupt_or_oversized_frames) ... ok
+test_mode_takeover_prevents_late_modifier_commit (test_carousel.CarouselTests.test_mode_takeover_prevents_late_modifier_commit) ... ok
+test_preview_decodes_exact_pixel_bytes (test_carousel.CarouselTests.test_preview_decodes_exact_pixel_bytes) ... ok
+test_preview_rejects_truncated_and_excessive_sizes (test_carousel.CarouselTests.test_preview_rejects_truncated_and_excessive_sizes) ... ok
+test_retina_preview_keeps_all_native_pixels (test_carousel.CarouselTests.test_retina_preview_keeps_all_native_pixels) ... ok
+test_runtime_is_scoped_to_compositor (test_carousel.CarouselTests.test_runtime_is_scoped_to_compositor) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.629s
+
+OK
+test_actual_modifier_release_still_commits_after_a_held_focus_entry (test_carousel_handoff.CarouselHandoffTests.test_actual_modifier_release_still_commits_after_a_held_focus_entry) ... ok
+test_close_discards_pending_keyboard_ready_callback (test_carousel_handoff.CarouselHandoffTests.test_close_discards_pending_keyboard_ready_callback) ... ok
+test_empty_modifiers_before_keyboard_enter_never_commit (test_carousel_handoff.CarouselHandoffTests.test_empty_modifiers_before_keyboard_enter_never_commit) ... ok
+test_escape_bindings_have_only_synchronous_mode_handoff (test_carousel_handoff.CarouselHandoffTests.test_escape_bindings_have_only_synchronous_mode_handoff) ... ok
+test_focus_loss_after_protocol_sync_cancels_pending_initial_check (test_carousel_handoff.CarouselHandoffTests.test_focus_loss_after_protocol_sync_cancels_pending_initial_check) ... ok
+test_quick_release_before_keyboard_enter_commits_after_protocol_sync (test_carousel_handoff.CarouselHandoffTests.test_quick_release_before_keyboard_enter_commits_after_protocol_sync) ... ok
+test_real_mode_event_closes_popup_without_a_cancel_command (test_carousel_handoff.CarouselHandoffTests.test_real_mode_event_closes_popup_without_a_cancel_command) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.240s
+
+OK
+test_delayed_frame_catches_up_to_elapsed_time (test_carousel_responsiveness.Responsiveness.test_delayed_frame_catches_up_to_elapsed_time) ... ok
+test_first_frame_shows_progress_after_request (test_carousel_responsiveness.Responsiveness.test_first_frame_shows_progress_after_request) ... ok
+test_new_input_preserves_running_animation_clock (test_carousel_responsiveness.Responsiveness.test_new_input_preserves_running_animation_clock) ... ok
+test_restarting_after_idle_preserves_visible_navigation (test_carousel_responsiveness.Responsiveness.test_restarting_after_idle_preserves_visible_navigation) ... ok
+test_reveal_finishes_by_200_ms_and_navigation_by_300_ms (test_carousel_responsiveness.Responsiveness.test_reveal_finishes_by_200_ms_and_navigation_by_300_ms) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.006s
+
+OK
+test_click_uses_the_frontmost_projected_card (test_carousel_view.Layout.test_click_uses_the_frontmost_projected_card) ... ok
+test_empty_carousel_is_safe (test_carousel_view.Layout.test_empty_carousel_is_safe) ... ok
+test_nearby_cards_are_unique_and_wrap_around_the_selection (test_carousel_view.Layout.test_nearby_cards_are_unique_and_wrap_around_the_selection) ... ok
+test_previews_are_letterboxed_without_changing_aspect (test_carousel_view.Layout.test_previews_are_letterboxed_without_changing_aspect) ... ok
+test_selected_card_faces_forward_and_neighbors_turn_inward (test_carousel_view.Layout.test_selected_card_faces_forward_and_neighbors_turn_inward) ... ok
+test_small_candidate_lists_never_duplicate_a_preview (test_carousel_view.Layout.test_small_candidate_lists_never_duplicate_a_preview) ... ok
+test_motion_tracks_elapsed_time_at_different_refresh_rates (test_carousel_view.Motion.test_motion_tracks_elapsed_time_at_different_refresh_rates) ... ok
+test_resting_selection_does_not_overshoot_its_destination (test_carousel_view.Motion.test_resting_selection_does_not_overshoot_its_destination) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.056s
+
+OK
+test_appearance_combines_foot_font_with_validated_active_palette (test_decoration.DecorationTests.test_appearance_combines_foot_font_with_validated_active_palette) ... ok
+test_captions_follow_each_outputs_selected_workspace (test_decoration.DecorationTests.test_captions_follow_each_outputs_selected_workspace) ... ok
+test_decoration_settings_validate_ranges_and_types (test_decoration.DecorationTests.test_decoration_settings_validate_ranges_and_types) ... ok
+test_focus_path_includes_floating_windows_and_nested_splits (test_decoration.DecorationTests.test_focus_path_includes_floating_windows_and_nested_splits) ... ok
+test_fullscreen_square_caption_excludes_floating_windows (test_decoration.DecorationTests.test_fullscreen_square_caption_excludes_floating_windows) ... ok
+test_fullscreen_square_caption_uses_visible_output_and_root_state (test_decoration.DecorationTests.test_fullscreen_square_caption_uses_visible_output_and_root_state) ... ok
+test_geometry_update_reaches_main_loop_before_ready_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_ready_redrawing) ... /usr/lib/python3.14/site-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+/usr/lib/python3.14/site-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+ok
+test_pointer_actions_use_fixed_argv_without_a_shell (test_decoration.DecorationTests.test_pointer_actions_use_fixed_argv_without_a_shell) ... ok
+test_settings_migrate_legacy_position_and_save_through_symlink (test_decoration.DecorationTests.test_settings_migrate_legacy_position_and_save_through_symlink) ... ok
+test_vertical_text_uses_horizontal_separators_and_preserves_accents (test_decoration.DecorationTests.test_vertical_text_uses_horizontal_separators_and_preserves_accents) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.588s
+
+OK
+test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry (test_decoration_handoff.CaptionHandoffTests.test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 9.198s
+
+OK
+test_60_and_120_hz_follow_the_same_trajectory (test_decoration_motion.DecorationMotionTests.test_60_and_120_hz_follow_the_same_trajectory) ... ok
+test_moving_target_trajectories_remain_consistent_at_60_and_120_hz (test_decoration_motion.DecorationMotionTests.test_moving_target_trajectories_remain_consistent_at_60_and_120_hz) ... ok
+test_opacity_uses_a_small_tolerance_and_settles_at_exact_target (test_decoration_motion.DecorationMotionTests.test_opacity_uses_a_small_tolerance_and_settles_at_exact_target) ... ok
+test_rectangle_settles_exactly_and_keeps_positive_dimensions (test_decoration_motion.DecorationMotionTests.test_rectangle_settles_exactly_and_keeps_positive_dimensions) ... ok
+test_retarget_keeps_motion_bounded_in_both_directions (test_decoration_motion.DecorationMotionTests.test_retarget_keeps_motion_bounded_in_both_directions) ... ok
+test_stalled_frame_is_bounded_and_zero_time_preserves_motion (test_decoration_motion.DecorationMotionTests.test_stalled_frame_is_bounded_and_zero_time_preserves_motion) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.011s
+
+OK
+test_fullscreen_context_follows_actual_focused_ancestors_not_siblings (test_decoration_placement.DecorationActionContextTests.test_fullscreen_context_follows_actual_focused_ancestors_not_siblings) ... ok
+test_fullscreen_floating_view_offers_leave_fullscreen (test_decoration_placement.DecorationActionContextTests.test_fullscreen_floating_view_offers_leave_fullscreen) ... ok
+test_normal_floating_view_offers_enter_fullscreen_despite_workspace_marker (test_decoration_placement.DecorationActionContextTests.test_normal_floating_view_offers_enter_fullscreen_despite_workspace_marker) ... ok
+test_attached_caption_tracks_move_and_resize_without_mutating_tree (test_decoration_placement.DecorationPlacementTests.test_attached_caption_tracks_move_and_resize_without_mutating_tree) ... ok
+test_closed_last_ordinary_window_does_not_leave_stale_caption_target (test_decoration_placement.DecorationPlacementTests.test_closed_last_ordinary_window_does_not_leave_stale_caption_target) ... ok
+test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings (test_decoration_placement.DecorationPlacementTests.test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings) ... ok
+test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving (test_decoration_placement.DecorationPlacementTests.test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving) ... ok
+test_dropdown_focus_keeps_last_ordinary_window_context_and_geometry (test_decoration_placement.DecorationPlacementTests.test_dropdown_focus_keeps_last_ordinary_window_context_and_geometry) ... ok
+test_empty_workspace_retains_configured_edge (test_decoration_placement.DecorationPlacementTests.test_empty_workspace_retains_configured_edge) ... ok
+test_floating_fullscreen_keeps_rounding_at_forced_bottom (test_decoration_placement.DecorationPlacementTests.test_floating_fullscreen_keeps_rounding_at_forced_bottom) ... ok
+test_focused_floating_caption_uses_window_geometry (test_decoration_placement.DecorationPlacementTests.test_focused_floating_caption_uses_window_geometry) ... ok
+test_fullscreen_console_does_not_override_retained_floating_caption (test_decoration_placement.DecorationPlacementTests.test_fullscreen_console_does_not_override_retained_floating_caption) ... ok
+test_fullscreen_sibling_overrides_floating_focus_and_right_preference (test_decoration_placement.DecorationPlacementTests.test_fullscreen_sibling_overrides_floating_focus_and_right_preference) ... ok
+test_global_floating_fullscreen_keeps_rounding_on_all_outputs (test_decoration_placement.DecorationPlacementTests.test_global_floating_fullscreen_keeps_rounding_on_all_outputs) ... ok
+test_global_fullscreen_anywhere_forces_all_outputs_to_bottom (test_decoration_placement.DecorationPlacementTests.test_global_fullscreen_anywhere_forces_all_outputs_to_bottom) ... ok
+test_hidden_workspace_fullscreen_does_not_displace_visible_floating_caption (test_decoration_placement.DecorationPlacementTests.test_hidden_workspace_fullscreen_does_not_displace_visible_floating_caption) ... ok
+test_internal_outputs_and_outputs_without_workspace_have_no_caption (test_decoration_placement.DecorationPlacementTests.test_internal_outputs_and_outputs_without_workspace_have_no_caption) ... ok
+test_leaving_fullscreen_restores_floating_attachment_and_right_preference (test_decoration_placement.DecorationPlacementTests.test_leaving_fullscreen_restores_floating_attachment_and_right_preference) ... ok
+test_nested_floating_container_attaches_to_focused_view (test_decoration_placement.DecorationPlacementTests.test_nested_floating_container_attaches_to_focused_view) ... ok
+test_non_container_fullscreen_markers_do_not_override_window_state (test_decoration_placement.DecorationPlacementTests.test_non_container_fullscreen_markers_do_not_override_window_state) ... ok
+test_similarly_named_terminals_remain_caption_targets (test_decoration_placement.DecorationPlacementTests.test_similarly_named_terminals_remain_caption_targets) ... ok
+test_sway_workspace_fullscreen_marker_does_not_block_floating_attachment (test_decoration_placement.DecorationPlacementTests.test_sway_workspace_fullscreen_marker_does_not_block_floating_attachment) ... ok
+test_sway_workspace_fullscreen_marker_keeps_tiled_preferred_edge (test_decoration_placement.DecorationPlacementTests.test_sway_workspace_fullscreen_marker_keeps_tiled_preferred_edge) ... ok
+test_tiled_focus_keeps_workspace_strip_despite_other_floating_window (test_decoration_placement.DecorationPlacementTests.test_tiled_focus_keeps_workspace_strip_despite_other_floating_window) ... ok
+test_workspace_fullscreen_does_not_change_other_output (test_decoration_placement.DecorationPlacementTests.test_workspace_fullscreen_does_not_change_other_output) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.109s
+
+OK
+test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll (test_decoration_watch.DecorationWatchTests.test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll) ... ok
+test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit (test_decoration_watch.DecorationWatchTests.test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit) ... ok
+test_close_interrupts_blocked_tree_read_and_does_not_restart (test_decoration_watch.DecorationWatchTests.test_close_interrupts_blocked_tree_read_and_does_not_restart) ... ok
+test_disconnect_reconnects_and_shutdown_closes_both_connections (test_decoration_watch.DecorationWatchTests.test_disconnect_reconnects_and_shutdown_closes_both_connections) ... ok
+test_oversized_frame_is_rejected_without_reading_its_body (test_decoration_watch.DecorationWatchTests.test_oversized_frame_is_rejected_without_reading_its_body) ... ok
+test_partial_frames_reuse_connection_and_suppress_unchanged_trees (test_decoration_watch.DecorationWatchTests.test_partial_frames_reuse_connection_and_suppress_unchanged_trees) ... ok
+test_request_processing_does_not_add_another_poll_interval_while_moving (test_decoration_watch.DecorationWatchTests.test_request_processing_does_not_add_another_poll_interval_while_moving) ... FAIL
+test_semantic_event_refreshes_before_long_idle_poll (test_decoration_watch.DecorationWatchTests.test_semantic_event_refreshes_before_long_idle_poll) ... ok
+test_stationary_attached_caption_releases_half_the_poll_budget (test_decoration_watch.DecorationWatchTests.test_stationary_attached_caption_releases_half_the_poll_budget) ... ok
+test_title_changes_do_not_keep_the_motion_poll_budget_running (test_decoration_watch.DecorationWatchTests.test_title_changes_do_not_keep_the_motion_poll_budget_running) ... ok
+
+======================================================================
+FAIL: test_request_processing_does_not_add_another_poll_interval_while_moving (test_decoration_watch.DecorationWatchTests.test_request_processing_does_not_add_another_poll_interval_while_moving)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration_watch.py", line 260, in test_request_processing_does_not_add_another_poll_interval_while_moving
+    self.assertLessEqual(mean_interval, 1 / 60)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0.017306855533388444 not less than or equal to 0.016666666666666666
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.555s
+
+FAILED (failures=1)
+test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback (test_deploy.DeployTest.test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_database_backup_manifest_does_not_block_deployment_or_rollback (test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... ok
+test_existing_legacy_overlay_symlink_does_not_create_alias (test_deploy.DeployTest.test_existing_legacy_overlay_symlink_does_not_create_alias) ... ok
+test_explicit_legacy_overlay_config_is_not_replaced_by_alias (test_deploy.DeployTest.test_explicit_legacy_overlay_config_is_not_replaced_by_alias) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_malformed_deployment_headers_block_before_replacing_user_files (test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... ok
+test_only_rejects_missing_and_unsafe_selections_before_target_changes (test_deploy.DeployTest.test_only_rejects_missing_and_unsafe_selections_before_target_changes) ... ok
+test_only_selects_exact_config_pair_and_excludes_unrelated_files (test_deploy.DeployTest.test_only_selects_exact_config_pair_and_excludes_unrelated_files) ... ok
+test_partial_deployment_rolls_back_all_originals (test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_superhold_config_alias_shares_edits_and_restores_legacy_file (test_deploy.DeployTest.test_superhold_config_alias_shares_edits_and_restores_legacy_file) ... ok
+test_portable_profiles_precede_oldbook_with_legacy_fallback (test_deploy.WrapperMigrationTest.test_portable_profiles_precede_oldbook_with_legacy_fallback) ... ok
+test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 3.574s
+
+OK
+test_cancelled_or_invalid_menu_output_never_selects_a_window (test_expo.ExpoTests.test_cancelled_or_invalid_menu_output_never_selects_a_window) ... ok
+test_empty_strata_is_available_on_ten_and_six_is_ordinary (test_expo.ExpoTests.test_empty_strata_is_available_on_ten_and_six_is_ordinary) ... ok
+test_focus_command_uses_numeric_identity_not_untrusted_window_title (test_expo.ExpoTests.test_focus_command_uses_numeric_identity_not_untrusted_window_title) ... ok
+test_overview_keeps_empty_desktops_and_excludes_scratchpad (test_expo.ExpoTests.test_overview_keeps_empty_desktops_and_excludes_scratchpad) ... ok
+test_picker_keeps_duplicate_titles_distinct_and_removes_line_breaks (test_expo.ExpoTests.test_picker_keeps_duplicate_titles_distinct_and_removes_line_breaks) ... ok
+test_uncreated_workspaces_already_have_their_names_in_the_picker (test_expo.ExpoTests.test_uncreated_workspaces_already_have_their_names_in_the_picker) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.218s
+
+OK
+test_all_checks_are_existing_files_and_ids_are_unique (test_feature_contracts.FeatureImpact.test_all_checks_are_existing_files_and_ids_are_unique) ... ok
+test_deleted_profile_still_has_impact_without_an_existing_file (test_feature_contracts.FeatureImpact.test_deleted_profile_still_has_impact_without_an_existing_file) ... ok
+test_installed_guide_source_is_in_scope_across_project_directories (test_feature_contracts.FeatureImpact.test_installed_guide_source_is_in_scope_across_project_directories) ... ok
+test_mode_binding_change_reviews_keys_and_window_switching_together (test_feature_contracts.FeatureImpact.test_mode_binding_change_reviews_keys_and_window_switching_together) ... ok
+test_path_normalization_keeps_hidden_files_and_rejects_escape (test_feature_contracts.FeatureImpact.test_path_normalization_keeps_hidden_files_and_rejects_escape) ... ok
+test_shared_checks_run_once_and_a_failure_fails_the_review (test_feature_contracts.FeatureImpact.test_shared_checks_run_once_and_a_failure_fails_the_review) ... ok
+test_theme_template_change_reviews_brand_lock_and_caption_contracts (test_feature_contracts.FeatureImpact.test_theme_template_change_reviews_brand_lock_and_caption_contracts) ... ok
+test_unknown_feature_is_rejected_instead_of_running_nothing (test_feature_contracts.FeatureImpact.test_unknown_feature_is_rejected_instead_of_running_nothing) ... ok
+test_unmapped_change_is_reported_without_claiming_coverage (test_feature_contracts.FeatureImpact.test_unmapped_change_is_reported_without_claiming_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 7.470s
+
+OK
+test_attention_keeps_flashing_until_no_window_is_pending (test_notification_led.NotificationLedTests.test_attention_keeps_flashing_until_no_window_is_pending) ... ok
+test_caps_led_control_leaves_other_lights_alone (test_notification_led.NotificationLedTests.test_caps_led_control_leaves_other_lights_alone) ... ok
+test_codex_route_ignores_malformed_types_and_handles_equal_ties (test_notification_led.NotificationLedTests.test_codex_route_ignores_malformed_types_and_handles_equal_ties) ... ok
+test_control_subscriber_eof_cannot_silently_acknowledge_a_later_alert (test_notification_led.NotificationLedTests.test_control_subscriber_eof_cannot_silently_acknowledge_a_later_alert) ... ok
+test_exact_windows_clear_individually_on_focus_or_close (test_notification_led.NotificationLedTests.test_exact_windows_clear_individually_on_focus_or_close) ... ok
+test_focused_target_is_already_seen_and_never_becomes_pending (test_notification_led.NotificationLedTests.test_focused_target_is_already_seen_and_never_becomes_pending) ... ok
+test_hotplug_and_external_reset_recover_without_a_new_notification (test_notification_led.NotificationLedTests.test_hotplug_and_external_reset_recover_without_a_new_notification) ... ok
+test_new_alert_does_not_reset_the_existing_flash_phase (test_notification_led.NotificationLedTests.test_new_alert_does_not_reset_the_existing_flash_phase) ... ok
+test_no_candidate_fallback_clears_on_provider_focus_or_control_center (test_notification_led.NotificationLedTests.test_no_candidate_fallback_clears_on_provider_focus_or_control_center) ... ok
+test_notification_center_visibility_only_acknowledges_fallback (test_notification_led.NotificationLedTests.test_notification_center_visibility_only_acknowledges_fallback) ... ok
+test_only_attributed_ai_attention_events_start_flashing (test_notification_led.NotificationLedTests.test_only_attributed_ai_attention_events_start_flashing) ... ok
+test_only_window_lifecycle_and_focus_events_trigger_snapshots (test_notification_led.NotificationLedTests.test_only_window_lifecycle_and_focus_events_trigger_snapshots) ... ok
+test_recent_owned_codex_record_supplies_exact_route (test_notification_led.NotificationLedTests.test_recent_owned_codex_record_supplies_exact_route) ... ok
+test_sigterm_clears_led_and_stops_subscription (test_notification_led.NotificationLedTests.test_sigterm_clears_led_and_stops_subscription) ... ok
+test_singleton_subscription_restart_and_session_exit_clear_led (test_notification_led.NotificationLedTests.test_singleton_subscription_restart_and_session_exit_clear_led) ... ok
+test_unrouted_alert_queues_every_candidate_until_each_is_visited (test_notification_led.NotificationLedTests.test_unrouted_alert_queues_every_candidate_until_each_is_visited) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 20.160s
+
+OK
+test_invalid_theme_cannot_inject_css (test_overlay_theme.OverlayThemeTests.test_invalid_theme_cannot_inject_css) ... ok
+test_qt_and_gtk_consume_the_same_theme (test_overlay_theme.OverlayThemeTests.test_qt_and_gtk_consume_the_same_theme) ... ok
+test_running_qt_overlay_refreshes_after_palette_edit (test_overlay_theme.OverlayThemeTests.test_running_qt_overlay_refreshes_after_palette_edit) ... ok
+test_theme_switch_updates_surface_and_accent_without_restart (test_overlay_theme.OverlayThemeTests.test_theme_switch_updates_surface_and_accent_without_restart) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.495s
+
+OK
+test_concurrent_reload_starts_services_once (test_session.SessionTests.test_concurrent_reload_starts_services_once) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.075s
+
+OK
+test_a_fullscreen_window_hides_the_rest (test_showdesktop.Cards.test_a_fullscreen_window_hides_the_rest) ... ok
+test_a_tabbed_container_contributes_only_its_visible_tab (test_showdesktop.Cards.test_a_tabbed_container_contributes_only_its_visible_tab) ... ok
+test_clips_windows_hanging_off_the_output (test_showdesktop.Cards.test_clips_windows_hanging_off_the_output) ... ok
+test_drops_windows_entirely_off_the_output (test_showdesktop.Cards.test_drops_windows_entirely_off_the_output) ... ok
+test_floating_windows_are_drawn_over_tiled_ones (test_showdesktop.Cards.test_floating_windows_are_drawn_over_tiled_ones) ... ok
+test_skips_sticky_windows_that_survive_the_swap (test_showdesktop.Cards.test_skips_sticky_windows_that_survive_the_swap) ... ok
+test_uses_output_local_coordinates (test_showdesktop.Cards.test_uses_output_local_coordinates) ... ok
+test_a_card_is_never_cropped_past_the_capture (test_showdesktop.Cropping.test_a_card_is_never_cropped_past_the_capture) ... ok
+test_a_full_frame_crop_returns_every_pixel (test_showdesktop.Cropping.test_a_full_frame_crop_returns_every_pixel) ... ok
+test_logical_rectangles_scale_to_capture_pixels (test_showdesktop.Cropping.test_logical_rectangles_scale_to_capture_pixels) ... ok
+test_rows_are_copied_out_tightly_packed (test_showdesktop.Cropping.test_rows_are_copied_out_tightly_packed) ... ok
+test_a_fullscreen_card_still_clears (test_showdesktop.ExitGeometry.test_a_fullscreen_card_still_clears) ... ok
+test_a_wide_band_near_the_bottom_leaves_downward (test_showdesktop.ExitGeometry.test_a_wide_band_near_the_bottom_leaves_downward) ... ok
+test_a_wide_band_near_the_top_leaves_upward (test_showdesktop.ExitGeometry.test_a_wide_band_near_the_top_leaves_upward) ... ok
+test_left_half_leaves_by_the_left_edge (test_showdesktop.ExitGeometry.test_left_half_leaves_by_the_left_edge) ... ok
+test_right_half_leaves_by_the_right_edge (test_showdesktop.ExitGeometry.test_right_half_leaves_by_the_right_edge) ... ok
+test_reads_dimensions_and_pixel_offset (test_showdesktop.ParsePpm.test_reads_dimensions_and_pixel_offset) ... ok
+test_rejects_foreign_format (test_showdesktop.ParsePpm.test_rejects_foreign_format) ... ok
+test_rejects_truncated_pixels (test_showdesktop.ParsePpm.test_rejects_truncated_pixels) ... ok
+test_skips_comments_and_extra_whitespace (test_showdesktop.ParsePpm.test_skips_comments_and_extra_whitespace) ... ok
+test_a_named_workspace_falls_back_to_back_and_forth (test_showdesktop.Switching.test_a_named_workspace_falls_back_to_back_and_forth) ... ok
+test_a_numbered_workspace_is_addressed_by_number (test_showdesktop.Switching.test_a_numbered_workspace_is_addressed_by_number) ... ok
+test_a_later_slot_is_still_at_rest_when_the_first_has_moved (test_showdesktop.Timing.test_a_later_slot_is_still_at_rest_when_the_first_has_moved) ... ok
+test_easing_curves_span_the_unit_interval (test_showdesktop.Timing.test_easing_curves_span_the_unit_interval) ... ok
+test_easing_is_monotonic (test_showdesktop.Timing.test_easing_is_monotonic) ... ok
+test_every_card_has_landed_by_the_end_of_the_sequence (test_showdesktop.Timing.test_every_card_has_landed_by_the_end_of_the_sequence) ... ok
+test_leaving_accelerates_and_arriving_decelerates (test_showdesktop.Timing.test_leaving_accelerates_and_arriving_decelerates) ... ok
+test_restoring_runs_from_clear_to_rest (test_showdesktop.Timing.test_restoring_runs_from_clear_to_rest) ... ok
+test_showing_runs_from_rest_to_clear (test_showdesktop.Timing.test_showing_runs_from_rest_to_clear) ... ok
+test_stagger_is_capped_so_crowded_workspaces_stay_quick (test_showdesktop.Timing.test_stagger_is_capped_so_crowded_workspaces_stay_quick) ... ok
+test_top_left_card_launches_first (test_showdesktop.Timing.test_top_left_card_launches_first) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.029s
+
+OK
+test_closed_hidden_windows_release_state_and_open_carousel (test_showdesktop_lifecycle.Lifecycle.test_closed_hidden_windows_release_state_and_open_carousel) ... ok
+test_cold_return_is_still_restore_after_startup_recovery (test_showdesktop_lifecycle.Lifecycle.test_cold_return_is_still_restore_after_startup_recovery) ... ok
+test_external_focus_cancels_active_pass_before_recovery (test_showdesktop_lifecycle.Lifecycle.test_external_focus_cancels_active_pass_before_recovery) ... ok
+test_external_focus_recovers_an_idle_hidden_session_immediately (test_showdesktop_lifecycle.Lifecycle.test_external_focus_recovers_an_idle_hidden_session_immediately) ... ok
+test_external_same_output_destination_is_retained_without_detour (test_showdesktop_lifecycle.Lifecycle.test_external_same_output_destination_is_retained_without_detour) ... ok
+test_failed_animation_attempts_recovery (test_showdesktop_lifecycle.Lifecycle.test_failed_animation_attempts_recovery) ... ok
+test_failed_recovery_retains_state_for_retry (test_showdesktop_lifecycle.Lifecycle.test_failed_recovery_retains_state_for_retry) ... ok
+test_foreign_session_state_never_moves_this_session (test_showdesktop_lifecycle.Lifecycle.test_foreign_session_state_never_moves_this_session) ... ok
+test_hidden_origin_is_found_by_id_after_rename (test_showdesktop_lifecycle.Lifecycle.test_hidden_origin_is_found_by_id_after_rename) ... ok
+test_lost_capture_restores_real_windows_without_animation (test_showdesktop_lifecycle.Lifecycle.test_lost_capture_restores_real_windows_without_animation) ... ok
+test_missing_origin_returns_to_normal_numbered_workspace (test_showdesktop_lifecycle.Lifecycle.test_missing_origin_returns_to_normal_numbered_workspace) ... ok
+test_other_output_restores_origin_and_retains_requested_custom_destination (test_showdesktop_lifecycle.Lifecycle.test_other_output_restores_origin_and_retains_requested_custom_destination) ... ok
+test_own_hide_and_restore_focus_events_do_not_cancel (test_showdesktop_lifecycle.Lifecycle.test_own_hide_and_restore_focus_events_do_not_cancel) ... ok
+test_pending_origin_focus_before_hide_does_not_cancel (test_showdesktop_lifecycle.Lifecycle.test_pending_origin_focus_before_hide_does_not_cancel) ... ok
+test_restore_without_hidden_state_does_not_open_carousel (test_showdesktop_lifecycle.Lifecycle.test_restore_without_hidden_state_does_not_open_carousel) ... ok
+test_return_gesture_restores_hidden_windows_without_carousel (test_showdesktop_lifecycle.Lifecycle.test_return_gesture_restores_hidden_windows_without_carousel) ... ok
+test_return_gesture_without_hidden_state_opens_carousel_once (test_showdesktop_lifecycle.Lifecycle.test_return_gesture_without_hidden_state_opens_carousel_once) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.560s
+
+OK
+test_healthy_service_resets_backoff_only_after_stability (test_strata.BackoffTests.test_healthy_service_resets_backoff_only_after_stability) ... ok
+test_restart_delays_increase_and_remain_bounded (test_strata.BackoffTests.test_restart_delays_increase_and_remain_bounded) ... ok
+test_busy_launcher_stops_at_deadline_with_a_helpful_error (test_strata.LifecycleTests.test_busy_launcher_stops_at_deadline_with_a_helpful_error) ... ok
+test_dead_compositor_stops_service_even_with_a_stale_socket (test_strata.LifecycleTests.test_dead_compositor_stops_service_even_with_a_stale_socket) ... ok
+test_duplicate_daemon_does_not_create_another_service (test_strata.LifecycleTests.test_duplicate_daemon_does_not_create_another_service) ... ok
+test_explicit_launch_retries_busy_ipc_requests_and_commands (test_strata.LifecycleTests.test_explicit_launch_retries_busy_ipc_requests_and_commands) ... ok
+test_explicit_launch_reuses_daemon_and_focuses_workspace_ten_window (test_strata.LifecycleTests.test_explicit_launch_reuses_daemon_and_focuses_workspace_ten_window) ... ok
+test_fossil_is_always_bound_to_loopback (test_strata.LifecycleTests.test_fossil_is_always_bound_to_loopback) ... ok
+test_initial_refused_connection_exits_without_retrying_a_stale_socket (test_strata.LifecycleTests.test_initial_refused_connection_exits_without_retrying_a_stale_socket) ... ok
+test_peer_disappearing_before_pin_does_not_become_an_endless_retry (test_strata.LifecycleTests.test_peer_disappearing_before_pin_does_not_become_an_endless_retry) ... ok
+test_peer_handle_pins_the_compositors_authenticated_process (test_strata.LifecycleTests.test_peer_handle_pins_the_compositors_authenticated_process) ... ok
+test_port_override_rejects_unusable_values (test_strata.LifecycleTests.test_port_override_rejects_unusable_values) ... ok
+test_private_firefox_profile_and_exact_app_id_are_retained (test_strata.LifecycleTests.test_private_firefox_profile_and_exact_app_id_are_retained) ... ok
+test_session_shutdown_stops_owned_server_and_browser (test_strata.LifecycleTests.test_session_shutdown_stops_owned_server_and_browser) ... ok
+test_transient_ipc_timeout_reconnects_without_replacing_service (test_strata.LifecycleTests.test_transient_ipc_timeout_reconnects_without_replacing_service) ... ok
+test_adopts_and_pins_only_the_dedicated_window_without_focus (test_strata.ServiceTests.test_adopts_and_pins_only_the_dedicated_window_without_focus) ... ok
+test_closed_window_restarts_after_backoff (test_strata.ServiceTests.test_closed_window_restarts_after_backoff) ... ok
+test_crashed_browser_retries_without_a_tight_loop (test_strata.ServiceTests.test_crashed_browser_retries_without_a_tight_loop) ... ok
+test_failed_browser_exec_keeps_service_alive_and_waits_before_retry (test_strata.ServiceTests.test_failed_browser_exec_keeps_service_alive_and_waits_before_retry) ... ok
+test_failed_server_exec_keeps_service_alive_and_waits_before_retry (test_strata.ServiceTests.test_failed_server_exec_keeps_service_alive_and_waits_before_retry) ... ok
+test_scratchpad_is_not_a_way_to_lose_the_review_window (test_strata.ServiceTests.test_scratchpad_is_not_a_way_to_lose_the_review_window) ... ok
+test_server_failure_delays_browser_and_retries_server_once (test_strata.ServiceTests.test_server_failure_delays_browser_and_retries_server_once) ... ok
+test_starting_browser_is_not_duplicated_before_its_window_maps (test_strata.ServiceTests.test_starting_browser_is_not_duplicated_before_its_window_maps) ... ok
+test_stop_waits_and_kills_an_unresponsive_owned_child (test_strata.ServiceTests.test_stop_waits_and_kills_an_unresponsive_owned_child) ... ok
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.863s
+
+OK
+test_cold_or_invalid_commands_leave_recovery_to_full_cli (test_ui_command.WarmHandoffTests.test_cold_or_invalid_commands_leave_recovery_to_full_cli) ... ok
+test_down_swipe_reaches_ready_carousel_without_spawning (test_ui_command.WarmHandoffTests.test_down_swipe_reaches_ready_carousel_without_spawning) ... ok
+test_executables_deliver_gestures_with_minimal_python_startup (test_ui_command.WarmHandoffTests.test_executables_deliver_gestures_with_minimal_python_startup) ... ok
+test_showdesktop_protocol_uses_its_existing_session_socket (test_ui_command.WarmHandoffTests.test_showdesktop_protocol_uses_its_existing_session_socket) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 1.186s
+
+OK
+test_accepts_system_ui_but_not_spoofed_name (test_ui_priority.PriorityTests.test_accepts_system_ui_but_not_spoofed_name) ... ok
+test_accepts_versioned_superhold_daemon_only (test_ui_priority.PriorityTests.test_accepts_versioned_superhold_daemon_only) ... ok
+test_boost_requires_reset_before_negative_nice_and_keeps_realtime (test_ui_priority.PriorityTests.test_boost_requires_reset_before_negative_nice_and_keeps_realtime) ... ok
+test_failed_reset_never_applies_negative_nice (test_ui_priority.PriorityTests.test_failed_reset_never_applies_negative_nice) ... ok
+test_ignores_other_users_and_non_ui_executables (test_ui_priority.PriorityTests.test_ignores_other_users_and_non_ui_executables) ... ok
+test_python_is_limited_to_exact_desktop_daemon_path (test_ui_priority.PriorityTests.test_python_is_limited_to_exact_desktop_daemon_path) ... ok
+test_reads_real_self_scheduler_on_musl (test_ui_priority.PriorityTests.test_reads_real_self_scheduler_on_musl) ... ok
+test_session_scope_uses_exact_socket_environment_or_compositor_pid (test_ui_priority.PriorityTests.test_session_scope_uses_exact_socket_environment_or_compositor_pid) ... ok
+test_session_socket_requires_caller_ownership_and_real_peer_credentials (test_ui_priority.PriorityTests.test_session_socket_requires_caller_ownership_and_real_peer_credentials) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.487s
+
+OK
+test_accepts_explicit_https_and_rejects_unsafe_or_missing_sources (test_video_background.VideoBackgroundTests.test_accepts_explicit_https_and_rejects_unsafe_or_missing_sources) ... ok
+test_picker_passes_an_explicit_selection_through_validation (test_video_background.VideoBackgroundTests.test_picker_passes_an_explicit_selection_through_validation) ... ok
+test_replacement_stops_only_the_previously_recorded_group (test_video_background.VideoBackgroundTests.test_replacement_stops_only_the_previously_recorded_group) ... ok
+test_start_and_stop_use_one_owned_group_and_literal_arguments (test_video_background.VideoBackgroundTests.test_start_and_stop_use_one_owned_group_and_literal_arguments) ... ok
+test_waybar_reload_targets_only_same_executable_and_compositor (test_video_background.VideoBackgroundTests.test_waybar_reload_targets_only_same_executable_and_compositor) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 32.363s
+
+OK
+test_excludes_scratch_and_exact_helper_ids_without_excluding_agent_apps (test_window_switching.CandidateTests.test_excludes_scratch_and_exact_helper_ids_without_excluding_agent_apps) ... ok
+test_includes_all_apps_tiled_floating_named_workspaces_and_outputs (test_window_switching.CandidateTests.test_includes_all_apps_tiled_floating_named_workspaces_and_outputs) ... ok
+test_includes_xwayland_and_uses_its_class_without_inventing_app_id (test_window_switching.CandidateTests.test_includes_xwayland_and_uses_its_class_without_inventing_app_id) ... ok
+test_invalid_ids_and_duplicate_focus_entries_do_not_duplicate_candidates (test_window_switching.CandidateTests.test_invalid_ids_and_duplicate_focus_entries_do_not_duplicate_candidates) ... ok
+test_preserves_raw_unicode_title_and_capture_identifier_for_hidden_views (test_window_switching.CandidateTests.test_preserves_raw_unicode_title_and_capture_identifier_for_hidden_views) ... ok
+test_actual_focus_events_interleave_windows_across_workspace_groups (test_window_switching.FocusHistoryTests.test_actual_focus_events_interleave_windows_across_workspace_groups) ... ok
+test_closed_identity_is_pruned_and_reused_id_starts_as_unseen (test_window_switching.FocusHistoryTests.test_closed_identity_is_pruned_and_reused_id_starts_as_unseen) ... ok
+test_explicit_focus_event_wins_over_a_stale_tree_flag (test_window_switching.FocusHistoryTests.test_explicit_focus_event_wins_over_a_stale_tree_flag) ... ok
+test_only_final_initiating_modifier_release_commits (test_window_switching.GestureInputTests.test_only_final_initiating_modifier_release_commits) ... ok
+test_persistent_gesture_never_accepts_a_modifier_release (test_window_switching.GestureInputTests.test_persistent_gesture_never_accepts_a_modifier_release) ... ok
+test_tab_directions_and_unrelated_keys (test_window_switching.GestureInputTests.test_tab_directions_and_unrelated_keys) ... ok
+test_closed_selection_advances_to_next_survivor_and_wraps (test_window_switching.SwitchStateTests.test_closed_selection_advances_to_next_survivor_and_wraps) ... ok
+test_commit_revalidates_pid_and_app_id_not_just_container_number (test_window_switching.SwitchStateTests.test_commit_revalidates_pid_and_app_id_not_just_container_number) ... ok
+test_empty_and_single_window_gestures_are_safe (test_window_switching.SwitchStateTests.test_empty_and_single_window_gestures_are_safe) ... ok
+test_refresh_preserves_selection_and_order_despite_new_windows_and_tree_reorder (test_window_switching.SwitchStateTests.test_refresh_preserves_selection_and_order_despite_new_windows_and_tree_reorder) ... ok
+test_show_keeps_current_while_first_forward_and_reverse_step_select_neighbors (test_window_switching.SwitchStateTests.test_show_keeps_current_while_first_forward_and_reverse_step_select_neighbors) ... ok
+test_steps_wrap_in_the_frozen_order (test_window_switching.SwitchStateTests.test_steps_wrap_in_the_frozen_order) ... ok
+test_unfocused_desktop_starts_at_mru_or_reverse_end (test_window_switching.SwitchStateTests.test_unfocused_desktop_starts_at_mru_or_reverse_end) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.048s
+
+OK
+Failed feature checks: test_decoration_watch.py

@@ -1,0 +1,41 @@
+{
+  "name": {
+    "de": "1Password: Passwortmanager",
+    "en-US": "1Password: Password Manager",
+    "es-ES": "1Password: Gestor de contrase\u00f1as",
+    "fr": "1Password",
+    "it": "1Password: Gestore Password",
+    "ja": "1Password: \u30d1\u30b9\u30ef\u30fc\u30c9\u4fdd\u7ba1\u5eab",
+    "ru": "1Password: \u041c\u0435\u043d\u0435\u0434\u0436\u0435\u0440 \u043f\u0430\u0440\u043e\u043b\u0435\u0439"
+  },
+  "version": "8.12.32.33",
+  "guid": "{d634138d-c276-4fc8-924b-40a0ea21d284}",
+  "api_url": "https://addons.mozilla.org/api/v5/addons/addon/1password-x-password-manager/",
+  "download_url": "https://addons.mozilla.org/firefox/downloads/file/4951729/1password_x_password_manager-8.12.32.33.xpi",
+  "hash": "sha256:b952fb617027f78b5649ffdd88f58bc07da92d21dc73cc6bb6e28879e5e2e30b",
+  "size": 17988929,
+  "artifact_path": "/home/jack/.local/share/1password-install/1password-firefox-8.12.32.33.xpi",
+  "installed_artifact_path": "/usr/local/share/1password/firefox/1password-firefox-8.12.32.33.xpi",
+  "policy_path": "/etc/firefox/policies/policies.json",
+  "policy_sha256": "71bf4438ceda67bf261f17d0fdae2adbc5b89f5d7330913e8062d9f6a9389db8",
+  "installed_artifact_sha256": "b952fb617027f78b5649ffdd88f58bc07da92d21dc73cc6bb6e28879e5e2e30b",
+  "verified_at": "2026-09-07T12:22:33.352222+00:00",
+  "install_mode": "Extensions.Install without Locked (user can disable or remove)",
+  "fossil_artifact": "sha256/b952fb617027f78b5649ffdd88f58bc07da92d21dc73cc6bb6e28879e5e2e30b/1password-firefox-8.12.32.33.xpi",
+  "validation": {
+    "profile": "/tmp/firefox-1password-check-zwzzp29a",
+    "log": "/home/jack/.local/share/1password-install/firefox-validation.log",
+    "validation_pid": 23623,
+    "addon": {
+      "id": "{d634138d-c276-4fc8-924b-40a0ea21d284}",
+      "version": "8.12.32.33",
+      "active": true,
+      "userDisabled": false,
+      "appDisabled": false,
+      "signedState": 2,
+      "path": "/tmp/firefox-1password-check-zwzzp29a/extensions/{d634138d-c276-4fc8-924b-40a0ea21d284}.xpi",
+      "seen": true
+    },
+    "exit_code": -15
+  }
+}

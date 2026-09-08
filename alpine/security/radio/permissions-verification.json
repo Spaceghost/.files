@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "checked_at_utc": "2026-09-07T13:55:30Z",
+  "scope": "Permission-only preparation; controller and network policy remain staged",
+  "installed_helper": {
+    "path": "/usr/local/libexec/mbp-intel-radio/install",
+    "source": "alpine/security/radio/install",
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o750",
+    "regular": true,
+    "sha256": "43e6edb11577727a140f52783ec2d8bb1bcca1fc4292fa1e0b6e753463f01749",
+    "source_sha256_matches": true
+  },
+  "installed_rule": {
+    "path": "/etc/udev/rules.d/72-privacy-rfkill.rules",
+    "adjacent_copy": "/usr/local/libexec/mbp-intel-radio/72-privacy-rfkill.rules",
+    "source": "alpine/security/radio/root/etc/udev/rules.d/72-privacy-rfkill.rules",
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o644",
+    "regular": true,
+    "sha256": "a556644f696febd184e0d5b3382624d768535f6da44ee58105e8b3f9f52341f7",
+    "source_and_adjacent_sha256_match": true
+  },
+  "private_recovery_journal": {
+    "path": "/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q",
+    "mode": "0o700",
+    "status": "prepared",
+    "record_files_mode_0600": true,
+    "contents_omitted": "Includes private association/address data and original ACL"
+  },
+  "device": {
+    "uid": 0,
+    "gid": 0,
+    "mode": "0o644",
+    "character_device": true,
+    "major": 10,
+    "minor": 242,
+    "acl_absent": true,
+    "uaccess_tag_absent": true,
+    "jack": {
+      "read_access": true,
+      "write_access": false,
+      "write_open_denied": true
+    },
+    "root_write_access": true
+  },
+  "unchanged_state": {
+    "radio_soft_and_hard_match_before": true,
+    "wifi_identity_and_addresses_match_before": true,
+    "routes": {
+      "private_baseline": "/var/lib/mbp_intel/radio-permissions/attempt-0huvvd1q/routes.json",
+      "normalization": "Remove only expires fields; retain all route identities and attributes",
+      "recorded_unchanged": true,
+      "before_after_equal_after_normalization": true,
+      "current_equals_after_normalization": true
+    }
+  },
+  "radio_state_at_check": {
+    "rfkill0": {
+      "type": "bluetooth",
+      "soft": "0",
+      "hard": "0"
+    },
+    "rfkill1": {
+      "type": "wlan",
+      "soft": "0",
+      "hard": "0"
+    }
+  },
+  "panel": {
+    "radio_status_class": "enabled",
+    "firewall_status_class": "running",
+    "status_commands_succeeded": true
+  },
+  "existing_rfkill_handles": [
+    {
+      "pid": 2651,
+      "comm": "wpa_supplicant",
+      "uid": 0,
+      "fd": 9,
+      "access_mode": "read-only"
+    },
+    {
+      "pid": 2651,
+      "comm": "wpa_supplicant",
+      "uid": 0,
+      "fd": 15,
+      "access_mode": "read-only"
+    },
+    {
+      "pid": 32516,
+      "comm": "waybar",
+      "uid": 1000,
+      "fd": 51,
+      "access_mode": "read-only"
+    }
+  ],
+  "controller_targets_present": {
+    "/usr/local/sbin/privacyctl": false,
+    "/etc/privacyctl/profiles": false,
+    "/etc/init.d/radio-off": false,
+    "/etc/init.d/privacyctl-supervisor": false,
+    "/etc/elogind/system-sleep/95-radio-off": false
+  },
+  "dhcp": {
+    "existing_daemon_pid": 2746,
+    "existing_daemon_left_running": true,
+    "staged_one_shot_client_renews_leases": false,
+    "single_owner_and_renewal_integration_pending": true
+  },
+  "limits": {
+    "existing_unrestricted_wheel_nopass_authority": true,
+    "existing_handles_not_revoked_by_permission_changes": true,
+    "no_existing_writable_handle_observed": true,
+    "seat_change_and_reboot_persistence_unverified": true,
+    "physical_radio_silence_not_established": true,
+    "controller_or_service_activation_performed": false
+  },
+  "verification_performed_radio_scan_or_write": false,
+  "secrets_or_network_identifiers_in_artifact": false
+}

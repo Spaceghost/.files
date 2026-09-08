@@ -1,0 +1,554 @@
+{
+  "status": "passed",
+  "module": "/tmp/waybar-workspaces-r5-final3.so",
+  "module_sha256": "62c099bb1f44f4b58e85fb575d6705f25c645a07f340730f3ff1db5c0ddc0a7a",
+  "isolation": "private D-Bus, HOME, XDG paths, headless Sway",
+  "host_changes": 0,
+  "states": [
+    {
+      "theme": "spaceghost",
+      "stage": "active-1",
+      "focused": "1: GHOST \u00b7 Foot",
+      "labels": [
+        {
+          "focused": true,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 8,
+              "weight": 700,
+              "color": "#ffffe9e9ffff"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#ce59b843d630"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0a08a8aafaf"
+            }
+          ],
+          "text": "2: ORBIT \u00b7 Music"
+        },
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0a08a8aafaf"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "4066bcdbc653a7731f53bdd148d9e132141dc40becc817a56d0091d56efd9028",
+      "screenshot": "spaceghost/active-1.png",
+      "screenshot_sha256": "1210ba6dad9c4a55803a34b5d88d859368e1fb21f774de37c45ceacc15eb882b"
+    },
+    {
+      "theme": "spaceghost",
+      "stage": "active-2",
+      "focused": "2: ORBIT \u00b7 Music",
+      "labels": [
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#ffaee998ffba"
+            },
+            {
+              "start": 1,
+              "end": 8,
+              "weight": 400,
+              "color": "#ffaee998ffba"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#ffaee998ffba"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": true,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 8,
+              "weight": 700,
+              "color": "#ffffe9e9ffff"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0f18adbaff4"
+            }
+          ],
+          "text": "2: ORBIT \u00b7 Music"
+        },
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0a08a8aafaf"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "4066bcdbc653a7731f53bdd148d9e132141dc40becc817a56d0091d56efd9028",
+      "screenshot": "spaceghost/active-2.png",
+      "screenshot_sha256": "2d79c27631a6fc0a06a8ac913c609a2154aaa2c6ab7ec2405a3083a8eda98349"
+    },
+    {
+      "theme": "spaceghost",
+      "stage": "literal-rename",
+      "focused": "2: \u00d3RBIT <moon> \u00b7 Music & Radio",
+      "labels": [
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0a08a8aafaf"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": true,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 16,
+              "weight": 700,
+              "color": "#ffffe9e9ffff"
+            },
+            {
+              "start": 16,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a1dd8bc7b0ba"
+            }
+          ],
+          "text": "2: \u00d3RBIT <moon> \u00b7 Music & Radio"
+        },
+        {
+          "focused": false,
+          "active": "#ffffe9e9ffff",
+          "secondary": "#a0a08a8aafaf",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a0a08a8aafaf"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a0a08a8aafaf"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "4066bcdbc653a7731f53bdd148d9e132141dc40becc817a56d0091d56efd9028",
+      "screenshot": "spaceghost/literal-rename.png",
+      "screenshot_sha256": "18cb39a8c2490d1aa78fff78830dbd6a9664d4b1610c540ffb84add9e5623750"
+    },
+    {
+      "theme": "gruvbox-dark",
+      "stage": "active-1",
+      "focused": "1: GHOST \u00b7 Foot",
+      "labels": [
+        {
+          "focused": true,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 8,
+              "weight": 700,
+              "color": "#fbfbf1f1c7c7"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8e899dd84b7"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "2: ORBIT \u00b7 Music"
+        },
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "b8527b0b8fa44b5925e2094c4b3573296e2c18043a93a0daf5f3ab507893dc9e",
+      "screenshot": "gruvbox-dark/active-1.png",
+      "screenshot_sha256": "dada4309cadb3df3f4a110b26089fa3ee23b7ad1118a9a30551ff1112b93c64e"
+    },
+    {
+      "theme": "gruvbox-dark",
+      "stage": "active-2",
+      "focused": "2: ORBIT \u00b7 Music",
+      "labels": [
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#f6b6ec5ac386"
+            },
+            {
+              "start": 1,
+              "end": 8,
+              "weight": 400,
+              "color": "#f6b6ec5ac386"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#f6b6ec5ac386"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": true,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 8,
+              "weight": 700,
+              "color": "#fbfbf1f1c7c7"
+            },
+            {
+              "start": 8,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#aded9f3088c5"
+            }
+          ],
+          "text": "2: ORBIT \u00b7 Music"
+        },
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "b8527b0b8fa44b5925e2094c4b3573296e2c18043a93a0daf5f3ab507893dc9e",
+      "screenshot": "gruvbox-dark/active-2.png",
+      "screenshot_sha256": "20cf9b077689b06007ecb9682837012640a59d1926d71503ff6c1114a4877169"
+    },
+    {
+      "theme": "gruvbox-dark",
+      "stage": "literal-rename",
+      "focused": "2: \u00d3RBIT <moon> \u00b7 Music & Radio",
+      "labels": [
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "1: GHOST \u00b7 Foot"
+        },
+        {
+          "focused": true,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 16,
+              "weight": 700,
+              "color": "#fbfbf1f1c7c7"
+            },
+            {
+              "start": 16,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "2: \u00d3RBIT <moon> \u00b7 Music & Radio"
+        },
+        {
+          "focused": false,
+          "active": "#fbfbf1f1c7c7",
+          "secondary": "#a8a899998484",
+          "ranges": [
+            {
+              "start": 0,
+              "end": 1,
+              "weight": 700,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 1,
+              "end": 2147483647,
+              "weight": 400,
+              "color": "#a8a899998484"
+            },
+            {
+              "start": 2147483647,
+              "end": 2147483647,
+              "weight": 500,
+              "color": "#a8a899998484"
+            }
+          ],
+          "text": "3: LAB \u00b7 Editor"
+        }
+      ],
+      "style_sha256": "b8527b0b8fa44b5925e2094c4b3573296e2c18043a93a0daf5f3ab507893dc9e",
+      "screenshot": "gruvbox-dark/literal-rename.png",
+      "screenshot_sha256": "e094ee76ef5d6ab71bf1cb42d90c667ec1f2afd97865fc7142208786b8eff16a"
+    }
+  ],
+  "verifier": {
+    "path": "alpine/packages/waybar-art/verify-workspaces-headless",
+    "sha256": "a4ce9426aba8897f379a56c5d6b6849486c63130f7276c84f8d14cb8a99d1f94"
+  },
+  "gtk_critical_errors": 0
+}

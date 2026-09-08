@@ -1,0 +1,11 @@
+[Unit]
+Description=MBP Intel shortcut overlay
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/mbp-intel-shortcuts daemon
+Restart=on-failure
+RestartSec=2
+

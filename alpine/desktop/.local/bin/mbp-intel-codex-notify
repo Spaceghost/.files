@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Turn supported Codex lifecycle events into content-free desktop notices."""
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import subprocess
+import sys
+import time
+
+
+EVENT_TTL = 300
+PANE_PATTERN = re.compile(r'%[0-9]+')
+
+
+def load_event(mode, arguments):
+    try:
+        if mode == '--notify' and len(arguments) == 1:
+            payload = json.loads(arguments[0])
+        elif mode == '--hook' and not arguments:
+            payload = json.load(sys.stdin)
+        else:
+            return None
+    except (json.JSONDecodeError, UnicodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def event_details(mode, payload):
+    if mode == '--notify' and payload.get('type') == 'agent-turn-complete':
+        session_id = payload.get('thread-id')
+        return ('turn-complete', session_id, 'normal', 'Codex • Done')
+    if mode == '--hook' and payload.get('hook_event_name') == 'PermissionRequest':
+        session_id = payload.get('session_id')
+        return ('approval-requested', session_id, 'critical',
+                'Codex • Needs attention')
+    if mode == '--hook' and payload.get('hook_event_name') == 'UserPromptSubmit':
+        return ('clear', payload.get('session_id'), None, None)
+    return None
+
+
+def private_directory(path):
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    info = path.stat(follow_symlinks=False)
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError(f'unsafe runtime directory: {path}')
+
+
+def event_directory():
+    runtime_name = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime_name:
+        raise RuntimeError('XDG_RUNTIME_DIR is unset')
+    runtime = Path(runtime_name)
+    info = runtime.stat(follow_symlinks=False)
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError('XDG_RUNTIME_DIR must be an owned private directory')
+    mbp_intel = runtime / 'mbp-intel'
+    private_directory(mbp_intel)
+    events = mbp_intel / 'codex-events'
+    private_directory(events)
+    return events
+
+
+def session_path(root, session_id):
+    if not isinstance(session_id, str) or not session_id:
+        return None
+    digest = hashlib.sha256(session_id.encode()).hexdigest()
+    return root / f'{digest}.json'
+
+
+def tty_path(device):
+    """Map this Linux process's /proc stat tty_nr to a terminal path."""
+    if type(device) is not int or device <= 0:
+        return None
+    try:
+        major = os.major(device)
+        minor = os.minor(device)
+    except (OverflowError, ValueError):
+        return None
+    if 136 <= major <= 143:
+        return f'/dev/pts/{(major - 136) * 256 + minor}'
+    if major == 4 and 0 < minor < 64:
+        return f'/dev/tty{minor}'
+    return None
+
+
+def current_tty():
+    for descriptor in (0, 1, 2):
+        try:
+            name = os.ttyname(descriptor)
+            if re.fullmatch(r'/dev/(?:pts/[0-9]+|tty[0-9]+)', name):
+                return name
+        except OSError:
+            pass
+    try:
+        process_stat = Path('/proc/self/stat').read_text()
+        close = process_stat.rfind(')')
+        fields = process_stat[close + 1:].split()
+        if close >= 0 and len(fields) >= 5:
+            return tty_path(int(fields[4]))
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def remove_expired(root, now):
+    for path in root.glob('*.json'):
+        try:
+            document = json.loads(path.read_text())
+            if type(document.get('valid_until')) is int and document['valid_until'] < now:
+                path.unlink()
+        except (OSError, ValueError, AttributeError):
+            continue
+
+
+def write_event(root, session_id, event, now):
+    target = session_path(root, session_id)
+    if target is None:
+        return
+    pane = os.environ.get('TMUX_PANE')
+    if not isinstance(pane, str) or PANE_PATTERN.fullmatch(pane) is None:
+        pane = None
+    document = {
+        'version': 1,
+        'event': event,
+        'observed_at': now,
+        'valid_until': now + EVENT_TTL,
+        'tmux_pane': pane,
+        'tty': current_tty(),
+    }
+    temporary = target.with_name(f'.{target.name}.{os.getpid()}.{time.time_ns()}.tmp')
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            json.dump(document, stream, separators=(',', ':'))
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def update_routing_record(event, session_id):
+    try:
+        root = event_directory()
+        now = int(time.time())
+        remove_expired(root, now)
+        if event == 'clear':
+            target = session_path(root, session_id)
+            if target is not None:
+                target.unlink(missing_ok=True)
+        else:
+            write_event(root, session_id, event, now)
+    except (OSError, RuntimeError, UnicodeError, ValueError) as error:
+        print(f'mbp-intel-codex-notify: routing record unavailable: {error}', file=sys.stderr)
+
+
+def send_notification(urgency, title):
+    try:
+        subprocess.run(
+            ['notify-send', '--app-name=Codex', f'--urgency={urgency}', title],
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, timeout=2, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+def main():
+    if len(sys.argv) < 2:
+        return
+    mode = sys.argv[1]
+    payload = load_event(mode, sys.argv[2:])
+    if payload is None:
+        return
+    details = event_details(mode, payload)
+    if details is None:
+        return
+    event, session_id, urgency, title = details
+    update_routing_record(event, session_id)
+    if title is not None:
+        send_notification(urgency, title)
+
+
+if __name__ == '__main__':
+    main()

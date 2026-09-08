@@ -1,0 +1,37 @@
+{
+  "old_pid": 3740,
+  "new_pid": 4752,
+  "helper_sha256": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+  "checks": {
+    "one_live_daemon": true,
+    "one_caption_per_active_output": true,
+    "appearance_settings_preserved": true
+  },
+  "settings": {
+    "position": "bottom",
+    "opacity": 0.67,
+    "corner_radius": 7
+  },
+  "captions": {
+    "eDP-1": [
+      {
+        "namespace": "oldbook-decoration",
+        "layer": "top",
+        "extent": {
+          "width": 1100,
+          "height": 28,
+          "x": 170,
+          "y": 799
+        },
+        "effects": {
+          "blur": false,
+          "blur_xray": false,
+          "blur_ignore_transparent": false,
+          "shadows": false,
+          "corner_radius": 0
+        }
+      }
+    ]
+  },
+  "activation_log": "/home/jack/.local/state/oldbook/decoration/mode-activation.log"
+}

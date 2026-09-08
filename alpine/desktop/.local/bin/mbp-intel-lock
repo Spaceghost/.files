@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""Wait for compositor lock readiness, serialized across all session callers."""
+import fcntl
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import stat
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/mbp_intel'))
+from overlay_theme import THEMES, read_palette
+
+
+def private_directory(path):
+    path.mkdir(mode=0o700, exist_ok=True)
+    info = path.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError(f'Lock runtime must be an owned private directory: {path}')
+
+
+def process_identity(pid):
+    """PID reuse and zombies cannot authenticate an old readiness record."""
+    try:
+        process = Path('/proc') / str(int(pid))
+        if process.stat().st_uid != os.getuid():
+            return None
+        fields = (process / 'stat').read_text().rsplit(')', 1)[1].split()
+        if fields[0] in ('Z', 'X'):
+            return None
+        return {'pid': int(pid), 'start_time': fields[19],
+                'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip()}
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def compositor_identity(runtime):
+    display = Path(os.environ.get('WAYLAND_DISPLAY', 'wayland-0'))
+    path = display if display.is_absolute() else runtime / display
+    info = path.lstat()
+    if path.parent != runtime or info.st_uid != os.getuid() or not stat.S_ISSOCK(info.st_mode):
+        raise RuntimeError('Lock requires an owned Wayland socket in the session runtime')
+    return {'socket': str(path), 'device': info.st_dev, 'inode': info.st_ino,
+            'created_ns': info.st_ctime_ns}
+
+
+def ready_process(record, compositor):
+    try:
+        if record.is_symlink():
+            return False
+        saved = json.loads(record.read_text())
+        return (saved['compositor'] == compositor
+                and saved['process'] == process_identity(saved['process']['pid']))
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def lock_arguments(ready_fd):
+    wallpaper = Path.home() / '.local/share/mbp-intel/current-wallpaper.png'
+    if not wallpaper.is_file():
+        wallpaper = Path.home() / '.local/share/mbp-intel/wallpaper.png'
+    palette = read_palette(THEMES)
+
+    def color(name, alpha='ff'):
+        return palette[name].lstrip('#') + alpha
+
+    args = ['-R', str(ready_fd), '--indicator-idle-visible', '--indicator-radius', '105',
+            '--indicator-thickness', '9', '--inside-color', color('background', 'ee'),
+            '--inside-clear-color', color('surface', 'ee'),
+            '--inside-caps-lock-color', color('surface', 'ee'),
+            '--inside-ver-color', color('surface', 'ee'),
+            '--inside-wrong-color', color('surface', 'ee'),
+            '--ring-color', color('accent'), '--ring-clear-color', color('border'),
+            '--ring-caps-lock-color', color('accent'), '--ring-ver-color', color('muted'),
+            '--ring-wrong-color', color('foreground'), '--line-color', '00000000',
+            '--line-clear-color', '00000000', '--line-caps-lock-color', '00000000',
+            '--line-ver-color', '00000000', '--line-wrong-color', '00000000',
+            '--key-hl-color', color('accent'), '--bs-hl-color', color('foreground'),
+            '--caps-lock-key-hl-color', color('accent'),
+            '--caps-lock-bs-hl-color', color('muted'),
+            '--text-color', color('foreground'), '--text-clear-color', color('foreground'),
+            '--text-caps-lock-color', color('accent'), '--text-ver-color', color('muted'),
+            '--text-wrong-color', color('foreground'),
+            '--layout-bg-color', color('background', 'ee'),
+            '--layout-border-color', color('accent'), '--layout-text-color', color('foreground'),
+            '--separator-color', '00000000', '--font', 'JetBrainsMono Nerd Font',
+            '--font-size', '18']
+    return args + (['-i', str(wallpaper), '-s', 'fill'] if wallpaper.is_file()
+                   else ['-c', palette['background'].lstrip('#')])
+
+
+def acquire_lock(runtime, command='swaylockd', timeout=10):
+    private_directory(runtime)
+    directory = runtime / 'mbp-intel-screen-lock'
+    private_directory(directory)
+    compositor = compositor_identity(runtime)
+    deadline = time.monotonic() + timeout
+    descriptor = os.open(directory / 'acquisition.lock',
+                         os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+    with os.fdopen(descriptor, 'r+') as guard:
+        while True:
+            try:
+                fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                break
+            except BlockingIOError:
+                if time.monotonic() >= deadline:
+                    raise RuntimeError('Another lock request did not finish readiness in time')
+                time.sleep(0.05)
+        record = directory / 'ready.json'
+        if ready_process(record, compositor):
+            return
+        record.unlink(missing_ok=True)
+        read_fd, write_fd = os.pipe()
+        process = None
+        try:
+            # Keep swaylockd in the foreground so its supervised process lifetime
+            # is identifiable. A process name alone never proves a locked surface.
+            process = subprocess.Popen([command] + lock_arguments(write_fd),
+                                       pass_fds=(write_fd,), start_new_session=True,
+                                       stdin=subprocess.DEVNULL,
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            os.close(write_fd)
+            write_fd = -1
+            while time.monotonic() < deadline:
+                if process.poll() is not None:
+                    raise RuntimeError('swaylockd exited before lock readiness')
+                readable, _, _ = select.select([read_fd], [], [], min(0.1, max(0, deadline - time.monotonic())))
+                if readable:
+                    if not os.read(read_fd, 1):
+                        raise RuntimeError('swaylockd closed its readiness pipe without locking')
+                    identity = process_identity(process.pid)
+                    if identity is None or process.poll() is not None:
+                        raise RuntimeError('Lock process disappeared during readiness')
+                    if compositor_identity(runtime) != compositor:
+                        raise RuntimeError('Compositor changed during lock acquisition')
+                    temporary = directory / f'ready.{os.getpid()}.tmp'
+                    fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+                    with os.fdopen(fd, 'w') as stream:
+                        json.dump({'process': identity, 'compositor': compositor}, stream)
+                        stream.write('\n')
+                    temporary.replace(record)
+                    return
+            raise RuntimeError('swaylockd did not report readiness within the deadline')
+        except BaseException:
+            if process is not None and process.poll() is None:
+                # swaylockd blocks signals and can restart a terminated child.
+                # Kill only this failed launch's separate process group.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                process.wait(timeout=2)
+            raise
+        finally:
+            os.close(read_fd)
+            if write_fd >= 0:
+                os.close(write_fd)
+
+
+def main():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        raise RuntimeError('XDG_RUNTIME_DIR is required for safe session locking')
+    acquire_lock(Path(runtime))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+        print(f'mbp-intel-lock: {error}', file=sys.stderr)
+        sys.exit(1)

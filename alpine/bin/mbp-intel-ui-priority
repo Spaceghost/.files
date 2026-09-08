@@ -1,0 +1,216 @@
+#!/usr/bin/python3 -I
+"""Favor the caller's desktop UI once; child applications retain normal priority.
+
+Installed as a root-owned file by install-desktop-system. Invoke through doas
+after session/daemon startup, never in a gesture or animation callback.
+"""
+import argparse
+import ctypes
+import errno
+import json
+import os
+from pathlib import Path
+import pwd
+import re
+import socket
+import stat
+import struct
+import sys
+
+
+NATIVE = {'/usr/bin/' + name: (-10 if name in ('sway', 'swayfx') else -5)
+          for name in ('sway', 'swayfx', 'waybar', 'swaync', 'superhold')}
+DAEMONS = {'mbp-intel-carousel', 'mbp-intel-showdesktop', 'mbp-intel-decoration'}
+
+
+def session_owner(session, uid):
+    path = Path(session)
+    metadata = path.lstat()
+    if not path.is_absolute() or metadata.st_uid != uid or not stat.S_ISSOCK(metadata.st_mode):
+        raise ValueError('Session must be an absolute caller-owned Unix socket')
+    with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
+        connection.settimeout(2)
+        connection.connect(session)
+        pid, peer_uid, _gid = struct.unpack('3i', connection.getsockopt(
+            socket.SOL_SOCKET, socket.SO_PEERCRED, struct.calcsize('3i')))
+    if peer_uid != uid or pid <= 1:
+        raise ValueError('Compositor socket peer must belong to the desktop caller')
+    return pid
+
+
+def in_session(pid, session, compositor_pid, proc=Path('/proc')):
+    if pid == compositor_pid:
+        return True
+    try:
+        return os.fsencode('SWAYSOCK=' + session) in (proc / str(pid) / 'environ').read_bytes().split(b'\0')
+    except OSError:
+        return False
+
+
+def status_fields(path):
+    return dict(line.split(':', 1) for line in (path / 'status').read_text().splitlines()
+                if ':' in line)
+
+
+def owned(path, uid, tgid):
+    fields = status_fields(path)
+    return (list(map(int, fields['Uid'].split())) == [uid] * 4
+            and int(fields['Tgid']) == tgid)
+
+
+def start_time(path):
+    # comm may contain spaces or parentheses; field 22 follows its last ')'.
+    return (path / 'stat').read_text().rsplit(')', 1)[1].split()[19]
+
+
+def identify(pid, uid, home, proc=Path('/proc')):
+    """Return safe identifying data only; do not retain or print command lines."""
+    path = proc / str(pid)
+    try:
+        if not owned(path, uid, pid):
+            return None
+        executable = os.readlink(path / 'exe').removesuffix(' (deleted)')
+        binary = (path / 'exe').stat()
+        if binary.st_uid != 0 or binary.st_mode & 0o022 or not stat.S_ISREG(binary.st_mode):
+            return None
+        if executable in NATIVE:
+            return {'name': Path(executable).name, 'nice': NATIVE[executable],
+                    'start': start_time(path)}
+        if not re.fullmatch(r'/usr/bin/python3(?:\.\d+)?', executable):
+            return None
+        args = (path / 'cmdline').read_bytes().rstrip(b'\0').split(b'\0')
+        if args[1:2] == [b'-S']:
+            del args[1]
+        if len(args) != 3 or args[2] != b'daemon':
+            return None
+        script = Path(os.fsdecode(args[1]))
+        if not script.is_absolute():
+            return None
+        name = script.name
+        source = script.resolve(strict=True)
+        checkout = home / '.files/alpine/desktop/.local/bin'
+        allowed = (name in DAEMONS
+                   and script in (home / '.local/bin' / name, checkout / name)
+                   and source == (checkout / name).resolve(strict=True)
+                   and source.stat().st_uid == uid)
+        if name == 'superhold':
+            versions = home / '.local/share/superhold/versions'
+            relative = source.relative_to(versions) if source.is_relative_to(versions) else None
+            allowed = ((script == Path('/usr/bin/superhold') and source.stat().st_uid == 0)
+                       or (relative is not None and len(relative.parts) == 3
+                           and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', relative.parts[0])
+                           and relative.parts[1:] == ('bin', 'superhold')
+                           and script == source and source.stat().st_uid == uid))
+        if allowed:
+            return {'name': name, 'nice': -5, 'start': start_time(path)}
+    except (OSError, ValueError, KeyError, IndexError):
+        pass
+    return None
+
+
+def linux_scheduler_call(number, *arguments):
+    # musl deliberately stubs the process-wide POSIX API with ENOSYS. Linux's
+    # per-thread ABI is what this helper needs (also used by util-linux chrt).
+    # This laptop is x86_64: values are from asm/unistd_64.h. Refuse to guess on
+    # another ABI; libc remains the first choice everywhere.
+    if os.uname().machine != 'x86_64':
+        raise OSError(errno.ENOSYS, 'Scheduling syscall fallback requires x86_64')
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.syscall.restype = ctypes.c_long
+    result = libc.syscall(ctypes.c_long(number), *arguments)
+    if result == -1:
+        error = ctypes.get_errno()
+        raise OSError(error, os.strerror(error))
+    return result
+
+
+def scheduler_policy(tid):
+    try:
+        return os.sched_getscheduler(tid)
+    except OSError as error:
+        if error.errno != errno.ENOSYS:
+            raise
+        return linux_scheduler_call(145, ctypes.c_int(tid))
+
+
+def arm_child_reset(tid):
+    policy = os.SCHED_OTHER | os.SCHED_RESET_ON_FORK
+    try:
+        os.sched_setscheduler(tid, policy, os.sched_param(0))
+    except OSError as error:
+        if error.errno != errno.ENOSYS:
+            raise
+        parameter = ctypes.c_int(0)
+        linux_scheduler_call(144, ctypes.c_int(tid), ctypes.c_int(policy),
+                             ctypes.byref(parameter))
+
+
+def boost_thread(tid, nice):
+    """Arm child reset before boosting; preserve realtime and explicit policies."""
+    current = scheduler_policy(tid)
+    if current & ~os.SCHED_RESET_ON_FORK != os.SCHED_OTHER:
+        return False
+    arm_child_reset(tid)
+    os.setpriority(os.PRIO_PROCESS, tid, nice)
+    return True
+
+
+def apply(pid, uid, home, check=False, session=None, compositor_pid=None):
+    identity = identify(pid, uid, home)
+    if identity is None or (session is not None and not in_session(pid, session, compositor_pid)):
+        return None
+    result = {'pid': pid, 'name': identity['name'], 'target_nice': identity['nice'],
+              'threads': []}
+    try:
+        tasks = list((Path('/proc') / str(pid) / 'task').iterdir())
+    except OSError:
+        return None
+    for task in tasks:
+        try:
+            tid = int(task.name)
+            if not owned(task, uid, pid) or identify(pid, uid, home) != identity:
+                continue
+            changed = boost_thread(tid, identity['nice']) if not check else False
+            result['threads'].append({'tid': tid, 'nice': os.getpriority(os.PRIO_PROCESS, tid),
+                                      'policy': scheduler_policy(tid), 'applied': changed})
+        except ProcessLookupError:
+            continue
+        except OSError as error:
+            result['threads'].append({'tid': tid, 'error': error.errno})
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true', help='report only; leave scheduling untouched')
+    parser.add_argument('--session', help='limit all targets to this caller-owned Sway IPC socket')
+    parser.add_argument('pids', nargs='*', type=int, help='optional desktop process IDs')
+    args = parser.parse_args()
+    if not args.pids and not args.session:
+        parser.error('A session socket is required when scanning desktop processes')
+    if any(pid <= 1 for pid in args.pids):
+        parser.error('Process IDs must be greater than one')
+    try:
+        caller = pwd.getpwnam(os.environ['DOAS_USER'])
+    except (KeyError, ValueError):
+        parser.error('Run through doas as a desktop user')
+    if os.geteuid() != 0 or caller.pw_uid == 0:
+        parser.error('Run through doas as a non-root desktop user')
+    home = Path(caller.pw_dir)
+    if not home.is_absolute() or not home.is_dir():
+        parser.error('The desktop user must have an existing absolute HOME')
+    try:
+        compositor_pid = session_owner(args.session, caller.pw_uid) if args.session else None
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    pids = args.pids or sorted(int(path.name) for path in Path('/proc').iterdir()
+                               if path.name.isdecimal())
+    results = [result for pid in pids
+               if (result := apply(pid, caller.pw_uid, home, args.check,
+                                   args.session, compositor_pid)) is not None]
+    print(json.dumps({'check': args.check, 'uid': caller.pw_uid, 'processes': results}, indent=2))
+    return int(any('error' in thread for result in results for thread in result['threads']))
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,35 @@
+test_strips_footnote_markup_that_both_sources_ship (test_scripture_library.CleanTests.test_strips_footnote_markup_that_both_sources_ship) ... ok
+test_unescapes_entities_and_flattens_whitespace (test_scripture_library.CleanTests.test_unescapes_entities_and_flattens_whitespace) ... ok
+test_getbible_rejects_a_document_without_books (test_scripture_library.ConversionTests.test_getbible_rejects_a_document_without_books) ... ok
+test_getbible_rows_drop_empty_verses (test_scripture_library.ConversionTests.test_getbible_rows_drop_empty_verses) ... ok
+test_sefaria_joins_a_nested_segment (test_scripture_library.ConversionTests.test_sefaria_joins_a_nested_segment) ... ok
+test_sefaria_rejects_a_response_with_no_version (test_scripture_library.ConversionTests.test_sefaria_rejects_a_response_with_no_version) ... ok
+test_sefaria_rows_number_chapters_and_verses_in_order (test_scripture_library.ConversionTests.test_sefaria_rows_number_chapters_and_verses_in_order) ... ok
+test_live_manifest_is_valid_and_states_every_licence (test_scripture_library.ManifestTests.test_live_manifest_is_valid_and_states_every_licence) ... ok
+test_manifest_excludes_translations_that_cannot_be_redistributed (test_scripture_library.ManifestTests.test_manifest_excludes_translations_that_cannot_be_redistributed) ... ok
+test_rejects_a_source_it_cannot_fetch (test_scripture_library.ManifestTests.test_rejects_a_source_it_cannot_fetch) ... ok
+test_a_missing_translation_says_how_to_install_it (test_scripture_library.ReaderTests.test_a_missing_translation_says_how_to_install_it) ... ok
+test_an_unsafe_identifier_is_refused (test_scripture_library.ReaderTests.test_an_unsafe_identifier_is_refused) ... ok
+test_available_translations_always_offer_the_bundled_text (test_scripture_library.ReaderTests.test_available_translations_always_offer_the_bundled_text) ... ok
+test_bundled_text_resolves_without_an_install (test_scripture_library.ReaderTests.test_bundled_text_resolves_without_an_install) ... ok
+test_a_disputed_attribution_says_so (test_scripture_library.WitnessTests.test_a_disputed_attribution_says_so) ... ok
+test_every_quote_is_complete_and_attributed (test_scripture_library.WitnessTests.test_every_quote_is_complete_and_attributed) ... ok
+test_rejects_a_quote_missing_its_source (test_scripture_library.WitnessTests.test_rejects_a_quote_missing_its_source) ... ok
+test_the_daily_quote_walks_the_whole_set (test_scripture_library.WitnessTests.test_the_daily_quote_walks_the_whole_set) ... ok
+test_installed_texts_needs_both_the_data_and_its_record (test_scripture_library.WriteTests.test_installed_texts_needs_both_the_data_and_its_record) ... ok
+test_refuses_a_record_containing_a_tab (test_scripture_library.WriteTests.test_refuses_a_record_containing_a_tab) ... ok
+test_refuses_to_write_nothing (test_scripture_library.WriteTests.test_refuses_to_write_nothing) ... ok
+test_the_same_rows_always_produce_the_same_bytes (test_scripture_library.WriteTests.test_the_same_rows_always_produce_the_same_bytes) ... ok
+test_written_text_round_trips_through_the_reader (test_scripture_library.WriteTests.test_written_text_round_trips_through_the_reader) ... ok
+test_talmud_daf_reference_and_optional_collection_prefix (test_scripture_selection.LibraryTests.test_talmud_daf_reference_and_optional_collection_prefix) ... ok
+test_torah_and_kjv_are_distinct_and_selection_keeps_attribution (test_scripture_selection.LibraryTests.test_torah_and_kjv_are_distinct_and_selection_keeps_attribution) ... ok
+test_all_picker_preserves_lower_priority_for_bible_matches (test_scripture_selection.PickerScopeTests.test_all_picker_preserves_lower_priority_for_bible_matches) ... ok
+test_default_picker_contains_only_bible_verses (test_scripture_selection.PickerScopeTests.test_default_picker_contains_only_bible_verses) ... ok
+test_enter_saves_selection_then_requests_immediate_panel_refresh (test_scripture_selection.SelectionTests.test_enter_saves_selection_then_requests_immediate_panel_refresh) ... ok
+test_picker_enter_uses_the_chosen_row_reference (test_scripture_selection.SelectionTests.test_picker_enter_uses_the_chosen_row_reference) ... ok
+
+----------------------------------------------------------------------
+Ran 29 tests in 0.074s
+
+OK
+John 3:16

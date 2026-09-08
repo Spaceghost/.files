@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""Reload btop and Neovim colors in their existing processes."""
+import argparse
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+
+
+# MBP Intel profiles keep color commands in init.lua, including Spaceghost's
+# explicit highlight overrides. Execute only those commands: sourcing the whole
+# init would overwrite options and mappings changed during an editing session.
+NVIM_COLORS = r'''
+local lines = vim.fn.readfile(vim.fn.stdpath('config') .. '/init.lua')
+local colors, schemes = {}, 0
+for _, line in ipairs(lines) do
+    if line:match('^%s*vim%.cmd%.colorscheme%s*%(') then
+        schemes = schemes + 1
+        table.insert(colors, line)
+    elseif line:match('^%s*vim%.api%.nvim_set_hl%s*%(') then
+        table.insert(colors, line)
+    end
+end
+if schemes ~= 1 then
+    error('MBP Intel color commands unavailable in the active Neovim config')
+end
+local apply, problem = loadstring(table.concat(colors, '\n'), 'MBP Intel theme refresh')
+if not apply then error(problem) end
+apply()
+vim.cmd.redraw()
+return 'reloaded'
+'''
+
+
+def application_processes(pids=None):
+    """Inspect actual same-user executables, never an arbitrary argv label."""
+    requested = set(pids) if pids is not None else None
+    for process in sorted(Path('/proc').iterdir()):
+        if not process.name.isdigit():
+            continue
+        if requested is not None and int(process.name) not in requested:
+            continue
+        try:
+            if process.stat().st_uid != os.getuid():
+                continue
+            executable = (process / 'exe').resolve(strict=True)
+            if executable in (Path('/usr/bin/btop'), Path('/usr/bin/nvim')):
+                yield process, executable.name
+        except OSError:
+            continue
+
+
+def reload_btop(process):
+    """btop 1.4.7 handles SIGUSR2 by reloading config and redrawing its theme.
+
+    A pidfd prevents PID reuse from directing the signal to an unrelated app;
+    the handler check avoids terminating a btop still starting up.
+    """
+    descriptor = os.pidfd_open(int(process.name))
+    try:
+        if (process / 'exe').resolve(strict=True) != Path('/usr/bin/btop'):
+            raise RuntimeError('process executable changed')
+        caught = re.search(r'^SigCgt:\s*([0-9a-fA-F]+)$',
+                           (process / 'status').read_text(), re.MULTILINE)
+        if not caught or not int(caught[1], 16) & (1 << (signal.SIGUSR2 - 1)):
+            raise RuntimeError('btop reload handler is not ready')
+        signal.pidfd_send_signal(descriptor, signal.SIGUSR2)
+    finally:
+        os.close(descriptor)
+
+
+def nvim_sockets(process):
+    """Find this process's listening UNIX sockets, including custom paths."""
+    inodes = set()
+    for descriptor in (process / 'fd').iterdir():
+        try:
+            target = os.readlink(descriptor)
+        except OSError:
+            continue
+        match = re.fullmatch(r'socket:\[([0-9]+)\]', target)
+        if match:
+            inodes.add(match[1])
+    for line in (process / 'net/unix').read_text().splitlines()[1:]:
+        fields = line.split(maxsplit=7)
+        if (len(fields) != 8 or fields[6] not in inodes
+                or fields[3] != '00010000' or fields[4] != '0001'):
+            continue
+        socket = Path(fields[7])
+        try:
+            if socket.is_socket() and socket.stat().st_uid == os.getuid():
+                yield socket
+        except OSError:
+            continue
+
+
+def reload_nvim(process):
+    # Remote expressions use RPC, without injecting keys or leaving insert mode.
+    # Verify getpid within the request before touching the receiving editor.
+    lua = (f'(function() if vim.fn.getpid() ~= {int(process.name)} then '
+           "error('Neovim process changed') end\n" + NVIM_COLORS + '\nend)()')
+    expression = "luaeval('" + lua.replace("'", "''") + "')"
+    errors = []
+    for socket in nvim_sockets(process):
+        try:
+            result = subprocess.run(
+                ['/usr/bin/nvim', '--server', str(socket), '--remote-expr', expression],
+                stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=3)
+            if result.returncode == 0 and result.stdout.strip() == 'reloaded':
+                return
+            errors.append(result.stderr.strip() or result.stdout.strip() or 'RPC failed')
+        except (OSError, subprocess.SubprocessError) as error:
+            errors.append(str(error))
+    raise RuntimeError('; '.join(errors) if errors else 'no accessible Neovim RPC socket')
+
+
+def refresh_applications(pids=None):
+    notes = []
+    failed = False
+    for process, name in application_processes(pids):
+        label = 'Neovim' if name == 'nvim' else 'btop'
+        try:
+            if name == 'btop':
+                reload_btop(process)
+                notes.append(f'btop reload requested (PID {process.name})')
+            else:
+                reload_nvim(process)
+                notes.append(f'Neovim reloaded (PID {process.name})')
+        except (OSError, RuntimeError, AttributeError) as error:
+            notes.append(f'{label} theme refresh FAILED (PID {process.name}): {error}')
+            failed = True
+    return notes, failed
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--pid', type=int, action='append',
+                        help='Refresh only these process IDs; repeat for multiple apps')
+    args = parser.parse_args(argv)
+    notes, failed = refresh_applications(args.pid)
+    print('\n'.join(notes) if notes else 'No running btop or Neovim sessions')
+    return int(failed)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

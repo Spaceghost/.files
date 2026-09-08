@@ -1,0 +1,7 @@
+include README.md LICENSE-STATUS.md CHANGELOG.md
+recursive-include bin *
+recursive-include docs *.md *.json *.png
+recursive-include integrations *.desktop *.conf
+recursive-include share *.desktop
+recursive-include tests *.py
+recursive-include .github *.yml

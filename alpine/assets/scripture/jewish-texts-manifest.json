@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "segments": 87327,
+  "sha256": "8c61d829094705a8435c5c3021dfd8e4a3435ecb2a9d0f7100df0dd289313000",
+  "sources": [
+    {
+      "filename": "Arakhin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Arakhin/English/William Davidson Edition - English.json",
+      "sha256": "ae59e197d16b3ae8f4b26da1eb1ff420191b7451aea88b53aa3cef4970cd8e3b",
+      "title": "Arakhin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1175,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Avodah Zarah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Avodah Zarah/English/William Davidson Edition - English.json",
+      "sha256": "7b74a1972e955e410c2cd204114582c72f16b0a2beaa1ec0b07c8d2a18b496f7",
+      "title": "Avodah Zarah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2126,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Bava Batra.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Bava Batra/English/William Davidson Edition - English.json",
+      "sha256": "e8ea9c868656eb2734ed243590ded3729bb852c87dd1474af7cfcb4e45ff0148",
+      "title": "Bava Batra",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3794,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Bava Kamma.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Bava Kamma/English/William Davidson Edition - English.json",
+      "sha256": "49b08447d4d80a26667f713d933256d5b92504fbbea86dd73b0ba7819865b673",
+      "title": "Bava Kamma",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 4304,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Bava Metzia.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Bava Metzia/English/William Davidson Edition - English.json",
+      "sha256": "653a2e62a942b2d44b2806f716bebd24138e5004a9dc6abf54b2c83f72a79fcd",
+      "title": "Bava Metzia",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3650,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Beitzah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Beitzah/English/William Davidson Edition - English.json",
+      "sha256": "dffff086902107162316d253c3b6666dcec7381832903fbd0d3d461bc68bb275",
+      "title": "Beitzah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1146,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Bekhorot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Bekhorot/English/William Davidson Edition - English.json",
+      "sha256": "f3f1c4557667b0fa8d250e153d0ea45d01be15694a1a72833fa9830b1d4a1f8e",
+      "title": "Bekhorot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1948,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Berakhot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Zeraim/Berakhot/English/William Davidson Edition - English.json",
+      "sha256": "567a2e6d98de125c40b05341428f347dfca24265b9a048a97a20d97dc2729e5b",
+      "title": "Berakhot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2740,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Chagigah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Chagigah/English/William Davidson Edition - English.json",
+      "sha256": "17949f79d840de8534835c663d74547ba2eb549a140aafc3818af5c7bbc148d0",
+      "title": "Chagigah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 732,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Chullin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Chullin/English/William Davidson Edition - English.json",
+      "sha256": "abb337f1b47aae48a5cdcf24d6bd00bdb0c5a61a3d678a85812258d58242f522",
+      "title": "Chullin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 4381,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Deuteronomy.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Tanakh/Torah/Deuteronomy/English/The Holy Scriptures A New Translation JPS 1917.json",
+      "sha256": "89ddae811c76468bd2d78a3f4a006a046b3e2fe3c2b4142fb0735ab1974863c5",
+      "title": "Deuteronomy",
+      "version": "The Holy Scriptures: A New Translation (JPS 1917)",
+      "license": "Public Domain",
+      "segments": 956,
+      "collection": "Torah"
+    },
+    {
+      "filename": "Eruvin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Eruvin/English/William Davidson Edition - English.json",
+      "sha256": "7d63a109af5e412838afb825cc1d0a133b906f75fbc98aa77e4f60df4ec5aa44",
+      "title": "Eruvin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3636,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Exodus.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Tanakh/Torah/Exodus/English/The Holy Scriptures A New Translation JPS 1917.json",
+      "sha256": "06f24083680cc4395af49c85c51bac81d827d2016f53bb73b8b89c5c8484cdfe",
+      "title": "Exodus",
+      "version": "The Holy Scriptures: A New Translation (JPS 1917)",
+      "license": "Public Domain",
+      "segments": 1210,
+      "collection": "Torah"
+    },
+    {
+      "filename": "Genesis.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Tanakh/Torah/Genesis/English/The Holy Scriptures A New Translation JPS 1917.json",
+      "sha256": "ad1d64986bb4dc2bce6c8f09fc90c83dcaee9b1eaf7545cdeca4051584456543",
+      "title": "Genesis",
+      "version": "The Holy Scriptures: A New Translation (JPS 1917)",
+      "license": "Public Domain",
+      "segments": 1533,
+      "collection": "Torah"
+    },
+    {
+      "filename": "Gittin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Gittin/English/William Davidson Edition - English.json",
+      "sha256": "40ecdd207c94366b21389e30550be72074f34d7e939b19d06bf8e17e22ae1cb1",
+      "title": "Gittin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2983,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Horayot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Horayot/English/William Davidson Edition - English.json",
+      "sha256": "1fec0469e11d0ba10379f31504852dd19da3464b80de34dd93c4104da29358a7",
+      "title": "Horayot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 448,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Keritot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Keritot/English/William Davidson Edition - English.json",
+      "sha256": "7225c2d9564d5f6aaf47fabb96a5ee8e1a97c0772468a0af73f28716f9e63523",
+      "title": "Keritot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1205,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Ketubot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Ketubot/English/William Davidson Edition - English.json",
+      "sha256": "30cf8e249bc1e6acbda4d567c37e090cfcbb702d73f42a588eb55ae698db10e5",
+      "title": "Ketubot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3025,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Kiddushin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Kiddushin/English/William Davidson Edition - English.json",
+      "sha256": "9432a90565fad8d2ea83484b45ccc575f917413e9d8653a6bfeb7eebebe432d6",
+      "title": "Kiddushin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2402,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Leviticus.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Tanakh/Torah/Leviticus/English/The Holy Scriptures A New Translation JPS 1917.json",
+      "sha256": "057450f70b8c82c742d250ed64f714c35a8d315fa15c1bc19caec6f2bd7d9f5f",
+      "title": "Leviticus",
+      "version": "The Holy Scriptures: A New Translation (JPS 1917)",
+      "license": "Public Domain",
+      "segments": 859,
+      "collection": "Torah"
+    },
+    {
+      "filename": "Makkot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Makkot/English/William Davidson Edition - English.json",
+      "sha256": "3f00840699b42c1aa64f8017528123a7ee1f93e09b17c833a8c18f38cad17aa0",
+      "title": "Makkot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 706,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Megillah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Megillah/English/William Davidson Edition - English.json",
+      "sha256": "b588b24d73a874817ae1fd6c1df81169b3a4db9e8ca14c77edd7b926fc202eda",
+      "title": "Megillah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1209,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Meilah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Meilah/English/William Davidson Edition - English.json",
+      "sha256": "1678e79ab85120f3a472cfdb7ab376988570a4e6ec646b7134cdba6a24773727",
+      "title": "Meilah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 509,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Menachot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Menachot/English/William Davidson Edition - English.json",
+      "sha256": "e56ba9450e59056e3c966d54e83b1718b42d31b6b23457b42c648e933ca45215",
+      "title": "Menachot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3770,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Moed Katan.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Moed Katan/English/William Davidson Edition - English.json",
+      "sha256": "5f5a655e681f5035442a4bb8e56d28f4c023c397bc35f9d8bbaec578f8892b9a",
+      "title": "Moed Katan",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1023,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Nazir.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Nazir/English/William Davidson Edition - English.json",
+      "sha256": "8cebd54d447344489c9de3508bc7f9a6cd72db1a107c58062f8595c0290b0cf8",
+      "title": "Nazir",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1290,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Nedarim.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Nedarim/English/William Davidson Edition - English.json",
+      "sha256": "51822f12b5c044fe88d6c7013196db66a8b0fe5493c560e8b6786c2faf5f9dc7",
+      "title": "Nedarim",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1498,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Niddah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Tahorot/Niddah/English/William Davidson Edition - English.json",
+      "sha256": "9983daf569fb9bc8edb987da99b27b93653e39ffdb78c3967473d92efdeaf2c4",
+      "title": "Niddah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2655,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Numbers.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Tanakh/Torah/Numbers/English/The Holy Scriptures A New Translation JPS 1917.json",
+      "sha256": "95094e170cd2b6124824c8fb9b5a4d98a8254001a3b8f680bf48413d136166e5",
+      "title": "Numbers",
+      "version": "The Holy Scriptures: A New Translation (JPS 1917)",
+      "license": "Public Domain",
+      "segments": 1288,
+      "collection": "Torah"
+    },
+    {
+      "filename": "Pesachim.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Pesachim/English/William Davidson Edition - English.json",
+      "sha256": "0afb5bc38b0d9502f004b6df81912637a2b8d7a425039e6994fb95799c16e372",
+      "title": "Pesachim",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3509,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Rosh Hashanah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Rosh Hashanah/English/William Davidson Edition - English.json",
+      "sha256": "4d6c749b2bb717efe7d2bd25f4e98625cdfa09440af77c8acbd23cf37cd33b48",
+      "title": "Rosh Hashanah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1021,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Sanhedrin.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Sanhedrin/English/William Davidson Edition - English.json",
+      "sha256": "7eee28500c23f980be172cfec4eae1edcf762594be33a959815fa3b947b78423",
+      "title": "Sanhedrin",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 4160,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Shabbat.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Shabbat/English/William Davidson Edition - English.json",
+      "sha256": "3759dc41ad77e917a941bf73df2162a0ca82621b9e8570832b2fca9186cd928f",
+      "title": "Shabbat",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3754,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Shevuot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nezikin/Shevuot/English/William Davidson Edition - English.json",
+      "sha256": "d74c6f9e51174d36bd09f42f91d8693204153fff45494f10cf4d1b20f2e37609",
+      "title": "Shevuot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1547,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Sotah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Sotah/English/William Davidson Edition - English.json",
+      "sha256": "4bfb7d80b87e3628b8178c1b4187ebc90815d0e6da58ae44425a5d4255126261",
+      "title": "Sotah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1626,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Sukkah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Sukkah/English/William Davidson Edition - English.json",
+      "sha256": "ca7ade4daacff366a5f476b9d916cb1129c5f5f47c590188f150f69345c51bf1",
+      "title": "Sukkah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1356,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Taanit.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Taanit/English/William Davidson Edition - English.json",
+      "sha256": "b4dd85df7e5bd57d08b3e53630f451de5888311f864063a3918e412fc60ba0ab",
+      "title": "Taanit",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 891,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Tamid.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Tamid/English/William Davidson Edition - English.json",
+      "sha256": "07eaf3f1aed111c00701de248da5ff5a893810906a53e388154c6a2bae9c474b",
+      "title": "Tamid",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 200,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Temurah.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Temurah/English/William Davidson Edition - English.json",
+      "sha256": "674d8050b3e655a67fe65731cda1388adc8cb30e38cde525f5ec03921ff08013",
+      "title": "Temurah",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 1143,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Yevamot.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Nashim/Yevamot/English/William Davidson Edition - English.json",
+      "sha256": "c9852214d8ffee5fb5b96fc761e0aa728a4e36880bb41bb636ad9e7115fd1ba2",
+      "title": "Yevamot",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3853,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Yoma.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Moed/Yoma/English/William Davidson Edition - English.json",
+      "sha256": "a5bcdc7ae2ffdd183fa743d7ab58d8f75bc1a7372ac281a9e91192cd4392401a",
+      "title": "Yoma",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 2263,
+      "collection": "Babylonian Talmud"
+    },
+    {
+      "filename": "Zevachim.json",
+      "url": "https://storage.googleapis.com/sefaria-export/json/Talmud/Bavli/Seder Kodashim/Zevachim/English/William Davidson Edition - English.json",
+      "sha256": "3c3e9d676d7d9c1d0807b276fc089981971deec204f32245836baf7a0f8537be",
+      "title": "Zevachim",
+      "version": "William Davidson Edition - English",
+      "license": "CC-BY-NC",
+      "segments": 3803,
+      "collection": "Babylonian Talmud"
+    }
+  ]
+}

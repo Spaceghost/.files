@@ -1,0 +1,35 @@
+{
+  "apk_green": {
+    "binary": "/home/jack/.local/state/oldbook/verify/waybar-strata-r6/workspace-emphasis-apk",
+    "core_dumps": false,
+    "exit_code": 0,
+    "fatal_gtk_warnings": true,
+    "isolation": "private Xvfb, D-Bus, HOME and XDG directories; no host windows"
+  },
+  "artifact": "sha256/c3337cc121e97d30a47f38fd27eb3e8e8015e128edd73c1cc20b85f29fa70273/oldbook-waybar-art-1.0.0-r6.apk",
+  "binary_sha256": "2c2a92972276144526d3950075379b24852fba3638e337eb6cc12cd5a5f7da73",
+  "native_gtk_checks": 45,
+  "package_sha256": "c3337cc121e97d30a47f38fd27eb3e8e8015e128edd73c1cc20b85f29fa70273",
+  "regression_red": {
+    "binary": "/home/jack/.local/state/oldbook/verify/waybar-strata-r6/workspace-emphasis-red",
+    "core_dumps": false,
+    "exit_code": -6,
+    "fatal_gtk_warnings": true,
+    "isolation": "private Xvfb, D-Bus, HOME and XDG directories; no host windows"
+  },
+  "source_green": {
+    "binary": "/home/jack/.local/state/oldbook/verify/waybar-strata-r6/workspace-emphasis-green",
+    "core_dumps": false,
+    "exit_code": 0,
+    "fatal_gtk_warnings": true,
+    "isolation": "private Xvfb, D-Bus, HOME and XDG directories; no host windows"
+  },
+  "source_sha512": {
+    "APKBUILD": "7d77fe435c9e2c66f31b956747c199da1f14e9c613fe21971af6de4c3316dd37e68aee107be1a96270a6fe405a34aafd3e0f657c5393b6f034a369834627ab24",
+    "LICENSE.Waybar": "fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2",
+    "art.c": "d794d1c7c67446ca7d9f6f505e9353e7a4b0786c75719ccd906b9c4a4fe6de30af48e1c9cf48aa36a704ae678bc78d2135062c235c4146f7be3593d51762ef1f",
+    "help.c": "1b64cdcd163d46c428911e80005bd4958607ae26f9ca9af982646ad2d24e42c36e1ea2febe65f90f2f00e1341d7e1bf0c66fbc736d872eae5df4eade6b0e716d",
+    "help.h": "8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4",
+    "waybar_cffi_module.h": "b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd"
+  }
+}

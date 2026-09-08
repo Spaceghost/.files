@@ -1,0 +1,151 @@
+{
+  "status": "passed",
+  "checks": [
+    "three-agent-candidates-across-workspaces",
+    "ordinary-foot-excluded",
+    "persistent-virtual-keyboard-before-clients",
+    "single-popup",
+    "focus-stable-while-cycling",
+    "alt-release-commits",
+    "same-popup-active-theme-to-light",
+    "tab-forward-repeat",
+    "shift-tab-backward",
+    "escape-cancels",
+    "rapid-tap-closes-and-commits",
+    "closed-window-refreshed",
+    "rendered-theme-colors",
+    "default-mode-restored-after-every-exit",
+    "implementation-stable-through-run"
+  ],
+  "states": {
+    "theme-cycle": {
+      "origin": 5,
+      "committed": 11
+    },
+    "forward-repeat": {
+      "origin": 11,
+      "committed": 9
+    },
+    "backward": {
+      "origin": 9,
+      "committed": 5
+    },
+    "rapid-tap": {
+      "origin": 5,
+      "committed": 9
+    },
+    "closed-window": {
+      "closed": 5,
+      "committed": 11
+    }
+  },
+  "screenshots": [
+    "popup-active-theme.png",
+    "popup-light.png"
+  ],
+  "host_changes": 0,
+  "implementation": {
+    "alpine/desktop/.local/bin/oldbook-agent-switcher": "014ad7d16998ed33df42bb461a3f4647ea5d8ad70d0ade4bfee2e9f634a63e23",
+    "alpine/desktop/.local/lib/oldbook/agent_switcher.py": "51773b2739bfa5680809be97c23374868b01505dd03af532e14887c8bf6e9b90",
+    "alpine/desktop/.local/lib/oldbook/app_identity.py": "b48d1eddaac2891ef89db478dd5d8d306541522eeaa6be76a31252c190f6e5f3",
+    "alpine/desktop/.config/sway/local.d/agent-switcher.conf": "53434b646c4918075be133112f6eba2efeda8de6c78c6c43a0274e4dff2d3b3e"
+  },
+  "clients": {
+    "Codex Alpha": {
+      "id": 5,
+      "pid": 29137,
+      "app_id": "codex",
+      "workspace": 1,
+      "launcher_pid": 29137
+    },
+    "Ordinary terminal": {
+      "id": 7,
+      "pid": 29163,
+      "app_id": "foot",
+      "workspace": 2,
+      "launcher_pid": 29163
+    },
+    "Claude Beta": {
+      "id": 9,
+      "pid": 29177,
+      "app_id": "claude",
+      "workspace": 3,
+      "launcher_pid": 29177
+    },
+    "Oldbook Agent Gamma": {
+      "id": 11,
+      "pid": 29195,
+      "app_id": "oldbook-agent",
+      "workspace": 4,
+      "launcher_pid": 29195
+    }
+  },
+  "resolved": {
+    "5": {
+      "name": "Codex",
+      "kind": "codex",
+      "state": null,
+      "tty": "/dev/pts/13"
+    },
+    "7": {
+      "name": "Foot",
+      "kind": "app",
+      "state": null
+    },
+    "9": {
+      "name": "Claude",
+      "kind": "claude",
+      "state": null,
+      "tty": "/dev/pts/17"
+    },
+    "11": {
+      "name": "Codex",
+      "kind": "codex",
+      "state": null,
+      "tty": "/dev/pts/18"
+    }
+  },
+  "candidate_ids": [
+    5,
+    9,
+    11
+  ],
+  "mode_restorations": [
+    "alt-release",
+    "forward-release",
+    "reverse-release",
+    "escape-cancel",
+    "rapid-release",
+    "closed-window-release"
+  ],
+  "rendered_colors": {
+    "active": {
+      "#171522": 3143,
+      "#b78a42": 1541
+    },
+    "light": {
+      "#f4eedf": 0,
+      "#b2385b": 1541
+    }
+  },
+  "visual": {
+    "visible_rows": [
+      "Codex Alpha",
+      "Oldbook Agent Gamma",
+      "Claude Beta"
+    ],
+    "selected_row": "Oldbook Agent Gamma",
+    "active_theme": "vespersteel-archive-968881e8a08a"
+  },
+  "screenshot_sha256": {
+    "popup-active-theme.png": "ab0463094445f645dcf9ef9b32ad68f1d3f40372e6fccd6aa54ff2ea0871862f",
+    "popup-light.png": "7cdab92464adc6dd6d4c1b48c5785a72a1dde9c2930cd2c50619b35e46f976e6"
+  },
+  "popup_visual_extent": {
+    "x": 360,
+    "y": 324,
+    "width": 560,
+    "height": 252,
+    "source": "pixel bounds in both 1280x900 screenshots"
+  }
+}

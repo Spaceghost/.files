@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""Show pinned features affected by changed paths; optionally run their checks."""
+import argparse
+import fnmatch
+import json
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[2]
+INDEX = REPO / 'alpine/feature-checks.json'
+
+
+def load_index(path=INDEX, repo=REPO):
+    document = json.loads(path.read_text())
+    if document.get('version') != 1 or not isinstance(document.get('features'), list):
+        raise ValueError('Unsupported feature check index')
+    seen = set()
+    for item in document['features']:
+        identity = item.get('id', '')
+        if not re.fullmatch(r'[A-Z]+(?:-[A-Z]+)*', identity) or identity in seen:
+            raise ValueError('Invalid or duplicate feature ID: ' + identity)
+        seen.add(identity)
+        if not item.get('paths') or not all(isinstance(p, str) and Path(p).parts
+                                            and not Path(p).is_absolute()
+                                            and '..' not in Path(p).parts for p in item['paths']):
+            raise ValueError('Invalid feature paths: ' + identity)
+        for test in item.get('tests', []):
+            if not re.fullmatch(r'test_[a-z0-9_]+\.py', test) or not (repo / 'alpine/tests' / test).is_file():
+                raise ValueError('Missing or unsafe feature check: ' + str(test))
+    contracts = set(re.findall(r'^### ([A-Z]+(?:-[A-Z]+)*)$',
+                               (repo / 'alpine/FEATURES.md').read_text(), re.MULTILINE))
+    if contracts != seen:
+        raise ValueError('Contract/check index IDs differ: ' + ', '.join(sorted(contracts ^ seen)))
+    return document['features']
+
+
+def normalize_path(value, repo=REPO):
+    path = Path(value)
+    if path.is_absolute():
+        path = path.relative_to(repo)
+    if '..' in path.parts or not path.parts:
+        raise ValueError('Use checkout-relative paths: ' + value)
+    return path.as_posix()
+
+
+def affected(features, paths):
+    return [item for item in features if any(fnmatch.fnmatchcase(path, pattern)
+             for path in paths for pattern in item['paths'])]
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument('--feature', action='append', help='select this feature ID (repeatable)')
+    selection.add_argument('--all', action='store_true', help='show every pinned feature')
+    parser.add_argument('--run', action='store_true', help='run each selected existing unittest file once')
+    parser.add_argument('--json', action='store_true', help='print the impact report as JSON')
+    parser.add_argument('paths', nargs='*', help='checkout-relative changed paths; defaults to Fossil changes')
+    args = parser.parse_args(argv)
+    if args.paths and (args.feature or args.all):
+        parser.error('Choose paths or feature selection, not both')
+    features = load_index()
+    paths = []
+    if args.all:
+        selected = features
+    elif args.feature:
+        unknown = set(args.feature) - {item['id'] for item in features}
+        if unknown:
+            parser.error('Unknown feature: ' + ', '.join(sorted(unknown)))
+        selected = [item for item in features if item['id'] in args.feature]
+    else:
+        values = args.paths
+        if not values:
+            result = subprocess.run(['fossil', 'changes', '--differ', '--dotfiles', '--no-merge',
+                                     '--no-classify', '--rel-paths'], cwd=REPO, text=True,
+                                    capture_output=True, check=True)
+            values = result.stdout.splitlines()
+        paths = sorted({normalize_path(value) for value in values})
+        selected = affected(features, paths)
+    tests = sorted({test for item in selected for test in item.get('tests', [])})
+    unmapped = [path for path in paths if not affected(features, [path])]
+    report = {'features': [item['id'] for item in selected], 'tests': tests,
+              'unmapped_paths': unmapped, 'contract': 'alpine/FEATURES.md',
+              'manual_only': [item['id'] for item in selected if not item.get('tests')],
+              'note': 'Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.'}
+    if args.json:
+        print(json.dumps(report, indent=2), flush=True)
+    else:
+        print('Review alpine/FEATURES.md for these pinned behaviors:', flush=True)
+        for item in selected:
+            checks = item.get('tests', [])
+            print('  ' + item['id'] + ' — ' + (str(len(checks)) + ' check files' if checks
+                                               else 'manual/native review required'))
+        if not selected:
+            print('  No mapped features; inspect uncovered changes before proceeding.')
+        if unmapped:
+            print('Unmapped paths (review and extend the index when they affect a feature):')
+            for path in unmapped[:20]:
+                print('  ' + path)
+            if len(unmapped) > 20:
+                print('  ... ' + str(len(unmapped) - 20) + ' more; use --json for the full list.')
+        print(str(len(tests)) + ' unique check files. ' + report['note'], flush=True)
+    if args.run:
+        failed = []
+        for test in tests:
+            result = subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'alpine/tests',
+                                     '-p', test, '-v'], cwd=REPO)
+            if result.returncode:
+                failed.append(test)
+        if failed:
+            print('Failed feature checks: ' + ', '.join(failed), file=sys.stderr)
+            return 1
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        sys.exit('check-features: ' + str(error))

@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "recorded_utc": "2026-09-08T02:01:01.949885+00:00",
+  "measurement": "time.process_time, three placement calls per implementation; NumPy and image grid loaded before timing",
+  "scope": "place_panels only; image decoding and desktop process restarts excluded",
+  "grid": {
+    "columns": 72,
+    "rows": 45
+  },
+  "area": {
+    "width": 1440,
+    "height": 900,
+    "top": 60,
+    "bottom": 60,
+    "left": 16,
+    "right": 16
+  },
+  "reserved": [
+    {
+      "x": 340,
+      "y": 776,
+      "width": 760,
+      "height": 64
+    }
+  ],
+  "panel_count": 6,
+  "before_cpu_seconds": [
+    1.2856356590000002,
+    1.302806131,
+    0.8842976889999998
+  ],
+  "after_cpu_seconds": [
+    0.04719479599999943,
+    0.05047324600000014,
+    0.05150402499999984
+  ],
+  "before_median_cpu_seconds": 1.2856356590000002,
+  "after_median_cpu_seconds": 0.05047324600000014,
+  "median_speedup": 25.47162627503681,
+  "cpu_reduction_percent": 96.07406300170148,
+  "source_sha256": {
+    "before": "0cfea9ec949271d79048b90f597055c02ae6db27433f5063da8c658d35401924",
+    "after": "cc518b8228e997d75fe96a0f6a1a8d156f9137448eb8f022c83c729baa78dd87"
+  },
+  "active_wallpaper_equal": {
+    "placements": true,
+    "rounded_scores": true,
+    "background_colours": true
+  },
+  "additional_equivalence": {
+    "cases": 100,
+    "seed": 71,
+    "grid_columns": 12,
+    "grid_rows": 10,
+    "panels_per_case": 6,
+    "all_results_exactly_equal": true
+  },
+  "placements": [
+    {
+      "id": "masthead",
+      "x": 20,
+      "y": 60,
+      "width": 380,
+      "height": 80,
+      "score": -0.11
+    },
+    {
+      "id": "scripture",
+      "x": 1000,
+      "y": 60,
+      "width": 420,
+      "height": 200,
+      "score": -0.0443
+    },
+    {
+      "id": "gallery",
+      "x": 620,
+      "y": 60,
+      "width": 360,
+      "height": 120,
+      "score": 0.3498
+    },
+    {
+      "id": "power",
+      "x": 140,
+      "y": 160,
+      "width": 280,
+      "height": 80,
+      "score": 0.2539
+    },
+    {
+      "id": "witness",
+      "x": 20,
+      "y": 580,
+      "width": 400,
+      "height": 160,
+      "score": 0.412
+    },
+    {
+      "id": "ghost",
+      "x": 1060,
+      "y": 600,
+      "width": 360,
+      "height": 140,
+      "score": 0.1315
+    }
+  ]
+}

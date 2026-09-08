@@ -1,0 +1,20 @@
+test_concurrent_reload_starts_services_once (session_fixture.SessionTests.test_concurrent_reload_starts_services_once) ... ERROR
+
+======================================================================
+ERROR: test_concurrent_reload_starts_services_once (session_fixture.SessionTests.test_concurrent_reload_starts_services_once)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_session.py", line 47, in test_concurrent_reload_starts_services_once
+    self.assertEqual(client.wait(timeout=4), 0)
+                     ~~~~~~~~~~~^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1279, in wait
+    return self._wait(timeout=timeout)
+           ~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2076, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-session']' timed out after 4 seconds
+
+----------------------------------------------------------------------
+Ran 1 test in 4.198s
+
+FAILED (errors=1)

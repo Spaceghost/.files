@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+"""Use the current gallery palette for every application and desktop picker."""
+import os
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/mbp_intel'))
+from overlay_theme import read_palette
+from launcher_theme import color_arguments
+
+os.execvp('fuzzel', ['fuzzel', '--selection-radius=6', *color_arguments(read_palette()), *sys.argv[1:]])

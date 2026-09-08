@@ -1,0 +1,11 @@
+[Unit]
+Description=MBP Intel workspace names and AI switcher
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/mbp-intel-workspaces daemon
+Restart=on-failure
+RestartSec=2
+

@@ -1,0 +1,26 @@
+[general]
+bars = 36
+framerate = 60
+sensitivity = 100
+autosens = 1
+
+[input]
+method = pulse
+source = auto
+
+[output]
+method = ncurses
+channels = stereo
+mono_option = average
+bar_width = 2
+bar_spacing = 1
+bar_height = 18
+[color]
+background = '#081B26'
+foreground = '#D9654F'
+gradient = 1
+gradient_count = 4
+gradient_color_1 = '#88c6af'
+gradient_color_2 = '#9dc672'
+gradient_color_3 = '#D9654F'
+gradient_color_4 = '#d89772'

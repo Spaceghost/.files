@@ -1,0 +1,47 @@
+{
+  "scope": "Private headless Sway with separate GTK target process; synthetic evdev monitor; native virtual keyboard and pointer only in disposable compositor.",
+  "interactive": [
+    "guide takes keyboard focus",
+    "guide stays open after Super release",
+    "search Enter delivers Ctrl+Shift+S to original app",
+    "search Enter does not leak to original app",
+    "alternative Enter delivers uppercase N",
+    "multi-step native shortcut delivered",
+    "real pointer click delivers native shortcut once",
+    "focus loss dismisses guide",
+    "no activation errors"
+  ],
+  "cli": [
+    "target starts focused",
+    "one-shot show survives initial background session probe",
+    "one-shot show exits after Enter activation",
+    "CLI provider profile search delivers native Ctrl+Shift+S",
+    "daemon publishes ready status",
+    "show reuses running daemon",
+    "manual show retains daemon PID",
+    "CLI guide closes on focus loss",
+    "manual show stays searchable under release-mode settings",
+    "manual search runs after idle settings reload",
+    "daemon still running after manual shortcut",
+    "manual show opens for error presentation check",
+    "native dispatch failure is visible",
+    "release-mode daemon preserves error dialog across idle overlay reset",
+    "repeated show leaves the pending error readable",
+    "unfocused fullscreen guide is dismissed without changing fullscreen state",
+    "daemon exits cleanly on SIGTERM",
+    "lease records stopped state"
+  ],
+  "host_input_injected": false,
+  "installed_configuration_changed": false,
+  "installed_wheel": {
+    "version": "0.2.0.dev0",
+    "isolated_virtualenv": true,
+    "system_GI": true,
+    "native_integration_repeats": [
+      true,
+      true,
+      true
+    ],
+    "note": "One initial fixture run lost focus before its release assertion; a traced rerun and three repeats passed. Physical-session focus stability remains in the manual release matrix."
+  }
+}

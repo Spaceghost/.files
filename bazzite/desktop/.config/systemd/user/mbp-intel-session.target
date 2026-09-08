@@ -1,0 +1,13 @@
+[Unit]
+Description=Space Ghost MBP Intel desktop services
+BindsTo=sway-session.target
+After=sway-session.target
+Wants=mbp-intel-desktop-settings.service
+Wants=mbp-intel-notification-led.service
+Wants=mbp-intel-shortcuts.service
+Wants=mbp-intel-swayidle.service
+Wants=mbp-intel-swaync.service
+Wants=mbp-intel-wallpaper.service
+Wants=mbp-intel-waybar.service
+Wants=mbp-intel-workspaces.service
+

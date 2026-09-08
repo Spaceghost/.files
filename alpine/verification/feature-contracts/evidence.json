@@ -1,0 +1,14 @@
+{
+  "unit_returncode": 0,
+  "contracts": 30,
+  "source_sha256": {
+    "alpine/FEATURES.md": "9d371ee06a8f794bc57569e8b345bc88b96465221ef5c9551acdca62ffd226c0",
+    "alpine/feature-checks.json": "68842f5ceca72b19e65dbbcb8518bf0271a75cbcae2d744565fd2264f6d62dc1",
+    "alpine/bin/check-features": "83f277fffa5c1917881f18bcd339872acf413d8754fa4988124ce2011645ba6e",
+    "alpine/tests/test_feature_contracts.py": "e6e97766f8ba6c208d3cc08f7419a6836bc55339557c979c8c20ff0ccee3aedb",
+    "alpine/AGENTS.md": "40224f7788558d250fa2f41256f7f106dbe26234f8d34c54ce20499fba61dd84"
+  },
+  "coverage": "Nine impact/runner checks; existing feature tests are selected, not all rerun by this verification.",
+  "verification_checkout": "/home/jack/.local/state/oldbook/checkouts/strata-zero-wj4r7ymx",
+  "checks": "Nine feature-contract tests plus four warm command tests passed in the isolated commit checkout."
+}

@@ -1,0 +1,279 @@
+{
+  "status": "failed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "8fb593bd48fe910c99d1871bda484c8083c8c72dafde3467c2029d98859a8e0e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows",
+    "scale-two-previews-preserve-provider-pixels-without-upscaling",
+    "hidden-workspace-preview-renders-without-focus-change",
+    "open-gesture-keeps-still-image-after-real-window-content-changes",
+    "persistent-show-ignores-modifier-release-and-escape-cancels"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 30577
+    },
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows": {
+      "pid": 30577,
+      "ready": true,
+      "open": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": null,
+      "preview_ids": [],
+      "preview_dimensions": {},
+      "frames": 0,
+      "frame_times": []
+    },
+    "scale-two-previews-preserve-provider-pixels-without-upscaling": {
+      "actual": {
+        "6": [
+          720,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "5": [
+          720,
+          900
+        ]
+      },
+      "direct_provider": {
+        "5": [
+          720,
+          900
+        ],
+        "6": [
+          720,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ]
+      },
+      "logical_rect_times_output_scale": {
+        "5": [
+          1440,
+          1800
+        ],
+        "6": [
+          1440,
+          1800
+        ],
+        "8": [
+          2880,
+          1800
+        ],
+        "10": [
+          2880,
+          1800
+        ]
+      },
+      "physical_letterboxed_card": {
+        "6": [
+          624.0,
+          780.0
+        ],
+        "10": [
+          1248.0,
+          780.0
+        ],
+        "8": [
+          1248.0,
+          780.0
+        ],
+        "5": [
+          624.0,
+          780.0
+        ]
+      },
+      "grim_explicit_scale_one": [
+        1440,
+        900
+      ]
+    },
+    "hidden-workspace-preview-renders-without-focus-change": {
+      "preview_ids": [
+        5,
+        6,
+        8,
+        10
+      ],
+      "cyan_pixels": 971427,
+      "workspace_focus": 1,
+      "focus_events": []
+    },
+    "open-gesture-keeps-still-image-after-real-window-content-changes": {
+      "unchanged_green_pixels": 476231,
+      "new_magenta_pixels": 0,
+      "preview_dimensions_unchanged": true
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "verifier_sha256": "4d95153b5b67a28a76791f1ca2e5136040271d6a444223f2c20d4dbb8b9843bb",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "error": "new gesture did not capture origin again",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 523, in run\n    wait_for(lambda: opened(b['id']) and b['id'] in state().get('preview_ids', []),\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n             'new gesture did not capture origin again')\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 44, in wait_for\n    raise AssertionError(message)\nAssertionError: new gesture did not capture origin again\n",
+  "last_state": {
+    "pid": 30577,
+    "ready": true,
+    "open": false,
+    "selected_id": null,
+    "candidate_ids": [],
+    "modifier": null,
+    "preview_ids": [],
+    "preview_dimensions": {},
+    "frames": 2,
+    "frame_times": [
+      22072434482,
+      22072634486
+    ]
+  },
+  "last_outputs": [
+    {
+      "id": 3,
+      "type": "output",
+      "orientation": "none",
+      "percent": 1.0,
+      "urgent": false,
+      "marks": [],
+      "layout": "output",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "HEADLESS-1",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        4,
+        7,
+        9
+      ],
+      "fullscreen_mode": 0,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "primary": false,
+      "make": "Unknown",
+      "model": "Unknown",
+      "serial": "Unknown",
+      "modes": [],
+      "features": {
+        "adaptive_sync": false,
+        "hdr": false
+      },
+      "non_desktop": false,
+      "active": true,
+      "dpms": true,
+      "power": true,
+      "scale": 2.0,
+      "scale_filter": "nearest",
+      "transform": "normal",
+      "adaptive_sync_status": "disabled",
+      "layer_shell_surfaces": [
+        {
+          "namespace": "wallpaper",
+          "layer": "background",
+          "extent": {
+            "width": 1440,
+            "height": 900,
+            "x": 0,
+            "y": 0
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "current_workspace": "1",
+      "current_mode": {
+        "width": 2880,
+        "height": 1800,
+        "refresh": 0
+      },
+      "max_render_time": 0,
+      "allow_tearing": false,
+      "hdr": false,
+      "focused": true,
+      "subpixel_hinting": "unknown"
+    }
+  ],
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

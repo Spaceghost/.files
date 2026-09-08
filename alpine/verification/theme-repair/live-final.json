@@ -1,0 +1,52 @@
+{
+  "previous_theme": "waxen-meridian-373c11cb12f0",
+  "active_theme": "the-bellows-intercept-b503d18336b4",
+  "command_exit": 0,
+  "reload_report_has_failures": false,
+  "processes": {
+    "waybar": [
+      8427
+    ],
+    "ghostty": [
+      5853,
+      16296
+    ],
+    "foot": [
+      1406,
+      17729,
+      17867,
+      21040,
+      21147,
+      21182,
+      27440,
+      28546
+    ],
+    "btop": [
+      21149
+    ],
+    "firefox": [
+      29211,
+      29316
+    ]
+  },
+  "original_pids_absent_at_final_observation": {
+    "waybar": [],
+    "ghostty": [],
+    "foot": [
+      29683
+    ],
+    "btop": [],
+    "firefox": []
+  },
+  "process_evidence_limit": "All original PIDs survived the first activation. One Foot process ended before the final observation; its exit cause was not observed.",
+  "foreign_backup_manifests_unchanged": true,
+  "wallpaper": "alpine/assets/gallery/themes/the-bellows-intercept-b503d18336b4/2026-09-07-the-bellows-intercept-b503d18336b4-scene-e542baaf069561be-806f1286ff0e.png",
+  "source_sha256": {
+    "alpine/bin/deploy-home": "b76b0e925fae92e7fa1f38971861edefa7e971bef4b7785e7a561bb5f7d80cef",
+    "alpine/desktop/.local/bin/oldbook-theme": "8aa0ee35dea7010a2ec32bfef895de3fdc3c7de330883538a1be650f52797bde",
+    "alpine/desktop/.local/bin/oldbook-wallpaper": "9b044b1c76fbd26b7c4717e0762ef01199571206b0daafe9d9e9ef2864196ad2",
+    "alpine/desktop/.local/bin/oldbook-refresh-terminal-theme": "64a68734e0c8c9dc1a11a054f45196ed7179a777bde4add90efbdca10a1cb5cb",
+    "alpine/desktop/.local/bin/oldbook-refresh-application-theme": "de4bd8afb10e4c8090bd745935e0d8a2121b62d83f2b32f98804f476c1d3456a",
+    "alpine/desktop/.local/lib/oldbook/scripture_history_reader.py": "38f983f5691de3d4dbd8806054207ab45439d6f93ac2b872e4f93340ee463629"
+  }
+}

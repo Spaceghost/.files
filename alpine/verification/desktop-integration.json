@@ -1,0 +1,191 @@
+{
+  "recorded_at_utc": "2026-09-07T13:44:26Z",
+  "repository_checkin": "a93c5ec1e3",
+  "deployment": {
+    "method": "Unmodified deploy-home.deploy with overlay iteration restricted to exactly three previously absent tracked files; no wallpaper argument",
+    "journal": "/home/jack/.local/state/oldbook/backups/1788788666658528298/manifest.json",
+    "journal_status": "complete",
+    "links": [
+      {
+        "path": "/home/jack/.local/bin/oldbook-video-background",
+        "source": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-video-background",
+        "source_python_parse": "passed"
+      },
+      {
+        "path": "/home/jack/.local/lib/oldbook/workspace_defaults.py",
+        "source": "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_defaults.py",
+        "source_python_parse": "passed"
+      },
+      {
+        "path": "/home/jack/.local/lib/oldbook/youtube_queue.py",
+        "source": "/home/jack/.files/alpine/desktop/.local/lib/oldbook/youtube_queue.py",
+        "source_python_parse": "passed"
+      }
+    ],
+    "video_launcher_executable": true,
+    "playback_or_selection_changed": false,
+    "missing_tracked_overlay_destinations_after": []
+  },
+  "live_compositor": {
+    "pid": 4611,
+    "variant": "sway",
+    "version": "1.12",
+    "restarted": false
+  },
+  "headless_cleanup": {
+    "status": "no_processes_signalled",
+    "live_compositor_excluded": 4611,
+    "candidates": [
+      {
+        "pid": 945,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1557644",
+        "backend": "headless",
+        "runtime": "/tmp/oldbook-gallery-prompts-controls-murfhx8t/run",
+        "runtime_exists": false,
+        "config": "/tmp/oldbook-gallery-prompts-controls-murfhx8t/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      },
+      {
+        "pid": 2141,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1564580",
+        "backend": "headless",
+        "runtime": "/tmp/oldbook-gallery-prompts-controls-c7nvoqco/run",
+        "runtime_exists": false,
+        "config": "/tmp/oldbook-gallery-prompts-controls-c7nvoqco/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      },
+      {
+        "pid": 4379,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1575794",
+        "backend": "headless",
+        "runtime": "/tmp/oldbook-gallery-prompts-controls-sb6ddj24/run",
+        "runtime_exists": false,
+        "config": "/tmp/oldbook-gallery-prompts-controls-sb6ddj24/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      },
+      {
+        "pid": 5445,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1582154",
+        "backend": "headless",
+        "runtime": "/tmp/oldbook-gallery-prompts-controls-_ji9gga2/run",
+        "runtime_exists": false,
+        "config": "/tmp/oldbook-gallery-prompts-controls-_ji9gga2/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      },
+      {
+        "pid": 6568,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1589300",
+        "backend": "headless",
+        "runtime": "/tmp/oldbook-gallery-prompts-controls-qq087udc/run",
+        "runtime_exists": false,
+        "config": "/tmp/oldbook-gallery-prompts-controls-qq087udc/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      },
+      {
+        "pid": 31898,
+        "uid": 1000,
+        "ppid": 1,
+        "start_time_ticks": "1386644",
+        "backend": "headless",
+        "runtime": "/tmp/gallery-preview-dxulrmm8/run",
+        "runtime_exists": false,
+        "config": "/tmp/gallery-preview-dxulrmm8/sway.conf",
+        "config_exists": false,
+        "log_fd_points_to_deleted_file": true,
+        "action": "left_running"
+      }
+    ],
+    "available_completion_evidence": [
+      "alpine/verification/gallery-prompts.json",
+      "alpine/verification/gallery-controls.json",
+      "alpine/verification/gallery-themes/result.json"
+    ],
+    "reason": "All six have deleted private runtime/config paths and retained HEADLESS-1 log lines, but completion records do not retain the corresponding PID/start time/runtime identity or application lifecycle. No remaining IPC socket exists to verify the synthetic application tree. Left running because the requested proof is incomplete."
+  },
+  "calendar": {
+    "before_sha256": "ec229363cbfdca23d60530aadedad8ba4544927cca62afa537ca27dc17eb3442",
+    "after_sha256": "2208d6ababddfe6e9dcb10a90663fbe366e45564bd9ebe316a5de0d0ba67d528",
+    "json_parse": "passed",
+    "only_changed_json_paths": [
+      "[0].clock.calendar.format.months",
+      "[0].clock.calendar.format.weekdays",
+      "[0].clock.calendar.format.today"
+    ],
+    "all_existing_bar_config_and_gestures_preserved": true,
+    "colors": {
+      "months": "#ebdbb2",
+      "weekdays": "#928374",
+      "today": "#fabd2f"
+    },
+    "live_reload": {
+      "method": "oldbook-video-background.reload_waybar, restricted to existing UID, executable and live Sway/Wayland environment, with exact PID start-time guard",
+      "pid": 32516,
+      "start_time_ticks": "1554260",
+      "signal": "SIGUSR2",
+      "same_process_survived": true,
+      "post_reload_bar_configured_count": 2,
+      "log_offset": 851,
+      "log_delta_sha256": "6590c2ba8916583823c5c0244e7bec9d6c9d853c21a8164daf9369735b4416db",
+      "personal_window_contents_captured": false
+    }
+  },
+  "help": {
+    "desktop_theme_description": "Gruvbox Dark",
+    "lock_fallback": "current-wallpaper.png, wallpaper.png, #282828",
+    "added_controls": [
+      "Hold Super for contextual shortcuts",
+      "Shift+left artwork prompt editor"
+    ],
+    "existing_control_rows_retained": true,
+    "hold_to_help_autostart_link": "/home/jack/.config/sway/local.d/shortcuts.conf",
+    "theme_readme_bar_layout": "Context capsule immediately before right status group",
+    "original_control_rows_preserved": 11
+  },
+  "observed_runtime": {
+    "firewall_services": {
+      "oldbook-firewall": "started",
+      "opensnitchd": "started"
+    },
+    "firewall_nft_tables": [
+      "inet opensnitch",
+      "inet oldbook"
+    ],
+    "firewall_indicator_class": "running",
+    "hold_to_help": {
+      "pid": 29013,
+      "state": "running",
+      "visible": false,
+      "locked": true,
+      "device_count": 2,
+      "autostart_deployed": true
+    },
+    "theme_descriptor": "gruvbox-dark",
+    "theme_switcher": "Not implemented; profiles are reference and restore copies",
+    "package_selector": "No command-deck package selector; package-archive remains the reproducibility CLI",
+    "swayidle": {
+      "pid": 1213,
+      "executable_deleted": true,
+      "action": "unchanged; active locking service was not restarted"
+    }
+  }
+}

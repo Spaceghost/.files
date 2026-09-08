@@ -1,0 +1,69 @@
+.TH SUPERHOLD 1 "September 2026" "Superhold 0.1.0" "User Commands"
+.SH NAME
+superhold \- contextual shortcut guide shown while holding a key
+.SH SYNOPSIS
+.B superhold
+.RI "[daemon|dump|preview|status] [options]"
+.SH DESCRIPTION
+Hold Super alone for half a second to show shortcuts for the focused application
+and desktop. Release it or press another key to dismiss the guide. The window
+does not take keyboard focus. Use the pointer wheel to scroll long sections.
+.PP
+The Sway backend uses readable evdev keyboards and compositor IPC. The X11
+backend uses XInput2 raw key events, XQueryKeymap and EWMH window properties, with Openbox and LXQt
+configuration where available. Application profiles explicitly label partial
+coverage. Unsupported Wayland compositors are not silently treated as Sway.
+.SH COMMANDS
+.TP
+.B daemon
+Run the hold-to-show service for this graphical session.
+.TP
+.B dump
+Print a JSON snapshot of the current shortcut context.
+.TP
+.B preview
+Show the current context briefly without waiting for the hold key.
+.TP
+.B status
+Report whether a matching service is running.
+.SH OPTIONS
+.TP
+.BI "--trigger " "super|capslock"
+Observe this physical key without changing keyboard mappings or Caps Lock state.
+.TP
+.BI "--backend " "auto|sway|x11"
+Select the graphical session backend.
+.TP
+.BI "--config " PATH
+Read settings from this TOML file.
+.TP
+.BI "--profiles " PATH
+Read additional application shortcut profiles from this JSON file.
+.TP
+.BI "--socket " PATH
+Use this Sway IPC socket.
+.TP
+.BI "--seconds " NUMBER
+Set the preview duration.
+.TP
+.BI "--hold-seconds " NUMBER
+Override the configured hold duration (0.15 to 3 seconds).
+.SH FILES
+.I ~/.config/superhold/config.toml
+contains trigger, hold_seconds and backend settings.
+.I ~/.config/superhold/profiles.json
+contains user application profiles. XDG_CONFIG_HOME overrides ~/.config.
+.SH THEMING
+Uses the Qt application palette, fonts and style. Configure these with your
+desktop's appearance settings or qt6ct. The program does not select a platform
+theme or force a particular palette. Desktop plugins vary in whether changes
+are broadcast to running applications; restart the guide if your plugin only
+loads settings at startup.
+.SH SECURITY
+Run as the desktop user, never as root. Sway requires existing read access to
+keyboard devices. The package does not grant device permissions or add users
+to the input group. Key contents are not logged or sent over the network.
+.SH SEE ALSO
+.BR sway (1),
+.BR openbox (1),
+.BR qt6ct (1)

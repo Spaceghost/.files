@@ -1,0 +1,131 @@
+{
+  "description": "Supplemental exact APK artifacts for pylast and the 17 dependencies newly installed on 2026-09-07; not a full system restore lock.",
+  "packages": [
+    {
+      "name": "py3-anyio",
+      "version": "4.12.1-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-anyio-4.12.1-r1.apk",
+      "sha256": "7610f8d72698f7b6a4ec1dbe22944adcbe19860dace58f9b25af439377200b0c",
+      "artifact": "sha256/7610f8d72698f7b6a4ec1dbe22944adcbe19860dace58f9b25af439377200b0c/py3-anyio-4.12.1-r1.apk"
+    },
+    {
+      "name": "py3-anyio-pyc",
+      "version": "4.12.1-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-anyio-pyc-4.12.1-r1.apk",
+      "sha256": "85473716017252e004256b219f5267bdcc15809f80a3a757cde6da28bafd17b0",
+      "artifact": "sha256/85473716017252e004256b219f5267bdcc15809f80a3a757cde6da28bafd17b0/py3-anyio-pyc-4.12.1-r1.apk"
+    },
+    {
+      "name": "py3-certifi",
+      "version": "2026.7.22-r0",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/py3-certifi-2026.7.22-r0.apk",
+      "sha256": "2faa42d06757fe7c93da8fd338a13cf94e9b1306425d2aebe20d4c5ab37a1e16",
+      "artifact": "sha256/2faa42d06757fe7c93da8fd338a13cf94e9b1306425d2aebe20d4c5ab37a1e16/py3-certifi-2026.7.22-r0.apk"
+    },
+    {
+      "name": "py3-certifi-pyc",
+      "version": "2026.7.22-r0",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/py3-certifi-pyc-2026.7.22-r0.apk",
+      "sha256": "152a48786d8e2ee1a87e58e4e1574e6cb2a37ae8efb4042ac1848959d0a81157",
+      "artifact": "sha256/152a48786d8e2ee1a87e58e4e1574e6cb2a37ae8efb4042ac1848959d0a81157/py3-certifi-pyc-2026.7.22-r0.apk"
+    },
+    {
+      "name": "py3-curio",
+      "version": "1.6-r4",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-curio-1.6-r4.apk",
+      "sha256": "c1c567dcbeab404425005985b00b4ad67f7efda4bce65d449aaa84c00d4aaf96",
+      "artifact": "sha256/c1c567dcbeab404425005985b00b4ad67f7efda4bce65d449aaa84c00d4aaf96/py3-curio-1.6-r4.apk"
+    },
+    {
+      "name": "py3-curio-pyc",
+      "version": "1.6-r4",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-curio-pyc-1.6-r4.apk",
+      "sha256": "a23ca401f78cf1ddb26a2840061620e7c5ec385f7052c69d5bedc7dd7802a7c0",
+      "artifact": "sha256/a23ca401f78cf1ddb26a2840061620e7c5ec385f7052c69d5bedc7dd7802a7c0/py3-curio-pyc-1.6-r4.apk"
+    },
+    {
+      "name": "py3-h11",
+      "version": "0.16.0-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-h11-0.16.0-r1.apk",
+      "sha256": "9357124f1a7edacd4a88e8bf918b773a56a6e0611f7c83ff5930e039a2077460",
+      "artifact": "sha256/9357124f1a7edacd4a88e8bf918b773a56a6e0611f7c83ff5930e039a2077460/py3-h11-0.16.0-r1.apk"
+    },
+    {
+      "name": "py3-h11-pyc",
+      "version": "0.16.0-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-h11-pyc-0.16.0-r1.apk",
+      "sha256": "6c03fa1804bec70526d0d8f30c2b848a7ec6b51b52f7625ff70c30f9a7e76758",
+      "artifact": "sha256/6c03fa1804bec70526d0d8f30c2b848a7ec6b51b52f7625ff70c30f9a7e76758/py3-h11-pyc-0.16.0-r1.apk"
+    },
+    {
+      "name": "py3-httpcore",
+      "version": "1.0.9-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-httpcore-1.0.9-r1.apk",
+      "sha256": "226fb197b594ec2c5fe9a60db0743786bb786dc4da9366c6f336834fb34647a2",
+      "artifact": "sha256/226fb197b594ec2c5fe9a60db0743786bb786dc4da9366c6f336834fb34647a2/py3-httpcore-1.0.9-r1.apk"
+    },
+    {
+      "name": "py3-httpcore-pyc",
+      "version": "1.0.9-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-httpcore-pyc-1.0.9-r1.apk",
+      "sha256": "f047a64f0704fa3d1ad24580cc114c11225f65d38c114f67e23fa0b99f074239",
+      "artifact": "sha256/f047a64f0704fa3d1ad24580cc114c11225f65d38c114f67e23fa0b99f074239/py3-httpcore-pyc-1.0.9-r1.apk"
+    },
+    {
+      "name": "py3-httpx",
+      "version": "0.28.1-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-httpx-0.28.1-r1.apk",
+      "sha256": "6333a061b5371e03cf4a8df6c7b7974e58b124657888a7c2193be93fff9f7102",
+      "artifact": "sha256/6333a061b5371e03cf4a8df6c7b7974e58b124657888a7c2193be93fff9f7102/py3-httpx-0.28.1-r1.apk"
+    },
+    {
+      "name": "py3-httpx-pyc",
+      "version": "0.28.1-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-httpx-pyc-0.28.1-r1.apk",
+      "sha256": "0e52cc371eae8e12742f2d60dfe2407bbbdaf3f85b716ea01e5d85e6ebd44f28",
+      "artifact": "sha256/0e52cc371eae8e12742f2d60dfe2407bbbdaf3f85b716ea01e5d85e6ebd44f28/py3-httpx-pyc-0.28.1-r1.apk"
+    },
+    {
+      "name": "py3-idna",
+      "version": "3.19-r0",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/py3-idna-3.19-r0.apk",
+      "sha256": "dd251709426100627e15734b1d3332bbdea8573f98f1effa98d16fd199085bc5",
+      "artifact": "sha256/dd251709426100627e15734b1d3332bbdea8573f98f1effa98d16fd199085bc5/py3-idna-3.19-r0.apk"
+    },
+    {
+      "name": "py3-idna-pyc",
+      "version": "3.19-r0",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/py3-idna-pyc-3.19-r0.apk",
+      "sha256": "95285cd668623348be6f0ead667d1da675294ae7befcec688285f7ca1f7ee99c",
+      "artifact": "sha256/95285cd668623348be6f0ead667d1da675294ae7befcec688285f7ca1f7ee99c/py3-idna-pyc-3.19-r0.apk"
+    },
+    {
+      "name": "py3-pylast",
+      "version": "5.5.0-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-pylast-5.5.0-r1.apk",
+      "sha256": "b328f90516c443c778e694753f93db2048e4e7ba6bf53e09db9b510711259f70",
+      "artifact": "sha256/b328f90516c443c778e694753f93db2048e4e7ba6bf53e09db9b510711259f70/py3-pylast-5.5.0-r1.apk"
+    },
+    {
+      "name": "py3-pylast-pyc",
+      "version": "5.5.0-r1",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-pylast-pyc-5.5.0-r1.apk",
+      "sha256": "335ab0d8278334c968475bc3489f6d2377e2eadbd4563211522da698deb1b620",
+      "artifact": "sha256/335ab0d8278334c968475bc3489f6d2377e2eadbd4563211522da698deb1b620/py3-pylast-pyc-5.5.0-r1.apk"
+    },
+    {
+      "name": "py3-sniffio",
+      "version": "1.3.1-r2",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-sniffio-1.3.1-r2.apk",
+      "sha256": "c3e598d0c286865c84ee422ca2b0afc57a3cfe26e425629296e64b6ee033eb0f",
+      "artifact": "sha256/c3e598d0c286865c84ee422ca2b0afc57a3cfe26e425629296e64b6ee033eb0f/py3-sniffio-1.3.1-r2.apk"
+    },
+    {
+      "name": "py3-sniffio-pyc",
+      "version": "1.3.1-r2",
+      "source": "https://dl-cdn.alpinelinux.org/alpine/edge/community/x86_64/py3-sniffio-pyc-1.3.1-r2.apk",
+      "sha256": "b5958e12093a8dce6a56356840976821ed8c283c50a926386430d09028ccb8fd",
+      "artifact": "sha256/b5958e12093a8dce6a56356840976821ed8c283c50a926386430d09028ccb8fd/py3-sniffio-pyc-1.3.1-r2.apk"
+    }
+  ]
+}

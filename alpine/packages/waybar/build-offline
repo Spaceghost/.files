@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Build the pinned Waybar APK in abuild's disposable rootbld environment."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--source', required=True, type=Path,
+                    help='Pinned Waybar-0.15.0.tar.gz')
+parser.add_argument('--work', required=True, type=Path,
+                    help='New, nonexisting build directory')
+args = parser.parse_args()
+if os.geteuid() == 0:
+    parser.error('Run as the ordinary build user with a configured abuild signing key')
+
+recipe = Path(__file__).resolve().parent
+manifest = json.loads((recipe / 'manifest.json').read_text())
+source = args.source.resolve(strict=True)
+expected = manifest['source']['sha256']
+if hashlib.sha256(source.read_bytes()).hexdigest() != expected:
+    parser.error('Source SHA-256 does not match manifest.json')
+
+work = args.work.absolute()
+work.mkdir(parents=True, exist_ok=False)
+stage = work / 'aports/community/waybar'
+stage.mkdir(parents=True)
+for name in ('APKBUILD', 'waybar.initd', 'sway-ipc-reconnect.patch'):
+    shutil.copy2(recipe / name, stage / name)
+distfiles = work / 'distfiles'
+distfiles.mkdir()
+shutil.copy2(source, distfiles / manifest['source']['filename'])
+shutil.copy2(source, stage / manifest['source']['filename'])
+
+# rootbld expands this template while preparing its disposable APK root.
+(stage.parent / '.rootbld-repositories').write_text(
+    'https://dl-cdn.alpinelinux.org/alpine/$version/main\n'
+    'https://dl-cdn.alpinelinux.org/alpine/$version/community\n'
+    '@testing https://dl-cdn.alpinelinux.org/alpine/$version/testing\n')
+
+packages = work / 'packages'
+packages.mkdir()
+command = ['abuild', '-K', '-P', str(packages), '-s', str(distfiles), 'rootbld']
+with (work / 'build.log').open('w') as log:
+    result = subprocess.run(command, cwd=stage, stdout=log,
+                            stderr=subprocess.STDOUT,
+                            env=dict(os.environ, JOBS='4'))
+if result.returncode:
+    raise SystemExit(f'Build failed; see {work / "build.log"}')
+apk = next(packages.glob('community/*/waybar-[0-9]*.apk'))
+print(apk)
+print('SHA-256', hashlib.sha256(apk.read_bytes()).hexdigest())

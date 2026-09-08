@@ -1,0 +1,130 @@
+--- a/daemon/firewall/nftables/rules.go
++++ b/daemon/firewall/nftables/rules.go
+@@ -2,6 +2,7 @@
+ 
+ import (
+ 	"fmt"
++	"os"
+ 
+ 	"github.com/evilsocket/opensnitch/daemon/firewall/nftables/exprs"
+ 	"github.com/evilsocket/opensnitch/daemon/log"
+@@ -78,6 +79,12 @@
+ // rules above this one to exclude a service/app from being intercepted.
+ // nft insert rule ip mangle OUTPUT ct state new queue num 0 bypass
+ func (n *Nft) QueueConnections(enable, logError bool) (error, error) {
++	// MBP Intel owns a permanent no-bypass output queue outside our tables.
++	// Do not queue a connection twice or remove that gate during shutdown.
++	if os.Getenv("OPENSNITCH_EXTERNAL_OUTPUT_QUEUE") == "1" {
++		return nil, nil
++	}
++
+ 	if n.Conn == nil {
+ 		return nil, fmt.Errorf("nftables QueueConnections: netlink connection not active")
+ 	}
+--- a/daemon/firewall/nftables/monitor.go
++++ b/daemon/firewall/nftables/monitor.go
+@@ -1,6 +1,7 @@
+ package nftables
+ 
+ import (
++	"os"
+ 	"time"
+ 
+ 	"github.com/evilsocket/opensnitch/daemon/firewall/common"
+@@ -14,6 +15,7 @@
+ 	defer n.Unlock()
+ 
+ 	nRules := 0
++	externalOutputQueue := os.Getenv("OPENSNITCH_EXTERNAL_OUTPUT_QUEUE") == "1"
+ 	chains, err := n.Conn.ListChains()
+ 	if err != nil {
+ 		log.Warning("[nftables] error listing nftables chains: %s", err)
+@@ -31,6 +33,10 @@
+ 		}
+ 		for rdx, r := range rules {
+ 			if string(r.UserData) == InterceptionRuleKey {
++				if externalOutputQueue && c.Name != exprs.CHAIN_FILTER_INPUT {
++					log.Warning("nftables unexpected interception rule in external output queue mode: %s", c.Name)
++					return false
++				}
+ 				if c.Name == exprs.CHAIN_FILTER_INPUT && rdx != 0 {
+ 					log.Warning("nftables DNS rule not in 1st position (%d)", rdx)
+ 					return false
+@@ -45,7 +51,11 @@
+ 	}
+ 	// we expect to have exactly 3 rules (2 queue and 1 dns). If there're less or more, then we
+ 	// need to reload them.
+-	if nRules != 3 {
++	expected := 3
++	if externalOutputQueue {
++		expected = 1 // DNS only; the independent output gate is not ours.
++	}
++	if nRules != expected {
+ 		log.Warning("nfables filter rules not loaded: %d", nRules)
+ 		return false
+ 	}
+--- a/daemon/firewall/nftables/rules_test.go
++++ b/daemon/firewall/nftables/rules_test.go
+@@ -168,6 +168,18 @@
+ 	}
+ }
+ 
++func TestExternalOutputQueueSkipsNativeQueue(t *testing.T) {
++	t.Setenv("OPENSNITCH_EXTERNAL_OUTPUT_QUEUE", "1")
++	fw, err := nftb.Fw()
++	if err != nil {
++		t.Fatal(err)
++	}
++
++	if err1, err2 := fw.QueueConnections(true, true); err1 != nil || err2 != nil {
++		t.Fatalf("external output queue should not require a native nftables connection: %v, %v", err1, err2)
++	}
++}
++
+ func TestQueueDNSResponses(t *testing.T) {
+ 	nftest.SkipIfNotPrivileged(t)
+ 
+--- a/daemon/firewall/nftables/monitor_test.go
++++ b/daemon/firewall/nftables/monitor_test.go
+@@ -78,6 +78,41 @@
+ 	}
+ }
+ 
++func TestExternalOutputQueueRequiresDNSRule(t *testing.T) {
++	nftest.SkipIfNotPrivileged(t)
++	t.Setenv("OPENSNITCH_EXTERNAL_OUTPUT_QUEUE", "1")
++
++	conn, newNS := nftest.OpenSystemConn(t)
++	defer nftest.CleanupSystemConn(t, newNS)
++	nftest.Fw.Conn = conn
++
++	addInterceptionRules(nftest.Fw, t)
++	if !nftest.Fw.AreRulesLoaded() {
++		t.Fatal("DNS interception rule should satisfy external output queue mode")
++	}
++
++	table := nftest.Fw.GetTable(exprs.TABLE_OPENSNITCH, exprs.NFT_FAMILY_INET)
++	input := nftest.Fw.GetChain(exprs.CHAIN_FILTER_INPUT, table, exprs.NFT_FAMILY_INET)
++	conn.FlushChain(input)
++	if !nftest.Fw.Commit() {
++		t.Fatal("failed to remove DNS interception rule")
++	}
++	if _, err := nftest.Fw.AddRule(
++		exprs.CHAIN_MANGLE_OUTPUT,
++		exprs.TABLE_OPENSNITCH,
++		exprs.NFT_FAMILY_INET,
++		0,
++		nftb.InterceptionRuleKey,
++		exprs.NewNoTrack(),
++	); err != nil {
++		t.Fatalf("failed to add stale output interception rule: %v", err)
++	}
++
++	if nftest.Fw.AreRulesLoaded() {
++		t.Error("stale output interception rule must not substitute for the DNS rule")
++	}
++}
++
+ func TestMonitorReload(t *testing.T) {
+ 	nftest.SkipIfNotPrivileged(t)
+ 

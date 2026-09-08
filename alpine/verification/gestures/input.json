@@ -1,0 +1,27 @@
+[
+  {
+    "identifier": "1452:628:bcm5974",
+    "name": "bcm5974",
+    "type": "touchpad",
+    "scroll_factor": 1.0,
+    "libinput": {
+      "send_events": "enabled",
+      "tap": "enabled",
+      "tap_button_map": "lrm",
+      "tap_drag": "enabled",
+      "tap_drag_lock": "disabled",
+      "accel_speed": 0.20000000298023224,
+      "accel_profile": "adaptive",
+      "natural_scroll": "enabled",
+      "left_handed": "disabled",
+      "click_method": "clickfinger",
+      "clickfinger_button_map": "lrm",
+      "middle_emulation": "enabled",
+      "scroll_method": "two_finger",
+      "dwt": "enabled",
+      "dwtp": "enabled"
+    },
+    "vendor": 1452,
+    "product": 628
+  }
+]

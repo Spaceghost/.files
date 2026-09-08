@@ -1,0 +1,48 @@
+{
+  "name": "mbp-intel-radio-runtime",
+  "version": "0.1.0",
+  "revision": 0,
+  "architecture": "noarch",
+  "license": "LicenseRef-Unknown",
+  "source_date_epoch": 1788739200,
+  "status": "installed inert runtime; profiles and ownership migration remain inactive",
+  "source_manifest": "alpine/security/radio/RUNTIME_SOURCE_MANIFEST",
+  "source": {
+    "filename": "mbp-intel-radio-runtime-0.1.0.tar.gz",
+    "sha256": "7f79d19d52463ef7b6656829282ab2fdfa7cbf7ad1fe8733fa1ce50543ac5cfd",
+    "artifact": "sha256/7f79d19d52463ef7b6656829282ab2fdfa7cbf7ad1fe8733fa1ce50543ac5cfd/mbp-intel-radio-runtime-0.1.0.tar.gz"
+  },
+  "packages": [
+    {
+      "filename": "mbp-intel-radio-runtime-0.1.0-r0.apk",
+      "sha256": "8e86aa8b166e1419ab5649b885b23faebed151636063e544cc4af64a2cc6438d",
+      "artifact": "sha256/8e86aa8b166e1419ab5649b885b23faebed151636063e544cc4af64a2cc6438d/mbp-intel-radio-runtime-0.1.0-r0.apk",
+      "bytes": 52708
+    }
+  ],
+  "payload": {
+    "regular_files": 17,
+    "cli": "/usr/local/sbin/privacyctl",
+    "modules": "/usr/local/lib/privacyctl_runtime",
+    "helpers": [
+      "/usr/local/libexec/privacyctl-dhcp-launch",
+      "/usr/local/libexec/privacyctl-dhcp-event"
+    ],
+    "owner": "root:root",
+    "command_mode": "0750",
+    "module_mode": "0644",
+    "activation_files": false,
+    "install_scripts": false
+  },
+  "checks": {
+    "command": "PYTHONPATH=tests python3 -B -m unittest -v test_lease.LeaseTests test_privacyctl.ProtocolTests test_runtime_release.RuntimeReleaseTests",
+    "native_security_proof": false,
+    "package_installation_invokes_runtime": false
+  },
+  "reproducibility": {
+    "builds": 2,
+    "signed_apks_byte_identical": true,
+    "network": "builder creates a separate empty network namespace",
+    "package_check_tests_per_build": 31
+  }
+}

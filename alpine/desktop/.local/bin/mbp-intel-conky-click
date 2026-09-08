@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Open reading history, advance a card or return to the earlier passage after a desktop click."""
+import argparse
+import fcntl
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+BIN = Path(__file__).resolve().parent
+ACTIONS = {'scripture': ('mbp-intel-scripture', 'next'),
+           'scripture-history': ('mbp-intel-scripture', 'history'),
+           'scripture-previous': ('mbp-intel-scripture', 'previous'),
+           'witness': ('mbp-intel-scripture', 'witness-next'),
+           'ghost': ('mbp-intel-journal', 'next'),
+           'gallery': ('mbp-intel-wallpaper', 'next')}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('card', choices=ACTIONS)
+    args = parser.parse_args()
+    directory = Path.home() / '.local/state/mbp-intel/conky'
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    if directory.is_symlink() or directory.stat().st_uid != os.getuid():
+        raise RuntimeError('Conky state directory must be an owned regular directory')
+    # Keep rapid clicks ordered through saving the choice and replacing its card.
+    with (directory / 'click.lock').open('a+') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if (directory / 'disabled').exists():
+            return 0
+        helper, action = ACTIONS[args.card]
+        if args.card == 'scripture-history':
+            # A reader can stay open indefinitely; release the card lock after
+            # launch so it cannot block subsequent passage or journal clicks.
+            subprocess.Popen([str(BIN / helper), action], stdin=subprocess.DEVNULL,
+                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                             start_new_session=True)
+            return 0
+        subprocess.run([str(BIN / helper), action], check=True)
+        if args.card == 'ghost':
+            subprocess.run([str(BIN / 'mbp-intel-scripture'), 'refresh', 'ghost'], check=True)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, subprocess.SubprocessError) as error:
+        print(f'mbp-intel-conky-click: {error}', file=sys.stderr)
+        sys.exit(1)

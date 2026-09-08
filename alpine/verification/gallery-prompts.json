@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "captured_at": "2026-09-07T13:00:25Z",
+  "fixture_only": true,
+  "private_headless_sway": true,
+  "window": {
+    "app_id": "oldbook-gallery-prompts",
+    "title": "Gallery Prompts",
+    "width": 904,
+    "height": 721
+  },
+  "checks": {
+    "native_wayland_window": true,
+    "actual_save_button": true,
+    "scene_switch_preserves_edits": true,
+    "unknown_fields_preserved": true,
+    "scene_ids_preserved": true,
+    "model_timeout_preserved": true,
+    "source_mode_preserved": true,
+    "exact_private_backup": true,
+    "actual_cancel_button": true,
+    "cancel_creates_no_backup": true,
+    "no_image_generation": true
+  },
+  "screenshot": "alpine/verification/gallery-prompts.png",
+  "host_prompt_file_modified": false
+}

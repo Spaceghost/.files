@@ -1,0 +1,186 @@
+{
+  "verified_at": "2026-09-07T19:00:24.781496+00:00",
+  "environment": "Private headless SwayFX 0.6 / Sway 1.12 on Alpine; no host input devices or settings changed",
+  "backend": "wtype; native bindings execute private touch markers; unmodified q binding checks modifier release",
+  "source": "https://github.com/swaywm/sway/blob/1.12/sway/commands/bind.c",
+  "cases": [
+    {
+      "binding": "Mod4+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+Shift+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+Shift+X",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+X",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Control+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "ctrl"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Control+Shift+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Control+Shift+X",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "ctrl",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+Control+Shift+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "ctrl",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "--release Mod4+Shift+x",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "shift"
+          ],
+          "key": "x"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+Shift+0x58",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "shift"
+          ],
+          "key": "X"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+plus",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo"
+          ],
+          "key": "plus"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    },
+    {
+      "binding": "Mod4+Shift+plus",
+      "native_sequence": [
+        {
+          "modifiers": [
+            "logo",
+            "shift"
+          ],
+          "key": "plus"
+        }
+      ],
+      "dispatch_ok": true,
+      "binding_fired": true,
+      "all_modifiers_released": true
+    }
+  ],
+  "all_passed": true
+}

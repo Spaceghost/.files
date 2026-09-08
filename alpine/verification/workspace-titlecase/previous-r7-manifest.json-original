@@ -1,0 +1,27 @@
+{
+  "alpine_release": "3.25.0_alpha20260805",
+  "arch": "x86_64",
+  "packages": [
+    {
+      "apk_identity": "Q1zaxuiP8v8BCbkE4QJoIcoU4kxg0=",
+      "arch": "x86_64",
+      "artifact": "sha256/4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b/oldbook-waybar-art-1.0.0-r7.apk",
+      "artifact_arch": "x86_64",
+      "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+      "filename": "oldbook-waybar-art-1.0.0-r7.apk",
+      "name": "oldbook-waybar-art",
+      "sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b",
+      "version": "1.0.0-r7"
+    }
+  ],
+  "schema": 1,
+  "verification": [
+    "two byte-identical network-isolated builds",
+    "apk verify for both APKs",
+    "Fossil unversioned archive readback",
+    "regression demonstrated with r6 helper before fix",
+    "49 native GTK checks against the extracted signed APK library",
+    "installed library hash and preserved host package identities",
+    "1119-package lock matches all installed name/version/arch/APK identities"
+  ]
+}

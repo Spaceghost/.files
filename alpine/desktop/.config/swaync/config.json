@@ -1,0 +1,40 @@
+{
+  "positionX": "right",
+  "positionY": "top",
+  "layer": "top",
+  "control-center-layer": "top",
+  "layer-shell-cover-screen": false,
+  "control-center-exclusive-zone": false,
+  "control-center-margin-top": 50,
+  "control-center-margin-bottom": 14,
+  "control-center-margin-right": 14,
+  "control-center-width": 380,
+  "control-center-height": -1,
+  "notification-window-width": 380,
+  "notification-icon-size": 48,
+  "timeout": 8,
+  "timeout-low": 4,
+  "fit-to-screen": false,
+  "keyboard-shortcuts": false,
+  "transition-time": 0,
+  "image-visibility": "when-available",
+  "widgets": [
+    "title",
+    "dnd",
+    "notifications"
+  ],
+  "widget-config": {
+    "title": {
+      "text": "INCOMING TRANSMISSIONS",
+      "clear-all-button": true,
+      "button-text": "Clear"
+    },
+    "dnd": {
+      "text": "Off the air"
+    },
+    "notifications": {
+      "vexpand": false
+    }
+  },
+  "layer-shell": true
+}

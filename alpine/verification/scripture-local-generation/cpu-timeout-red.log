@@ -1,0 +1,17 @@
+test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes (test_scripture_generation.GenerationTests.test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes) ... ERROR
+
+======================================================================
+ERROR: test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes (test_scripture_generation.GenerationTests.test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_scripture_generation.py", line 179, in test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes
+    entry = generation.generate_entry('John 3:16', 'study-note', [source()],
+                                       endpoint=ollama.endpoint, timeout=900)
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/scripture_generation.py", line 228, in generate_entry
+    raise ValueError('Ollama timeout must be between 0 and 300 seconds')
+ValueError: Ollama timeout must be between 0 and 300 seconds
+
+----------------------------------------------------------------------
+Ran 1 test in 0.533s
+
+FAILED (errors=1)

@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "status": "staged components and combined native fixture verified; not activated",
+  "verified_at_utc": "2026-09-07T16:39:26Z",
+  "unit_suite": {
+    "command": "doas -n python3 -B -m unittest discover -s alpine/security/radio/tests -v",
+    "tests_passed": 213,
+    "elapsed_seconds": 13.185,
+    "log_artifact": "sha256/ca0365b6597f76f00b72da4453c6af2805e8e4aa9a874eb0c961d5bc62b6697e/radio-owner-verified-core-tests.log",
+    "log_sha256": "ca0365b6597f76f00b72da4453c6af2805e8e4aa9a874eb0c961d5bc62b6697e"
+  },
+  "source_sha256": {
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/adapter.py": "8fa542ccbf5d3bc98ddd67ea03ee23eb6408f1cca5afa4b91cb7f394d0a93634",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/dhcp.py": "84fc00759ee7cbf1943e7fe26582ae516b2949a4403e528fdad5437c17551df8",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/hook.py": "8fdcba813da12f647437bfaa8f6fcea93d88df1035040fd6585e7e7e8894f1dd",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/ipc.py": "54adc94130dbb4c28ffad2893011bd24e8c43b62c453a304aedfe64da57a488e",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "320479f485f8e88f10445a12324292344556fec01507701748768fbe7ecc1696",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/runner.py": "ead61d28b2a55d1ea7d96cc3bc2586d5b378904ac2735c2d0bf4b5150ee6486e",
+    "alpine/security/radio/root/usr/local/lib/privacyctl_runtime/service.py": "50f9887c356f712eba1fe4ac7be48b117e8ad52fb137df883974fb9217af8789",
+    "alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-event": "9c242a9ab5bc9a59a02a8081561b3859bc6450a7799ebd7ddca77262bd93500f",
+    "alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-launch": "ee9857880a292f835baf65ba3417a17ef5fbdf517f72aab07e816d1de54e81de",
+    "alpine/security/radio/root/usr/local/sbin/privacyctl": "6c79a6dc2d0e653375204fbb89611e862125223accc2e77f925d696d053dec57",
+    "alpine/security/radio/tests/test_bluetooth_install.py": "7d992623121a8dc739a0c1d909bf1a6c47b9384aac84b419bc7fd544d31d8e95",
+    "alpine/security/radio/tests/test_dhcp.py": "c18a62a9d74561fa0d0ac0060171aa4dfdaccef3b14282c8196bd88ad1cf5b6d",
+    "alpine/security/radio/tests/test_install.py": "ada89435c90cddf0df198c22b08591be16d346017ca9d4774ad75db02ea2b003",
+    "alpine/security/radio/tests/test_ipc.py": "c589cc04930f629c838c653931ad3db1342af08561f97b19530b45ca45f49788",
+    "alpine/security/radio/tests/test_lease.py": "4c53219723e346ee5c3af3f216970b88c50a2ae6d6570798f5fc335f78be8cbc",
+    "alpine/security/radio/tests/test_network.py": "538739cda3beaa0810a7d5ffc4efbac5690469613a86281300f904de9d947055",
+    "alpine/security/radio/tests/test_owner_adapter.py": "fd79ed999ea28132c68c36575eed6edd50bc32916c6032ace3333d086861e3b6",
+    "alpine/security/radio/tests/test_owner_runner.py": "3524fb0ff95084ea45982cc6cea30bfe6d42a19b8e007b8513d843ae0aae0c71",
+    "alpine/security/radio/tests/test_privacyctl.py": "842cf2afbdabf4f124d06acfbe0c0b2c07ef7f4b3b98961aad8db9758325c2ab",
+    "alpine/security/radio/tests/test_service.py": "f76010f9df0eaf3f4957f18f4c8f3a2ea8f0f65d7d518c0779a5426732103587",
+    "alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+    "alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+    "alpine/security/radio/tests/verify_radio_owner.py": "f802e65e31e7b869229e8b397887f90f71660690b3cd2bfffd8930f6ae46a8b5"
+  },
+  "native_applier": {
+    "artifact": "sha256/bd3b3c0e6801e9f3a04189f09dfac3b7c2e2367b34532312efae6d3bdb1e9c01/radio-owner-applier-verified.json",
+    "sha256": "bd3b3c0e6801e9f3a04189f09dfac3b7c2e2367b34532312efae6d3bdb1e9c01",
+    "status": "passed",
+    "case_count": 7,
+    "elapsed_seconds": 12.063994020998507
+  },
+  "native_owner": {
+    "artifact": "sha256/fc15343e4378bda0dc6a874d5312dc410bca18a25a35a8f07f616bd68ad826a4/radio-owner-native-verified.json",
+    "sha256": "fc15343e4378bda0dc6a874d5312dc410bca18a25a35a8f07f616bd68ad826a4",
+    "status": "passed",
+    "cases": [
+      "real_bound_and_same_client_renewal",
+      "cli_off_removes_owned_state_and_dirty_marker",
+      "captured_pre_off_fence_rejected",
+      "scan_ignores_wrong_id_and_accepts_exact_completion",
+      "owner_home_hotspot_home_restores_ipv6",
+      "real_renewal_nak_cleans_owner",
+      "real_server_silence_removes_authorization"
+    ],
+    "elapsed_seconds": 78.25036550200093,
+    "lease_seconds_offered": 32,
+    "host_state_unchanged": true,
+    "remaining_namespace_members": []
+  },
+  "historical_failed_fixture_runs": [
+    {
+      "artifact": "sha256/4ecfd34e0fd5219c4c90c5318710369cbb454dc28d1c78170861bdbab616da61/radio-owner-native-first.json",
+      "sha256": "4ecfd34e0fd5219c4c90c5318710369cbb454dc28d1c78170861bdbab616da61",
+      "reason": "13-second fixture renewal wait ended before observed BusyBox short-lease renewal"
+    },
+    {
+      "artifact": "sha256/6a97293490d1bfc2d11c9bd3263316e52c08625bd40188dfb9e69f2e1136945b/radio-owner-native-diagnostics.json",
+      "sha256": "6a97293490d1bfc2d11c9bd3263316e52c08625bd40188dfb9e69f2e1136945b",
+      "reason": "same wait failure; diagnostics showed bound owner and no renewal packets yet"
+    },
+    {
+      "artifact": "sha256/9aae15290ec16aa55706b360e4193a324eebfc14bf273c507d4d6f6d83d07173/radio-owner-native-dad-deadline.json",
+      "sha256": "9aae15290ec16aa55706b360e4193a324eebfc14bf273c507d4d6f6d83d07173",
+      "reason": "real veth IPv6 DAD plus native application exceeded old three-second budget; partial state cleaned"
+    },
+    {
+      "artifact": "sha256/895a68305da5f2755e3b175ecceeb933b652ed988e4ed98cd9ffd5a1e2659aac/radio-owner-native-timing.json",
+      "sha256": "895a68305da5f2755e3b175ecceeb933b652ed988e4ed98cd9ffd5a1e2659aac",
+      "reason": "six cases passed; fixture incorrectly required expiry even when DHCP deconfiguration ended authorization earlier"
+    }
+  ],
+  "review_findings_fixed": [
+    "ordinary off rotates the request fence before cancellation",
+    "guardian resets inherited SIGCHLD handling before fork and pidfd capture",
+    "cleanup drains retained native processes even before an owned network record exists",
+    "four-second application budget includes real IPv6 DAD; five-second hook and actual expiry remain independent"
+  ],
+  "process_proof_scope": "Guardian/owner death and competing-guardian checks use real private processes with marker callbacks; combined native fixture launches Owner directly.",
+  "not_claimed": [
+    "physical radio or real WPA association proof",
+    "combined cancellation while a hook or native operation is blocked",
+    "combined guardian death and OpenRC service startup",
+    "packet-gate or OpenSnitch authorization of DHCP/DNS",
+    "live migration or confirmed trusted SSIDs",
+    "RA/SLAAC profile policy",
+    "automatic orphan-state recovery",
+    "reboot or suspend acceptance"
+  ],
+  "package_lock": {
+    "artifact": "sha256/b2d28cffd48c815b584945c2139dd717158a0d4c00377b495b0c6f2af4f3c5af/radio-owner-package-lock-check.json",
+    "sha256": "b2d28cffd48c815b584945c2139dd717158a0d4c00377b495b0c6f2af4f3c5af",
+    "path": "alpine/packages/locks/929661069218e44178e3.json",
+    "package_count": 1080
+  }
+}

@@ -1,0 +1,801 @@
+..............................................................F...........F..............................................................................................................................mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+mbp-intel-conky: omitted telemetry panel card; system stats belong in Waybar
+....<frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+mbp-intel-conky: omitted telemetry panel reactor; system stats belong in Waybar
+......./usr/lib/python3.14/site-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+/usr/lib/python3.14/site-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+.........................................................................<frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+...F...................................hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/mbp-intel-publication-test-y16xapwv/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+To /tmp/mbp-intel-publication-test-y16xapwv/remote.git
+ ! [rejected]        alpine-oldbook -> alpine-oldbook (fetch first)
+error: failed to push some refs to '/tmp/mbp-intel-publication-test-y16xapwv/remote.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+.hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/mbp-intel-publication-test-ogngfsh4/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+...hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/mbp-intel-publication-test-92_1ir6t/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+Everything up-to-date
+To /tmp/mbp-intel-publication-test-92_1ir6t/remote.git
+   bee0c9d..dbd4ea0  alpine-oldbook -> alpine-oldbook
+...hint: Using 'master' as the name for the initial branch. This default branch name
+hint: will change to "main" in Git 3.0. To configure the initial branch name
+hint: to use in all of your new repositories, which will suppress this warning,
+hint: call:
+hint:
+hint: 	git config --global init.defaultBranch <name>
+hint:
+hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+hint: 'development'. The just-created branch can be renamed via this command:
+hint:
+hint: 	git branch -m <name>
+hint:
+hint: Disable this message with "git config set advice.defaultBranchName false"
+To /tmp/mbp-intel-publication-test-60qaldet/remote.git
+ * [new branch]      alpine-oldbook -> alpine-oldbook
+........E/usr/lib/python3.14/tempfile.py:962: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpcaqxava8'>
+  _warnings.warn(warn_message, ResourceWarning)
+..E/usr/lib/python3.14/tempfile.py:962: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmp6uk8v6gm'>
+  _warnings.warn(warn_message, ResourceWarning)
+E/usr/lib/python3.14/tempfile.py:962: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpdj1ht0yn'>
+  _warnings.warn(warn_message, ResourceWarning)
+..E/usr/lib/python3.14/tempfile.py:962: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmpl_sfjuae'>
+  _warnings.warn(warn_message, ResourceWarning)
+.............EEEEE.FE...............................................EEEEEEEEEEEE.E...E/usr/lib/python3.14/tempfile.py:962: ResourceWarning: Implicitly cleaning up <TemporaryDirectory '/tmp/tmp07ml0mke'>
+  _warnings.warn(warn_message, ResourceWarning)
+............................Another publisher holds the mirror lock; retry on the next run.
+git init /tmp/mbp-intel-publication-test-y16xapwv/mirror
+Initialized empty Git repository in /tmp/mbp-intel-publication-test-y16xapwv/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/mbp-intel-publication-test-y16xapwv/mirror
+git update-ref "refs/heads/alpine-oldbook" 709b76641e7defc861ac3465020d35717d1468d5
+git update-ref "refs/heads/base" 8cc72aec23782382a8a8ef3f3e9358439a8173c2
+git repack -adf
+Published alpine-oldbook: 709b76641e7defc861ac3465020d35717d1468d5
+no changes
+git init /tmp/mbp-intel-publication-test-ogngfsh4/mirror
+Initialized empty Git repository in /tmp/mbp-intel-publication-test-ogngfsh4/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/mbp-intel-publication-test-ogngfsh4/mirror
+git update-ref "refs/heads/alpine-oldbook" a55ad2ba962d24cd195f6b947f45e0c64c621512
+git update-ref "refs/heads/base" db40ab07d52ea403eef84ea9c2dae31df64fc4c4
+git repack -adf
+Exported alpine-oldbook: a55ad2ba962d24cd195f6b947f45e0c64c621512; not pushed
+no changes
+Published alpine-oldbook: a55ad2ba962d24cd195f6b947f45e0c64c621512
+/tmp/mbp-intel-publication-test-b5oyp7e2/public.fossil
+SHA256 3ea1b973b1d5bf5a2e05fe5ddd403e39fe7a43ccc163d5fe4be9f1aabac91cde
+Archived inputs: 1
+git init /tmp/mbp-intel-publication-test-92_1ir6t/mirror
+Initialized empty Git repository in /tmp/mbp-intel-publication-test-92_1ir6t/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/mbp-intel-publication-test-92_1ir6t/mirror
+git update-ref "refs/heads/alpine-oldbook" bee0c9d1b78c03437484198c07cf03aa35374d78
+git update-ref "refs/heads/base" 48c5ae78a723e49c9d72ef7dc78189d484ad4951
+git repack -adf
+Published alpine-oldbook: bee0c9d1b78c03437484198c07cf03aa35374d78
+no changes
+Published alpine-oldbook: bee0c9d1b78c03437484198c07cf03aa35374d78
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/1      1 check-ins added to the /tmp/mbp-intel-publication-test-92_1ir6t/mirror
+git update-ref "refs/heads/alpine-oldbook" dbd4ea04b3cd05a50a93aefa06b772d1e4b244a5
+Published alpine-oldbook: dbd4ea04b3cd05a50a93aefa06b772d1e4b244a5
+git init /tmp/mbp-intel-publication-test-60qaldet/mirror
+Initialized empty Git repository in /tmp/mbp-intel-publication-test-60qaldet/mirror/.git/
+git symbolic-ref HEAD refs/heads/base
+git fast-import --export-marks=.mirror_state/marks.txt --quiet --done
+1/2      2/2      2 check-ins added to the /tmp/mbp-intel-publication-test-60qaldet/mirror
+git update-ref "refs/heads/alpine-oldbook" 39ced339736ba5e1ad158304449708d04bd1df72
+git update-ref "refs/heads/base" 43abae2bdfd49577793ac0701eba9c6f3dca7c59
+git repack -adf
+Published alpine-oldbook: 39ced339736ba5e1ad158304449708d04bd1df72
+no changes
+Verified 1 archived APKs
+.Verified 1 archived APKs
+Verified 1 archived APKs
+Compared package versions, native architectures and APK identities: 1
+.Exact package closure restored and compared: /tmp/tmp2jvgpbaa/root
+Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmpe_deqotr/host/var/backups/mbp-intel/install-host-lfwdut9q
+..Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmpgau3rjke/host/var/backups/mbp-intel/install-host-kd7kzgqo
+Locked APK identities verified; extra installed packages retained: extra
+Host package set is not an exact closure match.
+.Verified 1 archived APKs
+.Verified 1 archived APKs
+.......Compared package versions, native architectures and APK identities: 1
+...............................................EE.........................<frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+...............................................Local CPU generation can take up to 15 minutes.
+.................<frozen importlib._bootstrap>:533: DeprecationWarning: the load_module() method is deprecated and slated for removal in Python 3.15; use exec_module() instead
+.......................................................................................................................................................................................EEEEE............................EEEEEEEEEEEE......................................mbp-intel-waybar-dim: synthetic busy compositor; reconnecting
+.....................................................................
+======================================================================
+ERROR: test_duplicate_invented_proposals_never_reach_image_generation (test_fresh_scenes.FreshSceneTests.test_duplicate_invented_proposals_never_reach_image_generation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_fresh_scenes.py", line 90, in test_duplicate_invented_proposals_never_reach_image_generation
+    fixture.setUp()
+    ~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_explicit_old_scene_is_refused_before_requesting_design_or_image (test_fresh_scenes.FreshSceneTests.test_explicit_old_scene_is_refused_before_requesting_design_or_image)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_fresh_scenes.py", line 115, in test_explicit_old_scene_is_refused_before_requesting_design_or_image
+    fixture.setUp()
+    ~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_failed_image_attempt_preserves_invented_mix_descriptions (test_fresh_scenes.FreshSceneTests.test_failed_image_attempt_preserves_invented_mix_descriptions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_fresh_scenes.py", line 131, in test_failed_image_attempt_preserves_invented_mix_descriptions
+    fixture.setUp()
+    ~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_manual_request_designs_a_new_subject_after_catalog_exhaustion (test_fresh_scenes.FreshSceneTests.test_manual_request_designs_a_new_subject_after_catalog_exhaustion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_fresh_scenes.py", line 156, in test_manual_request_designs_a_new_subject_after_catalog_exhaustion
+    fixture.setUp()
+    ~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_exhausted_daily_generation_stops_after_three_retries (test_generation_retries.GenerationRetryTests.test_exhausted_daily_generation_stops_after_three_retries)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_generation_retries.py", line 15, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_failed_theme_design_retries_before_painting (test_generation_retries.GenerationRetryTests.test_failed_theme_design_retries_before_painting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_generation_retries.py", line 15, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_invalid_image_retries_and_checkpoint_failure_does_not_repaint (test_generation_retries.GenerationRetryTests.test_invalid_image_retries_and_checkpoint_failure_does_not_repaint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_generation_retries.py", line 15, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_malformed_native_result_is_reported_as_a_retryable_failure (test_generation_retries.GenerationRetryTests.test_malformed_native_result_is_reported_as_a_retryable_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_generation_retries.py", line 15, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_third_retry_saves_one_image_and_keeps_designed_name (test_generation_retries.GenerationRetryTests.test_third_retry_saves_one_image_and_keeps_designed_name)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_generation_retries.py", line 15, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_ghost_branding.py", line 48, in test_generated_distinct_palettes_keep_badge_while_bar_changes
+    theme = json.loads((ROOT / 'alpine/themes' / (theme_id + '.json')).read_text())
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/themes/spaceghost.json'
+
+======================================================================
+ERROR: test_activation_failure_keeps_successful_checkpoint_and_artifact (test_manual_artwork.ManualArtworkTests.test_activation_failure_keeps_successful_checkpoint_and_artifact)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_edit_prompts_command_opens_editor (test_manual_artwork.ManualArtworkTests.test_edit_prompts_command_opens_editor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_failed_native_request_never_selects_or_creates_artwork (test_manual_artwork.ManualArtworkTests.test_failed_native_request_never_selects_or_creates_artwork)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_controls_remain_reachable_with_eighteen_paintings (test_manual_artwork.ManualArtworkTests.test_gallery_controls_remain_reachable_with_eighteen_paintings)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_generation_entry_does_not_shift_existing_selections (test_manual_artwork.ManualArtworkTests.test_gallery_generation_entry_does_not_shift_existing_selections)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_keeps_browse_and_pause_commands_without_generating (test_manual_artwork.ManualArtworkTests.test_gallery_keeps_browse_and_pause_commands_without_generating)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_opens_prompt_editor_without_changing_or_generating_art (test_manual_artwork.ManualArtworkTests.test_gallery_opens_prompt_editor_without_changing_or_generating_art)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release (test_manual_artwork.ManualArtworkTests.test_held_generation_lock_prevents_manual_request_and_clears_busy_on_release)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_hover_tooltip_renders_full_help_in_every_state (test_manual_artwork.ManualArtworkTests.test_hover_tooltip_renders_full_help_in_every_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image (test_manual_artwork.ManualArtworkTests.test_manual_after_daily_reservation_saves_commits_and_selects_exact_new_image)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit (test_manual_artwork.ManualArtworkTests.test_pending_checkpoint_still_activates_and_cron_retries_only_its_commit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_select_resets_rotation_deadline_and_preserves_pause (test_manual_artwork.ManualArtworkTests.test_select_resets_rotation_deadline_and_preserves_pause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_manual_artwork.py", line 46, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_existing_themes_are_selected_in_a_separate_picker (test_new_themes.NewThemeTests.test_existing_themes_are_selected_in_a_separate_picker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_new_themes.py", line 132, in test_existing_themes_are_selected_in_a_separate_picker
+    art.pick()
+    ~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/desktop/.local/bin/mbp-intel-wallpaper", line 537, in pick
+    selected = gallery_menu('Paint in a theme · type to search ❯ ',
+               ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                            ['← Back to images', *themed_commands])
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/desktop/.local/bin/mbp-intel-wallpaper", line 449, in gallery_menu
+    result = subprocess.run([str(MENU), '--dmenu', '--no-sort', '--prompt', prompt,
+                            '--lines', str(min(9, len(options))), '--width', '48'],
+                           input='\n'.join(options) + '\n', capture_output=True,
+                           text=True)
+  File "/usr/lib/python3.14/unittest/mock.py", line 1176, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1180, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 1247, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_new_themes.py", line 127, in choose
+    chosen = next(item for item in options if 'Space Ghost' in item)
+StopIteration
+
+======================================================================
+ERROR: test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_new_themes.py", line 151, in test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline
+    fixture.setUp()
+    ~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gruvbox_uses_the_active_background_text_and_gold_accent (test_scripture_bar_theme.ScriptureBarThemeTests.test_gruvbox_uses_the_active_background_text_and_gold_accent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_scripture_bar_theme.py", line 129, in test_gruvbox_uses_the_active_background_text_and_gold_accent
+    self.assertEqual(self.render('gruvbox-dark')[0], {
+                     ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_scripture_bar_theme.py", line 121, in render
+    shutil.copyfile(REPO / 'alpine/themes' / (name + '.json'),
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    themes / (name + '.json'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/themes/spaceghost.json'
+
+======================================================================
+ERROR: test_running_bar_follows_theme_switch_and_descriptor_edits (test_scripture_bar_theme.ScriptureBarThemeTests.test_running_bar_follows_theme_switch_and_descriptor_edits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_scripture_bar_theme.py", line 133, in test_running_bar_follows_theme_switch_and_descriptor_edits
+    samples = self.render('spaceghost')
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_scripture_bar_theme.py", line 121, in render
+    shutil.copyfile(REPO / 'alpine/themes' / (name + '.json'),
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    themes / (name + '.json'))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/themes/spaceghost.json'
+
+======================================================================
+ERROR: test_failed_activation_announces_saved_artwork_without_claiming_desktop_switch (test_theme_completion_notification.ThemeCompletionTests.test_failed_activation_announces_saved_artwork_without_claiming_desktop_switch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_theme_completion_notification.py", line 16, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_failed_image_does_not_announce_completion (test_theme_completion_notification.ThemeCompletionTests.test_failed_image_does_not_announce_completion)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_theme_completion_notification.py", line 16, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_only_success_does_not_claim_desktop_activation (test_theme_completion_notification.ThemeCompletionTests.test_gallery_only_success_does_not_claim_desktop_activation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_theme_completion_notification.py", line 16, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_pending_checkpoint_announces_saved_artwork_with_accurate_pending_status (test_theme_completion_notification.ThemeCompletionTests.test_pending_checkpoint_announces_saved_artwork_with_accurate_pending_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_theme_completion_notification.py", line 16, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_success_names_theme_and_previews_exact_saved_image_after_activation (test_theme_completion_notification.ThemeCompletionTests.test_success_names_theme_and_previews_exact_saved_image_after_activation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_theme_completion_notification.py", line 16, in setUp
+    self.fixture.setUp()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_destination_changed_during_generation_never_receives_artwork (test_themed_artwork.ThemedArtworkTests.test_destination_changed_during_generation_never_receives_artwork)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_gallery_adds_theme_and_general_generation_after_existing_controls (test_themed_artwork.ThemedArtworkTests.test_gallery_adds_theme_and_general_generation_after_existing_controls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_manual_active_theme_records_palette_and_saves_nested_pair (test_themed_artwork.ThemedArtworkTests.test_manual_active_theme_records_palette_and_saves_nested_pair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_nonactivating_generation_does_not_switch_theme_or_painting (test_themed_artwork.ThemedArtworkTests.test_nonactivating_generation_does_not_switch_theme_or_painting)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art (test_themed_artwork.ThemedArtworkTests.test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_symlinked_theme_configuration_never_reserves_or_generates (test_themed_artwork.ThemedArtworkTests.test_symlinked_theme_configuration_never_reserves_or_generates)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_theme_activation_failure_preserves_painting_and_does_not_select_it (test_themed_artwork.ThemedArtworkTests.test_theme_activation_failure_preserves_painting_and_does_not_select_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available (test_themed_artwork.ThemedArtworkTests.test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_unsafe_or_unknown_theme_does_not_reserve_attempt (test_themed_artwork.ThemedArtworkTests.test_unsafe_or_unknown_theme_does_not_reserve_attempt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_unthemed_activation_selects_painting_without_replacing_desktop_theme (test_themed_artwork.ThemedArtworkTests.test_unthemed_activation_selects_painting_without_replacing_desktop_theme)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+ERROR: test_unthemed_generation_uses_general_folder_without_active_palette (test_themed_artwork.ThemedArtworkTests.test_unthemed_generation_uses_general_folder_without_active_palette)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_themed_artwork.py", line 36, in setUp
+    shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/shutil.py", line 313, in copyfile
+    with open(src, 'rb') as fsrc:
+         ~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/assets/gallery/delaware.png'
+
+======================================================================
+FAIL: test_nvim_refreshes_theme_without_changing_unsaved_editing_state (test_application_theme_refresh.ApplicationThemeRefresh.test_nvim_refreshes_theme_without_changing_unsaved_editing_state)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_application_theme_refresh.py", line 121, in test_nvim_refreshes_theme_without_changing_unsaved_editing_state
+    self.refresh(process)
+    ~~~~~~~~~~~~^^^^^^^^^
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_application_theme_refresh.py", line 43, in refresh
+    self.assertEqual(result.returncode, 0, result.stderr)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 1 != 0 : 
+
+======================================================================
+FAIL: test_deployed_overlay_theme_reads_the_checkout_palette (test_bazzite_profile.BazziteProfileTest.test_deployed_overlay_theme_reads_the_checkout_palette)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_bazzite_profile.py", line 241, in test_deployed_overlay_theme_reads_the_checkout_palette
+    self.assertEqual(theme.THEMES, REPO / 'alpine/themes')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: PosixPath('/tmp/tmpw9t7oemk/home/.local/state/mbp-int[39 chars]mes') != PosixPath('/home/jack/.local/state/oldbook/checkouts/[34 chars]mes')
+
+======================================================================
+FAIL: test_hidden_local_fullscreen_does_not_reserve_but_global_does (test_desktop_space.DesktopSpaceTests.test_hidden_local_fullscreen_does_not_reserve_but_global_does)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_desktop_space.py", line 77, in test_hidden_local_fullscreen_does_not_reserve_but_global_does
+    self.assertEqual(desktop_space.screen_space(output(), tree(floating=True, hidden_fullscreen=mode))['bottom'], bottom)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 16 != 60
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.local/state/oldbook/checkouts/scripture-return-8s2k1n/alpine/tests/test_ghost_branding.py", line 40, in test_existing_profiles_and_base_keep_original_badge
+    self.assertGreater(len(paths), 2)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+AssertionError: 2 not greater than 2
+
+----------------------------------------------------------------------
+Ran 947 tests in 101.507s
+
+FAILED (failures=4, errors=43)
+John 3:16
+exit=1

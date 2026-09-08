@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+"""Install the complete pinned musl runtime bundles without npm."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tarfile
+import tempfile
+import time
+import urllib.request
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def digest(path):
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--cache', type=Path, required=True)
+    p.add_argument('--download-only', action='store_true')
+    a = p.parse_args()
+    manifest = json.loads((REPO / 'alpine/packages/codex/release.json').read_text())
+    if os.uname().machine != 'x86_64':
+        p.error('This pinned bundle targets x86_64 musl')
+    a.cache.mkdir(parents=True, exist_ok=True)
+    for item in manifest['assets']:
+        archive = a.cache / item['name']
+        if not archive.exists():
+            tmp = archive.with_suffix('.partial')
+            urllib.request.urlretrieve(item['url'], tmp)
+            if digest(tmp) != item['sha256']:
+                raise RuntimeError(f'Checksum mismatch: {tmp}')
+            tmp.rename(archive)
+        if digest(archive) != item['sha256']:
+            raise RuntimeError(f'Checksum mismatch: {archive}')
+        print('Verified', item['name'], flush=True)
+    if a.download_only:
+        return
+    if os.geteuid() != 0:
+        p.error('Installation requires root; run with doas and the same --cache')
+    base = Path('/opt/codex')
+    base.mkdir(parents=True, exist_ok=True)
+    target = base / manifest['version']
+    staging = Path(tempfile.mkdtemp(prefix='.install-', dir=base))
+    for item in manifest['assets']:
+        part = staging / item['kind']
+        part.mkdir()
+        with tarfile.open(a.cache / item['name']) as archive:
+            archive.extractall(part, filter='data')
+    proxy = list((staging / 'proxy').rglob('codex-responses-api-proxy*'))
+    if len(proxy) != 1 or not proxy[0].is_file():
+        raise RuntimeError('Unexpected proxy archive layout')
+    proxy[0].rename(staging / 'proxy/codex-responses-api-proxy')
+    for part, exe in [('cli', 'codex'), ('app-server', 'codex-app-server')]:
+        metadata = json.loads((staging / part / 'codex-package.json').read_text())
+        if metadata['version'] != manifest['version'] or metadata['layoutVersion'] != 1:
+            raise RuntimeError('Unexpected package metadata')
+        for relative in [f'bin/{exe}', 'bin/codex-code-mode-host',
+                         'codex-path/rg', 'codex-resources/bwrap',
+                         'codex-resources/zsh/bin/zsh']:
+            file = staging / part / relative
+            if not file.is_file() or not os.access(file, os.X_OK):
+                raise RuntimeError(f'Missing executable: {file}')
+    # The published musl bundles contain a GNU-linked zsh. Retain it, but
+    # use the APK-managed native zsh in the executable slot on Alpine.
+    native_zsh = Path('/bin/zsh')
+    if not native_zsh.is_file():
+        raise RuntimeError('Install Alpine zsh before installing these bundles')
+    native_version = subprocess.check_output([str(native_zsh), '--version'], text=True).strip()
+    for part in ['cli', 'app-server']:
+        shell = staging / part / 'codex-resources/zsh/bin/zsh'
+        shell.rename(shell.with_name('zsh.upstream-gnu'))
+        shell.symlink_to(native_zsh)
+    (staging / 'alpine-adaptations.json').write_text(json.dumps({
+        'private_zsh': str(native_zsh), 'version': native_version,
+        'reason': 'upstream musl archive private zsh requires GNU loader',
+        'preserved_original': 'codex-resources/zsh/bin/zsh.upstream-gnu'
+    }, indent=2) + '\n')
+    for args in [[staging/'cli/bin/codex', '--version'],
+                 [staging/'app-server/bin/codex-app-server', '--help'],
+                 [staging/'cli/codex-resources/bwrap', '--version'],
+                 [staging/'cli/codex-path/rg', '--version'],
+                 [staging/'cli/codex-resources/zsh/bin/zsh', '--version'],
+                 [staging/'proxy/codex-responses-api-proxy', '--help']]:
+        subprocess.run([str(x) for x in args], check=True, stdout=subprocess.DEVNULL)
+    stamp = str(time.time_ns())
+    if target.exists():
+        target.rename(base / (manifest['version'] + '.backup-' + stamp))
+    staging.rename(target)
+    # mkdtemp starts private; the completed runtime must be executable by jack.
+    target.chmod(0o755)
+    backups = Path('/var/backups/alpine-rice') / ('codex-' + stamp)
+    backups.mkdir(parents=True, mode=0o700)
+    for name, relative in {'codex':'cli/bin/codex',
+                           'codex-code-mode-host':'cli/bin/codex-code-mode-host',
+                           'codex-app-server':'app-server/bin/codex-app-server',
+                           'codex-responses-api-proxy':'proxy/codex-responses-api-proxy'}.items():
+        link = Path('/usr/local/bin') / name
+        if link.exists() or link.is_symlink():
+            shutil.move(str(link), str(backups/name))
+        link.symlink_to(target / relative)
+    print('Installed complete Codex', manifest['version'], 'at', target)
+    print('Previous launchers saved at', backups)
+
+
+if __name__ == '__main__':
+    main()

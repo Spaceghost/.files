@@ -1,0 +1,10 @@
+{
+  "snapshot": "alpine/packages/locks/fec17adaeaa5972078b8.json",
+  "packages": 1121,
+  "live_recorded_arch_versions_and_identities_match": true,
+  "world_repositories_and_public_keys_match": true,
+  "archived_apk_hashes_verified": 1121,
+  "restore_root_checker_architecture_only_mismatches": 233,
+  "restore_root_checker_note": "verify-root compares locally restored APK noarch metadata. The host installed those artifacts through indexes recording x86_64. Direct host verification used the snapshot recorded installed arch; every version, APK identity and installed arch matches.",
+  "installed_swayfx_sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+}

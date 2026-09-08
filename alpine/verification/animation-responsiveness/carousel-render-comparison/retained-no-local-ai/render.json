@@ -1,0 +1,121 @@
+{
+  "construction_ms": 3567.686489,
+  "renderer": "GskGLRenderer",
+  "runs": [
+    {
+      "action": "show",
+      "requested_us": 24604816759,
+      "frames": [
+        {
+          "frame_time_us": 24604849613,
+          "callback_time_us": 24604853163,
+          "position": 0.0,
+          "reveal": 0.5323616291283639,
+          "presentation_time_us": 24611762443,
+          "refresh_interval_us": 16667,
+          "complete": true
+        },
+        {
+          "frame_time_us": 24611766418,
+          "callback_time_us": 24611766041,
+          "position": 0.0,
+          "reveal": 1.0,
+          "presentation_time_us": 24611883319,
+          "refresh_interval_us": 16667,
+          "complete": true
+        }
+      ],
+      "settled_ms": 6949.282,
+      "first_tick_ms": 36.404
+    }
+  ],
+  "snapshots": [
+    {
+      "elapsed_ms": 192.005,
+      "thread_cpu_ms": 96.166143,
+      "position": 0.0,
+      "reveal": 0.5323616291283639
+    },
+    {
+      "elapsed_ms": 8.95,
+      "thread_cpu_ms": 5.524252,
+      "position": 0.0,
+      "reveal": 1.0
+    }
+  ],
+  "paint_phases": [
+    {
+      "elapsed_ms": 6910.937,
+      "thread_cpu_ms": 1451.904862
+    },
+    {
+      "elapsed_ms": 116.118,
+      "thread_cpu_ms": 50.986903
+    }
+  ],
+  "preview_dimensions": [
+    1536,
+    960
+  ],
+  "candidate_count": 7,
+  "probe_nice": -5,
+  "fixed_fixture_palette": {
+    "background": "#21192c",
+    "background_hard": "#171020",
+    "surface": "#362641",
+    "foreground": "#eee7f7",
+    "muted": "#baaccb",
+    "border": "#674d7c",
+    "accent": "#b99bea"
+  },
+  "compose_cards": false,
+  "screenshot_requested": true,
+  "frame_clock_intervals": {
+    "count": 1,
+    "median_ms": 6916.805,
+    "p95_ms": 6916.805,
+    "maximum_ms": 6916.805
+  },
+  "presentation_intervals": {
+    "count": 1,
+    "median_ms": 120.876,
+    "p95_ms": 120.876,
+    "maximum_ms": 120.876
+  },
+  "navigation_frame_clock_intervals": {
+    "count": 0
+  },
+  "navigation_presentation_intervals": {
+    "count": 0
+  },
+  "python_snapshot_time": {
+    "count": 2,
+    "median_ms": 100.47749999999999,
+    "p95_ms": 192.005,
+    "maximum_ms": 192.005
+  },
+  "python_snapshot_cpu_time": {
+    "count": 2,
+    "median_ms": 50.845197500000005,
+    "p95_ms": 96.166143,
+    "maximum_ms": 96.166143
+  },
+  "gtk_paint_time": {
+    "count": 2,
+    "median_ms": 3513.5275,
+    "p95_ms": 6910.937,
+    "maximum_ms": 6910.937
+  },
+  "gtk_paint_cpu_time": {
+    "count": 2,
+    "median_ms": 751.4458825,
+    "p95_ms": 1451.904862,
+    "maximum_ms": 1451.904862
+  },
+  "idle_gaps": "excluded by separating each requested animation, not by duration",
+  "all_sequences_settled": false,
+  "errors": [
+    "view did not complete seven animation sequences within 15 seconds"
+  ],
+  "status": "failed"
+}

@@ -1,0 +1,31 @@
+{
+  "tests-after.log": "passed",
+  "session-tests.log": "passed",
+  "theme-tests.log": "passed",
+  "complete-theme-tests.log": "passed",
+  "foot_configs": "14 passed",
+  "ghostty_config": "passed",
+  "shellcheck": "passed",
+  "sway_config": "passed",
+  "full_suite": "Interrupted during unrelated Bazzite package-export tests; see full-tests.log",
+  "runtime": {
+    "before_owner_exit_loses_clipboard": true,
+    "daemon_reload_single_instance": true,
+    "wayland_text_and_history": true,
+    "after_owner_exit_preserves_clipboard": true,
+    "image_history_restores_exact_png": true,
+    "neovim_bidirectional": true,
+    "tmux_vi_y_and_enter_copy": true,
+    "wayland_gtk_bidirectional": true,
+    "x11_gtk_bidirectional": true,
+    "foot_mouse_selection_both_clipboards": true,
+    "screenshot_copies_png": true,
+    "real_history_menu_cancel_preserves_clipboard": true
+  },
+  "live_service_children": [
+    "wl-paste",
+    "wl-paste",
+    "wl-clip-persist"
+  ],
+  "deployment_journal": "/home/jack/.local/state/oldbook/backups/1788838395962593053"
+}

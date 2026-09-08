@@ -1,0 +1,35 @@
+#!/bin/sh
+# Status only: inspect sysfs and the routing table.  This never requests Wi-Fi scans.
+set -eu
+
+default_iface=$(ip route show default 2>/dev/null | awk 'NR == 1 { for (i = 1; i <= NF; i++) if ($i == "dev") { print $(i + 1); exit } }')
+wireless_iface=
+for candidate in /sys/class/net/*; do
+    [ -d "$candidate/wireless" ] || continue
+    wireless_iface=${candidate##*/}
+    break
+done
+
+iface=${default_iface:-$wireless_iface}
+if [ -z "$iface" ]; then
+    jq -cn --arg text '󰤭 offline' --arg tooltip 'No default route. Wi-Fi status is read from the kernel; no scan was requested.' --arg class offline '{text: $text, tooltip: $tooltip, class: $class}'
+    exit 0
+fi
+
+state=$(cat "/sys/class/net/$iface/operstate" 2>/dev/null || printf unknown)
+carrier=$(cat "/sys/class/net/$iface/carrier" 2>/dev/null || printf 0)
+if [ -d "/sys/class/net/$iface/wireless" ]; then
+    glyph='󰤨'
+    medium='wireless'
+else
+    glyph='󰈀'
+    medium='wired'
+fi
+if [ "$carrier" = 1 ] && [ -n "$default_iface" ]; then
+    text="$glyph $iface"
+    class='connected'
+else
+    text="$glyph $iface down"
+    class='offline'
+fi
+jq -cn --arg text "$text" --arg tooltip "$medium interface $iface: $state. Status is kernel/routing data only; no wireless scan was requested." --arg class "$class" '{text: $text, tooltip: $tooltip, class: $class}'

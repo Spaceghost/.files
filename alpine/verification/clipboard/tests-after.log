@@ -1,0 +1,12 @@
+test_cancel_does_not_replace_clipboard (test_clipboard.ClipboardTests.test_cancel_does_not_replace_clipboard) ... ok
+test_database_is_private_and_history_is_deduplicated (test_clipboard.ClipboardTests.test_database_is_private_and_history_is_deduplicated) ... ok
+test_delete_removes_only_selected_entry_and_clear_empties_history (test_clipboard.ClipboardTests.test_delete_removes_only_selected_entry_and_clear_empties_history) ... ok
+test_failed_decode_does_not_clear_clipboard (test_clipboard.ClipboardTests.test_failed_decode_does_not_clear_clipboard) ... ok
+test_recall_preserves_binary_bytes (test_clipboard.ClipboardTests.test_recall_preserves_binary_bytes) ... ok
+test_recall_preserves_multiline_unicode_and_trailing_newlines (test_clipboard.ClipboardTests.test_recall_preserves_multiline_unicode_and_trailing_newlines) ... ok
+test_sensitive_and_empty_events_do_not_enter_history (test_clipboard.ClipboardTests.test_sensitive_and_empty_events_do_not_enter_history) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 11.236s
+
+OK

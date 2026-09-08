@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Resize the focused window from its center or fit it almost to the workspace."""
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+
+
+STEP = 40
+NEAR_FULL_MARGIN = 24
+
+
+def ipc(kind, command=None):
+    args = ['swaymsg', '-r', '-t', kind]
+    if command:
+        args.append(command)
+    result = subprocess.run(args, capture_output=True, text=True, timeout=3)
+    data = json.loads(result.stdout)
+    if kind == 'command' and any(not item.get('success') for item in data):
+        raise RuntimeError(str(data))
+    result.check_returncode()
+    return data
+
+
+def find_window(node, identity=None):
+    matches = node.get('focused') if identity is None else node.get('id') == identity
+    if matches and (node.get('app_id') or node.get('window')):
+        return node
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        found = find_window(child, identity)
+        if found:
+            return found
+    return None
+
+
+def find_workspace(node, identity, workspace=None):
+    if node.get('type') == 'workspace':
+        workspace = node
+    if node.get('id') == identity:
+        return workspace
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        found = find_workspace(child, identity, workspace)
+        if found is not None:
+            return found
+    return None
+
+
+def resize(direction):
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    session = hashlib.sha256(os.environ['SWAYSOCK'].encode()).hexdigest()[:16]
+    # Coalesce rapid key repeats instead of continuing to resize after release.
+    with (runtime / f'mbp-intel-resize-{session}.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        tree = ipc('get_tree')
+        node = find_window(tree)
+        if not node:
+            return
+        rect = node['rect']
+        near_full = direction == 'near-full'
+        if near_full:
+            workspace = find_workspace(tree, node['id'])
+            if workspace is None:
+                return
+            # Workspace coordinates already account for output scale, position
+            # and reserved bars. Keep five percent (at least 24 px) per edge.
+            rect = workspace['rect']
+            width = max(1, rect['width'] - 2 * max(NEAR_FULL_MARGIN, round(rect['width'] * .05)))
+            height = max(1, rect['height'] - 2 * max(NEAR_FULL_MARGIN, round(rect['height'] * .05)))
+        else:
+            amount = STEP if direction == 'grow' else -STEP
+            width = max(1, rect['width'] + amount)
+            height = max(1, rect['height'] + amount)
+        criteria = f'[con_id={node["id"]}]'
+        floating = node.get('type') == 'floating_con'
+        commands = []
+        if node.get('fullscreen_mode'):
+            commands.append('fullscreen disable')
+        if not floating:
+            commands.append('floating enable')
+        # Native resize set clamps both axes and preserves a floating center.
+        commands.append(f'resize set {width} px {height} px')
+        if near_full:
+            x = rect['x'] + (rect['width'] - width) // 2
+            y = rect['y'] + (rect['height'] - height) // 2
+            commands.append(f'move absolute position {x} px {y} px')
+        ipc('command', criteria + ' ' + ', '.join(commands))
+        if near_full or not floating or node.get('fullscreen_mode'):
+            # Enabling floating uses the application's natural geometry. Restore
+            # the original center after a mode change and size constraints.
+            actual = find_window(ipc('get_tree'), node['id'])
+            if actual:
+                size = actual['rect']
+                x = rect['x'] + (rect['width'] - size['width']) // 2
+                y = rect['y'] + (rect['height'] - size['height']) // 2
+                if not near_full or (size['x'], size['y']) != (x, y):
+                    ipc('command', criteria + f' move absolute position {x} px {y} px')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('direction', choices=('grow', 'shrink', 'near-full'))
+    args = parser.parse_args()
+    try:
+        resize(args.direction)
+    except (OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        raise SystemExit(f'mbp-intel-resize: {error}')

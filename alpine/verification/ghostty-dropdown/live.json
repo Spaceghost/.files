@@ -1,0 +1,24 @@
+{
+  "app_id": "com.oldbook.dropdown",
+  "shell": "xdg_shell",
+  "geometry": {
+    "x": 43,
+    "y": 53,
+    "width": 1354,
+    "height": 468
+  },
+  "container_id": 319,
+  "process_id": 5853,
+  "warm_show_seconds": [
+    0.10458751999976812
+  ],
+  "checks": {
+    "native_wayland": true,
+    "hide_show_preserves_shell": true,
+    "focused_when_shown": true,
+    "left_hidden": true
+  },
+  "legacy_foot_shell_preserved": true,
+  "screenshot": "alpine/verification/ghostty-dropdown/live.png",
+  "startup_and_show_seconds": 4.97726495400093
+}

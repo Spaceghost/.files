@@ -1,0 +1,17 @@
+2026-09-07 17:12:08 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:214: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:215: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead
+  GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
+/home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:179: DeprecationWarning: Gdk.Screen.get_monitor_plug_name is deprecated
+  monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
+Workspace decoration: right
+Workspace decoration: bottom
+[2026-09-07 17:12:14.247] [info] Using configuration file /tmp/workspace-chrome-d7_3tmgy/bar.json
+[2026-09-07 17:12:14.280] [info] Discovered appearance 'dark'
+[2026-09-07 17:12:14.280] [info] Using CSS file /tmp/workspace-chrome-d7_3tmgy/style.css
+[2026-09-07 17:12:14.396] [info] Bar configured (width: 1432, height: 32) for output: HEADLESS-1
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

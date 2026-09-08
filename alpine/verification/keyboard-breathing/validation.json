@@ -1,0 +1,24 @@
+{
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-keyboard-backlight": "0e02ff174a6a7e5a6155e1943228ee67cf18b793aefbeb6fa41980fe0b3d78d8",
+    "alpine/desktop/.local/bin/oldbook-control": "91700835e4e72292b0c802e63d8414a2991e51b6169dde1b4cbf669c3e35d5e3",
+    "alpine/desktop/.config/sway/local.d/keyboard-backlight.conf": "acaaa9864e989dba2f6243be9f04b6109c81440e143d57f15dc49df1f8bc96af",
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "63d93f85292e27080e3860fc5ab89b3c1d7528e0d9fb9a7229874e145b26f090",
+    "alpine/tests/test_keyboard_backlight.py": "c6d33d1f8ec339ec0659e379754d38143e28f030bd593b9b21c75e346e08b19d"
+  },
+  "checks": {
+    "keyboard_units": 18,
+    "shortcut_sources": 22,
+    "apple_overview": 4,
+    "feature_contracts": 9,
+    "menu_scenarios": 3,
+    "sway_parser": "passed",
+    "python_compile": "passed"
+  },
+  "hardware": "live.json",
+  "limitations": [
+    "No optical timing measurement; the Apple SMC worker can coalesce writes.",
+    "No physical engraved-key presses or suspend/resume exercised.",
+    "Startup restore and session loss checked with synthetic peers; no actual logout performed."
+  ]
+}

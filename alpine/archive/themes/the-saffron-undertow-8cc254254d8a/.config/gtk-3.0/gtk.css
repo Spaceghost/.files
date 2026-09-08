@@ -1,0 +1,58 @@
+/* Gruvbox Dark: shared GTK 3/4 semantic palette. */
+@define-color accent_bg_color #D5A63A;
+@define-color accent_fg_color #0c151b;
+@define-color accent_color #D5A63A;
+@define-color window_bg_color #101C24;
+@define-color window_fg_color #E7E1CF;
+@define-color view_bg_color #0c151b;
+@define-color view_fg_color #E7E1CF;
+@define-color headerbar_bg_color #1c272d;
+@define-color headerbar_fg_color #E7E1CF;
+@define-color headerbar_border_color #3f474a;
+@define-color headerbar_backdrop_color #101C24;
+@define-color headerbar_shade_color rgba(12, 21, 27, 0.36);
+@define-color headerbar_darker_shade_color rgba(12, 21, 27, 0.9);
+@define-color card_bg_color #263035;
+@define-color card_fg_color #E7E1CF;
+@define-color card_shade_color rgba(12, 21, 27, 0.36);
+@define-color popover_bg_color #1c272d;
+@define-color popover_fg_color #E7E1CF;
+@define-color popover_shade_color rgba(12, 21, 27, 0.25);
+@define-color dialog_bg_color #1c272d;
+@define-color dialog_fg_color #E7E1CF;
+@define-color sidebar_bg_color #1c272d;
+@define-color sidebar_fg_color #E7E1CF;
+@define-color sidebar_backdrop_color #101C24;
+@define-color sidebar_shade_color rgba(12, 21, 27, 0.25);
+@define-color sidebar_border_color #3f474a;
+@define-color thumbnail_bg_color #263035;
+@define-color thumbnail_fg_color #E7E1CF;
+@define-color destructive_bg_color #d8846f;
+@define-color destructive_fg_color #0c151b;
+@define-color destructive_color #d8846f;
+@define-color success_bg_color #9cd06f;
+@define-color success_fg_color #0c151b;
+@define-color success_color #9cd06f;
+@define-color warning_bg_color #D5A63A;
+@define-color warning_fg_color #0c151b;
+@define-color warning_color #D5A63A;
+@define-color error_bg_color #d8846f;
+@define-color error_fg_color #0c151b;
+@define-color error_color #d8846f;
+@define-color shade_color rgba(12, 21, 27, 0.25);
+@define-color scrollbar_outline_color #0c151b;
+@define-color panel_bg_color #0c151b;
+@define-color panel_fg_color #E7E1CF;
+/* GTK applications that use the traditional theme color names. */
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+@define-color insensitive_fg_color #91928b;
+@define-color borders #3f474a;
+selection { background-color: #3f474a; color: #ece7d9; }
+
+button, entry, popover > contents { border-radius: 6px; }
+button { padding: 5px 10px; }

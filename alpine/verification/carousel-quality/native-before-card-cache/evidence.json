@@ -1,0 +1,309 @@
+{
+  "status": "passed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "f9fd5fbf704a40c3e35dfb75360566f19f63e74ba92fb08199edb47b7a3f29fd",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows",
+    "scale-two-previews-preserve-provider-pixels-without-upscaling",
+    "hidden-workspace-preview-renders-without-focus-change",
+    "open-gesture-keeps-still-image-after-real-window-content-changes",
+    "persistent-show-ignores-modifier-release-and-escape-cancels",
+    "new-gesture-refreshes-still-image-at-native-quality",
+    "super-tab-repeat-reverse-frozen-order-and-release-commit",
+    "alt-tab-shares-all-window-order-and-final-release",
+    "alt-shift-tab-uses-reverse-binding",
+    "held-escape-cancels-and-restores-default-mode",
+    "quick-super-and-alt-taps-toggle-last-two-windows",
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits",
+    "next-gesture-discovers-new-window",
+    "rapid-close-reopen-keeps-one-current-preview-generation",
+    "mode-takeover-and-orphaned-mode-escape-recovery",
+    "production-source-hashes-stable",
+    "compositor-exit-stops-carousel-daemon"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 1208
+    },
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows": {
+      "pid": 1208,
+      "ready": true,
+      "open": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": null,
+      "preview_ids": [],
+      "preview_dimensions": {},
+      "frames": 0,
+      "frame_times": []
+    },
+    "scale-two-previews-preserve-provider-pixels-without-upscaling": {
+      "actual": {
+        "6": [
+          720,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "5": [
+          720,
+          900
+        ]
+      },
+      "direct_provider": {
+        "5": [
+          720,
+          900
+        ],
+        "6": [
+          720,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ]
+      },
+      "logical_rect_times_output_scale": {
+        "5": [
+          1440,
+          1800
+        ],
+        "6": [
+          1440,
+          1800
+        ],
+        "8": [
+          2880,
+          1800
+        ],
+        "10": [
+          2880,
+          1800
+        ]
+      },
+      "physical_letterboxed_card": {
+        "6": [
+          624.0,
+          780.0
+        ],
+        "10": [
+          1248.0,
+          780.0
+        ],
+        "8": [
+          1248.0,
+          780.0
+        ],
+        "5": [
+          624.0,
+          780.0
+        ]
+      },
+      "grim_explicit_scale_one": [
+        1440,
+        900
+      ]
+    },
+    "hidden-workspace-preview-renders-without-focus-change": {
+      "preview_ids": [
+        5,
+        6,
+        8,
+        10
+      ],
+      "cyan_pixels": 971427,
+      "workspace_focus": 1,
+      "focus_events": []
+    },
+    "open-gesture-keeps-still-image-after-real-window-content-changes": {
+      "unchanged_green_pixels": 476231,
+      "new_magenta_pixels": 0,
+      "preview_dimensions_unchanged": true
+    },
+    "new-gesture-refreshes-still-image-at-native-quality": {
+      "new_magenta_pixels": 473803
+    },
+    "super-tab-repeat-reverse-frozen-order-and-release-commit": {
+      "frames": 74,
+      "frame_times_us": [
+        20772952913,
+        20772986247,
+        20773019540,
+        20773036120,
+        20773054164,
+        20773074486,
+        20773104757,
+        20773121533,
+        20773141705,
+        20773171037,
+        20773187851,
+        20773207380,
+        20773237283,
+        20773254039,
+        20773273145,
+        20773303573,
+        20773320318,
+        20773339029,
+        20773368773,
+        20773385447,
+        20773403998,
+        20773433584,
+        20773450266,
+        20773469113,
+        20774347908,
+        20774364575,
+        20774396362,
+        20774415477,
+        20774444986,
+        20774461819,
+        20774480941,
+        20774501743,
+        20774522386,
+        20774543076,
+        20774563840,
+        20774593050,
+        20774609722,
+        20774627948,
+        20774648723,
+        20774678826,
+        20774695521,
+        20774714033,
+        20774743571,
+        20774760296,
+        20774779474,
+        20774809028,
+        20774825706,
+        20774843989,
+        20774873786,
+        20775552861,
+        20775569528,
+        20775586195,
+        20775602878,
+        20775620517,
+        20775640281,
+        20775670866,
+        20775687758,
+        20775708226,
+        20775739013,
+        20775755760,
+        20775774434,
+        20775804257,
+        20775820974,
+        20775839602,
+        20775869602,
+        20775886381,
+        20775905751,
+        20775935812,
+        20775952497,
+        20775971155,
+        20776000845,
+        20776017604,
+        20776036702,
+        20776066913
+      ],
+      "active_frame_interval_median_ms": 19.115,
+      "idle_gaps_excluded": 2
+    },
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits": {
+      "removed": 8,
+      "committed": 10,
+      "deferred_new": 11
+    },
+    "compositor-exit-stops-carousel-daemon": {
+      "exit_status": 1,
+      "gdk_display_disconnect": true
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "verifier_sha256": "14c28d2be475b8a23255c7752993f04a5bd9694629bc26dccea43d670a790bd8",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "targeted_activation_probe": {
+    "include_command": "include \"/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf\"",
+    "include_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command 'include'"
+      }
+    ],
+    "inline_command": "mode \"probe-mode\" { bindsym Escape mode \"default\" }",
+    "inline_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command '{'"
+      }
+    ],
+    "modes_before": [
+      "default",
+      "fixture-other",
+      "window-switcher"
+    ],
+    "modes_after": [
+      "default",
+      "fixture-other",
+      "window-switcher",
+      "probe-mode"
+    ],
+    "probe_mode_created": true,
+    "mode_after_probe": {
+      "name": "default"
+    }
+  },
+  "screenshot_sha256": {
+    "still-preview-next-gesture.png": "04123203873a27f0041fc459bdba6d7ec8bb859c3f13ccc0474add3d1d4d6645",
+    "still-preview-held.png": "f40ec06b22a048ad70ab63d4def20f2cbf87a0c84c511be06907d787a0b377dc",
+    "still-source-updated.png": "a54d8275fb5b753cefe98a2c4ede296c5676ba5f5a529cc3e22728898f89104e",
+    "carousel-hidden-previews.png": "be2bc0817ae694a0725f572f20462f79f6d2a0a46d105626d1a5a18c64246361"
+  },
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

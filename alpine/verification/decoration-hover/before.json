@@ -1,0 +1,324 @@
+{
+  "status": "failed",
+  "error": "hover handoff rendered an intermediate position or size",
+  "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
+  "host_config_changes": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "d640952cf583a4f39c7089ad9ceabe1c9096099cc586068dae9d3134b76da0dd",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "2cf9fb823aee549382e60a186d2d630f9b6003e8e9b5f69d25bd7b10a230f9a1",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "205b0d0c6018d044d90c6b85c9729ae3d9e57fdc69aad80ffc89e1d1662215fb",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e04700de8b0b5fea56180a74377c46fc120221fb5144abba767d2b253c7eb1cc",
+    "alpine/desktop/.local/lib/oldbook/decoration_motion.py": "f67bed21fed21eadf6fc5b40c5da0a1af62a5263acdd5f3718ca3cd94cb5cea3",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "f68cf027a2c1dcac34d6311fcee1e8c1c8d9b918aa5f56fd3eff5b2a2804fd6d",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843"
+  },
+  "hover_handoffs": [
+    {
+      "target": "attachment-floating",
+      "before": {
+        "width": 420,
+        "height": 28,
+        "x": 900,
+        "y": 400
+      },
+      "expected": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "samples": [
+        {
+          "elapsed_ms": 7.46,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 18.61,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 26.69,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 34.87,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 42.43,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 343,
+            "y": 495
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 52.21,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 343,
+            "y": 495
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 61.25,
+          "caption_rect": {
+            "width": 579,
+            "height": 28,
+            "x": 243,
+            "y": 513
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 72.46,
+          "caption_rect": {
+            "width": 579,
+            "height": 28,
+            "x": 243,
+            "y": 513
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 81.68,
+          "caption_rect": {
+            "width": 608,
+            "height": 28,
+            "x": 211,
+            "y": 518
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 91.56,
+          "caption_rect": {
+            "width": 608,
+            "height": 28,
+            "x": 211,
+            "y": 518
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 100.44,
+          "caption_rect": {
+            "width": 617,
+            "height": 28,
+            "x": 203,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 109.98,
+          "caption_rect": {
+            "width": 617,
+            "height": 28,
+            "x": 203,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 118.34,
+          "caption_rect": {
+            "width": 619,
+            "height": 28,
+            "x": 201,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 126.49,
+          "caption_rect": {
+            "width": 619,
+            "height": 28,
+            "x": 201,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 134.53,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 144.22,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 152.46,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 160.2,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 167.46,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 175.85,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 184.5,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 193.3,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 201.38,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 211.01,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 220.56,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 228.97,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 236.45,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 244.58,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 252.86,
+          "caption_rect": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "target_focused": true
+        }
+      ]
+    }
+  ]
+}

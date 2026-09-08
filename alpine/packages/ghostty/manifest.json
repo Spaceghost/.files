@@ -1,0 +1,43 @@
+{
+  "arch": "x86_64",
+  "packages": [
+    {
+      "apk_identity": "Q17WNSsL7CQT4PVKv1TZ+mxzabQJ0=",
+      "arch": "x86_64",
+      "artifact": "sha256/0ad81b1354c7c587bcc505c04fa832a197ab4d3e14228fbb0ff6142c1aaec01c/ghostty-1.3.1_git20260810-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "ghostty-1.3.1_git20260810-r1.apk",
+      "name": "ghostty",
+      "sha256": "0ad81b1354c7c587bcc505c04fa832a197ab4d3e14228fbb0ff6142c1aaec01c",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/ghostty-1.3.1_git20260810-r1.apk",
+      "version": "1.3.1_git20260810-r1"
+    },
+    {
+      "apk_identity": "Q13IvClN5LPGXaY8ZO8h4UDzgZEOQ=",
+      "arch": "x86_64",
+      "artifact": "sha256/8d92715caf052ef8cef70d0f30e6f9190cba4e7528465fc242781a4a2d32e838/ghostty-zsh-completion-1.3.1_git20260810-r1.apk",
+      "artifact_arch": "noarch",
+      "filename": "ghostty-zsh-completion-1.3.1_git20260810-r1.apk",
+      "name": "ghostty-zsh-completion",
+      "sha256": "8d92715caf052ef8cef70d0f30e6f9190cba4e7528465fc242781a4a2d32e838",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/edge/testing/x86_64/ghostty-zsh-completion-1.3.1_git20260810-r1.apk",
+      "version": "1.3.1_git20260810-r1"
+    },
+    {
+      "apk_identity": "Q1dLrt4s3w8Tvds9D6TNGqDLgxli4=",
+      "arch": "x86_64",
+      "artifact": "sha256/d18b2eac3e28c3bc2c523cd6ee27024fd69da7ffdacad6a3b9f74acad25cf020/simdutf-9.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "simdutf-9.1.0-r0.apk",
+      "name": "simdutf",
+      "sha256": "d18b2eac3e28c3bc2c523cd6ee27024fd69da7ffdacad6a3b9f74acad25cf020",
+      "url": "https://dl-cdn.alpinelinux.org/alpine/edge/main/x86_64/simdutf-9.1.0-r0.apk",
+      "version": "9.1.0-r0"
+    }
+  ],
+  "schema": 1,
+  "verification": [
+    "apk verify",
+    "installed APK identity comparison"
+  ]
+}

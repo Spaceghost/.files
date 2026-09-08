@@ -1,0 +1,41 @@
+test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection (test_theme_refresh.ThemeRefreshTests.test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection) ... FAIL
+test_wallpaper_failure_still_refreshes_deployed_application_theme (test_theme_refresh.ThemeRefreshTests.test_wallpaper_failure_still_refreshes_deployed_application_theme) ... FAIL
+
+======================================================================
+FAIL: test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection (test_theme_refresh.ThemeRefreshTests.test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 78, in test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection
+    self.assertEqual(status, 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 2 != 1
+
+======================================================================
+FAIL: test_wallpaper_failure_still_refreshes_deployed_application_theme (test_theme_refresh.ThemeRefreshTests.test_wallpaper_failure_still_refreshes_deployed_application_theme)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 52, in test_wallpaper_failure_still_refreshes_deployed_application_theme
+    theme, profile, backup, notes = self.namespace['use']('gruvbox-dark')
+                                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/tmp/theme-refresh-5xycpgcc/repo/alpine/desktop/.local/bin/oldbook-theme", line 289, in use
+    gallery['update']('select', matching[-1]['id'])
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 42, in <lambda>
+    'update': lambda *args: (_ for _ in ()).throw(RuntimeError('display unavailable'))}
+                            ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 42, in <genexpr>
+    'update': lambda *args: (_ for _ in ()).throw(RuntimeError('display unavailable'))}
+RuntimeError: display unavailable
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 54, in test_wallpaper_failure_still_refreshes_deployed_application_theme
+    self.fail(f'Wallpaper prevented application refresh: {error}')
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Wallpaper prevented application refresh: display unavailable
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.572s
+
+FAILED (failures=2)

@@ -1,0 +1,257 @@
+--- a/include/sway/commands.h
++++ b/include/sway/commands.h
+@@ -174,6 +174,7 @@
+ sway_cmd cmd_mark;
+ sway_cmd cmd_max_render_time;
+ sway_cmd cmd_mode;
++sway_cmd cmd_mouse_raise_delay;
+ sway_cmd cmd_mouse_warping;
+ sway_cmd cmd_move;
+ sway_cmd cmd_new_float;
+--- a/include/sway/config.h
++++ b/include/sway/config.h
+@@ -563,6 +563,7 @@
+ 
+ 	// Flags
+ 	enum focus_follows_mouse_mode focus_follows_mouse;
++	int mouse_raise_delay;
+ 	enum mouse_warping_mode mouse_warping;
+ 	enum focus_wrapping_mode focus_wrapping;
+ 	bool active;
+--- a/sway/commands.c
++++ b/sway/commands.c
+@@ -90,6 +90,7 @@
+ 	{ "input", cmd_input },
+ 	{ "layer_effects", cmd_layer_effects },
+ 	{ "mode", cmd_mode },
++	{ "mouse_raise_delay", cmd_mouse_raise_delay },
+ 	{ "mouse_warping", cmd_mouse_warping },
+ 	{ "new_float", cmd_new_float },
+ 	{ "new_window", cmd_new_window },
+--- /dev/null
++++ b/sway/commands/mouse_raise_delay.c
+@@ -0,0 +1,18 @@
++#include <errno.h>
++#include <stdlib.h>
++#include "sway/commands.h"
++
++struct cmd_results *cmd_mouse_raise_delay(int argc, char **argv) {
++	struct cmd_results *error = checkarg(argc, "mouse_raise_delay", EXPECTED_EQUAL_TO, 1);
++	if (error) {
++		return error;
++	}
++	char *end;
++	errno = 0;
++	long value = strtol(argv[0], &end, 10);
++	if (errno || end == argv[0] || *end || value < 0 || value > 60000) {
++		return cmd_results_new(CMD_INVALID, "Expected a delay from 0 to 60000 milliseconds");
++	}
++	config->mouse_raise_delay = value;
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
+--- a/sway/config.c
++++ b/sway/config.c
+@@ -277,6 +277,7 @@
+ 
+ 	// Flags
+ 	config->focus_follows_mouse = FOLLOWS_YES;
++	config->mouse_raise_delay = 0;
+ 	config->mouse_warping = WARP_OUTPUT;
+ 	config->focus_wrapping = WRAP_YES;
+ 	config->validating = false;
+--- a/sway/input/seat.c
++++ b/sway/input/seat.c
+@@ -85,6 +85,7 @@
+ 			link) {
+ 		seat_node_destroy(seat_node);
+ 	}
++	seatop_end(seat);
+ 	sway_input_method_relay_finish(&seat->im_relay);
+ 	sway_cursor_destroy(seat->cursor);
+ 	wl_list_remove(&seat->new_node.link);
+--- a/sway/input/seatop_default.c
++++ b/sway/input/seatop_default.c
+@@ -23,10 +23,106 @@
+ 
+ struct seatop_default_event {
+ 	struct sway_node *previous_node;
++	struct sway_container *raise_hovered;
++	struct sway_workspace *raise_workspace;
++	struct wl_event_source *raise_timer;
++	struct wl_listener raise_focus_change;
++	double raise_x, raise_y, raise_width, raise_height;
++	int raise_delay;
+ 	uint32_t pressed_buttons[SWAY_CURSOR_PRESSED_BUTTONS_CAP];
+ 	size_t pressed_button_count;
+ 	struct gesture_tracker gestures;
+ };
++
++// These timers use compositor hit testing, never raw keyboard/pointer logging.
++static void cancel_mouse_raise(struct seatop_default_event *e) {
++	if (e->raise_timer) {
++		wl_event_source_remove(e->raise_timer);
++		e->raise_timer = NULL;
++	}
++}
++
++static bool mouse_raise_matches(struct sway_seat *seat, struct sway_node *node) {
++	struct seatop_default_event *e = seat->seatop_data;
++	struct sway_container *con = e->raise_hovered;
++	return con && node == &con->node && seat_get_focus(seat) == node &&
++		!server.session_lock.lock && !seat->focused_layer && !e->pressed_button_count &&
++		!con->node.destroying && con->view && view_is_visible(con->view) &&
++		container_is_floating_or_child(con) && !container_is_fullscreen_or_child(con) &&
++		config->focus_follows_mouse != FOLLOWS_NO &&
++		config->mouse_raise_delay > 0 && config->mouse_raise_delay == e->raise_delay &&
++		con->pending.workspace == e->raise_workspace &&
++		con->pending.x == e->raise_x && con->pending.y == e->raise_y &&
++		con->pending.width == e->raise_width && con->pending.height == e->raise_height;
++}
++
++static int handle_mouse_raise_timeout(void *data) {
++	struct sway_seat *seat = data;
++	struct seatop_default_event *e = seat->seatop_data;
++	struct wlr_surface *surface = NULL;
++	double sx, sy;
++	struct sway_node *node = node_at_coords(seat,
++		seat->cursor->cursor->x, seat->cursor->cursor->y, &surface, &sx, &sy);
++	cancel_mouse_raise(e);
++	if (mouse_raise_matches(seat, node)) {
++		container_raise_floating(e->raise_hovered);
++		transaction_commit_dirty();
++	}
++	return 0;
++}
++
++static void update_mouse_raise(struct sway_seat *seat, struct sway_node *node) {
++	struct seatop_default_event *e = seat->seatop_data;
++	struct sway_container *con = node && node_is_view(node) ? node->sway_container : NULL;
++	if (con == e->raise_hovered) {
++		if (e->raise_timer && !mouse_raise_matches(seat, node)) {
++			cancel_mouse_raise(e);
++		}
++		return;
++	}
++	cancel_mouse_raise(e);
++	e->raise_hovered = con;
++	if (!con) {
++		return;
++	}
++	e->raise_workspace = con->pending.workspace;
++	e->raise_x = con->pending.x;
++	e->raise_y = con->pending.y;
++	e->raise_width = con->pending.width;
++	e->raise_height = con->pending.height;
++	e->raise_delay = config->mouse_raise_delay;
++	if (mouse_raise_matches(seat, node)) {
++		e->raise_timer = wl_event_loop_add_timer(server.wl_event_loop,
++			handle_mouse_raise_timeout, seat);
++		if (e->raise_timer) {
++			wl_event_source_timer_update(e->raise_timer, e->raise_delay);
++		}
++	}
++}
++
++static void handle_raise_focus_change(struct wl_listener *listener, void *data) {
++	(void)data;
++	struct seatop_default_event *e = wl_container_of(listener, e, raise_focus_change);
++	// A newer focus must never be undone, even if it changes away and back.
++	cancel_mouse_raise(e);
++}
++
++static void handle_raise_end(struct sway_seat *seat) {
++	struct seatop_default_event *e = seat->seatop_data;
++	cancel_mouse_raise(e);
++	wl_list_remove(&e->raise_focus_change.link);
++}
++
++static void handle_raise_unref(struct sway_seat *seat, struct sway_container *con) {
++	struct seatop_default_event *e = seat->seatop_data;
++	if (e->raise_hovered == con) {
++		cancel_mouse_raise(e);
++		e->raise_hovered = NULL;
++	}
++	if (e->previous_node == &con->node) {
++		e->previous_node = NULL;
++	}
++}
+ 
+ /*-----------------------------------------\
+  * Functions shared by multiple callbacks  /
+@@ -332,6 +428,7 @@
+ static void handle_button(struct sway_seat *seat, uint32_t time_msec,
+ 		struct wlr_input_device *device, uint32_t button,
+ 		enum wl_pointer_button_state state) {
++	cancel_mouse_raise(seat->seatop_data);
+ 	struct sway_cursor *cursor = seat->cursor;
+ 
+ 	// Determine what's under the cursor
+@@ -611,6 +708,7 @@
+ 	if (config->focus_follows_mouse != FOLLOWS_NO) {
+ 		check_focus_follows_mouse(seat, e, node);
+ 	}
++	update_mouse_raise(seat, node);
+ 
+ 	if (surface) {
+ 		if (seat_is_input_allowed(seat, surface)) {
+@@ -1111,6 +1209,13 @@
+ 	double sx = 0.0, sy = 0.0;
+ 	e->previous_node = node_at_coords(seat,
+ 			cursor->cursor->x, cursor->cursor->y, &surface, &sx, &sy);
++	if (e->raise_timer && !mouse_raise_matches(seat, e->previous_node)) {
++		cancel_mouse_raise(e);
++	}
++	if (!e->previous_node || !e->raise_hovered ||
++			e->previous_node != &e->raise_hovered->node) {
++		e->raise_hovered = NULL;
++	}
+ 
+ 	if (surface) {
+ 		if (seat_is_input_allowed(seat, surface) && !cursor->hidden) {
+@@ -1124,6 +1229,8 @@
+ }
+ 
+ static const struct sway_seatop_impl seatop_impl = {
++	.end = handle_raise_end,
++	.unref = handle_raise_unref,
+ 	.button = handle_button,
+ 	.pointer_motion = handle_pointer_motion,
+ 	.pointer_axis = handle_pointer_axis,
+@@ -1151,6 +1258,9 @@
+ 
+ 	seat->seatop_impl = &seatop_impl;
+ 	seat->seatop_data = e;
++	e->raise_focus_change.notify = handle_raise_focus_change;
++	wl_signal_add(&seat->wlr_seat->keyboard_state.events.focus_change,
++		&e->raise_focus_change);
+ 
+ 	uint32_t time_msec = get_current_time_in_msec();
+ 	seatop_rebase(seat, time_msec);
+--- a/sway/meson.build
++++ b/sway/meson.build
+@@ -95,6 +95,7 @@
+ 	'commands/layout.c',
+ 	'commands/layer_effects.c',
+ 	'commands/mode.c',
++	'commands/mouse_raise_delay.c',
+ 	'commands/mouse_warping.c',
+ 	'commands/move.c',
+ 	'commands/new_float.c',
+--- a/sway/sway.5.scd
++++ b/sway/sway.5.scd
+@@ -810,6 +810,15 @@
+ 	set to _always_, the window under the cursor will always be focused, even
+ 	after switching between workspaces.
+ 
++*mouse_raise_delay* <milliseconds>
++	Raise a floating window after the pointer stays over it for this duration.
++	Focus still follows the pointer immediately. Requires *focus_follows_mouse*
++	_yes_ or _always_. Zero disables delayed raising (the default); valid values
++	are 0 through 60000. Pointer leave, focus loss, geometry changes, dragging,
++	closing, fullscreen and session locking cancel a pending raise. Keyboard
++	focus alone never starts the timer. Already focused floating windows are
++	raised without changing keyboard focus or moving the pointer.
++
+ *focus_on_window_activation* smart|urgent|focus|none
+ 	This option determines what to do when a client requests window activation.
+ 	If set to _urgent_, the urgent state will be set for that window. If set to

@@ -1,0 +1,9 @@
+{
+  "checks": [],
+  "failures": [
+    "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/test_scripture_history_theme.py\", line 97, in verify\n    assert color(reader) == '#ffccaa', ('open reader kept the old palette', color(reader))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: ('open reader kept the old palette', '#ddeeff')\n"
+  ],
+  "source_sha256": "3d6ca01ce2d513c7b13a02ea36a6025004130efc450b1e41c1e71346a3cbe8cd",
+  "computed_foreground": "#ddeeff",
+  "status": "failed"
+}
