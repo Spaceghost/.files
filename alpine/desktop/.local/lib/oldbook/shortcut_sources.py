@@ -559,12 +559,12 @@ class ShortcutProvider:
             return 'Switch tiling / floating focus'
         if command == 'workspace back_and_forth':
             return 'Return to previous workspace'
-        match = re.fullmatch(r'workspace number ([0-9]+)', command)
+        match = re.fullmatch(r'workspace number (?:"([0-9]+)(?:: [^"]+)?"|([0-9]+))', command)
         if match:
-            return f'Switch to workspace {match.group(1)}'
-        match = re.fullmatch(r'move container to workspace number ([0-9]+)', command)
+            return f'Switch to workspace {match.group(1) or match.group(2)}'
+        match = re.fullmatch(r'move container to workspace number (?:"([0-9]+)(?:: [^"]+)?"|([0-9]+))', command)
         if match:
-            return f'Move window to workspace {match.group(1)}'
+            return f'Move window to workspace {match.group(1) or match.group(2)}'
         match = re.fullmatch(r'focus (left|right|up|down|parent|child)', command)
         if match:
             return f"Focus {match.group(1)}"
@@ -591,6 +591,14 @@ class ShortcutProvider:
                     ('foot',): 'Open terminal',
                     ('oldbook-dropdown',): 'Toggle drop-down console',
                     ('oldbook-dropdown', 'monitor'): 'Toggle system monitor',
+                    ('oldbook-center',): 'Center and raise focused window',
+                    ('oldbook-resize', 'near-full'): 'Give this window room: float, nearly fill, and center',
+                    ('oldbook-carousel', 'next', '--modifier', 'super'): 'Next recent window — hold Super to browse, release to land',
+                    ('oldbook-carousel', 'previous', '--modifier', 'super'): 'Previous window — Shift reverses; Escape brings you back',
+                    ('oldbook-carousel', 'next', '--modifier', 'alt'): 'Next recent window — hold Alt to browse, release to land',
+                    ('oldbook-carousel', 'previous', '--modifier', 'alt'): 'Previous window — Shift reverses; Escape brings you back',
+                    ('oldbook-carousel', 'show'): 'Browse every workspace: choose a window, then Enter to land',
+                    ('oldbook-showdesktop', 'restore-or-carousel'): 'Bring hidden windows home, or browse every window',
                     ('oldbook-control',): 'Open system controls',
                     ('oldbook-lock',): 'Lock session',
                     ('oldbook-menu',): 'Open application launcher',

@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "backup": "/home/jack/.local/state/oldbook/backups/1788839052504469766",
+  "command": [
+    "alpine/bin/deploy-home",
+    "--target",
+    "/home/jack",
+    "--only",
+    ".local/bin/oldbook-center",
+    "--only",
+    ".config/sway/local.d/center.conf"
+  ]
+}

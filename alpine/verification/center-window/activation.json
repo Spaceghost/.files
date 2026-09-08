@@ -1,0 +1,106 @@
+{
+  "status": "passed",
+  "activated_at_unix": 1788839161.1578262,
+  "sway_version": {
+    "human_readable": "0.6",
+    "sway_original_version": "1.12.0",
+    "variant": "sway",
+    "major": 0,
+    "minor": 6,
+    "patch": 0,
+    "loaded_config_file_name": "/home/jack/.config/swayfx/config"
+  },
+  "method": "scoped deploy-home and targeted IPC binding replacement",
+  "full_reload": false,
+  "window_centering_invoked": false,
+  "bindings": [
+    {
+      "command": "unbindsym Mod4+Shift+c",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    },
+    {
+      "command": "bindsym Mod4+c exec /home/jack/.local/bin/oldbook-center",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    },
+    {
+      "command": "bindsym Mod4+Shift+c exec /home/jack/.local/bin/oldbook-center",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    },
+    {
+      "command": "bindsym Mod4+Ctrl+Shift+c reload",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    }
+  ],
+  "focused_before": {
+    "id": 306,
+    "pid": 16296,
+    "app_id": "com.mitchellh.ghostty",
+    "focused": true,
+    "rect": {
+      "x": 320,
+      "y": 73,
+      "width": 800,
+      "height": 600
+    },
+    "workspace_id": 353
+  },
+  "focused_after": {
+    "id": 306,
+    "pid": 16296,
+    "app_id": "com.mitchellh.ghostty",
+    "focused": true,
+    "rect": {
+      "x": 320,
+      "y": 73,
+      "width": 800,
+      "height": 600
+    },
+    "workspace_id": 353
+  },
+  "focused_window_preserved": true,
+  "all_window_geometry_preserved": true,
+  "current_source_definitions": {
+    "$mod+c": [
+      {
+        "path": "/home/jack/.config/sway/local.d/center.conf",
+        "line": 2,
+        "definition": "bindsym $mod+c exec ~/.local/bin/oldbook-center"
+      }
+    ],
+    "$mod+Shift+c": [
+      {
+        "path": "/home/jack/.config/sway/local.d/center.conf",
+        "line": 3,
+        "definition": "bindsym $mod+Shift+c exec ~/.local/bin/oldbook-center"
+      }
+    ],
+    "$mod+Ctrl+Shift+c": [
+      {
+        "path": "/home/jack/.config/sway/config",
+        "line": 57,
+        "definition": "bindsym $mod+Ctrl+Shift+c reload"
+      }
+    ]
+  },
+  "single_definitions": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-center": "c52e08d118f34300dd68523c00d35a4bce8d835dd9659f69b4d1a9510c5260fb",
+    "alpine/desktop/.config/sway/local.d/center.conf": "05d49c93d8835283785d852f14f3777f54a8608930196d7876c9318b98d6ce4c"
+  }
+}

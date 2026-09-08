@@ -1,0 +1,269 @@
+{
+  "status": "passed",
+  "host_changes": 0,
+  "isolation": "private HOME/XDG directories, headless Sway, nonexistent session bus",
+  "keyboard": "wtype virtual keyboard with explicit Mod4 and Shift modifiers",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-center": "c52e08d118f34300dd68523c00d35a4bce8d835dd9659f69b4d1a9510c5260fb",
+    "alpine/desktop/.config/sway/local.d/center.conf": "05d49c93d8835283785d852f14f3777f54a8608930196d7876c9318b98d6ce4c",
+    "alpine/tests/verify_center_window.py": "9b43278167f4ded39ef4a213f6a154247db6a29e06e29ad086a480196125a071",
+    "alpine/packages/waybar-art/tests/pointer-input.c": "e2743cbd289ab8ee699f7f25d87fad690154b7663916ad1948a046ef51342ac7",
+    "alpine/packages/waybar-art/tests/pointer.xml": "3ff6d540be0bc5228195bf072bde42117ea17945a5c2061add5d3cf97d6bb524"
+  },
+  "checks": [
+    "focused-target-starts-below-overlapping-control",
+    "super-c-centers-preserves-size-and-raises-focused-window",
+    "super-shift-c-centers-and-raises",
+    "single-tiled-window-becomes-floating-with-visible-margin",
+    "fullscreen-exits-and-restores-useful-floating-size",
+    "oversized-floating-window-fits-usable-area",
+    "offset-output-centers-without-replacing-window",
+    "repeated-centering-is-idempotent",
+    "empty-workspace-is-a-no-op"
+  ],
+  "states": [
+    {
+      "after": "focused-target-starts-below-overlapping-control",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 120,
+          "y": 160,
+          "width": 600,
+          "height": 400
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "super-c-centers-preserves-size-and-raises-focused-window",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 420,
+          "y": 270,
+          "width": 600,
+          "height": 400
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "super-shift-c-centers-and-raises",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 420,
+          "y": 270,
+          "width": 600,
+          "height": 400
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "single-tiled-window-becomes-floating-with-visible-margin",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 72,
+          "y": 83,
+          "width": 1296,
+          "height": 774
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "fullscreen-exits-and-restores-useful-floating-size",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 410,
+          "y": 290,
+          "width": 620,
+          "height": 360
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "oversized-floating-window-fits-usable-area",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 0,
+          "y": 40,
+          "width": 1440,
+          "height": 860
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "offset-output-centers-without-replacing-window",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 1440,
+          "y": 140,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 1850,
+          "y": 390,
+          "width": 620,
+          "height": 360
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "repeated-centering-is-idempotent",
+      "workspace": {
+        "id": 4,
+        "name": "1",
+        "rect": {
+          "x": 1440,
+          "y": 140,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 1850,
+          "y": 390,
+          "width": 620,
+          "height": 360
+        },
+        "type": "floating_con",
+        "focused": true,
+        "fullscreen_mode": 0
+      }
+    },
+    {
+      "after": "empty-workspace-is-a-no-op",
+      "workspace": {
+        "id": 7,
+        "name": "2",
+        "rect": {
+          "x": 1440,
+          "y": 140,
+          "width": 1440,
+          "height": 860
+        },
+        "output": "HEADLESS-1"
+      },
+      "target": {
+        "id": 5,
+        "pid": 29434,
+        "rect": {
+          "x": 1850,
+          "y": 390,
+          "width": 620,
+          "height": 360
+        },
+        "type": "floating_con",
+        "focused": false,
+        "fullscreen_mode": 0
+      }
+    }
+  ]
+}

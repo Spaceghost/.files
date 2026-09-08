@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""Center and raise the focused window within its workspace's usable area."""
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+
+
+def ipc(kind, command=None):
+    args = ['swaymsg', '-r', '-t', kind]
+    if command:
+        args.append(command)
+    result = subprocess.run(args, capture_output=True, text=True, timeout=3)
+    data = json.loads(result.stdout)
+    if kind == 'command' and any(not item.get('success') for item in data):
+        raise RuntimeError(str(data))
+    result.check_returncode()
+    return data
+
+
+def find_window(node, identity=None, workspace=None, floating=False):
+    if node.get('type') == 'workspace':
+        workspace = node
+    floating = floating or node.get('type') == 'floating_con'
+    matches = node.get('focused') if identity is None else node.get('id') == identity
+    if matches and (node.get('app_id') or node.get('window')):
+        return node, workspace, floating
+    for child in node.get('nodes', []):
+        found = find_window(child, identity, workspace, floating)
+        if found:
+            return found
+    for child in node.get('floating_nodes', []):
+        found = find_window(child, identity, workspace, True)
+        if found:
+            return found
+    return None
+
+
+def center():
+    runtime = Path(os.environ['XDG_RUNTIME_DIR'])
+    session = hashlib.sha256(os.environ['SWAYSOCK'].encode()).hexdigest()[:16]
+    with (runtime / f'oldbook-center-{session}.lock').open('a') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        found = find_window(ipc('get_tree'))
+        if not found or not found[1]:
+            return
+        node, workspace, floating = found
+        criteria = f'[con_id={node["id"]}]'
+        if node.get('fullscreen_mode'):
+            # Restore its pre-fullscreen size before deciding what to preserve.
+            ipc('command', criteria + ' fullscreen disable')
+            found = find_window(ipc('get_tree'), node['id'])
+            if not found:
+                return
+            node, workspace, floating = found
+        usable = workspace['rect']
+        rect = node['rect']
+        # A single tiled view can fill the entire workspace. Leave a margin
+        # when detaching it; ordinary floating windows retain their size.
+        limit = 1 if floating else .9
+        width = max(1, min(rect['width'], round(usable['width'] * limit)))
+        height = max(1, min(rect['height'], round(usable['height'] * limit)))
+        commands = []
+        if not floating:
+            commands.append('floating enable')
+        if not floating or (width, height) != (rect['width'], rect['height']):
+            commands.append(f'resize set {width} px {height} px')
+        # Native centering uses the workspace's usable area and the constrained
+        # pending size in the same transaction. Explicit focus also raises an
+        # already-focused floating window.
+        commands.extend(['move position center', 'focus'])
+        ipc('command', criteria + ' ' + ', '.join(commands))
+
+
+if __name__ == '__main__':
+    try:
+        center()
+    except (OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        raise SystemExit(f'oldbook-center: {error}')

@@ -47,7 +47,7 @@ Run the repository deployment tool after its package and wallpaper stages:
 ~/.files/alpine/bin/deploy-home --target "$HOME"
 ```
 
-Start a new session with `oldbook-sway`; reload a deployed session with `Mod+Shift+C`. Verify the panel, launcher, notification popups and history card, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
+Start a new session with `oldbook-sway`; reload a deployed session with `Super+Ctrl+Shift+C`. Verify the panel, launcher, notification popups and history card, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
 
 The configured display mode is the native internal panel. Do not copy it to an external display until its supported modes have been inspected with `swaymsg -t get_outputs`.
 
@@ -58,7 +58,12 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | `Super+Enter`, `Super+D` | Ghostty terminal, Spaceghost application menu |
 | Super + backtick (\`) | Toggle the persistent drop-down console |
 | `Super+~` (`Super+Shift+grave`) | Toggle a separate persistent btop system monitor |
-| `Alt+Tab`, `Alt+Shift+Tab` | Browse agent windows across workspaces; release Alt to switch or press Escape to cancel. |
+| `Super+C`, `Super+Shift+C` | Center the active window and bring it forward |
+| `Super+Ctrl+Shift+C` | Reload Sway configuration |
+| `Super+Tab` or `Alt+Tab` | Browse all windows in recent-use order; add Shift to reverse, release Super/Alt to select, or Escape to cancel. |
+| `Super+Shift+Space` | Float the window, size it to 90% of usable space, and center it with breathing room. |
+| Four-finger swipe up / down | Clear the desktop / restore its windows. Down opens the all-workspace carousel when nothing is hidden. |
+| `Super+0` | Workspace **10: Strata**, after workspaces 1–9. |
 | Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
 | `Super+Escape` | Lock with the installed `swaylockd` PAM-compatible binary |
 | `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot |
@@ -76,6 +81,21 @@ while the session is locked or inactive. It combines Sway bindings with relevant
 application profiles; profiles are useful baselines, not exhaustive shortcut lists.
 `oldbook-shortcuts status` reports its state. The default trigger remains Super,
 so Caps Lock retains its Escape behavior and notification indicator.
+
+Window switching is shared by both Tab shortcuts. Hold the modifier to browse
+a frozen list; repeated quick taps alternate between your two most recent
+windows. Ordinary Tab and Ctrl+Tab stay with the application. Agent navigation
+remains on Super+i and Super+Shift+i. The gesture-opened carousel stays open:
+use arrows, Tab/Shift+Tab, the wheel or a card click; Enter selects and Escape
+returns to the window you started from. Its angled previews are captured from
+each exact window, including other workspaces, without moving focus. Images
+stay in process memory and are discarded when the carousel closes.
+
+Leaving an exposed desktop ends that expose session and restores the captured
+output where necessary, preserving the workspace you chose. The warm
+`oldbook-carousel daemon` and `oldbook-showdesktop daemon` start with Sway and
+use per-session locks. For local recovery, Escape leaves the carousel mode;
+`oldbook-carousel cancel` and `oldbook-showdesktop restore` dismiss either view.
 
 The MacBook keyboard light uses the kernel's `applesmc` LED device
 `smc::kbd_backlight`; the existing `brightnessctl` udev rule and `input` group

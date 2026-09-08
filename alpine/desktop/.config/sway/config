@@ -54,7 +54,7 @@ bindsym $mod+n exec ~/.local/bin/oldbook-agents
 bindsym $mod+Ctrl+n exec ~/.local/bin/oldbook-agents quick
 bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
 bindsym $mod+Shift+q kill
-bindsym $mod+Shift+c reload
+bindsym $mod+Ctrl+Shift+c reload
 bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
 bindsym $mod+Escape exec $lock
 bindsym $mod+Shift+r mode "resize"
@@ -104,10 +104,10 @@ bindsym $mod+b splith
 bindsym $mod+v splitv
 bindsym $mod+f fullscreen toggle
 bindsym $mod+space floating toggle
-bindsym $mod+Shift+space focus mode_toggle
+bindsym $mod+Shift+space exec ~/.local/bin/oldbook-resize near-full
 bindsym $mod+a focus parent
 bindsym $mod+Shift+a focus child
-bindsym $mod+Tab workspace back_and_forth
+# Super/Alt+Tab share the window carousel in local.d/window-switcher.conf.
 
 # Caption only: middle click toggles tiled/floating. Left drag and right resize
 # remain native; clicks in application content keep their usual meaning.

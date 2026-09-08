@@ -793,3 +793,15 @@ ordered compositor events establish readiness at creation.
   the new monitor was shown/hidden while preserving both existing consoles.
 - Physical human keypresses and a new login remain unobserved. Evidence and
   screenshots: `verification/console-monitor/`.
+
+
+## Center and raise shortcuts — 2026-09-07
+
+- Super+C and Super+Shift+C center the active window in usable workspace space
+  and bring it forward. Ordinary floats retain size; tiled views become floating
+  with a small margin, and fullscreen views restore before centering.
+- Nine isolated native checks, full SwayFX parsing and 22 shortcut-source tests
+  passed. Scoped deployment and targeted bindings are active; activation
+  preserved all window geometry and focus. Reload moved to Super+Ctrl+Shift+C.
+- Physical keypresses and a new login remain unobserved. Evidence and recovery:
+  `verification/center-window/`.
