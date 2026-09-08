@@ -440,7 +440,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         lease.acquire()
         self.addCleanup(lease.close)
         env = dict(os.environ, XDG_RUNTIME_DIR=str(self.runtime),
-                   PYTHONPATH=str(LIB_PARENT))
+                   PYTHONPATH=str(LIB_PARENT), OLDBOOK_SHORTCUTS_LEGACY='1')
         result = subprocess.run(
             [str(COMMAND), 'status', '--socket', str(self.sway_socket)],
             env=env, text=True, capture_output=True, timeout=3)
@@ -464,7 +464,7 @@ class RuntimeSafetyTests(unittest.TestCase):
         record['process']['start_time'] = 'reused-pid'
         lease.status_path.write_text(json.dumps(record))
         env = dict(os.environ, XDG_RUNTIME_DIR=str(self.runtime),
-                   PYTHONPATH=str(LIB_PARENT))
+                   PYTHONPATH=str(LIB_PARENT), OLDBOOK_SHORTCUTS_LEGACY='1')
         result = subprocess.run(
             [str(COMMAND), 'status', '--socket', str(self.sway_socket)],
             env=env, text=True, capture_output=True, timeout=3)

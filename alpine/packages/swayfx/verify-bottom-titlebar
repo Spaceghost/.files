@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise bottom titlebar geometry and pointer input in an isolated SwayFX session."""
 import argparse
+import configparser
 import hashlib
 import json
 import os
@@ -38,6 +39,8 @@ def main(argv=None):
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
     parser.add_argument('--render-device', default='/dev/dri/renderD128')
+    parser.add_argument('--theme-profile', choices=('spaceghost', 'gruvbox-dark'),
+                        help='Render and exercise an authored theme profile')
     args = parser.parse_args(argv)
     binary = args.binary.resolve(strict=True)
     out = args.output.absolute()
@@ -54,8 +57,19 @@ def main(argv=None):
         if not condition:
             raise AssertionError(message)
 
-    theme = REPO / 'alpine/desktop/.config/sway/theme.conf'
-    foot_config = REPO / 'alpine/desktop/.config/foot/foot.ini'
+    desktop = REPO / 'alpine/desktop/.config'
+    theme_root = (REPO / 'alpine/themes/profiles' / args.theme_profile / '.config'
+                  if args.theme_profile else desktop)
+    theme = theme_root / 'sway/theme.conf'
+    foot_config = theme_root / 'foot/foot.ini'
+    foot_settings = configparser.ConfigParser(interpolation=None, inline_comment_prefixes=('#',))
+    foot_settings.read(foot_config)
+    background_rgb = list(bytes.fromhex(foot_settings['colors-dark']['background']))
+    theme_name = args.theme_profile or 'gruvbox-dark'
+    screenshot = out / (theme_name + '-bottom-titlebars.png')
+    evidence['theme_profile'] = args.theme_profile or 'desktop'
+    caption_bindings = '\n'.join(line for line in (desktop / 'sway/config').read_text().splitlines()
+                                 if line.startswith('bindsym --release button2 '))
     (out / 'sway.conf').write_text(f'''xwayland disable
 output HEADLESS-1 mode {WIDTH}x{HEIGHT}
 output * bg #1d2021 solid_color
@@ -63,6 +77,7 @@ seat seat0 fallback true
 focus_follows_mouse no
 mouse_warping none
 include {theme}
+{caption_bindings}
 default_border normal 2
 default_floating_border normal 2
 gaps inner 0
@@ -74,7 +89,7 @@ animation_duration_ms 0
 ''')
     (out / 'client.py').write_text('''import sys,time
 print("\\033[1;33mGHOST\\033[0m  /  \\033[1mOLDBOOK\\033[0m\\n")
-print("  Gruvbox Dark / bottom titlebar preview\\n")
+print("  Theme-matched / bottom titlebar preview\\n")
 print("\\033[32m  ●  Native Alpine + musl\\033[0m")
 print("\\033[34m  ●  Rebuildable SwayFX\\033[0m")
 print("\\033[35m  ●  Everything kept in Fossil\\033[0m\\n")
@@ -187,10 +202,10 @@ time.sleep(180)
                     pointer.stdin.flush()
                     reply('ok')
 
-                def click(x, y):
+                def click(x, y, button=272):
                     point(f'move {int(x)} {int(y)}')
-                    point('press 272')
-                    point('release 272')
+                    point(f'press {button}')
+                    point(f'release {button}')
                     time.sleep(.35)
 
                 def drag(x, y, dx, dy):
@@ -237,6 +252,24 @@ time.sleep(180)
                 require(client('titlebar-a')['rect']['width'] >= rect['width'] + 50,
                         'Tiled divider resize stopped working')
                 checked('tiled divider pointer resize')
+
+                current_stage = 'caption-only middle click'
+                def floating_ids():
+                    return {item['id'] for node in walk(tree())
+                            for item in node.get('floating_nodes', [])}
+                body = client('titlebar-b')['rect']
+                click(body['x'] + body['width'] / 2, body['y'] + 60, 274)
+                require(client('titlebar-b')['id'] not in floating_ids(),
+                        'Application middle click unexpectedly floated its window')
+                deco = client('titlebar-b')['deco_rect']
+                click(deco['x'] + deco['width'] / 2, deco['y'] + deco['height'] / 2, 274)
+                require(client('titlebar-b')['id'] in floating_ids(),
+                        'Caption middle click did not float the clicked window')
+                deco = client('titlebar-b')['deco_rect']
+                click(deco['x'] + deco['width'] / 2, deco['y'] + deco['height'] / 2, 274)
+                require(client('titlebar-b')['id'] not in floating_ids(),
+                        'Caption middle click did not restore tiling')
+                checked('caption middle click toggles floating; content middle click is untouched')
 
                 for layout in ('tabbed', 'stacking'):
                     current_stage = f'{layout} group title input'
@@ -321,7 +354,8 @@ time.sleep(180)
                              (WIDTH // 2, HEIGHT - 30)):
                     offset = y * picture.get_rowstride() + x * picture.get_n_channels()
                     rgb = list(pixels[offset:offset + 3])
-                    require(all(abs(channel - 40) <= 3 for channel in rgb),
+                    require(all(abs(actual - expected) <= 3
+                                for actual, expected in zip(rgb, background_rgb)),
                             f'Fullscreen content clipped at ({x}, {y}): {rgb}')
                     samples.append({'x': x, 'y': y, 'rgb': rgb})
                 checked('fullscreen actual client pixels reach bottom and right edges', samples=samples)
@@ -356,9 +390,9 @@ time.sleep(180)
                 command('titlebar_position bottom')
                 checked('stacked workspace with two floaters counts one titlebar each')
 
-                current_stage = 'Gruvbox preview'
+                current_stage = theme_name + ' preview'
                 with (out / 'sway.conf').open('a') as config:
-                    config.write(f'\ninclude {REPO}/alpine/desktop/.config/swayfx/effects.conf\n'
+                    config.write(f'\ninclude {theme_root}/swayfx/effects.conf\n'
                                  'titlebar_position bottom\ndefault_border normal 0\n'
                                  'default_floating_border normal 0\n')
                 command('reload')
@@ -371,9 +405,9 @@ time.sleep(180)
                 normal('titlebar-float', 'bottom')
                 normal('titlebar-b', 'bottom')
                 time.sleep(.5)
-                subprocess.run(['grim', str(out / 'gruvbox-bottom-titlebars.png')], env=env, check=True)
+                subprocess.run(['grim', str(screenshot)], env=env, check=True)
                 (out / 'final-tree.json').write_text(json.dumps(tree(), indent=2) + '\n')
-                checked('actual Gruvbox Foot palette with SwayFX effects and bottom titlebars')
+                checked('actual ' + theme_name + ' Foot palette with SwayFX effects and bottom titlebars')
                 evidence['status'] = 'passed'
             except Exception as error:
                 evidence.update(status='failed', failed_stage=current_stage, error=str(error))
@@ -390,7 +424,7 @@ time.sleep(180)
                             process.wait(timeout=5)
     print(json.dumps({'status': evidence['status'], 'checks': len(evidence['checks']),
                       'evidence': str(out / 'evidence.json'),
-                      'screenshot': str(out / 'gruvbox-bottom-titlebars.png')}))
+                      'screenshot': str(screenshot)}))
     return 0
 
 

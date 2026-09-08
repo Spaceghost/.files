@@ -77,6 +77,8 @@ class DecorationTests(unittest.TestCase):
                 '[main]\nfont=Fixture Mono:size=9.5\n')
             script = runpy.run_path(str(SCRIPT))
             script['appearance'].__globals__['CONFIG'] = root
+            script['appearance'].__globals__['SETTINGS'] = root / 'oldbook/decoration.json'
+            script['appearance'].__globals__['STATE'] = root / 'state'
             script['appearance'].__globals__['read_palette'] = lambda: {
                 'background': '#13091f', 'surface': '#261631',
                 'foreground': '#eaddf5', 'accent': '#dca7ff',
@@ -128,11 +130,13 @@ class DecorationTests(unittest.TestCase):
             self.assertEqual(migrated['position'], 'right')
             self.assertTrue(config.is_symlink())
             self.assertEqual(json.loads(target.read_text()), migrated)
-            saved = self.model.save_settings(config, {'opacity': 0.55})
+            saved = self.model.save_settings(config, {'position': 'bottom', 'opacity': 0.55},
+                                             legacy)
             self.assertTrue(config.is_symlink())
             self.assertEqual(saved, {'position': 'bottom', 'opacity': 0.55,
                                      'corner_radius': 7})
             self.assertEqual(json.loads(target.read_text()), saved)
+            self.assertEqual(legacy.read_text(), 'bottom\n')
 
 
 if __name__ == '__main__':

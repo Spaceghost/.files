@@ -1,6 +1,7 @@
 """Lock acquisition regression tests; never connect to the live compositor."""
 import json
 import os
+import runpy
 import signal
 import socket
 from pathlib import Path
@@ -14,6 +15,40 @@ LOCK = REPO / 'alpine/desktop/.local/bin/oldbook-lock'
 
 
 class LockRegressionTests(unittest.TestCase):
+    def test_indicator_palette_follows_the_selected_theme(self):
+        with tempfile.TemporaryDirectory(prefix='oldbook-lock-theme-') as directory:
+            themes = Path(directory)
+            (themes / 'current').write_text('violet\n')
+            (themes / 'violet.json').write_text(json.dumps({'palette': {
+                'background': '#13091f', 'surface': '#261631',
+                'foreground': '#eaddf5', 'accent': '#dca7ff',
+                'muted': '#816b91'}}))
+            lock = runpy.run_path(str(LOCK))
+            lock['lock_arguments'].__globals__['THEMES'] = themes
+
+            arguments = lock['lock_arguments'](9)
+
+            self.assertEqual(arguments[arguments.index('--inside-color') + 1], '13091fee')
+            self.assertEqual(arguments[arguments.index('--ring-color') + 1], 'dca7ffff')
+            self.assertEqual(arguments[arguments.index('--text-color') + 1], 'eaddf5ff')
+            expected_states = {
+                '--bs-hl-color': 'eaddf5ff',
+                '--caps-lock-bs-hl-color': '816b91ff',
+                '--caps-lock-key-hl-color': 'dca7ffff',
+                '--inside-caps-lock-color': '261631ee',
+                '--ring-caps-lock-color': 'dca7ffff',
+                '--text-clear-color': 'eaddf5ff',
+                '--text-caps-lock-color': 'dca7ffff',
+                '--line-clear-color': '00000000',
+                '--line-caps-lock-color': '00000000',
+                '--line-ver-color': '00000000',
+                '--line-wrong-color': '00000000',
+            }
+            for option, expected in expected_states.items():
+                with self.subTest(option=option):
+                    self.assertIn(option, arguments)
+                    self.assertEqual(arguments[arguments.index(option) + 1], expected)
+
     def test_process_name_alone_never_proves_readiness(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
             root = Path(directory)

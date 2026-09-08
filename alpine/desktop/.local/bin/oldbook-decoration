@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Workspace-edge captions. Right-click the strip to switch bottom/right."""
+"""Interactive workspace-edge captions with persistent appearance settings."""
 import argparse
 import configparser
 import fcntl
@@ -30,11 +30,16 @@ def position():
 def set_position(value):
     settings = load_settings(SETTINGS, STATE / 'position')
     settings['position'] = value
-    save_settings(SETTINGS, settings)
-    STATE.mkdir(parents=True, exist_ok=True)
-    temporary = STATE / f'position.{os.getpid()}.tmp'
-    temporary.write_text(value + '\n')
-    temporary.replace(STATE / 'position')
+    save_settings(SETTINGS, settings, STATE / 'position')
+
+
+def launch(command):
+    try:
+        subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        return True
+    except OSError:
+        return False
 
 
 def appearance():
@@ -80,7 +85,7 @@ def daemon():
             GtkLayerShell.init_for_window(self.window)
             GtkLayerShell.set_namespace(self.window, 'oldbook-decoration')
             GtkLayerShell.set_monitor(self.window, monitor)
-            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP)
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.OVERLAY)
             GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
             anchors = ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM')
             for name in anchors:
@@ -102,20 +107,16 @@ def daemon():
             self.box.connect('button-press-event', self.click)
             self.window.add(self.box)
             self.provider = Gtk.CssProvider()
-            self.box.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            self.label.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-            self.window.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+            self.box.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            self.label.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            self.window.get_style_context().add_provider(self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             self.previous = None
 
         def click(self, _widget, event):
-            command = action_command(event.button)
+            shifted = bool(event.state & Gdk.ModifierType.SHIFT_MASK)
+            command = action_command(event.button, shifted=shifted)
             if command:
-                try:
-                    subprocess.Popen(command, stdin=subprocess.DEVNULL,
-                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                                     start_new_session=True)
-                except OSError:
-                    pass
+                launch(command)
             elif event.button == 3:
                 set_position('right' if self.edge == 'bottom' else 'bottom')
             return True
@@ -136,7 +137,7 @@ def daemon():
                     background-image: linear-gradient({direction},
                         alpha({colors['surface']}, {surface_opacity:.3f}),
                         alpha({colors['background']}, {opacity:.3f}));
-                    border: none;
+                    border: none; outline: none;
                     border-radius: {radius}px; padding: {padding};
                     min-height: 0; min-width: 0;
                     box-shadow: 0 2px 10px alpha({colors['background_hard']}, 0.72);
@@ -164,8 +165,9 @@ def daemon():
                 shown = title
             self.label.set_text(shown)
             self.box.set_tooltip_text(
-                title + '\n\nWINDOW DECK  ·  Left: choose window  ·  Middle: float/tile  ·  Right: move to '
-                + ('right edge' if self.edge == 'bottom' else 'bottom edge'))
+                title + '\n\nWINDOW DECK\nLeft: choose window  ·  Middle: float/tile\nRight: move to '
+                + ('right edge' if self.edge == 'bottom' else 'bottom edge')
+                + '  ·  Shift+Right: appearance settings')
             self.previous = (title, style, square)
             self.window.show_all()
 
@@ -229,12 +231,17 @@ def daemon():
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=('daemon', 'bottom', 'right', 'toggle', 'status'))
+    parser.add_argument('mode', choices=('daemon', 'bottom', 'right', 'toggle', 'status',
+                                         'settings'))
     args = parser.parse_args()
     if args.mode == 'daemon':
         return daemon()
     if args.mode == 'status':
         print(position())
+    elif args.mode == 'settings':
+        if not launch(action_command(3, shifted=True)):
+            print('Decoration settings are unavailable.', file=sys.stderr)
+            return 1
     else:
         value = args.mode if args.mode != 'toggle' else ('right' if position() == 'bottom' else 'bottom')
         set_position(value)

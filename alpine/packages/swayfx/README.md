@@ -83,6 +83,12 @@ This uses a private Wayland virtual pointer and synthetic Foot clients. It does
 not inject input into the live desktop. The compiler, Wayland development tools,
 Foot, grim and Python GdkPixbuf dependencies are retained in the package lock.
 
+Pass `--theme-profile spaceghost` or `--theme-profile gruvbox-dark` to check the
+authored theme's captions, terminal palette, and effects. The test also exercises
+the production middle-click binding: the caption toggles floating twice, while
+the same click inside terminal content leaves tiling alone. Each profile saves
+its own screenshot and JSON evidence.
+
 ![Actual bottom captions and rounded corners](bottom-titlebar-preview.png)
 
 Upstream: [SwayFX 0.6](https://github.com/wlrfx/swayfx/releases/tag/0.6),

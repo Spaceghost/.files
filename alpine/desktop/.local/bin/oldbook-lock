@@ -11,6 +11,9 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+from overlay_theme import THEMES, read_palette
+
 
 def private_directory(path):
     path.mkdir(mode=0o700, exist_ok=True)
@@ -59,18 +62,34 @@ def lock_arguments(ready_fd):
     wallpaper = Path.home() / '.local/share/oldbook/current-wallpaper.png'
     if not wallpaper.is_file():
         wallpaper = Path.home() / '.local/share/oldbook/wallpaper.png'
+    palette = read_palette(THEMES)
+
+    def color(name, alpha='ff'):
+        return palette[name].lstrip('#') + alpha
+
     args = ['-R', str(ready_fd), '--indicator-idle-visible', '--indicator-radius', '105',
-            '--indicator-thickness', '9', '--inside-color', '282828ee',
-            '--inside-clear-color', '504945ee', '--inside-ver-color', '3c3836ee',
-            '--inside-wrong-color', '9d2420ee', '--ring-color', 'fabd2fff',
-            '--ring-clear-color', 'fe8019ff', '--ring-ver-color', '83a598ff',
-            '--ring-wrong-color', 'fb4934ff', '--line-color', '00000000',
-            '--key-hl-color', 'b8bb26ff', '--text-color', 'ebdbb2ff',
-            '--text-ver-color', '83a598ff', '--text-wrong-color', 'fb4934ff',
+            '--indicator-thickness', '9', '--inside-color', color('background', 'ee'),
+            '--inside-clear-color', color('surface', 'ee'),
+            '--inside-caps-lock-color', color('surface', 'ee'),
+            '--inside-ver-color', color('surface', 'ee'),
+            '--inside-wrong-color', color('surface', 'ee'),
+            '--ring-color', color('accent'), '--ring-clear-color', color('border'),
+            '--ring-caps-lock-color', color('accent'), '--ring-ver-color', color('muted'),
+            '--ring-wrong-color', color('foreground'), '--line-color', '00000000',
+            '--line-clear-color', '00000000', '--line-caps-lock-color', '00000000',
+            '--line-ver-color', '00000000', '--line-wrong-color', '00000000',
+            '--key-hl-color', color('accent'), '--bs-hl-color', color('foreground'),
+            '--caps-lock-key-hl-color', color('accent'),
+            '--caps-lock-bs-hl-color', color('muted'),
+            '--text-color', color('foreground'), '--text-clear-color', color('foreground'),
+            '--text-caps-lock-color', color('accent'), '--text-ver-color', color('muted'),
+            '--text-wrong-color', color('foreground'),
+            '--layout-bg-color', color('background', 'ee'),
+            '--layout-border-color', color('accent'), '--layout-text-color', color('foreground'),
             '--separator-color', '00000000', '--font', 'JetBrainsMono Nerd Font',
             '--font-size', '18']
     return args + (['-i', str(wallpaper), '-s', 'fill'] if wallpaper.is_file()
-                   else ['-c', '282828'])
+                   else ['-c', palette['background'].lstrip('#')])
 
 
 def acquire_lock(runtime, command='swaylockd', timeout=10):

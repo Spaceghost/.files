@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "checks": [
+    "external-change-blocks-stale-controls",
+    "reload-applies-external-change",
+    "controls-save-and-update-json",
+    "legacy-position-follows-gui-save",
+    "invalid-json-preserves-saved-file",
+    "json-save-and-update-controls",
+    "invalid-value-preserves-saved-file",
+    "external-change-blocks-stale-json",
+    "reload-restores-both-panels"
+  ],
+  "final_config": {
+    "position": "right",
+    "opacity": 0.6,
+    "corner_radius": 7
+  },
+  "legacy_position": "right",
+  "screenshots": {
+    "preferences.png": "0586aef57173c483a7fa20b0fc7c9c1a4dd9f0ed70ada246c157a5917a89ee05",
+    "conflict.png": "aa45d454e950634d0e5175c148b813a0c1e8fea992e0d93b064c27da25325548"
+  },
+  "host_config_changes": 0,
+  "source_sha256": "7613237713c5ec29d1ffcbf15006ed38ffacf9c2ea620aa395f6c41b235fb784",
+  "live_settings_path": "/home/jack/.config/oldbook/decoration.json",
+  "live_changes_by_verifier": 0
+}

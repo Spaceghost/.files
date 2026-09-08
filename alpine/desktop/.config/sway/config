@@ -101,6 +101,10 @@ bindsym $mod+a focus parent
 bindsym $mod+Shift+a focus child
 bindsym $mod+Tab workspace back_and_forth
 
+# Caption only: middle click toggles tiled/floating. Left drag and right resize
+# remain native; clicks in application content keep their usual meaning.
+bindsym --release button2 floating toggle
+
 bindsym Print exec ~/.local/bin/oldbook-screenshot full
 bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
 bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
@@ -125,6 +129,7 @@ mode "resize" {
 }
 
 for_window [app_id="oldbook-agent"] floating enable, resize set width 1100 px height 700 px, move position center
+for_window [app_id="oldbook-decoration-settings"] floating enable, move position center
 for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
 for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt

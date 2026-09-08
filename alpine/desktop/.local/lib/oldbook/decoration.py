@@ -32,7 +32,7 @@ def validate_settings(values):
     return result
 
 
-def save_settings(path, values):
+def save_settings(path, values, legacy_position=None):
     settings = validate_settings(values)
     path = Path(path)
     target = path.resolve(strict=False) if path.is_symlink() else path
@@ -47,6 +47,18 @@ def save_settings(path, values):
         temporary.replace(target)
     finally:
         temporary.unlink(missing_ok=True)
+    if legacy_position is not None:
+        legacy = Path(legacy_position)
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        state_temporary = legacy.with_name(f'{legacy.name}.{os.getpid()}.tmp')
+        try:
+            with state_temporary.open('x') as stream:
+                stream.write(settings['position'] + '\n')
+                stream.flush()
+                os.fsync(stream.fileno())
+            state_temporary.replace(legacy)
+        finally:
+            state_temporary.unlink(missing_ok=True)
     return settings
 
 
@@ -56,7 +68,7 @@ def load_settings(path, legacy_position=None):
         return validate_settings(json.loads(path.read_text()))
     except FileNotFoundError:
         pass
-    except (OSError, ValueError, TypeError, json.JSONDecodeError):
+    except (OSError, ValueError, TypeError):
         return dict(SETTINGS_DEFAULTS)
     if legacy_position is not None:
         try:
