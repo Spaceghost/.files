@@ -837,3 +837,29 @@ ordered compositor events establish readiness at creation.
   20,264 changed pixels and 8,949 visible text pixels. The full disposable
   transfer and native rerun passed; screenshots contain only test-desktop
   content. Additional study CLI deployment journal: `1788839620926671175`.
+
+## Predictable Tab switching, window carousel and expose recovery — 2026-09-07
+
+- Super+Tab and Alt+Tab now share every normal window across workspaces in real
+  recent-focus order. Hold to cycle a frozen list, add Shift to reverse, release
+  to select, or Escape to cancel. Quick taps alternate the last two windows.
+  Plain Tab/Ctrl+Tab remain with applications; agent navigation stays on Super+i.
+- Four-finger down restores exposed windows, or opens the persistent themed
+  carousel when none are hidden. Its angled cards use exact per-window previews
+  without visiting hidden workspaces, soft shadows and frame-clock animation.
+  Leaving expose cancels stale animation/state while preserving the destination.
+- Super+Shift+Space exits fullscreen, floats, sizes to 90% of usable space and
+  centers with at least 24px margins. Super+0 remains numeric workspace 10, last.
+- All 112 focused unit tests and 54 native check groups pass across selection,
+  controller, geometry, shortcut help, resize and expose lifecycle. The carousel
+  final sample records a 16.4385ms median active frame interval; this is private
+  compositor evidence, not a measured physical-panel frame-rate guarantee.
+  Sway parsing, ShellCheck and disposable-HOME deployment pass.
+- New helper links and single-owner carousel/showdesktop daemons are active. One
+  validated Sway reload loaded the new window-switcher mode. Window IDs survived;
+  one window moved during reload and again afterward, so its newer position was
+  preserved. The live workspace sequence remains 1,2,3,4,10.
+- Evidence, synthetic screenshots, source hashes and recovery:
+  `verification/window-navigation/`, `verification/carousel/`,
+  `verification/near-full-resize/`, `verification/showdesktop-recovery/`.
+  Physical keyboard/touchpad input and a fresh login remain manual checks.

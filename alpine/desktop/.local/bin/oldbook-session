@@ -135,6 +135,10 @@ fi
 if command -v oldbook-showdesktop >/dev/null 2>&1; then
     oldbook-showdesktop daemon 9>&- >>"$art_state/showdesktop.log" 2>&1 &
 fi
+# Record global window focus order and keep the carousel ready for Tab/swipes.
+if command -v oldbook-carousel >/dev/null 2>&1; then
+    oldbook-carousel daemon 9>&- >>"$art_state/carousel.log" 2>&1 &
+fi
 if command -v oldbook-wallpaper >/dev/null 2>&1; then
     oldbook-wallpaper refresh >>"$art_state/wallpaper.log" 2>&1 || true
     oldbook-wallpaper daemon 9>&- >>"$art_state/wallpaper.log" 2>&1 &

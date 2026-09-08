@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "tests": 48,
+  "elapsed_seconds": 0.019,
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "alpine/desktop/.local/bin/oldbook-showdesktop": "3b76d8beda0eb3e0c34888365a24a2dd95d0fbc0a81d8738c3dc3f06de5e315d",
+    "alpine/tests/test_showdesktop.py": "66124015ccba315166d0bb1bc28b474d0852e58731380001d0bc4896c6b0fc10",
+    "alpine/tests/test_showdesktop_lifecycle.py": "ca105de487a40dbbb5a2bc6f37e7daeaccdb5d78808a495f5331336a3a6747c0"
+  },
+  "command": "python3 -m unittest discover -s alpine/tests -p 'test_showdesktop*.py' -v"
+}

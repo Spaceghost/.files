@@ -1,0 +1,21 @@
+test_carousel (unittest.loader._FailedTest.test_carousel) ... ERROR
+
+======================================================================
+ERROR: test_carousel (unittest.loader._FailedTest.test_carousel)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_carousel
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/unittest/loader.py", line 433, in _find_test_path
+    module = self._get_module_from_name(name)
+  File "/usr/lib/python3.14/unittest/loader.py", line 374, in _get_module_from_name
+    __import__(name)
+    ~~~~~~~~~~^^^^^^
+  File "/home/jack/.files/alpine/tests/test_carousel.py", line 10, in <module>
+    from carousel import EventFrames, PreviewStore, decode_preview, runtime_directory
+ModuleNotFoundError: No module named 'carousel'
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (errors=1)
