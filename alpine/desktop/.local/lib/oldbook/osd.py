@@ -20,6 +20,14 @@ FADE_MS = 260.0
 FLASH_MS = 120.0
 FLASH_ALPHA = 0.85
 
+# The now-transmitting card: a slower, wider surface than the pill.
+CARD_SLIDE_MS = 320.0
+CARD_HOLD_MS = 4000.0
+CARD_MAX_TEXT = 160
+# A player that republishes the same metadata (a position tick, a volume
+# change) must not re-announce the track it is already playing.
+CARD_REPEAT_MS = 20000.0
+
 # Nerd Font (Material Design) code points shared with the Waybar modules.
 GLYPHS = {'volume-off': '\U000f0581', 'volume-low': '\U000f057f',
           'volume-medium': '\U000f0580', 'volume-high': '\U000f057e',
@@ -44,6 +52,29 @@ def flash_message():
     return json.dumps({'action': 'flash'}).encode()
 
 
+def clean_text(value, limit=CARD_MAX_TEXT):
+    """One tidy line from whatever a player publishes, or the empty string."""
+    if isinstance(value, (list, tuple)):
+        value = ', '.join(str(item) for item in value if item)
+    if not isinstance(value, str):
+        return ''
+    value = ' '.join(value.split())
+    return value[:limit]
+
+
+def card_message(title, artist='', album='', art=''):
+    title = clean_text(title)
+    if not title:
+        raise ValueError('a track card needs a title')
+    return json.dumps({'action': 'card', 'title': title, 'artist': clean_text(artist),
+                       'album': clean_text(album), 'art': clean_text(str(art), 1024)}).encode()
+
+
+def track_identity(title, artist='', album=''):
+    """What makes two announcements the same track, ignoring position ticks."""
+    return (clean_text(title), clean_text(artist), clean_text(album))
+
+
 def parse_message(data):
     """Return a validated request, or None for anything the pill must ignore."""
     if not isinstance(data, (bytes, bytearray)) or len(data) > MAX_MESSAGE:
@@ -57,6 +88,15 @@ def parse_message(data):
     action = payload.get('action')
     if action == 'flash':
         return {'action': 'flash'}
+    if action == 'card':
+        title = clean_text(payload.get('title'))
+        if not title:
+            return None
+        art = payload.get('art')
+        return {'action': 'card', 'title': title,
+                'artist': clean_text(payload.get('artist')),
+                'album': clean_text(payload.get('album')),
+                'art': art if isinstance(art, str) else ''}
     if action != 'show':
         return None
     kind, value, muted = payload.get('kind'), payload.get('value'), payload.get('muted', False)
@@ -157,6 +197,85 @@ class Flash:
 
     def finished_at(self, now):
         return self.alpha_at(now) <= 0.0
+
+
+class Card:
+    """The now-transmitting card: slide in, hold, slide out, then stop drawing.
+
+    ``offset_at`` is how far off the right edge the card sits, in pixels, so
+    the drawing code translates by it and nothing else keeps time. The slide
+    eases out on the way in and in on the way out, settling exactly on 0 and
+    on the full travel with no overshoot.
+    """
+
+    def __init__(self, content, started_at, travel, slide_ms=CARD_SLIDE_MS,
+                 hold_ms=CARD_HOLD_MS, animate=True):
+        if travel <= 0 or slide_ms <= 0 or hold_ms < 0:
+            raise ValueError('a card needs positive travel, slide and a nonnegative hold')
+        self.content = dict(content)
+        self.started_at = float(started_at)
+        self.travel = float(travel)
+        self.slide_ms, self.hold_ms = float(slide_ms), float(hold_ms)
+        self.animate = animate
+        self.dismissed_at = None
+
+    def dismiss(self, now):
+        """Cut the hold short, from the current position, without a jump."""
+        if self.dismissed_at is None:
+            self.dismissed_at = max(float(now), self.started_at)
+
+    def _leaves_at(self):
+        entry = self.slide_ms if self.animate else 0.0
+        natural = self.started_at + entry + self.hold_ms
+        if self.dismissed_at is None:
+            return natural
+        return min(natural, self.dismissed_at)
+
+    def offset_at(self, now):
+        elapsed = float(now) - self.started_at
+        if not self.animate:
+            return 0.0 if float(now) < self._leaves_at() else self.travel
+        if elapsed < self.slide_ms:
+            # Cubic ease-out: quick departure, gentle arrival.
+            progress = max(0.0, elapsed) / self.slide_ms
+            return self.travel * (1.0 - progress) ** 3
+        leaving = float(now) - self._leaves_at()
+        if leaving <= 0.0:
+            return 0.0
+        # Cubic ease-in on the way out, mirroring the arrival.
+        progress = min(1.0, leaving / self.slide_ms)
+        return self.travel * progress ** 3
+
+    def finished_at(self, now):
+        return float(now) >= self._leaves_at() + (self.slide_ms if self.animate else 0.0)
+
+
+class Announcer:
+    """Decides whether a metadata change deserves a card.
+
+    Players republish metadata for reasons that are not a new track, and the
+    card must stay out of the way while the desktop is locked or the
+    notification centre is open. Keeping the rule here means it is testable
+    without a bus or a display.
+    """
+
+    def __init__(self, repeat_ms=CARD_REPEAT_MS):
+        self.repeat_ms = float(repeat_ms)
+        self.last_identity = None
+        self.last_shown_at = None
+
+    def consider(self, title, artist='', album='', now=0.0, playing=True,
+                 enabled=True, locked=False, centre_open=False):
+        identity = track_identity(title, artist, album)
+        if not identity[0]:
+            return False
+        repeated = (identity == self.last_identity and self.last_shown_at is not None
+                    and float(now) - self.last_shown_at < self.repeat_ms)
+        # A suppressed announcement still counts as seen, so the card does not
+        # ambush the user the moment they unlock or close the centre.
+        self.last_identity = identity
+        self.last_shown_at = float(now)
+        return bool(enabled and playing and not locked and not centre_open and not repeated)
 
 
 def send(payload, runtime=None):

@@ -228,6 +228,41 @@ include "{DESKTOP / '.config/sway/local.d/screenshot.conf'}"
                 report['luma']['idle_full'] = mean_luma(idle)
                 shrink(flash, output / 'flash.png')
 
+                # The now-transmitting card: slide in, hold, slide out, then go.
+                def announce(*arguments):
+                    subprocess.run([sys.executable, str(helper), 'card', *arguments],
+                                   env=env, check=True, timeout=10)
+
+                announce('--title', 'Coast to Coast', '--artist', 'Space Ghost & The Zorak Quartet',
+                         '--album', 'Late Night Transmissions', '--art', str(ART))
+                wait_for(lambda: surfaces(env, 'oldbook-card'), 'the track card surface', 3)
+                time.sleep(.45)
+                card_shot = grab(env, base / 'card.png')
+                card_surface = surfaces(env, 'oldbook-card')
+                report['card_surface'] = card_surface
+                extent = card_surface[0]['extent']
+                card_box = (extent['x'], extent['y'], extent['width'], extent['height'])
+                report['card_box'] = card_box
+                report['workspace_rect_card'] = workspace_rect(env)
+                crop(card_shot, card_box, output / 'card-shown.png')
+                report['luma']['card_idle_box'] = mean_luma(idle, card_box)
+                report['luma']['card_shown_box'] = mean_luma(card_shot, card_box)
+                wait_for(lambda: not surfaces(env, 'oldbook-card'), 'the card to unmap', 8)
+                gone = grab(env, base / 'card-gone.png')
+                report['card_surfaces_after'] = surfaces(env, 'oldbook-card')
+                report['luma']['card_gone_box'] = mean_luma(gone, card_box)
+
+                # A locked desktop keeps the card away; the daemon reads the
+                # lock helper's own readiness record and checks it is live.
+                lock_record = runtime / 'oldbook-screen-lock'
+                lock_record.mkdir(mode=0o700, exist_ok=True)
+                (lock_record / 'ready.json').write_text(json.dumps(
+                    {'process': {'pid': os.getpid()}, 'locker': 'verifier'}))
+                announce('--title', 'Not While Locked', '--artist', 'Zorak')
+                time.sleep(1.2)
+                report['card_surfaces_while_locked'] = surfaces(env, 'oldbook-card')
+                shutil.rmtree(lock_record)
+
                 capture = home / 'capture.png'
                 shutil.copy(idle, capture)
                 satty_log = output / 'satty.log'
@@ -283,6 +318,13 @@ include "{DESKTOP / '.config/sway/local.d/screenshot.conf'}"
         'flash_brightened_output': luma['flash_full'] > luma['idle_full'] + 40,
         'flash_gone_after': abs(luma['after_flash_full'] - luma['idle_full']) < 2.0
                             and report['flash_surfaces_after'] == [],
+        'card_on_overlay_layer': bool(report['card_surface']) and
+                                 report['card_surface'][0]['layer'] == 'overlay',
+        'card_visible_while_held': abs(luma['card_shown_box'] - luma['card_idle_box']) > 2.0,
+        'workspace_unchanged_while_card_shown': report['workspace_rect_before'] == report['workspace_rect_card'],
+        'card_unmapped_after_hold': report['card_surfaces_after'] == [] and
+                                    abs(luma['card_gone_box'] - luma['card_idle_box']) < 2.0,
+        'card_suppressed_while_locked': report['card_surfaces_while_locked'] == [],
         'satty_floats': report['satty']['floating'],
         'satty_config_accepted': not any('error' in line.lower() for line in report['satty']['log']),
         'daemon_survived': report['daemon_alive_at_end'],

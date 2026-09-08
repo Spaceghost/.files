@@ -270,5 +270,164 @@ class HelperWiringTests(unittest.TestCase):
         self.assertFalse(any(line.startswith('oldbook-osd') for line in self.calls()))
 
 
+class CardMessageTests(unittest.TestCase):
+    def test_a_card_carries_the_track_and_survives_the_round_trip(self):
+        request = osd.parse_message(osd.card_message(
+            'Coast to Coast', ['Space Ghost', 'Zorak'], 'Late Night', 'file:///tmp/art.png'))
+        self.assertEqual(request['action'], 'card')
+        self.assertEqual(request['title'], 'Coast to Coast')
+        self.assertEqual(request['artist'], 'Space Ghost, Zorak')
+        self.assertEqual(request['art'], 'file:///tmp/art.png')
+
+    def test_a_card_without_a_title_is_refused(self):
+        with self.assertRaises(ValueError):
+            osd.card_message('   ')
+        self.assertIsNone(osd.parse_message(json.dumps({'action': 'card', 'title': ''}).encode()))
+
+    def test_titles_are_tidied_and_bounded(self):
+        self.assertEqual(osd.clean_text('  a\n  long   name '), 'a long name')
+        self.assertEqual(len(osd.clean_text('x' * 500)), osd.CARD_MAX_TEXT)
+        self.assertEqual(osd.clean_text(None), '')
+
+
+class AnnouncerTests(unittest.TestCase):
+    def setUp(self):
+        self.announcer = osd.Announcer(repeat_ms=1000)
+
+    def test_a_new_track_is_announced(self):
+        self.assertTrue(self.announcer.consider('One', 'Ghost', now=0))
+
+    def test_the_same_track_republished_is_ignored(self):
+        self.announcer.consider('One', 'Ghost', now=0)
+        self.assertFalse(self.announcer.consider('One', 'Ghost', now=500))
+
+    def test_the_same_track_much_later_announces_again(self):
+        self.announcer.consider('One', 'Ghost', now=0)
+        self.assertTrue(self.announcer.consider('One', 'Ghost', now=2000))
+
+    def test_a_different_track_announces_immediately(self):
+        self.announcer.consider('One', 'Ghost', now=0)
+        self.assertTrue(self.announcer.consider('Two', 'Ghost', now=10))
+
+    def test_a_paused_locked_or_covered_desktop_stays_quiet(self):
+        for reason in ({'playing': False}, {'locked': True}, {'centre_open': True},
+                       {'enabled': False}):
+            with self.subTest(**reason):
+                announcer = osd.Announcer(repeat_ms=1000)
+                self.assertFalse(announcer.consider('One', 'Ghost', now=0, **reason))
+
+    def test_a_suppressed_track_is_not_announced_when_the_reason_clears(self):
+        self.announcer.consider('One', 'Ghost', now=0, locked=True)
+        self.assertFalse(self.announcer.consider('One', 'Ghost', now=100))
+
+
+class CardTimingTests(unittest.TestCase):
+    def card(self, **overrides):
+        options = dict(slide_ms=100.0, hold_ms=1000.0)
+        options.update(overrides)
+        return osd.Card({'title': 'One'}, 0.0, 400.0, **options)
+
+    def test_the_card_slides_in_from_off_screen_and_settles_exactly(self):
+        card = self.card()
+        self.assertEqual(card.offset_at(0.0), 400.0)
+        self.assertLess(card.offset_at(50.0), 400.0)
+        self.assertGreater(card.offset_at(50.0), 0.0)
+        self.assertEqual(card.offset_at(100.0), 0.0)
+        self.assertEqual(card.offset_at(600.0), 0.0)
+
+    def test_the_slide_never_overshoots_and_moves_one_way(self):
+        card = self.card()
+        samples = [card.offset_at(step) for step in range(0, 101, 5)]
+        self.assertTrue(all(0.0 <= value <= 400.0 for value in samples))
+        self.assertEqual(samples, sorted(samples, reverse=True))
+
+    def test_the_card_leaves_after_the_hold_and_finishes(self):
+        card = self.card()
+        self.assertEqual(card.offset_at(1100.0), 0.0)
+        self.assertGreater(card.offset_at(1150.0), 0.0)
+        self.assertEqual(card.offset_at(1200.0), 400.0)
+        self.assertFalse(card.finished_at(1150.0))
+        self.assertTrue(card.finished_at(1200.0))
+
+    def test_dismissing_starts_the_exit_early_without_a_jump(self):
+        card = self.card()
+        card.dismiss(300.0)
+        self.assertEqual(card.offset_at(300.0), 0.0)
+        self.assertGreater(card.offset_at(350.0), 0.0)
+        self.assertTrue(card.finished_at(400.0))
+
+    def test_dismissing_twice_keeps_the_first_moment(self):
+        card = self.card()
+        card.dismiss(300.0)
+        card.dismiss(900.0)
+        self.assertTrue(card.finished_at(400.0))
+
+    def test_without_animation_the_card_appears_and_disappears(self):
+        card = self.card(animate=False)
+        self.assertEqual(card.offset_at(0.0), 0.0)
+        self.assertEqual(card.offset_at(999.0), 0.0)
+        self.assertEqual(card.offset_at(1000.0), 400.0)
+        self.assertTrue(card.finished_at(1000.0))
+
+    def test_a_card_needs_positive_travel_and_slide(self):
+        for bad in ({'travel': 0.0}, {'slide_ms': 0.0}, {'hold_ms': -1.0}):
+            options = {'travel': 400.0, 'slide_ms': 100.0, 'hold_ms': 10.0}
+            options.update(bad)
+            with self.subTest(**bad), self.assertRaises(ValueError):
+                osd.Card({'title': 'One'}, 0.0, **options)
+
+
+class CardRenderingTests(unittest.TestCase):
+    def render(self, *arguments):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'card.png'
+            result = subprocess.run([sys.executable, str(HELPER), 'preview-card',
+                                     *arguments, '--output', str(output)],
+                                    capture_output=True, text=True, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            return output.read_bytes()
+
+    def test_the_card_renders_without_a_display_or_album_art(self):
+        image = self.render('--title', 'Coast to Coast', '--artist', 'Space Ghost')
+        self.assertTrue(image.startswith(b'\x89PNG'))
+        self.assertGreater(len(image), 2000)
+
+    def test_a_missing_album_art_path_still_renders(self):
+        image = self.render('--title', 'One', '--art', '/nonexistent/art.png')
+        self.assertTrue(image.startswith(b'\x89PNG'))
+
+
+class PreferenceTests(unittest.TestCase):
+    def helper(self):
+        return runpy.run_path(str(HELPER), run_name='oldbook_osd_preferences')
+
+    def test_the_card_is_on_by_default_and_survives_a_broken_file(self):
+        module = self.helper()
+        with tempfile.TemporaryDirectory() as directory:
+            self.assertTrue(module['preferences'](directory)['card'])
+            path = Path(directory) / 'oldbook'
+            path.mkdir()
+            (path / 'osd.json').write_text('{ not json')
+            self.assertTrue(module['preferences'](directory)['card'])
+
+    def test_the_card_can_be_switched_off(self):
+        module = self.helper()
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'oldbook'
+            path.mkdir()
+            (path / 'osd.json').write_text('{"card": false}')
+            self.assertFalse(module['preferences'](directory)['card'])
+
+    def test_a_stale_lock_record_does_not_mean_a_locked_desktop(self):
+        module = self.helper()
+        with tempfile.TemporaryDirectory() as directory:
+            record = Path(directory) / 'oldbook-screen-lock'
+            record.mkdir()
+            (record / 'ready.json').write_text(json.dumps({'process': {'pid': 999999}}))
+            self.assertFalse(module['session_locked'](directory))
+            (record / 'ready.json').write_text(json.dumps({'process': {'pid': os.getpid()}}))
+            self.assertTrue(module['session_locked'](directory))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -18,12 +18,14 @@ import sys
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
-from osd import (FLASH_ALPHA, HOLD_MS, KINDS, MAX_VALUE, Feedback, Flash, describe,
-                 endpoint, flash_message, parse_message, send, show_message)
+from osd import (CARD_HOLD_MS, CARD_SLIDE_MS, FLASH_ALPHA, HOLD_MS, KINDS, MAX_VALUE, Announcer,
+                 Card, Feedback, Flash, card_message, describe, endpoint, flash_message,
+                 parse_message, send, show_message)
 from overlay_theme import read_palette
 
 NAMESPACE = 'oldbook-osd'
 FLASH_NAMESPACE = 'oldbook-flash'
+CARD_NAMESPACE = 'oldbook-card'
 WIDTH, HEIGHT = 300, 66
 PADDING = 18
 RADIUS = 14
@@ -33,6 +35,54 @@ BOTTOM_MARGIN = 36
 FONT = 'JetBrainsMono Nerd Font'
 # Aged cream rather than pure white, so the wash belongs to the palette.
 FLASH_COLOR = (0.984, 0.945, 0.780)
+
+# The now-transmitting card. Its travel is the full width plus the margin, so
+# it starts and ends completely off the edge of the output.
+CARD_WIDTH, CARD_HEIGHT = 380, 96
+CARD_PADDING = 12
+CARD_RADIUS = 14
+CARD_ART = 72
+CARD_ART_RADIUS = 9
+CARD_MARGIN = 16
+CARD_TEXT_GAP = 14
+# Nerd Font music glyph, drawn when a track has no usable album art.
+CARD_FALLBACK_GLYPH = '\U000f075a'
+PREFERENCES = 'oldbook/osd.json'
+MPRIS_PREFIX = 'org.mpris.MediaPlayer2'
+PLAYER_INTERFACE = MPRIS_PREFIX + '.Player'
+SWAYNC_NAME = 'org.erikreider.swaync.cc'
+SWAYNC_PATH = '/org/erikreider/swaync/cc'
+
+
+def preferences(config=None):
+    """User switches for the pill and the card; any problem means defaults."""
+    base = config or os.environ.get('XDG_CONFIG_HOME') or str(Path.home() / '.config')
+    try:
+        import json
+        value = json.loads((Path(base) / PREFERENCES).read_text())
+        if not isinstance(value, dict):
+            return {'card': True}
+        return {'card': value.get('card', True) is not False}
+    except (OSError, ValueError):
+        return {'card': True}
+
+
+def session_locked(runtime=None):
+    """True while a live locker owns this session, from the lock's own record.
+
+    The lock helper leaves its readiness record behind, so the recorded
+    process must still exist before the card treats the desktop as locked.
+    """
+    base = runtime or os.environ.get('XDG_RUNTIME_DIR')
+    if not base:
+        return False
+    try:
+        import json
+        record = json.loads((Path(base) / 'oldbook-screen-lock' / 'ready.json').read_text())
+        pid = int(record['process']['pid'])
+        return (Path('/proc') / str(pid)).exists()
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
 
 
 def private_directory(path):
@@ -133,6 +183,113 @@ def render_pill(cr, width, height, content, palette):
         cr.set_source_rgb(*rgb(accent))
         cr.fill()
     cr.restore()
+
+
+def art_pixbuf(art, size):
+    """Decode and cover-crop the album art to a square, or None."""
+    if not art:
+        return None
+    path = art
+    if path.startswith('file://'):
+        from urllib.parse import unquote, urlparse
+        parsed = urlparse(path)
+        if parsed.netloc not in ('', 'localhost'):
+            return None
+        path = unquote(parsed.path)
+    if not os.path.isabs(path):
+        return None
+    try:
+        import gi
+        gi.require_version('GdkPixbuf', '2.0')
+        from gi.repository import GdkPixbuf
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(path)
+    except Exception:
+        return None
+    width, height = pixbuf.get_width(), pixbuf.get_height()
+    if width <= 0 or height <= 0:
+        return None
+    scale = max(size / width, size / height)
+    scaled = pixbuf.scale_simple(max(1, round(width * scale)), max(1, round(height * scale)),
+                                 GdkPixbuf.InterpType.BILINEAR)
+    x = max(0, (scaled.get_width() - size) // 2)
+    y = max(0, (scaled.get_height() - size) // 2)
+    return scaled.new_subpixbuf(x, y, min(size, scaled.get_width()),
+                                min(size, scaled.get_height()))
+
+
+def render_card(cr, width, height, content, palette, pixbuf=None):
+    """Draw the now-transmitting card at full opacity, in the notification style."""
+    import gi
+    gi.require_version('Gdk', '3.0')
+    from gi.repository import Gdk
+    cr.save()
+    rounded_rectangle(cr, 0, 0, width, height, CARD_RADIUS)
+    cr.set_source_rgba(*rgb(palette['background']), 0.94)
+    cr.fill_preserve()
+    cr.set_source_rgba(*rgb(palette['border']), 0.55)
+    cr.set_line_width(1.0)
+    cr.stroke()
+    art_x, art_y = CARD_PADDING, (height - CARD_ART) / 2.0
+    cr.save()
+    rounded_rectangle(cr, art_x, art_y, CARD_ART, CARD_ART, CARD_ART_RADIUS)
+    cr.clip()
+    if pixbuf is not None:
+        Gdk.cairo_set_source_pixbuf(cr, pixbuf, art_x, art_y)
+        cr.paint()
+    else:
+        cr.set_source_rgb(*rgb(palette['surface']))
+        cr.paint()
+    cr.restore()
+    if pixbuf is None:
+        draw_text(cr, CARD_FALLBACK_GLYPH, art_x, 0, 30, palette['muted'],
+                  align='center', box_width=CARD_ART, middle=height / 2.0)
+    left = art_x + CARD_ART + CARD_TEXT_GAP
+    span = max(40.0, width - CARD_PADDING - left - 4)
+    top = art_y + 2
+    draw_text(cr, 'NOW TRANSMITTING', left, top, 9, palette['accent'], weight='bold')
+    lines = [(content['title'], 13.0, palette['foreground'], 'bold'),
+             (content['artist'], 11.0, palette['muted'], 'normal'),
+             (content['album'], 10.0, palette['muted'], 'normal')]
+    y = top + 16
+    for text, size, color, weight in lines:
+        if not text:
+            continue
+        logical = draw_text(cr, ellipsize(cr, text, size, weight, span), left, y, size, color,
+                            weight=weight)
+        y += logical.height + 3
+    cr.restore()
+
+
+def ellipsize(cr, text, size, weight, span):
+    """Trim to the column width; Pango ellipsis needs a width we set by hand."""
+    if not text:
+        return text
+    probe = layout(cr, text, size, weight)
+    _, logical = probe.get_pixel_extents()
+    if logical.width <= span:
+        return text
+    trimmed = text
+    while trimmed:
+        trimmed = trimmed[:-1]
+        candidate = trimmed.rstrip() + '…'
+        _, logical = layout(cr, candidate, size, weight).get_pixel_extents()
+        if logical.width <= span:
+            return candidate
+    return '…'
+
+
+def preview_card(title, artist, album, art, output, palette=None):
+    """Render the card into a PNG without a display, for evidence and review."""
+    import cairo
+    palette = palette or read_palette()
+    content = {'title': title, 'artist': artist, 'album': album}
+    scale = 2
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, CARD_WIDTH * scale, CARD_HEIGHT * scale)
+    cr = cairo.Context(surface)
+    cr.scale(scale, scale)
+    render_card(cr, CARD_WIDTH, CARD_HEIGHT, content, palette, art_pixbuf(art, CARD_ART))
+    surface.write_to_png(str(output))
+    return content
 
 
 def preview(kind, value, muted, output, palette=None):
@@ -321,7 +478,162 @@ def daemon():
                 cr.paint()
             return True
 
-    pill, wash = Pill(), Wash()
+    class Announcement:
+        """The now-transmitting card: one slide-in surface at the bottom right."""
+
+        def __init__(self):
+            self.state = None
+            self.palette = read_palette()
+            self.pixbuf = None
+            self.ticker = 0
+            self.window = transparent_window(CARD_NAMESPACE)
+            GtkLayerShell.set_exclusive_zone(self.window, 0)
+            for edge, margin in ((GtkLayerShell.Edge.BOTTOM, CARD_MARGIN),
+                                 (GtkLayerShell.Edge.RIGHT, CARD_MARGIN)):
+                GtkLayerShell.set_anchor(self.window, edge, True)
+                GtkLayerShell.set_margin(self.window, edge, margin)
+            self.window.set_resizable(False)
+            # The surface is wide enough to hold the card at any point of its
+            # travel, so the slide is a translation and never a resize.
+            self.travel = CARD_WIDTH + CARD_MARGIN
+            self.window.set_default_size(CARD_WIDTH + self.travel, CARD_HEIGHT)
+            self.area = Gtk.DrawingArea()
+            self.area.set_size_request(CARD_WIDTH + self.travel, CARD_HEIGHT)
+            self.area.connect('draw', self.draw)
+            self.window.add(self.area)
+
+        def show(self, request):
+            self.palette = read_palette()
+            self.pixbuf = art_pixbuf(request.get('art'), CARD_ART)
+            content = {'title': request['title'], 'artist': request.get('artist', ''),
+                       'album': request.get('album', '')}
+            self.state = Card(content, frame_now(self.area), self.travel, animate=animations)
+            if self.ticker:
+                self.area.remove_tick_callback(self.ticker)
+                self.ticker = 0
+            if not self.window.get_visible():
+                self.window.show_all()
+            self.ticker = self.area.add_tick_callback(self.tick)
+            self.area.queue_draw()
+
+        def dismiss(self):
+            """Slide out now, used when the desktop locks under an open card."""
+            if self.state is not None:
+                self.state.dismiss(frame_now(self.area))
+
+        def tick(self, widget, clock):
+            if self.state is None or self.state.finished_at(clock.get_frame_time() / 1000.0):
+                self.ticker = 0
+                self.state = None
+                self.pixbuf = None
+                self.window.hide()
+                return GLib.SOURCE_REMOVE
+            widget.queue_draw()
+            return GLib.SOURCE_CONTINUE
+
+        def draw(self, widget, cr):
+            if self.state is None:
+                return True
+            offset = self.state.offset_at(frame_now(widget))
+            if offset >= self.travel:
+                return True
+            width = widget.get_allocated_width()
+            cr.save()
+            cr.translate(width - CARD_WIDTH + offset, 0)
+            render_card(cr, CARD_WIDTH, widget.get_allocated_height(), self.state.content,
+                        self.palette, self.pixbuf)
+            cr.restore()
+            return True
+
+    pill, wash, card = Pill(), Wash(), Announcement()
+    wants_card = preferences()['card']
+    centre_open = False
+    announcer = Announcer()
+
+    def card_allowed():
+        return wants_card and not centre_open and not session_locked(runtime)
+
+    def announce(request):
+        if session_locked(runtime):
+            card.dismiss()
+            return
+        if card_allowed():
+            card.show(request)
+
+    bus = None
+    try:
+        from gi.repository import Gio
+        bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    except Exception as error:
+        print('oldbook-osd: no session bus for the track card: ' + str(error), file=sys.stderr)
+
+    def centre_changed(*arguments):
+        nonlocal centre_open
+        parameters = arguments[-2] if len(arguments) >= 2 else None
+        try:
+            values = parameters.unpack()
+        except Exception:
+            return
+        # Subscribe(count, dnd, cc_open) and SubscribeV2 add inhibited last.
+        if len(values) >= 3 and isinstance(values[2], bool):
+            centre_open = values[2]
+            if centre_open:
+                card.dismiss()
+
+    def metadata_changed(_connection, sender, _path, _interface, _signal, parameters):
+        if not wants_card or sender is None:
+            return
+        try:
+            name, changed, _invalid = parameters.unpack()
+        except Exception:
+            return
+        if name != PLAYER_INTERFACE:
+            return
+        metadata = changed.get('Metadata')
+        status = changed.get('PlaybackStatus')
+        if metadata is None:
+            return
+        if status is None:
+            try:
+                reply = bus.call_sync(sender, '/org/mpris/MediaPlayer2',
+                                      'org.freedesktop.DBus.Properties', 'Get',
+                                      GLib.Variant('(ss)', (PLAYER_INTERFACE, 'PlaybackStatus')),
+                                      GLib.VariantType('(v)'), Gio.DBusCallFlags.NONE, 400, None)
+                status = reply.unpack()[0]
+            except Exception:
+                status = 'Playing'
+        request = {'action': 'card', 'title': metadata.get('xesam:title', ''),
+                   'artist': metadata.get('xesam:artist', ''),
+                   'album': metadata.get('xesam:album', ''),
+                   'art': metadata.get('mpris:artUrl', '')}
+        if not isinstance(request['title'], str) or not request['title'].strip():
+            return
+        if announcer.consider(request['title'], request['artist'], request['album'],
+                              now=GLib.get_monotonic_time() / 1000.0,
+                              playing=status == 'Playing', enabled=wants_card,
+                              locked=session_locked(runtime), centre_open=centre_open):
+            parsed = parse_message(card_message(request['title'], request['artist'],
+                                                request['album'], request['art']))
+            if parsed:
+                announce(parsed)
+
+    subscriptions = []
+    if bus is not None:
+        subscriptions.append(bus.signal_subscribe(
+            None, 'org.freedesktop.DBus.Properties', 'PropertiesChanged',
+            '/org/mpris/MediaPlayer2', PLAYER_INTERFACE, Gio.DBusSignalFlags.NONE,
+            metadata_changed))
+        for signal_name in ('SubscribeV2', 'Subscribe'):
+            subscriptions.append(bus.signal_subscribe(
+                SWAYNC_NAME, SWAYNC_NAME, signal_name, SWAYNC_PATH, None,
+                Gio.DBusSignalFlags.NONE, centre_changed))
+        try:
+            reply = bus.call_sync(SWAYNC_NAME, SWAYNC_PATH, SWAYNC_NAME, 'GetVisibility', None,
+                                  GLib.VariantType('(b)'), Gio.DBusCallFlags.NONE, 400, None)
+            centre_open = bool(reply.unpack()[0])
+        except Exception:
+            centre_open = False
+
     address = endpoint(runtime)
     address.unlink(missing_ok=True)
     control = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -338,6 +650,8 @@ def daemon():
             return GLib.SOURCE_CONTINUE
         if request['action'] == 'flash':
             wash.flash()
+        elif request['action'] == 'card':
+            announce(request)
         else:
             pill.show(request)
         return GLib.SOURCE_CONTINUE
@@ -349,6 +663,9 @@ def daemon():
         Gtk.main()
     finally:
         GLib.source_remove(watch)
+        if bus is not None:
+            for subscription in subscriptions:
+                bus.signal_unsubscribe(subscription)
         control.close()
         address.unlink(missing_ok=True)
         guard.close()
@@ -364,11 +681,23 @@ def main(argv=None):
     show.add_argument('--value', required=True, type=int, help='0 to %d percent' % MAX_VALUE)
     show.add_argument('--muted', action='store_true')
     commands.add_parser('flash', help='wash the focused output after a screenshot')
+    track = commands.add_parser('card', help='announce a track on the now-transmitting card')
+    track.add_argument('--title', required=True)
+    track.add_argument('--artist', default='')
+    track.add_argument('--album', default='')
+    track.add_argument('--art', default='', help='album art path or file:// URL')
     render = commands.add_parser('preview', help='render the pill to a PNG without a display')
     render.add_argument('--kind', default='volume', choices=KINDS)
     render.add_argument('--value', default=42, type=int)
     render.add_argument('--muted', action='store_true')
     render.add_argument('--output', required=True, type=Path)
+    render_card = commands.add_parser('preview-card',
+                                      help='render the track card to a PNG without a display')
+    render_card.add_argument('--title', default='Coast to Coast')
+    render_card.add_argument('--artist', default='Space Ghost')
+    render_card.add_argument('--album', default='Late Night Transmissions')
+    render_card.add_argument('--art', default='')
+    render_card.add_argument('--output', required=True, type=Path)
     arguments = parser.parse_args(argv)
     if arguments.command == 'daemon':
         return daemon()
@@ -376,8 +705,15 @@ def main(argv=None):
         content = preview(arguments.kind, arguments.value, arguments.muted, arguments.output)
         print(content['label'], str(content['value']) + '%', arguments.output)
         return 0
+    if arguments.command == 'preview-card':
+        content = preview_card(arguments.title, arguments.artist, arguments.album,
+                               arguments.art, arguments.output)
+        print(content['title'], '·', content['artist'], arguments.output)
+        return 0
     if arguments.command == 'show':
         send(show_message(arguments.kind, arguments.value, arguments.muted))
+    elif arguments.command == 'card':
+        send(card_message(arguments.title, arguments.artist, arguments.album, arguments.art))
     else:
         send(flash_message())
     return 0

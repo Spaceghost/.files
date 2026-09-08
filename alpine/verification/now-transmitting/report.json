@@ -1,0 +1,153 @@
+{
+  "renderer": "pixman",
+  "artwork": "2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png",
+  "artwork_sha256": "f932fef36c22728ef6679a40431b2908e69d62e21fe673b6d7435bd6765c1eb1",
+  "daemon_sha256": "97f40616bee412864679e95fb2b34e2dc7e98759d94cbd33348a19ec372b1e73",
+  "library_sha256": "8ae9ca1de369a3f3e37ee4c8e4734a274afd6ebdb729dde1386f626622f42114",
+  "versions": {
+    "swayfx": "swayfx version 0.6 (based on sway 1.12.0)",
+    "satty": "satty_cli 0.20.1",
+    "grim": "Usage: grim [options...] [output-file]"
+  },
+  "sway_version": "0.6",
+  "idle_surfaces": [],
+  "pill_surface": [
+    {
+      "namespace": "oldbook-osd",
+      "layer": "overlay",
+      "extent": {
+        "width": 300,
+        "height": 66,
+        "x": 570,
+        "y": 798
+      },
+      "effects": {
+        "blur": true,
+        "blur_xray": true,
+        "blur_ignore_transparent": true,
+        "shadows": true,
+        "corner_radius": 14
+      }
+    }
+  ],
+  "pill_box": [
+    570,
+    798,
+    300,
+    66
+  ],
+  "workspace_rect_before": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "workspace_rect_shown": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "hidden_surfaces": [],
+  "luma": {
+    "idle_box": 38.24058745098038,
+    "shown_box": 46.86223137254884,
+    "fading_box": 30.068854901960755,
+    "hidden_box": 38.24058745098038,
+    "flash_full": 149.81699128395147,
+    "after_flash_full": 64.27551791358312,
+    "idle_full": 64.27551791358312,
+    "card_idle_box": 33.51030111683849,
+    "card_shown_box": 44.71707753436444,
+    "card_gone_box": 33.51030111683849
+  },
+  "second_surfaces": [
+    {
+      "namespace": "oldbook-osd",
+      "layer": "overlay",
+      "extent": {
+        "width": 300,
+        "height": 66,
+        "x": 570,
+        "y": 798
+      },
+      "effects": {
+        "blur": true,
+        "blur_xray": true,
+        "blur_ignore_transparent": true,
+        "shadows": true,
+        "corner_radius": 14
+      }
+    }
+  ],
+  "flash_surface": [],
+  "flash_surfaces_after": [],
+  "card_surface": [
+    {
+      "namespace": "oldbook-card",
+      "layer": "overlay",
+      "extent": {
+        "width": 776,
+        "height": 96,
+        "x": 648,
+        "y": 788
+      },
+      "effects": {
+        "blur": false,
+        "blur_xray": false,
+        "blur_ignore_transparent": false,
+        "shadows": false,
+        "corner_radius": 0
+      }
+    }
+  ],
+  "card_box": [
+    648,
+    788,
+    776,
+    96
+  ],
+  "workspace_rect_card": {
+    "x": 0,
+    "y": 0,
+    "width": 1440,
+    "height": 900
+  },
+  "card_surfaces_after": [],
+  "card_surfaces_while_locked": [],
+  "satty": {
+    "app_id": "com.gabm.satty",
+    "type": "floating_con",
+    "floating": true,
+    "rect": {
+      "x": 115,
+      "y": 111,
+      "width": 1209,
+      "height": 717
+    },
+    "log": [
+      "CSS overrides file /tmp/oldbook-osd-verify-258yu6yc/home/.config/satty/overrides.css does not exist, using builtin CSS only.",
+      "Fullscreen None | Resize None | Floatinghack false"
+    ]
+  },
+  "daemon_alive_at_end": true,
+  "checks": {
+    "pill_on_overlay_layer": true,
+    "pill_size_matches": true,
+    "workspace_unchanged_while_shown": true,
+    "pill_unmapped_after_fade": true,
+    "pill_visible_then_fading": true,
+    "pill_gone_after_hide": true,
+    "flash_brightened_output": true,
+    "flash_gone_after": true,
+    "card_on_overlay_layer": true,
+    "card_visible_while_held": true,
+    "workspace_unchanged_while_card_shown": true,
+    "card_unmapped_after_hold": true,
+    "card_suppressed_while_locked": true,
+    "satty_floats": true,
+    "satty_config_accepted": true,
+    "daemon_survived": true
+  },
+  "passed": true
+}
