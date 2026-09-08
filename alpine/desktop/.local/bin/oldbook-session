@@ -96,6 +96,7 @@ fi
 # The bar imports this stylesheet, so it must exist before Waybar reads style.css.
 # oldbook-waybar-dim owns its contents from then on.
 waybar_state="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/waybar-state.css"
+mkdir -p "${waybar_state%/*}"
 [ -f "$waybar_state" ] || printf '%s\n' '/* Written by oldbook-waybar-dim; edit style.css instead. */' > "$waybar_state"
 if ! has_comm waybar; then
     start_service waybar waybar

@@ -182,9 +182,11 @@ python3 "$HOME/.files/alpine/wallpapers/generate.py"
 ```
 
 Run `alpine/bin/install-wallpaper-schedule` from the checkout to preserve existing
-cron jobs and add an hourly wake check. The generator reserves **one attempt per
-local calendar day**, including failures; it never retries a billed daily run.
-It uses an exclusive lock and a maximum 15-minute deadline. Alpine's `crond`
+cron jobs and add an hourly wake check. The generator reserves **one job per
+local calendar day**, including failures. Each job retries failed generation up to
+three times after the initial attempt, waiting 2, 4, then 8 seconds. Later cron
+wakes cannot restart an exhausted job. It uses an exclusive lock across retries
+and a maximum 15-minute deadline per image attempt. Alpine's `crond`
 service must be enabled. `--remove` removes only this managed cron block; the
 previous crontab is backed up in the private state directory.
 
@@ -222,22 +224,28 @@ same prompt again is intentionally creative and is not deterministic.
 
 ## Create a new theme
 
-Right-click the artwork widget to open **Ghost Gallery**, then type `new theme`:
+Right-click the artwork widget to open **Ghost Gallery**:
 
-- **Random new theme** invents a named collection, palette, and art direction.
-- **New theme from a phrase/title** asks for a short idea, then interprets it as
-  a collection and its first scene. Escape cancels without requesting generation.
+- **Create theme from prompt** is on the first screen. Describe what you want;
+  the generator invents the name, palette, art direction, and first scene.
+  Escape cancels without requesting generation.
+- **Paint in an existing theme…** opens a separate alphabetical picker; type to
+  filter the theme names, then select one for another painting.
+- **Random new theme**, under **Gallery actions…**, invents a collection without a prompt.
 
 Both run in the background through the existing Codex ChatGPT login. A busy
 indicator and desktop notifications cover theme design and painting. Once ready,
-its first wallpaper is selected. The named collection then appears among the
-“Generate … artwork” choices for future paintings. These are gallery themes;
+its first wallpaper is selected. The named collection then appears in the
+existing-theme picker for future paintings. These are gallery themes;
 application colors and the default rotation theme remain independently configured.
 
 Theme definitions live in `alpine/themes/<unique-id>.json`. The first successful
 image checkpoint includes its new descriptor and PNG/JSON pair, with autosync off.
-If painting fails, the saved collection remains available: select its named
-Generate action to try an image again. If a checkpoint fails, files remain saved
+Theme design and painting each retry up to three times after the initial attempt.
+Notifications show retry progress and each attempt keeps a separate private log.
+A successful theme design is reused for all image retries. If painting still
+fails, the saved collection remains available in the existing-theme picker.
+If a checkpoint fails, files remain saved
 and the existing pending-checkpoint recovery applies. Private request logs are
 under `~/.local/state/oldbook/wallpaper-generation/manual/`.
 

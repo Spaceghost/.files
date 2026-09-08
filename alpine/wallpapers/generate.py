@@ -210,6 +210,34 @@ def records():
     return sorted([*STATE.glob('????-??-??.json'), *(STATE / 'manual').glob('*.json')])
 
 
+def retry_generation(operation, *, record, metadata, lock, phase, title, log):
+    """Keep one reservation and lock for the initial request plus three retries."""
+    for attempt in range(1, 5):
+        attempt_log = log if attempt == 1 else log.with_name(
+            log.stem + f'.attempt-{attempt}' + log.suffix)
+        metadata.setdefault('attempts', {})[phase] = attempt
+        metadata.update(status='reserved', phase=phase)
+        atomic_json(record, metadata)
+        lock.seek(0)
+        lock.truncate()
+        json.dump({'title': f'{title} · attempt {attempt}/4',
+                   'phase': phase, 'attempt': attempt}, lock)
+        lock.flush()
+        try:
+            return operation(attempt_log)
+        except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+            metadata.setdefault('attempt_errors', []).append({
+                'phase': phase, 'attempt': attempt, 'error': str(error),
+                'log': attempt_log.name})
+            atomic_json(record, metadata)
+            if attempt == 4:
+                raise
+            delay = 2 ** attempt
+            notify(f'Retrying {"theme design" if phase == "theme" else "painting"} · {attempt}/3',
+                   f'{title}. Trying again in {delay} seconds.')
+            time.sleep(delay)
+
+
 def generate_native(config, prompt, env, log):
     request = (
         'This is an unattended, already-authorized wallpaper generation. '
@@ -241,7 +269,8 @@ def generate_native(config, prompt, env, log):
         if process.returncode:
             raise RuntimeError(f'Codex exited with status {process.returncode}; see private generation log')
         answer = json.loads((work / 'result.json').read_text())
-        if not answer.get('image_path'):
+        if (not isinstance(answer, dict) or not isinstance(answer.get('image_path'), str)
+                or not answer['image_path'].strip()):
             raise RuntimeError('Codex did not produce a native generated image')
         return answer['image_path']
 
@@ -294,9 +323,11 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
         else:
             record = STATE / f'{day}.json'
             if record.exists():
-                print(f'{day}: daily attempt already reserved; no retry.')
+                print(f'{day}: daily job already reserved; no new job.')
                 return 0
         config = prompt_catalog.load_catalog(REPO / 'alpine/wallpapers/prompts.json')
+        metadata = {'day': day, 'manual': manual,
+                    'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
         if new_theme is not None:
             from new_themes import design_theme
             lock.seek(0)
@@ -310,10 +341,14 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                                        text=True, timeout=20)
                 if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
                     raise RuntimeError('Theme generation requires existing Codex ChatGPT login.')
-                selected_theme = design_theme(REPO, config, env, record.with_suffix('.theme.jsonl'),
-                                              new_theme, codex_command)
+                selected_theme = retry_generation(
+                    lambda log: design_theme(REPO, config, env, log, new_theme, codex_command),
+                    record=record, metadata=metadata, lock=lock, phase='theme',
+                    title='Designing ' + (new_theme or 'a random theme'),
+                    log=record.with_suffix('.theme.jsonl'))
             except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
-                atomic_json(record, {'status': 'failed', 'phase': 'theme', 'error': str(error)})
+                metadata.update(status='failed', phase='theme', error=str(error))
+                atomic_json(record, metadata)
                 notify('Theme design hit a snag', str(error)[:300])
                 raise
         else:
@@ -333,12 +368,12 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 medium_id=medium_override)
         seed = prompt_catalog.variation_seed()
         started = time.time()
-        metadata = {'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
+        metadata.update({'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
                     'insertion': insertion['id'] if insertion else None,
                     'medium': medium['id'] if medium else None, 'variation_seed': seed,
                     'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
-                    'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
-        # Reserve before making a model request. Daily failures cannot retry.
+                    'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()})
+        # All retries belong to this reservation; cron cannot start another daily job.
         atomic_json(record, metadata)
         lock.seek(0)
         lock.truncate()
@@ -355,9 +390,13 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 notify('Space Ghost is painting…', scene['title'] + '. Your new artwork will ' + destination_notice + ' when ready.')
             prompt = prompt_catalog.compose_prompt(config, selected_theme, scene, insertion,
                                                    medium, seed)
-            source_path = generate_native(config, prompt, env, record.with_suffix('.jsonl'))
-            source, width, height = validate_image(source_path,
-                                                   Path(env['CODEX_HOME']) / 'generated_images', started)
+            def paint(log):
+                source_path = generate_native(config, prompt, env, log)
+                return validate_image(source_path,
+                                      Path(env['CODEX_HOME']) / 'generated_images', started)
+            source, width, height = retry_generation(
+                paint, record=record, metadata=metadata, lock=lock, phase='image',
+                title=scene['title'], log=record.with_suffix('.jsonl'))
             digest = hashlib.sha256(source.read_bytes()).hexdigest()
             if has_symlink(gallery, REPO):
                 raise RuntimeError('Artwork destination must remain a regular directory in the gallery')
@@ -412,7 +451,7 @@ def main():
     parser.add_argument('--insertion', help='Select a named Space Ghost insertion style.')
     parser.add_argument('--medium', help='Select a named medium and treatment.')
     parser.add_argument('--theme', default='active', help='active (default), none, or a theme ID from alpine/themes/.')
-    parser.add_argument('--new-theme', nargs='?', const='', help='Create a collection from a phrase, or random if empty.')
+    parser.add_argument('--new-theme', nargs='?', const='', help='Create an automatically named collection from a prompt, or random if empty.')
     parser.add_argument('--manual', action='store_true', help='One explicit request, independent of the daily schedule.')
     parser.add_argument('--activate', action='store_true', help='Switch to the newly saved artwork when ready.')
     parser.add_argument('--print-command', action='store_true', help='Show the cron-safe command without generating.')

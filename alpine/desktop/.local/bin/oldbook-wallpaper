@@ -450,20 +450,28 @@ def pick():
     help_label = '?  Help & gallery controls'
     deck_label = '󰊠  Open command deck · all desktop commands'
     edit_label = '✎  Edit artwork prompts · Shift+click'
-    themed_commands = {'✦  Generate unthemed artwork & switch to it': 'none'}
-    themed_commands.update({'✦  Paint a new ' + theme['name'] + ' image (takes a while)': theme['id']
-                            for theme in available_themes(REPO)})
+    unthemed_label = '✦  Generate unthemed artwork & switch to it'
+    existing_label = '✦  Paint in an existing theme…'
+    themed_commands = {}
+    for theme in sorted(available_themes(REPO), key=lambda t: t['name'].casefold()):
+        label = theme['name']
+        number = 2
+        while label in themed_commands:
+            label = f'{theme["name"]} ({number})'
+            number += 1
+        themed_commands[label] = theme['id']
     random_label = '✦  Random new theme'
-    phrase_label = '✦  New theme from a phrase/title'
+    phrase_label = '✦  Create theme from prompt'
     actions = [theme_label, *controls, delete_label, delete_many_label, panels_label,
                refit_label, help_label, deck_label, edit_label, generate_label,
-               random_label, phrase_label, *themed_commands]
+               random_label, phrase_label, existing_label, unthemed_label]
     try:
         active_name = load_theme(REPO)['name']
     except (OSError, ValueError, RuntimeError):
         active_name = 'Unthemed'
     page = 0
-    page_size = 6
+    # Four paintings leave room for both paging controls and all three actions.
+    page_size = 4
     page_count = max(1, (len(entries) + page_size - 1) // page_size)
     while True:
         options = labels[page * page_size:(page + 1) * page_size]
@@ -471,7 +479,7 @@ def pick():
             options += ['← Newer images']
         if page + 1 < page_count:
             options += ['Older images →']
-        options += ['Gallery actions…']
+        options += [phrase_label, existing_label, 'Gallery actions…']
         selected = gallery_menu(
             f'Gallery {page + 1}/{page_count} · {active_name} ❯ ', options)
         if selected not in options:
@@ -486,20 +494,28 @@ def pick():
             selected = gallery_menu('Gallery actions ❯ ', ['← Back to images', *actions])
             if selected is None or selected == '← Back to images':
                 continue
+        if selected == existing_label:
+            selected = gallery_menu('Paint in a theme · type to search ❯ ',
+                                    ['← Back to images', *themed_commands])
+            if selected is None or selected == '← Back to images':
+                continue
+            if selected in themed_commands:
+                start_generation(themed_commands[selected])
+            return
         break
     if selected is not None:
         if selected == random_label:
             start_generation(new_theme='')
         elif selected == phrase_label:
-            phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Theme phrase/title ❯ ',
+            phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Describe your theme · name generated ❯ ',
                                      '--lines', '0', '--width', '62'],
                                     input='', capture_output=True, text=True)
             if phrase.returncode == 0 and phrase.stdout.strip():
                 start_generation(new_theme=phrase.stdout.strip())
         elif selected == generate_label:
             start_generation()
-        elif selected in themed_commands:
-            start_generation(themed_commands[selected])
+        elif selected == unthemed_label:
+            start_generation('none')
         elif selected in labels:
             update('pick', entries[labels.index(selected)]['id'])
         elif selected in controls:

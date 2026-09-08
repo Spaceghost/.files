@@ -25,11 +25,12 @@ SCHEMA = {
 
 def theme_prompt(phrase, style=''):
     if not isinstance(phrase, str) or len(phrase) > 500 or any(ord(c) < 32 for c in phrase):
-        raise ValueError('Use a single phrase/title of at most 500 characters')
-    direction = ('Interpret this phrase/title as creative inspiration: ' + json.dumps(phrase)
+        raise ValueError('Use a single-line prompt of at most 500 characters')
+    direction = ('Interpret this prompt as creative inspiration: ' + json.dumps(phrase)
                  if phrase else 'Invent a surprising random theme; avoid familiar preset palettes.')
     return ('Design one original named wallpaper collection for Ghost Gallery. Return only the '
-            'requested JSON. No tools or image generation. Provide a short display name, three '
+            'requested JSON. No tools or image generation. Invent a short evocative display name '
+            'for the collection; the user provides only a prompt and should never need to name it. Provide three '
             'six-digit #RRGGBB colors (dark background, legible foreground, accent), a rich '
             'reusable image_style describing medium, mood and palette, and a specific first '
             'wallpaper scene featuring Space Ghost. Landscape art, quiet top edge, no lettering. '

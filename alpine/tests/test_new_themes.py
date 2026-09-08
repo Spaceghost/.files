@@ -67,7 +67,7 @@ class NewThemeTests(unittest.TestCase):
         from subprocess import CompletedProcess
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
                 mock.patch.object(art.subprocess, 'run', side_effect=[
-                    CompletedProcess([], 0, '✦  New theme from a phrase/title\n', ''),
+                    CompletedProcess([], 0, '✦  Create theme from prompt\n', ''),
                     CompletedProcess([], 1, '', '')]), \
                 mock.patch.object(art, 'start_generation') as start:
             art.pick()
@@ -78,12 +78,43 @@ class NewThemeTests(unittest.TestCase):
         phrase = 'Moon books; $(touch /tmp/nope)'
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
                 mock.patch.object(art.subprocess, 'run', side_effect=[
-                    CompletedProcess([], 0, 'Gallery actions…\n', ''),
-                    CompletedProcess([], 0, '✦  New theme from a phrase/title\n', ''),
+                    CompletedProcess([], 0, '✦  Create theme from prompt\n', ''),
                     CompletedProcess([], 0, phrase + '\n', '')]), \
                 mock.patch.object(art, 'start_generation') as start:
             art.pick()
         start.assert_called_once_with(new_theme=phrase)
+
+    def test_existing_themes_are_selected_in_a_separate_picker(self):
+        from subprocess import CompletedProcess
+        menus = []
+        def choose(command, **kwargs):
+            options = kwargs['input'].splitlines()
+            menus.append(options)
+            if len(menus) == 1:
+                self.assertIn('✦  Create theme from prompt', options)
+                self.assertFalse(any('Paint a new ' in item for item in options))
+                chosen = '✦  Paint in an existing theme…'
+                self.assertIn(chosen, options)
+            else:
+                chosen = next(item for item in options if 'Space Ghost' in item)
+            return CompletedProcess(command, 0, chosen + '\n', '')
+        with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
+                mock.patch.object(art.subprocess, 'run', side_effect=choose), \
+                mock.patch.object(art, 'start_generation') as start:
+            art.pick()
+        start.assert_called_once_with('spaceghost')
+
+    def test_generated_name_matching_an_action_still_paints_that_theme(self):
+        from subprocess import CompletedProcess
+        name = '✦  Create theme from prompt'
+        with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
+                mock.patch.object(art, 'available_themes', return_value=[{'name': name, 'id': 'moon-books'}]), \
+                mock.patch.object(art.subprocess, 'run', side_effect=[
+                    CompletedProcess([], 0, '✦  Paint in an existing theme…\n', ''),
+                    CompletedProcess([], 0, name + '\n', '')]), \
+                mock.patch.object(art, 'start_generation') as start:
+            art.pick()
+        start.assert_called_once_with('moon-books')
 
     def test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline(self):
         import subprocess
