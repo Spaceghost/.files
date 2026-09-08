@@ -6,6 +6,7 @@ from pathlib import Path
 import socket
 import subprocess
 import sys
+import time
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
@@ -36,10 +37,34 @@ def sessions():
     return launcher.parse_sessions(result.stdout) if result.returncode == 0 else []
 
 
-def attach(document, name, title=None):
-    subprocess.Popen(launcher.attach_command(document, name, title),
-                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                     stderr=subprocess.DEVNULL, start_new_session=True)
+def attach(document, name, title=None, workspace=None):
+    terminal = subprocess.Popen(launcher.attach_command(document, name, title),
+                                stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL, start_new_session=True)
+    if workspace is not None:
+        def window(node):
+            if node.get('pid') == terminal.pid and node.get('app_id') == 'oldbook-agent-quick':
+                return node['id']
+            for child in node.get('nodes', []) + node.get('floating_nodes', []):
+                found = window(child)
+                if found is not None:
+                    return found
+            return None
+        for _ in range(50):
+            tree = subprocess.run(['swaymsg', '-r', '-t', 'get_tree'],
+                                  check=True, capture_output=True, text=True, timeout=5)
+            identifier = window(json.loads(tree.stdout))
+            if identifier is not None:
+                target = ('number ' + str(workspace['num']) if workspace['num'] >= 0
+                          else json.dumps(workspace['name']))
+                result = subprocess.run(['swaymsg', '-r',
+                                         f'[con_id={identifier}] move container to workspace {target}'],
+                                        check=True, capture_output=True, text=True, timeout=5)
+                if not all(reply.get('success') for reply in json.loads(result.stdout)):
+                    raise RuntimeError('Could not place the quick-launch terminal')
+                return
+            time.sleep(.1)
+        raise RuntimeError('Terminal did not appear; reattach session ' + name + ' from Super+N')
 
 
 def reachable(host, port=22, timeout=4.0):
@@ -77,7 +102,7 @@ def preflight(agent):
             'Add an ssh rule for this node in the Tailscale admin console.')
 
 
-def start(document, agent, workdir):
+def start(document, agent, workdir, workspace=None):
     preflight(agent)
     existing = {session['name'] for session in sessions()}
     name = launcher.session_name(document, agent['id'], existing)
@@ -91,7 +116,7 @@ def start(document, agent, workdir):
     if check.returncode:
         raise RuntimeError(f'{agent["title"]} exited immediately; is it installed'
                            + (f' on {agent["host"]}?' if agent.get('host') else ' here?'))
-    attach(document, name, agent['title'])
+    attach(document, name, agent['title'], workspace=workspace)
     return name
 
 
@@ -160,11 +185,29 @@ def pick(document):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='menu',
-                        choices=['menu', 'list', 'new', 'attach', 'kill', 'agents'])
+                        choices=['menu', 'list', 'new', 'attach', 'kill', 'agents',
+                                 'quick', 'bar-click'])
     parser.add_argument('target', nargs='?', help='Agent id, or session name.')
     parser.add_argument('--cwd', help='Working directory for a new session.')
     arguments = parser.parse_args()
+    if arguments.action == 'bar-click':
+        if not launcher.super_pressed():
+            return subprocess.run([str(FUZZEL.parent / 'oldbook-workspaces'),
+                                   'ai-next'], timeout=10).returncode
+        arguments.action = 'quick'
     document = launcher.load_config(CONFIG)
+
+    if arguments.action == 'quick':
+        agent = next((item for item in document['agents'] if item['id'] == 'codex-ultra'), None)
+        if agent is None:
+            raise RuntimeError('Missing codex-ultra agent preset')
+        result = subprocess.run(['swaymsg', '-r', '-t', 'get_workspaces'],
+                                check=True, capture_output=True, text=True, timeout=5)
+        workspace = next(item for item in json.loads(result.stdout) if item.get('focused'))
+        document = dict(document, terminal=['foot', '--app-id=oldbook-agent-quick',
+                                           '--title={title}', '-e'])
+        print(start(document, agent, arguments.cwd or Path.home(), workspace=workspace))
+        return 0
 
     if arguments.action == 'agents':
         for agent in launcher.enabled_agents(document):

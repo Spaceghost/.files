@@ -6,16 +6,46 @@ agents are the same thing with an ssh hop in front, which is why a tailnet host
 needs no special handling here.
 """
 import json
+import fcntl
 import os
 from pathlib import Path
 import re
 import shlex
+import stat
 
 SAFE_ID = re.compile(r'[a-z0-9][a-z0-9-]{0,63}')
 SAFE_HOST = re.compile(r'[A-Za-z0-9][A-Za-z0-9._-]{0,253}')
 # Plain ssh needs keys and a listening sshd; Tailscale SSH needs neither and
 # authenticates with the tailnet identity instead.
 TRANSPORTS = ('ssh', 'tailscale-ssh')
+
+
+def keyboard_super(capabilities, pressed):
+    def bit(bits, key):
+        return bool(bits[key // 8] & (1 << (key % 8)))
+    return (all(bit(capabilities, key) for key in (30, 28, 57))
+            and any(bit(pressed, key) for key in (125, 126)))
+
+
+def super_pressed():
+    # Waybar has no keyboard focus: inspect a current key snapshot, like the
+    # artwork control. Never read an event stream or retain keyboard history.
+    for device in Path('/dev/input').glob('event*'):
+        try:
+            fd = os.open(device, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC | os.O_NOFOLLOW)
+            try:
+                if not stat.S_ISCHR(os.fstat(fd).st_mode):
+                    continue
+                capabilities, pressed = bytearray(96), bytearray(96)
+                fcntl.ioctl(fd, 0x80604521, capabilities)  # EVIOCGBIT(EV_KEY, 96)
+                fcntl.ioctl(fd, 0x80604518, pressed)  # EVIOCGKEY(96)
+                if keyboard_super(capabilities, pressed):
+                    return True
+            finally:
+                os.close(fd)
+        except OSError:
+            continue
+    return False
 
 
 def load_config(path):

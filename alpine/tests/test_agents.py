@@ -177,6 +177,32 @@ class CommandTests(unittest.TestCase):
                                    'tmux', 'attach-session', '-t', 'agent-codex'])
 
 
+class QuickLaunchTests(unittest.TestCase):
+    def test_quick_launch_starts_a_fresh_uncontained_ultra_session(self):
+        document = launcher.load_config(LIVE)
+        agent = next((a for a in document['agents'] if a['id'] == 'codex-ultra'), None)
+        self.assertIsNotNone(agent, 'quick-launch preset is missing')
+        name = launcher.session_name(document, agent['id'], {'agent-codex-ultra'})
+        command = launcher.new_session_command(document, agent, name, '/tmp/project with spaces')
+        self.assertNotEqual(name, 'agent-codex-ultra')
+        self.assertEqual(command[:8], ['tmux', 'new-session', '-d', '-s', name,
+                                      '-c', '/tmp/project with spaces', '--'])
+        self.assertIn('--dangerously-bypass-approvals-and-sandbox', command)
+        self.assertEqual(command[command.index('--model') + 1], 'gpt-6-astra')
+        self.assertIn('model_reasoning_effort="ultra"', command)
+
+    def test_only_real_keyboards_with_either_super_key_trigger_launch(self):
+        def bits(*keys):
+            result = bytearray(96)
+            for key in keys:
+                result[key // 8] |= 1 << (key % 8)
+            return result
+        for key in (125, 126):
+            self.assertTrue(launcher.keyboard_super(bits(28, 30, 57, key), bits(key)))
+            self.assertFalse(launcher.keyboard_super(bits(key), bits(key)))
+        self.assertFalse(launcher.keyboard_super(bits(28, 30, 57, 125), bits(42)))
+
+
 class SessionListingTests(unittest.TestCase):
     def test_parses_the_tab_separated_listing(self):
         output = 'agent-codex\t2\t1\t/home/jack\nother\t1\t0\t/tmp\n'

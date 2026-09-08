@@ -14,6 +14,21 @@
   ],
   "agents": [
     {
+      "id": "codex-ultra",
+      "title": "Codex · Astra ultra",
+      "subtitle": "GPT-6 Astra · ultra reasoning · uncontained",
+      "enabled": true,
+      "command": [
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "--model",
+        "gpt-6-astra",
+        "-c",
+        "model_reasoning_effort=\"ultra\""
+      ]
+    },
+    {
       "id": "codex",
       "title": "Codex",
       "subtitle": "OpenAI Codex CLI, here",
