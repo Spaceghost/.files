@@ -38,7 +38,7 @@ input type:keyboard {
     xkb_numlock enabled
 }
 
-bindsym $mod+Return exec $term
+# Super+Enter is defined once in local.d/terminal.conf.
 bindsym $mod+Shift+Return exec $term
 bindsym $mod+d exec $menu
 bindsym $mod+Shift+d exec ~/.local/bin/oldbook-control
