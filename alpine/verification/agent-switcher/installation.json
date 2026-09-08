@@ -1,0 +1,25 @@
+{
+  "deployed": [
+    ".local/bin/oldbook-agent-switcher",
+    ".local/lib/oldbook/agent_switcher.py",
+    ".config/sway/local.d/agent-switcher.conf"
+  ],
+  "backup": "/home/jack/.local/state/oldbook/backups/1788835183838710801",
+  "preview_home": "/tmp/oldbook-agent-switcher-preview",
+  "unit_tests": 11,
+  "related_focused_tests": 53,
+  "swayfx_configuration_validation": "passed",
+  "live_binding_modes": [
+    "default",
+    "resize",
+    "agent-switcher"
+  ],
+  "live_binding_state": "default",
+  "reload_reply": "connection closed before response; subsequent IPC confirms mode loaded",
+  "explicit_bindings": {
+    "Mod1+Tab": true,
+    "Mod1+Shift+Tab": true,
+    "Mod4+Return exec ghostty": true
+  },
+  "physical_keyboard_verification": "not performed; native virtual-keyboard verification used private Sway"
+}

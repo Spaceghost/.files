@@ -55,7 +55,8 @@ The configured display mode is the native internal panel. Do not copy it to an e
 
 | Control | Action |
 | --- | --- |
-| `Super+Enter`, `Super+D` | Foot terminal, Spaceghost application menu |
+| `Super+Enter`, `Super+D` | Ghostty terminal, Spaceghost application menu |
+| `Alt+Tab`, `Alt+Shift+Tab` | Browse agent windows across workspaces; release Alt to switch or press Escape to cancel. |
 | Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
 | `Super+Escape` | Lock with the installed `swaylockd` PAM-compatible binary |
 | `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot |
