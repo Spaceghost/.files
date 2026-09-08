@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""Warm the display after sunset with wlsunset, only for an explicit location.
+
+``run`` is what the session starts: it execs wlsunset with the configured
+coordinates, or exits quietly when no location.json exists or the light was
+switched off. ``start``, ``stop`` and ``toggle`` are the user's controls; a
+marker under the state directory keeps a stop in force across Sway reloads.
+"""
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import astro
+
+LOW, HIGH = '3500', '6500'
+STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/sun-light'
+DISABLED = STATE / 'disabled'
+
+
+def lock_path():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        raise RuntimeError('XDG_RUNTIME_DIR is required')
+    directory = Path(runtime) / 'oldbook-session'
+    directory.mkdir(mode=0o700, exist_ok=True)
+    return directory / 'sun-light.lock'
+
+
+def command(location):
+    return ['wlsunset', '-l', f'{location.latitude:.4f}', '-L', f'{location.longitude:.4f}',
+            '-t', LOW, '-T', HIGH]
+
+
+def running():
+    result = subprocess.run(['pgrep', '-u', str(os.getuid()), '-x', 'wlsunset'],
+                            capture_output=True, text=True)
+    return result.returncode == 0
+
+
+def notify(summary, body):
+    if shutil.which('notify-send'):
+        subprocess.run(['notify-send', '-h', 'string:x-canonical-private-synchronous:oldbook-sun-light',
+                        summary, body], check=False)
+
+
+def run():
+    location = astro.load_location()
+    if location is None:
+        print('oldbook-sun-light: no ~/.config/oldbook/location.json; night light stays off',
+              file=sys.stderr)
+        return 0
+    if DISABLED.exists():
+        return 0
+    if not shutil.which('wlsunset'):
+        print('oldbook-sun-light: wlsunset is not installed', file=sys.stderr)
+        return 0
+    os.execvp('wlsunset', command(location))
+
+
+def start():
+    location = astro.load_location()
+    if location is None:
+        notify('Night light needs a location',
+               'Create ~/.config/oldbook/location.json first; nothing is inferred.')
+        return 1
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    DISABLED.unlink(missing_ok=True)
+    if running():
+        return 0
+    # The session's flock name keeps one owner per compositor session.
+    subprocess.Popen(['flock', '-n', str(lock_path()), *command(location)],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    notify('Night light on', f'Warming after sunset over {location.name}.')
+    return 0
+
+
+def stop():
+    STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+    DISABLED.touch()
+    subprocess.run(['pkill', '-u', str(os.getuid()), '-x', 'wlsunset'], check=False)
+    notify('Night light off', 'The display keeps its daytime colour.')
+    return 0
+
+
+def status():
+    if astro.load_location() is None:
+        print('unconfigured')
+    elif running():
+        print('on')
+    elif DISABLED.exists():
+        print('off')
+    else:
+        print('stopped')
+    return 0
+
+
+def main():
+    action = sys.argv[1] if len(sys.argv) > 1 else 'status'
+    actions = {'run': run, 'start': start, 'stop': stop, 'status': status,
+               'toggle': lambda: stop() if running() else start()}
+    if action not in actions:
+        print('usage: oldbook-sun-light {run|start|stop|toggle|status}', file=sys.stderr)
+        return 64
+    return actions[action]()
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, RuntimeError) as error:
+        print(f'oldbook-sun-light: {error}', file=sys.stderr)
+        sys.exit(1)

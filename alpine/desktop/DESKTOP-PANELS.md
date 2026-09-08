@@ -41,6 +41,18 @@ theme automatically, including theme changes while it is already running.
 Panels are fully transparent: the window colour is `#00000000` and legibility
 comes from the contrast pass plus a text shadow, never from a filled box.
 
+## Sun and moon on the masthead
+
+When `~/.config/oldbook/location.json` exists, the masthead card adds one quiet
+line: sunrise and sunset times, then the moon's phase glyph, name and lit
+fraction, refreshed every five minutes by `oldbook-astro panel`. Everything is
+computed offline from the file's coordinates and time zone (NOAA solar
+equations and a low-precision lunar longitude); nothing is fetched and no
+location is ever inferred. Without the file the line is simply empty. Copy
+`location.example.json` from the same directory to start, and see the
+[desktop README](README.md) for the night light and nocturne preference that
+share the file.
+
 ## Content and refresh policy
 
 Conky is reserved for slow information: date, Scripture, battery charge/status,

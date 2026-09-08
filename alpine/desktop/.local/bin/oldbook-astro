@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Sun and moon for the masthead card, computed offline from location.json."""
+import argparse
+import datetime as dt
+import json
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import astro
+
+
+def moment(arguments):
+    if arguments.at:
+        value = dt.datetime.fromisoformat(arguments.at)
+        return value if value.tzinfo else value.replace(tzinfo=dt.timezone.utc)
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='status', choices=['status', 'panel'])
+    parser.add_argument('--at', help='ISO 8601 instant instead of now (naive means UTC)')
+    parser.add_argument('--location', type=Path, help='Alternative location.json')
+    arguments = parser.parse_args()
+    location = astro.load_location(arguments.location)
+    if location is None:
+        if arguments.action == 'status':
+            print(json.dumps({'configured': False, 'location_file': str(arguments.location or astro.LOCATION_FILE)}))
+        return 0
+    report = astro.status(moment(arguments), location)
+    if arguments.action == 'panel':
+        print(astro.panel_line(report))
+    else:
+        print(json.dumps({'configured': True, **astro.serializable(report)}, ensure_ascii=False))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError) as error:
+        print(f'oldbook-astro: {error}', file=sys.stderr)
+        sys.exit(1)

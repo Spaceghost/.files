@@ -10,8 +10,8 @@
       "priority": 100,
       "prefer": "top",
       "width": 372,
-      "height": 80,
-      "text": "${font JetBrainsMono Nerd Font:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet · Coast to Coast"
+      "height": 100,
+      "text": "${font JetBrainsMono Nerd Font:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet · Coast to Coast\n${execpi 300 ~/.local/bin/oldbook-astro panel}"
     },
     {
       "id": "scripture",
