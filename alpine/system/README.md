@@ -56,5 +56,20 @@ additional GRUB entry derived from the stock entry (managed block in
 GRUB menu to test it. Rerun the installer after a kernel upgrade so the ghost
 archive matches the new modules. See `docs/superpowers/specs/2026-09-08-luks-prompt.md`.
 
+## Boot menu theme
+
+`alpine/system/grub/theme/` is the Ghost Planet GRUB menu: a graded, blurred
+background from the current painting, an amber selection bar and two PF2 fonts
+compiled from JetBrains Mono, because `grub-mkfont` is not packaged and GRUB's
+own font is sixteen pixels tall. `alpine/bin/build-grub-theme` regenerates it
+(`--check` says whether the committed copy is current) and
+`alpine/system/grub/grub_theme.py` holds the font writer, the theme renderer and
+the GRUB key rewriter. The installer copies the theme to
+`/boot/grub/themes/ghost-planet`, sets a three-second menu and hands the
+graphics mode to the kernel so the console palette above still applies.
+`--skip-theme` leaves it alone, `--remove-theme` withdraws it. See
+`docs/superpowers/specs/2026-09-08-grub-theme.md` and the rendered preview in
+`alpine/verification/grub-theme/`.
+
 Nothing here reboots, switches VTs or loads a font into a live console. The
 visual result is only observable at the next boot.

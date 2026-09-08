@@ -1,0 +1,33 @@
+{
+  "status": "installed",
+  "simulation_only": true,
+  "grub_version": "2.14",
+  "grub_mkfont": "not packaged; PF2 fonts are compiled by alpine/bin/build-grub-theme",
+  "grub_emu": "not packaged; the menu itself is unverified until the next boot",
+  "installed_to": "/boot/grub/themes/ghost-planet",
+  "boot_filesystem": "vfat /dev/sda1",
+  "fonts": [
+    {
+      "name": "Ghost Mono Regular 32",
+      "glyphs": 216,
+      "bytes": 13336,
+      "sha256": "600f708135ba57d085bd93816d6e613490c8641930b4accfffde9f03abac2c2f"
+    },
+    {
+      "name": "Ghost Mono Regular 20",
+      "glyphs": 216,
+      "bytes": 7937,
+      "sha256": "d406b518a3a774576f0bdc08f53c580735ef57bb84855ac8aa2fe05f107ebc40"
+    }
+  ],
+  "background_bytes": 234597,
+  "checks": [
+    "grub-script-check on the generated grub.cfg",
+    "stock entry kernel/initramfs/root/crypt parameters unchanged",
+    "stock entry still first and still the default",
+    "set theme, insmod gfxmenu, insmod png and both loadfont lines present",
+    "set timeout=3 and set timeout_style=menu present",
+    "second run made no changes"
+  ],
+  "preview": "menu-preview.png rendered by alpine/system/grub/render-preview from the committed theme and fonts"
+}

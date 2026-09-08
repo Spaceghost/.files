@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Draw what the Ghost Planet GRUB menu should look like, from the theme itself.
+
+This is a simulation, not GRUB. It reads the committed theme.txt, decodes the
+committed PF2 fonts with the same parser the tests use, and composes the labels,
+menu entries, selection pixmaps and progress bar at their declared positions.
+That proves the fonts carry renderable glyphs and the layout numbers land where
+they were meant to; it cannot prove GRUB's own gfxmenu agrees, which stays
+unverified until the next boot (grub-emu is not packaged for this machine).
+
+    alpine/system/grub/render-preview --output preview.png
+"""
+import argparse
+import re
+from pathlib import Path
+import sys
+
+import cairo
+
+BASE = Path(__file__).resolve().parent
+sys.path.insert(0, str(BASE))
+import grub_theme  # noqa: E402
+
+THEME = BASE / 'theme'
+ENTRIES = ('Alpine Linux edge, with Linux lts',
+           'Alpine Linux edge, with Linux lts (Ghost Planet initramfs)',
+           'UEFI Firmware Settings')
+
+
+def parse_theme(text):
+    """The globals and components of a theme.txt, enough to lay the preview out."""
+    globals_, components = {}, []
+    current = None
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith('#'):
+            continue
+        if line.startswith('+'):
+            current = {'type': line[1:].split('{')[0].strip()}
+            components.append(current)
+            continue
+        if line == '}':
+            current = None
+            continue
+        if current is None:
+            match = re.match(r'^([a-z-]+)\s*:\s*"?([^"]*)"?\s*$', line)
+            if match:
+                globals_[match.group(1)] = match.group(2)
+        else:
+            match = re.match(r'^([a-z_]+)\s*=\s*"?([^"]*)"?\s*$', line)
+            if match:
+                current[match.group(1)] = match.group(2)
+    return globals_, components
+
+
+def measure(value, extent):
+    if str(value).endswith('%'):
+        return extent * float(str(value).rstrip('%')) / 100
+    return float(value)
+
+
+def rgb(value):
+    value = value.lstrip('#')
+    return tuple(int(value[offset:offset + 2], 16) / 255 for offset in (0, 2, 4))
+
+
+class Font:
+    """A decoded PF2 font, drawn one glyph bitmap at a time."""
+
+    def __init__(self, path):
+        self.document = grub_theme.parse_pf2(Path(path).read_bytes())
+        self.name = self.document['name']
+        self.ascent = self.document['asce']
+
+    def width(self, text):
+        return sum(self.document['glyphs'][ord(ch)]['device_width']
+                   for ch in text if ord(ch) in self.document['glyphs'])
+
+    def draw(self, context, text, x, baseline, color):
+        context.set_source_rgb(*color)
+        pen = x
+        for character in text:
+            glyph = self.document['glyphs'].get(ord(character))
+            if glyph is None:
+                continue
+            if glyph['width'] and glyph['height']:
+                rows = grub_theme.unpack_bitmap(glyph['bitmap'], glyph['width'], glyph['height'])
+                top = baseline - glyph['y_ofs'] - glyph['height']
+                for row_index, row in enumerate(rows):
+                    for column, pixel in enumerate(row):
+                        if pixel:
+                            context.rectangle(pen + glyph['x_ofs'] + column, top + row_index, 1, 1)
+                context.fill()
+            pen += glyph['device_width']
+        return pen
+
+
+def load_fonts(components, globals_):
+    fonts = {}
+    for path in sorted(THEME.glob('*.pf2')):
+        font = Font(path)
+        fonts[font.name] = font
+    return fonts
+
+
+def render(width, height, output):
+    text = (THEME / grub_theme.THEME_FILE).read_text()
+    globals_, components = parse_theme(text)
+    fonts = load_fonts(components, globals_)
+    surface = cairo.ImageSurface(cairo.FORMAT_RGB24, width, height)
+    context = cairo.Context(surface)
+    context.set_source_rgb(*rgb(globals_.get('desktop-color', '#282828')))
+    context.paint()
+    background = cairo.ImageSurface.create_from_png(str(THEME / globals_['desktop-image']))
+    context.save()
+    context.scale(width / background.get_width(), height / background.get_height())
+    context.set_source_surface(background, 0, 0)
+    context.paint()
+    context.restore()
+    selection = cairo.ImageSurface.create_from_png(str(THEME / 'select_c.png'))
+    for component in components:
+        kind = component['type']
+        if kind == 'label':
+            font = fonts[component['font']]
+            label = component['text']
+            left = measure(component.get('left', 0), width)
+            span = measure(component.get('width', '100%'), width)
+            top = measure(component['top'], height)
+            if component.get('align') == 'center':
+                left += (span - font.width(label)) / 2
+            font.draw(context, label, left, top + font.ascent, rgb(component['color']))
+        elif kind == 'boot_menu':
+            font = fonts[component['item_font']]
+            left = measure(component['left'], width)
+            top = measure(component['top'], height)
+            span = measure(component['width'], width)
+            item_height = float(component['item_height'])
+            spacing = float(component.get('item_spacing', 0))
+            padding = float(component.get('item_padding', 0))
+            for index, entry in enumerate(ENTRIES):
+                row = top + index * (item_height + spacing)
+                colour = rgb(component['item_color'])
+                if index == 0:
+                    context.save()
+                    context.set_source_rgb(*rgb('#fabd2f'))
+                    context.rectangle(left, row, span, item_height)
+                    context.fill()
+                    context.restore()
+                    colour = rgb(component['selected_item_color'])
+                font.draw(context, entry, left + padding,
+                          row + (item_height - font.ascent) / 2 + font.ascent * 0.85, colour)
+        elif kind == 'progress_bar':
+            left = measure(component['left'], width)
+            top = measure(component['top'], height)
+            span = measure(component['width'], width)
+            bar_height = float(component['height'])
+            context.set_source_rgb(*rgb(component['bg_color']))
+            context.rectangle(left, top, span, bar_height)
+            context.fill()
+            context.set_source_rgb(*rgb(component['fg_color']))
+            context.rectangle(left, top, span * 0.62, bar_height)
+            context.fill()
+            context.set_source_rgb(*rgb(component['border_color']))
+            context.set_line_width(1)
+            context.rectangle(left + 0.5, top + 0.5, span - 1, bar_height - 1)
+            context.stroke()
+            font = fonts[component['font']]
+            caption = 'Booting in 2 seconds'
+            font.draw(context, caption, left + (span - font.width(caption)) / 2,
+                      top + bar_height + 6 + font.ascent, rgb(component['text_color']))
+    surface.write_to_png(str(output))
+    return {'width': width, 'height': height, 'fonts': sorted(fonts),
+            'components': [component['type'] for component in components],
+            'selection_tile': (selection.get_width(), selection.get_height())}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--width', type=int, default=1440)
+    parser.add_argument('--height', type=int, default=900)
+    arguments = parser.parse_args()
+    summary = render(arguments.width, arguments.height, arguments.output)
+    print(summary)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

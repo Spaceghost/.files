@@ -7,23 +7,30 @@ Root actions, each backed up under /var/backups/alpine-rice/boot-console-*:
    GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub (idempotent: the managed
    tokens are replaced, every other token and line is kept).
 2. Install the versioned /etc/issue banner for the rescue gettys.
-3. Unless --skip-ghost: build /boot/initramfs-lts-ghost from the versioned
+3. Unless --skip-theme: copy the versioned Ghost Planet GRUB theme to
+   /boot/grub/themes/ghost-planet and point GRUB at it with a three-second
+   menu (GRUB_TIMEOUT, GRUB_TIMEOUT_STYLE, GRUB_THEME, GRUB_GFXMODE and
+   GRUB_GFXPAYLOAD_LINUX=keep, which hands the graphics mode to the kernel so
+   the console palette above still applies).
+4. Unless --skip-ghost: build /boot/initramfs-lts-ghost from the versioned
    banner init (a copy of the installed mkinitfs init with a Gruvbox masthead
    printed before the encrypted-root passphrase prompt), prove the archive
    holds that init and the stock file set, and publish it as an additional,
    non-default GRUB entry through a managed block in /etc/grub.d/40_custom.
    /boot/initramfs-lts and the stock entry are never touched.
-4. Regenerate /boot/grub/grub.cfg into a temporary file, check it with
+5. Regenerate /boot/grub/grub.cfg into a temporary file, check it with
    grub-script-check, prove the stock entry still boots the same kernel,
    initramfs, root and crypt parameters plus exactly the managed tokens and
-   stays first, and only then move it into place. Any mismatch restores this
-   run's backups.
+   stays first, prove the themed menu really is selected, and only then move it
+   into place. Any mismatch restores this run's backups.
 
 `--dry-run` shows the planned edits without root. `--render-init` (as the
 user) refreshes the versioned banner init from the installed mkinitfs after a
-mkinitfs upgrade. `--remove-ghost` withdraws the banner entry and initramfs.
+mkinitfs upgrade. `--remove-ghost` withdraws the banner entry and initramfs;
+`--remove-theme` withdraws the menu theme and leaves GRUB's plain menu.
 `--rollback DIR` restores the files recorded in a backup directory. A reboot is
-never performed here.
+never performed here, so the menu, palette and font stay unseen until the next
+one.
 """
 import argparse
 import difflib
@@ -39,9 +46,23 @@ import time
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/system/boot'))
+sys.path.insert(0, str(REPO / 'alpine/system/grub'))
 import boot_console  # noqa: E402
+import grub_theme  # noqa: E402
 
 PALETTE = REPO / 'alpine/system/boot/console-palette.json'
+THEME_SOURCE = REPO / 'alpine/system/grub/theme'
+THEME_TARGET = Path('/boot/grub/themes') / grub_theme.THEME_DIRECTORY
+MENU_TIMEOUT = 3
+MENU_KEYS = {
+    'GRUB_TIMEOUT': MENU_TIMEOUT,
+    'GRUB_TIMEOUT_STYLE': 'menu',
+    'GRUB_THEME': str(THEME_TARGET / grub_theme.THEME_FILE),
+    # The panel's own mode, then handed to the kernel so the framebuffer console
+    # keeps it and the Gruvbox palette applies from the first kernel message.
+    'GRUB_GFXMODE': 'auto',
+    'GRUB_GFXPAYLOAD_LINUX': 'keep',
+}
 ISSUE_TEMPLATE = REPO / 'alpine/system/boot/issue.template'
 MKINITFS_SOURCES = REPO / 'alpine/system/mkinitfs'
 GHOST_INIT = MKINITFS_SOURCES / 'initramfs-init'
@@ -255,6 +276,49 @@ def build_ghost_initramfs(installer, kernel, rebuild=False):
         raise
 
 
+def theme_files():
+    """The versioned theme, with theme.txt proved consistent before it is copied."""
+    if not (THEME_SOURCE / grub_theme.THEME_FILE).is_file():
+        raise RuntimeError('missing %s; run alpine/bin/build-grub-theme first'
+                           % (THEME_SOURCE / grub_theme.THEME_FILE))
+    files = sorted(path for path in THEME_SOURCE.iterdir() if path.is_file())
+    provenance = json.loads((THEME_SOURCE / 'provenance.json').read_text())
+    fonts = []
+    for record in provenance['fonts']:
+        parsed = grub_theme.parse_pf2((THEME_SOURCE / record['file']).read_bytes())
+        if parsed['name'] != record['name']:
+            raise RuntimeError('font %s does not carry its declared name' % record['file'])
+        fonts.append(record['name'])
+    images = [path.name for path in files if path.suffix == '.png']
+    grub_theme.validate_theme((THEME_SOURCE / grub_theme.THEME_FILE).read_text(),
+                              fonts=fonts, images=images)
+    return files
+
+
+def install_theme(installer, files):
+    """Copy the theme onto the boot partition, dropping anything we no longer ship."""
+    if not installer.dry_run:
+        THEME_TARGET.mkdir(parents=True, exist_ok=True)
+    shipped = {path.name for path in files}
+    changed = 0
+    for path in files:
+        if installer.write(THEME_TARGET / path.name, path.read_bytes(), 0o644):
+            changed += 1
+    if THEME_TARGET.is_dir():
+        for existing in sorted(THEME_TARGET.iterdir()):
+            if existing.is_file() and existing.name not in shipped:
+                installer.remove(existing)
+                changed += 1
+    return changed
+
+
+def remove_theme(installer):
+    if THEME_TARGET.is_dir():
+        for existing in sorted(THEME_TARGET.iterdir()):
+            if existing.is_file():
+                installer.remove(existing)
+
+
 def rollback(directory):
     manifest = json.loads((directory / 'manifest.json').read_text())
     for value in manifest['backed_up']:
@@ -272,6 +336,8 @@ def main(argv=None):
     parser.add_argument('--skip-ghost', action='store_true', help='leave the banner initramfs and its entry alone')
     parser.add_argument('--remove-ghost', action='store_true', help='withdraw the banner entry and initramfs')
     parser.add_argument('--rebuild-ghost', action='store_true', help='rebuild the banner initramfs even if current')
+    parser.add_argument('--skip-theme', action='store_true', help='leave the menu theme and its GRUB keys alone')
+    parser.add_argument('--remove-theme', action='store_true', help='withdraw the menu theme, keeping GRUB usable')
     parser.add_argument('--render-init', action='store_true',
                         help='refresh alpine/system/mkinitfs from the installed mkinitfs init (no root)')
     parser.add_argument('--rollback', type=Path, metavar='DIR', help='restore the files recorded in DIR')
@@ -298,9 +364,23 @@ def main(argv=None):
     previous_cfg = GRUB_CFG.read_text() if GRUB_CFG.is_file() else None
     temporary_cfg = GRUB_CFG.with_name('grub.cfg.oldbook-new')
     ghost_summary = None
+    theme_expected = not (args.skip_theme or args.remove_theme)
     try:
         grub_default = boot_console.rewrite_grub_default(GRUB_DEFAULT.read_text(), parameters)
+        if theme_expected:
+            files = theme_files()
+            grub_default = grub_theme.rewrite_grub_keys(grub_default, MENU_KEYS)
+        elif args.remove_theme:
+            # An empty GRUB_THEME is what 00_header tests for, so the plain menu
+            # comes back without disturbing the timeout the user chose.
+            grub_default = grub_theme.rewrite_grub_keys(grub_default, {'GRUB_THEME': ''})
         installer.write(GRUB_DEFAULT, grub_default.encode(), 0o644)
+        if theme_expected:
+            # 00_header only emits the theme when the file is already on disk,
+            # so the copy has to happen before grub-mkconfig runs below.
+            install_theme(installer, files)
+        elif args.remove_theme:
+            remove_theme(installer)
         installer.write(ISSUE, boot_console.render_issue(ISSUE_TEMPLATE.read_text()), 0o644)
         custom = GRUB_CUSTOM.read_text()
         if args.remove_ghost:
@@ -334,6 +414,10 @@ def main(argv=None):
         boot_console.validate_generated_cfg(
             previous_cfg, generated, parameters,
             ghost_initrd=str(GHOST_INITRAMFS).replace('/boot', '', 1) if ghost_expected else None)
+        if theme_expected:
+            loaded = grub_theme.validate_menu_cfg(generated, MENU_KEYS['GRUB_THEME'], MENU_TIMEOUT)
+            installer.changes.append('themed menu loads %d font(s): %s'
+                                     % (len(loaded['fonts']), ', '.join(loaded['fonts'])))
         installer.write(GRUB_CFG, generated.encode(), 0o755)
     except BaseException:
         temporary_cfg.unlink(missing_ok=True)

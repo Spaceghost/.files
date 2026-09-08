@@ -1,0 +1,398 @@
+#!/usr/bin/env python3
+"""Render the Ghost Planet GRUB theme: PF2 fonts, artwork, pixmaps and theme.txt.
+
+Run as the user, from the checkout. Everything it writes lands in
+alpine/system/grub/theme/ and is versioned; the installer only copies it to the
+boot partition. Nothing here needs root and nothing touches a live boot path.
+
+    alpine/bin/build-grub-theme            # rebuild the whole theme
+    alpine/bin/build-grub-theme --check    # rebuild into a temporary directory
+                                           # and report whether it still matches
+
+The fonts are compiled here because `grub-mkfont` is not packaged for this
+machine and GRUB's own `unicode.pf2` is sixteen pixels tall, which is a smear on
+a 2880x1800 panel. Glyphs are rendered with Pango at the requested pixel size,
+thresholded to the one-bit bitmaps PF2 stores, and written by
+alpine/system/grub/grub_theme.py, which the tests round-trip.
+
+The background is deliberately small and heavily blurred: GRUB decodes PNGs on
+the CPU before the menu appears, so a soft 1280x800 image stretched to the panel
+costs a fraction of a sharp one and looks the same once it is out of focus.
+"""
+import argparse
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import shutil
+import sys
+import tempfile
+
+import cairo
+import gi
+gi.require_version('Pango', '1.0')
+gi.require_version('PangoCairo', '1.0')
+gi.require_version('GdkPixbuf', '2.0')
+from gi.repository import GdkPixbuf, Pango, PangoCairo  # noqa: E402
+import numpy  # noqa: E402
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/system/grub'))
+sys.path.insert(0, str(REPO / 'alpine/system/boot'))
+import grub_theme  # noqa: E402
+import boot_console  # noqa: E402
+
+THEME_DIR = REPO / 'alpine/system/grub/theme'
+PALETTE_FILE = REPO / 'alpine/system/boot/console-palette.json'
+ARTWORK = REPO / 'alpine/assets/spaceghost.png'
+SOURCE_FONT = 'JetBrainsMono Nerd Font'
+FONT_FAMILY = 'Ghost Mono'
+FONT_SIZES = (32, 20)
+BACKGROUND_SIZE = (1280, 800)
+SELECTION_CORNER = 12
+SELECTION_TILE = 4
+
+# Gruvbox roles, read from the console palette so the boot menu, the console and
+# the desktop cannot drift apart. Indices follow the ANSI order.
+ROLE_INDEX = {'background': 0, 'background_hard': 0, 'red': 1, 'green': 2, 'amber': 11,
+              'blue': 4, 'purple': 5, 'aqua': 6, 'muted': 7, 'grey': 8,
+              'orange': 3, 'foreground': 15}
+HARD_BACKGROUND = '#1d2021'
+SURFACE = '#3c3836'
+BORDER = '#504945'
+
+# ASCII, Latin-1 and the punctuation GRUB's own strings use, plus the Material
+# Design ghost the desktop brands itself with (U+F02A0 in the Nerd Font).
+GHOST_GLYPH = 0xF02A0
+EXTRA_CODEPOINTS = (0x2018, 0x2019, 0x201C, 0x201D, 0x2013, 0x2014, 0x2026, 0x2022,
+                    0x2190, 0x2191, 0x2192, 0x2193, 0x21B5,
+                    0x2500, 0x2502, 0x250C, 0x2510, 0x2514, 0x2518, 0x251C, 0x2524,
+                    0x252C, 0x2534, 0x253C, GHOST_GLYPH)
+
+
+def codepoints():
+    points = list(range(0x20, 0x7F)) + list(range(0xA0, 0x100))
+    return sorted(set(points) | set(EXTRA_CODEPOINTS))
+
+
+def palette():
+    document = boot_console.load_palette(PALETTE_FILE.read_text())
+    colors = document['colors']
+    roles = {name: colors[index] for name, index in ROLE_INDEX.items()}
+    roles.update(background_hard=HARD_BACKGROUND, surface=SURFACE, border=BORDER)
+    return roles
+
+
+def rgb(value):
+    value = value.lstrip('#')
+    return tuple(int(value[offset:offset + 2], 16) / 255 for offset in (0, 2, 4))
+
+
+def render_glyphs(size):
+    """Render every code point at this pixel size into PF2 glyph dictionaries."""
+    scratch = cairo.ImageSurface(cairo.FORMAT_A8, 1, 1)
+    context = cairo.Context(scratch)
+    layout = PangoCairo.create_layout(context)
+    description = Pango.FontDescription('%s %dpx' % (SOURCE_FONT, size))
+    layout.set_font_description(description)
+    metrics = layout.get_context().get_metrics(description, None)
+    ascent = math.ceil(metrics.get_ascent() / Pango.SCALE)
+    descent = math.ceil(metrics.get_descent() / Pango.SCALE)
+    glyphs, blank = [], []
+    for code in codepoints():
+        character = chr(code)
+        layout.set_text(character, -1)
+        ink, logical = layout.get_extents()
+        baseline = layout.get_baseline() / Pango.SCALE
+        advance = max(0, round(logical.width / Pango.SCALE))
+        if ink.width <= 0 or ink.height <= 0:
+            if not character.isspace():
+                blank.append(code)
+            glyphs.append({'code': code, 'width': 0, 'height': 0, 'x_ofs': 0,
+                           'y_ofs': 0, 'device_width': advance, 'bitmap': b''})
+            continue
+        left = math.floor(ink.x / Pango.SCALE)
+        top = math.floor(ink.y / Pango.SCALE)
+        width = math.ceil((ink.x + ink.width) / Pango.SCALE) - left
+        height = math.ceil((ink.y + ink.height) / Pango.SCALE) - top
+        surface = cairo.ImageSurface(cairo.FORMAT_A8, width, height)
+        glyph_context = cairo.Context(surface)
+        glyph_context.translate(-left, -top)
+        glyph_context.set_source_rgba(0, 0, 0, 1)
+        PangoCairo.show_layout(glyph_context, layout)
+        surface.flush()
+        stride = surface.get_stride()
+        pixels = numpy.frombuffer(surface.get_data(), dtype=numpy.uint8)
+        pixels = pixels.reshape(height, stride)[:, :width]
+        rows = (pixels >= 128).tolist()
+        glyphs.append({'code': code, 'width': width, 'height': height,
+                       'x_ofs': left, 'y_ofs': round(baseline) - top - height,
+                       'device_width': advance,
+                       'bitmap': grub_theme.pack_bitmap(rows)})
+    return glyphs, ascent, descent, blank
+
+
+def build_font(size, destination):
+    glyphs, ascent, descent, blank = render_glyphs(size)
+    name = grub_theme.font_name(FONT_FAMILY, size)
+    data = grub_theme.build_pf2(glyphs, name, FONT_FAMILY, size, ascent, descent)
+    parsed = grub_theme.parse_pf2(data)
+    if parsed['name'] != name or len(parsed['glyphs']) != len(glyphs):
+        raise RuntimeError('the font did not survive a round trip: ' + name)
+    destination.write_bytes(data)
+    return {'file': destination.name, 'name': name, 'pixel_size': size,
+            'glyphs': len(glyphs), 'ascent': ascent, 'descent': descent,
+            'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest(),
+            'blank_codepoints': ['U+%04X' % code for code in blank]}
+
+
+def blur(channel, radius):
+    """A separable box blur, run three times, which is close enough to Gaussian."""
+    result = channel.astype(numpy.float32)
+    for _ in range(3):
+        for axis in (0, 1):
+            padded = numpy.pad(result, [(radius, radius) if index == axis else (0, 0)
+                                        for index in range(2)], mode='edge')
+            window = numpy.cumsum(padded, axis=axis)
+            window = numpy.concatenate(
+                [numpy.take(window, [0], axis=axis) * 0, window], axis=axis)
+            upper = numpy.take(window, range(2 * radius + 1, window.shape[axis]), axis=axis)
+            lower = numpy.take(window, range(0, window.shape[axis] - 2 * radius - 1), axis=axis)
+            result = (upper - lower) / (2 * radius + 1)
+    return result
+
+
+def artwork_layer(width, height):
+    """The painting, cover-cropped, blurred and darkened into a calm backdrop."""
+    if not ARTWORK.exists():
+        return None, None
+    source = ARTWORK.resolve()
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(source))
+    scale = max(width / pixbuf.get_width(), height / pixbuf.get_height())
+    scaled = pixbuf.scale_simple(max(1, round(pixbuf.get_width() * scale)),
+                                max(1, round(pixbuf.get_height() * scale)),
+                                GdkPixbuf.InterpType.BILINEAR)
+    channels = scaled.get_n_channels()
+    pixels = numpy.frombuffer(scaled.get_pixels(), dtype=numpy.uint8)
+    pixels = pixels.reshape(scaled.get_height(), scaled.get_rowstride() // channels, channels)
+    pixels = pixels[:scaled.get_height(), :scaled.get_width(), :3]
+    top = (pixels.shape[0] - height) // 2
+    left = (pixels.shape[1] - width) // 2
+    crop = pixels[top:top + height, left:left + width, :].astype(numpy.float32) / 255
+    softened = numpy.dstack([blur(crop[:, :, index], 9) for index in range(3)])
+    return softened, hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def render_background(destination, roles):
+    width, height = BACKGROUND_SIZE
+    ys = numpy.linspace(0, 1, height, dtype=numpy.float32)[:, None]
+    top_color = numpy.array(rgb(roles['background_hard']), dtype=numpy.float32)
+    bottom_color = numpy.array(rgb(roles['background']), dtype=numpy.float32)
+    ground = top_color[None, None, :] * (1 - ys[:, :, None]) + bottom_color[None, None, :] * ys[:, :, None]
+    ground = numpy.repeat(ground, width, axis=1)
+    xs = numpy.linspace(-1, 1, width, dtype=numpy.float32)[None, :]
+    ys = numpy.linspace(-1, 1, height, dtype=numpy.float32)[:, None]
+    painting, source_hash = artwork_layer(width, height)
+    if painting is not None:
+        # The gallery leans nocturnal, so a plain darkening turns to mud. Stretch
+        # the blurred luminance across its own range first, then grade it towards
+        # the amber end and mix it in as a warm texture rather than a picture.
+        luminance = painting @ numpy.array([0.2126, 0.7152, 0.0722], dtype=numpy.float32)
+        low, high = numpy.percentile(luminance, (2, 98))
+        stretched = numpy.clip((luminance - low) / max(high - low, 1e-3), 0, 1)
+        warm = numpy.dstack([stretched, stretched * 0.82, stretched * 0.52])
+        detail = 0.35 * painting + 0.65 * warm
+        # Menu text sits in the middle, so the painting is held back there and
+        # allowed to come forward only towards the edges of the screen.
+        centre = numpy.sqrt((xs / 1.15) ** 2 + (ys / 0.95) ** 2)
+        keep = 0.24 + 0.76 * numpy.clip(centre, 0, 1) ** 1.5
+        ground = ground + numpy.clip(detail, 0, 1) * keep[:, :, None] * 0.30
+    radius = numpy.sqrt(xs ** 2 + (ys * 1.1) ** 2) / math.sqrt(2)
+    vignette = numpy.clip(1 - 0.62 * numpy.clip(radius - 0.22, 0, None) ** 1.4, 0.3, 1)
+    ground = ground * vignette[:, :, None]
+    # A soft amber lamp behind the wordmark and the menu, so the middle of the
+    # screen lifts and the entries never sit on a flat black field.
+    glow_radius = numpy.sqrt((xs / 0.9) ** 2 + ((ys + 0.45) / 0.85) ** 2)
+    glow = numpy.clip(1 - glow_radius, 0, 1) ** 2
+    ground = ground + glow[:, :, None] * numpy.array(rgb(roles['amber']),
+                                                     dtype=numpy.float32)[None, None, :] * 0.13
+    data = numpy.clip(ground * 255, 0, 255).astype(numpy.uint8)
+    surface = cairo.ImageSurface(cairo.FORMAT_RGB24, width, height)
+    stride = surface.get_stride()
+    buffer = numpy.ndarray(shape=(height, stride // 4, 4), dtype=numpy.uint8,
+                           buffer=surface.get_data())
+    buffer[:, :width, 2] = data[:, :, 0]
+    buffer[:, :width, 1] = data[:, :, 1]
+    buffer[:, :width, 0] = data[:, :, 2]
+    buffer[:, :width, 3] = 255
+    surface.mark_dirty()
+    surface.write_to_png(str(destination))
+    return {'file': destination.name, 'width': width, 'height': height,
+            'bytes': destination.stat().st_size, 'artwork': str(ARTWORK.relative_to(REPO)),
+            'artwork_sha256': source_hash,
+            'sha256': hashlib.sha256(destination.read_bytes()).hexdigest()}
+
+
+def rounded_tile(path, width, height, color, corners, radius):
+    """One tile of the nine-slice selection bar, with only the named corners round."""
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+    context = cairo.Context(surface)
+    context.set_source_rgba(*rgb(color), 1)
+    context.new_path()
+    context.move_to(0, 0)
+    context.line_to(width, 0)
+    context.line_to(width, height)
+    context.line_to(0, height)
+    context.close_path()
+    context.fill()
+    if corners:
+        # Carve the outside of the corner away so the bar reads as a rounded pill.
+        context.set_operator(cairo.OPERATOR_CLEAR)
+        for corner in corners:
+            centre_x = radius if 'w' in corner else width - radius
+            centre_y = radius if 'n' in corner else height - radius
+            context.new_path()
+            context.move_to(0 if 'w' in corner else width, 0 if 'n' in corner else height)
+            context.line_to(0 if 'w' in corner else width, centre_y)
+            context.arc_negative(centre_x, centre_y, radius,
+                                 math.pi if 'w' in corner else 0,
+                                 math.pi * 1.5 if 'n' in corner else math.pi * 0.5)
+            context.close_path()
+            context.fill()
+    surface.write_to_png(str(path))
+    return path.name
+
+
+def render_selection(directory, roles):
+    """The nine tiles GRUB stretches behind the highlighted menu entry."""
+    corner, tile, radius = SELECTION_CORNER, SELECTION_TILE, SELECTION_CORNER
+    plan = {
+        'select_nw.png': (corner, corner, ('nw',)),
+        'select_ne.png': (corner, corner, ('ne',)),
+        'select_sw.png': (corner, corner, ('sw',)),
+        'select_se.png': (corner, corner, ('se',)),
+        'select_n.png': (tile, corner, ()),
+        'select_s.png': (tile, corner, ()),
+        'select_w.png': (corner, tile, ()),
+        'select_e.png': (corner, tile, ()),
+        'select_c.png': (tile, tile, ()),
+    }
+    written = []
+    for name, (width, height, corners) in sorted(plan.items()):
+        written.append(rounded_tile(directory / name, width, height, roles['amber'], corners, radius))
+    return written
+
+
+def theme_specification(roles, fonts):
+    menu_font = fonts[0]['name']
+    small_font = fonts[-1]['name']
+    return {
+        'globals': {
+            'title-text': '',
+            'desktop-image': 'background.png',
+            'desktop-image-scale-method': 'stretch',
+            'desktop-color': roles['background'],
+            'terminal-font': small_font,
+            'terminal-left': '8%',
+            'terminal-top': '12%',
+            'terminal-width': '84%',
+            'terminal-height': '76%',
+            'terminal-border': '0',
+            'message-color': roles['foreground'],
+            'message-bg-color': roles['background_hard'],
+        },
+        'components': [
+            {'type': 'label', 'id': 'ghost_mark', 'top': '13%', 'left': '0', 'width': '100%',
+             'height': 48, 'align': 'center', 'text': chr(GHOST_GLYPH) + '  GHOST PLANET',
+             'color': roles['amber'], 'font': menu_font},
+            {'type': 'label', 'id': 'ghost_subtitle', 'top': '20%', 'left': '0', 'width': '100%',
+             'height': 28, 'align': 'center', 'text': 'Oldbook  ·  Alpine Linux  ·  broadcasting live',
+             'color': roles['muted'], 'font': small_font},
+            # Wide enough that the longest generated title, the Ghost Planet
+            # initramfs entry, still fits at the fixed 32-pixel item font.
+            {'type': 'boot_menu', 'left': '8%', 'top': '31%', 'width': '84%', 'height': '40%',
+             'item_font': menu_font, 'item_color': roles['foreground'],
+             'selected_item_color': roles['background_hard'],
+             'selected_item_pixmap_style': 'select_*.png',
+             'item_height': 46, 'item_padding': 10, 'item_spacing': 6,
+             'icon_width': 0, 'icon_height': 0, 'scrollbar': False},
+            {'type': 'progress_bar', 'id': '__timeout__', 'left': '30%', 'top': '78%',
+             'width': '40%', 'height': 18, 'show_text': True,
+             'text': '@TIMEOUT_NOTIFICATION_SHORT@', 'text_color': roles['muted'],
+             'font': small_font, 'fg_color': roles['amber'], 'bg_color': roles['surface'],
+             'border_color': roles['border']},
+            {'type': 'label', 'id': 'ghost_help', 'top': '88%', 'left': '0', 'width': '100%',
+             'height': 26, 'align': 'center',
+             'text': 'Arrows choose  ·  Enter boots  ·  E edits  ·  C is a GRUB console',
+             'color': roles['grey'], 'font': small_font},
+        ],
+    }
+
+
+def build(directory):
+    directory.mkdir(parents=True, exist_ok=True)
+    roles = palette()
+    fonts = [build_font(size, directory / ('ghost-%d.pf2' % size)) for size in FONT_SIZES]
+    background = render_background(directory / 'background.png', roles)
+    pixmaps = render_selection(directory, roles)
+    specification = theme_specification(roles, fonts)
+    text = grub_theme.render_theme(specification)
+    images = [background['file']] + pixmaps
+    grub_theme.validate_theme(text, fonts=[font['name'] for font in fonts], images=images)
+    (directory / grub_theme.THEME_FILE).write_text(text)
+    provenance = {
+        'generator': 'alpine/bin/build-grub-theme',
+        'source_font': SOURCE_FONT,
+        'palette': str(PALETTE_FILE.relative_to(REPO)),
+        'fonts': fonts,
+        'background': background,
+        'pixmaps': pixmaps,
+        'theme_sha256': hashlib.sha256(text.encode()).hexdigest(),
+        'note': ('PF2 fonts are compiled here because grub-mkfont is not packaged; '
+                 'the background is small and blurred so GRUB decodes it quickly.'),
+    }
+    (directory / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
+    return provenance
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--check', action='store_true',
+                        help='render into a temporary directory and compare with the committed theme')
+    parser.add_argument('--output', type=Path, default=THEME_DIR)
+    arguments = parser.parse_args()
+    if arguments.check:
+        with tempfile.TemporaryDirectory(prefix='ghost-grub-theme-') as temporary:
+            fresh = Path(temporary)
+            build(fresh)
+            differences = []
+            for path in sorted(fresh.iterdir()):
+                committed = arguments.output / path.name
+                if not committed.is_file():
+                    differences.append('missing ' + path.name)
+                elif committed.read_bytes() != path.read_bytes() and path.name != 'provenance.json':
+                    differences.append('differs ' + path.name)
+            for path in sorted(arguments.output.glob('*')):
+                if not (fresh / path.name).exists():
+                    differences.append('extra ' + path.name)
+            print('\n'.join(differences) or 'The committed theme matches a fresh render.')
+            return 1 if differences else 0
+    provenance = build(arguments.output)
+    print(json.dumps({'fonts': [(font['name'], font['bytes'], font['glyphs']) for font in provenance['fonts']],
+                      'background_bytes': provenance['background']['bytes'],
+                      'pixmaps': len(provenance['pixmaps'])}, indent=2))
+    blank = [code for font in provenance['fonts'] for code in font['blank_codepoints']]
+    if blank:
+        print('warning: no ink for', ', '.join(sorted(set(blank))), file=sys.stderr)
+    print('Wrote', arguments.output)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, RuntimeError) as error:
+        print('build-grub-theme: %s' % error, file=sys.stderr)
+        sys.exit(1)

@@ -1,0 +1,55 @@
+{
+  "generator": "alpine/bin/build-grub-theme",
+  "source_font": "JetBrainsMono Nerd Font",
+  "palette": "alpine/system/boot/console-palette.json",
+  "fonts": [
+    {
+      "file": "ghost-32.pf2",
+      "name": "Ghost Mono Regular 32",
+      "pixel_size": 32,
+      "glyphs": 216,
+      "ascent": 33,
+      "descent": 10,
+      "bytes": 13336,
+      "sha256": "600f708135ba57d085bd93816d6e613490c8641930b4accfffde9f03abac2c2f",
+      "blank_codepoints": [
+        "U+00AD"
+      ]
+    },
+    {
+      "file": "ghost-20.pf2",
+      "name": "Ghost Mono Regular 20",
+      "pixel_size": 20,
+      "glyphs": 216,
+      "ascent": 21,
+      "descent": 6,
+      "bytes": 7937,
+      "sha256": "d406b518a3a774576f0bdc08f53c580735ef57bb84855ac8aa2fe05f107ebc40",
+      "blank_codepoints": [
+        "U+00AD"
+      ]
+    }
+  ],
+  "background": {
+    "file": "background.png",
+    "width": 1280,
+    "height": 800,
+    "bytes": 234597,
+    "artwork": "alpine/assets/spaceghost.png",
+    "artwork_sha256": "0986082ea55722b0d9199ee820fb2de8328253acb1f8bc45f5d33c9e6cf1d8b6",
+    "sha256": "ceb2b4abcd3f1a56acaa014f831ba5a97bdbcf77a18464fa229bc3a46dce38ed"
+  },
+  "pixmaps": [
+    "select_c.png",
+    "select_e.png",
+    "select_n.png",
+    "select_ne.png",
+    "select_nw.png",
+    "select_s.png",
+    "select_se.png",
+    "select_sw.png",
+    "select_w.png"
+  ],
+  "theme_sha256": "08119ff7fe4adee9c1c2a6165b7a0c4a4591c5e6bb54e77d1d15d4b049ea31b5",
+  "note": "PF2 fonts are compiled here because grub-mkfont is not packaged; the background is small and blurred so GRUB decodes it quickly."
+}
