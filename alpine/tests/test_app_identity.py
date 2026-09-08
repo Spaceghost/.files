@@ -1,5 +1,7 @@
 """Application identity tests use disposable process and tmux snapshots."""
 import os
+import runpy
+from unittest import mock
 from pathlib import Path
 import sys
 import tempfile
@@ -60,6 +62,71 @@ class ApplicationResolverTests(unittest.TestCase):
         self.assertEqual(result, {
             5: {'name': 'btop', 'kind': 'app', 'state': None},
         })
+
+    def test_custom_terminal_id_resolves_tmux_agent_from_process_snapshot(self):
+        self.process(100, 'foot')
+        self.process(110, 'tmux: client', ppid=100, tty=34818, tpgid=110)
+        runner = TmuxRunner(
+            clients='110\t$0\t@0\n',
+            panes='$0\t@0\t0\t%2\t1002\t/dev/pts/2\tcodex\t120\t40\t1\t'
+                  'jack | codex | ~ | Working | Context 42% left\n')
+        result = self.resolver(runner).resolve_all([
+            {'id': 5, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'}])
+        self.assertEqual(result[5], {
+            'name': 'Codex', 'kind': 'codex', 'state': 'Working',
+            'tmux_pane': '%2', 'tty': '/dev/pts/2'})
+        self.assertEqual(len(runner.calls), 2)
+
+    def test_custom_tmux_agent_is_counted_and_reached_by_switcher(self):
+        self.process(100, 'foot')
+        self.process(110, 'tmux: client', ppid=100, tty=34818, tpgid=110)
+        self.process(200, 'foot')
+        self.process(210, 'codex', ppid=200, tty=34819, tpgid=210)
+        runner = TmuxRunner(
+            clients='110\t$0\t@0\n',
+            panes='$0\t@0\t0\t%2\t1002\t/dev/pts/2\tcodex\t120\t40\t1\tCodex\n')
+        resolver = self.resolver(runner)
+        service = runpy.run_path(str(LIB.parent / 'bin/oldbook-workspaces'))
+        windows = [
+            {'id': 5, 'pid': 200, 'app_id': 'foot', 'name': 'Codex', 'focused': True},
+            {'id': 6, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'}]
+        workspaces = []
+        for i, window in enumerate(windows, 1):
+            window.update(type='con', rect={'x': 0, 'y': 0, 'width': 100, 'height': 100},
+                          nodes=[], floating_nodes=[])
+            workspaces.append({'id': 100+i, 'type': 'workspace', 'num': i, 'name': str(i),
+                               'nodes': [window], 'floating_nodes': []})
+        tree = {'nodes': [{'type': 'output', 'name': 'eDP-1', 'nodes': workspaces}]}
+        runtime = self.proc / 'runtime'
+        runtime.mkdir()
+        _, agents = service['collect'](tree, resolver, runtime, service['WorkspaceNames']())
+        self.assertEqual([agent['id'] for agent in agents], [5, 6])
+        self.assertEqual([agent['kind'] for agent in agents], ['codex', 'codex'])
+        import app_identity
+        switch = service['switch_ai']
+        commands = []
+        with mock.patch.object(app_identity, 'ApplicationResolver', return_value=resolver), mock.patch.dict(
+                switch.__globals__, request=lambda *_: tree,
+                command=lambda path, command: commands.append(command)):
+            switch('/unused-sway-socket', runtime)
+        self.assertEqual(commands, ['[con_id=6] focus'])
+
+    def test_custom_terminal_id_resolves_direct_foreground_agent(self):
+        self.process(100, 'ghostty')
+        self.process(110, 'claude', ppid=100, tty=34818, tpgid=110)
+        result = self.resolver().resolve_all([
+            {'id': 5, 'pid': 100, 'app_id': 'custom-terminal', 'name': 'Private title'}])
+        self.assertEqual(result[5], {
+            'name': 'Claude', 'kind': 'claude', 'state': None, 'tty': '/dev/pts/2'})
+
+    def test_custom_agent_name_without_terminal_process_is_not_an_agent(self):
+        self.process(100, 'unrelated-app')
+        runner = TmuxRunner()
+        result = self.resolver(runner).resolve_all([
+            {'id': 5, 'pid': 100, 'app_id': 'oldbook-agent', 'name': 'Codex'},
+            {'id': 6, 'pid': 99999, 'app_id': 'oldbook-agent', 'name': 'Codex'}])
+        self.assertEqual([value['kind'] for value in result.values()], ['app', 'app'])
+        self.assertEqual(runner.calls, [])
 
     def test_tmux_uses_largest_pane_in_clients_displayed_window(self):
         self.process(100, 'foot')

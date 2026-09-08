@@ -159,7 +159,7 @@ class ApplicationResolver:
 
     def resolve_all(self, windows: list[dict]) -> dict[int, dict]:
         processes = self._process_snapshot()
-        terminal_windows = [window for window in windows if self._terminal_source(window)]
+        terminal_windows = [window for window in windows if self._terminal_source(window, processes)]
         clients = {}
         panes = []
         if terminal_windows:
@@ -267,8 +267,15 @@ class ApplicationResolver:
         properties = properties if isinstance(properties, dict) else {}
         return [window.get('app_id'), properties.get('class'), properties.get('instance')]
 
-    def _terminal_source(self, window):
-        return next((source for source in self._window_sources(window) if _is_terminal(source)), None)
+    def _terminal_source(self, window, processes):
+        sources = self._window_sources(window)
+        # Launchers may replace the Wayland app_id (for example oldbook-agent).
+        # Reuse the UID-filtered process snapshot to recognize the actual
+        # terminal without trusting its title or querying /proc again per view.
+        pid = window.get('pid')
+        if type(pid) is int and pid > 0:
+            sources.append(processes.get(pid, {}).get('comm'))
+        return next((source for source in sources if _is_terminal(source)), None)
 
     @staticmethod
     def _title(window):
@@ -285,7 +292,7 @@ class ApplicationResolver:
         if browser and re.search(r'(?<![A-Za-z0-9])(?:claude|claude\.ai)(?![A-Za-z0-9])', title, re.I):
             return {'name': 'Claude', 'kind': 'claude', 'state': None}
 
-        terminal = self._terminal_source(window)
+        terminal = self._terminal_source(window, processes)
         if terminal:
             return self._terminal_identity(window, terminal, title, processes, clients, panes)
 
