@@ -82,6 +82,38 @@ class HistoryTests(unittest.TestCase):
         self.assertEqual(len(set(identifiers)), 1)
         self.assertEqual(len(history.entries(self.database)), 2)
 
+    def test_return_walks_back_along_the_reading_path_without_editing_history(self):
+        history.select(passage(), self.database, now=100)
+        for number, now in ((2, 3700), (3, 7400)):
+            history.advance(lambda: passage(), lambda old, n=number: passage(n), self.database, now=now)
+        returned = history.retreat(self.database, now=7500)
+        self.assertEqual(returned['document']['reference'], 'John 1:2')
+        self.assertEqual((returned['reason'], returned['next_at']), ('manual-previous', 11100))
+        self.assertEqual(history.retreat(self.database, now=7600)['document']['reference'], 'John 1:1')
+        self.assertIsNone(history.retreat(self.database, now=7700))
+        forward = history.advance(lambda: passage(), lambda old: passage(2), self.database, now=7800, force=True)
+        self.assertEqual(forward['document']['reference'], 'John 1:2')
+        # A return after Next goes back to where Next started, not to the newest older row.
+        self.assertEqual(history.retreat(self.database, now=7900)['document']['reference'], 'John 1:1')
+        self.assertIsNone(history.retreat(self.database, now=8000))
+        rows = history.entries(self.database)
+        self.assertEqual([row['document']['reference'] for row in reversed(rows)],
+                         ['John 1:1', 'John 1:2', 'John 1:3', 'John 1:2', 'John 1:1', 'John 1:2', 'John 1:1'])
+        self.assertEqual(history.current(self.database)['id'], rows[0]['id'])
+        self.assertEqual(history.get(rows[-1]['id'], self.database)['document'], passage())
+
+    def test_return_passes_repeated_passages_without_looping(self):
+        for number, now in ((1, 100), (2, 200), (1, 300), (3, 400)):
+            history.select(passage(number), self.database, now=now)
+        references = []
+        while len(references) < 10:
+            returned = history.retreat(self.database, now=500 + len(references))
+            if returned is None:
+                break
+            references.append(returned['document']['reference'])
+        self.assertEqual(references, ['John 1:1', 'John 1:2', 'John 1:1'])
+        self.assertEqual(len(history.entries(self.database)), 7)
+
     def test_history_navigation_preserves_notes_and_full_text(self):
         first = history.select(passage(), self.database, now=1)
         second = history.select(passage(2), self.database, now=2)
@@ -187,6 +219,23 @@ class CommandHistoryTests(unittest.TestCase):
         with patch.object(history.time, 'time', return_value=3700):
             self.assertEqual(self.helper.next_selection(self.bible), 'John 1:2')
         self.assertEqual(len(history.entries()), 2)
+
+    def test_previous_returns_to_the_earlier_passage_and_refreshes_only_then(self):
+        with patch.object(history.time, 'time', return_value=100):
+            self.helper.select_reference(self.bible, 'John 1:1')
+        with patch.object(history.time, 'time', return_value=200):
+            self.assertEqual(self.helper.next_selection(self.bible), 'John 1:2')
+        self.refresh.reset_mock()
+        with patch.object(history.time, 'time', return_value=300):
+            self.assertEqual(self.helper.previous_selection(self.bible), 'John 1:1')
+        self.refresh.assert_called_once_with()
+        selection = json.loads(self.helper.SELECTION.read_text())
+        self.assertEqual((selection['reference'], selection['next_at']), ('John 1:1', 3900))
+        self.assertEqual(len(history.entries()), 3)
+        with patch.object(history.time, 'time', return_value=400):
+            self.assertIsNone(self.helper.previous_selection(self.bible))
+        self.refresh.assert_called_once_with()
+        self.assertEqual(len(history.entries()), 3)
 
     def test_clock_refreshes_only_due_card_independently_of_conky_cache(self):
         with patch.object(history.time, 'time', return_value=100):

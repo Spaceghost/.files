@@ -7,14 +7,22 @@ function conky_mbp_intel_history(x, width, height)
 end
 
 function conky_mbp_intel_click(event)
-    if event.type ~= 'button_down' or event.button ~= 'left' then
+    if event.type ~= 'button_down' then
         return false
     end
     local identifier = (conky_config or ''):match('([^/]+)%.conf$')
     if not cards[identifier] then
         return false
     end
-    if identifier == 'scripture' and history_link
+    if event.button == 'right' then
+        -- Only the Scripture card keeps a reading history to return to.
+        if identifier ~= 'scripture' then
+            return false
+        end
+        identifier = 'scripture-previous'
+    elseif event.button ~= 'left' then
+        return false
+    elseif identifier == 'scripture' and history_link
             and type(event.x) == 'number' and type(event.y) == 'number'
             and event.x >= history_link.x and event.x < history_link.x + history_link.width
             and event.y >= 0 and event.y < history_link.height then

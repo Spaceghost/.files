@@ -73,7 +73,9 @@ class ClickCommandsTests(unittest.TestCase):
         script.write_text('conky_config = "/tmp/scripture.conf"\n'
                           + f'dofile({json.dumps(str(hook))})\n'
                           + '''assert(conky_mbp_intel_click({type='mouse_move'}) == false)
+conky_config = '/tmp/witness.conf'
 assert(conky_mbp_intel_click({type='button_down',button='right'}) == false)
+conky_config = '/tmp/scripture.conf'
 assert(conky_mbp_intel_click({type='button_up',button='left'}) == false)
 assert(conky_mbp_intel_click({type='button_down',button='left'}) == true)
 conky_config = '/tmp/power.conf'
@@ -86,6 +88,29 @@ assert(conky_mbp_intel_click({type='button_down',button='left'}) == false)
         while time.monotonic() < deadline and self.selection()['reference'] == 'John 3:16':
             time.sleep(.1)
         self.assertEqual(self.selection()['reference'], 'John 3:17')
+
+    def test_right_click_returns_to_the_passage_shown_before(self):
+        target = self.home / '.local/bin/mbp-intel-conky-click'
+        target.parent.mkdir(parents=True)
+        target.symlink_to(BIN / 'mbp-intel-conky-click')
+        hook = REPO / 'alpine/desktop/.local/lib/mbp_intel/conky_click.lua'
+        self.command('mbp-intel-scripture', 'select', 'John 3:16')
+        self.command('mbp-intel-scripture', 'next')
+        self.assertEqual(self.selection()['reference'], 'John 3:17')
+        script = self.home / 'return.lua'
+        script.write_text('conky_config = "/tmp/scripture.conf"\n'
+                          + f'dofile({json.dumps(str(hook))})\n'
+                          + "assert(conky_mbp_intel_click({type='button_down',button='right',x=60,y=50}) == true)\n")
+        result = subprocess.run(['lua', str(script)], env=self.env,
+                                capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline and self.selection()['reference'] != 'John 3:16':
+            time.sleep(.1)
+        self.assertEqual(self.selection()['reference'], 'John 3:16')
+        listing = self.command('mbp-intel-scripture', 'history-list').splitlines()
+        self.assertEqual([line.split('\t')[2] for line in reversed(listing)],
+                         ['John 3:16', 'John 3:17', 'John 3:16'])
 
     def test_disabled_desktop_does_not_advance_from_stale_click(self):
         selection = self.home / '.local/state/mbp-intel/scripture/selection.json'
@@ -133,6 +158,17 @@ click(348, 0, 'scripture%-history')
 click(419, 17, 'scripture%-history')
 click(390, 18, 'scripture')
 assert(#commands == 7)
+local function press_right(x, y)
+    assert(conky_mbp_intel_click({type='button_down', button='right', x=x, y=y}))
+    assert(commands[#commands]:match('mbp%-intel%-conky%-click" scripture%-previous >'),
+           'Right-click at ' .. x .. ',' .. y .. ' did not return: ' .. commands[#commands])
+end
+press_right(390, 8)
+press_right(30, 40)
+assert(#commands == 9)
+conky_config = '/tmp/witness.conf'
+assert(conky_mbp_intel_click({type='button_down', button='right', x=30, y=40}) == false)
+assert(#commands == 9)
 ''')
         result = subprocess.run(['lua', str(script)], env=self.env,
                                 capture_output=True, text=True, timeout=10)

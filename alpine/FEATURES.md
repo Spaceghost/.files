@@ -398,7 +398,8 @@ native reading-card click actions; Scripture search may adapt to free space.
 - Implementation: [runtime policy](desktop/.local/lib/mbp_intel/conky_policy.py),
   [layout](desktop/.local/lib/mbp_intel/conky_layout.py), [panels](desktop/.config/conky/panels.json).
 - Checks: [policy](tests/test_conky_policy.py), [layout](tests/test_conky_layout.py),
-  [clicks](tests/test_conky_clicks.py), [desktop space](tests/test_desktop_space.py).
+  [clicks](tests/test_conky_clicks.py), [desktop space](tests/test_desktop_space.py),
+  [native click evidence](verification/conky-clicks/README.md).
   [Persistent requirements](AGENTS.md) apply to every theme and rebuild.
 
 ### JOURNAL
@@ -428,8 +429,14 @@ History is a clickable text link on the Scripture header line, in the active
 card font and accent color. It opens saved reading without advancing the passage;
 the passage itself keeps its click-to-advance action. This supersedes the separate
 History button beside the desktop search bar.
+Right-click on the Scripture card returns to the passage shown before the current
+one, one step per click along the reader's own path: a return after Next goes
+back to where Next started, and returning past a repeated passage does not loop.
+Each return is appended to history as a new hour-long selection; no saved entry
+is edited or removed. Other cards ignore right-clicks.
 
 - Implementation: [Scripture modules](desktop/.local/lib/mbp_intel/scripture.py),
+  [card clicks](desktop/.local/lib/mbp_intel/conky_click.lua),
   [history](desktop/.local/lib/mbp_intel/scripture_history.py),
   [generation](desktop/.local/lib/mbp_intel/scripture_generation.py).
 - Checks: [selection](tests/test_scripture_selection.py), [history](tests/test_scripture_history.py),

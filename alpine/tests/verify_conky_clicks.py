@@ -183,11 +183,11 @@ def verify():
                     pointer.stdin.flush()
                     assert pointer.stdout.readline().strip() == 'ok'
 
-                def click(x, y):
+                def click(x, y, button=272):
                     event(f'move {round(x * 800 / 1000)} {round(y * 600 / 700)}')
                     time.sleep(.15)
-                    event('press 272')
-                    event('release 272')
+                    event(f'press {button}')
+                    event(f'release {button}')
 
                 def current_pids():
                     return json.loads((state / 'pids.json').read_text())
@@ -228,6 +228,28 @@ def verify():
                 command('grim', str(OUTPUT / 'after.png'))
                 assert (OUTPUT / 'before.png').read_bytes() != (OUTPUT / 'after.png').read_bytes()
 
+                # A native right-click on the Scripture card returns to the passage shown before it.
+                identifier, x, y, _ = panels[0]
+
+                def scripture_pixels():
+                    return subprocess.check_output(['grim', '-g', f'{x},{y} 430x250', '-'], env=env)
+
+                before = current_pids()
+                before_pixels = scripture_pixels()
+                started = time.monotonic()
+                click(x + 60, y + 50, button=273)
+                after = wait_for(lambda: (now if (now := current_pids())[identifier]
+                                          != before[identifier] else None),
+                                 'scripture did not react to its native right-click')
+                assert all(after[key] == before[key] for key in before if key != identifier)
+                wait_for(click_complete, 'scripture right-click did not finish replacing its card')
+                wait_for(lambda: scripture_pixels() != before_pixels,
+                         'scripture did not draw the returned passage')
+                durations['scripture-right-click'] = round(time.monotonic() - started, 2)
+                returned = json.loads((home / '.local/state/mbp-intel/scripture/selection.json').read_text())
+                assert returned['reference'] == 'John 3:16', returned['reference']
+                command('grim', str(OUTPUT / 'returned.png'))
+
                 marker = root / 'application-click'
                 app = spawn([sys.executable, __file__, 'cover', str(marker)])
                 wait_for(lambda: 'Conky click cover' in command('swaymsg', '-r', '-t', 'get_tree'),
@@ -246,6 +268,7 @@ def verify():
                 report = {'native_wayland_clicks': durations, 'only_clicked_card_restarted': True,
                           'each_clicked_card_redrawn': True,
                           'selected_reference': selected['reference'],
+                          'right_click_returned_reference': returned['reference'],
                           'tiled_and_floating_application_input': True,
                           'periodic_seconds': {'display': 60, 'scripture': 60, 'witness': 300, 'journal': 240}}
                 (OUTPUT / 'native.json').write_text(json.dumps(report, indent=2) + '\n')

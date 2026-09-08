@@ -348,6 +348,19 @@ def next_selection(bible):
     return document.get('id') or document['reference']
 
 
+def previous_selection(bible):
+    """Return to the passage displayed before the current one, if there is one."""
+    if history.current() is None:
+        current(bible)
+    record = history.retreat()
+    if record is None:
+        return None
+    mirror_selection(record)
+    refresh_panel()
+    document = record['document']
+    return document.get('id') or document['reference']
+
+
 def wrap(text, width, limit):
     lines = textwrap.wrap(text, width)
     if len(lines) > limit:
@@ -453,7 +466,8 @@ def main():
     parser.add_argument('action', nargs='?', default='panel',
                         choices=['panel', 'show', 'search', 'find', 'select',
                                  'select-reflection', 'reflections', 'figures', 'daily', 'bar',
-                                 'witness', 'witness-next', 'next', 'refresh', 'translations', 'use',
+                                 'witness', 'witness-next', 'next', 'previous', 'refresh',
+                                 'translations', 'use',
                                  'history', 'history-list', 'history-show', 'history-use',
                                  'history-add', 'history-add-study', 'history-backup', 'tick'])
     parser.add_argument('query', nargs='*', help='A reference, reflection ID or search words.')
@@ -551,6 +565,13 @@ def main():
         return select_reflection(bible, entry['id']) and 0
     if arguments.action == 'next':
         print(next_selection(bible))
+        return 0
+    if arguments.action == 'previous':
+        chosen = previous_selection(bible)
+        if chosen is None:
+            print('Nothing earlier in Scripture history', file=sys.stderr)
+        else:
+            print(chosen)
         return 0
     if not query:
         parser.error(f'{arguments.action} needs a reference, ID or search words')
