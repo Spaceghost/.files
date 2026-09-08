@@ -15,7 +15,9 @@
         "alpine/desktop/.local/share/lxqt/*",
         "alpine/themes/profiles/*",
         "projects/superhold-guide/*",
-        "projects/superhold/*"
+        "projects/superhold/*",
+        "alpine/bin/build-cursor-theme",
+        "alpine/desktop/.local/share/icons/*"
       ],
       "tests": [
         "test_application_theme_refresh.py",
@@ -26,10 +28,12 @@
         "test_theme_refresh.py",
         "test_theme_session.py",
         "test_theme_sway_reload.py",
-        "test_theme_switch.py"
+        "test_theme_switch.py",
+        "test_cursor_theme.py"
       ],
       "evidence": [
-        "verification/complete-themes/"
+        "verification/complete-themes/",
+        "verification/animated-cursors/"
       ]
     },
     {
@@ -61,6 +65,22 @@
       ],
       "evidence": [
         "verification/lock-screen/"
+      ]
+    },
+    {
+      "id": "SOUND-CUES",
+      "paths": [
+        "alpine/bin/build-sound-theme",
+        "alpine/desktop/.local/bin/oldbook-sound",
+        "alpine/desktop/.local/bin/oldbook-battery-cue",
+        "alpine/desktop/.local/share/sounds/*",
+        "alpine/desktop/.config/swaync/config.json"
+      ],
+      "tests": [
+        "test_sound_theme.py"
+      ],
+      "evidence": [
+        "verification/sound-theme/"
       ]
     },
     {
@@ -291,12 +311,14 @@
         "alpine/desktop/.local/lib/oldbook/shortcut_sources.py",
         "alpine/desktop/.local/bin/oldbook-idle",
         "alpine/tests/test_keyboard_backlight.py",
-        "alpine/tests/test_idle_dim.py"
+        "alpine/tests/test_idle_dim.py",
+        "alpine/desktop/.local/lib/oldbook/air.py"
       ],
       "tests": [
         "test_keyboard_backlight.py",
         "test_idle_dim.py",
-        "test_shortcut_sources.py"
+        "test_shortcut_sources.py",
+        "test_air.py"
       ],
       "evidence": [
         "verification/keyboard-breathing/README.md",
@@ -311,15 +333,24 @@
         "alpine/desktop/.local/lib/oldbook/carousel*",
         "alpine/desktop/.config/sway/config",
         "alpine/desktop/.config/sway/local.d/apple-overview.conf",
-        "alpine/desktop/.local/bin/oldbook-keyboard-backlight"
+        "alpine/desktop/.local/bin/oldbook-keyboard-backlight",
+        "alpine/desktop/.local/lib/oldbook/launchpad.py",
+        "alpine/desktop/.local/lib/oldbook/mission_control.py",
+        "alpine/desktop/.local/lib/oldbook/grid_overlay.py",
+        "alpine/desktop/.local/lib/oldbook/grid_layout.py",
+        "alpine/desktop/.local/lib/oldbook/app_index.py",
+        "alpine/desktop/.local/bin/oldbook-launchpad",
+        "alpine/desktop/.local/bin/oldbook-mission-control"
       ],
       "tests": [
         "test_apple_overview.py",
-        "test_shortcut_sources.py"
+        "test_shortcut_sources.py",
+        "test_grids.py"
       ],
       "evidence": [
         "verification/apple-overview/README.md",
-        "verification/keyboard-backlight/README.md"
+        "verification/keyboard-backlight/README.md",
+        "verification/launchpad-mission-control/"
       ]
     },
     {
@@ -331,13 +362,15 @@
         "alpine/themes/*",
         "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
         "alpine/desktop/.local/bin/oldbook-decoration",
-        "alpine/desktop/.local/bin/oldbook-decoration-settings"
+        "alpine/desktop/.local/bin/oldbook-decoration-settings",
+        "alpine/desktop/.local/lib/oldbook/air.py"
       ],
       "tests": [
         "test_decoration.py",
         "test_decoration_watch.py",
         "test_overlay_theme.py",
-        "test_decoration_handoff.py"
+        "test_decoration_handoff.py",
+        "test_air.py"
       ],
       "evidence": [
         "verification/decoration-context/"
@@ -378,7 +411,8 @@
         "alpine/bin/oldbook-ui-priority",
         "alpine/desktop/.local/lib/oldbook/ui_priority.py",
         "alpine/desktop/.local/lib/oldbook/ui_command.py",
-        "alpine/desktop/.local/lib/oldbook/graphics_warmup.py"
+        "alpine/desktop/.local/lib/oldbook/graphics_warmup.py",
+        "alpine/desktop/.local/lib/oldbook/air.py"
       ],
       "tests": [
         "test_carousel_view.py",
@@ -389,7 +423,8 @@
         "test_carousel_responsiveness.py",
         "test_decoration_handoff.py",
         "test_ui_priority_request.py",
-        "test_ui_startup.py"
+        "test_ui_startup.py",
+        "test_air.py"
       ],
       "evidence": [
         "verification/decoration-framerate/README.md",
@@ -470,6 +505,17 @@
         "test_osd.py",
         "test_screenshot_shutter.py",
         "test_session.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "AMBIENT-DISPLAY",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-ambient-display",
+        "alpine/desktop/.local/lib/oldbook/ambient_light.py"
+      ],
+      "tests": [
+        "test_ambient_display.py"
       ],
       "evidence": []
     },
@@ -669,14 +715,20 @@
         "alpine/desktop/.local/lib/oldbook/background_fade.py",
         "alpine/desktop/.local/bin/oldbook-wallpaper",
         "alpine/desktop/.local/bin/oldbook-session",
-        "alpine/tests/verify_background_crossfade.py"
+        "alpine/tests/verify_background_crossfade.py",
+        "alpine/desktop/.local/lib/oldbook/air.py",
+        "alpine/desktop/.local/bin/oldbook-screensaver",
+        "alpine/tests/verify_desktop_breath.py"
       ],
       "tests": [
         "test_background.py",
-        "test_background_gallery.py"
+        "test_background_gallery.py",
+        "test_air.py"
       ],
       "evidence": [
-        "verification/background-crossfade/"
+        "verification/background-crossfade/",
+        "verification/desktop-breath/",
+        "verification/gallery-screensaver/"
       ]
     },
     {

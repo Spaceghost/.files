@@ -134,6 +134,19 @@ macOS does. `F5`/`F6` still move the peak; `Shift+F5` returns to steady light.
 The mode is refused when no sensor is readable. The control deck's **Keyboard
 glow** menu shows the current room reading beside the ambient entry.
 
+The panel can follow the same sensor. **Ambient screen** in the control deck, or
+`oldbook-ambient-display on`, hands the backlight to the room: a dark room
+settles it at a fifteen percent floor, never off, a sunlit desk takes it to full,
+and everything between is the same log-scale curve with a hysteresis band and a
+1.2-second eased fade. It is off until you switch it on. Change the brightness by
+hand while it is running and your level stands: the difference from the curve is
+learned as a lasting offset in `~/.config/oldbook/ambient-display.json`, so the
+room still moves the panel but around the brightness you actually like. It
+writes nothing while the pre-lock dim holds the display or while the session is
+locked, automatic changes are silent, and `oldbook-ambient-display off` stops it
+wherever the panel stands. `oldbook-ambient-display status` prints the room
+reading, the curve's suggestion and the current level.
+
 `Option+Shift+F6` (`Mod1+Shift+XF86KbdBrightnessUp`) selects **breathe on
 air**: the keys breathe continuously, but the lungs start a quarter full at a
 slow seven-second tempo; every keystroke is a sip of air that deepens the
@@ -184,7 +197,23 @@ To disable the light integration, remove the notification helper launch from
 to retain the Escape mapping. A reboot or keyboard reconnect restores the
 kernel's default LED trigger; the helper detaches it again when it starts.
 
-Screenshots are stored in `~/Pictures/Screenshots` and offered to Satty for annotation (Swappy remains the fallback), with the Gruvbox palette from `~/.config/satty/config.toml`; Enter copies the annotated image and closes, Ctrl+S overwrites the capture. The flash and shutter sound run only after the file is written, so neither appears in the picture, and `oldbook-osd` also draws the volume, microphone, brightness and keyboard-light pill; `oldbook-osd preview --output pill.png` renders it without a display. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
+Screenshots are stored in `~/Pictures/Screenshots` and offered to Satty for annotation (Swappy remains the fallback), with the Gruvbox palette from `~/.config/satty/config.toml`; Enter copies the annotated image and closes, Ctrl+S overwrites the capture. The flash and shutter sound run only after the file is written, so neither appears in the picture, and `oldbook-osd` also draws the volume, microphone, brightness and keyboard-light pill; `oldbook-osd preview --output pill.png` renders it without a display. The same daemon announces a new track on a card at the bottom right, with the album art, for four seconds: it watches MPRIS on the session bus, stays quiet while the desktop is locked or the notification centre is open, never repeats the song already playing, and is switched off from **Now transmitting** in the command deck or `{"card": false}` in `~/.config/oldbook/osd.json`. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
+
+The painting breathes with the keyboard. While any breathing keyboard mode runs,
+`oldbook-keyboard-backlight` publishes the breath to
+`$XDG_RUNTIME_DIR/oldbook/air.json`, and `oldbook-background` swells the picture
+with it: a hint at rest, a little more once your keystrokes have filled the lungs
+in **breathe on air** mode, always settling back to exactly the untouched
+painting. In that mode the caption strip's accent glows in time as well. Switch
+either half off in `~/.config/oldbook/breath.json` or with **Desktop breath** in
+the command deck.
+
+Four minutes idle, the paintings take over: `oldbook-screensaver start` (run by
+`oldbook-idle screensaver` from swayidle) drifts slowly across the current
+painting and crossfades to the next every thirty seconds. Any activity, or the
+dim stage at 270 seconds, glides it back to rest and to the painting it
+interrupted. It never changes the saved painting, the rotation deadline or the
+pause switch, so it runs even while rotation is paused.
 
 The overlay does not infer a geographic location. Sun and moon features start only when you create `~/.config/oldbook/location.json` yourself (copy `location.example.json` beside it: `name`, `latitude`, `longitude`, `timezone`). With that file present, `oldbook-session` starts `oldbook-sun-light run`, which execs `wlsunset` with the configured coordinates so the display warms after the computed sunset; `oldbook-sun-light toggle` (also **Night light** in the command deck) switches it off and on, and a stop stays in force across Sway reloads. The same file feeds the masthead's sunrise/sunset/moon line (`oldbook-astro panel`, see [desktop panels](DESKTOP-PANELS.md)) and the gallery's night preference for nocturnes ([gallery guide](../wallpapers/README.md)). All of it is computed offline; without the file the night light stays off and the line stays empty. A manual `wlsunset` schedule in `~/.config/sway/local.d/` remains possible instead.
 

@@ -34,14 +34,20 @@ Every built-in and generated theme is a complete desktop design: palette,
 typography, geometry, spacing, window treatment, launcher, widgets, application
 styling and matching artwork. Switching must apply it across the desktop.
 Shared controls, personal content, quiet-panel policy and saved decoration
-preferences survive. Selecting the current theme must permit reapplication;
+preferences survive. The pointer set is part of the design: Oldbook-Ghost
+redraws the waiting shapes as a turning amber ring and inherits every other
+shape from the installed Simp1e Gruvbox set, so a theme switch never leaves the
+cursor behind. Selecting the current theme must permit reapplication;
 application failures must be visible instead of reporting an unqualified success.
 
 - Implementation: [oldbook-theme](desktop/.local/bin/oldbook-theme),
-  [desktop_theme.py](wallpapers/desktop_theme.py), [profiles](themes/profiles/).
+  [desktop_theme.py](wallpapers/desktop_theme.py), [profiles](themes/profiles/),
+  [cursor generator](bin/build-cursor-theme).
 - Checks: [complete themes](tests/test_complete_themes.py),
   [theme switch](tests/test_theme_switch.py), [theme picker](tests/test_theme_picker.py),
-  [application refresh](tests/test_application_theme_refresh.py).
+  [application refresh](tests/test_application_theme_refresh.py),
+  [cursor theme](tests/test_cursor_theme.py) with
+  [drawn frames and a session load](verification/animated-cursors/README.md).
   [Recorded previews](verification/complete-themes/) cover selected themes;
   they do not prove every running application accepts every change immediately.
 
@@ -109,6 +115,9 @@ the user's saved values, currently bottom / 0.67 opacity / radius 7. Caption
 typography follows the active theme's design typeface (Inter Medium for Gruvbox
 Dark) one point above the terminal size, left-aligned with Ghost Observatory
 padding; a theme without a design font keeps the terminal font.
+The accent wash behind the brand button follows the keystroke breath alone,
+between 0.06 and 0.22 alpha on its own stylesheet provider; the plain breath,
+the last breath and a stopped worker leave the strip at its resting value.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),
@@ -258,8 +267,10 @@ second on the same eligible floating window and cancels stale targets.
 
 ### APPLE-KEYS
 
-The engraved Mission Control/F3 key opens or closes the overview; Launchpad/F4
-opens the application launcher and exits an overview first. Fn+F3/F4 remain
+The engraved Mission Control/F3 key opens or closes Mission Control, the
+workspace overview; Launchpad/F4 opens or closes the Launchpad application grid
+and exits an overview first. This supersedes F3 meaning the window carousel and
+F4 the Fuzzel launcher, both of which keep their own bindings. Fn+F3/F4 remain
 application function keys. Preserve Caps Lock as Escape, including with Shift.
 Keyboard illumination controls retain off/brightness preferences across login;
 Sway reload does not reset them. Do not change hid_apple mode incidentally.
@@ -267,7 +278,11 @@ Sway reload does not reset them. Do not change hid_apple mode incidentally.
 - Implementation: [Sway input](desktop/.config/sway/config),
   [Apple overview bindings](desktop/.config/sway/local.d/apple-overview.conf),
   [keyboard light](desktop/.local/bin/oldbook-keyboard-backlight).
-- Checks: [Apple mapping](tests/test_apple_overview.py),
+- Implementation: [Launchpad](desktop/.local/lib/oldbook/launchpad.py),
+  [Mission Control](desktop/.local/lib/oldbook/mission_control.py),
+  [shared overlay](desktop/.local/lib/oldbook/grid_overlay.py).
+- Checks: [Apple mapping](tests/test_apple_overview.py), [grids](tests/test_grids.py),
+  [headless renders](verification/launchpad-mission-control/README.md),
   [native overview](verification/apple-overview/README.md),
   [keyboard-light evidence](verification/keyboard-backlight/README.md).
   Distinguish synthetic native key events from physical engraved-key tests.
@@ -299,6 +314,12 @@ leak back toward the quiet baseline with a twenty-second time constant while
 idle, and keep a continuous phase so no keystroke ever jumps the light.
 Keep the same controls and same
 mode persistence rules as the existing features.
+While any breathing mode runs, the worker publishes the breath itself to
+`$XDG_RUNTIME_DIR/oldbook/air.json` about twenty times a second: mode, lung
+volume, phase, the normalised brightness of the curve and the tempo, with one
+closing record when it stops. It is the desktop's shared clock for the breath;
+a record older than half a second counts as no breath at all. Publishing never
+changes a saved level or mode, and the typing and ambient modes publish nothing.
 The Ghost control deck exposes the same controls with useful descriptions.
 While breathing, F5/F6 adjust the saved peak; off stops the animation.
 Keep the selected level and mode across logins and leave them alone on reload
@@ -445,6 +466,48 @@ compositor session. Permission and missing-device errors remain notifications.
 
 ## Gallery and durable reading content
 
+### AMBIENT-DISPLAY
+
+The panel may follow the Apple SMC light sensor: a dark room settles it at a
+fifteen percent floor, never off, and a bright one takes it to full, on a
+log-scale curve with a hysteresis band and a short eased fade that settles
+exactly. It is opt-in, off by default, and remembered in the user's own
+preference file. A brightness the user sets by hand while it is on is kept, and
+its distance from the curve is learned as a lasting offset that shifts the whole
+curve including its ceiling. The daemon writes nothing while `oldbook-idle`
+holds display state or while a live lock readiness record exists, and abandons a
+fade if either becomes true or the level changes underneath it. Automatic
+changes are silent; only the user's own on and off show the pill.
+
+- Implementation: [ambient display](desktop/.local/bin/oldbook-ambient-display),
+  [sensor and curve](desktop/.local/lib/oldbook/ambient_light.py),
+  [command deck](desktop/.local/bin/oldbook-control), [session](desktop/.local/bin/oldbook-session).
+- Checks: [ambient display tests](tests/test_ambient_display.py).
+  Fake-sensor tests and the live pause rules are not a proof of an eased fade on
+  the physical panel or of a real change in room light.
+
+### SOUND-CUES
+
+Six short synthesized cues mark the lock engaging, the lock releasing, a battery
+crossing a warning threshold, a deliberate gallery change, a critical
+notification and small acknowledgements. Nothing is sampled or downloaded; the
+set is generated locally and normalised to a quiet fixed level. Sound is never
+load-bearing: a missing player, a missing file, a muted sink or a switched-off
+set is silence rather than failure, playback is detached so no caller waits, and
+every hook stays one or two lines. The master switch defaults to on and lives in
+the user's preferences. The battery cue is edge-triggered, once per crossing, and
+silent while charging. Urgent notifications are matched declaratively by the
+notification daemon, never by the AI attention stream, whose meaning is separate.
+
+- Implementation: [cue synthesis](bin/build-sound-theme),
+  [player](desktop/.local/bin/oldbook-sound),
+  [battery watcher](desktop/.local/bin/oldbook-battery-cue),
+  [notification match](desktop/.config/swaync/config.json).
+- Checks: [sound tests](tests/test_sound_theme.py),
+  [waveforms and levels](verification/sound-theme/README.md).
+  Levels and exit codes are measured; no cue has yet been heard firing from its
+  own occasion, and whether the set is pleasant is the user's judgement.
+
 ### GALLERY-ACTIONS
 
 Left-click opens the gallery; right-click advances; middle-click pauses; scroll
@@ -506,6 +569,13 @@ never refreshed after a fade. The daemon starts on what swaybg shows, re-creates
 its surface when a respawned swaybg covers it, restores desktop cards it
 displaced, and exits with the session. Manual browsing, the pause state and the
 shared painting link are unchanged.
+The painting also follows the keyboard's breath, swelling from 1.000 to 1.006
+at rest and up to 1.018 at full lungs and settling exactly back; the swell only
+ever enlarges, so no edge can show. While the session is idle the daemon drifts
+slowly across each painting and crossfades to the next, then glides back to rest
+and to the painting it interrupted; the gallery's saved selection, deadline and
+pause switch are never written by that path. `~/.config/oldbook/breath.json`
+switches the swell and the caption pulse off.
 
 - Implementation: [oldbook-background](desktop/.local/bin/oldbook-background),
   [fade model](desktop/.local/lib/oldbook/background_fade.py),

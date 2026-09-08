@@ -9,8 +9,8 @@ Glib dispatcher warning during in-process reload).
 | Control | Actions |
 | --- | --- |
 | Ghost badge | Left: command deck. Right: application launcher. |
-| Artwork | Left: gallery picker. Right: next image. Middle: pause/resume rotation. Scroll: previous/next. Hover: artwork provenance, rotation state, and all controls. Command/Super+left: generate a new image and switch to it. Shift+left: edit shared guidance and scene prompts. |
-| Workspaces | Click a named workspace; scroll to cycle. GHOST, ORBIT, LAB, SIGNAL, and LOUNGE are visual labels for 1–5, without forced application assignments. Workspaces 6–10 appear when used. |
+| Artwork | Left: gallery picker. Right: next image. Middle: pause/resume rotation. Scroll: previous/next. Hover: artwork provenance, rotation state, and all controls. Command/Super+left: generate a new image and switch to it. Shift+left: edit shared guidance and scene prompts. The right-click hands the crossfade the point you clicked, so the next painting grows out of the badge. |
+| Workspaces | Click a named workspace; scroll to cycle. GHOST, ORBIT, LAB, SIGNAL, and LOUNGE are visual labels for 1–5, without forced application assignments. Workspaces 6–10 appear when used. Rest on one for a third of a second and its windows appear beneath the bar, one still and title per window; move away to close it. |
 | Media | The center shows previous, play/pause with the current track, and next while an MPRIS player is available. The track also accepts left: play/pause, middle: previous, right: next, and scroll: seek five seconds. |
 | CPU | Hover to reveal memory, temperature, and root storage; click to open btop. |
 | Network | Live receive rate; hover shows transmit rate, IP addresses, and signal. Hover also reveals radio and firewall state. Left: network controls. Right: connection report. |

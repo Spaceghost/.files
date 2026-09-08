@@ -5,7 +5,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 export XDG_CURRENT_DESKTOP=sway
 export XDG_SESSION_TYPE=wayland
 export QT_QPA_PLATFORMTHEME=qt6ct
-export XCURSOR_THEME=simp1e-cursors-gruvbox-dark
+export XCURSOR_THEME=Oldbook-Ghost
 export XCURSOR_SIZE=24
 
 uid=$(id -u)
@@ -97,13 +97,17 @@ fi
 if ! has_comm swayidle; then
     # Half a minute before the lock, oldbook-idle eases the display down and gives
     # the keyboard light one last breath; activity brings both back.
-    start_service swayidle swayidle -w timeout 270 'oldbook-idle dim' resume 'oldbook-idle undim' timeout 300 'oldbook-lock' timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' before-sleep 'oldbook-lock'
+    start_service swayidle swayidle -w timeout 240 'oldbook-idle screensaver' timeout 270 'oldbook-idle dim' resume 'oldbook-idle undim' timeout 300 'oldbook-lock' timeout 600 'swaymsg "output * dpms off"' resume 'swaymsg "output * dpms on"' before-sleep 'oldbook-lock'
 fi
 # The bar imports this stylesheet, so it must exist before Waybar reads style.css.
 # oldbook-waybar-dim owns its contents from then on.
 waybar_state="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/waybar-state.css"
 mkdir -p "${waybar_state%/*}"
 [ -f "$waybar_state" ] || printf '%s\n' '/* Written by oldbook-waybar-dim; edit style.css instead. */' > "$waybar_state"
+# The bar imports the accent sheet as well, so it must exist before Waybar reads
+# style.css. oldbook-palette owns its contents from the first painting onward.
+waybar_accent="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/waybar-accent.css"
+[ -f "$waybar_accent" ] || printf '%s\n' '/* Written by oldbook-palette; edit style.css instead. */' > "$waybar_accent"
 if ! has_comm waybar; then
     start_service waybar waybar
 fi
@@ -114,6 +118,11 @@ fi
 if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/oldbook/location.json" ] \
         && command -v oldbook-sun-light >/dev/null 2>&1 && ! has_comm wlsunset; then
     start_service sun-light oldbook-sun-light run
+fi
+# The panel follows the room only when the user has switched it on; the helper
+# reads its own preference and exits immediately when it is off.
+if command -v oldbook-ambient-display >/dev/null 2>&1; then
+    start_service ambient-display oldbook-ambient-display run
 fi
 
 # The wallpaper service uses a flock; starting it after reload is safe.
@@ -138,6 +147,11 @@ fi
 # key helpers stay quiet when it is absent and never start it themselves.
 if command -v oldbook-osd >/dev/null 2>&1; then
     start_service osd oldbook-osd daemon
+fi
+# One cue when the battery crosses a threshold Waybar can only colour. The
+# watcher is edge-triggered, so a long discharge speaks twice at most.
+if command -v oldbook-battery-cue >/dev/null 2>&1; then
+    start_service battery-cue oldbook-battery-cue
 fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
@@ -169,6 +183,11 @@ fi
 if command -v oldbook-wallpaper >/dev/null 2>&1; then
     oldbook-wallpaper refresh >>"$art_state/wallpaper.log" 2>&1 || true
     oldbook-wallpaper daemon 9>&- >>"$art_state/wallpaper.log" 2>&1 &
+fi
+# Re-elect the accent for whatever painting the session came back to; every
+# later change is announced by oldbook-wallpaper itself.
+if command -v oldbook-palette >/dev/null 2>&1; then
+    oldbook-palette apply --quiet 9>&- >>"$art_state/palette.log" 2>&1 &
 fi
 
 # Desktop panels are refitted to each new wallpaper by oldbook-wallpaper itself.

@@ -151,6 +151,35 @@ def keyboard():
         run([BIN / "oldbook-keyboard-backlight", options[selected]])
 
 
+def ambient_display():
+    """Switch the panel's own ambient mode, reporting what the room reads now."""
+    result = run([BIN / "oldbook-ambient-display", "status"], capture_output=True, text=True)
+    try:
+        state = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        notify("Ambient screen", "The ambient display helper could not report its status.")
+        return
+    if not state.get("sensor"):
+        notify("Ambient screen", "This machine does not expose the Apple light sensor.")
+        return
+    light = state.get("light")
+    room = f" · room light {light}" if light is not None else ""
+    target = f" · the room suggests {state['target_percent']}%" if "target_percent" in state else ""
+    options = {
+        ("◉  Following the room · stop and keep this brightness" if state.get("enabled")
+         else f"◌  Follow the room{room} · dim in the dark, full in daylight"):
+            "off" if state.get("enabled") else "on",
+    }
+    mode = "FOLLOWING THE ROOM" if state.get("enabled") else "MANUAL"
+    percent = state.get("percent")
+    heading = f"AMBIENT SCREEN · {mode}"
+    if percent is not None:
+        heading += f" · {percent}%{target}"
+    selected = choose(heading, list(options))
+    if selected in options:
+        run([BIN / "oldbook-ambient-display", options[selected]])
+
+
 def suspend():
     if run([BIN / "oldbook-lock"]).returncode == 0:
         run(["loginctl", "suspend"])
@@ -159,6 +188,40 @@ def suspend():
 def logout():
     if choose("LEAVE THE GHOST PLANET?", ["Stay on air", "End this Sway session"]) == "End this Sway session":
         run(["swaymsg", "exit"])
+
+
+def track_card():
+    """Switch the now-transmitting card on or off for the next daemon start."""
+    path = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config")) / "oldbook/osd.json"
+    try:
+        settings = json.loads(path.read_text())
+        if not isinstance(settings, dict):
+            settings = {}
+    except (OSError, ValueError):
+        settings = {}
+    wanted = settings.get("card", True) is False
+    settings["card"] = wanted
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
+    temporary.write_text(json.dumps(settings, indent=2) + "\n")
+    temporary.replace(path)
+    run(["notify-send", "-h", "string:x-canonical-private-synchronous:oldbook-osd-card",
+         "Now transmitting",
+         "Track cards on · they announce the next song" if wanted else
+         "Track cards off · the music plays unannounced"])
+
+
+def desktop_breath():
+    """Let the painting and the caption follow the keyboard's breath, or hold still."""
+    sys.path.insert(0, str(BIN.parent / "lib/oldbook"))
+    import air
+    settings = air.read_preferences()
+    wanted = not (settings["wallpaper"] and settings["caption"])
+    air.write_preferences({"wallpaper": wanted, "caption": wanted})
+    run(["notify-send", "-h", "string:x-canonical-private-synchronous:oldbook-breath",
+         "Desktop breath",
+         "The painting breathes with your keys" if wanted else
+         "The painting holds its breath"])
 
 
 def menu(section="main"):
@@ -177,6 +240,10 @@ def menu(section="main"):
             "󰕾  Sound studio · mixer and microphone": lambda: launch(["pavucontrol"]),
             "☀  Keyboard glow · breathing and brightness": keyboard,
             "󰖨  Night light · warm after sunset, needs location.json": lambda: run([BIN / "oldbook-sun-light", "toggle"]),
+            "󰃞  Ambient screen · the panel follows the room light": ambient_display,
+            "󰎈  Sound cues · the Ghost Planet chimes on and off": lambda: run([BIN / "oldbook-sound", "toggle"]),
+            "󰎈  Now transmitting · announce the track on screen": track_card,
+            "󰗑  Desktop breath · the painting swells with your typing": desktop_breath,
             "󰒃  Application firewall": firewall,
             "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
             "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),

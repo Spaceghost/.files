@@ -100,6 +100,13 @@ tooltip label { color: #ebdbb2; padding: 13px 15px; font-size: 11px; font-weight
 #custom-art.paused image.thumbnail { opacity: 0.55; }
 #custom-art:hover image.thumbnail { opacity: 0.85; }
 
+/* Workspace peek: rest on a workspace and its windows appear beneath the bar. */
+popover#oldbook-peek { background: rgba(29, 32, 33, 0.98); border-radius: 16px; }
+popover#oldbook-peek contents { background: transparent; }
+popover#oldbook-peek .oldbook-peek-card { padding: 2px; }
+popover#oldbook-peek .oldbook-peek-still { background: #3c3836; border-radius: 6px; }
+popover#oldbook-peek .oldbook-peek-title { color: #a89984; font-size: 10px; padding-top: 2px; }
+
 /* Click-through system monitor: bottom layer, visible through transparent terminals. */
 window#waybar.monitor { background: transparent; color: #d5c4a1; }
 window#waybar.monitor .modules-left {
@@ -156,3 +163,7 @@ window#waybar #status:hover {
 
 /* Music controls occupy the center naturally, without a surrounding island. */
 window#waybar.top .modules-center { margin: 0 8px; padding: 0; }
+
+/* The accent follows the painting on screen. Written by oldbook-palette;
+   imported last so its rules win over the declared accent above. */
+@import url("waybar-accent.css");
