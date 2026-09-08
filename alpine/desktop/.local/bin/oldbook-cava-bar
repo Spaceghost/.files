@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+"""Feed Waybar a small audio spectrum from cava while a player is playing.
+
+Each frame prints one JSON line for a `custom/cava` module. When no MPRIS
+player reports Playing, cava is stopped so the bar costs nothing, and after
+half a second of complete silence the module collapses with the `silent` class.
+Remove the module from the bar's modules-center list to retire it entirely.
+"""
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import subprocess
+import sys
+import time
+
+BARS = 10
+FRAMERATE = 20
+GLYPHS = '▁▂▃▄▅▆▇█'
+SILENT_FRAMES = FRAMERATE // 2
+CONFIG = f'''[general]
+bars = {BARS}
+framerate = {FRAMERATE}
+autosens = 1
+sensitivity = 100
+lower_cutoff_freq = 50
+higher_cutoff_freq = 10000
+
+[input]
+method = pulse
+source = auto
+
+[output]
+method = raw
+raw_target = /dev/stdout
+data_format = ascii
+ascii_max_range = {len(GLYPHS) - 1}
+bar_delimiter = 59
+frame_delimiter = 10
+channels = mono
+mono_option = average
+
+[smoothing]
+noise_reduction = 77
+'''
+
+
+def frame_text(line):
+    """Map one cava ASCII frame to block glyphs; None for a malformed line."""
+    values = []
+    for field in line.strip().split(';'):
+        if not field:
+            continue
+        try:
+            values.append(min(len(GLYPHS) - 1, max(0, int(field))))
+        except ValueError:
+            return None
+    if not values:
+        return None
+    return ''.join(GLYPHS[value] for value in values)
+
+
+def config_path():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    base = Path(runtime) / 'oldbook' if runtime else Path.home() / '.cache/oldbook'
+    base.mkdir(parents=True, exist_ok=True, mode=0o700)
+    path = base / 'cava-bar.conf'
+    if not path.exists() or path.read_text() != CONFIG:
+        path.write_text(CONFIG)
+        path.chmod(0o600)
+    return path
+
+
+def playing():
+    try:
+        result = subprocess.run(['playerctl', 'status'], capture_output=True, text=True, timeout=2)
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return result.returncode == 0 and result.stdout.strip() == 'Playing'
+
+
+class Bar:
+    def __init__(self):
+        self.cava = None
+        self.last = None
+        self.quiet_frames = 0
+
+    def emit(self, text, css_class):
+        if (text, css_class) == self.last:
+            return
+        self.last = (text, css_class)
+        sys.stdout.write(json.dumps({'text': text, 'class': css_class, 'tooltip': ''}) + '\n')
+        sys.stdout.flush()
+
+    def start(self):
+        try:
+            self.cava = subprocess.Popen(['cava', '-p', str(config_path())], stdin=subprocess.DEVNULL,
+                                         stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                         text=True, start_new_session=True)
+        except OSError:
+            self.cava = None
+        return self.cava
+
+    def stop(self):
+        if self.cava is None:
+            return
+        if self.cava.poll() is None:
+            self.cava.terminate()
+            try:
+                self.cava.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                self.cava.kill()
+                self.cava.wait()
+        self.cava.stdout.close()
+        self.cava = None
+
+    def run(self):
+        self.emit('', 'silent')
+        checked, active = 0.0, False
+        while True:
+            now = time.monotonic()
+            if now - checked >= 1:
+                active, checked = playing(), now
+            if not active:
+                self.stop()
+                self.emit('', 'silent')
+                time.sleep(1)
+                continue
+            if self.cava is None and self.start() is None:
+                self.emit('', 'silent')
+                time.sleep(30)
+                continue
+            ready, _, _ = select.select([self.cava.stdout], [], [], 1.0)
+            if not ready:
+                continue
+            line = self.cava.stdout.readline()
+            if not line:
+                self.stop()
+                self.emit('', 'silent')
+                time.sleep(1)
+                continue
+            text = frame_text(line)
+            if text is None:
+                continue
+            if set(text) == {GLYPHS[0]}:
+                self.quiet_frames += 1
+                if self.quiet_frames >= SILENT_FRAMES:
+                    self.emit('', 'silent')
+                    continue
+            else:
+                self.quiet_frames = 0
+            self.emit(text, 'playing')
+
+
+def main():
+    bar = Bar()
+
+    def leave(*_):
+        bar.stop()
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, leave)
+    signal.signal(signal.SIGINT, leave)
+    try:
+        bar.run()
+    except BrokenPipeError:
+        # Waybar went away; park stdout so the interpreter's final flush is quiet.
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+    finally:
+        bar.stop()
+
+
+if __name__ == '__main__':
+    main()
