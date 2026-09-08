@@ -554,6 +554,9 @@ class ShortcutProvider:
             return 'Leave the overview and open the application launcher'
         if re.fullmatch(r'mode ["\']?default["\']?, exec (?:[^ ]*/)?oldbook-menu', command):
             return 'Leave the overview and open the application launcher'
+        if re.fullmatch(r'mode ["\']?default["\']?, exec (?:[^ ]*/)?oldbook-launchpad(?: toggle)?',
+                        command):
+            return 'Leave the overview and open Launchpad'
         if command == 'kill':
             return 'Close focused window'
         if command == 'reload':
@@ -613,6 +616,10 @@ class ShortcutProvider:
                     ('oldbook-control',): 'Open system controls',
                     ('oldbook-lock',): 'Lock session',
                     ('oldbook-menu',): 'Open application launcher',
+                    ('oldbook-launchpad',): 'Open Launchpad: every application, type to find one',
+                    ('oldbook-launchpad', 'toggle'): 'Open Launchpad: every application, type to find one',
+                    ('oldbook-mission-control',): 'Mission Control: every workspace and its windows',
+                    ('oldbook-mission-control', 'toggle'): 'Mission Control: every workspace and its windows',
                     ('oldbook-wallpaper', 'pick'): 'Choose wallpaper',
                     ('oldbook-wallpaper', 'next'): 'Next wallpaper',
                     ('oldbook-wallpaper', 'prev'): 'Previous wallpaper',

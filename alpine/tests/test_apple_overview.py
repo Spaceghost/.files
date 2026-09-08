@@ -23,15 +23,16 @@ class AppleOverviewTests(unittest.TestCase):
     def test_default_keys_have_recognizable_help(self):
         rows = self.rows()
         self.assertEqual(rows['Mission Control (F3)'],
-                         'Browse every workspace: choose a window, then Enter to land')
-        self.assertEqual(rows['Launchpad (F4)'], 'Open application launcher')
+                         'Mission Control: every workspace and its windows')
+        self.assertEqual(rows['Launchpad (F4)'],
+                         'Open Launchpad: every application, type to find one')
 
     def test_second_mode_block_preserves_escape_and_adds_both_actions(self):
         rows = self.rows('window-switcher')
         self.assertEqual(rows['Mission Control (F3)'],
                          'Leave the overview and return to your window')
         self.assertEqual(rows['Launchpad (F4)'],
-                         'Leave the overview and open the application launcher')
+                         'Leave the overview and open Launchpad')
         self.assertEqual(rows['Escape'], 'Leave the overview and return to your window')
         self.assertIn('Super+Escape', rows)
         self.assertIn('Alt+Escape', rows)
