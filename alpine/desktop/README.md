@@ -56,6 +56,8 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Control | Action |
 | --- | --- |
 | `Super+Enter`, `Super+D` | Ghostty terminal, Spaceghost application menu |
+| Super + backtick (\`) | Toggle the persistent drop-down console |
+| `Super+~` (`Super+Shift+grave`) | Toggle a separate persistent btop system monitor |
 | `Alt+Tab`, `Alt+Shift+Tab` | Browse agent windows across workspaces; release Alt to switch or press Escape to cancel. |
 | Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
 | `Super+Escape` | Lock with the installed `swaylockd` PAM-compatible binary |

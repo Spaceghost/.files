@@ -589,6 +589,8 @@ class ShortcutProvider:
                 action = tuple(arguments[1:])
                 known_exec = {
                     ('foot',): 'Open terminal',
+                    ('oldbook-dropdown',): 'Toggle drop-down console',
+                    ('oldbook-dropdown', 'monitor'): 'Toggle system monitor',
                     ('oldbook-control',): 'Open system controls',
                     ('oldbook-lock',): 'Lock session',
                     ('oldbook-menu',): 'Open application launcher',

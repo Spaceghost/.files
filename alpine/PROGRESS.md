@@ -781,3 +781,15 @@ Evidence and recovery: `alpine/verification/workspace-ready/`,
 `docs/superpowers/decisions/2026-09-07-workspace-names-at-creation.md`.
 No required checks remain. Physical key-to-screen timing was not measured;
 ordered compositor events establish readiness at creation.
+
+
+## Separate console and system monitor shortcuts — 2026-09-07
+
+- Super+backtick toggles the existing console; Super+tilde toggles a separate
+  persistent btop window. Both preserve their processes while hidden.
+- Eight native groups exercised the actual US XKB grave/Shift+grave mapping,
+  real Ghostty/btop launch, input and independent hide/show. Full SwayFX parsing
+  and 22 shortcut-source tests passed. Targeted live bindings are installed;
+  the new monitor was shown/hidden while preserving both existing consoles.
+- Physical human keypresses and a new login remain unobserved. Evidence and
+  screenshots: `verification/console-monitor/`.

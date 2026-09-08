@@ -1,0 +1,261 @@
+{
+  "status": "passed",
+  "host_changes": 0,
+  "isolation": "private HOME/XDG directories, non-activating D-Bus, headless Sway",
+  "keyboard": "Wayland virtual keyboard with libxkbcommon US keymap, evdev KEY_GRAVE 41, Mod4 and Mod4+Shift",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-dropdown": "87c05efcb53c75501c676b65b09d4b6ef6cbae74c60bb2b9b04ae317acf0a45d",
+    "alpine/desktop/.config/sway/local.d/dropdown.conf": "a76a2faf2a7d05e88fd2c0c8fbf2dc27aee49e6fac9f1fff7463552963eae84f",
+    "alpine/desktop/.config/ghostty/config": "6840b26353530fa6f8806370107a817ae906c0cd063ead5e1ce751c1255e54b5",
+    "alpine/desktop/.config/btop/btop.conf": "3b78c3d278d82f0fccfeea5e6a527d71120713f799c6224b9c629d4505014674"
+  },
+  "checks": [
+    "super-grave-starts-console-only",
+    "console-shell-accepts-keyboard-input",
+    "super-grave-hides-console",
+    "physical-super-shift-grave-starts-btop-only",
+    "physical-super-shift-grave-hides-monitor-only",
+    "super-grave-reuses-console-with-monitor-hidden",
+    "physical-super-shift-grave-reuses-monitor-and-btop-process",
+    "one-console-and-one-monitor"
+  ],
+  "states": [
+    {
+      "after": "super-grave-starts-console-only",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "console-shell-accepts-keyboard-input",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "super-grave-hides-console",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "physical-super-shift-grave-starts-btop-only",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        },
+        {
+          "id": 6,
+          "pid": 10179,
+          "app_id": "com.oldbook.monitor",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "physical-super-shift-grave-hides-monitor-only",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        },
+        {
+          "id": 6,
+          "pid": 10179,
+          "app_id": "com.oldbook.monitor",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "super-grave-reuses-console-with-monitor-hidden",
+      "views": [
+        {
+          "id": 6,
+          "pid": 10179,
+          "app_id": "com.oldbook.monitor",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        },
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "physical-super-shift-grave-reuses-monitor-and-btop-process",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        },
+        {
+          "id": 6,
+          "pid": 10179,
+          "app_id": "com.oldbook.monitor",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    },
+    {
+      "after": "one-console-and-one-monitor",
+      "views": [
+        {
+          "id": 5,
+          "pid": 9698,
+          "app_id": "com.oldbook.dropdown",
+          "workspace": "__i3_scratch",
+          "visible": false,
+          "focused": false,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        },
+        {
+          "id": 6,
+          "pid": 10179,
+          "app_id": "com.oldbook.monitor",
+          "workspace": "1",
+          "visible": true,
+          "focused": true,
+          "rect": {
+            "x": 43,
+            "y": 39,
+            "width": 1354,
+            "height": 468
+          }
+        }
+      ]
+    }
+  ],
+  "keys": [
+    "US evdev KEY_GRAVE=41, Mod4, keysym=grave",
+    "US evdev KEY_GRAVE=41, Mod4, keysym=grave",
+    "US evdev KEY_GRAVE=41, Mod4+Shift, keysym=asciitilde",
+    "US evdev KEY_GRAVE=41, Mod4+Shift, keysym=asciitilde",
+    "US evdev KEY_GRAVE=41, Mod4, keysym=grave",
+    "US evdev KEY_GRAVE=41, Mod4, keysym=grave",
+    "US evdev KEY_GRAVE=41, Mod4+Shift, keysym=asciitilde"
+  ],
+  "monitor_process": {
+    "pid": 10386,
+    "comm": "btop",
+    "ghostty_ancestor": 10179
+  },
+  "private_processes_terminated_after_compositor_exit": []
+}
