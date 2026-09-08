@@ -8,14 +8,59 @@
 .control-center { padding: 12px; box-shadow: 0 10px 32px rgba(29, 32, 33, 0.65); }
 .notification { margin: 8px; padding: 12px; }
 .notification-row:focus, .notification-row:hover { background: #504945; }
+.control-center .control-center-list,
+.control-center .control-center-list > row,
+.control-center .notification-group,
+.control-center .notification-row,
+.control-center .notification-background { background: transparent; box-shadow: none; }
+.control-center .notification-row:hover { background: rgba(80, 73, 69, 0.65); }
 .widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid { margin: 6px 0; padding: 10px; }
 .widget-title > button, .widget-dnd > switch slider, .widget-buttons-grid > flowbox > flowboxchild > button { background: #3c3836; color: #ebdbb2; border-radius: 10px; }
 .widget-title > button:hover, .widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #665c54; }
 progressbar, scale highlight { background: #fabd2f; border-radius: 8px; }
 scale trough { background: #504945; border-radius: 8px; min-height: 9px; }
+scale slider { background: #fabd2f; border: none; border-radius: 50%; min-width: 14px; min-height: 14px; margin: -3px; box-shadow: 0 1px 4px rgba(29, 32, 33, 0.6); }
+scale slider:hover { background: #fbf1c7; }
 
 .notification.critical { border-color: #fb4934; }
 .notification .summary { color: #fbf1c7; font-weight: bold; }
 .notification .time, .notification .app-name { color: #a89984; }
 .widget-title > label { color: #fabd2f; font-weight: bold; }
 .widget-dnd > switch:checked { background: #d79921; }
+
+/* Now transmitting: the MPRIS player card. Album art is the blurred backdrop
+   of its own card; the overlay keeps titles legible over any cover. */
+:root {
+  --mpris-album-art-icon-size: 84px;
+  --widget-volume-row-icon-size: 22px;
+}
+.widget-mpris { padding: 0; }
+.widget-mpris .widget-mpris-player { margin: 0; border-radius: 14px; box-shadow: none; background: #1d2021; }
+.widget-mpris .widget-mpris-player .mpris-background { filter: blur(14px); }
+.widget-mpris .widget-mpris-player .mpris-overlay { padding: 12px 14px; background: rgba(29, 32, 33, 0.72); }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-album-art { border-radius: 9px; box-shadow: 0 6px 18px rgba(29, 32, 33, 0.6); }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title { color: #fbf1c7; font-weight: bold; font-size: 13px; }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: #a89984; font-size: 11px; }
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button { background: transparent; color: #ebdbb2; border-radius: 8px; padding: 2px 6px; }
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button:hover { background: rgba(80, 73, 69, 0.85); color: #fabd2f; }
+.widget-mpris > box > button { background: transparent; color: #928374; border-radius: 8px; }
+.widget-mpris > box > button:hover { color: #fbf1c7; }
+.widget-mpris > box > button:disabled { color: #504945; }
+
+/* Sound system and moonlight control: amber sliders on charcoal troughs. */
+.widget-volume, .widget-backlight { padding: 8px 12px; }
+.widget-volume label, .widget-backlight label { color: #fabd2f; font-size: 15px; margin-right: 8px; }
+.widget-volume button { background: #3c3836; color: #a89984; border-radius: 8px; padding: 2px 8px; margin-left: 6px; }
+.widget-volume button:hover { background: #504945; color: #fbf1c7; }
+.per-app-volume { background: rgba(60, 56, 54, 0.75); border-radius: 10px; margin: 8px 0 0; padding: 4px 6px; }
+.widget-volume row { background: transparent; border-radius: 8px; padding: 4px 6px; }
+.widget-volume row:hover { background: rgba(80, 73, 69, 0.55); }
+.widget-volume row label { color: #d5c4a1; font-size: 11px; margin: 0; }
+
+/* Quick actions: charcoal keys, amber when a toggle is engaged. */
+.widget-buttons-grid { padding: 8px; }
+.widget-buttons-grid flowbox, .widget-buttons-grid flowboxchild { background: transparent; padding: 0; margin: 0; }
+.widget-buttons-grid flowboxchild > button { background: #3c3836; color: #ebdbb2; border-radius: 10px; margin: 3px; padding: 8px 4px; font-size: 12px; }
+.widget-buttons-grid flowboxchild > button:hover { background: #665c54; color: #fbf1c7; }
+.widget-buttons-grid flowboxchild > button.toggle:checked { background: #fabd2f; color: #1d2021; }
+.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #d79921; color: #1d2021; }

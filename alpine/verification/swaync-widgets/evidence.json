@@ -1,0 +1,31 @@
+{
+  "status": "passed",
+  "widgets_loaded": [
+    "title",
+    "dnd",
+    "mpris",
+    "volume",
+    "backlight",
+    "buttons-grid",
+    "widget-notifications"
+  ],
+  "widgets_expected": [
+    "title",
+    "dnd",
+    "mpris",
+    "volume",
+    "backlight",
+    "buttons-grid",
+    "widget-notifications"
+  ],
+  "log_problems": [
+    "ac_compute_device_uuid's output is based on invalid pci bus info."
+  ],
+  "config_sha256": "f9cf7faafdd4fa5709abf1d93ba5965e660ce708fdb3dfa104e19ebefbdf200c",
+  "style_sha256": "7e6185fa78eb4e69ae533f5648c6f105113cac8974e49a54958ab94161b858ed",
+  "isolation": "private headless SwayFX (pixman), private D-Bus session, private HOME and XDG directories",
+  "fake_player": "org.mpris.MediaPlayer2.ghostradio with local album art",
+  "live_session_notifications": 0,
+  "owned_notification_server_pid": 12584,
+  "notification_count": 2
+}

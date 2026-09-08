@@ -21,6 +21,10 @@
   "widgets": [
     "title",
     "dnd",
+    "mpris",
+    "volume",
+    "backlight",
+    "buttons-grid",
     "notifications"
   ],
   "widget-config": {
@@ -31,6 +35,64 @@
     },
     "dnd": {
       "text": "Off the air"
+    },
+    "mpris": {
+      "show-album-art": "when-available",
+      "autohide": true,
+      "loop-carousel": false
+    },
+    "volume": {
+      "label": "󰕾",
+      "show-per-app": true,
+      "show-per-app-icon": true,
+      "show-per-app-label": false,
+      "expand-per-app": false,
+      "empty-list-label": "Nothing on the air",
+      "expand-button-label": "󰅀",
+      "collapse-button-label": "󰅃",
+      "animation-type": "slide_down",
+      "animation-duration": 180
+    },
+    "backlight": {
+      "label": "󰃟",
+      "device": "gmux_backlight",
+      "subsystem": "backlight",
+      "min": 40
+    },
+    "buttons-grid": {
+      "buttons-per-row": 3,
+      "actions": [
+        {
+          "label": "󰌾  Lock",
+          "command": "~/.local/bin/oldbook-lock"
+        },
+        {
+          "label": "󰊠  Deck",
+          "command": "~/.local/bin/oldbook-control"
+        },
+        {
+          "label": "󰸉  Next art",
+          "command": "~/.local/bin/oldbook-wallpaper next"
+        },
+        {
+          "label": "󰏤  Hold art",
+          "type": "toggle",
+          "command": "~/.local/bin/oldbook-wallpaper pause",
+          "update-command": "~/.local/bin/oldbook-wallpaper status 2>/dev/null | grep -q 'class.: .paused' && echo true || echo false"
+        },
+        {
+          "label": "󰍭  Mic off",
+          "type": "toggle",
+          "command": "~/.local/bin/oldbook-audio mic-mute",
+          "update-command": "wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q MUTED && echo true || echo false"
+        },
+        {
+          "label": "󱂬  Cards",
+          "type": "toggle",
+          "command": "~/.local/bin/oldbook-conky toggle",
+          "update-command": "~/.local/bin/oldbook-conky status 2>/dev/null | grep -q ^on && echo true || echo false"
+        }
+      ]
     },
     "notifications": {
       "vexpand": false
