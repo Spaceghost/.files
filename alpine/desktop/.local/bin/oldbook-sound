@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+"""Play one Ghost Planet cue, quietly, and never get in the way.
+
+Every caller is a hook on something more important than a sound: the lock, the
+gallery, a falling battery. So this exits zero whether or not anything was
+audible. A missing player, a missing file, a muted sink or a switched-off cue set
+are all silence, not failure, and playback is handed to a detached process so no
+caller ever waits on the speakers.
+"""
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+FALLBACK = Path.home() / '.local/share/sounds/oldbook'
+CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'oldbook/sound.json'
+CUES = ('lock-engage', 'unlock', 'low-battery', 'painting-change',
+        'urgent-notification', 'tick')
+DEFAULT_VOLUME = 0.55
+
+
+def sound_directory():
+    override = os.environ.get('OLDBOOK_SOUND_DIR')
+    if override:
+        return Path(override)
+    local = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'sounds/oldbook'
+    return local if local.is_dir() else FALLBACK
+
+
+def preferences():
+    try:
+        document = json.loads(CONFIG.read_text())
+    except (OSError, ValueError):
+        document = {}
+    enabled = document.get('enabled', True)
+    volume = document.get('volume', DEFAULT_VOLUME)
+    if not isinstance(enabled, bool):
+        enabled = True
+    if not isinstance(volume, (int, float)) or not 0 <= volume <= 1:
+        volume = DEFAULT_VOLUME
+    return {'enabled': enabled, 'volume': float(volume)}
+
+
+def save(preference):
+    CONFIG.parent.mkdir(parents=True, exist_ok=True)
+    temporary = CONFIG.with_name(CONFIG.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(preference, indent=2) + '\n')
+    temporary.replace(CONFIG)
+
+
+def muted():
+    """True only when a sink is definitely muted; an unreadable mixer is not."""
+    for command, marker in ((['wpctl', 'get-volume', '@DEFAULT_AUDIO_SINK@'], 'MUTED'),
+                            (['pactl', 'get-sink-mute', '@DEFAULT_SINK@'], 'yes')):
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if result.returncode == 0:
+            return marker in result.stdout
+    return False
+
+
+def play(cue, preference=None):
+    """True when a player was started. Every other outcome is silence."""
+    preference = preference or preferences()
+    if cue not in CUES or not preference['enabled']:
+        return False
+    path = sound_directory() / f'{cue}.wav'
+    if not path.is_file():
+        return False
+    player = next((name for name in ('pw-play', 'paplay') if shutil.which(name)), None)
+    if player is None or muted():
+        return False
+    command = ([player, f'--volume={preference["volume"]:.3f}', str(path)]
+               if player == 'pw-play' else [player, str(path)])
+    try:
+        subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        return False
+    return True
+
+
+def main(argv):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='status',
+                        help='a cue name, or list, status, on, off, toggle')
+    arguments = parser.parse_args(argv)
+    action = arguments.action
+    if action == 'list':
+        print('\n'.join(CUES))
+        return 0
+    if action in ('on', 'off', 'toggle'):
+        preference = preferences()
+        preference['enabled'] = (action == 'on' if action != 'toggle'
+                                 else not preference['enabled'])
+        save(preference)
+        if preference['enabled']:
+            play('tick', preference)
+        print('on' if preference['enabled'] else 'off')
+        return 0
+    if action == 'status':
+        preference = preferences()
+        print(json.dumps({**preference, 'directory': str(sound_directory()),
+                          'muted': muted(), 'cues': list(CUES)}, indent=2))
+        return 0
+    if action not in CUES:
+        print(f'oldbook-sound: unknown cue {action!r}; try list', file=sys.stderr)
+        return 64
+    play(action)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except (OSError, ValueError):
+        # A cue is never worth failing a lock, a screenshot or a painting change.
+        sys.exit(0)

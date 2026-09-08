@@ -1,0 +1,236 @@
+#!/usr/bin/env python3
+"""Synthesize the Ghost Planet cue set: six short, warm sounds, made from scratch.
+
+Nothing is sampled and nothing is downloaded. Each cue is a few sine and triangle
+partials with a soft attack and an exponential tail, laid over a very quiet bed of
+filtered noise that stands in for late-night studio room tone. The set is tuned
+around A3 so the cues sit under speech and never draw attention to themselves.
+"""
+import argparse
+import json
+import math
+from pathlib import Path
+import wave
+
+import cairo
+import numpy as np
+
+REPO = Path(__file__).resolve().parents[2]
+DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/sounds/oldbook'
+RATE = 48000
+PEAK = 0.25  # about -12 dBFS: audible in a quiet room, never startling.
+
+A3 = 220.0
+C4 = 261.63
+CS4 = 277.18
+E4 = 329.63
+GS4 = 415.30
+A4 = 440.0
+
+
+def envelope(length, attack, decay, hold=0.0):
+    """Raised-cosine attack, flat hold, exponential tail. No clicks at either end."""
+    time = np.arange(length) / RATE
+    rise = np.clip(time / max(attack, 1e-6), 0, 1)
+    rise = 0.5 - 0.5 * np.cos(math.pi * rise)
+    fall = np.exp(-np.clip(time - attack - hold, 0, None) / max(decay, 1e-6))
+    # A short linear taper guarantees the very last sample is silent.
+    taper = np.clip((length - np.arange(length)) / max(int(RATE * 0.004), 1), 0, 1)
+    return rise * fall * taper
+
+
+def voice(freq, seconds, attack=0.008, decay=0.18, hold=0.0, partials=(1.0, 0.24, 0.09, 0.035),
+          detune=0.4):
+    """A warm note: fundamental plus quiet odd partials, very slightly detuned."""
+    length = int(RATE * seconds)
+    time = np.arange(length) / RATE
+    tone = np.zeros(length)
+    for index, amplitude in enumerate(partials):
+        harmonic = freq * (2 * index + 1)
+        if harmonic > RATE / 2.2:
+            break
+        tone += amplitude * np.sin(2 * math.pi * harmonic * time)
+        tone += amplitude * 0.35 * np.sin(2 * math.pi * (harmonic + detune) * time)
+    return tone * envelope(length, attack, decay, hold)
+
+
+def room_tone(seconds, level=0.02, seed=0):
+    """A breath of filtered noise: the room the transmission comes from."""
+    length = int(RATE * seconds)
+    generator = np.random.default_rng(seed)
+    noise = generator.standard_normal(length)
+    # One-pole low pass, twice, so the hiss is soft rather than sibilant.
+    filtered = np.zeros(length)
+    alpha, state = 0.035, 0.0
+    for _ in range(2):
+        for index in range(length):
+            state += alpha * (noise[index] - state)
+            filtered[index] = state
+        noise, state = filtered.copy(), 0.0
+    shape = envelope(length, seconds * 0.35, seconds * 0.5)
+    return filtered / (np.max(np.abs(filtered)) or 1) * level * shape
+
+
+def place(canvas, signal, at):
+    """Lay a voice into the cue. A voice cut short would click, so refuse it."""
+    start = int(RATE * at)
+    if start + len(signal) > len(canvas):
+        raise ValueError('The cue is too short to hold this voice to its silence')
+    canvas[start:start + len(signal)] += signal
+    return canvas
+
+
+def blank(seconds):
+    return np.zeros(int(RATE * seconds))
+
+
+def lock_engage():
+    """Two notes falling shut, with a low thump underneath."""
+    canvas = blank(0.62)
+    place(canvas, voice(E4, 0.34, decay=0.11) * 0.85, 0.0)
+    place(canvas, voice(A3, 0.46, decay=0.20), 0.12)
+    place(canvas, voice(A3 / 2, 0.40, attack=0.004, decay=0.13,
+                        partials=(1.0, 0.06)) * 0.5, 0.12)
+    return canvas + room_tone(0.62, 0.018, seed=1)
+
+
+def unlock():
+    """The same interval opening the other way, a shade brighter."""
+    canvas = blank(0.55)
+    place(canvas, voice(A3, 0.30, decay=0.10) * 0.8, 0.0)
+    place(canvas, voice(E4, 0.42, decay=0.17), 0.10)
+    place(canvas, voice(A4, 0.30, decay=0.12,
+                        partials=(1.0, 0.12, 0.04)) * 0.28, 0.16)
+    return canvas + room_tone(0.55, 0.016, seed=2)
+
+
+def low_battery():
+    """Two patient pulses, then a minor third down: reserves are falling."""
+    canvas = blank(0.92)
+    place(canvas, voice(C4, 0.26, decay=0.09) * 0.6, 0.0)
+    place(canvas, voice(C4, 0.26, decay=0.09) * 0.6, 0.20)
+    place(canvas, voice(A3, 0.50, decay=0.22) * 0.85, 0.40)
+    return canvas + room_tone(0.92, 0.02, seed=3)
+
+
+def painting_change():
+    """A small chime: the gallery has turned a page."""
+    canvas = blank(0.70)
+    for offset, freq, gain in ((0.0, A3, 0.55), (0.055, CS4, 0.6), (0.11, E4, 0.7),
+                               (0.165, A4, 0.42)):
+        place(canvas, voice(freq, 0.5, attack=0.005, decay=0.15,
+                            partials=(1.0, 0.16, 0.05)) * gain, offset)
+    return canvas + room_tone(0.70, 0.014, seed=4)
+
+
+def urgent_notification():
+    """Two firm blips a major third apart. Insistent, still warm."""
+    canvas = blank(0.5)
+    place(canvas, voice(E4, 0.18, attack=0.004, decay=0.05, hold=0.03), 0.0)
+    place(canvas, voice(GS4, 0.30, attack=0.004, decay=0.09, hold=0.03), 0.14)
+    return canvas + room_tone(0.5, 0.012, seed=5)
+
+
+def tick():
+    """The smallest possible acknowledgement."""
+    canvas = blank(0.07)
+    place(canvas, voice(A4 * 2, 0.05, attack=0.001, decay=0.012,
+                        partials=(1.0, 0.2)) * 0.5, 0.0)
+    place(canvas, room_tone(0.05, 0.05, seed=6) * 0.6, 0.0)
+    return canvas
+
+
+CUES = {
+    'lock-engage': lock_engage,
+    'unlock': unlock,
+    'low-battery': low_battery,
+    'painting-change': painting_change,
+    'urgent-notification': urgent_notification,
+    'tick': tick,
+}
+
+
+def stereo(mono, width=0.0006):
+    """A few samples of delay on one side: width without smearing the transient."""
+    offset = int(RATE * width)
+    left = mono
+    right = np.concatenate((np.zeros(offset), mono[:len(mono) - offset])) if offset else mono
+    return np.stack((left, right), axis=1)
+
+
+def normalise(frames, peak=PEAK):
+    highest = float(np.max(np.abs(frames))) or 1.0
+    return frames / highest * peak
+
+
+def write_wave(path, frames):
+    data = np.clip(normalise(frames), -1.0, 1.0)
+    samples = (data * 32767).astype('<i2')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with wave.open(str(path), 'wb') as handle:
+        handle.setnchannels(2)
+        handle.setsampwidth(2)
+        handle.setframerate(RATE)
+        handle.writeframes(samples.tobytes())
+    return path.stat().st_size
+
+
+def build(output, cues=None):
+    written = {}
+    for name in sorted(cues or CUES):
+        frames = stereo(CUES[name]())
+        size = write_wave(output / f'{name}.wav', frames)
+        written[name] = {'bytes': size, 'seconds': round(len(frames) / RATE, 3)}
+    return written
+
+
+def waveforms(path, cues=None):
+    """Draw each cue as a Gruvbox waveform so the record is not only numbers."""
+    names = sorted(cues or CUES)
+    row, width = 78, 720
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, row * len(names))
+    ctx = cairo.Context(surface)
+    ctx.set_source_rgb(0.157, 0.157, 0.157)
+    ctx.paint()
+    ctx.select_font_face('monospace')
+    ctx.set_font_size(11)
+    for index, name in enumerate(names):
+        frames = normalise(CUES[name]())
+        top = index * row
+        middle = top + row / 2
+        ctx.set_source_rgba(0.314, 0.286, 0.278, 1)
+        ctx.set_line_width(1)
+        ctx.move_to(0, middle)
+        ctx.line_to(width, middle)
+        ctx.stroke()
+        buckets = np.array_split(frames, width - 180)
+        ctx.set_source_rgba(0.98, 0.741, 0.184, 0.95)
+        for column, bucket in enumerate(buckets):
+            height = float(np.max(np.abs(bucket))) * (row / 2 - 10) / PEAK
+            ctx.move_to(180 + column, middle - height)
+            ctx.line_to(180 + column, middle + height)
+        ctx.stroke()
+        ctx.set_source_rgba(0.922, 0.859, 0.698, 1)
+        ctx.move_to(12, middle + 4)
+        ctx.show_text(f'{name}  {len(frames) / RATE:.2f}s')
+    path.parent.mkdir(parents=True, exist_ok=True)
+    surface.write_to_png(str(path))
+    return path
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument('--cue', action='append', choices=sorted(CUES),
+                        help='build only these cues')
+    parser.add_argument('--waveforms', type=Path, help='also draw a waveform sheet here')
+    arguments = parser.parse_args()
+    written = build(arguments.output, arguments.cue)
+    if arguments.waveforms:
+        written['waveforms'] = str(waveforms(arguments.waveforms, arguments.cue))
+    print(json.dumps(written, indent=2))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

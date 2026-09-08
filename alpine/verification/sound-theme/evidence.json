@@ -1,0 +1,59 @@
+{
+  "status": "passed",
+  "cues": {
+    "lock-engage": {
+      "seconds": 0.62,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -23.9
+    },
+    "low-battery": {
+      "seconds": 0.92,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -21.5
+    },
+    "painting-change": {
+      "seconds": 0.7,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -24.2
+    },
+    "tick": {
+      "seconds": 0.07,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -24.0
+    },
+    "unlock": {
+      "seconds": 0.55,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -21.8
+    },
+    "urgent-notification": {
+      "seconds": 0.5,
+      "channels": 2,
+      "rate": 48000,
+      "peak_dbfs": -12.0,
+      "rms_dbfs": -19.8
+    }
+  },
+  "played_live": [
+    "lock-engage",
+    "low-battery",
+    "painting-change",
+    "tick",
+    "unlock",
+    "urgent-notification"
+  ],
+  "player": true,
+  "live_playback": "pw-play rendered unlock.wav and exited 0 with the sink unmuted at 40 percent",
+  "synthesis": "numpy only; no sample was recorded, downloaded or copied",
+  "limits": "Exit codes and levels are measurable; whether the cues sound good is the user\u2019s judgement, and nobody has heard them on the built-in speakers other than during this one quiet pass."
+}

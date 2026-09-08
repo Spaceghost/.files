@@ -27,6 +27,12 @@
     "buttons-grid",
     "notifications"
   ],
+  "scripts": {
+    "ghost-urgent": {
+      "exec": "~/.local/bin/oldbook-sound urgent-notification",
+      "urgency": "Critical"
+    }
+  },
   "widget-config": {
     "title": {
       "text": "INCOMING TRANSMISSIONS",
