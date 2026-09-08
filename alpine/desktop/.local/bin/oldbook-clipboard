@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Private text/image history and clipboard ownership for the Wayland session."""
+import argparse
+import fcntl
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+
+MAX_BYTES = 8 * 1024 * 1024
+
+
+def history(command, data=None):
+    directory = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'oldbook/clipboard'
+    directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+    directory.chmod(0o700)
+    if command in ('list', 'wipe') and not (directory / 'history.db').exists():
+        return b''
+    return subprocess.run(
+        ['cliphist', '-db-path', str(directory / 'history.db'),
+         '-max-items', '200', '-max-dedupe-search', '200', command],
+        input=data, stdout=subprocess.PIPE, check=True, timeout=10).stdout
+
+
+def choose(rows, prompt):
+    result = subprocess.run(
+        ['oldbook-fuzzel', '--dmenu', '--no-sort', '--with-nth', '2',
+         '--prompt', prompt, '--lines', '12', '--width', '65'],
+        input=rows, stdout=subprocess.PIPE, check=False)
+    return result.stdout if result.returncode == 0 else b''
+
+
+def pick(action):
+    rows = history('list')
+    if action == 'pick':
+        rows += b'delete\tDelete an entry...\nclear\tClear history...\n'
+    if not rows:
+        return
+    selected = choose(rows, 'Clipboard ❯ ' if action == 'pick' else 'Delete ❯ ')
+    if not selected:
+        return
+    ident = selected.split(b'\t', 1)[0].strip()
+    if ident == b'delete':
+        pick('delete')
+    elif ident == b'clear':
+        answer = choose(b'keep\tKeep history\nclear\tClear history\n', 'Clear history? ')
+        if answer.startswith(b'clear\t'):
+            history('wipe')
+    elif action == 'delete':
+        history('delete', selected)
+    else:
+        # Decode successfully before touching the clipboard. Do not route binary
+        # data through shell variables or add/remove whitespace.
+        data = history('decode', selected)
+        subprocess.run(['wl-copy'], input=data, check=True, timeout=10)
+
+
+def daemon():
+    runtime = Path(os.environ['XDG_RUNTIME_DIR']) / 'oldbook-clipboard'
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    runtime.chmod(0o700)
+    display = Path(os.environ['WAYLAND_DISPLAY']).name
+    with (runtime / (display + '.lock')).open('w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        children = []
+        stopping = False
+
+        def stop(_signum, _frame):
+            nonlocal stopping
+            stopping = True
+
+        signal.signal(signal.SIGTERM, stop)
+        signal.signal(signal.SIGINT, stop)
+        try:
+            for mime in ('text', 'image'):
+                children.append(subprocess.Popen(
+                    ['wl-paste', '--type', mime, '--watch', str(Path(__file__).resolve()), 'store']))
+            children.append(subprocess.Popen(
+                ['wl-clip-persist', '--clipboard', 'regular', '--ignore-event-on-error',
+                 '--selection-size-limit', str(32 * 1024 * 1024),
+                 '--all-mime-type-regex', '^(?!x-kde-passwordManagerHint).+'],
+                env=dict(os.environ, RUST_LOG='error')))
+            while not stopping:
+                if any(child.poll() is not None for child in children):
+                    raise RuntimeError('A clipboard service exited; restart oldbook-clipboard daemon')
+                time.sleep(0.2)
+        finally:
+            for child in children:
+                if child.poll() is None:
+                    child.terminate()
+            for child in children:
+                try:
+                    child.wait(timeout=3)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait()
+
+
+def main():
+    os.umask(0o077)
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='pick',
+                        choices=('daemon', 'store', 'list', 'pick', 'delete', 'clear', 'copy', 'paste'))
+    action = parser.parse_args().action
+    if action == 'daemon':
+        daemon()
+    elif action == 'store':
+        if os.environ.get('CLIPBOARD_STATE', 'data') != 'data':
+            return
+        data = sys.stdin.buffer.read(MAX_BYTES + 1)
+        if data and len(data) <= MAX_BYTES:
+            history('store', data)
+    elif action == 'list':
+        sys.stdout.buffer.write(history('list'))
+    elif action in ('pick', 'delete'):
+        pick(action)
+    elif action == 'clear':
+        history('wipe')
+    elif action == 'copy':
+        os.execvp('wl-copy', ['wl-copy', '--type', 'text/plain;charset=utf-8'])
+    elif action == 'paste':
+        os.execvp('wl-paste', ['wl-paste', '--no-newline', '--type', 'text'])
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+        print(f'oldbook-clipboard: {error}', file=sys.stderr)
+        sys.exit(1)

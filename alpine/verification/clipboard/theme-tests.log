@@ -1,0 +1,16 @@
+test_a_partial_palette_omits_only_what_is_missing (test_theme_switch.GhosttyPalette.test_a_partial_palette_omits_only_what_is_missing) ... ok
+test_a_theme_without_dark_colours_is_skipped_rather_than_half_written (test_theme_switch.GhosttyPalette.test_a_theme_without_dark_colours_is_skipped_rather_than_half_written) ... ok
+test_cursor_pair_splits_into_text_and_colour (test_theme_switch.GhosttyPalette.test_cursor_pair_splits_into_text_and_colour) ... ok
+test_every_ansi_slot_is_carried_over (test_theme_switch.GhosttyPalette.test_every_ansi_slot_is_carried_over) ... ok
+test_font_family_and_size_follow_foot (test_theme_switch.GhosttyPalette.test_font_family_and_size_follow_foot) ... ok
+test_regular_and_bright_map_to_the_low_and_high_halves (test_theme_switch.GhosttyPalette.test_regular_and_bright_map_to_the_low_and_high_halves) ... ok
+test_shared_settings_survive_and_the_theme_names_itself (test_theme_switch.GhosttyPalette.test_shared_settings_survive_and_the_theme_names_itself) ... ok
+test_surface_colours_and_opacity_follow_foot (test_theme_switch.GhosttyPalette.test_surface_colours_and_opacity_follow_foot) ... ok
+test_every_profile_with_foot_colours_has_a_matching_ghostty_config (test_theme_switch.ShippedProfiles.test_every_profile_with_foot_colours_has_a_matching_ghostty_config) ... ok
+test_selecting_a_theme_refreshes_ghostty_before_deploying_it (test_theme_switch.ShippedProfiles.test_selecting_a_theme_refreshes_ghostty_before_deploying_it) ... ok
+test_the_active_theme_is_a_real_theme (test_theme_switch.ShippedProfiles.test_the_active_theme_is_a_real_theme) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 1.802s
+
+OK

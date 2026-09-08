@@ -26,6 +26,7 @@ case "$mode" in
         ;;
 esac
 
+wl-copy --type image/png < "$target"
 if command -v swappy >/dev/null 2>&1; then
     swappy -f "$target" &
 fi
