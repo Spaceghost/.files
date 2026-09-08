@@ -97,6 +97,17 @@ class DesktopSpaceTests(unittest.TestCase):
             self.assertEqual(original, helper.pairing_key(image, free, 'spaceghost', []))
             self.assertEqual((free['bottom'], free['right']), (60, 60))
 
+    def test_notification_popups_do_not_shift_the_search_bar(self):
+        # swaync maps a full-height popup window on the right whenever any
+        # notification shows; it is transient, not a fixed strip.
+        popups = surface('swaync-notification-window', 1060, 40, 380, 827, 'top')
+        space = desktop_space.screen_space(output([popups]), tree(floating=True))
+        self.assertEqual(space['right'], 16)
+        self.assertEqual(desktop_space.search_rectangle(space)['x'], 340)
+        control_center = surface('swaync-control-center', 1060, 40, 380, 827, 'top')
+        space = desktop_space.screen_space(output([control_center]), tree(floating=True))
+        self.assertEqual(space['right'], 16)
+
 
 if __name__ == '__main__':
     unittest.main()
