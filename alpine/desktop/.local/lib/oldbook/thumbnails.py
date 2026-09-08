@@ -64,12 +64,33 @@ def rounded_rectangle(context, x, y, width, height, radius):
     context.close_path()
 
 
+def load_gdk():
+    """Return Gdk at whichever version this process already uses.
+
+    Only `cairo_set_source_pixbuf` is wanted here, and both Gdk 3 and Gdk 4
+    have it. Pinning 3.0 unconditionally raises inside a process that has
+    already chosen GTK 4 -- the overview grids do, and the test suite runs
+    them beside these tests -- and `thumbnail` turns every such failure into
+    None, so a hard pin would silently empty the cache rather than say why.
+    """
+    import gi
+    if 'gi.repository.Gdk' not in sys.modules:
+        for version in ('3.0', '4.0'):
+            try:
+                gi.require_version('Gdk', version)
+                break
+            except ValueError:
+                continue
+    from gi.repository import Gdk
+    return Gdk
+
+
 def render(source, destination, height, radius, shape):
     """Scale the painting to the requested height and clip its corners."""
     import gi
     gi.require_version('GdkPixbuf', '2.0')
-    gi.require_version('Gdk', '3.0')
-    from gi.repository import Gdk, GdkPixbuf
+    from gi.repository import GdkPixbuf
+    Gdk = load_gdk()
     import cairo
     if shape == 'square':
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(source))

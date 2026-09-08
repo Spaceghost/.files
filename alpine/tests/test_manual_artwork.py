@@ -30,6 +30,19 @@ def open_actions_then(fragment, capture=None):
         return subprocess.CompletedProcess(command, 0, selected + '\n', '')
     return run
 
+def sample_painting():
+    """A real landscape painting for the generator's PNG validation.
+
+    Any gallery painting satisfies it. Naming one file broke the suite the day
+    that painting was archived, so take the first that is still there and fall
+    back to the archive before giving up.
+    """
+    for root in (REPO / 'alpine/assets/gallery', REPO / 'alpine/archive/assets/gallery'):
+        for path in sorted(root.rglob('*.png')):
+            return path
+    raise unittest.SkipTest('No gallery painting to copy')
+
+
 class ManualArtworkTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -43,7 +56,7 @@ class ManualArtworkTests(unittest.TestCase):
         shutil.copyfile(REPO / 'alpine/wallpapers/prompts.json', prompts / 'prompts.json')
         self.native = self.root / 'codex/generated_images/new.png'
         self.native.parent.mkdir(parents=True)
-        shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+        shutil.copyfile(sample_painting(), self.native)
         self.daily = self.state / (generator.dt.date.today().isoformat() + '.json')
         self.daily.write_text('{"status":"failed","scene":"american-gothic"}')
         self.stack = contextlib.ExitStack()

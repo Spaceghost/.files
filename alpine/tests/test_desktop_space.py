@@ -26,8 +26,11 @@ def tree(*, floating=False, fullscreen=0, hidden_fullscreen=0):
     workspace = {'id': 2, 'type': 'workspace', 'fullscreen_mode': 1, 'focus': [3],
                  'nodes': [] if floating else [view],
                  'floating_nodes': [view] if floating else []}
+    # A fullscreen container is always a view, so it carries an identity; without
+    # one nothing is detected at all and both modes read alike.
     hidden = {'id': 4, 'type': 'workspace', 'nodes': [
-        {'id': 5, 'type': 'con', 'fullscreen_mode': hidden_fullscreen}]}
+        {'id': 5, 'type': 'con', 'app_id': 'foot',
+         'fullscreen_mode': hidden_fullscreen}]}
     return {'type': 'root', 'nodes': [dict(output(), type='output', focus=[2],
                                           nodes=[workspace, hidden])]}
 

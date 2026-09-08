@@ -197,9 +197,14 @@ def transform(relative, content, target):
             text = text.replace(
                 old_control, "Path(__file__).resolve().parent / 'oldbook-control'", 1)
         if relative == Path('.local/bin/oldbook-lock'):
-            if "command='swaylockd'" not in text:
+            # Bazzite carries stock swaylock alone: no swaylockd supervisor and
+            # no swaylock-effects, so the Oldbook lock scene cannot run there.
+            # Naming the locker outright also skips the backend probe, and
+            # lock_arguments is already the stock-flag set.
+            default = 'def acquire_lock(runtime, command=None,'
+            if default not in text:
                 raise RuntimeError('Cannot select stock swaylock in oldbook-lock')
-            text = text.replace('swaylockd', 'swaylock')
+            text = text.replace(default, "def acquire_lock(runtime, command='swaylock',", 1)
         return text.encode(errors='surrogateescape')
     if relative.parts[:3] == ('.local', 'lib', 'oldbook') and relative.suffix == '.py':
         text = content.decode()

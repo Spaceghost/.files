@@ -12,6 +12,19 @@ from unittest import mock
 from test_wallpapers import REPO, art, generator
 
 
+def sample_painting():
+    """A real landscape painting for the generator's PNG validation.
+
+    Any gallery painting satisfies it. Naming one file broke the suite the day
+    that painting was archived, so take the first that is still there and fall
+    back to the archive before giving up.
+    """
+    for root in (REPO / 'alpine/assets/gallery', REPO / 'alpine/archive/assets/gallery'):
+        for path in sorted(root.rglob('*.png')):
+            return path
+    raise unittest.SkipTest('No gallery painting to copy')
+
+
 class ThemedArtworkTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -33,7 +46,7 @@ class ThemedArtworkTests(unittest.TestCase):
         self.state.mkdir()
         self.native = self.root / 'codex/generated_images/new.png'
         self.native.parent.mkdir(parents=True)
-        shutil.copyfile(REPO / 'alpine/assets/gallery/delaware.png', self.native)
+        shutil.copyfile(sample_painting(), self.native)
         self.stack = contextlib.ExitStack()
         self.addCleanup(self.stack.close)
         self.stack.enter_context(mock.patch.object(generator, 'STATE', self.state))

@@ -10,6 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'alpine/wallpapers'))
 from desktop_theme import colors, recolor, render_profile
+from theme_fixtures import theme_descriptor
 
 
 def badge(css, hover=False):
@@ -37,7 +38,10 @@ class GhostBrandingTests(unittest.TestCase):
     def test_existing_profiles_and_base_keep_original_badge(self):
         paths = [ROOT / 'alpine/desktop/.config/waybar/style.css',
                  *sorted((ROOT / 'alpine/themes/profiles').glob('*/.config/waybar/style.css'))]
-        self.assertGreater(len(paths), 2)
+        # The base stylesheet plus every rendered profile; the repository ships
+        # one profile now that Space Ghost is archived, so require the glob to
+        # have found at least that one rather than a count it no longer meets.
+        self.assertGreaterEqual(len(paths), 2)
         for path in paths:
             with self.subTest(profile=str(path.relative_to(ROOT))):
                 self.assert_brand(path.read_text())
@@ -45,7 +49,7 @@ class GhostBrandingTests(unittest.TestCase):
     def test_generated_distinct_palettes_keep_badge_while_bar_changes(self):
         rendered = []
         for theme_id in ('spaceghost', 'gruvbox-dark', 'waxen-meridian-373c11cb12f0'):
-            theme = json.loads((ROOT / 'alpine/themes' / (theme_id + '.json')).read_text())
+            theme = json.loads(theme_descriptor(theme_id).read_text())
             with self.subTest(theme=theme_id):
                 css = render_profile(ROOT, theme)['.config/waybar/style.css']
                 self.assert_brand(css)

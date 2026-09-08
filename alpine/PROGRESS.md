@@ -2,6 +2,41 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Test suite repaired — 2026-09-08
+
+`python3 -m unittest discover -s alpine/tests` runs 1342 tests green again. It
+reported sixty-seven problems from four unrelated causes, none of which the
+individual modules showed on their own.
+
+- **The thumbnail cache went silently empty in any process that had chosen GTK
+  4.** `thumbnails.render` pinned `Gdk` to 3.0, which raises once the Launchpad
+  and Mission Control grids have loaded 4.0, and `thumbnail` turns every failure
+  into `None` so the picker would simply have had no pictures in it. Only
+  `cairo_set_source_pixbuf` was wanted and both versions have it, so the module
+  now takes whichever Gdk the process already uses and pins 3.0 only when
+  nothing has chosen. A new test renders under Gdk 4 in a child process.
+- **Thirteen Bazzite tests broke on the lock-screen rewrite.** The profile
+  rewrote `command='swaylockd'` in `oldbook-lock` to reach stock swaylock, and
+  the new supervisor has no such line; the profile refused to apply at all.
+  It now sets the default of `acquire_lock`, which names the locker outright and
+  skips the backend probe, exactly as that machine needs. A fourteenth assertion
+  was stale rather than broken: the Bazzite bar drops the radio, link and
+  firewall modules but keeps `custom/notifications`, which runs
+  `oldbook-panel-status`, so that reader does ship there.
+- **Forty-six tests named fixtures another session archived.** The two artwork
+  suites copied one painting by name; they now take the first painting the
+  gallery still has. Four suites are written against Space Ghost, because a
+  second theme is what proves a palette reaches the bar, the Scripture strip,
+  Neovim and the profile stylesheets, and it moved to `archive/themes/` intact.
+  A new `tests/theme_fixtures.py` looks live-first and falls back to the
+  archive, so a retired theme keeps proving the same contract.
+- **Two tests were reading the live desktop.** The Scripture bar probe inherited
+  the user's `XDG_STATE_HOME`, so the accent the painting on screen elected
+  overruled the descriptor the test had just edited; it now runs with a private
+  state directory. And the hidden-fullscreen fixture carried no `app_id`, which
+  no real fullscreen view lacks, so neither of its two modes was detected and
+  the test could not tell them apart.
+
 ## Eyecandy round — 2026-09-08
 
 Eighteen additions were built in one pass by parallel agents, each with its own
@@ -360,12 +395,10 @@ yet.
   `/etc/apk/world`, but only r3 exists in the repositories, the caches and the
   Fossil artifact store, so `package-archive snapshot` refuses to write a
   closure it cannot reproduce; the recipe under `packages/waybar/` is intact, so
-  no source was lost and only the built artifact is missing. And the full test
-  suite is not a usable gate: about sixty tests break on fixtures another
-  session archived (`spaceghost.json`, `delaware.png`, the spaceghost profile),
-  and seven thumbnail tests fail only when the whole suite shares one Python
-  process with the new GTK 4 grid tests, passing when run alone. Every
-  round-two module passes on its own.
+  no source was lost and only the built artifact is missing. The full test suite was not a
+  usable gate at the close of the round and is one again: `unittest discover -s
+  alpine/tests` now runs 1342 tests green, repaired in the check-in that follows
+  this round.
 
 ## Radio preparation and desktop repairs — 2026-09-07
 

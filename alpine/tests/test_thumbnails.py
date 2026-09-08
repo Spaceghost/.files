@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -123,6 +124,37 @@ class ThumbnailCacheTests(unittest.TestCase):
         printed = Path(output.getvalue().strip())
         self.assertTrue(printed.is_file())
         self.assertTrue(printed.name.endswith('-h24-r3-fit.png'))
+
+    def test_renders_inside_a_process_that_already_chose_gtk4(self):
+        """The overview grids load Gdk 4; the cache must not go silently empty.
+
+        A hard `require_version('Gdk', '3.0')` raises there, and `thumbnail`
+        turns any failure into None, so this ran as an empty picker rather than
+        an error. Rendering happens in a child so this process keeps its own
+        Gdk free for the tests around it.
+        """
+        library = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'
+        program = (
+            'import sys, gi\n'
+            "gi.require_version('Gdk', '4.0')\n"
+            'from gi.repository import Gdk\n'
+            f'sys.path.insert(0, {str(library)!r})\n'
+            'import thumbnails\n'
+            f'path = thumbnails.thumbnail({str(self.source)!r}, height=48, '
+            f'cache={str(self.cache)!r})\n'
+            'print(path if path else "")\n')
+        result = subprocess.run([sys.executable, '-c', program], text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        printed = result.stdout.strip().splitlines()[-1] if result.stdout.strip() else ''
+        self.assertTrue(printed, f'No thumbnail rendered under Gdk 4: {result.stdout}')
+        rendered = Path(printed)
+        self.assertTrue(rendered.is_file())
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(rendered))
+        self.assertEqual((pixbuf.get_width(), pixbuf.get_height()), (76, 48))
+        corners, centre = corner_alpha(rendered)
+        self.assertEqual(corners, [0, 0, 0, 0])
+        self.assertEqual(centre, 255)
 
 
 if __name__ == '__main__':

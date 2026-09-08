@@ -15,6 +15,7 @@ import termios
 import time
 import unittest
 from unittest import mock
+from theme_fixtures import theme_profile
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -114,7 +115,7 @@ class ApplicationThemeRefresh(unittest.TestCase):
         self.assertEqual(before['mode'], 'i')
         self.assertEqual(self.remote('vim.api.nvim_get_hl(0,{name="Normal"}).bg'),
                          str(0x282828))
-        source = REPO / 'alpine/themes/profiles/spaceghost/.config/nvim/init.lua'
+        source = theme_profile('spaceghost') / '.config/nvim/init.lua'
         deployed = self.config / 'nvim/init.lua'
         deployed.unlink()
         deployed.symlink_to(source)

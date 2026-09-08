@@ -126,7 +126,12 @@ class NewThemeTests(unittest.TestCase):
             else:
                 chosen = next(item for item in options if 'Space Ghost' in item)
             return CompletedProcess(command, 0, chosen + '\n', '')
+        # Name the theme this picker offers rather than borrowing one from the
+        # repository: Space Ghost has since been archived, and the contract here
+        # is that the second menu paints the theme chosen in it, whichever it is.
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
+                mock.patch.object(art, 'available_themes',
+                                  return_value=[{'name': 'Space Ghost', 'id': 'spaceghost'}]), \
                 mock.patch.object(art.subprocess, 'run', side_effect=choose), \
                 mock.patch.object(art, 'start_generation') as start:
             art.pick()

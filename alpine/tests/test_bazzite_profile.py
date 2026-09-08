@@ -102,7 +102,9 @@ class BazziteProfileTest(unittest.TestCase):
 
         self.assertFalse((self.home / '.local/bin/oldbook-session').exists())
         self.assertFalse((self.home / '.local/bin/oldbook-firewall-ui').exists())
-        self.assertFalse((self.home / '.local/bin/oldbook-panel-status').exists())
+        # The Bazzite bar drops the radio, link and firewall modules but keeps
+        # custom/notifications, which runs this reader, so it has to ship.
+        self.assertTrue((self.home / '.local/bin/oldbook-panel-status').exists())
         target = self.home / '.config/systemd/user/oldbook-session.target'
         self.assertIn('oldbook-waybar.service', target.read_text())
         for name in ('oldbook-waybar.service', 'oldbook-swaync.service',

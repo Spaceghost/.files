@@ -9,6 +9,8 @@ import tempfile
 import time
 import unittest
 
+from theme_fixtures import theme_descriptor
+
 
 REPO = Path(__file__).resolve().parents[2]
 BAR = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar'
@@ -80,7 +82,14 @@ class ScriptureBarThemeTests(unittest.TestCase):
         cls.root = Path(cls.temporary.name)
         runtime = cls.root / 'run'
         runtime.mkdir(mode=0o700)
+        # A private state directory as well: oldbook-palette records the accent
+        # the painting on screen elected under XDG_STATE_HOME, and read_palette
+        # honours it for the matching theme. Inheriting the user's would let the
+        # live desktop's amber overrule the descriptor this test just edited.
+        state = cls.root / 'state'
+        state.mkdir(mode=0o700)
         cls.env = dict(os.environ, XDG_RUNTIME_DIR=str(runtime), GDK_BACKEND='wayland',
+                       XDG_STATE_HOME=str(state),
                        WLR_BACKENDS='headless', WLR_RENDERER='pixman',
                        WLR_LIBINPUT_NO_DEVICES='1')
         for name in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY'):
@@ -118,8 +127,7 @@ class ScriptureBarThemeTests(unittest.TestCase):
             themes = root / 'alpine/themes'
             themes.mkdir(parents=True)
             for name in ('spaceghost', 'gruvbox-dark'):
-                shutil.copyfile(REPO / 'alpine/themes' / (name + '.json'),
-                                themes / (name + '.json'))
+                shutil.copyfile(theme_descriptor(name), themes / (name + '.json'))
             result = subprocess.run([sys.executable, '-c', PROBE, str(BAR), str(root), initial],
                                     env=self.env, capture_output=True, text=True, timeout=15)
             self.assertEqual(result.returncode, 0, result.stderr)

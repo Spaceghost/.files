@@ -881,13 +881,15 @@ closure it cannot reproduce. No source was lost: the recipe under
 Rebuilding r4 from that recipe, or reconciling the world pin with the archived
 r3, unblocks the snapshot.
 
-**The full test suite is not a usable gate.** About sixty tests break on
-fixtures another session archived (`themes/spaceghost.json`,
-`assets/gallery/delaware.png`, the spaceghost profile), and seven thumbnail
-tests fail only when the whole suite shares one Python process with the new
-GTK 4 grid tests, passing when run alone. Every module from both rounds passes
-on its own; run them individually until the fixtures and the toolkit isolation
-are repaired.
+**The full test suite is a gate again.** `python3 -m unittest discover -s
+alpine/tests` runs 1342 tests green. It was not, for a while: about sixty tests
+named fixtures another session archived, seven thumbnail tests failed only when
+the suite shared one Python process with the new GTK 4 grid tests, and thirteen
+Bazzite tests broke on the lock-screen rewrite. The fixtures now look in
+`archive/themes/` when a theme has been retired, the thumbnail renderer accepts
+whichever Gdk the process already loaded, the Bazzite profile names stock
+swaylock through `acquire_lock`, and the Scripture bar test runs with a private
+state directory so the elected accent cannot reach in from the live desktop.
 
 The earlier features carry their own evidence directories under
 [verification/](verification/) and their contracts in [FEATURES.md](FEATURES.md);
