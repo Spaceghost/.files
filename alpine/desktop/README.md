@@ -109,4 +109,18 @@ Screenshots are stored in `~/Pictures/Screenshots` and offered to Swappy for ann
 
 The overlay does not infer a geographic location. It leaves `wlsunset` disabled by default. Add an explicit, local `wlsunset` command in `~/.config/sway/local.d/` only after choosing the correct location or an intentional fixed schedule.
 
-The tmux overlay retains the existing `C-a` workflow only when `~/.files/.tmux.conf` does not name TPM or another tmux-plugin path. It does not install or fetch a plugin manager. The shell, Neovim, btop, and cava configs likewise use only installed programs and built-in features.
+Every tmux theme loads `~/.config/tmux/oldbook.conf` for the personal controls
+carried over from the historical config: `Ctrl+A` prefix (twice to send a literal
+`Ctrl+A`), `v`/`|`/Enter for side-by-side splits, `s` for top/bottom splits,
+`h/j/k/l` for pane selection, `H/J/K/L` or `</+/-/>` for resizing, `Ctrl+h/l`
+for previous/next window, and Tab for the last pane. Windows and panes start at
+1; prefix+0 selects window 10. Copy mode uses vi keys with `v` to select and `y`
+to copy. Mouse, clipboard, focus events and 10,000 lines of scrollback are
+enabled. These controls survive theme switches; each theme supplies its colors
+and status line. Deploy the shared file with
+`alpine/bin/deploy-home --only .config/tmux/oldbook.conf`, then reload with
+`tmux source-file ~/.tmux.conf`. The scrollback limit applies to newly created
+panes; existing panes retain their current limit.
+The overlay does not source the historical plugin bootstrap or install a plugin
+manager. The shell, Neovim, btop, and cava configs likewise use only installed
+programs and built-in features.
