@@ -7,7 +7,11 @@ right-click for the next image, and middle-click to pause. **Super/Command +
 left-click** paints an unpainted scene with a fresh mix and switches directly to it when ready.
 **Shift + left-click** opens the prompt editor. **Super/Command + Shift +
 left-click** creates a random new named theme and switches to its first painting.
-Left and right Shift and Super keys work. Right/middle clicks and
+**Super/Command + Shift + right-click** asks for a theme description, not a title.
+The generator invents the name and creates a complete desktop theme and debut
+painting. Empty input or Escape cancels. Themes must include application styling,
+typography and layout as well as colors; incomplete designs are rejected.
+Left and right Shift and Super keys work. Other right/middle clicks and
 scrolling keep their usual actions even when a modifier is held.
 The gallery also offers **Generate new artwork & switch to it**. The same controls
 work from a terminal:
@@ -19,6 +23,7 @@ oldbook-wallpaper pick
 oldbook-wallpaper pause
 oldbook-wallpaper generate
 oldbook-wallpaper new-theme
+oldbook-wallpaper prompt-theme
 oldbook-wallpaper generate --theme none
 oldbook-wallpaper generate --theme gruvbox-dark
 oldbook-wallpaper edit-prompts

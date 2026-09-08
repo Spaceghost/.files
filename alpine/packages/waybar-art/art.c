@@ -157,7 +157,10 @@ static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer data)
                     modifiers.shift ? "edit-prompts" : modifiers.super ? "generate" : "pick");
     }
     else if (event->button == 2) action(art, "pause");
-    else if (event->button == 3) action(art, "next");
+    else if (event->button == 3) {
+        Modifiers modifiers = modifiers_pressed(event->state);
+        action(art, modifiers.super && modifiers.shift ? "prompt-theme" : "next");
+    }
     return TRUE;
 }
 

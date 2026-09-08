@@ -241,39 +241,52 @@ def daemon(runtime, directory, path):
         for sig in (signal.SIGINT, signal.SIGTERM):
             signal.signal(sig, stop)
         try:
-            with socket.socket(socket.AF_UNIX) as subscription:
-                subscription.settimeout(3)
-                subscription.connect(str(path))
-                send(subscription, 2, '["workspace","window","output","shutdown"]')
-                _, accepted = receive(subscription)
-                if not accepted.get('success'):
-                    raise RuntimeError('Sway rejected workspace subscription')
-                while running:
-                    plans, ai = collect(request(path, 4), resolver, runtime, names, place)
-                    for plan in plans:
-                        if plan['old'] != plan['new']:
-                            try:
-                                rename(path, plan['old'], plan['new'])
-                            except (ValueError, RuntimeError):
-                                # A window/workspace can close or be renamed
-                                # after GET_TREE; retry from the next snapshot.
-                                continue
-                        names.accept(plan)
-                    live_ids = {str(plan['id']) for plan in plans}
-                    names.records = {key: value for key, value in names.records.items() if key in live_ids}
-                    write_json(state_path, {'socket': str(path), 'updated_at': time.time(),
-                                           'records': names.records, 'workspaces': plans, 'ai': ai,
-                                           'placement': placement.state()})
-                    # Sway events detect logout immediately; a one-second refresh
-                    # also follows tmux foreground changes with an unchanged title.
-                    deadline = time.monotonic() + 1
-                    while running and time.monotonic() < deadline:
-                        ready, _, _ = select.select([subscription], [], [],
-                                                    max(0, deadline - time.monotonic()))
-                        if ready:
-                            kind, _ = receive(subscription)
-                            if kind == (1 << 31) | 6:
-                                running = False
+            while running:
+                try:
+                    with socket.socket(socket.AF_UNIX) as subscription:
+                        subscription.settimeout(3)
+                        subscription.connect(str(path))
+                        send(subscription, 2, '["workspace","window","output","shutdown"]')
+                        _, accepted = receive(subscription)
+                        if not accepted.get('success'):
+                            raise RuntimeError('Sway rejected workspace subscription')
+                        while running:
+                            plans, ai = collect(request(path, 4), resolver, runtime, names, place)
+                            for plan in plans:
+                                if plan['old'] != plan['new']:
+                                    try:
+                                        rename(path, plan['old'], plan['new'])
+                                    except (ValueError, RuntimeError):
+                                        # A window/workspace can close or be renamed
+                                        # after GET_TREE; retry from the next snapshot.
+                                        continue
+                                names.accept(plan)
+                            live_ids = {str(plan['id']) for plan in plans}
+                            names.records = {key: value for key, value in names.records.items() if key in live_ids}
+                            write_json(state_path, {'socket': str(path), 'updated_at': time.time(),
+                                                   'records': names.records, 'workspaces': plans, 'ai': ai,
+                                                   'placement': placement.state()})
+                            # Sway events detect logout immediately; a one-second refresh
+                            # also follows tmux foreground changes with an unchanged title.
+                            deadline = time.monotonic() + 1
+                            while running and time.monotonic() < deadline:
+                                ready, _, _ = select.select([subscription], [], [],
+                                                            max(0, deadline - time.monotonic()))
+                                if ready:
+                                    kind, _ = receive(subscription)
+                                    if kind == (1 << 31) | 6:
+                                        running = False
+                except (OSError, ValueError, RuntimeError) as error:
+                    # A busy compositor or a partial IPC frame must not stop
+                    # workspace labels and the agent indicator until next login.
+                    # Reconnect with a fresh stream; retain accepted name state.
+                    if (not running or not path.exists()
+                            or getattr(error, 'errno', None) in (errno.ENOENT, errno.ECONNREFUSED)):
+                        break
+                    print(f'oldbook-workspaces: {error}; reconnecting', file=sys.stderr)
+                    retry_at = time.monotonic() + 1
+                    while running and time.monotonic() < retry_at:
+                        time.sleep(min(.1, max(0, retry_at - time.monotonic())))
         finally:
             try:
                 restore(path, names.records)
@@ -288,6 +301,12 @@ def status(directory):
     snapshot = read_json(directory / 'state.json', {})
     updated_at = snapshot.get('updated_at', 0)
     fresh = isinstance(updated_at, (int, float)) and 0 <= time.time() - updated_at < 5
+    if not fresh:
+        print(json.dumps({'text': '✦ ?', 'class': 'disconnected',
+                          'tooltip': '<b>AI SESSIONS</b>\nAgent tracking is unavailable; '
+                                     'waiting for a fresh snapshot.\n\n'
+                                     'Left: next AI window · Right: sessions and launchers'}))
+        return
     candidates = snapshot.get('ai', [])
     windows = []
     if fresh and isinstance(candidates, list):

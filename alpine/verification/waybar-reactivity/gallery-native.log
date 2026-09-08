@@ -1,0 +1,34 @@
+{
+  "checks": [
+    "normal left click opens gallery",
+    "left Command plus left click",
+    "right Command plus left click",
+    "left Shift plus left click",
+    "right Shift plus left click",
+    "left Command and Shift plus left click creates a new theme",
+    "right Command and Shift plus left click creates a new theme",
+    "left Command and right Shift plus left click creates a new theme",
+    "right Command and left Shift plus left click creates a new theme",
+    "right click advances artwork",
+    "middle click pause",
+    "scroll up previous",
+    "scroll down next",
+    "right click with Shift remains next",
+    "middle click with Command remains pause",
+    "scroll up with Shift remains previous",
+    "scroll down with Command remains next",
+    "right click with Command and Shift prompts for a complete theme",
+    "middle click with Command and Shift remains pause",
+    "scroll up with Command and Shift remains previous",
+    "scroll down with Command and Shift remains next",
+    "modifiers stay scoped to artwork",
+    "normal click after modifier release opens gallery"
+  ],
+  "paid_generation_calls": 0,
+  "input_devices": [
+    "65261:49374:oldbook-art-test-22687",
+    "65261:49374:oldbook-art-noise-test-22687"
+  ],
+  "live_compositors_protected": 1,
+  "module": "/tmp/waybar-art-prompt-r9-extract/usr/lib/waybar/oldbook-art.so"
+}

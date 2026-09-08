@@ -305,13 +305,15 @@ class WorkspaceServiceTests(unittest.TestCase):
         self.module['events_for_apps'](self.runtime, apps)
         self.assertNotIn('event', apps[1])
 
-    def test_status_falls_back_to_idle_for_bad_or_stale_state(self):
+    def test_status_reports_unavailable_instead_of_no_agents_for_stale_state(self):
         for state in [[], {'updated_at': 1, 'ai': [{'id': 5}]}]:
             (self.runtime / 'state.json').write_text(json.dumps(state))
             output = io.StringIO()
             with contextlib.redirect_stdout(output):
                 self.module['status'](self.runtime)
-            self.assertEqual(json.loads(output.getvalue())['class'], 'idle')
+            status = json.loads(output.getvalue())
+            self.assertEqual(status['class'], 'disconnected')
+            self.assertNotIn('No open', status['tooltip'])
 
     def test_status_falls_back_to_idle_for_fresh_malformed_ai_state(self):
         for ai in ({}, 'bad', [{'id': 5}]):

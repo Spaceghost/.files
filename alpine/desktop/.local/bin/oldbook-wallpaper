@@ -376,6 +376,14 @@ def start_generation(theme='active', *, new_theme=None):
                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
 
 
+def prompt_theme():
+    phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Describe your theme · name generated ❯ ',
+                             '--lines', '0', '--width', '62'],
+                            input='', capture_output=True, text=True)
+    if phrase.returncode == 0 and phrase.stdout.strip():
+        start_generation(new_theme=phrase.stdout.strip())
+
+
 def edit_prompts():
     subprocess.Popen(['/usr/bin/python3', str(REPO / 'alpine/desktop/.local/bin/oldbook-gallery-prompts')],
                      start_new_session=True)
@@ -396,10 +404,11 @@ def status():
     controls = ('Left: gallery & themes · Right: next artwork\n'
                 'Middle: pause/resume · scroll: browse (↑ previous / ↓ next)\n'
                 'Command/Super+click: generate & switch · new scene and mix\n'
-                'Super+Shift+click: whole new theme · debut painting included\n'
+                'Super+Shift+left: random complete theme · debut painting included\n'
+                'Super+Shift+right: describe a complete theme · name generated\n'
                 'Super+Shift+G: desktop panels on/off\n'
                 'Shift+click: edit prompts · “Zorak, fix the script!”\n'
-                'Modified clicks use the left button.')
+                'Other modified clicks use the left button.')
     tooltip += '\n\n<b>YOUR CONTROL ROOM</b>\n' + html.escape(controls)
     busy = generation_status()
     if busy is not None:
@@ -507,11 +516,7 @@ def pick():
         if selected == random_label:
             start_generation(new_theme='')
         elif selected == phrase_label:
-            phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Describe your theme · name generated ❯ ',
-                                     '--lines', '0', '--width', '62'],
-                                    input='', capture_output=True, text=True)
-            if phrase.returncode == 0 and phrase.stdout.strip():
-                start_generation(new_theme=phrase.stdout.strip())
+            prompt_theme()
         elif selected == generate_label:
             start_generation()
         elif selected == unthemed_label:
@@ -584,7 +589,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', nargs='?', default='status',
                         choices=['status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh',
-                                 'generate', 'new-theme', 'select', 'edit-prompts', 'delete'])
+                                 'generate', 'new-theme', 'prompt-theme', 'select', 'edit-prompts', 'delete'])
     parser.add_argument('artwork_id', nargs='?', help='Exact gallery ID for select')
     parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
     args = parser.parse_args()
@@ -602,6 +607,8 @@ def main():
         start_generation(args.theme)
     elif args.action == 'new-theme':
         start_generation(new_theme='')
+    elif args.action == 'prompt-theme':
+        prompt_theme()
     elif args.action == 'edit-prompts':
         edit_prompts()
     elif args.action == 'delete':

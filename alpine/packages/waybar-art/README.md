@@ -6,8 +6,10 @@ left click** opens the prompt editor, and **Command/Super + Shift + left click**
 creates a random named theme and switches to its first painting through the
 gallery's existing new-theme generator. Left click opens the gallery, right
 click advances to the next image, middle click pauses, and scrolling moves to
-the previous or next image. Modifiers do not alter those right, middle, or
-scroll actions. The
+the previous or next image. Super/Command + Shift + right click opens a free-form theme description;
+the generator invents its name and creates a complete desktop design and first
+painting. Empty input or Escape cancels. Other right, middle and scroll actions
+keep their usual behavior. The
 widget displays the complete tooltip, icon and state classes from
 `oldbook-wallpaper status` without rewriting the help text. A bounded startup
 walk also adds contextual hover help to Waybar's workspace, focused-window,
@@ -43,7 +45,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r8.apk
+doas apk add --no-network /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r9.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -51,7 +53,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r8 APK identity and archived artifact.
+`manifest.json` records the exact signed r9 APK identity and archived artifact.
 
 ## Verify
 

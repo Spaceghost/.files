@@ -161,7 +161,7 @@ with (out/'runtime.log').open('w') as log:
         check('middle click with Command remains pause', 'pause', button=274, modifiers=(125,))
         check('scroll up with Shift remains previous', 'prev', scroll='up', modifiers=(54,))
         check('scroll down with Command remains next', 'next', scroll='down', modifiers=(126,))
-        check('right click with Command and Shift remains next', 'next', button=273, modifiers=(125, 42))
+        check('right click with Command and Shift prompts for a complete theme', 'prompt-theme', button=273, modifiers=(125, 42))
         check('middle click with Command and Shift remains pause', 'pause', button=274, modifiers=(125, 42))
         check('scroll up with Command and Shift remains previous', 'prev', scroll='up', modifiers=(125, 42))
         check('scroll down with Command and Shift remains next', 'next', scroll='down', modifiers=(125, 42))

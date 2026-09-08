@@ -88,6 +88,20 @@ class NewThemeTests(unittest.TestCase):
             art.pick()
         start.assert_called_once_with(new_theme=phrase)
 
+    def test_prompted_theme_command_accepts_description_and_cancel_is_inert(self):
+        from subprocess import CompletedProcess
+        for answer, code in [('Foggy observatory, etched brass and quiet typography', 0), ('', 0), ('ignored', 1)]:
+            with self.subTest(answer=answer, code=code), \
+                    mock.patch('sys.argv', ['oldbook-wallpaper', 'prompt-theme']), \
+                    mock.patch.object(art.subprocess, 'run', return_value=CompletedProcess([], code, answer, '')) as prompt, \
+                    mock.patch.object(art, 'start_generation') as start:
+                art.main()
+                if answer and code == 0:
+                    start.assert_called_once_with(new_theme=answer)
+                else:
+                    start.assert_not_called()
+                self.assertIn('Describe', ' '.join(prompt.call_args.args[0]))
+
     def test_new_theme_command_launches_random_theme_and_activates_debut_art(self):
         with tempfile.TemporaryDirectory() as directory, \
                 mock.patch('sys.argv', ['oldbook-wallpaper', 'new-theme']), \

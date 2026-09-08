@@ -3,27 +3,23 @@
   "arch": "x86_64",
   "packages": [
     {
-      "apk_identity": "Q1I8SvLt4V5W80gtWF/hLcETb/wYA=",
-      "arch": "x86_64",
-      "artifact": "sha256/2c4b759117efb06a103dffd8c6480594728db0adb6faa8d8e6a6822edd68fb11/oldbook-waybar-art-1.0.0-r8.apk",
-      "artifact_arch": "x86_64",
-      "binary_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
-      "filename": "oldbook-waybar-art-1.0.0-r8.apk",
+      "apk_identity": "Q1jUHKE8y3Lf4FWmn5SpSovYmMQ0w=",
       "name": "oldbook-waybar-art",
-      "sha256": "2c4b759117efb06a103dffd8c6480594728db0adb6faa8d8e6a6822edd68fb11",
-      "version": "1.0.0-r8"
+      "version": "1.0.0-r9",
+      "arch": "x86_64",
+      "filename": "oldbook-waybar-art-1.0.0-r9.apk",
+      "sha256": "46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060",
+      "artifact": "sha256/46659510e9cc4afde2b5b1771decd32ed53f2ab31b504ef9ac3a285906874060/oldbook-waybar-art-1.0.0-r9.apk",
+      "artifact_arch": "x86_64",
+      "binary_sha256": "2e9075cf0ca82d4ad182f82f286cbe1732bdcb45fbaa2f24c3440e318a4f8795"
     }
   ],
   "schema": 1,
   "verification": [
-    "two byte-identical network-isolated builds",
+    "two byte-identical signed network-isolated builds",
     "apk verify for both APKs",
     "Fossil unversioned archive readback",
-    "regression demonstrated with unchanged r7 helper before fix",
-    "126 native GTK checks against the extracted signed APK library",
-    "archive ownership and payload modes verified",
-    "installed library hash and preserved host package identities",
-    "1119-package lock matches all installed name/version/arch/APK identities; live Waybar activation pending",
-    "running Waybar maps the installed r8 library"
+    "23 native modifier and mouse regression checks",
+    "complete theme and prompt cancellation tests"
   ]
 }
