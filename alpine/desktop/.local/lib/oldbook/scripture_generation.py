@@ -224,8 +224,8 @@ def generate_entry(reference, kind, sources, endpoint=DEFAULT_ENDPOINT, model=DE
                    timeout=60, max_bytes=MAX_RESPONSE_BYTES, identifier=None, created_utc=None):
     """Ask a verified local Ollama model for one grounded, provenance-rich entry."""
     if (not isinstance(timeout, (int, float)) or isinstance(timeout, bool)
-            or timeout <= 0 or timeout > 300):
-        raise ValueError('Ollama timeout must be between 0 and 300 seconds')
+            or timeout <= 0 or timeout > 900):
+        raise ValueError('Ollama timeout must be between 0 and 900 seconds')
     if (not isinstance(max_bytes, int) or isinstance(max_bytes, bool)
             or max_bytes < 1024 or max_bytes > 1024 * 1024):
         raise ValueError('Ollama response size limit must be between 1 KiB and 1 MiB')

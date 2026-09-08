@@ -169,10 +169,16 @@ class GenerationTests(unittest.TestCase):
                          'http://127.0.0.1:11434')
 
     def test_request_timeout_is_bounded(self):
-        for timeout in (0, 301):
+        for timeout in (0, 901):
             with self.subTest(timeout=timeout), self.assertRaisesRegex(ValueError, 'timeout'):
                 generation.generate_entry('John 3:16', 'study-note', [source()],
                                             timeout=timeout)
+
+    def test_explicit_local_cpu_budget_can_wait_up_to_fifteen_minutes(self):
+        with OllamaFixture() as ollama:
+            entry = generation.generate_entry('John 3:16', 'study-note', [source()],
+                                               endpoint=ollama.endpoint, timeout=900)
+        self.assertEqual(entry['reference'], 'John 3:16')
 
     def test_cloud_model_names_are_rejected_before_network_access(self):
         with self.assertRaisesRegex(ValueError, 'cloud model'):
