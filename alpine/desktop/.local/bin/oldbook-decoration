@@ -76,7 +76,7 @@ def daemon():
         return 1
 
     class Caption:
-        def __init__(self, monitor, placement):
+        def __init__(self, monitor, placement, animate_entry=True):
             self.monitor, self.edge = monitor, placement['edge']
             edge = self.edge
             self.attachment_mode = placement['mode']
@@ -89,7 +89,7 @@ def daemon():
             self.tick_id = 0
             self.retiring = False
             self.animations = Gtk.Settings.get_default().get_property('gtk-enable-animations')
-            self.alpha = 0.0 if self.animations else 1.0
+            self.alpha = 0.0 if self.animations and animate_entry else 1.0
             self.alpha_velocity = 0.0
             self.context = {'id': None, 'edge': edge, 'node': {}}
             self.tree = {}
@@ -208,7 +208,7 @@ def daemon():
                 self.rendered_size = size
 
         def animate(self):
-            if self.animations and not self.tick_id:
+            if self.animations and self.window.get_mapped() and not self.tick_id:
                 self.frame_time = None
                 self.tick_id = self.window.add_tick_callback(self.frame)
 
@@ -463,7 +463,9 @@ def daemon():
             self.full_button.set_label('⤡' if context.get('fullscreen') else '⛶')
             self.full_button.set_tooltip_text('Leave fullscreen' if context.get('fullscreen') else 'Fullscreen')
             self.full_button.get_accessible().set_name(self.full_button.get_tooltip_text())
-            self.window.show_all()
+            # Measure the final visible controls and set attachment geometry
+            # before mapping the window's first buffer.
+            self.box.show_all()
             self.empty_controls.set_visible(not occupied and self.edge == 'bottom')
             attached = self.attachment_mode == 'window'
             span = placement['rect']['width' if self.edge == 'bottom' else 'height']
@@ -475,6 +477,7 @@ def daemon():
             self.title_button.set_visible(not attached or span >= 80)
             self.state_label.set_visible(occupied and self.edge == 'bottom' and (not attached or span >= 520))
             self.place(placement, output_rect)
+            self.window.show()
             self.animate()
             self.previous_display = display_state
 
@@ -545,6 +548,15 @@ def daemon():
             placement = placements.get(name)
             if placement is None:
                 continue
+            caption = captions.get(name)
+            if (caption is not None and placement['mode'] == 'window'
+                    and caption.context.get('id') != placement['window_id']):
+                # A hover handoff needs the new position and buffer size in its
+                # first frame. Reusing GTK's mapped surface briefly displays
+                # the old width after its layer margins move. Start a complete
+                # surface here; keep the existing spring for same-window drags.
+                caption.destroy()
+                captions[name] = Caption(monitor, placement, animate_entry=False)
             if name not in captions:
                 captions[name] = Caption(monitor, placement)
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),

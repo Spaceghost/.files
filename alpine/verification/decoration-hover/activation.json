@@ -1,0 +1,33 @@
+{
+  "status": "passed",
+  "initial_replacement_pid": 1224,
+  "new_pid": 3740,
+  "source_sha256": "c13495763064296552dc73ef9e5e83bfe1818e934c7e288ec0f7af7357f20665",
+  "settings_sha256_before": "c133fe76d8938bd1486348fe6b218a909f02871f0c613197b025eed49ce098e9",
+  "scope": "only live decoration helper; Wayland desktop environment; no compositor or bar restart",
+  "outputs": [
+    {
+      "name": "eDP-1",
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 1213,
+            "height": 28,
+            "x": 110,
+            "y": 874
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ]
+    }
+  ],
+  "settings_sha256_after": "c133fe76d8938bd1486348fe6b218a909f02871f0c613197b025eed49ce098e9"
+}

@@ -234,6 +234,8 @@ def run_verifier(output):
             'layer_effects "oldbook-decoration" {\n    corner_radius 0\n}\n'
             'for_window [app_id="attachment-floating"] floating enable, '
             "resize set 620 360, move absolute position 200 160\n"
+            'for_window [app_id="attachment-hover"] floating enable, '
+            "resize set 420 280, move absolute position 900 120\n"
         )
         env = dict(
             os.environ,
@@ -439,6 +441,58 @@ def run_verifier(output):
 
                 def move_pointer(x, y):
                     event(f"move {round(x * 800 / WIDTH)} {round(y * 600 / HEIGHT)}")
+
+                terminal("attachment-hover", "Second floating hover target")
+                hover = wait_for(lambda: node("attachment-hover"), "hover client missing")
+                second = capture("hover-target-bottom", lambda state:
+                        attached(state, "bottom", "attachment-hover"),
+                        "second floating caption did not settle")
+                move_pointer(1000, 200)
+                ipc(command="focus_follows_mouse yes")
+                handoffs = []
+                evidence["hover_handoffs"] = handoffs
+                targets = [("attachment-floating", (300, 240), 0.25),
+                           ("attachment-hover", (1000, 200), 0.25),
+                           ("attachment-floating", (300, 240), 0.25)]
+                targets += [("attachment-hover", (1000, 200), 0.08),
+                            ("attachment-floating", (300, 240), 0.08)] * 3
+                complete_rects = (None, initial["caption_global_rect"], second["caption_global_rect"])
+                for app_id, pointer_position, duration in targets:
+                    before = snapshot()["caption_global_rect"]
+                    expected = dict((initial if app_id == "attachment-floating" else second)
+                                    ["caption_global_rect"])
+                    started = time.monotonic()
+                    move_pointer(*pointer_position)
+                    samples = []
+                    while time.monotonic() - started < duration:
+                        state = snapshot()
+                        visible_rect = state["caption_global_rect"]
+                        if visible_rect and (visible_rect["width"] <= 0 or visible_rect["height"] <= 0):
+                            visible_rect = None
+                        samples.append({"elapsed_ms": round((time.monotonic() - started) * 1000, 2),
+                                        "caption_rect": visible_rect,
+                                        "caption_count": len(state["captions"]),
+                                        "target_focused": state["clients"][app_id]["focused"]})
+                        time.sleep(0.004)
+                    handoffs.append({"target": app_id, "before": before,
+                                     "expected": expected, "duration_seconds": duration,
+                                     "first_complete_ms": next((sample["elapsed_ms"]
+                                         for sample in samples if sample["caption_rect"] == expected), None),
+                                     "samples": samples})
+                    write_evidence()
+                    require(samples[-1]["target_focused"]
+                            and (duration < 0.25 or samples[-1]["caption_rect"] == expected),
+                            "hover focus did not attach to the new target")
+                    require(all(sample["caption_count"] <= 1
+                                and sample["caption_rect"] in complete_rects
+                                for sample in samples),
+                            "hover handoff rendered an intermediate position or size")
+                checks.append("hover-handoffs-have-no-intermediate-geometry")
+                capture("hover-return-bottom", lambda state: attached(state, "bottom"),
+                        "hover return did not keep the original attachment")
+                ipc(command="focus_follows_mouse no")
+                expected_exits.add("attachment-hover")
+                ipc(command=f'[con_id={hover["id"]}] kill')
 
                 rect = initial["clients"]["attachment-floating"]["rect"]
                 drag_keyboard = spawn("drag-keyboard", ["wtype", "-M", "logo", "-s", "2000", "-m", "logo"])
