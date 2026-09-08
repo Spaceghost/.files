@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-"""Generate a study entry with the retained, private local Ollama runtime."""
+"""Generate a study entry with an explicitly enabled private Ollama runtime.
+
+Local inference is disabled by default. This MacBook uses the Alienware GPUs;
+an unavailable remote endpoint never enables a local CPU fallback.
+"""
 from contextlib import contextmanager
 import argparse
 import fcntl
+import json
 import os
 from pathlib import Path
 import signal
@@ -138,6 +143,18 @@ def backend(data, state):
                         process.wait(timeout=5)
 
 
+def require_local_runtime():
+    config = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config')) / 'oldbook/ollama.json'
+    try:
+        policy = json.loads(config.read_text())
+    except (OSError, ValueError):
+        policy = {}
+    if (not isinstance(policy, dict) or policy.get('local_server_enabled') is not True
+            or policy.get('inference_host') != 'local'):
+        raise RuntimeError('Local Ollama is disabled. Use the Alienware GPU runtime; '
+                           'this launcher will not fall back to the MacBook CPU.')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('reference')
@@ -153,6 +170,7 @@ def main():
         parser.error('--timeout must be between 1 and 900 seconds')
     if not args.model.strip() or 'cloud' in args.model.lower():
         parser.error('--model must name an installed local model')
+    require_local_runtime()
     data = Path(os.environ.get('XDG_DATA_HOME', Path.home() / '.local/share')) / 'oldbook/ollama'
     state = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'oldbook/ollama'
     command = [sys.executable, str(HELPER)]

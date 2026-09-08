@@ -28,6 +28,9 @@ class LocalScriptureTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory(prefix='scripture-local-test-')
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
+        config = self.root / 'config/oldbook/ollama.json'
+        config.parent.mkdir(parents=True)
+        config.write_text(json.dumps({'local_server_enabled': True, 'inference_host': 'local'}))
         self.data = self.root / 'data/oldbook/ollama'
         self.state = self.root / 'state/oldbook/ollama'
         binary = self.data / 'runtime-0.17.7-r1/usr/bin/ollama'
@@ -62,7 +65,8 @@ target.write_text(json.dumps(sys.argv[1:]))
             port = reservation.getsockname()[1]
         for replacement in (patch.object(local, 'PORT', port), patch.object(local, 'HELPER', self.helper),
                             patch.dict(os.environ, XDG_DATA_HOME=str(self.root / 'data'),
-                                       XDG_STATE_HOME=str(self.root / 'state'))):
+                                       XDG_STATE_HOME=str(self.root / 'state'),
+                                       XDG_CONFIG_HOME=str(self.root / 'config'))):
             replacement.start()
             self.addCleanup(replacement.stop)
 
