@@ -2,24 +2,26 @@
   "positionX": "right",
   "positionY": "top",
   "layer": "overlay",
-  "control-center-layer": "top",
+  "control-center-layer": "overlay",
+  "layer-shell-cover-screen": false,
+  "control-center-exclusive-zone": false,
   "control-center-margin-top": 50,
   "control-center-margin-bottom": 14,
   "control-center-margin-right": 14,
+  "control-center-width": 380,
+  "control-center-height": -1,
   "notification-window-width": 380,
   "notification-icon-size": 48,
   "timeout": 8,
   "timeout-low": 4,
-  "fit-to-screen": true,
+  "fit-to-screen": false,
+  "keyboard-shortcuts": false,
+  "transition-time": 0,
   "image-visibility": "when-available",
   "widgets": [
     "title",
     "dnd",
-    "notifications",
-    "mpris",
-    "volume",
-    "backlight",
-    "buttons-grid"
+    "notifications"
   ],
   "widget-config": {
     "title": {
@@ -30,33 +32,9 @@
     "dnd": {
       "text": "Off the air"
     },
-    "mpris": {
-      "image-size": 80,
-      "image-radius": 12
-    },
-    "buttons-grid": {
-      "actions": [
-        {
-          "label": "\udb81\udd7e",
-          "command": "pavucontrol",
-          "tooltip": "Sound studio"
-        },
-        {
-          "label": "\udb83\ude09",
-          "command": "oldbook-wallpaper next",
-          "tooltip": "Next scene"
-        },
-        {
-          "label": "\udb80\udf3e",
-          "command": "oldbook-lock",
-          "tooltip": "Lock the ship"
-        },
-        {
-          "label": "\udb80\ude19",
-          "command": "foot -e nvim ~/.config/sway/config",
-          "tooltip": "Edit the desktop"
-        }
-      ]
+    "notifications": {
+      "vexpand": false
     }
-  }
+  },
+  "layer-shell": true
 }
