@@ -1,0 +1,328 @@
+#!/usr/bin/env python3
+"""Follow the room with the panel backlight, the way the keyboard follows it.
+
+The Apple SMC light sensor already drives the keyboard glow. This is its
+opposite number for the display: a dark room settles the panel near its floor, a
+sunlit desk takes it to full, and everything between is a log-scale curve with a
+hysteresis band and a short eased fade, so the screen never steps or flickers.
+
+It is opt-in and it never argues with anyone:
+
+- A brightness the user sets by hand while the mode is on is taken as the truth.
+  The difference from the curve is learned as a lasting offset, so the room
+  still moves the panel but around the level the user actually likes.
+- The idle stage owns the display while it dims towards the lock, so the daemon
+  stands down whenever `oldbook-idle` holds runtime state.
+- Nothing is written while the session is locked.
+- Automatic changes are silent. `on` and `off` show the pill, because those are
+  the user asking for something.
+
+    oldbook-ambient-display on|off|status
+    oldbook-ambient-display run          # the loop, started by oldbook-session
+"""
+import argparse
+import contextlib
+import fcntl
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import ambient_light  # noqa: E402
+
+ACTIONS = ('on', 'off', 'status', 'run')
+POLL_SECONDS = ambient_light.SENSOR_INTERVAL
+FADE_STEPS = 24
+# A fade the user started themselves is left alone for this long, so a burst of
+# brightness-key presses is never read as a dozen separate corrections.
+MANUAL_SETTLE = 1.5
+
+
+def config_path():
+    base = os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))
+    return Path(base) / 'oldbook/ambient-display.json'
+
+
+def runtime_dir():
+    base = os.environ.get('XDG_RUNTIME_DIR', str(Path.home() / '.local/state'))
+    return Path(base) / 'oldbook/ambient-display'
+
+
+class AmbientDisplay:
+    def __init__(self, config=None, runtime=None, backlight_root=None, sensors=None,
+                 idle_state=None, lock_record=None, clock=time.monotonic, notify=None):
+        self.config = Path(config or config_path())
+        self.runtime = Path(runtime or runtime_dir())
+        self.backlight_root = Path(backlight_root
+                                   or os.environ.get('OLDBOOK_BACKLIGHT_ROOT', '/sys/class/backlight'))
+        self.sensors = list(sensors) if sensors is not None else ambient_light.sensor_paths()
+        session = Path(os.environ.get('XDG_RUNTIME_DIR', str(Path.home() / '.local/state')))
+        self.idle_state = Path(idle_state) if idle_state else session / 'oldbook/idle/display.json'
+        self.lock_record = Path(lock_record) if lock_record else session / 'oldbook-screen-lock/ready.json'
+        self.clock = clock
+        self.notify = notify if notify is not None else self.show_pill
+        self.filtered = None
+        self.reference = None
+        self.written = None
+
+    # ---- preferences -------------------------------------------------------
+
+    def read_config(self):
+        try:
+            document = json.loads(self.config.read_text())
+        except (OSError, ValueError):
+            return {'enabled': False, 'offset': 0.0}
+        return {'enabled': bool(document.get('enabled', False)),
+                'offset': ambient_light.clamp_offset(float(document.get('offset', 0.0) or 0.0))}
+
+    def write_config(self, values):
+        self.config.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self.config.with_name(self.config.name + f'.{os.getpid()}.tmp')
+        temporary.write_text(json.dumps(values, indent=2, sort_keys=True) + '\n')
+        temporary.replace(self.config)
+
+    # ---- the panel ---------------------------------------------------------
+
+    def device(self):
+        """The first backlight this user may both read and write."""
+        for candidate in sorted(self.backlight_root.glob('*')):
+            if (os.access(candidate / 'brightness', os.R_OK | os.W_OK)
+                    and os.access(candidate / 'max_brightness', os.R_OK)):
+                return candidate
+        return None
+
+    @staticmethod
+    def read_value(path):
+        return int(Path(path).read_text().strip())
+
+    def levels(self, device):
+        return self.read_value(device / 'brightness'), self.read_value(device / 'max_brightness')
+
+    def write_level(self, device, value):
+        (device / 'brightness').write_text(str(int(value)) + '\n')
+        self.written = int(value)
+
+    # ---- other owners of the display ---------------------------------------
+
+    def idle_holds_display(self):
+        """The pre-lock dim owns the panel while its runtime state exists."""
+        return self.idle_state.exists()
+
+    def session_locked(self):
+        """A live lock readiness record means a locker is on screen."""
+        try:
+            record = json.loads(self.lock_record.read_text())
+            pid = int(record['process']['pid'])
+        except (OSError, ValueError, KeyError, TypeError):
+            return False
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return False
+        return True
+
+    def paused(self):
+        return self.idle_holds_display() or self.session_locked()
+
+    # ---- feedback ----------------------------------------------------------
+
+    def show_pill(self, percent):
+        """Only the user's own on/off gets a pill; the room's changes are silent."""
+        try:
+            subprocess.run(['oldbook-osd', 'show', '--kind', 'brightness',
+                            '--value', str(int(percent))],
+                           stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=3, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+
+    # ---- the loop -----------------------------------------------------------
+
+    def sample(self):
+        reading = ambient_light.read_sensor(self.sensors)
+        if reading is None:
+            return None
+        self.filtered = ambient_light.smooth(self.filtered, ambient_light.log_sample(reading))
+        return reading
+
+    def observe_manual_change(self, device, current, maximum, settings):
+        """Learn from a level the user set, and stop steering towards the old one."""
+        if self.written is None or current == self.written:
+            return settings, False
+        expected = ambient_light.display_fraction(self.filtered, settings['offset'])
+        settings = dict(settings,
+                        offset=ambient_light.learned_offset(settings['offset'],
+                                                            current / maximum, expected))
+        self.write_config(settings)
+        self.written = current
+        self.reference = None  # the next room change starts from the new level
+        return settings, True
+
+    def fade(self, device, target, maximum, seconds=ambient_light.FADE_SECONDS):
+        """Ease to the target, abandoning the fade if anyone else touches the panel."""
+        start = self.read_value(device / 'brightness')
+        if start == target:
+            self.written = target
+            return 'unchanged'
+        for step in range(1, FADE_STEPS + 1):
+            time.sleep(seconds / FADE_STEPS)
+            if self.paused():
+                return 'paused'
+            try:
+                current = self.read_value(device / 'brightness')
+            except (OSError, ValueError):
+                return 'gone'
+            if self.written is not None and current != self.written:
+                return 'taken'
+            value = ambient_light.fade_value(start, target, step / FADE_STEPS)
+            try:
+                self.write_level(device, value)
+            except OSError:
+                return 'denied'
+        return 'settled'
+
+    def tick(self):
+        """One sample; returns what it decided, for the tests and for `status`."""
+        settings = self.read_config()
+        if not settings['enabled']:
+            return 'disabled'
+        device = self.device()
+        if device is None:
+            return 'no-display'
+        if self.paused():
+            self.reference = None
+            return 'paused'
+        reading = self.sample()
+        if reading is None:
+            return 'no-sensor'
+        try:
+            current, maximum = self.levels(device)
+        except (OSError, ValueError):
+            return 'no-display'
+        settings, learned = self.observe_manual_change(device, current, maximum, settings)
+        if learned:
+            return 'learned'
+        if not ambient_light.should_retarget(self.filtered, self.reference):
+            return 'steady'
+        self.reference = self.filtered
+        target = max(1, int(round(maximum * ambient_light.display_fraction(
+            self.filtered, settings['offset']))))
+        if target == current:
+            self.written = current
+            return 'steady'
+        return self.fade(device, target, maximum)
+
+    def status(self):
+        settings = self.read_config()
+        device = self.device()
+        reading = ambient_light.read_sensor(self.sensors)
+        document = {'enabled': settings['enabled'], 'offset': round(settings['offset'], 3),
+                    'sensor': bool(self.sensors), 'light': reading,
+                    'running': self.owner_pid() is not None,
+                    'paused': self.paused(), 'device': device.name if device else None}
+        if reading is not None:
+            document['target_percent'] = round(100 * ambient_light.display_fraction(
+                ambient_light.log_sample(reading), settings['offset']))
+        if device is not None:
+            with contextlib.suppress(OSError, ValueError):
+                current, maximum = self.levels(device)
+                document['percent'] = round(100 * current / maximum)
+        return document
+
+    # ---- single owner -------------------------------------------------------
+
+    def owner_pid(self):
+        try:
+            pid = int((self.runtime / 'pid').read_text().strip())
+            os.kill(pid, 0)
+        except (OSError, ValueError):
+            return None
+        return pid
+
+    @contextlib.contextmanager
+    def owned(self):
+        self.runtime.mkdir(mode=0o700, parents=True, exist_ok=True)
+        with (self.runtime / 'lock').open('a') as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError('another ambient display worker owns this session')
+            (self.runtime / 'pid').write_text(str(os.getpid()) + '\n')
+            try:
+                yield
+            finally:
+                with contextlib.suppress(FileNotFoundError):
+                    (self.runtime / 'pid').unlink()
+
+    def run(self):
+        """Sample until the preference is switched off or the session ends."""
+        with self.owned():
+            while True:
+                if not self.read_config()['enabled']:
+                    return 0
+                try:
+                    self.tick()
+                except OSError as error:
+                    print('oldbook-ambient-display: %s' % error, file=sys.stderr)
+                time.sleep(POLL_SECONDS)
+
+    def spawn(self):
+        if self.owner_pid() is not None:
+            return False
+        subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'run'],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True, close_fds=True)
+        return True
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('action', nargs='?', default='status', choices=ACTIONS)
+    arguments = parser.parse_args(argv)
+    os.umask(0o077)
+    ambient = AmbientDisplay()
+    if arguments.action == 'run':
+        if not ambient.read_config()['enabled']:
+            return 0
+        if not ambient.sensors:
+            print('oldbook-ambient-display: no ambient light sensor on this machine',
+                  file=sys.stderr)
+            return 1
+        try:
+            return ambient.run()
+        except RuntimeError:
+            return 0  # another worker already owns the session
+    if arguments.action == 'on':
+        if not ambient.sensors:
+            print('oldbook-ambient-display: no ambient light sensor on this machine',
+                  file=sys.stderr)
+            return 1
+        settings = ambient.read_config()
+        ambient.write_config(dict(settings, enabled=True))
+        ambient.spawn()
+        status = ambient.status()
+        if status.get('percent') is not None:
+            ambient.notify(status['percent'])
+        print(json.dumps(status, sort_keys=True))
+        return 0
+    if arguments.action == 'off':
+        settings = ambient.read_config()
+        ambient.write_config(dict(settings, enabled=False))
+        status = ambient.status()
+        if status.get('percent') is not None:
+            ambient.notify(status['percent'])
+        print(json.dumps(status, sort_keys=True))
+        return 0
+    print(json.dumps(ambient.status(), sort_keys=True))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(0)
