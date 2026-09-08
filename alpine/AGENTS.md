@@ -14,7 +14,8 @@ explicit choice across theme changes, wallpaper pairing, template updates and
 rebuilds: no CPU/load/frequency, memory/swap/process, storage I/O, network or
 thermal telemetry. Waybar owns those stats. Battery charge/status is allowed.
 Keep date, Scripture, gallery notes and rotating text; email is welcome when a
-mailbox source is configured. Periodic refreshes must be 60–300 seconds.
+mailbox source is configured. Periodic refreshes must be 60–300 seconds, except
+Scripture: select and display a new passage once per hour (3600 seconds).
 
 Do not restore historical reactor, memory, storage or transmission panels.
 Keep the runtime guard in `desktop/.local/lib/oldbook/conky_policy.py` and its
@@ -38,9 +39,21 @@ Scripture shortcuts: Super+/ searches only Bible verses. Super+Shift+/ searches
 all collections, with Bible results after Torah, Talmud and reflections. Do not
 add non-Bible results or collection-switch commands to the Bible-only picker.
 Enter must save the choice and refresh only the Scripture card immediately;
-keep background refresh intervals at 60–300 seconds. Preserve the offline
+hold a manual choice for one hour before automatic rotation resumes. Scripture
+history is durable personal SQLite data, separate from the rebuildable study
+cache: preserve full passages, study material, sources, provenance and linked
+additional notes. Never rebuild or commit the history database. Keep all other
+background card intervals at 60–300 seconds. Preserve the offline
 English Torah (JPS 1917) and Babylonian Talmud (William Davidson) collection,
 source manifests and attribution alongside the Bible and curated reflections.
+
+Keep the earlier Scripture reflections and practice text available. Scripture
+study notes, inspirations, and observations use the SQLite reading library
+rebuilt from Fossil-tracked canonical records; never add application tables to
+the Fossil repository database. Generate new study prose only with local AI,
+ground it in attributed high-quality sources, and preserve source excerpts,
+hashes, and model provenance. Do not silently use a cloud model or include the
+separate personal desktop journal in this published study collection.
 
 Keep Conky placement stable through window, focus and fullscreen changes; the
 user prefers no automatic reflow to abrupt motion or continuous CPU work.

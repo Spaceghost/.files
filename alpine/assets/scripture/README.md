@@ -35,3 +35,11 @@ cmp alpine/assets/scripture/jewish-texts.jsonl.gz \
 
 The builder validates all input hashes and writes deterministic gzip output.
 The network-disabled rebuild matched the packaged output byte for byte.
+
+## Reflections and local study
+
+The original reflections and locally generated study records are served from
+a SQLite reading library. Fossil tracks their canonical source records so
+the SQLite can rebuild after checkout updates. Right-click the Scripture
+search bar to choose reflections and study material. See
+[`study/README.md`](study/README.md) for generation, sources, and synchronization.
