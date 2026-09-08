@@ -32,7 +32,7 @@ def source(identifier='kjv-john-3', text='John 3:16  Synthetic fixture verse.'):
 
 class OllamaFixture:
     def __init__(self, *, generated=None, tags=None, shown=None, redirect=False,
-                 generate_response=None):
+                 generate_response=None, bounded_grammar=False):
         self.requests = []
         self.redirect = redirect
         self.generated = generated or {
@@ -53,6 +53,7 @@ class OllamaFixture:
             'capabilities': ['completion'],
         }
         self.generate_response = generate_response
+        self.bounded_grammar = bounded_grammar
         fixture = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -82,6 +83,11 @@ class OllamaFixture:
                 elif self.path == '/api/show':
                     self.reply(fixture.shown)
                 elif self.path == '/api/generate':
+                    if fixture.bounded_grammar and any(
+                            value.get('maxLength', 0) > 1000
+                            for value in document['format']['properties'].values()):
+                        self.reply({'error': 'number of repetitions exceeds sane defaults'}, status=400)
+                        return
                     self.reply(fixture.generate_response or {
                         'model': document['model'], 'done': True, 'done_reason': 'stop',
                         'response': json.dumps(fixture.generated)})
@@ -106,6 +112,20 @@ class OllamaFixture:
 
 
 class GenerationTests(unittest.TestCase):
+    def test_native_grammar_repetition_limit_does_not_reject_the_schema(self):
+        with OllamaFixture(bounded_grammar=True) as ollama:
+            entry = generation.generate_entry('John 3:16', 'study-note', [source()],
+                                               endpoint=ollama.endpoint)
+        self.assertEqual(entry['reflection'], 'Synthetic observation grounded in the fixture.')
+
+    def test_generated_text_keeps_application_length_limits(self):
+        generated = {'title': 'Synthetic', 'trial': '', 'reflection': 'x' * 2401,
+                     'practice': '', 'cited_source_ids': ['kjv-john-3']}
+        with OllamaFixture(generated=generated) as ollama:
+            with self.assertRaisesRegex(ValueError, 'too long: reflection'):
+                generation.generate_entry('John 3:16', 'study-note', [source()],
+                                            endpoint=ollama.endpoint)
+
     def test_local_ollama_is_preflighted_and_receives_a_json_schema(self):
         with OllamaFixture() as ollama:
             entry = generation.generate_entry(

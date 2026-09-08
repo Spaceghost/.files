@@ -1,0 +1,22 @@
+test_generate_rejects_a_reference_outside_the_bundled_bible (test_scripture_generation.CommandTests.test_generate_rejects_a_reference_outside_the_bundled_bible) ... ok
+test_generate_saves_a_grounded_artifact_then_list_show_and_rebuild_read_it (test_scripture_generation.CommandTests.test_generate_saves_a_grounded_artifact_then_list_show_and_rebuild_read_it) ... ok
+test_rebuild_preserves_a_foreign_sqlite_database (test_scripture_generation.CommandTests.test_rebuild_preserves_a_foreign_sqlite_database) ... ok
+test_an_installed_model_needs_digest_weights_and_local_model_info (test_scripture_generation.GenerationTests.test_an_installed_model_needs_digest_weights_and_local_model_info) ... ok
+test_cloud_model_names_are_rejected_before_network_access (test_scripture_generation.GenerationTests.test_cloud_model_names_are_rejected_before_network_access) ... ok
+test_dns_names_are_rejected_and_literal_localhost_is_pinned (test_scripture_generation.GenerationTests.test_dns_names_are_rejected_and_literal_localhost_is_pinned) ... ok
+test_generated_text_keeps_application_length_limits (test_scripture_generation.GenerationTests.test_generated_text_keeps_application_length_limits) ... ok
+test_incomplete_or_different_model_responses_are_rejected (test_scripture_generation.GenerationTests.test_incomplete_or_different_model_responses_are_rejected) ... ok
+test_invalid_sources_are_rejected_before_ollama_receives_them (test_scripture_generation.GenerationTests.test_invalid_sources_are_rejected_before_ollama_receives_them) ... ok
+test_local_ollama_is_preflighted_and_receives_a_json_schema (test_scripture_generation.GenerationTests.test_local_ollama_is_preflighted_and_receives_a_json_schema) ... ok
+test_model_text_cannot_inject_conky_interpolation (test_scripture_generation.GenerationTests.test_model_text_cannot_inject_conky_interpolation) ... ok
+test_native_grammar_repetition_limit_does_not_reject_the_schema (test_scripture_generation.GenerationTests.test_native_grammar_repetition_limit_does_not_reject_the_schema) ... ok
+test_output_must_cite_only_supplied_sources (test_scripture_generation.GenerationTests.test_output_must_cite_only_supplied_sources) ... ok
+test_public_and_cloud_endpoints_are_rejected_before_network_access (test_scripture_generation.GenerationTests.test_public_and_cloud_endpoints_are_rejected_before_network_access) ... ok
+test_redirects_are_not_followed (test_scripture_generation.GenerationTests.test_redirects_are_not_followed) ... ok
+test_remote_model_metadata_is_rejected_before_generation (test_scripture_generation.GenerationTests.test_remote_model_metadata_is_rejected_before_generation) ... ok
+test_request_timeout_is_bounded (test_scripture_generation.GenerationTests.test_request_timeout_is_bounded) ... ok
+
+----------------------------------------------------------------------
+Ran 17 tests in 8.840s
+
+OK

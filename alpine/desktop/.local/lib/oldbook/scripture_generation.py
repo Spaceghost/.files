@@ -18,10 +18,12 @@ LOCAL_NETWORKS = tuple(ipaddress.ip_network(value) for value in (
 OUTPUT_SCHEMA = {
     'type': 'object',
     'properties': {
-        'title': {'type': 'string', 'minLength': 1, 'maxLength': 160},
-        'trial': {'type': 'string', 'maxLength': 1200},
-        'reflection': {'type': 'string', 'minLength': 1, 'maxLength': 2400},
-        'practice': {'type': 'string', 'maxLength': 800},
+        # Native Ollama grammars reject large bounded string repetitions.
+        # Keep the structure constrained here; validate lengths after decoding.
+        'title': {'type': 'string'},
+        'trial': {'type': 'string'},
+        'reflection': {'type': 'string'},
+        'practice': {'type': 'string'},
         'cited_source_ids': {
             'type': 'array', 'minItems': 1, 'uniqueItems': True,
             'items': {'type': 'string'},

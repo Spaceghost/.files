@@ -1,0 +1,26 @@
+{
+  "command": [
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture-study",
+    "--assets",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/assets",
+    "--database",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/study.sqlite3",
+    "generate",
+    "2 Corinthians 12:9",
+    "--kind",
+    "study-note",
+    "--endpoint",
+    "http://127.0.0.1:11435",
+    "--model",
+    "qwen2.5:1.5b",
+    "--timeout",
+    "300",
+    "--no-track"
+  ],
+  "exit_code": -15,
+  "elapsed_seconds": 136.924,
+  "cloud_calls": 0,
+  "real_model_request": true,
+  "outcome": "Rejected native grammar bounds; request cancelled before any source artifact was saved.",
+  "native_error": "number of repetitions exceeds sane defaults, please reduce the number of repetitions"
+}
