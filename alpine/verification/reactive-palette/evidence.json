@@ -1,0 +1,47 @@
+{
+  "status": "passed",
+  "subjects": [
+    {
+      "label": "warm",
+      "painting": "2026-09-07-gruvbox-dark-crusader-procession-b7da64196555.png",
+      "accent": "#fabd2f",
+      "accent_name": "yellow",
+      "accent_secondary": "#fe8019",
+      "reason": "largest share of the painting's colour",
+      "scores": {
+        "aqua": 0.0,
+        "blue": 0.0,
+        "green": 0.009217,
+        "orange": 0.064223,
+        "purple": 0.0,
+        "yellow": 0.92656
+      },
+      "bar": "bar-warm.png",
+      "pill": "pill-warm.png",
+      "rendered_badge": "#ecb32e",
+      "helper_said": "#fabd2f + #fe8019  (largest share of the painting's colour)"
+    },
+    {
+      "label": "cool",
+      "painting": "2026-09-07-gruvbox-dark-antarctic-station-b6c15e380baa.png",
+      "accent": "#83a598",
+      "accent_name": "blue",
+      "accent_secondary": "#d3869b",
+      "reason": "largest share of the painting's colour",
+      "scores": {
+        "aqua": 0.0,
+        "blue": 0.432767,
+        "green": 0.0,
+        "orange": 0.25758,
+        "purple": 0.275699,
+        "yellow": 0.033955
+      },
+      "bar": "bar-cool.png",
+      "pill": "pill-cool.png",
+      "rendered_badge": "#7d9d90",
+      "helper_said": "#83a598 + #d3869b  (largest share of the painting's colour)"
+    }
+  ],
+  "isolation": "private XDG state and config directories; private headless SwayFX (pixman) for the bar; display-free preview for the pill",
+  "limits": "The pixman renderer has no blur, and a small bar configuration holding only the accent-bearing modules stands in for the full control deck. Neither is a photograph of the live panel."
+}

@@ -98,6 +98,35 @@ previous/next and the gallery still reach every collection. The gallery offers
 active-theme, unthemed and named-theme generation. See the
 [gallery guide](../wallpapers/README.md).
 
+## The accent follows the painting
+
+The theme's colours stay put, but its accent moves with the artwork. After every
+image change `oldbook-palette` reduces the new painting to a weighted hue
+signature in OKLab and elects whichever of the theme's *own* accent candidates
+holds the largest share of its colour, plus a companion. Nothing is sampled out
+of the canvas: for Gruvbox Dark the choice is between the declared yellow,
+orange, aqua, green, blue and purple, and red stays reserved for urgency. A grey
+painting, or one where no colour holds a third of the frame, keeps the declared
+accent.
+
+The election lands in `~/.local/state/oldbook/palette-override.json`, which
+`overlay_theme.read_palette` honours for the theme that produced it and only for
+colours that theme declares, so the feedback pill, launcher, Expo, lock screen,
+caption strip and shortcut guide all retint on their next render. The bar reads
+`~/.config/waybar/waybar-accent.css`, imported last by `style.css` so it wins
+over the hardcoded amber. The Ghost badge is branding and never changes.
+
+```sh
+oldbook-palette          # re-elect for the painting on screen
+oldbook-palette show     # the current record, with its scores
+oldbook-palette clear    # back to the theme's declared accent
+```
+
+A descriptor turns the whole thing off with `"reactive_accent": false`; an
+absent key means enabled. Details and evidence:
+[the design note](../../docs/superpowers/specs/2026-09-08-reactive-palette.md)
+and [verification/reactive-palette](../verification/reactive-palette/README.md).
+
 ## Preserve and rebuild
 
 `profiles/spaceghost/` preserves the original application theme configurations;

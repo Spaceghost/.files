@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Publish the accent the painting on screen asks for.
+
+The desktop's chrome keeps the active theme's colours; only its accent follows
+the artwork, and only ever to another colour the theme itself declares. The
+choice lands in one small runtime record that every overlay already reads
+through `overlay_theme.read_palette`, plus a stylesheet the bar imports, so
+nothing has to be restarted for the desktop to change its mind.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import sys
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+from theme_catalog import load_theme
+
+CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
+FALLBACK = Path.home() / '.local/share/oldbook/wallpaper.png'
+OVERRIDE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) \
+    / 'oldbook/palette-override.json'
+ACCENT_CSS = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) \
+    / 'waybar/waybar-accent.css'
+HEADER = '/* Written by oldbook-palette; edit style.css instead. */\n'
+
+
+def painting_path(explicit=None):
+    for candidate in ([Path(explicit)] if explicit else [CURRENT, FALLBACK]):
+        if candidate.is_file():
+            return candidate.resolve()
+    return None
+
+
+def digest(path):
+    reader = hashlib.sha256()
+    with path.open('rb') as stream:
+        for block in iter(lambda: stream.read(1 << 16), b''):
+            reader.update(block)
+    return reader.hexdigest()
+
+
+def write_atomic(path, text):
+    """Replace a runtime file in one step, never following a link out of it."""
+    if path.is_symlink():
+        raise RuntimeError('Refusing to write through a symlink: ' + str(path))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_name(path.name + f'.{os.getpid()}.tmp')
+    temporary.write_text(text)
+    temporary.replace(path)
+
+
+def accent_stylesheet(accent, secondary):
+    """Bar rules for the four places the accent shows, and nowhere else.
+
+    The Ghost badge keeps its own white, purple and pink under every theme, and
+    the status colours (battery warning, staged firewall, keep-awake) stay
+    semantic rather than decorative, so none of them appear here.
+    """
+    return HEADER + f'''@define-color oldbook_accent {accent};
+@define-color oldbook_accent_secondary {secondary};
+#workspaces button.focused {{
+    background: linear-gradient(110deg, alpha(@oldbook_accent, .22), alpha(@oldbook_accent, .10));
+}}
+#custom-ai {{ color: @oldbook_accent; }}
+#clock {{ background: alpha(@oldbook_accent, .18); }}
+#custom-art.generating {{
+    color: @oldbook_accent;
+    text-shadow: 0 0 7px @oldbook_accent_secondary;
+}}
+'''
+
+
+def read_override():
+    try:
+        record = json.loads(OVERRIDE.read_text())
+        return record if isinstance(record, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def apply(explicit=None, force=False, quiet=False):
+    import painting_palette
+
+    theme = load_theme(REPO)
+    painting = painting_path(explicit)
+    if painting is None:
+        raise RuntimeError('No painting is on screen yet')
+    checksum = digest(painting)
+    previous = read_override()
+    if (not force and previous.get('sha256') == checksum
+            and previous.get('theme') == theme.get('id')):
+        if not quiet:
+            print('unchanged: ' + str(previous.get('accent')))
+        return 0
+    record = painting_palette.analyse(painting, theme)
+    record.update({'theme': theme.get('id'), 'painting': str(painting),
+                   'sha256': checksum, 'chosen_at': int(time.time())})
+    write_atomic(OVERRIDE, json.dumps(record, indent=2, sort_keys=True) + '\n')
+    write_atomic(ACCENT_CSS, accent_stylesheet(record['accent'], record['accent_secondary']))
+    if not quiet:
+        print(f"{record['accent']} + {record['accent_secondary']}  ({record['reason']})")
+    return 0
+
+
+def clear():
+    """Return the desktop to the theme's declared accent."""
+    theme = load_theme(REPO)
+    palette = theme.get('palette') or {}
+    accent = palette.get('accent') or palette.get('yellow') or '#fabd2f'
+    OVERRIDE.unlink(missing_ok=True)
+    write_atomic(ACCENT_CSS, accent_stylesheet(accent, accent))
+    print('cleared: ' + accent)
+    return 0
+
+
+def show():
+    record = read_override()
+    if not record:
+        print('no accent override')
+        return 0
+    print(json.dumps(record, indent=2, sort_keys=True))
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', nargs='?', default='apply',
+                        choices=['apply', 'show', 'clear'])
+    parser.add_argument('--painting', help='analyse this image instead of the one on screen')
+    parser.add_argument('--force', action='store_true', help='re-analyse an unchanged painting')
+    parser.add_argument('--quiet', action='store_true')
+    arguments = parser.parse_args()
+    if arguments.action == 'show':
+        return show()
+    if arguments.action == 'clear':
+        return clear()
+    return apply(arguments.painting, arguments.force, arguments.quiet)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, RuntimeError) as error:
+        print('oldbook-palette: ' + str(error), file=sys.stderr)
+        sys.exit(1)
