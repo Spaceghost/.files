@@ -45,11 +45,11 @@ def base_ghostty(repo):
 
 
 def ghostty_from_foot(foot_ini, base, name=None):
-    """Derive Ghostty colours from the theme's Foot palette.
+    """Derive Ghostty typography and colours from a theme's Foot config.
 
     Foot already carries a full sixteen-colour terminal palette for every theme,
-    including generated ones, so deriving from it means a new theme themes both
-    terminals without anyone hand-writing a second palette.
+    including generated ones, as well as the terminal font.  Deriving both means
+    a new theme keeps the two terminals aligned without duplicate authoring.
     """
     import configparser
     parser = configparser.ConfigParser(interpolation=None, strict=False,
@@ -58,10 +58,22 @@ def ghostty_from_foot(foot_ini, base, name=None):
         parser.read_file(stream)
     if not parser.has_section('colors-dark'):
         return None
+    shared = list(base)
+    font = parser.get('main', 'font', fallback='').split(',', 1)[0].strip()
+    family = font.split(':', 1)[0].strip()
+    size = re.search(r'(?:^|:)size=([^:]+)', font)
+    typography = {
+        'font-family': family,
+        'font-size': size.group(1).strip() if size else '',
+    }
+    for index, line in enumerate(shared):
+        key = line.split('=', 1)[0].strip()
+        if typography.get(key):
+            shared[index] = f'{key} = {typography[key]}'
     colors = parser['colors-dark']
     header = [f'# {name}: generated from this theme\'s Foot palette by oldbook-theme sync.',
               '# Edit the Foot colours, then rerun sync; this file is derived.'] if name else []
-    lines = header + [line for line in base if line.strip()] + ['']
+    lines = header + [line for line in shared if line.strip()] + ['']
     for name, key in (('background', 'background'), ('foreground', 'foreground'),
                       ('selection-background', 'selection-background'),
                       ('selection-foreground', 'selection-foreground')):
@@ -81,6 +93,27 @@ def ghostty_from_foot(foot_ini, base, name=None):
     return '\n'.join(lines).rstrip('\n') + '\n'
 
 
+def sync_ghostty_profile(repo, profile, theme, base=None):
+    """Refresh one derived terminal config before it becomes the active theme."""
+    foot_ini = profile / '.config/foot/foot.ini'
+    target = profile / '.config/ghostty/config'
+    if has_symlink(foot_ini, repo) or has_symlink(target, repo):
+        raise RuntimeError('Theme terminal configuration must not follow symlinks')
+    if not foot_ini.is_file():
+        return None
+    local_base = list(base if base is not None else base_ghostty(repo))
+    if theme.get('design'):
+        spacing = theme['design']['spacing']
+        local_base = [re.sub(r'^(window-padding-[xy])\s*=.*', rf'\1 = {spacing}', line)
+                      for line in local_base]
+    body = ghostty_from_foot(foot_ini, local_base, theme.get('name', profile.name))
+    if body is None or (target.is_file() and target.read_text() == body):
+        return None
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(body)
+    return str(target.relative_to(repo))
+
+
 def sync_profiles(repo):
     """Materialise the per-theme files that are derived rather than authored."""
     written = []
@@ -90,29 +123,14 @@ def sync_profiles(repo):
     for profile in sorted((repo / 'alpine/themes/profiles').glob('*')):
         if not profile.is_dir() or has_symlink(profile, repo):
             continue
-        foot_ini = profile / '.config/foot/foot.ini'
-        if not foot_ini.is_file():
-            continue
         theme = {}
         try:
             theme = load_theme(repo, profile.name)
-            name = theme['name']
         except (OSError, ValueError, RuntimeError):
-            name = profile.name
-        local_base = list(base)
-        if theme.get('design'):
-            spacing = theme['design']['spacing']
-            local_base = [re.sub(r'^(window-padding-[xy])\s*=.*', rf'\1 = {spacing}', line)
-                          for line in local_base]
-        body = ghostty_from_foot(foot_ini, local_base, name)
-        if body is None:
-            continue
-        target = profile / '.config/ghostty/config'
-        if target.is_file() and target.read_text() == body:
-            continue
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(body)
-        written.append(str(target.relative_to(repo)))
+            pass
+        changed = sync_ghostty_profile(repo, profile, theme, base)
+        if changed is not None:
+            written.append(changed)
     return written
 
 
@@ -257,6 +275,7 @@ def use(identity, *, reload=True):
     profile = ensure_profile(REPO, theme)
     deployed = None
     if profile is not None:
+        sync_ghostty_profile(REPO, profile, theme)
         # The deployer owns the symlink journal and its rollback, so switching
         # themes reuses it rather than inventing a second way to write HOME.
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))

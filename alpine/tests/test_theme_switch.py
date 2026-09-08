@@ -1,16 +1,18 @@
 """Deriving a Ghostty palette from a theme's Foot colours, and naming the active theme."""
 from pathlib import Path
 import runpy
+import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 THEME = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'))
 
 FOOT = '''[main]
 term=xterm-256color
-font=JetBrainsMono Nerd Font:size=11
+font=DejaVu Serif:size=9.5
 
 [colors-dark]
 alpha=0.94
@@ -77,8 +79,14 @@ class GhosttyPalette(unittest.TestCase):
 
     def test_shared_settings_survive_and_the_theme_names_itself(self):
         body = derive()
-        self.assertIn('font-family = JetBrainsMono Nerd Font', body)
+        self.assertIn('window-theme = dark', body)
         self.assertTrue(body.startswith('# Space Ghost Violet:'))
+
+    def test_font_family_and_size_follow_foot(self):
+        body = derive()
+        self.assertIn('font-family = DejaVu Serif', body)
+        self.assertIn('font-size = 9.5', body)
+        self.assertNotIn('font-size = 11', body)
 
     def test_a_theme_without_dark_colours_is_skipped_rather_than_half_written(self):
         self.assertIsNone(derive('[main]\nterm=xterm-256color\n'))
@@ -92,6 +100,34 @@ class GhosttyPalette(unittest.TestCase):
 
 
 class ShippedProfiles(unittest.TestCase):
+    def test_selecting_a_theme_refreshes_ghostty_before_deploying_it(self):
+        # An existing profile may have a newer Foot font than its derived
+        # Ghostty file. Selecting it must repair that drift without manual sync.
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / 'repo'
+            home = Path(directory) / 'home'
+            home.mkdir()
+            for relative in ('alpine/desktop', 'alpine/themes/profiles/gruvbox-dark'):
+                shutil.copytree(REPO / relative, root / relative,
+                                ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+            for relative in ('alpine/themes/gruvbox-dark.json', 'alpine/bin/deploy-home'):
+                target = root / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(REPO / relative, target)
+            theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/oldbook-theme'))
+            profile = root / 'alpine/themes/profiles/gruvbox-dark'
+            foot = profile / '.config/foot/foot.ini'
+            for font, expected_family, expected_size in (
+                    ('DejaVu Sans Mono:size=13', 'DejaVu Sans Mono', '13'),
+                    ('monospace:size=10.5', 'monospace', '10.5')):
+                foot.write_text(FOOT.replace('DejaVu Serif:size=9.5', font))
+                with mock.patch.object(Path, 'home', return_value=home):
+                    theme['use']('gruvbox-dark', reload=False)
+                deployed = home / '.config/ghostty/config'
+                self.assertTrue(deployed.is_symlink())
+                self.assertIn(f'font-family = {expected_family}', deployed.read_text())
+                self.assertIn(f'font-size = {expected_size}\n', deployed.read_text())
+
     def test_every_profile_with_foot_colours_has_a_matching_ghostty_config(self):
         # `oldbook-theme sync` generates these; a profile that drifts fails here.
         for profile in sorted((REPO / 'alpine/themes/profiles').glob('*')):
@@ -101,7 +137,15 @@ class ShippedProfiles(unittest.TestCase):
             with self.subTest(theme=profile.name):
                 ghostty = profile / '.config/ghostty/config'
                 self.assertTrue(ghostty.is_file(), 'run: oldbook-theme sync')
-                self.assertIn('palette = 0=#', ghostty.read_text())
+                body = ghostty.read_text()
+                self.assertIn('palette = 0=#', body)
+                foot_font = next(line.split('=', 1)[1] for line in foot.read_text().splitlines()
+                                 if line.startswith('font='))
+                family, *attributes = foot_font.split(':')
+                size = next(part.split('=', 1)[1] for part in attributes
+                            if part.startswith('size='))
+                self.assertIn(f'font-family = {family}', body)
+                self.assertIn(f'font-size = {size}', body)
 
     def test_the_active_theme_is_a_real_theme(self):
         active = (REPO / 'alpine/themes/current').read_text().strip()
