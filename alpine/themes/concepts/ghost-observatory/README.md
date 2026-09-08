@@ -28,3 +28,13 @@ then terminates only processes it created. The archived input is reproducible;
 live clock and telemetry values do not promise identical screenshot bytes.
 The checked-in `preview.png` was rendered with the installed patched compositor;
 `preview-evidence.json` records its binary and artwork hashes.
+
+## Status
+
+Adopted in production on 2026-09-08: corners, shadows, blur, gaps, bar islands,
+tooltips, launcher radius and caption typography now live in the Gruvbox Dark
+profile and the shared desktop templates. The centre window title and the
+amber Ghost badge shown here were not adopted (`BAR-LAYOUT`, `GHOST-BRAND`),
+and captions stay on the oldbook-decoration strip. `alpine/themes/preview`
+renders the production configuration the same way this script rendered the
+concept; see [verification/ghost-observatory](../../../verification/ghost-observatory/README.md).

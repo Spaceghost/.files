@@ -7,8 +7,8 @@ set $lock ~/.local/bin/oldbook-lock
 set $wallpaper ~/.files/alpine/assets/spaceghost.png
 
 # Palette and window chrome are switchable without changing shortcuts.
-gaps inner 3
-gaps outer 4
+gaps inner 6
+gaps outer 7
 include ~/.config/sway/theme.conf
 smart_gaps off
 focus_follows_mouse yes
@@ -55,7 +55,8 @@ bindsym $mod+Ctrl+n exec ~/.local/bin/oldbook-agents quick
 bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
 bindsym $mod+Shift+q kill
 bindsym $mod+Ctrl+Shift+c reload
-bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+# Power deck: wlogout over the blurred desktop; logout still asks first.
+bindsym $mod+Shift+e exec ~/.local/bin/oldbook-power
 bindsym $mod+Escape exec $lock
 bindsym $mod+Shift+r mode "resize"
 

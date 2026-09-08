@@ -122,6 +122,7 @@ class DecorationTests(unittest.TestCase):
                 'foreground': '#eaddf5', 'accent': '#dca7ff',
                 'muted': '#816b91', 'border': '#261631',
                 'background_hard': '#13091f'}
+            script['appearance'].__globals__['design_font'] = lambda: None
 
             family, size, colors, settings = script['appearance']()
 
@@ -131,6 +132,27 @@ class DecorationTests(unittest.TestCase):
             self.assertEqual(colors['surface'], '#261631')
             self.assertEqual(colors['accent'], '#dca7ff')
             self.assertEqual(colors['muted'], '#816b91')
+
+            # Ghost Observatory: a theme design typeface replaces the terminal
+            # face for captions, one point larger; the same face keeps its size.
+            script['appearance'].__globals__['design_font'] = lambda: 'Fixture Sans'
+            self.assertEqual(script['appearance']()[:2], ('Fixture Sans', 10.5))
+            script['appearance'].__globals__['design_font'] = lambda: 'Fixture Mono'
+            self.assertEqual(script['appearance']()[:2], ('Fixture Mono', 9.5))
+
+    def test_design_font_reads_the_active_theme_descriptor(self):
+        script = runpy.run_path(str(SCRIPT))
+        with tempfile.TemporaryDirectory(prefix='oldbook-decoration-font-') as directory:
+            themes = Path(directory)
+            (themes / 'current').write_text('fixture\n')
+            (themes / 'fixture.json').write_text(json.dumps(
+                {'palette': {}, 'design': {'font': 'Fixture Sans'}}))
+            self.assertEqual(script['design_font'](themes), 'Fixture Sans')
+            (themes / 'fixture.json').write_text(json.dumps({'palette': {}}))
+            self.assertIsNone(script['design_font'](themes))
+            (themes / 'current').write_text('../escape\n')
+            self.assertIsNone(script['design_font'](themes))
+            self.assertIsNone(script['design_font'](themes / 'missing'))
 
     def test_decoration_settings_validate_ranges_and_types(self):
         self.assertTrue(hasattr(self.model, 'validate_settings'))

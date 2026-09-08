@@ -1,0 +1,23 @@
+{
+  "status": "rendered",
+  "binary": "/usr/bin/swayfx",
+  "binary_sha256": "9476e4f292dc092cd42c2a984cdf9857f4ad248c28311708704049c0fce3be64",
+  "artwork": "alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png",
+  "artwork_sha256": "f932fef36c22728ef6679a40431b2908e69d62e21fe673b6d7435bd6765c1eb1",
+  "profile": "gruvbox-dark",
+  "gaps": {
+    "inner": 6,
+    "outer": 7
+  },
+  "live_session_changes": 0,
+  "screenshots": [
+    "production.png",
+    "production-floating.png"
+  ],
+  "content": "Synthetic terminal copy; real compositor, Foot, Waybar, caption daemon and telemetry",
+  "screenshot_sha256": {
+    "production.png": "44fcd7215eae9bdc078388d9c97ea07449656bbab28dd1031812be2b32bfaf7c",
+    "production-floating.png": "d3fb33e991804f2c92d1ade56cca92bd119dea01bd80320b294f9ea96ffc57c0"
+  },
+  "wlogout": null
+}

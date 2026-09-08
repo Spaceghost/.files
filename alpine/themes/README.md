@@ -57,7 +57,9 @@ and caption follow the active palette, including generated themes; the caption
 uses a translucent gradient without a pixel outline. Fullscreen tiled captions
 are square, while floating and ordinary windows keep the configured rounding.
 Left-click opens the window picker; middle-click toggles the focused window's
-floating state. The caption follows the saved terminal font.
+floating state. The caption uses the active theme's design typeface (Inter Medium
+for Gruvbox Dark) one point above the saved terminal size, left-aligned like an
+exhibit label; a theme without a design font keeps the terminal font.
 
 `sway/theme.conf` retains themed native captions as a fallback. Space Ghost uses
 plum and lilac; Gruvbox uses charcoal and amber, with centered terminal-font text.
@@ -65,12 +67,24 @@ The local SwayFX package can place these below individual windows when native
 captions are enabled. Its native drag/resize and middle-click behavior has been
 verified separately. See the [offline compositor recipe](../packages/swayfx/README.md).
 
-## Ghost Observatory concept
+## Ghost Observatory
 
-The [native concept preview](concepts/ghost-observatory/README.md) presents windows
-as exhibits: rounded charcoal surfaces, captions underneath, and the contextual
-bar above. Its larger corners and spacing are a visual proposal; the preview
-script renders the real patched compositor without changing the active theme.
+The [concept preview](concepts/ghost-observatory/README.md) presented windows as
+exhibits: rounded charcoal surfaces, captions underneath, and the contextual bar
+above. Its visual language is now the production desktop: 22-pixel window
+corners with soft, deep shadows, 6/7-pixel gaps, floating pill-shaped bar
+islands with rounded tooltips, an 18-pixel launcher, and Inter Medium captions
+with roomier padding. Two parts of the concept were deliberately not adopted:
+the window title stays out of the bar centre (music lives there, `BAR-LAYOUT`)
+and the caption remains the oldbook-decoration strip with the saved
+bottom / 0.67 / radius 7 preferences rather than native per-window titlebars
+(`DECORATION-STYLE`); the Ghost badge keeps its own colours (`GHOST-BRAND`).
+
+`alpine/themes/preview --output DIR [--power-deck]` renders the deployed
+profile, bar, caption daemon and three Foot cards in a private headless SwayFX
+session over the pinned Yosemite painting, without touching the live desktop.
+The adopted look is recorded in
+[verification/ghost-observatory](../verification/ghost-observatory/README.md).
 
 ## Artwork collections
 

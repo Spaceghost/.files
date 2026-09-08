@@ -13,7 +13,7 @@ DESIGN_SCHEMA = {
     'type': 'object', 'additionalProperties': False,
     'properties': {
         'font': {'type': 'string', 'enum': ['Inter', 'DejaVu Serif', 'DejaVu Sans', 'JetBrainsMono Nerd Font']},
-        'radius': {'type': 'integer', 'minimum': 0, 'maximum': 18},
+        'radius': {'type': 'integer', 'minimum': 0, 'maximum': 24},
         'spacing': {'type': 'integer', 'minimum': 2, 'maximum': 16},
         'opacity': {'type': 'number', 'minimum': 0.75, 'maximum': 1},
         'bar_position': {'type': 'string', 'enum': ['top', 'bottom']},
@@ -152,7 +152,7 @@ def render_profile(repo, theme):
     files['.config/waybar/style.css'] += (
         f'\n/* {theme["id"]}: typography and panel shape */\n'
         f'* {{ font-family: "{font}", "Symbols Nerd Font", sans-serif; }}\n'
-        f'window#waybar.top .modules-left, #status {{ border-radius: {radius}px; }}\n'
+        f'window#waybar.top .modules-left, window#waybar.top .modules-right {{ border-radius: {radius}px; }}\n'
         f'#workspaces button {{ padding: 0 {spacing}px; }}\n')
     document = json.loads(files['.config/conky/panels.json'])
     document['font'] = f'{font}:size=9'
