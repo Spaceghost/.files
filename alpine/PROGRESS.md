@@ -1556,3 +1556,30 @@ login. No live compositor restart or fresh-machine boot is claimed. Evidence:
   real logout/login and suspend/resume. The 60Hz request target is not a physical
   frame-rate claim; applesmc may coalesce updates. Recovery: Shift+F5 or
   oldbook-keyboard-backlight steady, preserving the latest chosen brightness.
+
+## Scripture right-click returns to the earlier passage — 2026-09-08
+
+- Right-clicking the desktop Scripture card now returns to the passage shown
+  before the current one. Left-click still advances, the header History link
+  still opens the reader, and the other cards ignore right-clicks.
+- Returns follow the reader's own path rather than raw entry order: each return
+  is appended to the durable history as a `manual-previous` entry that holds
+  for an hour, and every entry's predecessor is derived from entry order and
+  reasons alone. A return after Next goes back to where Next started, and
+  returning past a repeated passage does not loop. No schema change and no row
+  edited or removed; `oldbook-scripture previous` exposes the same action.
+- Validation: 9 Conky click tests and 20 history tests pass, including Lua
+  dispatch checks and an end-to-end right-click through the real click helper.
+  The mapped 15-file batch passed 13 files; the two failures are unrelated and
+  pre-existing in the live checkout (the desktop-space hidden-fullscreen
+  assertion, and the Scripture bar theme tests, which need the currently
+  missing `alpine/themes/spaceghost.json`). Native headless Sway evidence in
+  `verification/conky-clicks/` records a real Wayland right-click returning
+  John 3:17 to John 3:16 in 1.32 s with only the Scripture card restarted
+  (`returned.png`, `native.json`, `README.md`).
+- Activated live by replacing only the Scripture card through
+  `oldbook-scripture refresh scripture` (PID 31094 → 1555); the layout and the
+  other cards were untouched. The running desktop still uses the `oldbook`
+  checkout; the same change is committed at the renamed branch tip.
+- Not verified: a physical right-click on the live seat (only the private
+  headless seat was driven) and a physical hour of rotation after a return.

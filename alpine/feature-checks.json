@@ -474,7 +474,10 @@
         "alpine/wallpapers/desktop_theme.py",
         "alpine/desktop/.local/lib/oldbook/conky_policy.py",
         "alpine/desktop/.local/lib/oldbook/conky_layout.py",
-        "alpine/desktop/.config/conky/panels.json"
+        "alpine/desktop/.config/conky/panels.json",
+        "alpine/tests/test_conky_clicks.py",
+        "alpine/tests/verify_conky_clicks.py",
+        "alpine/verification/conky-clicks/*"
       ],
       "tests": [
         "test_conky_clicks.py",
@@ -482,7 +485,9 @@
         "test_conky_policy.py",
         "test_desktop_space.py"
       ],
-      "evidence": []
+      "evidence": [
+        "verification/conky-clicks/README.md"
+      ]
     },
     {
       "id": "JOURNAL",

@@ -93,8 +93,9 @@ separate personal desktop journal in this published study collection.
 Keep Conky placement stable through window, focus and fullscreen changes; the
 user prefers no automatic reflow to abrupt motion or continuous CPU work.
 Use fixed caption clearance when laying out cards, favor useful lower-right
-space, and preserve native click-to-advance on the reading cards. Scripture
-search may adapt to free/occupied edges and must follow the active theme.
+space, and preserve native click-to-advance on the reading cards and
+right-click-to-return on the Scripture card. Scripture search may adapt to
+free/occupied edges and must follow the active theme.
 
 Scripture cards must read continuously: passage and source citation, reflection,
 then practice. Do not insert a separate speaker/“who said” or duplicate title

@@ -15,6 +15,7 @@ import time
 
 APPLICATION_ID = 0x4F425348
 INTERVAL = 3600
+RETURN_REASON = 'manual-previous'
 
 
 def database_path():
@@ -138,6 +139,44 @@ def advance(initial, following, database=None, now=None, force=False):
             result = _select(db, following(previous['document']), 'manual-next' if force else 'hourly', now)
         else:
             result = previous
+        db.execute('COMMIT')
+        return result
+
+
+def _predecessors(db):
+    """Map each entry to the one displayed before it along its own path.
+
+    Selections are appended while their predecessor is current, so an ordinary
+    entry follows the entry just below it. A return reproduces the entry before
+    the one it was reached from, so it inherits that entry's predecessor. The
+    path comes from entry order and reasons alone; no row is ever edited.
+    """
+    before, previous = {}, None
+    for identifier, reason in db.execute('SELECT id, reason FROM entries ORDER BY id'):
+        target = previous
+        if reason == RETURN_REASON and previous is not None:
+            reproduced = before.get(previous)
+            target = before.get(reproduced) if reproduced is not None else None
+        before[identifier] = target
+        previous = identifier
+    return before
+
+
+def retreat(database=None, now=None):
+    """Return to the entry displayed before the current one, as a new selection.
+
+    The earlier snapshot is reproduced rather than edited and holds for an hour
+    like any manual choice. Returns None when nothing earlier exists.
+    """
+    now = instant(now)
+    with connect(database) as db:
+        db.execute('BEGIN IMMEDIATE')
+        previous = _current(db)
+        target = _predecessors(db).get(previous['id']) if previous else None
+        result = None
+        if target is not None:
+            entry = record(db.execute('SELECT * FROM entries WHERE id=?', (target,)).fetchone())
+            result = _select(db, entry['document'], RETURN_REASON, now)
         db.execute('COMMIT')
         return result
 
