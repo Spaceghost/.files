@@ -1647,6 +1647,11 @@ physical verification is claimed for this check-in.
   `oldbook` fork, which is no longer a leaf: commit there with `--allow-fork`
   and fold afterwards. The `mbp-intel` migration still needs the user's
   authorization.
+- Second fold: the live line's theme archive f75fa377ce (100 renames into
+  `alpine/archive/`, 438 additions, no conflicts; archive bytes kept verbatim).
+  The suite afterwards shows 4 failures and 43 errors: the three pre-existing
+  ones plus 44 tests that still load the archived themes and paintings from
+  their original paths, which that check-in already flags as fixtures to move.
 - `base` is published to GitHub with a Git merge commit on top of GitHub's own
   head, never a force push; `docs/GITHUB-FOSSIL.md` has the steps and the base
   merge check-in records the resulting commit IDs.

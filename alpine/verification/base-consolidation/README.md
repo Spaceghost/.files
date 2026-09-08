@@ -29,3 +29,17 @@ Syntax over the merged tree: 372 Python, 14 shell, 185 JSON and 6 Lua files
 parse and `sway --validate` passes. Outside recorded evidence, the only
 `oldbook` tokens left are the branch name, the superseded package row and the
 rename's own narrative. Nothing here was run against the live desktop.
+
+## Second fold: the theme archive (f75fa377ce)
+
+- `fossil-merge-themes.log` and `fold-report-themes.json`: the live line's
+  move of the 18 unreviewed themes, the spaceghost profile and the gallery
+  paintings under `alpine/archive/` (100 renames, 438 additions, one changed
+  decision record, no conflicts). Archive paths keep the live line's bytes.
+- `unit-tests-after-theme-archive.log`: the full suite afterwards, 947 tests
+  with 4 failures and 43 errors. The three pre-existing failures remain; the
+  other 44 are the tests that still load the archived descriptors, profiles and
+  paintings from their original paths. The archive check-in itself records that
+  "tests that expect the original gallery paths will need their fixtures moved
+  with them"; that work is pending and is not attempted by the fold.
+

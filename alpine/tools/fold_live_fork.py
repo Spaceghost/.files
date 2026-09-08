@@ -58,9 +58,13 @@ entries = []
 for line in subprocess.run(['fossil', 'diff', '--from', PIVOT, '--to', THEIRS, '--brief'], capture_output=True, text=True, check=True).stdout.splitlines():
     kind, path = line.split(None, 1)
     entries.append((kind, path))
-report = {'changed': [], 'added': [], 'moved': [], 'binary': [], 'conflicts': {}, 'skipped': []}
+report = {'changed': [], 'added': [], 'moved': [], 'deleted': [], 'binary': [], 'conflicts': {}, 'skipped': []}
 for kind, path in entries:
     target = rename_path(path)
+    if kind == 'DELETED':
+        # fossil merge already removed or renamed it; a rename's new path arrives as ADDED.
+        report['deleted'].append(target)
+        continue
     live = cat(THEIRS, path)
     if live is None:
         report['skipped'].append((kind, path, 'unreadable live content'))
@@ -115,5 +119,5 @@ for path, old, new in SLIPS:
         report['slips'].append(path)
 arguments.report.write_text(json.dumps(report, indent=1) + '\n')
 print('changed', len(report['changed']), 'added', len(report['added']), 'moved', len(report['moved']),
-      'binary', len(report['binary']), 'skipped', report['skipped'])
+      'deleted', len(report['deleted']), 'binary', len(report['binary']), 'skipped', report['skipped'])
 print('conflicts:', report['conflicts'])
