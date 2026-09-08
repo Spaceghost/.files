@@ -50,11 +50,13 @@ def output_contexts(tree):
             continue
         context = {'output': name, 'workspace': workspace.get('name', ''),
                    'layout': workspace.get('layout', ''), 'floating': False,
-                   'fullscreen': bool(tree.get('fullscreen_mode') or output.get('fullscreen_mode')),
+                   'fullscreen': False,
                    'id': None, 'node': {}}
         node = workspace
         while node:
-            context['fullscreen'] |= bool(node.get('fullscreen_mode'))
+            # Sway's workspace flag is always 1; only focused containers count.
+            if node is not workspace and node.get('type') not in ('root', 'output', 'workspace'):
+                context['fullscreen'] |= bool(node.get('fullscreen_mode'))
             if node.get('app_id') or node.get('window'):
                 context.update(id=node['id'], node=node, title=clean(node.get('name') or app_name(node)),
                                app=app_name(node), sticky=bool(node.get('sticky')))

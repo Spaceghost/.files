@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Interactive workspace-edge captions with persistent appearance settings."""
+"""Interactive floating-window and workspace captions with saved appearance."""
 import argparse
 import configparser
 import fcntl
-import json
 import os
 from pathlib import Path
 import re
@@ -14,11 +13,13 @@ import threading
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
-from decoration import (action_command, load_settings, save_settings,
-                        square_outputs, vertical_title)
+from decoration import action_command, load_settings, save_settings, vertical_title
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
 from overlay_theme import read_palette
+from decoration_placement import output_placements
+from decoration_motion import advance, advance_rect
+from decoration_watch import TreeWatch
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -75,14 +76,27 @@ def daemon():
         return 1
 
     class Caption:
-        def __init__(self, monitor, edge):
-            self.monitor, self.edge = monitor, edge
+        def __init__(self, monitor, placement):
+            self.monitor, self.edge = monitor, placement['edge']
+            edge = self.edge
+            self.attachment_mode = placement['mode']
+            self.previous_geometry = None
+            self.motion_rect = None
+            self.motion_target = None
+            self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
+            self.frame_time = None
+            self.tick_id = 0
+            self.retiring = False
+            self.animations = Gtk.Settings.get_default().get_property('gtk-enable-animations')
+            self.alpha = 0.0 if self.animations else 1.0
+            self.alpha_velocity = 0.0
             self.context = {'id': None, 'edge': edge, 'node': {}}
             self.tree = {}
             self.menu = None
             self.disposed = False
             self.icon_key = None
             self.window = Gtk.Window()
+            self.window.set_opacity(self.alpha)
             self.css_name = 'workspace-decoration-' + str(id(self))
             self.window.set_name(self.css_name)
             self.window.set_can_focus(False)
@@ -92,14 +106,22 @@ def daemon():
             GtkLayerShell.init_for_window(self.window)
             GtkLayerShell.set_namespace(self.window, 'oldbook-decoration')
             GtkLayerShell.set_monitor(self.window, monitor)
-            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.OVERLAY)
+            attached = self.attachment_mode == 'window'
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP if attached
+                                    else GtkLayerShell.Layer.OVERLAY)
             GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
-            anchors = ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM')
+            anchors = (('TOP', 'LEFT') if attached else
+                       ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM'))
             for name in anchors:
                 side = getattr(GtkLayerShell.Edge, name)
                 GtkLayerShell.set_anchor(self.window, side, True)
-                GtkLayerShell.set_margin(self.window, side, 5)
-            GtkLayerShell.auto_exclusive_zone_enable(self.window)
+                GtkLayerShell.set_margin(self.window, side, 0 if attached else 5)
+            if attached:
+                # Use the entire output coordinate space, independent of other
+                # reserved edges. Negative zone reserves no workspace space.
+                GtkLayerShell.set_exclusive_zone(self.window, -1)
+            else:
+                GtkLayerShell.auto_exclusive_zone_enable(self.window)
             orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
             self.box = Gtk.Box(orientation=orientation, spacing=4)
             self.box.get_style_context().add_class('caption')
@@ -144,6 +166,77 @@ def daemon():
                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER)
             self.previous_style = None
             self.previous_display = None
+
+        def place(self, placement, output_rect):
+            if self.attachment_mode != 'window':
+                return
+            rect = placement['rect']
+            geometry = (tuple(rect.get(key, 0) for key in ('x', 'y', 'width', 'height')),
+                        tuple(output_rect.get(key, 0) for key in ('x', 'y')),
+                        self.previous_style)
+            if geometry == self.previous_geometry:
+                return
+            x = rect['x'] - output_rect['x']
+            y = rect['y'] - output_rect['y']
+            if self.edge == 'bottom':
+                y += rect['height']
+                width = max(1, rect['width'])
+                height = max(1, self.box.get_preferred_height_for_width(width)[1])
+            else:
+                x += rect['width']
+                height = max(1, rect['height'])
+                width = max(1, self.box.get_preferred_width_for_height(height)[1])
+            self.motion_target = dict(x=x, y=y, width=width, height=height)
+            if self.motion_rect is None or not self.animations:
+                self.motion_rect = dict(self.motion_target)
+                self.render_geometry()
+            self.animate()
+            self.previous_geometry = geometry
+
+        def render_geometry(self):
+            rect = {key: round(value) for key, value in self.motion_rect.items()}
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rect['x'])
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, rect['y'])
+            self.window.set_size_request(rect['width'] if self.edge == 'bottom' else -1,
+                                         rect['height'] if self.edge == 'right' else -1)
+            self.window.resize(max(1, rect['width']), max(1, rect['height']))
+
+        def animate(self):
+            if self.animations and not self.tick_id:
+                self.frame_time = None
+                self.tick_id = self.window.add_tick_callback(self.frame)
+
+        def frame(self, widget, clock):
+            now = clock.get_frame_time() / 1_000_000
+            elapsed = 0 if self.frame_time is None else now - self.frame_time
+            self.frame_time = now
+            target_alpha = 0.0 if self.retiring else 1.0
+            self.alpha, self.alpha_velocity = advance(
+                self.alpha, self.alpha_velocity, target_alpha, elapsed,
+                response=0.09, tolerance=0.002)
+            self.window.set_opacity(self.alpha)
+            settled = True
+            if self.motion_target is not None and not self.retiring:
+                self.motion_rect, self.motion_velocity, settled = advance_rect(
+                    self.motion_rect, self.motion_velocity, self.motion_target,
+                    elapsed, response=0.045)
+                self.render_geometry()
+            if settled and self.alpha == target_alpha:
+                self.tick_id = 0
+                return False
+            return True
+
+        def retire(self):
+            if not self.animations:
+                self.destroy()
+                return
+            self.retiring = True
+            self.window.set_sensitive(False)
+            GtkLayerShell.set_exclusive_zone(self.window, -1)
+            retired.add(self)
+            self.animate()
+            # Also dispose when an output disappears and stops frame callbacks.
+            GLib.timeout_add(220, lambda: (self.destroy(), False)[1])
 
         def button(self, label, hint, callback):
             button = Gtk.Button.new_with_label(label)
@@ -276,7 +369,8 @@ def daemon():
                     background-image: linear-gradient(to bottom,
                         alpha({colors['surface']}, {min(1, opacity + .16):.3f}),
                         alpha({colors['background']}, {opacity:.3f}));
-                    border: none; outline: none; border-radius: {radius}px;
+                    border: none;
+                    outline: none; border-radius: {radius}px;
                     padding: {padding}; min-height: 24px;
                     box-shadow: 0 2px 9px alpha({colors['background_hard']}, .5);
                 }}
@@ -312,12 +406,15 @@ def daemon():
             '''.replace('#workspace-decoration', '#' + self.css_name).encode())
             self.previous_style = (style, square)
 
-        def update(self, context, tree, style, square=False):
+        def update(self, context, tree, style, placement, output_rect):
+            square = placement['square']
             self.context = dict(context, edge=self.edge)
             self.tree = tree
             display_state = (tuple(context.get(key) for key in
-                             ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')), style, square)
+                             ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')), style, square,
+                             placement['rect']['width'], placement['rect']['height'])
             if display_state == self.previous_display:
+                self.place(placement, output_rect)
                 return
             self.restyle(style, square)
             occupied = bool(context.get('id'))
@@ -342,7 +439,9 @@ def daemon():
                 family, size = style[:2]
                 layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
                 height = max(1, layout.get_pixel_size()[1])
-                available = max(1, self.monitor.get_workarea().height - 260)
+                span = (placement['rect']['height'] if self.attachment_mode == 'window'
+                        else self.monitor.get_workarea().height)
+                available = max(1, span - (110 if span < 240 else 260))
                 shown = vertical_title(title, available // height)
             else:
                 shown = title
@@ -360,13 +459,27 @@ def daemon():
             self.full_button.get_accessible().set_name(self.full_button.get_tooltip_text())
             self.window.show_all()
             self.empty_controls.set_visible(not occupied and self.edge == 'bottom')
-            self.tile_button.set_visible(occupied)
-            self.full_button.set_visible(occupied)
-            self.state_label.set_visible(occupied and self.edge == 'bottom')
+            attached = self.attachment_mode == 'window'
+            span = placement['rect']['width' if self.edge == 'bottom' else 'height']
+            compact = attached and span < (360 if self.edge == 'bottom' else 240)
+            self.tile_button.set_visible(occupied and not compact)
+            self.full_button.set_visible(occupied and not compact)
+            self.windows_button.set_visible(not compact)
+            self.more_button.set_visible(not attached or span >= 120)
+            self.title_button.set_visible(not attached or span >= 80)
+            self.state_label.set_visible(occupied and self.edge == 'bottom' and (not attached or span >= 520))
+            self.place(placement, output_rect)
+            self.animate()
             self.previous_display = display_state
 
         def destroy(self):
+            if self.disposed:
+                return
             self.disposed = True
+            retired.discard(self)
+            if self.tick_id:
+                self.window.remove_tick_callback(self.tick_id)
+                self.tick_id = 0
             if self.menu:
                 self.menu.destroy()
                 self.menu = None
@@ -374,48 +487,68 @@ def daemon():
             self.window.destroy()
 
     captions = {}
+    retired = set()
     last_tree = {}
-    busy = False
     stop = threading.Event()
+    style = appearance()
+    pending_lock = threading.Lock()
+    pending_tree = None
+    tree_idle = False
+
+    def deliver_tree(tree):
+        nonlocal pending_tree, tree_idle
+        with pending_lock:
+            if stop.is_set():
+                return
+            pending_tree = tree
+            if not tree_idle:
+                tree_idle = True
+                GLib.idle_add(apply_pending_tree)
+
+    def apply_pending_tree():
+        nonlocal pending_tree, tree_idle
+        with pending_lock:
+            tree, pending_tree = pending_tree, None
+            tree_idle = False
+        return apply(tree)
 
     def apply(tree):
-        nonlocal busy, last_tree
-        busy = False
+        nonlocal last_tree
+        if stop.is_set():
+            return False
         if tree is not None:
             last_tree = tree
         contexts = output_contexts(last_tree)
-        square = square_outputs(last_tree)
-        style = appearance()
-        edge = style[3]['position']
+        placements = output_placements(last_tree, style[3]['position'])
+        watcher.set_attached(any(item['mode'] == 'window' for item in placements.values()))
+        output_rects = {node['name']: node['rect'] for node in last_tree.get('nodes', [])
+                        if node.get('type') == 'output' and 'rect' in node}
         monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
                     for i in range(display.get_n_monitors())}
         for name in list(captions):
-            if name not in monitors or captions[name].edge != edge or captions[name].monitor != monitors[name]:
-                captions.pop(name).destroy()
+            placement = placements.get(name)
+            if (name not in monitors or placement is None or captions[name].edge != placement['edge']
+                    or captions[name].attachment_mode != placement['mode']
+                    or captions[name].monitor != monitors[name]):
+                previous = captions.pop(name)
+                for old in tuple(retired):
+                    if old.monitor == previous.monitor:
+                        old.destroy()
+                previous.retire()
         for name, monitor in monitors.items():
+            placement = placements.get(name)
+            if placement is None:
+                continue
             if name not in captions:
-                captions[name] = Caption(monitor, edge)
+                captions[name] = Caption(monitor, placement)
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
-                                  last_tree, style, name in square)
+                                  last_tree, style, placement, output_rects[name])
         return False
 
-    def poll():
-        nonlocal busy
-        if busy or stop.is_set():
-            return not stop.is_set()
-        busy = True
-
-        def fetch():
-            tree = None
-            try:
-                result = subprocess.run(['swaymsg', '-t', 'get_tree', '-r'],
-                                        capture_output=True, text=True, timeout=2, check=True)
-                tree = json.loads(result.stdout)
-            except (OSError, ValueError, subprocess.SubprocessError):
-                pass
-            if not stop.is_set():
-                GLib.idle_add(apply, tree)
-        threading.Thread(target=fetch, daemon=True).start()
+    def refresh_appearance():
+        nonlocal style
+        style = appearance()
+        apply(None)
         return True
 
     def quit_daemon():
@@ -423,12 +556,21 @@ def daemon():
         Gtk.main_quit()
         return False
 
+    watcher = TreeWatch(os.environ.get('SWAYSOCK', ''), deliver_tree)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, quit_daemon)
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
-    GLib.timeout_add(750, poll)
-    poll()
-    Gtk.main()
-    guard.close()
+    GLib.timeout_add(750, refresh_appearance)
+    watcher.start()
+    try:
+        Gtk.main()
+    finally:
+        stop.set()
+        watcher.close()
+        for caption in captions.values():
+            caption.destroy()
+        for caption in tuple(retired):
+            caption.destroy()
+        guard.close()
     return 0
 
 

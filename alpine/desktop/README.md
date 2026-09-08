@@ -15,10 +15,14 @@ automatically. See the [video guide](../packages/mpvpaper/README.md) and
 [Ghostty notes](../packages/ghostty/README.md).
 
 Waybar's middle section holds music controls between the left and right desktop
-controls. Window titles live in the workspace decoration at the bottom edge.
+controls. Window titles live in the decoration at the bottom edge. When a floating
+window is focused, its decoration attaches to that window and follows moves and
+resizes without reserving workspace space. Any fullscreen window on that visible
+workspace returns the decoration to the workspace bottom; leaving fullscreen
+restores the saved edge and attachment. Global fullscreen applies to all outputs.
 Open `oldbook-decoration-settings` to edit placement, opacity and corners beside
 the underlying `~/.config/oldbook/decoration.json`. The right edge remains an
-option; right-click the caption to swap edges or Shift + right-click to open the
+option; right-click the caption for placement controls or Shift + right-click to open the
 editor. Left-click chooses a window and middle-click toggles floating. The
 borderless caption follows the active theme, with square corners for fullscreen
 tiled windows and the selected rounding otherwise.

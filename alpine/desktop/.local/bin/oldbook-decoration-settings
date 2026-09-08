@@ -52,7 +52,7 @@ def create_window(config_path):
             self.position = Gtk.ComboBoxText()
             self.position.append('bottom', 'Bottom edge')
             self.position.append('right', 'Right edge')
-            self.position.set_tooltip_text('Choose the bottom or right edge. Right-click the strip for window actions and placement controls.')
+            self.position.set_tooltip_text('Choose the bottom or right edge. The caption follows a focused floating window; fullscreen sends it to the workspace bottom until you leave fullscreen. Right-click for window actions.')
             controls.pack_start(self.field('_Placement', self.position), False, False, 0)
 
             self.opacity = Gtk.Scale.new_with_range(Gtk.Orientation.HORIZONTAL, 20, 100, 1)
@@ -65,7 +65,7 @@ def create_window(config_path):
             self.radius.set_numeric(True)
             self.radius.set_tooltip_text('A softer landing for ordinary and floating windows. Fullscreen tiled windows always use square corners.')
             controls.pack_start(self.field('_Corner radius · pixels', self.radius), False, False, 0)
-            note = self.label('Blended theme colors, without an outline.\nFullscreen tiled windows keep square corners.')
+            note = self.label('Your floating window brings its caption along.\nFullscreen parks it at the workspace bottom.\nBlended colors; square corners for fullscreen tiles.')
             note.get_style_context().add_class('muted')
             controls.pack_start(note, False, False, 0)
             controls.pack_start(Gtk.Box(), True, True, 0)
