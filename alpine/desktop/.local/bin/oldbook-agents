@@ -144,17 +144,28 @@ def choose_workdir(document, agent):
 
 def pick(document):
     live = sessions()
+    agents = launcher.enabled_agents(document)
+    preferred = ('codex-ultra', 'claude-max')
     labels, actions = [], {}
+
+    def add_agent(agent):
+        label = '✦  New ' + launcher.describe(agent)
+        labels.append(label)
+        actions[label] = ('new', agent['id'])
+
+    for identifier in preferred:
+        for agent in agents:
+            if agent['id'] == identifier:
+                add_agent(agent)
     for session in live:
         mark = ' · attached' if session['attached'] else ''
         label = (f"󰆍  {session['name']} — {launcher.short_path(session['path'])}"
                  f" · {session['windows']}w{mark}")
         labels.append(label)
         actions[label] = ('attach', session['name'])
-    for agent in launcher.enabled_agents(document):
-        label = '✦  ' + launcher.describe(agent)
-        labels.append(label)
-        actions[label] = ('new', agent['id'])
+    for agent in agents:
+        if agent['id'] not in preferred:
+            add_agent(agent)
     close_label = '󰅖  Close a session…'
     labels.append(close_label)
     actions[close_label] = ('close', None)

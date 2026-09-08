@@ -29,6 +29,22 @@
       ]
     },
     {
+      "id": "claude-max",
+      "title": "Claude · best max",
+      "subtitle": "Best available Claude · max effort · uncontained",
+      "enabled": true,
+      "command": [
+        "claude",
+        "--model",
+        "best",
+        "--effort",
+        "max",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
+      ]
+    },
+    {
       "id": "codex",
       "title": "Codex",
       "subtitle": "OpenAI Codex CLI, here",
