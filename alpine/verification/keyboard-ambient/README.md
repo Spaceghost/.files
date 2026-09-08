@@ -71,3 +71,18 @@ The running swayidle still carries the previous command line; the new
 daemon is restarted deliberately. Readback is not optical measurement, and the
 physical Option+F6 chord, a real 270-second idle, suspend/resume and a genuine
 change of room light were not observed.
+
+## Breathe on air — live check
+
+[breathe-air-live.json](breathe-air-live.json) records an eight-second run of
+the new `breathe-air` mode on the real keyboard light while the user was at
+the machine. The saved peak was 255 and no keystrokes arrived during the
+window, so the resting breath showed exactly the quiet lungs: **31 → 87 → 31**
+(the 12% floor up to a quarter of the way toward the peak) over about seven
+seconds, then rising again. `breathe` returned the light to the user's saved
+breathing mode; saved level **255** and saved mode **breathing** were unchanged.
+The worker that had been running predated the edit, so the check passed
+through `steady` first to let it exit before the new mode spawned a worker
+that knows `breathe-air`; a normal login has no such step. Keystroke-driven
+inflation, the quickening tempo and the twenty-second leak were exercised on
+the synthetic clock with scripted evdev presses, not physically.

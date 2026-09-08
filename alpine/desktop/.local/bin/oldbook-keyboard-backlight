@@ -33,9 +33,9 @@ INPUT_PRESS = {1, 2}
 MAX_KEYS_PER_FRAME = 64
 ACTIONS = ('up', 'down', 'toggle', 'restore', 'breathe', 'steady',
            'typing', 'typing-dark', 'typing-wpm', 'typing-dark-wpm',
-           'ambient', 'last-breath', 'status')
+           'ambient', 'breathe-air', 'last-breath', 'status')
 ACTIVE_MODES = {'breathing', 'typing', 'typing-dark', 'typing-wpm',
-                'typing-dark-wpm', 'ambient'}
+                'typing-dark-wpm', 'ambient', 'breathe-air'}
 MODES = {'steady', *ACTIVE_MODES}
 TYPING_RISING_MODES = {'typing', 'typing-wpm'}
 TYPING_DARKING_MODES = {'typing-dark', 'typing-dark-wpm'}
@@ -59,6 +59,15 @@ AMBIENT_FADE = 1.2
 LAST_BREATH_RISE = 1.5
 LAST_BREATH_FALL = 4.5
 OVERLAY_IDLE_WAIT = 0.25
+# Breathing on air: the lungs start a quarter full and slow, every keystroke is
+# a sip that deepens and quickens the breath, and idle lungs leak back down.
+AIR_BASELINE = 0.25
+AIR_SIP = 0.06
+AIR_LEAK = 20.0
+AIR_SMOOTHING = 0.5
+AIR_PERIOD_REST = 7.0
+AIR_PERIOD_FULL = 3.0
+BREATH_FLOOR = 0.12
 
 
 def notify(message, percent=None):
@@ -363,9 +372,11 @@ class KeyboardBacklight:
                 if self.read_light() is None:
                     raise ValueError('No readable Apple SMC ambient light sensor is available.')
                 mode = 'ambient'
+            elif action == 'breathe-air':
+                mode = 'breathe-air'
 
             if action in {'typing', 'typing-dark', 'typing-wpm',
-                          'typing-dark-wpm', 'ambient'} or (
+                          'typing-dark-wpm', 'ambient', 'breathe-air'} or (
                     action == 'breathe' and mode == 'breathing'):
                 level = _mode_peak(maximum, mode, level)
 
@@ -539,6 +550,7 @@ class KeyboardBacklight:
             observed_level = None
             wpm_samples = deque()
             ambient = None
+            lung = None
             try:
                 with self.locked():
                     try:
@@ -584,6 +596,7 @@ class KeyboardBacklight:
                             observed_level = level
                             wpm_samples.clear()
                             ambient = None
+                            lung = None
                         elif observed_level != level:
                             anchor_level = float(level)
                             anchor_time = now
@@ -629,6 +642,30 @@ class KeyboardBacklight:
                             eased = progress * progress * (3 - 2 * progress)
                             value = int(round(ambient['origin'] + (ambient['target'] - ambient['origin']) * eased))
                             finished = progress >= 1.0
+                        elif mode == 'breathe-air':
+                            if poller is None:
+                                poller, handles = self._open_key_devices()
+                            presses = 0
+                            if poller is not None and handles:
+                                presses = self._consume_key_presses(poller, handles, next_frame)
+                            now = time.monotonic()
+                            if lung is None:
+                                lung = dict(target=AIR_BASELINE, air=AIR_BASELINE, phase=0.0, last=now)
+                            elapsed = max(0.0, now - lung['last'])
+                            lung['last'] = now
+                            # Idle lungs leak toward the quiet baseline; every keystroke is a sip.
+                            lung['target'] = AIR_BASELINE + (lung['target'] - AIR_BASELINE) * math.exp(-elapsed / AIR_LEAK)
+                            lung['target'] = min(1.0, lung['target'] + presses * AIR_SIP)
+                            # The visible volume follows the target smoothly, so a burst of
+                            # keys deepens the breath instead of snapping it.
+                            lung['air'] += (lung['target'] - lung['air']) * (1 - math.exp(-elapsed / AIR_SMOOTHING))
+                            fullness = (lung['air'] - AIR_BASELINE) / (1 - AIR_BASELINE)
+                            period = AIR_PERIOD_REST + (AIR_PERIOD_FULL - AIR_PERIOD_REST) * fullness
+                            # Phase accumulates continuously, so a change of tempo never jumps.
+                            lung['phase'] += elapsed / period
+                            wave = (1 - math.cos(2 * math.pi * lung['phase'])) / 2
+                            floor = level * BREATH_FLOOR
+                            value = max(1, min(maximum, round(floor + lung['air'] * (level - floor) * wave)))
                         else:
                             if poller is None:
                                 poller, handles = self._open_key_devices()
@@ -754,6 +791,9 @@ def main():
         elif result['mode'] == 'ambient':
             percent = round(result['level'] * 100 / result['maximum'])
             notify(f'Ghost keys follow the room light · {percent}% in the dark', percent)
+        elif result['mode'] == 'breathe-air':
+            percent = round(result['level'] * 100 / result['maximum'])
+            notify(f'Ghost keys breathe on your air · {percent}% peak · type to deepen the breath', percent)
         elif action != 'restore':
             percent = round(result['level'] * 100 / result['maximum'])
             notify(f'Steady keyboard light · {percent}%', percent)

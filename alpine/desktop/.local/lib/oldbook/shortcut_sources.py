@@ -639,6 +639,7 @@ class ShortcutProvider:
                     ('oldbook-keyboard-backlight', 'typing-wpm'): 'Pulse only during sustained fast typing',
                     ('oldbook-keyboard-backlight', 'typing-dark-wpm'): 'Darken only during sustained fast typing',
                     ('oldbook-keyboard-backlight', 'ambient'): 'Follow the room light — bright keys in the dark, off in daylight',
+                    ('oldbook-keyboard-backlight', 'breathe-air'): 'Breathe on air — every keystroke deepens and quickens the breath',
                     ('oldbook-keyboard-backlight', 'last-breath'): 'One last keyboard breath, then dark until you return',
                     ('oldbook-idle', 'dim'): 'Ease the display down before the lock',
                     ('oldbook-idle', 'undim'): 'Bring the display and keyboard light back',

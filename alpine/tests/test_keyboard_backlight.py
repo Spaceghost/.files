@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 import math
+import os
 from pathlib import Path
 import runpy
 import socket
@@ -336,11 +337,30 @@ class KeyboardBacklightTests(unittest.TestCase):
         self.assertIs(future.result(timeout=3), True)
         self.assertEqual(self.brightness(), 64)
 
-    def controlled_run(self, prepare, stop_at, hooks=(), sensor=False):
-        """Serve on a synthetic clock; hooks are (time, callback) pairs run in order."""
+    def controlled_run(self, prepare, stop_at, hooks=(), sensor=False, keystrokes=None):
+        """Serve on a synthetic clock; hooks are (time, callback) pairs run in order.
+
+        `keystrokes` scripts evdev presses as (time, count) pairs delivered by a
+        fake key-device reader, so no real input device is opened.
+        """
         now = [0.0]
         samples = []
         pending = sorted(hooks, key=lambda item: item[0])
+        presses = sorted(keystrokes or [], key=lambda item: item[0])
+
+        class SyntheticPoller:
+            def unregister(self, _fd):
+                pass
+
+        def open_devices():
+            # A real descriptor the worker's cleanup can close without harm.
+            return SyntheticPoller(), {os.open(os.devnull, os.O_RDONLY): 'synthetic-keyboard'}
+
+        def consume(_poller, _handles, _deadline):
+            count = 0
+            while presses and presses[0][0] <= now[0]:
+                count += presses.pop(0)[1]
+            return count
 
         def advance(seconds):
             if len(samples) >= 6000:
@@ -360,6 +380,9 @@ class KeyboardBacklightTests(unittest.TestCase):
 
         with patch('time.monotonic', side_effect=lambda: now[0]), patch('time.sleep', side_effect=advance):
             helper = load_helper()(self.led, self.state, self.runtime, sensor=sensor)
+            if keystrokes is not None:
+                helper._open_key_devices = open_devices
+                helper._consume_key_presses = consume
             prepare(helper)
             self.assertIs(helper.serve(ControlledStop()), True)
         return samples
@@ -367,6 +390,81 @@ class KeyboardBacklightTests(unittest.TestCase):
     @staticmethod
     def nearest(samples, stamp):
         return min(samples, key=lambda row: abs(row[0] - stamp))[1]
+
+    @staticmethod
+    def crests(samples, start, end):
+        """(time, level) of each local maximum between start and end."""
+        window = [row for row in samples if start <= row[0] <= end]
+        found = []
+        rising = False
+        top = None
+        for before, here in zip(window, window[1:]):
+            if here[1] > before[1]:
+                rising = True
+                top = here
+            elif here[1] < before[1] and rising:
+                # Integer levels plateau at the crest; report where the rise ended.
+                if not found or top[0] - found[-1][0] > 0.5:
+                    found.append(top)
+                rising = False
+        return found
+
+    def test_breathe_air_rests_shallow_then_deepens_with_keystrokes_and_leaks(self):
+        (self.led / 'max_brightness').write_text('1000\n')
+        (self.led / 'brightness').write_text('1000\n')
+        self.saved.write_text('1000\n')
+        recorded = {}
+
+        def prepare(helper):
+            helper.command('breathe-air', spawn=False)
+            recorded['mtime'] = self.saved.stat().st_mtime_ns
+
+        keystrokes = [(14.0, 15)]
+        samples = self.controlled_run(prepare, stop_at=90.0, keystrokes=keystrokes)
+        # Quiet lungs: a quarter of the way from the 12% floor toward the peak,
+        # exhaled at the start and again a seven-second cycle later.
+        rest = [level for stamp, level in samples if stamp <= 14.0]
+        self.assertAlmostEqual(min(rest), 120, delta=3)
+        self.assertAlmostEqual(max(rest), 340, delta=6)
+        self.assertAlmostEqual(self.nearest(samples, 3.5), 340, delta=6)
+        self.assertAlmostEqual(self.nearest(samples, 7.0), 120, delta=6)
+        # Fifteen sips fill the lungs: the first crest after them nears the peak
+        # about three seconds later, the tempo then eases as the lungs leak, and
+        # nothing moves more than 5% of the peak per frame.
+        full = self.crests(samples, 14.2, 26.0)
+        self.assertGreaterEqual(len(full), 3, full)
+        self.assertGreaterEqual(full[0][1], 900, full)
+        gaps = [after - before for (before, _), (after, _) in zip(full, full[1:])]
+        self.assertTrue(2.6 <= gaps[0] <= 3.6, gaps)
+        self.assertTrue(all(later >= earlier - 0.15 for earlier, later in zip(gaps, gaps[1:])), gaps)
+        steps = [abs(after[1] - before[1]) for before, after in zip(samples, samples[1:])]
+        self.assertLessEqual(max(steps), 50, 'a keystroke jumped the light')
+        # Idle lungs leak: crests fall back toward the resting third within a minute.
+        later = self.crests(samples, 40.0, 60.0)
+        last = self.crests(samples, 76.0, 90.0)
+        self.assertTrue(later and last, (later, last))
+        self.assertLess(max(level for _, level in later), max(level for _, level in full))
+        self.assertLess(max(level for _, level in last), 420)
+        self.assertGreater(max(level for _, level in last), 330)
+        # Saved preference untouched; the worker's stop restores it.
+        self.assertEqual(int(self.saved.read_text()), 1000)
+        self.assertEqual(self.saved.stat().st_mtime_ns, recorded['mtime'])
+        self.assertEqual(self.helper().status()['mode'], 'breathe-air')
+        self.assertEqual(self.brightness(), 1000)
+
+    def test_breathe_air_mode_persists_and_keys_adjust_the_peak(self):
+        helper = self.helper()
+        status = helper.command('breathe-air', spawn=False)
+        self.assertEqual(status['mode'], 'breathe-air')
+        self.assertEqual(status['level'], 64)
+        self.assertEqual(self.mode.read_text().strip(), 'breathe-air')
+        self.assertEqual(helper.command('up', spawn=False)['level'], 89)
+        self.assertEqual(self.helper().status()['mode'], 'breathe-air')
+        restored = self.helper().command('restore', spawn=False)
+        self.assertEqual(restored['mode'], 'breathe-air')
+        self.assertEqual(restored['level'], 89)
+        self.assertEqual(helper.command('steady', spawn=False)['mode'], 'steady')
+        self.assertEqual(self.brightness(), 89)
 
     def test_last_breath_rises_falls_dark_and_holds_without_saving(self):
         self.saved.write_text('200\n')
