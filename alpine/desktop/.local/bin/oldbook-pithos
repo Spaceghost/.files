@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Keep Pithos in the background and arbitrate the music bar's click gestures."""
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+import uuid
+
+APP_ID = 'io.github.Pithos'
+
+
+def ipc(kind, command=None):
+    args = ['swaymsg', '-r', '-t', kind]
+    if command:
+        args.append(command)
+    result = subprocess.run(args, check=True, capture_output=True, text=True, timeout=5)
+    data = json.loads(result.stdout)
+    if kind == 'command' and any(not item.get('success') for item in data):
+        raise RuntimeError(str(data))
+    return data
+
+
+def find_window(node, workspace=None):
+    if node.get('type') == 'workspace':
+        workspace = node.get('name')
+    if node.get('app_id') in (APP_ID, 'pithos') or (node.get('window_properties') or {}).get('class') == 'Pithos':
+        return node, workspace
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        found = find_window(child, workspace)
+        if found:
+            return found
+    return None
+
+
+def running():
+    result = subprocess.run([
+        'gdbus', 'call', '--session', '--dest', 'org.freedesktop.DBus',
+        '--object-path', '/org/freedesktop/DBus', '--method',
+        'org.freedesktop.DBus.NameHasOwner', APP_ID,
+    ], check=True, capture_output=True, text=True, timeout=5)
+    return result.stdout.strip() == '(true,)'
+
+
+def window_action(action):
+    # Reloading Sway must never activate an already-running Gtk.Application.
+    if action == 'start' and running():
+        return
+    found = find_window(ipc('get_tree'))
+    if not found:
+        # Sway owns the child lifetime; GTK activates its existing instance if
+        # the tray previously hid the window. The for_window rule hides new maps.
+        ipc('command', 'exec pithos')
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            found = find_window(ipc('get_tree'))
+            if found:
+                break
+            time.sleep(.05)
+        if not found:
+            raise RuntimeError('Pithos did not map a window within ten seconds')
+    node, workspace = found
+    criteria = f'[con_id={node["id"]}]'
+    if action == 'start':
+        if workspace != '__i3_scratch':
+            ipc('command', criteria + ' move scratchpad')
+    elif action == 'toggle' and node.get('visible', False):
+        ipc('command', criteria + ' move scratchpad')
+    elif workspace == '__i3_scratch':
+        ipc('command', criteria + ' scratchpad show, focus')
+    elif not node.get('visible', False):
+        ipc('command', criteria + ' move workspace current, focus')
+    else:
+        ipc('command', criteria + ' focus')
+
+
+def play_pause():
+    subprocess.run(['playerctl', '--player=io.github.Pithos', 'play-pause'],
+                   check=True, timeout=5)
+
+
+def click(runtime, delay=.35):
+    # Waybar's MPRIS module receives each physical press but ignores GDK's
+    # separate double-click event. Defer the single action and cancel its token
+    # on a second press, so opening the window never toggles playback first.
+    token = uuid.uuid4().hex
+    path = runtime / 'click.json'
+    with (runtime / 'click.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        try:
+            state = json.loads(path.read_text())
+        except (FileNotFoundError, ValueError):
+            state = {}
+        now = time.monotonic()
+        double = bool(state.get('token')) and 0 <= now - state.get('time', 0) < delay
+        path.write_text(json.dumps({} if double else {'token': token, 'time': now}))
+    if double:
+        window_action('show')
+        return
+    time.sleep(delay)
+    with (runtime / 'click.lock').open('a') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        state = json.loads(path.read_text())
+        if state.get('token') != token:
+            return
+        path.write_text('{}')
+        play_pause()
+
+
+def main():
+    action = sys.argv[1] if len(sys.argv) == 2 else ''
+    if action not in ('start', 'show', 'toggle', 'click'):
+        raise SystemExit('Usage: oldbook-pithos start|show|toggle|click')
+    session = hashlib.sha256(os.environ['SWAYSOCK'].encode()).hexdigest()[:16]
+    runtime = Path(os.environ['XDG_RUNTIME_DIR']) / ('oldbook-pithos-' + session)
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    if runtime.is_symlink() or runtime.stat().st_uid != os.getuid():
+        raise RuntimeError('Unsafe Pithos runtime directory')
+    if action == 'click':
+        click(runtime)
+    else:
+        with (runtime / 'window.lock').open('a') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            window_action(action)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, KeyError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        raise SystemExit(f'oldbook-pithos: {error}')

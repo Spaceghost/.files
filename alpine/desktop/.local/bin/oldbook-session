@@ -87,6 +87,10 @@ fi
 if [ -f /usr/share/pipewire/pipewire-pulse.conf ] && ! has_comm pipewire-pulse; then
     start_service pipewire-pulse pipewire-pulse
 fi
+# The helper checks the application bus owner, so reloads never raise its window.
+if command -v oldbook-pithos >/dev/null 2>&1; then
+    start_service pithos-start oldbook-pithos start
+fi
 if ! has_comm swaync; then
     start_service swaync swaync
 fi

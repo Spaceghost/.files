@@ -60,10 +60,11 @@
       "format": "\uf048",
       "format-paused": "\uf048",
       "format-stopped": "\uf048",
-      "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track",
-      "on-click": "playerctl --player=playerctld previous",
-      "on-click-middle": "playerctl --player=playerctld previous",
-      "on-click-right": "playerctl --player=playerctld previous"
+      "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track\nRight: show/hide Pithos",
+      "on-click": "playerctl --player=io.github.Pithos previous",
+      "on-click-middle": "playerctl --player=io.github.Pithos previous",
+      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
+      "player": "io"
     },
     "mpris": {
       "format": "{status_icon} {dynamic}",
@@ -82,19 +83,23 @@
         "paused": "\uf04b",
         "stopped": "\uf04b"
       },
-      "tooltip-format": "NOW TRANSMITTING\n{title}\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Middle: previous \u00b7 Right: next\nScroll: seek five seconds",
-      "on-scroll-up": "playerctl --player=playerctld position 5+",
-      "on-scroll-down": "playerctl --player=playerctld position 5-",
-      "smooth-scrolling-threshold": 2
+      "tooltip-format": "NOW TRANSMITTING\n{title}\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Double-click: open Pithos\nRight: show/hide Pithos \u00b7 Middle: previous\nScroll: seek five seconds",
+      "on-scroll-up": "playerctl --player=io.github.Pithos position 5+",
+      "on-scroll-down": "playerctl --player=io.github.Pithos position 5-",
+      "smooth-scrolling-threshold": 2,
+      "player": "io",
+      "on-click": "~/.local/bin/oldbook-pithos click",
+      "on-click-right": "~/.local/bin/oldbook-pithos toggle"
     },
     "mpris#next": {
       "format": "\uf051",
       "format-paused": "\uf051",
       "format-stopped": "\uf051",
-      "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track",
-      "on-click": "playerctl --player=playerctld next",
-      "on-click-middle": "playerctl --player=playerctld next",
-      "on-click-right": "playerctl --player=playerctld next"
+      "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track\nRight: show/hide Pithos",
+      "on-click": "playerctl --player=io.github.Pithos next",
+      "on-click-middle": "playerctl --player=io.github.Pithos next",
+      "on-click-right": "~/.local/bin/oldbook-pithos toggle",
+      "player": "io"
     },
     "group/telemetry": {
       "orientation": "horizontal",

@@ -135,6 +135,10 @@ for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
 for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt
 
 # oldbook-session is per-UID idempotent: reloads reuse the existing services.
+# Pithos keeps playing with its window tucked away until the music bar opens it.
+for_window [app_id="^(io[.]github[.]Pithos|pithos)$"] move scratchpad
+for_window [class="^Pithos$"] move scratchpad
+
 exec_always --no-startup-id ~/.local/bin/oldbook-session
 include ~/.config/sway/local.d/*
 

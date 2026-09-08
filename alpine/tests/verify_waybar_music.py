@@ -21,9 +21,9 @@ POINTER_PROTOCOL = REPO / "alpine/packages/waybar-art/tests/pointer.xml"
 PRIVATE_BUS_MARKER = "OLDBOOK_WAYBAR_MUSIC_PRIVATE_BUS"
 EXPECTED_TITLE = "Selected Coast to Coast"
 EXPECTED_ACTIONS = [
-    "GhostPlanet:Previous",
-    "GhostPlanet:PlayPause",
-    "GhostPlanet:Next",
+    "io.github.Pithos:Previous",
+    "io.github.Pithos:PlayPause",
+    "io.github.Pithos:Next",
 ]
 
 
@@ -136,6 +136,19 @@ def run_fake_mpris(actions, player_name, track_title):
         None,
         None,
     )
+    # A real GTK window on the private compositor exercises Sway's startup
+    # rule and show/hide commands without using the user's Pandora account.
+    if player_name == "io.github.Pithos":
+        GLib.set_prgname("io.github.Pithos")
+        gi.require_version("Gtk", "3.0")
+        from gi.repository import Gtk
+        app = Gtk.Application(application_id="io.github.Pithos")
+        app.register(None)
+        window = Gtk.ApplicationWindow(application=app, title="Private Pithos test")
+        window.set_default_size(500, 400)
+        window.add(Gtk.Label(label="Private Pithos controls verification"))
+        app.connect("activate", lambda *_: window.present())
+        window.show_all()
     print("ready", flush=True)
     GLib.MainLoop().run()
 
@@ -207,6 +220,13 @@ def run_verifier(output):
         actions = output / "actions"
         pointer_executable = build_pointer(base)
 
+        local_bin = base / "home/.local/bin"
+        local_bin.mkdir(parents=True)
+        (local_bin / "oldbook-pithos").symlink_to(
+            REPO / "alpine/desktop/.local/bin/oldbook-pithos")
+        (local_bin / "pithos").write_text("#!/bin/sh\nexec gapplication launch io.github.Pithos\n")
+        (local_bin / "pithos").chmod(0o755)
+
         config = json.loads(WAYBAR_CONFIG.read_text())
         top = config[0]
         top["output"] = "HEADLESS-1"
@@ -224,11 +244,14 @@ def run_verifier(output):
             "output HEADLESS-1 mode 1440x900\n"
             "output HEADLESS-1 bg #130a20 solid_color\n"
             "seat seat0 fallback true\n"
+            + "\n".join(line for line in (REPO / "alpine/desktop/.config/sway/config").read_text().splitlines()
+                        if line.startswith("for_window") and "Pithos" in line) + "\n"
         )
 
         env = dict(
             os.environ,
             HOME=str(base / "home"),
+            PATH=str(local_bin) + os.pathsep + os.environ["PATH"],
             XDG_RUNTIME_DIR=str(runtime),
             XDG_CONFIG_HOME=str(config_home),
             XDG_STATE_HOME=str(state_home),
@@ -293,13 +316,13 @@ def run_verifier(output):
                     "first MPRIS service failed",
                 )
                 service_b = spawn(
-                    "GhostPlanet",
+                    "io.github.Pithos",
                     [
                         sys.executable,
                         str(Path(__file__).resolve()),
                         "--fake-mpris",
                         str(actions),
-                        "GhostPlanet",
+                        "io.github.Pithos",
                         EXPECTED_TITLE,
                     ],
                     stdout=subprocess.PIPE,
@@ -310,7 +333,7 @@ def run_verifier(output):
                 )
                 time.sleep(0.3)
                 selected = subprocess.check_output(
-                    ["playerctl", "--player=playerctld", "metadata", "title"],
+                    ["playerctl", "--player=io.github.Pithos", "metadata", "title"],
                     env=env,
                     text=True,
                     timeout=5,
@@ -351,11 +374,31 @@ def run_verifier(output):
                         "virtual pointer stopped",
                     )
 
+                def pithos_visible():
+                    tree = json.loads(subprocess.check_output(
+                        ["swaymsg", "-r", "-t", "get_tree"], env=env, text=True))
+                    def visit(node):
+                        if node.get("app_id") == "io.github.Pithos":
+                            return node
+                        for child in node.get("nodes", []) + node.get("floating_nodes", []):
+                            found = visit(child)
+                            if found:
+                                return found
+                    (output / "window-tree.json").write_text(json.dumps(tree, indent=2))
+                    node = visit(tree)
+                    require(node is not None, "private Pithos window is missing")
+                    return node.get("visible", False)
+
+                require(not pithos_visible(), "Pithos did not start hidden")
+                subprocess.run([str(local_bin / "oldbook-pithos"), "start"],
+                               env=env, check=True, timeout=12)
+                require(not pithos_visible(), "session reload raised Pithos")
+
                 for x in (560, 720, 885):
                     event(f"move {round(x * 800 / 1440)} 16")
                     event("press 272")
                     event("release 272")
-                    time.sleep(0.25)
+                    time.sleep(0.5)
                 event("move 400 16")
                 time.sleep(1.2)
                 subprocess.run(
@@ -366,10 +409,37 @@ def run_verifier(output):
                 )
                 found = actions.read_text().splitlines() if actions.exists() else []
                 require(found == EXPECTED_ACTIONS, f"MPRIS actions were {found!r}")
+                # Right-click works on the arrows as well as the center title.
+                for x in (560, 885):
+                    event(f"move {round(x * 800 / 1440)} 16")
+                    event("press 273")
+                    event("release 273")
+                    wait_for(pithos_visible, [])
+                    event("press 273")
+                    event("release 273")
+                    wait_for(lambda: not pithos_visible(), [])
+                event("move 400 16")
+                event("press 273")
+                event("release 273")
+                wait_for(pithos_visible, [])
+                event("press 273")
+                event("release 273")
+                wait_for(lambda: not pithos_visible(), [])
+                event("press 272")
+                event("release 272")
+                time.sleep(.12)
+                event("press 272")
+                event("release 272")
+                wait_for(pithos_visible, [])
+                time.sleep(.5)
+                require(actions.read_text().splitlines() == EXPECTED_ACTIONS,
+                        "show/hide or double-click unexpectedly changed playback")
+                subprocess.run(["grim", str(output / "pithos-open.png")], env=env, check=True)
                 evidence = {
                     "selected": selected,
+                    "pithos_controls": "hidden startup, reload, right show/hide, double open without playback: PASS",
                     "actions": found,
-                    "screenshots": ["music.png", "tooltip.png"],
+                    "screenshots": ["music.png", "tooltip.png", "pithos-open.png"],
                 }
                 (output / "evidence.json").write_text(
                     json.dumps(evidence, indent=2) + "\n"
