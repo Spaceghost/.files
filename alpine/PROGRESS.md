@@ -743,10 +743,12 @@ under the final supervisor using its existing profile. Native bar r6 passed
 module mapping. Exact sources, screenshots and runtime evidence are retained
 in `alpine/verification/strata-service/` and `workspace-strata-zero/`.
 
-Concurrent changes subsequently mapped Strata to workspace 10 using the 0 key.
-The user clarification (actual workspace 0 versus workspace 10) and validation
-of those later edits are pending; the retained zero evidence does not validate
-those edits. No real logout/login cycle was performed.
+The user requested workspace 10 on the 0 key; that mapping is now committed
+and active. The dedicated `verification/workspace-ten/` evidence records 61
+focused tests, seven isolated native groups, and live migration preserving the
+workspace and review-window IDs. Numeric workspace 10 exists and workspace 0
+is absent. Earlier zero evidence remains historical. No real logout/login cycle
+was performed.
 
 
 ## MacBook keyboard backlight — 2026-09-07
