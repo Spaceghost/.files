@@ -127,10 +127,13 @@ Aim for at least 60fps, smooth continuous motion, preserved velocity and exact
 settling without overshoot. Use display frame clocks; stop animation when idle.
 Avoid redundant resize/layout work and unbounded update queues. Honor disabled
 desktop animations. Do not trade away high-quality still previews silently.
+React on the first available frame and prioritize compositor/UI work under load.
+Child applications and background jobs must retain ordinary scheduling priority.
 
 - Implementation: [decoration motion](desktop/.local/lib/oldbook/decoration_motion.py),
   [watcher](desktop/.local/lib/oldbook/decoration_watch.py),
-  [carousel renderer](desktop/.local/lib/oldbook/carousel_view.py).
+  [carousel renderer](desktop/.local/lib/oldbook/carousel_view.py),
+  [bounded scheduling helper](bin/oldbook-ui-priority).
 - Checks: [motion tests](tests/test_decoration_motion.py),
   [watcher tests](tests/test_decoration_watch.py),
   [frame-rate evidence](verification/decoration-framerate/README.md),
@@ -248,6 +251,40 @@ Sway reload does not reset them. Do not change hid_apple mode incidentally.
   [native overview](verification/apple-overview/README.md),
   [keyboard-light evidence](verification/keyboard-backlight/README.md).
   Distinguish synthetic native key events from physical engraved-key tests.
+
+### KEYBOARD-GLOW
+
+The MacBookPro11,5 exposes one whole-keyboard Apple SMC light, range 0–255;
+do not promise individual key or RGB control. Preserve F5/F6 and locked-session
+brightness controls, including fully off and ordinary Fn function keys.
+Shift+F6 toggles a gentle six-second breath; Shift+F5 restores steady light.
+Ctrl+XF86KbdBrightnessUp adds a typing rise effect that brightens on keypress and
+then decays with no extra user input; Ctrl+XF86KbdBrightnessDown starts bright
+and decays toward dark while you type and returns toward bright when you pause.
+Ctrl+Shift+XF86KbdBrightnessUp adds a sustained-typing mode that only reacts
+when average typing speed stays above about 22 WPM; slow typing leaves the light
+at its decayed level. Ctrl+Shift+XF86KbdBrightnessDown adds an
+inverse sustained mode: it starts bright and only darkens while typing remains
+above that threshold, then recovers as you pause. The device remains whole-keyboard
+Apple SMC output.
+Keep the same controls and same
+mode persistence rules as the existing features.
+The Ghost control deck exposes the same controls with useful descriptions.
+While breathing, F5/F6 adjust the saved peak; off stops the animation.
+Keep the selected level and mode across logins and leave them alone on reload
+or theme changes. Animation samples must never replace the saved brightness.
+One worker controls the physical keyboard, uses elapsed time, skips redundant
+writes and restores the chosen level on shutdown or compositor loss. Keep the
+Caps Lock attention indicator and display backlight separate.
+
+- Implementation: [keyboard light](desktop/.local/bin/oldbook-keyboard-backlight),
+  [bindings](desktop/.config/sway/local.d/keyboard-backlight.conf),
+  [control deck](desktop/.local/bin/oldbook-control).
+- Checks: [state and lifecycle](tests/test_keyboard_backlight.py),
+  [hardware evidence](verification/keyboard-breathing/README.md).
+  A 60Hz update target and sysfs readback do not prove optical refresh timing;
+  the kernel can coalesce writes. Suspend/resume and physical keypresses need
+  their own observation.
 
 ### SHORTCUT-HELP
 
@@ -415,26 +452,36 @@ personal database is not a repository artifact.
 
 ### SCRIPTURE
 
-Super+/ searches only Bible verses; Super+Shift+/ searches all collections with
-Bible results after Torah, Talmud and reflections. Selection displays immediately
+Super+/ focuses an editable Bible search in the existing desktop search bar;
+typing and results stay in that bar without opening a picker window. This
+supersedes the earlier button that launched Fuzzel. Release its keyboard grab
+after selection, cancellation or focus loss. Super+Shift+/ searches all
+collections with Bible results after Torah, Talmud and reflections. Selection displays immediately
 and holds for an hour. Preserve complete passages, attribution, continuous
 passage→reflection→practice presentation, offline sources and prior study text.
 Reading history is a separate durable personal SQLite database: append notes,
 research and drafts without replacing old material. Rebuildable study records
-belong outside the Fossil database. New study generation uses local AI only,
-grounded in retained sources/provenance; never cloud fallback or private journal
-content. Preserve other Conky cards and their intervals during refresh/recovery.
+belong outside the Fossil database. New study generation uses the Alienware's
+GPUs, grounded in retained sources/provenance; never cloud fallback or private
+journal content. Do not start Ollama or model workers on this MacBook Pro. An
+unavailable Alienware endpoint does not authorize local CPU fallback. This
+supersedes the earlier MacBook-local generation workflow. Preserve other Conky
+cards and their intervals during refresh/recovery.
 History is a clickable text link on the Scripture header line, in the active
 card font and accent color. It opens saved reading without advancing the passage;
 the passage itself keeps its click-to-advance action. This supersedes the separate
 History button beside the desktop search bar.
 
 - Implementation: [Scripture modules](desktop/.local/lib/oldbook/scripture.py),
+  [inline search bar](desktop/.local/bin/oldbook-scripture-bar),
   [history](desktop/.local/lib/oldbook/scripture_history.py),
   [generation](desktop/.local/lib/oldbook/scripture_generation.py).
 - Checks: [selection](tests/test_scripture_selection.py), [history](tests/test_scripture_history.py),
+  [inline search](tests/test_scripture_search.py),
+  [inline keyboard verification](tests/verify_scripture_inline.py),
   [study](tests/test_scripture_study.py), [local generation](tests/test_scripture_generation.py),
   [local runtime lifecycle](tests/test_scripture_local.py),
+  [runtime policy](tests/test_scripture_runtime_policy.py),
   [header clicks](tests/test_conky_clicks.py), [header visual proof](verification/scripture-header/README.md),
   [native/history evidence](verification/scripture-history/README.md),
   [local model provenance and replay](verification/scripture-local-generation/README.md).

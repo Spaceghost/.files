@@ -24,6 +24,7 @@ from workspace_defaults import choose_artwork
 STATE = Path.home() / '.local/state/oldbook/wallpaper'
 CURRENT = Path.home() / '.local/share/oldbook/current-wallpaper.png'
 GENERATION = Path.home() / '.local/state/oldbook/wallpaper-generation'
+MENU = Path(__file__).resolve().parent / 'oldbook-fuzzel'
 
 
 def atomic_json(path, value):
@@ -236,21 +237,26 @@ def delete_many(entries, labels):
     """Tick several paintings, then remove them in one confirmed step."""
     marked = set()
     while True:
+        menu_options = {'← Back to the gallery': ('back', None)}
         done = f'󰩹  Delete {len(marked)} selected…' if marked else None
-        options = [option for option in (done, '← Back to the gallery') if option]
-        options += [('[x] ' if index in marked else '[  ] ') + label
-                    for index, label in enumerate(labels)]
-        chosen = gallery_menu(f'Select images to delete ({len(marked)}) ❯ ', options)
-        if chosen is None or chosen == '← Back to the gallery':
-            return 0
-        if done is not None and chosen == done:
-            break
+        if done:
+            menu_options[done] = ('confirm', None)
         for index, label in enumerate(labels):
-            if chosen[5:] == label:
-                marked.symmetric_difference_update({index})
-                break
-        else:
+            option = ('[x] ' if index in marked else '[  ] ') + label
+            option = unique_label(option, menu_options)
+            menu_options[option] = ('toggle', index)
+        chosen = gallery_menu(f'Select images to delete ({len(marked)}) ❯ ',
+                             list(menu_options.keys()))
+        action = menu_options.get(chosen)
+        if action is None:
             return 0
+        if action[0] == 'back':
+            return 0
+        if action[0] == 'confirm':
+            break
+        if action[0] == 'toggle':
+            marked.symmetric_difference_update({action[1]})
+            continue
     picked = [entries[index] for index in sorted(marked)]
     answer = gallery_menu(f'Permanently delete {len(picked)} painting(s)? ',
                           ['Keep them', f'Delete {len(picked)} permanently'])
@@ -265,12 +271,13 @@ def switch_theme():
     """Apply an existing theme, rather than generating new artwork in its style."""
     active = current_theme_id()
     themes = available_themes(REPO)
-    labels = {}
+    labels = {'← Back to the gallery': None}
     for theme in themes:
         mark = '●' if theme['id'] == active else '○'
-        labels[f'{mark}  {theme["name"]}'] = theme['id']
-    chosen = gallery_menu('Switch theme ❯ ', ['← Back to the gallery', *labels])
-    if chosen is None or chosen not in labels:
+        label = unique_label(f'{mark}  {theme["name"]}', labels)
+        labels[label] = theme['id']
+    chosen = gallery_menu('Switch theme ❯ ', list(labels.keys()))
+    if chosen is None or labels.get(chosen) is None:
         return 0
     subprocess.Popen(['/usr/bin/python3', str(Path(__file__).resolve().parent / 'oldbook-theme'),
                       'use', labels[chosen], '--notify'], start_new_session=True)
@@ -375,9 +382,12 @@ def start_generation(theme='active', *, new_theme=None):
 
 
 def prompt_theme():
-    phrase = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'), '--dmenu', '--prompt', 'Describe your theme · name generated ❯ ',
-                             '--lines', '0', '--width', '62'],
-                            input='', capture_output=True, text=True)
+    try:
+        phrase = subprocess.run([str(MENU), '--dmenu', '--prompt', 'Describe your theme · name generated ❯ ',
+                                '--lines', '0', '--width', '62'],
+                               input='', capture_output=True, text=True)
+    except FileNotFoundError:
+        return
     if phrase.returncode == 0 and phrase.stdout.strip():
         start_generation(new_theme=phrase.stdout.strip())
 
@@ -433,19 +443,41 @@ def artwork_date(entry):
 
 
 def gallery_menu(prompt, options):
-    result = subprocess.run([str(Path(__file__).resolve().parent / 'oldbook-fuzzel'),
-                             '--dmenu', '--no-sort', '--prompt', prompt,
-                             '--lines', str(min(9, len(options))), '--width', '48'],
-                            input='\n'.join(options) + '\n', capture_output=True, text=True)
-    return result.stdout.rstrip('\n') if result.returncode == 0 else None
+    if not options:
+        return None
+    try:
+        result = subprocess.run([str(MENU), '--dmenu', '--no-sort', '--prompt', prompt,
+                                '--lines', str(min(9, len(options))), '--width', '48'],
+                               input='\n'.join(options) + '\n', capture_output=True,
+                               text=True)
+    except FileNotFoundError:
+        return None
+    if result.returncode != 0:
+        return None
+    selected = result.stdout.rstrip('\n')
+    return selected if selected in options else None
+
+
+def unique_label(base, seen):
+    """Return a unique label for a mutable menu state."""
+    candidate = base
+    suffix = 2
+    while candidate in seen:
+        candidate = f'{base} ({suffix})'
+        suffix += 1
+    return candidate
 
 
 def pick():
     entries, _ = load_gallery()
     entries = sorted(entries, key=lambda entry: (artwork_date(entry), str(entry['id'])), reverse=True)
-    labels = [f'{i + 1:02d}  ' + ' '.join(e["title"].split())
-              + (' · ' + e['theme_name'] if e.get('theme_name') else '')
-              for i, e in enumerate(entries)]
+    labels = []
+    pickable = {}
+    for i, entry in enumerate(entries):
+        title = ' '.join((entry.get('title') or entry.get('id') or 'A painting').split())
+        label = f'{i + 1:02d}  ' + title + (' · ' + entry['theme_name'] if entry.get('theme_name') else '')
+        labels.append(label)
+        pickable[label] = entry['id']
     generate_label = '✦  Generate new artwork & switch to it'
     controls = {'→  Next artwork': 'next', '←  Previous artwork': 'prev',
                 '⏯  Pause / resume rotation': 'pause'}
@@ -519,8 +551,8 @@ def pick():
             start_generation()
         elif selected == unthemed_label:
             start_generation('none')
-        elif selected in labels:
-            update('pick', entries[labels.index(selected)]['id'])
+        elif selected in pickable:
+            update('pick', pickable[selected])
         elif selected in controls:
             update(controls[selected])
         elif selected == delete_label:

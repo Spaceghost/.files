@@ -1,0 +1,37 @@
+test_appearance_combines_foot_font_with_validated_active_palette (test_decoration.DecorationTests.test_appearance_combines_foot_font_with_validated_active_palette) ... ok
+test_captions_follow_each_outputs_selected_workspace (test_decoration.DecorationTests.test_captions_follow_each_outputs_selected_workspace) ... ok
+test_decoration_settings_validate_ranges_and_types (test_decoration.DecorationTests.test_decoration_settings_validate_ranges_and_types) ... ok
+test_focus_path_includes_floating_windows_and_nested_splits (test_decoration.DecorationTests.test_focus_path_includes_floating_windows_and_nested_splits) ... ok
+test_fullscreen_square_caption_excludes_floating_windows (test_decoration.DecorationTests.test_fullscreen_square_caption_excludes_floating_windows) ... ok
+test_fullscreen_square_caption_uses_visible_output_and_root_state (test_decoration.DecorationTests.test_fullscreen_square_caption_uses_visible_output_and_root_state) ... ok
+test_geometry_update_reaches_main_loop_before_continuous_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_continuous_redrawing) ... /usr/lib/python3.14/site-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+/usr/lib/python3.14/site-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+FAIL
+test_pointer_actions_use_fixed_argv_without_a_shell (test_decoration.DecorationTests.test_pointer_actions_use_fixed_argv_without_a_shell) ... ok
+test_settings_migrate_legacy_position_and_save_through_symlink (test_decoration.DecorationTests.test_settings_migrate_legacy_position_and_save_through_symlink) ... ok
+test_vertical_text_uses_horizontal_separators_and_preserves_accents (test_decoration.DecorationTests.test_vertical_text_uses_horizontal_separators_and_preserves_accents) ... ok
+
+======================================================================
+FAIL: test_geometry_update_reaches_main_loop_before_continuous_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_continuous_redrawing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration.py", line 102, in test_geometry_update_reaches_main_loop_before_continuous_redrawing
+    self.assertEqual(events, ['geometry'],
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+                     'redrawing delayed the pending caption geometry')
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['redraw'] != ['geometry']
+
+First differing element 0:
+'redraw'
+'geometry'
+
+- ['redraw']
++ ['geometry'] : redrawing delayed the pending caption geometry
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.389s
+
+FAILED (failures=1)

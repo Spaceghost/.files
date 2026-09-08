@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-09-08T06:00:40.596541+00:00",
+  "prompt": "Return exactly OK.",
+  "num_predict": 8,
+  "num_thread": 1,
+  "stream": true,
+  "schema": null,
+  "request_limit_seconds": 120,
+  "model": "qwen2.5:1.5b",
+  "cloud_disabled": true,
+  "wrapper_source_sha256": "c413cd555c0c18aa7500d2ae970c2e63cb75112d1a6ca3bc52c4f660abfc8261",
+  "diagnostic_source_sha256": "65b01997fa101f6ceff60c25e20524ed57ea5ccad2028df488d095dce1c05983",
+  "diagnostic_source_delta": "Remove only nice -n10 command prefix; inherit ordinary priority. No persistent source edit.",
+  "study_saved": false,
+  "endpoint": "http://127.0.0.1:11435",
+  "verified_model_digest": "65ec06548149b04c096a120e4a6da9d4017ea809c91734ea5631e89f96ddc57b",
+  "request_started_utc": "2026-09-08T06:00:42.700016+00:00"
+}

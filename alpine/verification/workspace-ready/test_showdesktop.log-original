@@ -1,0 +1,36 @@
+test_a_fullscreen_window_hides_the_rest (test_showdesktop.Cards.test_a_fullscreen_window_hides_the_rest) ... ok
+test_a_tabbed_container_contributes_only_its_visible_tab (test_showdesktop.Cards.test_a_tabbed_container_contributes_only_its_visible_tab) ... ok
+test_clips_windows_hanging_off_the_output (test_showdesktop.Cards.test_clips_windows_hanging_off_the_output) ... ok
+test_drops_windows_entirely_off_the_output (test_showdesktop.Cards.test_drops_windows_entirely_off_the_output) ... ok
+test_floating_windows_are_drawn_over_tiled_ones (test_showdesktop.Cards.test_floating_windows_are_drawn_over_tiled_ones) ... ok
+test_skips_sticky_windows_that_survive_the_swap (test_showdesktop.Cards.test_skips_sticky_windows_that_survive_the_swap) ... ok
+test_uses_output_local_coordinates (test_showdesktop.Cards.test_uses_output_local_coordinates) ... ok
+test_a_card_is_never_cropped_past_the_capture (test_showdesktop.Cropping.test_a_card_is_never_cropped_past_the_capture) ... ok
+test_a_full_frame_crop_returns_every_pixel (test_showdesktop.Cropping.test_a_full_frame_crop_returns_every_pixel) ... ok
+test_logical_rectangles_scale_to_capture_pixels (test_showdesktop.Cropping.test_logical_rectangles_scale_to_capture_pixels) ... ok
+test_rows_are_copied_out_tightly_packed (test_showdesktop.Cropping.test_rows_are_copied_out_tightly_packed) ... ok
+test_a_fullscreen_card_still_clears (test_showdesktop.ExitGeometry.test_a_fullscreen_card_still_clears) ... ok
+test_a_wide_band_near_the_bottom_leaves_downward (test_showdesktop.ExitGeometry.test_a_wide_band_near_the_bottom_leaves_downward) ... ok
+test_a_wide_band_near_the_top_leaves_upward (test_showdesktop.ExitGeometry.test_a_wide_band_near_the_top_leaves_upward) ... ok
+test_left_half_leaves_by_the_left_edge (test_showdesktop.ExitGeometry.test_left_half_leaves_by_the_left_edge) ... ok
+test_right_half_leaves_by_the_right_edge (test_showdesktop.ExitGeometry.test_right_half_leaves_by_the_right_edge) ... ok
+test_reads_dimensions_and_pixel_offset (test_showdesktop.ParsePpm.test_reads_dimensions_and_pixel_offset) ... ok
+test_rejects_foreign_format (test_showdesktop.ParsePpm.test_rejects_foreign_format) ... ok
+test_rejects_truncated_pixels (test_showdesktop.ParsePpm.test_rejects_truncated_pixels) ... ok
+test_skips_comments_and_extra_whitespace (test_showdesktop.ParsePpm.test_skips_comments_and_extra_whitespace) ... ok
+test_a_named_workspace_falls_back_to_back_and_forth (test_showdesktop.Switching.test_a_named_workspace_falls_back_to_back_and_forth) ... ok
+test_a_numbered_workspace_is_addressed_by_number (test_showdesktop.Switching.test_a_numbered_workspace_is_addressed_by_number) ... ok
+test_a_later_slot_is_still_at_rest_when_the_first_has_moved (test_showdesktop.Timing.test_a_later_slot_is_still_at_rest_when_the_first_has_moved) ... ok
+test_easing_curves_span_the_unit_interval (test_showdesktop.Timing.test_easing_curves_span_the_unit_interval) ... ok
+test_easing_is_monotonic (test_showdesktop.Timing.test_easing_is_monotonic) ... ok
+test_every_card_has_landed_by_the_end_of_the_sequence (test_showdesktop.Timing.test_every_card_has_landed_by_the_end_of_the_sequence) ... ok
+test_leaving_accelerates_and_arriving_decelerates (test_showdesktop.Timing.test_leaving_accelerates_and_arriving_decelerates) ... ok
+test_restoring_runs_from_clear_to_rest (test_showdesktop.Timing.test_restoring_runs_from_clear_to_rest) ... ok
+test_showing_runs_from_rest_to_clear (test_showdesktop.Timing.test_showing_runs_from_rest_to_clear) ... ok
+test_stagger_is_capped_so_crowded_workspaces_stay_quick (test_showdesktop.Timing.test_stagger_is_capped_so_crowded_workspaces_stay_quick) ... ok
+test_top_left_card_launches_first (test_showdesktop.Timing.test_top_left_card_launches_first) ... ok
+
+----------------------------------------------------------------------
+Ran 31 tests in 0.015s
+
+OK

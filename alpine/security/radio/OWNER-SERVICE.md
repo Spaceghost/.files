@@ -1,8 +1,13 @@
 # Persistent radio owner service
 
-This implementation is staged. The live WPA, DHCP and resolver owners have not
-been replaced. Exact trusted SSIDs, controlled migration, live policy decisions
-and reboot/suspend checks remain activation requirements.
+The inert `oldbook-radio-runtime=0.1.0-r0` APK is installed, providing the CLI,
+fourteen Python modules and two private DHCP helpers. Its one-package transaction
+preserved all nine compared host-network sections and the same WPA/DHCP process
+identities. See the [runtime package instructions](../../packages/privacyctl-runtime/README.md).
+The supervisor is not running, and the live WPA, DHCP and resolver owners have
+not been replaced. Profiles, exact doas grants, OpenRC services, the sleep hook
+and resolver policy remain unactivated. Exact trusted SSIDs, controlled migration,
+live policy decisions and reboot/suspend checks remain activation requirements.
 
 ## Commands and lifetime
 
@@ -56,7 +61,7 @@ Parent identity is checked after installing the
 These mechanisms do not guarantee silence if both processes are killed at once
 or the kernel cannot execute the blocking operation.
 
-The staged source now takes the guardian, owner and DHCP lifetime locks in that
+When started, the installed runtime takes the guardian, owner and DHCP lifetime locks in that
 order before exposing IPC readiness. `NativeAdapter.prepare_recovery()`
 invalidates the request fence, verifies radio blocking and recovers the fixed
 `/var/lib/privacyctl/lease.json` under a 16-second startup recovery deadline. One
@@ -74,11 +79,12 @@ cleanup retain evidence and route retries through recovery. A failed DHCP stop
 prevents lease cleanup; its explicit lifetime lock remains held until successful
 `close()`.
 
-Unknown markers, malformed records, changed boot/namespace/link identities and
+Unknown markers, malformed records, changed same-boot namespace/link identities and
 unproved writer death refuse replacement. A marker by itself never grants
-permission to delete addresses or resolver providers. Different-boot completion
-is not implemented, so reboot does not authorize discarding the persistent
-journal. See [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md) for the implemented protocol
+permission to delete addresses or resolver providers. Different-boot DNS retirement
+is implemented separately in the inert runtime; reboot never authorizes silently discarding the persistent
+journal. See [DIFFERENT-BOOT-RECOVERY.md](DIFFERENT-BOOT-RECOVERY.md) for its DNS-only
+transition and [ORPHAN-RECOVERY.md](ORPHAN-RECOVERY.md) for the same-boot protocol
 and pending native acceptance. Do not delete ownership evidence merely to make
 a connection succeed.
 

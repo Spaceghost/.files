@@ -7,6 +7,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import stat
 import sys
@@ -16,7 +17,10 @@ REPO = Path(__file__).resolve().parents[2]
 SHARED = REPO / 'alpine/desktop'
 OVERRIDES = REPO / 'bazzite/desktop'
 DEPLOYER = REPO / 'alpine/bin/deploy-home'
+THEMES = REPO / 'alpine/themes'
 
+# Whole trees replay as they are. New helpers and snippets are therefore
+# picked up automatically; EXCLUDED names why a path stays on Alpine.
 SOURCE_TREES = (
     '.config/btop',
     '.config/cava',
@@ -28,8 +32,14 @@ SOURCE_TREES = (
     '.config/gtk-4.0',
     '.config/lxqt',
     '.config/nvim',
+    '.config/oldbook',
     '.config/qt6ct',
+    '.config/superhold',
+    '.config/sway/local.d',
+    '.config/swayfx',
     '.config/swaync',
+    '.config/tmux',
+    '.local/bin',
     '.local/lib/oldbook',
     '.local/share/applications',
     '.local/share/icons/Oldbook-Gruvbox',
@@ -39,47 +49,43 @@ SOURCE_FILES = (
     '.config/starship.toml',
     '.config/sway/config',
     '.config/sway/gestures.conf',
-    '.config/sway/local.d/shortcuts.conf',
     '.config/sway/theme.conf',
     '.config/waybar/config.jsonc',
     '.config/waybar/style.css',
-    '.config/oldbook/agents.json',
-    '.local/bin/oldbook-agents',
-    '.local/bin/oldbook-ai-notification-stream',
-    '.local/bin/oldbook-audio',
-    '.local/bin/oldbook-brightness',
-    '.local/bin/oldbook-claude-notify',
-    '.local/bin/oldbook-codex-notify',
-    '.local/bin/oldbook-conky',
-    '.local/bin/oldbook-expo',
-    '.local/bin/oldbook-fuzzel',
-    '.local/bin/oldbook-gallery-prompts',
-    '.local/bin/oldbook-gtk-settings',
-    '.local/bin/oldbook-lock',
-    '.local/bin/oldbook-menu',
-    '.local/bin/oldbook-network',
-    '.local/bin/oldbook-notification-led',
-    '.local/bin/oldbook-refresh-terminal-theme',
-    '.local/bin/oldbook-screenshot',
-    '.local/bin/oldbook-scripture',
-    '.local/bin/oldbook-scripture-bar',
-    '.local/bin/oldbook-scripture-library',
-    '.local/bin/oldbook-strata',
-    '.local/bin/oldbook-video-background',
-    '.local/bin/oldbook-wallpaper',
-    '.local/bin/oldbook-workspaces',
-    '.local/bin/oldbook-youtube',
     '.tmux.conf',
     '.zshrc',
 )
+EXCLUDED = {
+    '.config/sway/local.d/keyboard-backlight.conf': 'Apple SMC keyboard LED keys',
+    '.local/bin/oldbook-firewall-ui': 'OpenSnitch and nftables controls stay on Alpine',
+    '.local/bin/oldbook-keyboard-backlight': 'Apple SMC keyboard LED',
+    '.local/bin/oldbook-session': 'Alpine OpenRC/elogind session; see oldbook-bazzite-session',
+    '.local/bin/oldbook-sway': 'Alpine TTY entry point; greetd starts Sway on Bazzite',
+}
+# Fossil keeps conflict copies next to the tracked file; they are never desktop files.
+CONFLICT_COPY = re.compile(r'-original(-\d+)?$')
+
+# Every helper anchored to the checkout uses exactly these lines, so the
+# profile can point them at the immutable revision's `repo` link instead.
+BIN_ANCHOR = 'REPO = Path(__file__).resolve().parents[4]'
+BIN_ANCHOR_BAZZITE = "REPO = (Path(__file__).resolve().parents[3] / 'repo').resolve(strict=True)"
+LIB_ANCHOR = "THEMES = Path(__file__).resolve().parents[5] / 'alpine/themes'"
+LIB_ANCHOR_BAZZITE = ("THEMES = (Path(__file__).resolve().parents[4] / 'repo/alpine/themes')"
+                      ".resolve(strict=True)")
+
+# The image builds the glibc Waybar module; a per-user copy remains supported.
+SYSTEM_ARTWORK_MODULES = (Path('/usr/lib64/oldbook/oldbook-art.so'),
+                          Path('/usr/lib/oldbook/oldbook-art.so'))
+
 RUNTIME_COMMANDS = (
-    'brightnessctl', 'btop', 'conky', 'dbus-update-activation-environment',
-    'curl', 'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'ip', 'jq',
-    'less', 'loginctl', 'mpv',
-    'mpvpaper', 'nmcli', 'notify-send', 'pavucontrol', 'playerctl', 'python3',
-    'slurp', 'ssh', 'sway', 'swayidle', 'swaylock', 'swaymsg', 'swaync', 'swaync-client',
-    'superhold', 'systemctl', 'thunar', 'tmux', 'waybar', 'wl-copy', 'wpctl', 'yt-dlp',
+    'brightnessctl', 'btop', 'cliphist', 'conky', 'curl', 'dbus-update-activation-environment',
+    'eza', 'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'gsettings', 'ip', 'jq',
+    'less', 'loginctl', 'mpv', 'mpvpaper', 'nmcli', 'notify-send', 'nvim', 'pavucontrol',
+    'playerctl', 'python3', 'slurp', 'ssh', 'starship', 'superhold', 'sway', 'swayidle',
+    'swaylock', 'swaymsg', 'swaync', 'swaync-client', 'systemctl', 'thunar', 'tmux', 'waybar',
+    'wl-copy', 'wl-paste', 'wpctl', 'xdg-open', 'yt-dlp', 'zoxide', 'zsh',
 )
+OPTIONAL_COMMANDS = ('cava', 'pithos', 'swappy', 'wl-clip-persist', 'wtype')
 
 
 def load_deployer():
@@ -88,6 +94,13 @@ def load_deployer():
     module = importlib.util.module_from_spec(spec)
     loader.exec_module(module)
     return module
+
+
+def replayable(path):
+    return (path.is_file() and not path.is_symlink()
+            and '__pycache__' not in path.parts
+            and path.suffix not in ('.pyc', '.pyo')
+            and not CONFLICT_COPY.search(path.name))
 
 
 def source_paths():
@@ -102,10 +115,21 @@ def source_paths():
         if not root.is_dir() or root.is_symlink():
             raise RuntimeError(f'Missing shared profile source: {root}')
         paths.extend(path.relative_to(REPO) for path in sorted(root.rglob('*'))
-                     if path.is_file() and not path.is_symlink()
-                     and '__pycache__' not in path.parts
-                     and path.suffix not in ('.pyc', '.pyo'))
+                     if replayable(path)
+                     and str(path.relative_to(SHARED)) not in EXCLUDED)
     return tuple(dict.fromkeys(paths))
+
+
+def theme_profile():
+    """The current theme's HOME overlay, replayed over the shared files it themes."""
+    try:
+        identity = (THEMES / 'current').read_text().strip()
+    except OSError:
+        return None
+    if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', identity):
+        return None
+    profile = THEMES / 'profiles' / identity
+    return profile if profile.is_dir() and not profile.is_symlink() else None
 
 
 def _revision(desired):
@@ -123,6 +147,13 @@ def overlay_directory(target, desired=None):
             / _revision(desired) / 'desktop')
 
 
+def artwork_module(target):
+    for path in SYSTEM_ARTWORK_MODULES:
+        if path.is_file():
+            return path
+    return target / '.local/lib/oldbook/oldbook-art.so'
+
+
 def transform(relative, content, target):
     if relative == Path('.config/sway/config'):
         text = content.decode()
@@ -137,6 +168,12 @@ def transform(relative, content, target):
         return text.encode()
     if relative == Path('.config/sway/local.d/shortcuts.conf'):
         return (b'# oldbook-shortcuts is owned by oldbook-shortcuts.service on Bazzite.\n')
+    if relative == Path('.config/swayfx/config'):
+        # titlebar_position comes from the Alpine package's local patch; packaged
+        # SwayFX rejects it. Captions come from oldbook-decoration either way.
+        text = content.decode()
+        return ('\n'.join(line for line in text.splitlines()
+                          if not line.startswith('titlebar_position ')) + '\n').encode()
     if relative == Path('.config/waybar/config.jsonc'):
         document = json.loads(content)
         top = document[0]
@@ -144,42 +181,33 @@ def transform(relative, content, target):
                                            if name != 'group/transmission']
         for name in ('group/transmission', 'custom/link', 'custom/radio', 'custom/firewall'):
             top.pop(name, None)
-        top['cffi/art']['module_path'] = str(target / '.local/lib/oldbook/oldbook-art.so')
+        top['cffi/art']['module_path'] = str(artwork_module(target))
         top['cffi/art']['command'] = '~/.local/bin/oldbook-wallpaper'
         return (json.dumps(document, ensure_ascii=False, indent=2) + '\n').encode()
-    if relative in (Path('.local/bin/oldbook-wallpaper'),
-                    Path('.local/bin/oldbook-gallery-prompts'),
-                    Path('.local/bin/oldbook-conky'),
-                    Path('.local/bin/oldbook-scripture'),
-                    Path('.local/bin/oldbook-scripture-bar')):
-        text = content.decode()
-        old = 'REPO = Path(__file__).resolve().parents[4]'
-        if old not in text:
-            raise RuntimeError(f'Cannot anchor repository path in {relative}')
-        text = text.replace(
-            old, "REPO = (Path(__file__).resolve().parents[3] / 'repo').resolve(strict=True)",
-            1)
+    if relative.parts[:2] == ('.local', 'bin'):
+        text = content.decode(errors='surrogateescape')
+        if 'parents[4]' in text:
+            if BIN_ANCHOR not in text:
+                raise RuntimeError(f'Cannot anchor repository path in {relative}')
+            text = text.replace(BIN_ANCHOR, BIN_ANCHOR_BAZZITE, 1)
         if relative == Path('.local/bin/oldbook-wallpaper'):
             old_control = "REPO / 'alpine/desktop/.local/bin/oldbook-control'"
             if old_control not in text:
                 raise RuntimeError('Cannot route Bazzite command deck from oldbook-wallpaper')
             text = text.replace(
                 old_control, "Path(__file__).resolve().parent / 'oldbook-control'", 1)
+        if relative == Path('.local/bin/oldbook-lock'):
+            if "command='swaylockd'" not in text:
+                raise RuntimeError('Cannot select stock swaylock in oldbook-lock')
+            text = text.replace('swaylockd', 'swaylock')
+        return text.encode(errors='surrogateescape')
+    if relative.parts[:3] == ('.local', 'lib', 'oldbook') and relative.suffix == '.py':
+        text = content.decode()
+        if 'parents[5]' in text:
+            if LIB_ANCHOR not in text:
+                raise RuntimeError(f'Cannot anchor repository path in {relative}')
+            text = text.replace(LIB_ANCHOR, LIB_ANCHOR_BAZZITE, 1)
         return text.encode()
-    if relative == Path('.local/lib/oldbook/overlay_theme.py'):
-        text = content.decode()
-        old = "THEMES = Path(__file__).resolve().parents[5] / 'alpine/themes'"
-        if old not in text:
-            raise RuntimeError('Cannot anchor repository path in overlay_theme.py')
-        return text.replace(
-            old,
-            "THEMES = (Path(__file__).resolve().parents[4] / 'repo/alpine/themes').resolve(strict=True)",
-            1).encode()
-    if relative == Path('.local/bin/oldbook-lock'):
-        text = content.decode()
-        if "command='swaylockd'" not in text:
-            raise RuntimeError('Cannot select stock swaylock in oldbook-lock')
-        return text.replace('swaylockd', 'swaylock').encode()
     return content
 
 
@@ -190,10 +218,17 @@ def desired_files(target):
         relative = source.relative_to(SHARED)
         desired[relative] = (transform(relative, source.read_bytes(), target),
                              stat.S_IMODE(source.stat().st_mode))
+    profile = theme_profile()
+    if profile is not None:
+        # A theme only recolors files the shared desktop already provides; its
+        # runtime state copies (waybar-state.css) never become managed links.
+        for source in sorted(profile.rglob('*')):
+            relative = source.relative_to(profile)
+            if replayable(source) and relative in desired:
+                desired[relative] = (transform(relative, source.read_bytes(), target),
+                                     stat.S_IMODE(source.stat().st_mode))
     for source in sorted(OVERRIDES.rglob('*')):
-        if (source.is_file() and not source.is_symlink()
-                and '__pycache__' not in source.parts
-                and source.suffix not in ('.pyc', '.pyo')):
+        if replayable(source):
             relative = source.relative_to(OVERRIDES)
             desired[relative] = (source.read_bytes(), stat.S_IMODE(source.stat().st_mode))
     wallpaper = REPO / 'alpine/assets/spaceghost.png'
@@ -302,7 +337,7 @@ def preview(target):
 
 
 def check_module(target):
-    module = target / '.local/lib/oldbook/oldbook-art.so'
+    module = artwork_module(target)
     if not module.exists():
         return 'missing Fedora-built artwork module'
     try:
@@ -326,7 +361,35 @@ def check_superhold_library(target):
     return None if any(path.is_file() for path in candidates) else 'missing Fedora Superhold native bridge'
 
 
-def check(target, skip_runtime=False):
+def check_python_bindings():
+    problems = []
+    try:
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('GtkLayerShell', '0.1')
+        from gi.repository import Gtk  # noqa: F401
+        from gi.repository import GtkLayerShell  # noqa: F401
+    except (ImportError, ValueError):
+        problems.append('missing Python GTK 3 / GtkLayerShell bindings')
+    try:
+        import gi
+        gi.require_version('Gtk', '4.0')
+        gi.require_version('Gtk4LayerShell', '1.0')
+        from gi.repository import Gtk4LayerShell  # noqa: F401
+    except (ImportError, ValueError):
+        problems.append('missing Python GTK 4 / Gtk4LayerShell bindings')
+    try:
+        import dbus  # noqa: F401
+    except ImportError:
+        problems.append('missing Python D-Bus bindings')
+    try:
+        import PyQt6  # noqa: F401
+    except ImportError:
+        problems.append('missing Python PyQt 6 bindings')
+    return problems
+
+
+def check(target, skip_runtime=False, skip_repository=False):
     problems = []
     pending = [(state, path) for state, path in changes(target) if state != 'current']
     if pending:
@@ -341,24 +404,12 @@ def check(target, skip_runtime=False):
         missing = [name for name in RUNTIME_COMMANDS if shutil.which(name) is None]
         if missing:
             problems.append('missing runtime commands: ' + ', '.join(missing))
-        if not (target / '.local/share/fossil/files.fossil').is_file():
+        optional = [name for name in OPTIONAL_COMMANDS if shutil.which(name) is None]
+        if optional:
+            print('note: optional commands unavailable: ' + ', '.join(optional))
+        if not skip_repository and not (target / '.local/share/fossil/files.fossil').is_file():
             problems.append('missing Fossil repository database for Strata and gallery checkpoints')
-        try:
-            import gi
-            gi.require_version('Gtk', '3.0')
-            gi.require_version('GtkLayerShell', '0.1')
-            from gi.repository import Gtk  # noqa: F401
-            from gi.repository import GtkLayerShell  # noqa: F401
-        except (ImportError, ValueError):
-            problems.append('missing Python GTK 3 / GtkLayerShell bindings')
-        try:
-            import dbus  # noqa: F401
-        except ImportError:
-            problems.append('missing Python D-Bus bindings')
-        try:
-            import PyQt6  # noqa: F401
-        except ImportError:
-            problems.append('missing Python PyQt 6 bindings')
+        problems.extend(check_python_bindings())
     for problem in problems:
         print('FAIL:', problem)
     if not problems:
@@ -381,6 +432,8 @@ def main(argv=None):
     checker = command('check')
     checker.add_argument('--skip-runtime', action='store_true',
                          help=argparse.SUPPRESS)
+    checker.add_argument('--skip-repository', action='store_true',
+                         help='Do not require the Fossil database (image build validation).')
     command('apply')
     rollback_parser = command('rollback')
     rollback_parser.add_argument('backup', type=Path)
@@ -390,7 +443,7 @@ def main(argv=None):
         preview(target)
         return 0
     if args.action == 'check':
-        return check(target, args.skip_runtime)
+        return check(target, args.skip_runtime, args.skip_repository)
     deployer = load_deployer()
     if args.action == 'rollback':
         deployer.rollback(target, args.backup)

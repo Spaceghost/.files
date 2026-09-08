@@ -505,12 +505,13 @@ class NativeNetwork:
             self._pending_cleanup = None
 
     def _run(self, argv, *, deadline, check, content=None, operation='native-command'):
+        argv = tuple(argv)
         check()
         if os.geteuid() != 0:
             raise RuntimeError('network application requires root')
         self.drain_pending(deadline=deadline, check=check)
         if self.journal is not None:
-            self.journal.check_link(deadline=deadline, check=check)
+            self.journal.check_command(self, argv, content=content, deadline=deadline, check=check)
         ready_read = ready_write = gate_read = gate_write = host_proc = None
         process = None
         outer_fd = inner_fd = None
@@ -559,7 +560,7 @@ class NativeNetwork:
                 # attempted slot until exact init death and durable completion.
                 self._writer_pending = True
                 self.journal.writer_started('native', inner_pid, inner_fd, operation)
-                self.journal.check_link(deadline=command_deadline, check=check)
+                self.journal.check_command(self, argv, content=content, deadline=command_deadline, check=check)
             check()
             if time.monotonic() >= command_deadline:
                 raise RuntimeError('network command gate deadline exceeded')
@@ -571,7 +572,7 @@ class NativeNetwork:
                 raise RuntimeError('network command init survived completion')
             self._finish_writer()
             if self.journal is not None:
-                self.journal.check_link(deadline=command_deadline, check=check)
+                self.journal.check_command(self, argv, content=content, deadline=command_deadline, check=check)
             if len(output) > 262144:
                 raise RuntimeError('network command output is too large')
             check()
@@ -641,6 +642,9 @@ class NativeNetwork:
         # lock. Require the explicit bridge ABI before any lease can be applied.
         if self._run([self.resolvconf, '--host-pid-lock-version'], **options).strip() != '1':
             raise RuntimeError('native resolver host-PID locking capability is required')
+        self._resolver_configuration()
+
+    def _resolver_configuration(self):
         # PID-isolated commands deliberately cannot restart host cache daemons.
         # Require an explicit libc-only policy; never modify policy to make a
         # command succeed. Migration must also account for installed libc.d hooks.
@@ -663,6 +667,69 @@ class NativeNetwork:
                     raise RuntimeError('resolver notification hooks need separate migration review')
             elif path.name not in {'libc', *_CACHE_SUBSCRIBERS}:
                 raise RuntimeError('unknown native resolver subscriber')
+
+    def _prepare_retirement_state(self):
+        """Recreate only missing transient state/keys after validated policy.
+
+        Never initialize openresolv with -I: it deletes unrelated providers.
+        Existing legacy layouts, symlinks and writable ancestors are conflicts.
+        """
+        self._resolver_configuration()
+        self._managed_resolver()
+        if self.providers.name != 'keys':
+            raise RuntimeError('DNS retirement requires the explicit keys layout')
+        if os.path.lexists(self.providers.parent / 'interfaces'):
+            raise RuntimeError('legacy resolver layout requires migration')
+        for path in reversed((self.providers, *self.providers.parents)):
+            try:
+                info = path.lstat()
+            except FileNotFoundError:
+                if path not in (self.providers.parent, self.providers):
+                    raise RuntimeError('resolver state ancestor is unavailable') from None
+                path.mkdir(mode=0o755)
+                info = path.lstat()
+            sticky_root = info.st_uid == 0 and bool(info.st_mode & stat.S_ISVTX)
+            if (not stat.S_ISDIR(info.st_mode) or info.st_uid != 0
+                    or (info.st_mode & 0o022 and not sticky_root)):
+                raise RuntimeError('unsafe native resolver provider directory')
+        self._provider_directory()
+
+    def retire_dns(self, permit, *, deadline, check=lambda: None):
+        """Retire an exact old-boot DNS candidate using current provider inputs."""
+        from .recovery import validate_dns_permit
+
+        def checkpoint():
+            return validate_dns_permit(permit, self, deadline=deadline, check=check)
+
+        value = checkpoint()
+        resources = value['resources']
+        provider, contents = resources['provider'], resources['dns_contents']
+        if provider is None:
+            return
+        self._prepare_retirement_state()
+        checkpoint()
+        content = self.provider(provider)
+        if content is not None and content not in contents:
+            raise RuntimeError('owned resolver provider was replaced')
+        options = {'deadline': deadline, 'check': check}
+        self.regenerate_dns(**options)
+        checkpoint()
+        content = self.provider(provider)
+        if content is not None:
+            if content not in contents:
+                raise RuntimeError('owned resolver provider was replaced')
+            self.delete_provider(provider, **options)
+        checkpoint()
+        if self.provider(provider) is not None:
+            raise RuntimeError('resolver provider deletion was not applied')
+        self.regenerate_dns(**options)
+        checkpoint()
+        output = set(self.resolver(**options))
+        remaining = self.all_provider_dns()
+        removed = {server for content in contents for server in _servers(content)}
+        if (removed & output) - remaining:
+            raise RuntimeError('resolver subscriber retained unowned lease nameservers')
+        checkpoint()
 
     def _managed_resolver(self):
         content = self._read(self.resolver_path)

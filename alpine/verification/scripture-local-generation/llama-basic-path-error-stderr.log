@@ -1,0 +1,11 @@
+0.02.454.453 I llama_completion: llama backend init
+0.02.454.487 I llama_completion: load the model and apply lora adapter, if any
+0.02.468.996 E gguf_init_from_file: failed to open GGUF file '/home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a462818a5b4' (No such file or directory)
+0.02.515.385 E llama_model_load: error loading model: llama_model_loader: failed to load model from /home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a462818a5b4
+0.02.515.418 E llama_model_load_from_file_impl: failed to load model
+0.02.526.296 E common_fit_params: encountered an error while trying to fit params to free device memory: failed to load model
+0.02.526.448 E gguf_init_from_file: failed to open GGUF file '/home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a462818a5b4' (No such file or directory)
+0.02.526.512 E llama_model_load: error loading model: llama_model_loader: failed to load model from /home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a462818a5b4
+0.02.526.518 E llama_model_load_from_file_impl: failed to load model
+0.02.526.525 E cmn  common_init_: failed to load model '/home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a462818a5b4'
+0.02.526.529 E llama_completion: error: unable to create context

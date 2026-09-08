@@ -494,6 +494,22 @@ def serve(ipc, sway, directory, control):
     warm_up()
     from ui_priority import request_priority
     request_priority()
+    graphics_keeper = None
+    try:
+        from graphics_warmup import warm_graphics
+        graphics_keeper = warm_graphics()
+    except Exception as error:
+        print(f'oldbook-showdesktop: graphics warmup unavailable: {error}',
+              file=sys.stderr, flush=True)
+    request_priority()
+    try:
+        return serve_session(ipc, sway, directory, control)
+    finally:
+        if graphics_keeper is not None:
+            graphics_keeper.close()
+
+
+def serve_session(ipc, sway, directory, control):
     from gi.repository import GLib
 
     loop = GLib.MainLoop()

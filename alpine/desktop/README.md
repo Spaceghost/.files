@@ -72,6 +72,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback |
 | Brightness keys | Kernel backlight steps, with a clear notification if the seat lacks write permission |
 | Keyboard illumination keys (`F5` / `F6` on the MacBook) | Dim / brighten the keyboard by 10%, including fully off; also available while locked |
+| `Shift+F6` / `Shift+F5` | Toggle keyboard breathing / return to steady light; use the engraved illumination keys without Fn |
 | Click the panel audio icon | Open pavucontrol |
 | Click the notification glyph | Toggle the compact notification history card |
 | Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
@@ -104,11 +105,21 @@ use per-session locks. For local recovery, Escape leaves the carousel mode;
 
 The MacBook keyboard light uses the kernel's `applesmc` LED device
 `smc::kbd_backlight`; the existing `brightnessctl` udev rule and `input` group
-allow control without root. `oldbook-keyboard-backlight` accepts `up`, `down`,
-`toggle` and `restore`. It saves the chosen brightness (including off) under
+allow control without root. It is one whole-keyboard channel, 0–255, with no
+per-key interface on this MacBookPro11,5. `oldbook-keyboard-backlight` accepts
+`up`, `down`, `toggle`, `breathe`, `steady`, `restore` and JSON `status`.
+Breathing fades all backlit keys together over six seconds, from 12% of your
+chosen brightness to that brightness. `Shift+F6` toggles breathing; `Shift+F5`
+returns to steady light. The Ghost control deck also has **Keyboard glow**
+(`oldbook-control keyboard`). While breathing, F5/F6 adjust its peak; dimming
+to zero or toggling the light off stops the effect. It saves the chosen peak
+brightness (including off) under
 `~/.local/state/oldbook/keyboard-backlight` and restores it at Sway login; first
-use preserves an existing level or enables 25% brightness. Sway reloads do not
-reset it. With this MacBook's unchanged `hid_apple` setting `fnmode=3` (auto),
+use preserves an existing level or enables 25% brightness. The sibling
+`keyboard-backlight-mode` file remembers steady/breathing; animation samples
+never overwrite the saved level. One worker fades the light, skips redundant
+writes, and restores the chosen level when stopped or its Sway connection ends.
+Sway reloads do not reset it. With this MacBook's unchanged `hid_apple` setting `fnmode=3` (auto),
 `F5`/`F6` adjust the light and `Fn+F5`/`Fn+F6` remain application function keys.
 
 The artwork icon opens the gallery with left click, advances with right click,

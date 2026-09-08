@@ -1,16 +1,21 @@
 """Local Scripture study generation stays grounded and never reaches cloud AI."""
 import hashlib
 import gzip
+import io
 from contextlib import closing
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import os
 from pathlib import Path
+import socket
+import ssl
 import sys
 import threading
 import tempfile
 import subprocess
 import sqlite3
 import unittest
+from unittest.mock import Mock, patch
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
@@ -261,6 +266,132 @@ class GenerationTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, 'redirect'):
                 generation.generate_entry('John 3:16', 'study-note', [source()],
                                             endpoint=ollama.endpoint)
+
+
+class TailscaleTransportTests(unittest.TestCase):
+    """Exercise DNS pinning and TLS with synthetic replies and no real network."""
+    hostname = 'alienware.bishop-bearded.ts.net'
+    endpoint = 'https://' + hostname
+
+    @staticmethod
+    def answers(*addresses, port=443):
+        return [(socket.AF_INET6 if ':' in address else socket.AF_INET,
+                 socket.SOCK_STREAM, socket.IPPROTO_TCP, '',
+                 (address, port, 0, 0) if ':' in address else (address, port))
+                for address in addresses]
+
+    @staticmethod
+    def wire_reply(*, redirect=False):
+        if redirect:
+            return (b'HTTP/1.1 302 Found\r\nLocation: https://ollama.com/api/tags\r\n'
+                    b'Content-Length: 0\r\nConnection: close\r\n\r\n')
+        return b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\n{}'
+
+    def test_only_https_tailscale_dns_names_are_accepted_and_preserved(self):
+        with patch('socket.getaddrinfo') as resolve:
+            self.assertEqual(generation.validate_endpoint(self.endpoint), self.endpoint)
+            self.assertEqual(generation.validate_endpoint(self.endpoint + ':8443/'),
+                             self.endpoint + ':8443')
+            for endpoint in ('http://' + self.hostname, 'https://alienware',
+                             'https://example.com', self.endpoint + '.example.com',
+                             'https://notts.net'):
+                with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                    generation.validate_endpoint(endpoint)
+            resolve.assert_not_called()
+
+    def test_any_public_dns_answer_refuses_every_connection_before_http(self):
+        for addresses in (('100.90.80.70', '8.8.8.8'),
+                          ('8.8.8.8', '100.90.80.70'),
+                          ('fd7a:115c:a1e0::1', '2001:4860:4860::8888')):
+            with self.subTest(addresses=addresses), \
+                    patch('socket.getaddrinfo', return_value=self.answers(*addresses)) as resolve, \
+                    patch('socket.create_connection') as connect:
+                with self.assertRaisesRegex(ValueError, 'local network'):
+                    generation.generate_entry('John 3:16', 'study-note', [source()],
+                                              endpoint=self.endpoint)
+                resolve.assert_called_once_with(self.hostname, 443, type=socket.SOCK_STREAM)
+                connect.assert_not_called()
+
+    def test_empty_dns_answers_fail_before_connecting(self):
+        with patch('socket.getaddrinfo', return_value=[]), \
+                patch('socket.create_connection') as connect:
+            with self.assertRaises((ValueError, RuntimeError)):
+                generation._opener_for_endpoint(self.endpoint)
+            connect.assert_not_called()
+
+    def test_dns_is_pinned_once_and_tls_keeps_hostname_despite_proxy_environment(self):
+        context = ssl.create_default_context()
+        raw, secured = Mock(), Mock()
+        secured.makefile.side_effect = lambda *_args, **_kwargs: io.BytesIO(self.wire_reply())
+        with patch('socket.getaddrinfo', side_effect=[self.answers('100.90.80.70'),
+                                                    self.answers('8.8.8.8')]) as resolve, \
+                patch('socket.create_connection', return_value=raw) as connect, \
+                patch('ssl.create_default_context', return_value=context), \
+                patch.object(context, 'wrap_socket', return_value=secured) as wrap, \
+                patch.dict(os.environ, {'https_proxy': 'http://8.8.8.8:3128',
+                                        'HTTPS_PROXY': 'http://8.8.8.8:3128',
+                                        'no_proxy': '', 'NO_PROXY': ''}):
+            opener = generation._opener_for_endpoint(self.endpoint)
+            for path in ('/api/tags', '/api/show'):
+                self.assertEqual(generation._request(opener, self.endpoint, path), {})
+            resolve.assert_called_once_with(self.hostname, 443, type=socket.SOCK_STREAM)
+            self.assertEqual(connect.call_count, 2)
+            self.assertEqual([call.args[0] for call in connect.call_args_list],
+                             [('100.90.80.70', 443)] * 2)
+            self.assertEqual(wrap.call_count, 2)
+            for call in wrap.call_args_list:
+                self.assertIs(call.args[0], raw)
+                self.assertEqual(call.kwargs['server_hostname'], self.hostname)
+            self.assertTrue(context.check_hostname)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+            sent = b''.join(call.args[0] for call in secured.sendall.call_args_list)
+            self.assertIn(('Host: ' + self.hostname + '\r\n').encode(), sent)
+            self.assertNotIn(b'CONNECT ', sent)
+
+    def test_connection_failure_tries_only_other_pinned_local_addresses(self):
+        context = ssl.create_default_context()
+        raw, secured = Mock(), Mock()
+        secured.makefile.side_effect = lambda *_args, **_kwargs: io.BytesIO(self.wire_reply())
+        endpoint = self.endpoint + ':8443'
+        with patch('socket.getaddrinfo', return_value=self.answers(
+                '100.90.80.70', 'fd7a:115c:a1e0::1', port=8443)) as resolve, \
+                patch('socket.create_connection', side_effect=[OSError('fixture refused'), raw]) as connect, \
+                patch('ssl.create_default_context', return_value=context), \
+                patch.object(context, 'wrap_socket', return_value=secured) as wrap:
+            opener = generation._opener_for_endpoint(endpoint)
+            self.assertEqual(generation._request(opener, endpoint, '/api/tags'), {})
+            resolve.assert_called_once_with(self.hostname, 8443, type=socket.SOCK_STREAM)
+            self.assertEqual([call.args[0] for call in connect.call_args_list],
+                             [('100.90.80.70', 8443), ('fd7a:115c:a1e0::1', 8443)])
+            self.assertEqual(wrap.call_args.kwargs['server_hostname'], self.hostname)
+
+    def test_certificate_failure_sends_no_http_request(self):
+        context = ssl.create_default_context()
+        raw = Mock()
+        with patch('socket.getaddrinfo', return_value=self.answers('100.90.80.70')), \
+                patch('socket.create_connection', return_value=raw), \
+                patch('ssl.create_default_context', return_value=context), \
+                patch.object(context, 'wrap_socket', side_effect=ssl.SSLCertVerificationError(
+                    'fixture certificate hostname mismatch')):
+            opener = generation._opener_for_endpoint(self.endpoint)
+            with self.assertRaisesRegex(RuntimeError, 'certificate hostname mismatch'):
+                generation._request(opener, self.endpoint, '/api/tags')
+            raw.sendall.assert_not_called()
+            raw.close.assert_called()
+
+    def test_https_redirect_is_rejected_without_a_second_connection(self):
+        context = ssl.create_default_context()
+        raw, secured = Mock(), Mock()
+        secured.makefile.side_effect = lambda *_args, **_kwargs: io.BytesIO(self.wire_reply(redirect=True))
+        with patch('socket.getaddrinfo', return_value=self.answers('100.90.80.70')) as resolve, \
+                patch('socket.create_connection', return_value=raw) as connect, \
+                patch('ssl.create_default_context', return_value=context), \
+                patch.object(context, 'wrap_socket', return_value=secured):
+            opener = generation._opener_for_endpoint(self.endpoint)
+            with self.assertRaisesRegex(RuntimeError, 'redirect'):
+                generation._request(opener, self.endpoint, '/api/tags')
+            self.assertEqual(resolve.call_count, 1)
+            self.assertEqual(connect.call_count, 1)
 
 
 class CommandTests(unittest.TestCase):

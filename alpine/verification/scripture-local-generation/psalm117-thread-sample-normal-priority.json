@@ -1,0 +1,204 @@
+{
+  "sample_started_utc": "2026-09-08T05:34:11.931495+00:00",
+  "process_chain": {
+    "wrapper": 11533,
+    "server": 11601,
+    "runner": 13843
+  },
+  "process_start_ticks": {
+    "11533": 2351867,
+    "11601": 2352178,
+    "13843": 2360459
+  },
+  "listener": {
+    "address": "127.0.0.1",
+    "port": 11435,
+    "owned_by_pid": 11601
+  },
+  "duration_seconds": 5.017,
+  "clock_ticks_per_second": 100,
+  "threads_first": 12,
+  "threads_last": 12,
+  "aggregate_cpu_percent_of_one_core": 40.86,
+  "thread_deltas": [
+    {
+      "tid": 13875,
+      "user_ticks": 195,
+      "system_ticks": 10,
+      "cpu_percent_of_one_core": 40.86,
+      "state_sample_counts": {
+        "R": 6
+      },
+      "wait_channel_sample_counts": {
+        "0": 6
+      },
+      "observed_cpus": [
+        0,
+        1,
+        4
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13890,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        0
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13891,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "do_epoll_wait": 6
+      },
+      "observed_cpus": [
+        1
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13873,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        0,
+        4
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13874,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        0
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13843,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        3
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13876,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        7
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 13881,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        5
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    },
+    {
+      "tid": 16892,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        7
+      ],
+      "observed_nice_values": [
+        0
+      ]
+    }
+  ],
+  "comparison": {
+    "earlier_core_allocation": 0.412,
+    "current_core_allocation": 0.4086,
+    "allocation_ratio": 0.992,
+    "current_observed_cpu_seconds": 2.05
+  },
+  "collection_scope": "Only owned runner per-thread stat/wchan and owning server listener identity. Priority change was performed separately by root before this sample; this sampler made no process/settings changes and read no request/output content.",
+  "observations": {
+    "all_sampled_threads_nice_zero": true,
+    "threads_with_cpu_progress": 1,
+    "interpretation": "Observed CPU allocation was essentially unchanged: 0.4086 core after the separate priority adjustment versus 0.412 core in the earlier window. The active execution pattern changed from four runnable threads to one.",
+    "uncertainty": "Different execution stages and time-varying load prevent attributing this result solely to scheduler priority. The active thread function and generated output correctness are not established by stat/wchan observations.",
+    "not_a_whole_request_profile": true
+  }
+}

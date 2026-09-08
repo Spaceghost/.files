@@ -629,9 +629,15 @@ class ShortcutProvider:
                     ('oldbook-audio', 'mic-mute'): 'Toggle microphone mute',
                     ('oldbook-brightness', 'up'): 'Increase brightness',
                     ('oldbook-brightness', 'down'): 'Decrease brightness',
-                    ('oldbook-keyboard-backlight', 'up'): 'Increase keyboard backlight',
-                    ('oldbook-keyboard-backlight', 'down'): 'Decrease keyboard backlight',
+                    ('oldbook-keyboard-backlight', 'up'): 'Brighten the keys — adjusts the peak while breathing',
+                    ('oldbook-keyboard-backlight', 'down'): 'Dim the keys — all the way down turns breathing off',
                     ('oldbook-keyboard-backlight', 'toggle'): 'Toggle keyboard backlight',
+                    ('oldbook-keyboard-backlight', 'breathe'): 'Let the whole keyboard breathe — press again for steady light',
+                    ('oldbook-keyboard-backlight', 'steady'): 'Hold that glow — stop breathing at your chosen brightness',
+                    ('oldbook-keyboard-backlight', 'typing'): 'Pulse the keyboard with each keypress',
+                    ('oldbook-keyboard-backlight', 'typing-dark'): 'Start bright, darken as you keep typing',
+                    ('oldbook-keyboard-backlight', 'typing-wpm'): 'Pulse only during sustained fast typing',
+                    ('oldbook-keyboard-backlight', 'typing-dark-wpm'): 'Darken only during sustained fast typing',
                 }
                 label = known_exec.get((executable, *action))
                 if label:

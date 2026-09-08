@@ -186,7 +186,8 @@ def run(arguments):
         library = ROOT / 'alpine/desktop/.local/lib/oldbook'
         sources.extend([library / 'window_switching.py', library / 'overlay_theme.py',
                         library / 'showdesktop.py', library / 'workspace_model.py',
-                        library / 'ui_command.py', library / 'ui_priority.py'])
+                        library / 'ui_command.py', library / 'ui_priority.py',
+                        library / 'graphics_warmup.py'])
         sources.extend(library.glob('*carousel*.py'))
     hashes = {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources}
     report = {'status': 'running', 'baseline': arguments.baseline, 'host_changes': 0,
@@ -438,6 +439,8 @@ while True:
         wait_for(lambda: state_path.is_file() or daemon.poll() is not None,
                  'carousel daemon did not initialize', seconds=30)
         require(daemon.poll() is None, 'carousel daemon exited at startup')
+        require(state().get('graphics_warm'), 'carousel did not warm its GPU renderer before readiness')
+        check('graphics-primer-warmed-before-readiness')
         original_pid = state()['pid']
         if not arguments.modifier_handoff:
             duplicate = spawn('duplicate-carousel-daemon', [str(HELPER), 'daemon'])

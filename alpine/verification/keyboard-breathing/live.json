@@ -1,0 +1,317 @@
+{
+  "source_sha256": "0e02ff174a6a7e5a6155e1943228ee67cf18b793aefbeb6fa41980fe0b3d78d8",
+  "before": {
+    "available": true,
+    "device": "smc::kbd_backlight",
+    "control": "whole-keyboard",
+    "per_key": false,
+    "maximum": 255,
+    "brightness": 255,
+    "level": 255,
+    "mode": "steady",
+    "running": false
+  },
+  "samples": [
+    {
+      "seconds": 0.0023,
+      "brightness": 255
+    },
+    {
+      "seconds": 0.1102,
+      "brightness": 254
+    },
+    {
+      "seconds": 0.2152,
+      "brightness": 252
+    },
+    {
+      "seconds": 0.3177,
+      "brightness": 249
+    },
+    {
+      "seconds": 0.4203,
+      "brightness": 244
+    },
+    {
+      "seconds": 0.5223,
+      "brightness": 239
+    },
+    {
+      "seconds": 0.6243,
+      "brightness": 232
+    },
+    {
+      "seconds": 0.7276,
+      "brightness": 223
+    },
+    {
+      "seconds": 0.8309,
+      "brightness": 215
+    },
+    {
+      "seconds": 0.94,
+      "brightness": 205
+    },
+    {
+      "seconds": 1.0449,
+      "brightness": 193
+    },
+    {
+      "seconds": 1.149,
+      "brightness": 182
+    },
+    {
+      "seconds": 1.2516,
+      "brightness": 172
+    },
+    {
+      "seconds": 1.3699,
+      "brightness": 160
+    },
+    {
+      "seconds": 1.4721,
+      "brightness": 146
+    },
+    {
+      "seconds": 1.5746,
+      "brightness": 135
+    },
+    {
+      "seconds": 1.6805,
+      "brightness": 121
+    },
+    {
+      "seconds": 1.7828,
+      "brightness": 110
+    },
+    {
+      "seconds": 1.8857,
+      "brightness": 99
+    },
+    {
+      "seconds": 1.988,
+      "brightness": 88
+    },
+    {
+      "seconds": 2.0904,
+      "brightness": 78
+    },
+    {
+      "seconds": 2.1932,
+      "brightness": 69
+    },
+    {
+      "seconds": 2.2963,
+      "brightness": 59
+    },
+    {
+      "seconds": 2.3989,
+      "brightness": 52
+    },
+    {
+      "seconds": 2.5011,
+      "brightness": 45
+    },
+    {
+      "seconds": 2.6031,
+      "brightness": 40
+    },
+    {
+      "seconds": 2.705,
+      "brightness": 36
+    },
+    {
+      "seconds": 2.8072,
+      "brightness": 33
+    },
+    {
+      "seconds": 2.9111,
+      "brightness": 31
+    },
+    {
+      "seconds": 3.0135,
+      "brightness": 31
+    },
+    {
+      "seconds": 3.1177,
+      "brightness": 31
+    },
+    {
+      "seconds": 3.2197,
+      "brightness": 34
+    },
+    {
+      "seconds": 3.3218,
+      "brightness": 37
+    },
+    {
+      "seconds": 3.4237,
+      "brightness": 41
+    },
+    {
+      "seconds": 3.526,
+      "brightness": 47
+    },
+    {
+      "seconds": 3.6286,
+      "brightness": 55
+    },
+    {
+      "seconds": 3.7306,
+      "brightness": 62
+    },
+    {
+      "seconds": 3.8326,
+      "brightness": 71
+    },
+    {
+      "seconds": 3.9344,
+      "brightness": 80
+    },
+    {
+      "seconds": 4.0363,
+      "brightness": 90
+    },
+    {
+      "seconds": 4.1398,
+      "brightness": 101
+    },
+    {
+      "seconds": 4.2418,
+      "brightness": 112
+    },
+    {
+      "seconds": 4.3448,
+      "brightness": 126
+    },
+    {
+      "seconds": 4.4471,
+      "brightness": 137
+    },
+    {
+      "seconds": 4.5506,
+      "brightness": 149
+    },
+    {
+      "seconds": 4.6577,
+      "brightness": 161
+    },
+    {
+      "seconds": 4.7624,
+      "brightness": 174
+    },
+    {
+      "seconds": 4.8657,
+      "brightness": 185
+    },
+    {
+      "seconds": 4.9682,
+      "brightness": 196
+    },
+    {
+      "seconds": 5.0707,
+      "brightness": 206
+    },
+    {
+      "seconds": 5.1818,
+      "brightness": 217
+    },
+    {
+      "seconds": 5.2875,
+      "brightness": 225
+    },
+    {
+      "seconds": 5.3895,
+      "brightness": 233
+    },
+    {
+      "seconds": 5.4921,
+      "brightness": 239
+    },
+    {
+      "seconds": 5.5991,
+      "brightness": 245
+    },
+    {
+      "seconds": 5.7028,
+      "brightness": 250
+    },
+    {
+      "seconds": 5.8051,
+      "brightness": 253
+    },
+    {
+      "seconds": 5.9076,
+      "brightness": 254
+    },
+    {
+      "seconds": 6.01,
+      "brightness": 255
+    },
+    {
+      "seconds": 6.1135,
+      "brightness": 254
+    }
+  ],
+  "activated": {
+    "available": true,
+    "device": "smc::kbd_backlight",
+    "control": "whole-keyboard",
+    "per_key": false,
+    "maximum": 255,
+    "brightness": 255,
+    "level": 255,
+    "mode": "breathing",
+    "running": true
+  },
+  "saved_peak_unchanged_during_animation": true,
+  "range": [
+    31,
+    255
+  ],
+  "steady": {
+    "available": true,
+    "device": "smc::kbd_backlight",
+    "control": "whole-keyboard",
+    "per_key": false,
+    "maximum": 255,
+    "brightness": 255,
+    "level": 255,
+    "mode": "steady",
+    "running": true
+  },
+  "restored_peak": 255,
+  "final": {
+    "available": true,
+    "device": "smc::kbd_backlight",
+    "control": "whole-keyboard",
+    "per_key": false,
+    "maximum": 255,
+    "brightness": 255,
+    "level": 255,
+    "mode": "breathing",
+    "running": true
+  },
+  "worker_pids_after_repeated_restore": [
+    4259
+  ],
+  "binding_acknowledgements": [
+    {
+      "command": "bindsym --locked Shift+XF86KbdBrightnessUp exec ~/.local/bin/oldbook-keyboard-backlight breathe",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    },
+    {
+      "command": "bindsym --locked Shift+XF86KbdBrightnessDown exec ~/.local/bin/oldbook-keyboard-backlight steady",
+      "response": [
+        {
+          "success": true
+        }
+      ]
+    }
+  ],
+  "status": "passed"
+}

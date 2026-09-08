@@ -51,6 +51,9 @@ class Journal:
         check()
         self.events.append(('link',))
 
+    def check_command(self, backend, argv, *, content, deadline, check):
+        self.check_link(deadline=deadline, check=check)
+
     def record_owned(self, candidate):
         self.observe_record(candidate)
         if self.fail_record is not None and self.fail_record(candidate):

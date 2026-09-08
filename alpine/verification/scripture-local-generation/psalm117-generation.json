@@ -1,0 +1,27 @@
+{
+  "command": [
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-scripture-local",
+    "Psalm 117:1-2",
+    "--kind",
+    "observation",
+    "--assets",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/assets",
+    "--database",
+    "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/study.sqlite3",
+    "--no-track",
+    "--timeout",
+    "900"
+  ],
+  "started_utc": "2026-09-08T05:20:50.868162+00:00",
+  "cloud_disabled": true,
+  "real_model_request": true,
+  "full_chapter_preserved": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-scripture-local": "3367be0cc8c5be4f469a702a3aaf387c4d6d21211f159431f345d072f5c4632d",
+    "alpine/desktop/.local/bin/oldbook-scripture-study": "01475c63bd29093a795bc0bfefb830b3a12e554ed57bc2a98d92eddf778a3388",
+    "alpine/desktop/.local/lib/oldbook/scripture_generation.py": "0c2976146f0b8c8f053f52bdc8d7a40537810587ce832362ae650c757e510561"
+  },
+  "exit_code": 1,
+  "elapsed_seconds": 840.34,
+  "completed_utc": "2026-09-08T05:34:51.246032+00:00"
+}

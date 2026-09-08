@@ -1,0 +1,26 @@
+{
+  "started_utc": "2026-09-08T06:11:37.198236+00:00",
+  "host": "alienware.bishop-bearded.ts.net",
+  "port": 11434,
+  "resolved_local_addresses": [
+    "100.83.231.2"
+  ],
+  "pinned_connect_address": "100.83.231.2",
+  "tls_hostname": "alienware.bishop-bearded.ts.net",
+  "tls_certificate_verified": true,
+  "model": "qwen3.5:27b-text",
+  "model_digest_expected": "9b65bf078576a9e5ee02b3d608605a9616ef6f866286afe5db9b772eaa1dcef9",
+  "local_model_process_started": false,
+  "request": {
+    "model": "qwen3.5:27b-text",
+    "stream": false,
+    "keep_alive": "15m",
+    "options": {
+      "num_gpu": 999
+    }
+  },
+  "request_kind": "preload only; no prompt or generated study",
+  "error": "AssertionError: (500, b'{\"error\":\"llama-server process has terminated: exit status 1: cudaMalloc failed: out of memory\\\\nalloc_tensor_range: failed to allocate CUDA0 buffer of size 12947824640\\\\nerror loading model: unable to ')",
+  "elapsed_seconds": 93.077,
+  "completed_utc": "2026-09-08T06:13:10.276629+00:00"
+}

@@ -56,6 +56,14 @@ def appearance():
             load_settings(SETTINGS, STATE / 'position'))
 
 
+def queue_geometry_update(callback):
+    """Apply coalesced IPC geometry before GTK paints the next frame."""
+    from gi.repository import GLib
+    # Ordinary idle work (200) waits behind layout/redraw (110/120) and can
+    # starve under animation. IPC itself still runs ahead of this handoff.
+    return GLib.idle_add(callback, priority=GLib.PRIORITY_HIGH_IDLE)
+
+
 def daemon():
     import gi
     gi.require_version('Gtk', '3.0')
@@ -495,6 +503,30 @@ def daemon():
             Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
             self.window.destroy()
 
+        def handoff(self, placement):
+            # Reuse the expensive GTK controls and CSS, but never reuse the
+            # old native buffer at a new position with its previous width.
+            # Unmapping and unrealizing make the next show allocate a fresh
+            # native surface after update() prepares the complete new size.
+            if self.tick_id:
+                self.window.remove_tick_callback(self.tick_id)
+                self.tick_id = 0
+            if self.menu:
+                self.menu.destroy()
+                self.menu = None
+            self.window.hide()
+            self.window.unrealize()
+            self.previous_display = None
+            self.previous_geometry = None
+            self.rendered_size = None
+            self.motion_rect = None
+            self.motion_target = None
+            self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
+            self.frame_time = None
+            self.alpha, self.alpha_velocity = 1.0, 0.0
+            self.window.set_opacity(1.0)
+            return self
+
     captions = {}
     retired = set()
     last_tree = {}
@@ -512,7 +544,7 @@ def daemon():
             pending_tree = tree
             if not tree_idle:
                 tree_idle = True
-                GLib.idle_add(apply_pending_tree)
+                queue_geometry_update(apply_pending_tree)
 
     def apply_pending_tree():
         nonlocal pending_tree, tree_idle
@@ -561,10 +593,9 @@ def daemon():
                     and caption.context.get('id') != placement['window_id']):
                 # A hover handoff needs the new position and buffer size in its
                 # first frame. Reusing GTK's mapped surface briefly displays
-                # the old width after its layer margins move. Start a complete
-                # surface here; keep the existing spring for same-window drags.
-                caption.destroy()
-                captions[name] = Caption(monitor, placement, animate_entry=False)
+                # the old width after its layer margins move. Renew the native
+                # surface while keeping its prepared controls and stylesheet.
+                captions[name] = caption.handoff(placement)
             if name not in captions:
                 captions[name] = Caption(monitor, placement, animate_entry=name not in immediate)
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
@@ -587,6 +618,8 @@ def daemon():
     GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, quit_daemon)
     GLib.timeout_add(750, refresh_appearance)
     watcher.start()
+    from ui_priority import request_priority
+    request_priority()
     try:
         Gtk.main()
     finally:

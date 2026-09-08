@@ -1,0 +1,45 @@
+# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+# shellcheck shell=sh disable=SC2034,SC2154
+pkgname=oldbook-radio-runtime
+pkgver=0.1.0
+pkgrel=0
+pkgdesc="Inert privileged radio runtime; policy and ownership migration are separate"
+url="https://github.com/Spaceghost/.files"
+arch="noarch"
+license="LicenseRef-Unknown"
+depends="python3 busybox iproute2-minimal util-linux-misc openresolv=3.17.4-r1 wpa_supplicant"
+source="$pkgname-$pkgver.tar.gz"
+builddir="$srcdir/$pkgname-$pkgver"
+# These existing privileged paths are part of the reviewed runtime contract.
+# This local package deliberately retains /usr/local instead of relocating it.
+options="!net !fhs"
+export SOURCE_DATE_EPOCH=1788739200
+export PYTHONDONTWRITEBYTECODE=1
+
+build() {
+    :
+}
+
+check() {
+    # Exact reviewed suites: parser data, private UNIX sockets and temp files.
+    # Never discover native fixtures or invoke the privileged command here.
+    PYTHONPATH=tests python3 -B -m unittest -v \
+        test_lease.LeaseTests test_privacyctl.ProtocolTests \
+        test_runtime_release.RuntimeReleaseTests
+}
+
+package() {
+    install -Dm0750 root/usr/local/sbin/privacyctl "$pkgdir/usr/local/sbin/privacyctl"
+    install -Dm0750 root/usr/local/libexec/privacyctl-dhcp-launch \
+        "$pkgdir/usr/local/libexec/privacyctl-dhcp-launch"
+    install -Dm0750 root/usr/local/libexec/privacyctl-dhcp-event \
+        "$pkgdir/usr/local/libexec/privacyctl-dhcp-event"
+    for module in __init__ adapter dhcp hook ipc journal launch lease link network recovery runner service writers; do
+        install -Dm0644 "root/usr/local/lib/privacyctl_runtime/$module.py" \
+            "$pkgdir/usr/local/lib/privacyctl_runtime/$module.py"
+    done
+}
+
+sha512sums="
+9e4cfbc879f3ebeed363017d5b7f982847a75896c4f334c9650975a604ee4490e8ac382e8f7df9212cef56b0ab2c626db80b025eedad062f95f0266af7ff9920  oldbook-radio-runtime-0.1.0.tar.gz
+"

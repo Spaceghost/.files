@@ -157,7 +157,7 @@ class RecoveryTests(unittest.TestCase):
         self.begin(); self.coordinator.record_owned(self.owned())
         self.coordinator.writer_started('native', 323, 32, 'address-add')
         self.events.clear()
-        self.context['boot_id'] = '11234567-89ab-cdef-0123-456789abcdef'
+        self.context['observer_pidns']['ino'] += 1
         with self.assertRaises(recovery.RecoveryError): self.new().recover(deadline=100)
         self.assertEqual(self.events, [])
         self.context = copy.deepcopy(CONTEXT)

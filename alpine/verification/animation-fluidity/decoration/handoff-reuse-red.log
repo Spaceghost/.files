@@ -1,0 +1,17 @@
+test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry (test_decoration_handoff.CaptionHandoffTests.test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry) ... /home/jack/.files/alpine/desktop/.local/bin/oldbook-decoration:108: DeprecationWarning: Gtk.Window.set_opacity is deprecated
+  self.window.set_opacity(self.alpha)
+FAIL
+
+======================================================================
+FAIL: test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry (test_decoration_handoff.CaptionHandoffTests.test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration_handoff.py", line 58, in test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry
+    self.assertIs(replacement, caption, 'hover rebuilt the GTK widget tree')
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: <<run_path>.Caption object at 0x7f1f01c45a90> is not <<run_path>.Caption object at 0x7f1f01c45940> : hover rebuilt the GTK widget tree
+
+----------------------------------------------------------------------
+Ran 1 test in 11.178s
+
+FAILED (failures=1)

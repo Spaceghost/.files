@@ -1,0 +1,255 @@
+#!/usr/bin/env python3
+"""Bring this machine to the recorded desktop state. Safe to run repeatedly.
+
+Every step checks before it acts, so a second run reports what was already in
+place and changes nothing. Steps that need a person, a ChatGPT login and a
+Tailscale approval, are reported rather than attempted.
+"""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[2]
+HOME = Path.home()
+GREETD_CONFIG = REPO / 'alpine/system/greetd/config.toml'
+SERVICES = (('crond', 'default'), ('tailscale', 'default'), ('greetd', 'default'))
+GREETD_VT = 'tty1'
+
+
+class Step:
+    """One named unit of work that reports rather than assumes."""
+
+    def __init__(self, plan):
+        self.plan = plan
+        self.changed = []
+        self.already = []
+        self.manual = []
+        self.failed = []
+
+    def run(self, command, root=False, check=True, capture=True, timeout=1800):
+        if root and os.geteuid() != 0:
+            command = ['doas', *command]
+        if self.plan:
+            print('    would run: ' + ' '.join(command))
+            return subprocess.CompletedProcess(command, 0, '', '')
+        return subprocess.run(command, capture_output=capture, text=True,
+                              check=check, timeout=timeout)
+
+    def note(self, bucket, message):
+        getattr(self, bucket).append(message)
+        marks = {'changed': '  +', 'already': '  =', 'manual': '  !', 'failed': '  x'}
+        print(f'{marks[bucket]} {message}')
+
+
+def have(command):
+    return shutil.which(command) is not None
+
+
+def install_file(step, source, destination, mode=0o644):
+    """Copy a versioned file into place only when its content differs."""
+    destination = Path(destination)
+    wanted = Path(source).read_bytes()
+    try:
+        current = subprocess.run(['doas', 'cat', str(destination)],
+                                 capture_output=True, check=True).stdout
+    except subprocess.CalledProcessError:
+        current = None
+    if current == wanted:
+        step.note('already', f'{destination} matches the checkout')
+        return False
+    if step.plan:
+        step.note('changed', f'{destination} would be written from the checkout')
+        return True
+    step.run(['mkdir', '-p', str(destination.parent)], root=True)
+    step.run(['cp', str(source), str(destination)], root=True)
+    step.run(['chmod', oct(mode)[2:], str(destination)], root=True)
+    step.note('changed', f'{destination} written from the checkout')
+    return True
+
+
+def step_packages(step):
+    lock = REPO / 'alpine/packages/current-lock'
+    if not lock.is_file():
+        step.note('failed', 'no package lock in the checkout')
+        return
+    cache = '/var/cache/oldbook-apks'
+    try:
+        result = step.run([str(REPO / 'alpine/bin/package-archive'), 'install-host',
+                           '--cache', cache], root=True, check=False)
+    except (OSError, subprocess.SubprocessError) as error:
+        step.note('failed', f'package restore: {error}')
+        return
+    if step.plan:
+        return
+    if result.returncode:
+        step.note('failed', 'package restore reported: '
+                  + (result.stderr or result.stdout).strip().splitlines()[-1][:160])
+    else:
+        step.note('already' if 'exact' in (result.stdout or '').lower() else 'changed',
+                  'package closure restored from the archive')
+
+
+def step_overlay(step):
+    result = step.run([str(REPO / 'alpine/bin/deploy-home'), '--target', str(HOME)],
+                      check=False)
+    if step.plan:
+        return
+    if result.returncode:
+        step.note('failed', 'overlay deploy: ' + (result.stderr or '').strip()[:160])
+    elif (result.stdout or '').strip():
+        step.note('changed', 'home overlay deployed')
+    else:
+        step.note('already', 'home overlay already current')
+
+
+def step_desktop_entrypoint(step):
+    installer = REPO / 'alpine/bin/install-desktop-system'
+    if not installer.is_file():
+        step.note('failed', 'install-desktop-system is missing')
+        return
+    result = step.run([str(installer)], root=True, check=False)
+    if step.plan:
+        return
+    step.note('failed' if result.returncode else 'changed',
+              'desktop entrypoint installed'
+              if not result.returncode else 'desktop entrypoint: '
+              + (result.stderr or '').strip()[:160])
+
+
+def step_autologin(step):
+    """greetd takes vt1 so the session starts without a console login."""
+    if not have('greetd'):
+        step.note('failed', 'greetd is not installed; the package step should supply it')
+        return
+    install_file(step, GREETD_CONFIG, '/etc/greetd/config.toml')
+    try:
+        inittab = Path('/etc/inittab').read_text()
+    except OSError as error:
+        step.note('failed', f'/etc/inittab unreadable: {error}')
+        return
+    active = [line for line in inittab.splitlines()
+              if line.startswith(f'{GREETD_VT}::respawn') and not line.startswith('#')]
+    if not active:
+        step.note('already', f'{GREETD_VT} has no getty; greetd owns it')
+        return
+    if step.plan:
+        step.note('changed', f'{GREETD_VT} getty would be commented out')
+        return
+    updated = '\n'.join(
+        ('# ' + line + '   # greetd owns this vt' if line in active else line)
+        for line in inittab.splitlines()) + '\n'
+    temporary = Path('/tmp') / f'inittab.{os.getpid()}'
+    temporary.write_text(updated)
+    step.run(['cp', '/etc/inittab', '/etc/inittab.oldbook-bak'], root=True, check=False)
+    step.run(['cp', str(temporary), '/etc/inittab'], root=True)
+    temporary.unlink(missing_ok=True)
+    step.run(['kill', '-HUP', '1'], root=True, check=False)
+    step.note('changed', f'{GREETD_VT} getty disabled; gettys remain on vt2-vt5')
+
+
+def step_services(step):
+    for name, runlevel in SERVICES:
+        if not Path(f'/etc/init.d/{name}').exists():
+            step.note('failed', f'{name} has no init script')
+            continue
+        listed = step.run(['rc-update', 'show', runlevel], root=True, check=False)
+        if step.plan:
+            step.note('changed', f'{name} would be enabled at boot')
+            continue
+        if name in (listed.stdout or ''):
+            step.note('already', f'{name} already starts at boot')
+        else:
+            step.run(['rc-update', 'add', name, runlevel], root=True, check=False)
+            step.note('changed', f'{name} enabled at boot')
+        # greetd would replace the running session, so it is never started here.
+        if name == 'greetd':
+            continue
+        status = step.run(['rc-service', name, 'status'], root=True, check=False)
+        if 'started' not in (status.stdout or ''):
+            step.run(['rc-service', name, 'start'], root=True, check=False)
+            step.note('changed', f'{name} started')
+
+
+def step_schedule(step):
+    installer = REPO / 'alpine/bin/install-wallpaper-schedule'
+    if not installer.is_file():
+        return
+    result = step.run([str(installer)], check=False)
+    if not step.plan:
+        step.note('failed' if result.returncode else 'already',
+                  'painting schedule installed')
+
+
+def step_library(step):
+    helper = REPO / 'alpine/desktop/.local/bin/oldbook-scripture-library'
+    if not helper.is_file():
+        return
+    result = step.run(['/usr/bin/python3', str(helper), 'bootstrap'], check=False,
+                      timeout=3600)
+    if step.plan:
+        return
+    step.note('failed' if result.returncode else 'already',
+              'scripture library present'
+              if not result.returncode else 'scripture library: needs HTTPS')
+
+
+def step_logins(step):
+    login = step.run(['codex', 'login', 'status'], check=False) if have('codex') else None
+    if login is not None and not step.plan and 'Logged in' in (login.stdout or '') + (login.stderr or ''):
+        step.note('already', 'Codex is logged in')
+    else:
+        step.note('manual', 'run "codex login" once for artwork generation')
+    state = step.run(['tailscale', 'status'], check=False) if have('tailscale') else None
+    if state is not None and not step.plan and state.returncode == 0:
+        step.note('already', 'Tailscale is up')
+    else:
+        step.note('manual', 'run "doas tailscale up" once and approve the machine')
+
+
+STEPS = (
+    ('packages', step_packages),
+    ('desktop entrypoint', step_desktop_entrypoint),
+    ('home overlay', step_overlay),
+    ('autologin', step_autologin),
+    ('services', step_services),
+    ('painting schedule', step_schedule),
+    ('scripture library', step_library),
+    ('logins', step_logins),
+)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--plan', action='store_true',
+                        help='Report what would change without changing anything.')
+    parser.add_argument('--only', action='append', default=[],
+                        help='Run only the named step; repeatable.')
+    arguments = parser.parse_args()
+    if os.geteuid() == 0:
+        raise SystemExit('Run as the normal user; root steps escalate with doas.')
+
+    step = Step(arguments.plan)
+    for name, function in STEPS:
+        if arguments.only and name not in arguments.only:
+            continue
+        print(f'\n{name}:')
+        try:
+            function(step)
+        except (OSError, subprocess.SubprocessError) as error:
+            step.note('failed', f'{name}: {error}')
+
+    print('\n' + '-' * 60)
+    print(f'changed {len(step.changed)}   already correct {len(step.already)}   '
+          f'needs you {len(step.manual)}   failed {len(step.failed)}')
+    for message in step.manual:
+        print('  ! ' + message)
+    for message in step.failed:
+        print('  x ' + message)
+    return 1 if step.failed else 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

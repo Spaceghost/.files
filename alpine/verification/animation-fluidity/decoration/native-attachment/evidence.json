@@ -1,0 +1,2229 @@
+{
+  "status": "failed",
+  "checks": [
+    "attached-bottom",
+    "carousel-pauses-caption-geometry",
+    "carousel-exit-refreshes-latest-caption-geometry",
+    "carousel-return-bottom",
+    "dropdown-ghostty-keeps-ordinary-caption",
+    "dropdown-ghostty-hide-keeps-caption",
+    "dropdown-legacy-foot-keeps-ordinary-caption",
+    "dropdown-legacy-foot-hide-keeps-caption",
+    "dropdown-monitor-keeps-ordinary-caption",
+    "dropdown-monitor-hide-keeps-caption",
+    "hover-target-bottom"
+  ],
+  "states": {
+    "attached-bottom": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "carousel-pauses-caption-geometry": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 300,
+            "y": 220,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 300,
+                "y": 220,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "carousel-return-bottom": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-ghostty-keeps-ordinary-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "com.oldbook.dropdown": {
+          "id": 7,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 1000,
+            "height": 220
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": false,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            },
+            {
+              "id": 7,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17601126472094214,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 100,
+                "y": 60,
+                "width": 1000,
+                "height": 220
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1000,
+                "height": 220
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Private drop-down console",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 7123,
+              "app_id": "com.oldbook.dropdown",
+              "foreign_toplevel_identifier": "aca83d7dc42a575a91eeec1cb193b7cd",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            7,
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-ghostty-hide-keeps-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "com.oldbook.dropdown": {
+          "id": 7,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 1000,
+            "height": 220
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-legacy-foot-keeps-ordinary-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "oldbook-dropdown": {
+          "id": 8,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 720,
+            "height": 868
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": false,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            },
+            {
+              "id": 8,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.5,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 100,
+                "y": 60,
+                "width": 720,
+                "height": 868
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 720,
+                "height": 868
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Private drop-down console",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 7314,
+              "app_id": "oldbook-dropdown",
+              "foreign_toplevel_identifier": "3fde2ee4fc5307b473e379c989c63899",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            8,
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-legacy-foot-hide-keeps-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "oldbook-dropdown": {
+          "id": 8,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 720,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-monitor-keeps-ordinary-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "com.oldbook.monitor": {
+          "id": 9,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 1000,
+            "height": 220
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": false,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            },
+            {
+              "id": 9,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17601126472094214,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 100,
+                "y": 60,
+                "width": 1000,
+                "height": 220
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 1000,
+                "height": 220
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Private drop-down console",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 7426,
+              "app_id": "com.oldbook.monitor",
+              "foreign_toplevel_identifier": "21a02f2d0cc67b745ef52e9464852e31",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            9,
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "dropdown-monitor-hide-keeps-caption": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 620,
+            "height": 28,
+            "x": 200,
+            "y": 520
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "clients": {
+        "com.oldbook.monitor": {
+          "id": 9,
+          "rect": {
+            "x": 100,
+            "y": 60,
+            "width": 1000,
+            "height": 220
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    },
+    "hover-target-bottom": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [
+        {
+          "namespace": "oldbook-decoration",
+          "layer": "top",
+          "extent": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "effects": {
+            "blur": false,
+            "blur_xray": false,
+            "blur_ignore_transparent": false,
+            "shadows": false,
+            "corner_radius": 0
+          }
+        }
+      ],
+      "caption_global_rect": {
+        "width": 420,
+        "height": 28,
+        "x": 900,
+        "y": 400
+      },
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        },
+        "attachment-hover": {
+          "id": 10,
+          "rect": {
+            "x": 900,
+            "y": 120,
+            "width": 420,
+            "height": 280
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": false,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 6807,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "8b3d6ba0c2850f352dc602f5afa58432",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            },
+            {
+              "id": 10,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.09408602150537634,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 900,
+                "y": 120,
+                "width": 420,
+                "height": 280
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 420,
+                "height": 280
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Second floating hover target",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 7525,
+              "app_id": "attachment-hover",
+              "foreign_toplevel_identifier": "e6ccecec7e3e4fc9b04c50a87721e881",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            10,
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    }
+  },
+  "screenshots": [
+    "attached-bottom.png",
+    "carousel-pauses-caption-geometry.png",
+    "carousel-return-bottom.png",
+    "dropdown-ghostty-keeps-ordinary-caption.png",
+    "dropdown-ghostty-hide-keeps-caption.png",
+    "dropdown-legacy-foot-keeps-ordinary-caption.png",
+    "dropdown-legacy-foot-hide-keeps-caption.png",
+    "dropdown-monitor-keeps-ordinary-caption.png",
+    "dropdown-monitor-hide-keeps-caption.png",
+    "hover-target-bottom.png"
+  ],
+  "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
+  "host_config_changes": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230",
+    "alpine/desktop/.local/lib/oldbook/decoration_motion.py": "f67bed21fed21eadf6fc5b40c5da0a1af62a5263acdd5f3718ca3cd94cb5cea3",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "a20217bb856a1abfc28127ef9d480bf98c812c5740dbe278c31d39569d24340f",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843"
+  },
+  "carousel_resume_ms": 190.8,
+  "hover_handoffs": [
+    {
+      "target": "attachment-floating",
+      "before": {
+        "width": 420,
+        "height": 28,
+        "x": 900,
+        "y": 400
+      },
+      "expected": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "duration_seconds": 0.25,
+      "first_complete_ms": null,
+      "samples": [
+        {
+          "elapsed_ms": 58.67,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 75.52,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 104.13,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 119.7,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 145.04,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 162.97,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 175.72,
+          "caption_rect": {
+            "width": 420,
+            "height": 28,
+            "x": 900,
+            "y": 400
+          },
+          "caption_count": 1,
+          "target_focused": true
+        },
+        {
+          "elapsed_ms": 252.47,
+          "caption_rect": null,
+          "caption_count": 1,
+          "target_focused": true
+        }
+      ]
+    }
+  ],
+  "error": "hover focus did not attach to the new target"
+}

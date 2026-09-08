@@ -1,0 +1,251 @@
+{
+  "source_sha256": "0c2cfbafef35fa85c063a27f3797129460238310dce95f139add4fa40e6a6282",
+  "isolation": "Synthetic contexts; GTK3 widgets constructed and measured with Gtk.Window.show suppressed. No mapped toplevels or gesture/restart commands.",
+  "calls": [
+    {
+      "method": "__init__",
+      "wall_ms": 2091.929,
+      "cpu_ms": 492.379
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 46.05,
+      "cpu_ms": 7.488
+    },
+    {
+      "method": "place",
+      "wall_ms": 1891.305,
+      "cpu_ms": 222.176
+    },
+    {
+      "method": "update",
+      "wall_ms": 1989.762,
+      "cpu_ms": 242.355
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.333,
+      "cpu_ms": 0.35
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.027,
+      "cpu_ms": 0.04
+    },
+    {
+      "method": "place",
+      "wall_ms": 30.601,
+      "cpu_ms": 4.429
+    },
+    {
+      "method": "update",
+      "wall_ms": 69.149,
+      "cpu_ms": 8.878
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.121,
+      "cpu_ms": 0.132
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.021,
+      "cpu_ms": 0.031
+    },
+    {
+      "method": "place",
+      "wall_ms": 31.932,
+      "cpu_ms": 3.847
+    },
+    {
+      "method": "update",
+      "wall_ms": 60.578,
+      "cpu_ms": 7.571
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.087,
+      "cpu_ms": 0.099
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.022,
+      "cpu_ms": 0.034
+    },
+    {
+      "method": "place",
+      "wall_ms": 47.978,
+      "cpu_ms": 3.974
+    },
+    {
+      "method": "update",
+      "wall_ms": 73.554,
+      "cpu_ms": 7.48
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.088,
+      "cpu_ms": 0.101
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.024,
+      "cpu_ms": 0.035
+    },
+    {
+      "method": "place",
+      "wall_ms": 23.097,
+      "cpu_ms": 4.063
+    },
+    {
+      "method": "update",
+      "wall_ms": 82.806,
+      "cpu_ms": 7.988
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.124,
+      "cpu_ms": 0.123
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.021,
+      "cpu_ms": 0.031
+    },
+    {
+      "method": "place",
+      "wall_ms": 34.515,
+      "cpu_ms": 3.989
+    },
+    {
+      "method": "update",
+      "wall_ms": 79.762,
+      "cpu_ms": 7.663
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.101,
+      "cpu_ms": 0.101
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.02,
+      "cpu_ms": 0.029
+    },
+    {
+      "method": "place",
+      "wall_ms": 30.719,
+      "cpu_ms": 4.297
+    },
+    {
+      "method": "update",
+      "wall_ms": 102.51,
+      "cpu_ms": 8.234
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.097,
+      "cpu_ms": 0.111
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.026,
+      "cpu_ms": 0.036
+    },
+    {
+      "method": "place",
+      "wall_ms": 30.359,
+      "cpu_ms": 4.006
+    },
+    {
+      "method": "update",
+      "wall_ms": 58.005,
+      "cpu_ms": 8.12
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.095,
+      "cpu_ms": 0.108
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.028,
+      "cpu_ms": 0.047
+    },
+    {
+      "method": "place",
+      "wall_ms": 16.98,
+      "cpu_ms": 3.905
+    },
+    {
+      "method": "update",
+      "wall_ms": 43.016,
+      "cpu_ms": 7.675
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.077,
+      "cpu_ms": 0.09
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.023,
+      "cpu_ms": 0.034
+    },
+    {
+      "method": "place",
+      "wall_ms": 69.854,
+      "cpu_ms": 4.168
+    },
+    {
+      "method": "update",
+      "wall_ms": 103.118,
+      "cpu_ms": 7.366
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.089,
+      "cpu_ms": 0.101
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.021,
+      "cpu_ms": 0.03
+    },
+    {
+      "method": "place",
+      "wall_ms": 21.397,
+      "cpu_ms": 4.075
+    },
+    {
+      "method": "update",
+      "wall_ms": 59.399,
+      "cpu_ms": 7.951
+    },
+    {
+      "method": "handoff",
+      "wall_ms": 0.107,
+      "cpu_ms": 0.118
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 0.021,
+      "cpu_ms": 0.034
+    },
+    {
+      "method": "place",
+      "wall_ms": 35.859,
+      "cpu_ms": 3.781
+    },
+    {
+      "method": "update",
+      "wall_ms": 63.471,
+      "cpu_ms": 7.358
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 79.768,
+      "cpu_ms": 7.069
+    }
+  ]
+}

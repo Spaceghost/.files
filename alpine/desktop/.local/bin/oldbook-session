@@ -162,3 +162,14 @@ fi
 if command -v oldbook-decoration >/dev/null 2>&1; then
     oldbook-decoration daemon 9>&- >>"$art_state/decoration.log" 2>&1 &
 fi
+
+# Favor compositor/UI rendering once the services have started. The root-owned
+# helper scopes this to our compositor and resets priority in child processes.
+case ${SWAYSOCK:-} in
+    "$XDG_RUNTIME_DIR"/sway-ipc.*.sock)
+        if [ -x /usr/local/sbin/oldbook-ui-priority ] && [ -S "$SWAYSOCK" ]; then
+            doas -n /usr/local/sbin/oldbook-ui-priority --session "$SWAYSOCK" 9>&- \
+                >"$art_state/ui-priority.json" 2>"$art_state/ui-priority.log" &
+        fi
+        ;;
+esac

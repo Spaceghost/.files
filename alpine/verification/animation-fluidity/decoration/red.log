@@ -1,0 +1,34 @@
+test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll (test_decoration_watch.DecorationWatchTests.test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll) ... ok
+test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit (test_decoration_watch.DecorationWatchTests.test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit) ... FAIL
+test_close_interrupts_blocked_tree_read_and_does_not_restart (test_decoration_watch.DecorationWatchTests.test_close_interrupts_blocked_tree_read_and_does_not_restart) ... ok
+test_disconnect_reconnects_and_shutdown_closes_both_connections (test_decoration_watch.DecorationWatchTests.test_disconnect_reconnects_and_shutdown_closes_both_connections) ... ok
+test_oversized_frame_is_rejected_without_reading_its_body (test_decoration_watch.DecorationWatchTests.test_oversized_frame_is_rejected_without_reading_its_body) ... ok
+test_partial_frames_reuse_connection_and_suppress_unchanged_trees (test_decoration_watch.DecorationWatchTests.test_partial_frames_reuse_connection_and_suppress_unchanged_trees) ... ok
+test_request_processing_does_not_add_another_poll_interval (test_decoration_watch.DecorationWatchTests.test_request_processing_does_not_add_another_poll_interval) ... ok
+test_semantic_event_refreshes_before_long_idle_poll (test_decoration_watch.DecorationWatchTests.test_semantic_event_refreshes_before_long_idle_poll) ... ok
+test_stationary_attached_caption_releases_half_the_poll_budget (test_decoration_watch.DecorationWatchTests.test_stationary_attached_caption_releases_half_the_poll_budget) ... FAIL
+
+======================================================================
+FAIL: test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit (test_decoration_watch.DecorationWatchTests.test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration_watch.py", line 221, in test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit
+    self.assertFalse(self.server.wait_for(
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+        lambda: len(self.server.requests) > count, timeout=0.12))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_stationary_attached_caption_releases_half_the_poll_budget (test_decoration_watch.DecorationWatchTests.test_stationary_attached_caption_releases_half_the_poll_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_decoration_watch.py", line 205, in test_stationary_attached_caption_releases_half_the_poll_budget
+    self.assertGreaterEqual(mean_interval, 1 / 90)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0.008465105333420474 not greater than or equal to 0.011111111111111112
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.365s
+
+FAILED (failures=2)

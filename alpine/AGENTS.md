@@ -65,6 +65,11 @@ notes must describe observed events; do not invent personal experiences or
 collect private activity automatically. The live database is personal data and
 must not be committed; only the reviewed seed collection is versioned.
 
+Scripture search is editable directly in the existing desktop bar; do not open
+a separate picker window. Click or Super+/ focuses the entry, and selection,
+Escape or focus loss releases the keyboard. This replaces the earlier button
+that launched Fuzzel.
+
 Scripture shortcuts: Super+/ searches only Bible verses. Super+Shift+/ searches
 all collections, with Bible results after Torah, Talmud and reflections. Do not
 add non-Bible results or collection-switch commands to the Bible-only picker.
@@ -80,7 +85,7 @@ source manifests and attribution alongside the Bible and curated reflections.
 Keep the earlier Scripture reflections and practice text available. Scripture
 study notes, inspirations, and observations use the SQLite reading library
 rebuilt from Fossil-tracked canonical records; never add application tables to
-the Fossil repository database. Generate new study prose only with local AI,
+the Fossil repository database. Generate new study prose only with AI on the Alienware's GPUs,
 ground it in attributed high-quality sources, and preserve source excerpts,
 hashes, and model provenance. Do not silently use a cloud model or include the
 separate personal desktop journal in this published study collection.

@@ -1,0 +1,14 @@
+test_accepts_system_ui_but_not_spoofed_name (test_ui_priority.PriorityTests.test_accepts_system_ui_but_not_spoofed_name) ... ok
+test_accepts_versioned_superhold_daemon_only (test_ui_priority.PriorityTests.test_accepts_versioned_superhold_daemon_only) ... ok
+test_boost_requires_reset_before_negative_nice_and_keeps_realtime (test_ui_priority.PriorityTests.test_boost_requires_reset_before_negative_nice_and_keeps_realtime) ... ok
+test_failed_reset_never_applies_negative_nice (test_ui_priority.PriorityTests.test_failed_reset_never_applies_negative_nice) ... ok
+test_ignores_other_users_and_non_ui_executables (test_ui_priority.PriorityTests.test_ignores_other_users_and_non_ui_executables) ... ok
+test_python_is_limited_to_exact_desktop_daemon_path (test_ui_priority.PriorityTests.test_python_is_limited_to_exact_desktop_daemon_path) ... ok
+test_reads_real_self_scheduler_on_musl (test_ui_priority.PriorityTests.test_reads_real_self_scheduler_on_musl) ... ok
+test_session_scope_uses_exact_socket_environment_or_compositor_pid (test_ui_priority.PriorityTests.test_session_scope_uses_exact_socket_environment_or_compositor_pid) ... ok
+test_session_socket_requires_caller_ownership_and_real_peer_credentials (test_ui_priority.PriorityTests.test_session_socket_requires_caller_ownership_and_real_peer_credentials) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.145s
+
+OK

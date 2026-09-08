@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Install the current user's minute-by-minute Fossil to Git mirror schedule."""
+import argparse
+import datetime as dt
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[2]
+BEGIN = '# BEGIN oldbook-git-mirror (managed by alpine/bin/install-git-mirror-schedule)'
+END = '# END oldbook-git-mirror'
+
+
+def cron_command(home, repo):
+    home, repo = Path(home), Path(repo)
+    if any('\n' in str(path) or '\r' in str(path) for path in (home, repo)):
+        raise ValueError('Cron paths cannot contain newline characters')
+    if not home.is_absolute() or not repo.is_absolute():
+        raise ValueError('Cron paths must be absolute')
+    command = shlex.join([
+        '/usr/bin/env', 'HOME=' + str(home),
+        'PATH=' + str(home / '.local/bin') + ':/usr/local/bin:/usr/bin:/bin',
+        '/usr/bin/python3', str(repo / 'alpine/bin/publish-git-mirror'), '--scheduled',
+    ])
+    # Cron processes percent signs before the shell, including inside quotes.
+    return command.replace('%', '\\%')
+
+
+def update_crontab(existing, command=None):
+    """Replace managed blocks in place, retaining all other text verbatim."""
+    lines, managed, position = [], False, None
+    for line in existing.splitlines(keepends=True):
+        marker = line.rstrip('\r\n')
+        if marker == BEGIN:
+            if managed:
+                raise RuntimeError('Nested managed cron marker')
+            managed = True
+            if position is None:
+                position = len(lines)
+        elif marker == END:
+            if not managed:
+                raise RuntimeError('Orphan managed cron marker')
+            managed = False
+        elif not managed:
+            lines.append(line)
+    if managed:
+        raise RuntimeError('Unclosed managed cron marker')
+    if command is not None:
+        block = (BEGIN + '\n'
+                 '# Publish committed alpine-oldbook history; retry after offline periods.\n'
+                 '* * * * * ' + command + '\n' + END + '\n')
+        if position is None:
+            position = len(lines)
+            if lines and not lines[-1].endswith('\n'):
+                lines.append('\n')
+                position += 1
+        lines.insert(position, block)
+    return ''.join(lines)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--remove', action='store_true', help='remove only the managed mirror job')
+    parser.add_argument('--print', action='store_true', dest='print_only',
+                        help='print the proposed crontab without installing it')
+    args = parser.parse_args()
+    home = Path.home()
+    command = None if args.remove else cron_command(home, REPO)
+    current = subprocess.run(['crontab', '-l'], capture_output=True)
+    error = current.stderr.decode('utf-8', errors='replace')
+    if current.returncode and 'no crontab' not in error.lower() and 'no such file' not in error.lower():
+        raise RuntimeError('Cannot read existing crontab: ' + error.strip())
+    revised = update_crontab(current.stdout.decode('utf-8', errors='surrogateescape'), command)
+    revised_bytes = revised.encode('utf-8', errors='surrogateescape')
+    if args.print_only:
+        sys.stdout.buffer.write(revised_bytes)
+        return
+    if current.stdout == revised_bytes:
+        print('Git mirror schedule already current.')
+        return
+    state = home / '.local/state/oldbook/git-mirror-schedule'
+    state.mkdir(parents=True, exist_ok=True, mode=0o700)
+    os.chmod(state, 0o700)
+    backup = state / ('crontab-before-' + dt.datetime.now().strftime('%Y%m%dT%H%M%S%f') + '.txt')
+    with os.fdopen(os.open(backup, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), 'wb') as stream:
+        stream.write(current.stdout)
+    subprocess.run(['crontab', '-'], input=revised_bytes, check=True)
+    print(('Removed' if args.remove else 'Installed') + f' Git mirror schedule. Previous crontab: {backup}')
+
+
+if __name__ == '__main__':
+    main()

@@ -16,6 +16,7 @@ Glib dispatcher warning during in-process reload).
 | Network | Live receive rate; hover shows transmit rate, IP addresses, and signal. Hover also reveals radio and firewall state. Left: network controls. Right: connection report. |
 | Sound | Scroll for volume, left for mixer, right for mute. Hover reveals microphone; click its icon to toggle microphone mute. |
 | Battery | Hover reveals brightness and keep-awake controls. Scroll brightness to adjust. Left: lock/suspend/logout menu. |
+| Agents (✦) | Left: next AI window. Right: sessions and launchers. Super+left or Super+Ctrl+N: fresh GPT-6 Astra Codex with ultra reasoning, approvals and sandbox bypassed, in its own tmux session on the workspace where launched. Starts in `~`; Super+N opens the session picker for reattachment. |
 | Notifications | Left: compact notification history. Right: Do Not Disturb. |
 | Clock | Los Angeles time. Click to show the full date; scroll to browse the calendar. |
 

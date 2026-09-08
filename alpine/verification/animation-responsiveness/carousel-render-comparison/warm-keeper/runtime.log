@@ -1,0 +1,99 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:47:37 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+Extension available: VK_EXT_debug_report v0.0.10
+Extension available: VK_EXT_debug_utils v0.0.2
+Extension available: VK_KHR_portability_enumeration v0.0.1
+Extension available: VK_LUNARG_direct_driver_loading v0.0.1
+Not using Vulkan: Could not create a Vulkan instance: The requested version of Vulkan is not supported by the driver or is otherwise incompatible for implementation-specific reasons. (VK_ERROR_INCOMPATIBLE_DRIVER)
+EGL API version 1.5 found
+ - Vendor: Mesa Project
+ - Version: 1.5
+ - Device: /dev/dri/renderD128, 226 128
+ - Client APIs: OpenGL OpenGL_ES 
+ - Extensions:
+	EGL_ANDROID_blob_cache
+	EGL_EXT_buffer_age
+	EGL_EXT_config_select_group
+	EGL_EXT_create_context_robustness
+	EGL_EXT_image_dma_buf_import
+	EGL_EXT_image_dma_buf_import_modifiers
+	EGL_EXT_pixel_format_float
+	EGL_EXT_present_opaque
+	EGL_EXT_query_reset_notification_strategy
+	EGL_EXT_surface_compression
+	EGL_EXT_swap_buffers_with_damage
+	EGL_KHR_cl_event2
+	EGL_KHR_config_attribs
+	EGL_KHR_context_flush_control
+	EGL_KHR_create_context
+	EGL_KHR_create_context_no_error
+	EGL_KHR_fence_sync
+	EGL_KHR_get_all_proc_addresses
+	EGL_KHR_gl_colorspace
+	EGL_KHR_gl_renderbuffer_image
+	EGL_KHR_gl_texture_2D_image
+	EGL_KHR_gl_texture_3D_image
+	EGL_KHR_gl_texture_cubemap_image
+	EGL_KHR_image_base
+	EGL_KHR_no_config_context
+	EGL_KHR_reusable_sync
+	EGL_KHR_surfaceless_context
+	EGL_KHR_swap_buffers_with_damage
+	EGL_KHR_wait_sync
+	EGL_MESA_configless_context
+	EGL_MESA_gl_interop
+	EGL_MESA_image_dma_buf_export
+	EGL_MESA_query_driver
+	EGL_MESA_x11_native_visual_id
+ - Selected fbconfig: R8G8B8A8, depth 0, stencil 0
+          high depth: R16G16B16A16 float, depth 0, stencil 0
+Creating EGL context version 3.0 (debug:no, forward:no, legacy:no, es:yes)
+Using OpenGL backend EGL
+OpenGL ES version: 3.2 (core)
+GLSL version: OpenGL ES GLSL ES 3.20
+Max texture size: 16384
+Enabled features (use GDK_GL_DISABLE env var to disable):
+    debug: ✓
+    base-instance: ✓
+    buffer-storage: ✓
+    external-objects: ✗
+    external-objects-win32: ✗
+    blend-func-extended: ✓
+Creating EGL context version 3.0 (debug:no, forward:no, legacy:no, es:yes)
+OpenGL ES version: 3.2 (core)
+GLSL version: OpenGL ES GLSL ES 3.20
+Max texture size: 16384
+Enabled features (use GDK_GL_DISABLE env var to disable):
+    debug: ✓
+    base-instance: ✓
+    buffer-storage: ✓
+    external-objects: ✗
+    external-objects-win32: ✗
+    blend-func-extended: ✓
+Using renderer 'GskGLRenderer' for surface 'GdkWaylandToplevel'
+Creating EGL context version 3.0 (debug:no, forward:no, legacy:no, es:yes)
+OpenGL ES version: 3.2 (core)
+GLSL version: OpenGL ES GLSL ES 3.20
+Max texture size: 16384
+Enabled features (use GDK_GL_DISABLE env var to disable):
+    debug: ✓
+    base-instance: ✓
+    buffer-storage: ✓
+    external-objects: ✗
+    external-objects-win32: ✗
+    blend-func-extended: ✓
+Not using Vulkan: Could not create a Vulkan instance: The requested version of Vulkan is not supported by the driver or is otherwise incompatible for implementation-specific reasons. (VK_ERROR_INCOMPATIBLE_DRIVER)
+Creating EGL context version 3.0 (debug:no, forward:no, legacy:no, es:yes)
+OpenGL ES version: 3.2 (core)
+GLSL version: OpenGL ES GLSL ES 3.20
+Max texture size: 16384
+Enabled features (use GDK_GL_DISABLE env var to disable):
+    debug: ✓
+    base-instance: ✓
+    buffer-storage: ✓
+    external-objects: ✗
+    external-objects-win32: ✗
+    blend-func-extended: ✓
+Using renderer 'GskGLRenderer' for surface 'GdkWaylandToplevel'
+Resizing EGL window to 2880 1800
+Destroying EGL context

@@ -69,6 +69,44 @@ class DecorationTests(unittest.TestCase):
         self.assertEqual(self.model.action_command(3, home, shifted=True),
                          ['/home/fixture/.local/bin/oldbook-decoration-settings'])
 
+    def test_geometry_update_reaches_main_loop_before_ready_redrawing(self):
+        try:
+            from gi.repository import GLib
+        except ImportError:
+            self.skipTest('GLib introspection is unavailable')
+        script = runpy.run_path(str(SCRIPT))
+        loop = GLib.MainLoop()
+        events = []
+        redraws = 0
+
+        def redraw():
+            nonlocal redraws
+            redraws += 1
+            if not events:
+                events.append('redraw')
+            return redraws < 2
+
+        def geometry():
+            events.append('geometry')
+            loop.quit()
+            return False
+
+        # GTK redraw work has priority 120. Keep it ready for another dispatch
+        # so lower-priority geometry would visibly lose the ordering test.
+        # A finite source avoids confusing scheduler delays with GLib priority.
+        sources = [GLib.idle_add(redraw, priority=120),
+                   script['queue_geometry_update'](geometry)]
+        try:
+            loop.run()
+            self.assertEqual(events, ['geometry'],
+                             'redrawing delayed the pending caption geometry')
+        finally:
+            context = GLib.MainContext.default()
+            for identifier in sources:
+                source = context.find_source_by_id(identifier)
+                if source is not None:
+                    source.destroy()
+
     def test_appearance_combines_foot_font_with_validated_active_palette(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-decoration-theme-') as directory:
             root = Path(directory)
