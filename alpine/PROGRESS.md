@@ -948,3 +948,22 @@ ordered compositor events establish readiness at creation.
 - Recovery, source hashes, synthetic screenshots and honest failed attempts live
   in `verification/carousel-quality/`, `verification/apple-overview/`,
   `verification/ghost-branding/` and `verification/theme-switch-repair/`.
+
+
+## 2026-09-08 — rounded output corners (installed; next login)
+
+SwayFX 0.6-r3 is installed with a final compositor output mask, software cursor
+and render locks, and a final explicit-sync fence. The HOME launcher supplies a
+20 logical pixel radius. The running compositor was preserved and is still on
+its earlier executable: a new login is required for activation. The isolated
+packaged renderer passes full-screen, overlay, cursor, redraw, scale, rotation,
+resize, reload and session-lock checks; existing hover and 23 titlebar checks
+also pass. Config validation passes for both compositors. One deployment timeout
+under load passed unchanged on retry. All other 1,120 host package identities
+were preserved. Exact artifacts and the new host/desktop locks are archived.
+
+Pending: physical-screen visual confirmation, DRM/direct-scanout and hardware
+cursor behavior, GPU-reset recovery and physical frame rate after the next
+login. No live compositor restart or fresh-machine boot is claimed. Evidence:
+`alpine/verification/screen-corners/`.
+

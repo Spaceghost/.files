@@ -123,3 +123,16 @@ its own screenshot and JSON evidence.
 
 Upstream: [SwayFX 0.6](https://github.com/wlrfx/swayfx/releases/tag/0.6),
 [configuration and build instructions](https://github.com/wlrfx/swayfx/tree/fd71a6bdc061bd633b488ae7b83e8a6981d22f86).
+
+## Physical screen corners
+
+Revision r3 adds `screen-corners.patch`: a final black output mask above the full
+scene and software cursor, with direct scanout disabled while enabled. Set
+`SPACEGHOST_SCREEN_CORNER_RADIUS` to an integer from 0 through 100 at startup;
+0 disables it. The desktop launcher supplies 20. It does not reserve workspace
+area or change input routing. New executable code needs a new compositor session.
+
+Run `verify-screen-corners --binary /path/to/extracted/usr/bin/swayfx --output
+/new/evidence/directory` for the isolated renderer/overlay/cursor/lock checks.
+See `alpine/verification/screen-corners/README.md` for exact-package evidence and
+remaining physical-session checks.

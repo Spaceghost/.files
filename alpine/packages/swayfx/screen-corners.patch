@@ -1,0 +1,196 @@
+--- a/sway/desktop/output.c
++++ b/sway/desktop/output.c
+@@ -1,4 +1,7 @@
+ #include <assert.h>
++#include <math.h>
++#include <wlr/render/pass.h>
++#include <wlr/render/drm_syncobj.h>
+ #include <stdlib.h>
+ #include <strings.h>
+ #include <time.h>
+@@ -358,6 +361,119 @@
+ 	return false;
+ }
+ 
++
++// Output masks are applied after the complete scene, including software cursors.
++// They cannot be restacked by clients, fullscreen surfaces or session locks.
++static int screen_corner_radius(void) {
++	const char *value = getenv("SPACEGHOST_SCREEN_CORNER_RADIUS");
++	if (!value || !*value) {
++		return 0;
++	}
++	char *end;
++	long radius = strtol(value, &end, 10);
++	return *end == '\0' && radius >= 0 && radius <= 100 ? radius : 0;
++}
++
++static void handle_corner_renderer_destroy(struct wl_listener *listener, void *data) {
++	struct sway_output *output = wl_container_of(listener, output, corner_renderer_destroy);
++	wl_list_remove(&output->corner_renderer_destroy.link);
++	wlr_drm_syncobj_timeline_unref(output->corner_timeline);
++	output->corner_timeline = NULL;
++	output->corner_point = 0;
++}
++
++bool output_build_masked_state(struct sway_output *output,
++		struct wlr_output_state *state,
++		const struct wlr_scene_output_state_options *opts) {
++	int logical_radius = screen_corner_radius();
++	// Redraw the small corner regions before blending their antialiased edges.
++	// This runs only for an already requested frame: no idle repaint loop.
++	if (logical_radius) {
++		int width = output->wlr_output->width;
++		int height = output->wlr_output->height;
++		if (state->committed & WLR_OUTPUT_STATE_MODE) {
++			width = state->mode_type == WLR_OUTPUT_STATE_MODE_FIXED ?
++				state->mode->width : state->custom_mode.width;
++			height = state->mode_type == WLR_OUTPUT_STATE_MODE_FIXED ?
++				state->mode->height : state->custom_mode.height;
++		}
++		float scale = output->wlr_output->scale;
++		if (state->committed & WLR_OUTPUT_STATE_SCALE) {
++			scale = state->scale;
++		}
++		int radius = ceil(logical_radius * scale);
++		pixman_region32_t damage;
++		pixman_region32_init(&damage);
++		for (int corner = 0; corner < 4; corner++) {
++			pixman_region32_union_rect(&damage, &damage,
++				corner & 1 ? width - radius : 0,
++				corner & 2 ? height - radius : 0, radius, radius);
++		}
++		wlr_damage_ring_add(&output->scene_output->damage_ring, &damage);
++		pixman_region32_fini(&damage);
++	}
++	if (!wlr_scene_output_build_state(output->scene_output, state, opts)) {
++		return false;
++	}
++	if (!logical_radius || !state->buffer) {
++		return true;
++	}
++	struct wlr_renderer *renderer = output->wlr_output->renderer;
++	// SceneFX uses one ordered GL context. Signal a separate fence after this
++	// final pass so an explicit-sync backend cannot present the earlier fence.
++	if (state->wait_timeline && !output->corner_timeline) {
++		output->corner_timeline = wlr_drm_syncobj_timeline_create(
++			wlr_renderer_get_drm_fd(renderer));
++		if (!output->corner_timeline) {
++			return false;
++		}
++		output->corner_renderer_destroy.notify = handle_corner_renderer_destroy;
++		wl_signal_add(&renderer->events.destroy, &output->corner_renderer_destroy);
++	}
++	struct wlr_buffer_pass_options pass_opts = {
++		.signal_timeline = state->wait_timeline ? output->corner_timeline : NULL,
++		.signal_point = ++output->corner_point,
++	};
++	struct wlr_render_pass *pass = wlr_renderer_begin_buffer_pass(
++		renderer, state->buffer, &pass_opts);
++	if (!pass) {
++		return false;
++	}
++	int width = state->buffer->width, height = state->buffer->height;
++	float scale = state->committed & WLR_OUTPUT_STATE_SCALE ?
++		state->scale : output->wlr_output->scale;
++	int radius = ceil(logical_radius * scale);
++	radius = fmin(radius, fmin(width / 2, height / 2));
++	for (int y = 0; y < radius; y++) {
++		double dy = radius - y - 0.5;
++		double edge = radius - sqrt(radius * radius - dy * dy);
++		int solid = floor(edge);
++		for (int corner = 0; corner < 4; corner++) {
++			int row = corner & 2 ? height - y - 1 : y;
++			if (solid) {
++				wlr_render_pass_add_rect(pass, &(struct wlr_render_rect_options){
++					.box = {corner & 1 ? width - solid : 0, row, solid, 1},
++					.color = {0, 0, 0, 1},
++					.blend_mode = WLR_RENDER_BLEND_MODE_NONE,
++				});
++			}
++			wlr_render_pass_add_rect(pass, &(struct wlr_render_rect_options){
++				.box = {corner & 1 ? width - solid - 1 : solid, row, 1, 1},
++				.color = {0, 0, 0, edge - solid},
++			});
++		}
++	}
++	if (!wlr_render_pass_submit(pass)) {
++		wlr_damage_ring_add_whole(&output->scene_output->damage_ring);
++		return false;
++	}
++	if (pass_opts.signal_timeline) {
++		wlr_output_state_set_wait_timeline(state, output->corner_timeline,
++			output->corner_point);
++	}
++	return true;
++}
++
+ static int output_repaint_timer_handler(void *data) {
+ 	struct sway_output *output = data;
+ 
+@@ -379,7 +495,7 @@
+ 
+ 	struct wlr_output_state pending;
+ 	wlr_output_state_init(&pending);
+-	if (!wlr_scene_output_build_state(output->scene_output, &pending, &opts)) {
++	if (!output_build_masked_state(output, &pending, &opts)) {
+ 		wlr_output_state_finish(&pending);
+ 		return 0;
+ 	}
+@@ -520,6 +636,9 @@
+ }
+ 
+ static void begin_destroy(struct sway_output *output) {
++	if (output->corner_timeline) {
++		handle_corner_renderer_destroy(&output->corner_renderer_destroy, NULL);
++	}
+ 
+ 	wl_list_remove(&output->layout_destroy.link);
+ 	wl_list_remove(&output->destroy.link);
+@@ -669,6 +788,10 @@
+ 
+ 	output->server = server;
+ 	output->scene_output = scene_output;
++	if (screen_corner_radius()) {
++		wlr_output_lock_attach_render(wlr_output, true);
++		wlr_output_lock_software_cursors(wlr_output, true);
++	}
+ 
+ 	wl_signal_add(&root->output_layout->events.destroy, &output->layout_destroy);
+ 	output->layout_destroy.notify = handle_layout_destroy;
+--- a/include/sway/output.h
++++ b/include/sway/output.h
+@@ -18,6 +18,10 @@
+ 	list_t *workspaces;
+ 	struct sway_workspace *active_workspace;
+ };
++
++bool output_build_masked_state(struct sway_output *output,
++	struct wlr_output_state *state,
++	const struct wlr_scene_output_state_options *opts);
+ 
+ struct sway_output {
+ 	struct sway_node node;
+@@ -43,6 +47,9 @@
+ 
+ 	struct wlr_output *wlr_output;
+ 	struct wlr_scene_output *scene_output;
++	struct wlr_drm_syncobj_timeline *corner_timeline;
++	uint64_t corner_point;
++	struct wl_listener corner_renderer_destroy;
+ 	struct sway_server *server;
+ 	struct wl_list link;
+ 
+--- a/sway/config/output.c
++++ b/sway/config/output.c
+@@ -1054,9 +1054,8 @@
+ 				&swapchain_mgr, backend_state->output),
+ 			.color_transform = config_state->color_transform,
+ 		};
+-		struct wlr_scene_output *scene_output = cfg->output->scene_output;
+ 		struct wlr_output_state *state = &backend_state->base;
+-		if (!wlr_scene_output_build_state(scene_output, state, &opts)) {
++		if (!output_build_masked_state(cfg->output, state, &opts)) {
+ 			sway_log(SWAY_ERROR, "Building output state for '%s' failed",
+ 				backend_state->output->name);
+ 			goto out;

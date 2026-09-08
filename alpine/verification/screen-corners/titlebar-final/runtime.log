@@ -1,0 +1,1835 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+00:00:00.000 [INFO] [sway/main.c:308] swayfx version 0.6 (based on sway version 1.12.0)
+00:00:00.000 [INFO] [sway/main.c:309] wlroots version 0.20.2
+00:00:00.000 [INFO] [sway/main.c:310] scenefx version 0.5.0
+00:00:00.018 [INFO] [sway/main.c:78] Linux oldbook 6.18.49-0-lts #1-Alpine SMP PREEMPT_DYNAMIC 2026-09-07 07:20:48 x86_64 Linux
+00:00:00.019 [INFO] [sway/main.c:94] Contents of /etc/os-release:
+00:00:00.019 [INFO] [sway/main.c:78] NAME="Alpine Linux"
+00:00:00.019 [INFO] [sway/main.c:78] ID=alpine
+00:00:00.019 [INFO] [sway/main.c:78] VERSION_ID=3.25.0_alpha20260805
+00:00:00.019 [INFO] [sway/main.c:78] PRETTY_NAME="Alpine Linux edge"
+00:00:00.019 [INFO] [sway/main.c:78] HOME_URL="https://alpinelinux.org/"
+00:00:00.019 [INFO] [sway/main.c:78] BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
+00:00:00.019 [INFO] [sway/main.c:66] LD_LIBRARY_PATH=
+00:00:00.019 [INFO] [sway/main.c:66] LD_PRELOAD=
+00:00:00.019 [INFO] [sway/main.c:66] PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+00:00:00.019 [INFO] [sway/main.c:66] SWAYSOCK=
+00:00:00.019 [INFO] [sway/main.c:339] Starting swayfx version 0.6 (based on sway version 1.12.0
+00:00:00.019 [DEBUG] [sway/server.c:248] Initializing Wayland server
+00:00:00.019 [INFO] [wlr] [backend/backend.c:342] Loading user-specified backends due to WLR_BACKENDS: headless
+00:00:00.020 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.020 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE
+00:00:00.020 [INFO] [wlr] [render/egl.c:205] Supported EGL client extensions: EGL_EXT_client_extensions EGL_EXT_device_base EGL_EXT_device_enumeration EGL_EXT_device_query EGL_EXT_platform_base EGL_KHR_client_get_all_proc_addresses EGL_KHR_debug EGL_EXT_platform_device EGL_EXT_explicit_device EGL_EXT_platform_wayland EGL_KHR_platform_wayland EGL_EXT_platform_x11 EGL_KHR_platform_x11 EGL_EXT_platform_xcb EGL_MESA_platform_gbm EGL_KHR_platform_gbm EGL_MESA_platform_surfaceless
+00:00:00.030 [DEBUG] [wlr] [render/egl.c:526] Using EGL device /dev/dri/card0
+ac_compute_device_uuid's output is based on invalid pci bus info.
+00:00:00.231 [INFO] [wlr] [render/egl.c:369] Using EGL 1.5
+00:00:00.231 [INFO] [wlr] [render/egl.c:370] Supported EGL display extensions: EGL_ANDROID_blob_cache EGL_EXT_config_select_group EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_query_reset_notification_strategy EGL_EXT_surface_compression EGL_KHR_cl_event2 EGL_KHR_config_attribs EGL_KHR_context_flush_control EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_gl_interop EGL_MESA_image_dma_buf_export EGL_MESA_query_driver EGL_MESA_x11_native_visual_id 
+00:00:00.231 [INFO] [wlr] [render/egl.c:372] Supported EGL device extensions: EGL_EXT_device_drm EGL_EXT_device_drm_render_node EGL_EXT_device_query_name EGL_EXT_device_persistent_id
+00:00:00.231 [INFO] [wlr] [render/egl.c:374] EGL vendor: Mesa Project
+00:00:00.231 [INFO] [wlr] [render/egl.c:376] EGL driver name: radeonsi
+00:00:00.231 [DEBUG] [wlr] [render/egl.c:120] Supported DMA-BUF formats:
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AB4H (0x48344241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   XB4H (0x48344258)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AB48 (0x38344241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   XB48 (0x38344258)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AR30 (0x30335241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   XR30 (0x30335258)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AB30 (0x30334241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   XB30 (0x30334258)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AR24 (0x34325241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   AB24 (0x34324241)
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.232 [DEBUG] [wlr] [render/egl.c:169]   XR24 (0x34325258)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   XB24 (0x34324258)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   AR15 (0x35315241)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   AB15 (0x35314241)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   AR12 (0x32315241)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   AB12 (0x32314241)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   RG16 (0x36314752)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   R8 (0x20203852)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   R16 (0x20363152)
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.233 [DEBUG] [wlr] [render/egl.c:169]   GR88 (0x38385247)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   GR32 (0x32335247)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   R  H (0x48202052)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   R  F (0x46202052)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   GR H (0x48205247)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   GR F (0x46205247)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   AB8F (0x46384241)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   YUV9 (0x39565559)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   YU11 (0x31315559)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:169]   YU12 (0x32315559)
+00:00:00.234 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YU16 (0x36315559)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YU24 (0x34325559)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YVU9 (0x39555659)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YV11 (0x31315659)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YV12 (0x32315659)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YV16 (0x36315659)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   YV24 (0x34325659)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:169]   S010 (0x30313053)
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.235 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S210 (0x30313253)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S410 (0x30313453)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S012 (0x32313053)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S212 (0x32313253)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S412 (0x32313453)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S016 (0x36313053)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S216 (0x36313253)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   S416 (0x36313453)
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.236 [DEBUG] [wlr] [render/egl.c:169]   NV12 (0x3231564E)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   NV21 (0x3132564E)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   P010 (0x30313050)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   P012 (0x32313050)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   P016 (0x36313050)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   P030 (0x30333050)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   NV16 (0x3631564E)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   NV61 (0x3136564E)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   NV24 (0x3432564E)
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.237 [DEBUG] [wlr] [render/egl.c:169]   NV42 (0x3234564E)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   AYUV (0x56555941)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   XYUV (0x56555958)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   Y410 (0x30313459)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   Y412 (0x32313459)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   Y416 (0x36313459)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   YUYV (0x56595559)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   YVYU (0x55595659)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:169]   UYVY (0x59565955)
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.238 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:169]   VYUY (0x59555956)
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:169]   Y210 (0x30313259)
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:169]   Y212 (0x32313259)
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:169]   Y216 (0x36313259)
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.239 [DEBUG] [wlr] [render/egl.c:189] EGL DMA-BUF format modifiers unsupported
+00:00:00.264 [DEBUG] [wlr] [render/egl.c:439] Created EGL context using OpenGL ES 2.0
+00:00:00.264 [DEBUG] [wlr] [render/egl.c:578] Using EGL_PLATFORM_DEVICE_EXT
+00:00:00.265 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:473] Creating scenefx FX renderer
+00:00:00.265 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:474] Using OpenGL ES 3.2 Mesa 26.1.6
+00:00:00.265 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:475] GL vendor: AMD
+00:00:00.265 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:476] GL renderer:  (radeonsi, verde, ACO, DRM 2.51, 6.18.49-0-lts)
+00:00:00.265 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:477] Supported FX extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_draw_instanced GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_NV_conditional_render GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_texture_storage GL_NV_pack_subimage GL_NV_texture_barrier GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_pack_reverse_row_order GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_occlusion_query_boolean GL_EXT_robustness GL_EXT_sRGB GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_APPLE_sync GL_EXT_draw_buffers GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_shadow_samplers GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_generate_mipmap_sRGB GL_NV_pixel_buffer_object GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_debug_label GL_EXT_sRGB_write_control GL_EXT_separate_shader_objects GL_EXT_shader_group_vote GL_EXT_shader_implicit_conversions GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_multi_draw_indirect GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_EXT_texture_view GL_KHR_blend_equation_advanced GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_NV_shader_noperspective_interpolation GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_float_blend GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_EXT_texture_sRGB_R8 GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clear_texture GL_EXT_clip_cull_distance GL_EXT_conservative_depth GL_EXT_disjoint_timer_query GL_EXT_texture_compression_s3tc_srgb GL_EXT_window_rectangles GL_MESA_shader_integer_functions GL_EXT_clip_control GL_EXT_color_buffer_half_float GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_texture_compression_bptc GL_EXT_texture_mirror_clamp_to_edge GL_KHR_parallel_shader_compile GL_NV_alpha_to_coverage_dither_control GL_EXT_EGL_image_storage GL_EXT_texture_shadow_lod GL_INTEL_blackhole_render GL_MESA_framebuffer_flip_y GL_NV_compute_shader_derivatives GL_EXT_demote_to_helper_invocation GL_EXT_depth_clamp GL_EXT_texture_query_lod GL_KHR_shader_subgroup GL_MESA_sampler_objects GL_EXT_EGL_image_storage_compression GL_EXT_texture_storage_compression GL_MESA_bgra GL_MESA_texture_const_bandwidth GL_EXT_shader_clock 
+00:00:00.265 [DEBUG] [wlr] [render/fx_renderer/fx_renderer.c:533] GPU reset notifications are enabled
+00:00:00.619 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:585] FX RENDERER: Shaders Initialized Successfully
+00:00:00.643 [DEBUG] [wlr] [render/allocator/allocator.c:115] Trying to create gbm allocator
+00:00:00.789 [DEBUG] [wlr] [render/allocator/gbm.c:188] Created GBM allocator with backend drm
+00:00:00.790 [DEBUG] [wlr] [render/allocator/gbm.c:191] Using DRM node /dev/dri/renderD128
+00:00:00.790 [DEBUG] [wlr] [types/wlr_drm_lease_v1.c:679] No DRM backend supplied, failed to create wlr_drm_lease_v1_manager
+00:00:00.790 [DEBUG] [sway/server.c:499] Failed to create wlr_drm_lease_device_v1
+00:00:00.790 [INFO] [sway/server.c:500] VR will not be available
+00:00:00.790 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.824 [INFO] [sway/config.c:460] Loading config from /tmp/spaceghost-screen-corners/titlebar-final/sway.conf
+00:00:00.824 [DEBUG] [sway/config.c:819] Read line 1: xwayland disable
+00:00:00.824 [INFO] [sway/commands.c:407] Config command: xwayland disable
+00:00:00.824 [INFO] [sway/commands.c:430] After replacement: xwayland disable
+00:00:00.824 [DEBUG] [sway/config.c:819] Read line 2: output HEADLESS-1 mode 1440x900
+00:00:00.824 [INFO] [sway/commands.c:407] Config command: output HEADLESS-1 mode 1440x900
+00:00:00.824 [INFO] [sway/commands.c:430] After replacement: output HEADLESS-1 mode 1440x900
+00:00:00.824 [DEBUG] [sway/commands.c:462] Subcommand: mode 1440x900
+00:00:00.824 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (1440x900@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.825 [DEBUG] [sway/config.c:819] Read line 3: output * bg #1d2021 solid_color
+00:00:00.825 [INFO] [sway/commands.c:407] Config command: output * bg #1d2021 solid_color
+00:00:00.825 [INFO] [sway/commands.c:430] After replacement: output * bg #1d2021 solid_color
+00:00:00.825 [DEBUG] [sway/commands.c:462] Subcommand: bg #1d2021 solid_color
+00:00:00.825 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg #1d2021 solid_color) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.825 [DEBUG] [sway/config.c:819] Read line 4: seat seat0 fallback true
+00:00:00.825 [INFO] [sway/commands.c:407] Config command: seat seat0 fallback true
+00:00:00.825 [INFO] [sway/commands.c:430] After replacement: seat seat0 fallback true
+00:00:00.825 [DEBUG] [sway/commands.c:462] Subcommand: fallback true
+00:00:00.825 [DEBUG] [sway/config/seat.c:65] Adding non-wildcard seat config
+00:00:00.825 [DEBUG] [sway/config/seat.c:82] Config stored for seat seat0
+00:00:00.825 [DEBUG] [sway/config.c:819] Read line 5: focus_follows_mouse no
+00:00:00.825 [INFO] [sway/commands.c:407] Config command: focus_follows_mouse no
+00:00:00.825 [INFO] [sway/commands.c:430] After replacement: focus_follows_mouse no
+00:00:00.825 [DEBUG] [sway/config.c:819] Read line 6: mouse_warping none
+00:00:00.825 [INFO] [sway/commands.c:407] Config command: mouse_warping none
+00:00:00.825 [INFO] [sway/commands.c:430] After replacement: mouse_warping none
+00:00:00.825 [DEBUG] [sway/config.c:819] Read line 7: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:00.825 [INFO] [sway/commands.c:407] Config command: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:00.825 [INFO] [sway/commands.c:430] After replacement: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:00.839 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:00.840 [DEBUG] [sway/config.c:819] Read line 1: # Gruvbox Dark window chrome; keep session commands and shortcuts in sway/config.
+00:00:00.840 [DEBUG] [sway/config.c:819] Read line 2: # Tiled windows keep their clean edges; floating, stacked and tabbed views get titles.
+00:00:00.840 [DEBUG] [sway/config.c:819] Read line 3: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.840 [INFO] [sway/commands.c:407] Config command: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.840 [INFO] [sway/commands.c:430] After replacement: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.840 [DEBUG] [sway/commands.c:462] Subcommand: xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.840 [DEBUG] [sway/config/seat.c:45] Merging seat * config on seat0
+00:00:00.840 [DEBUG] [sway/config/seat.c:78] Adding seat * config
+00:00:00.840 [DEBUG] [sway/config/seat.c:82] Config stored for seat *
+00:00:00.840 [DEBUG] [sway/config.c:819] Read line 4: font pango:JetBrainsMono Nerd Font 9.5
+00:00:00.840 [INFO] [sway/commands.c:407] Config command: font pango:JetBrainsMono Nerd Font 9.5
+00:00:00.840 [INFO] [sway/commands.c:430] After replacement: font pango:JetBrainsMono Nerd Font 9.5
+00:00:00.984 [DEBUG] [sway/config.c:819] Read line 5: default_border pixel 0
+00:00:00.984 [INFO] [sway/commands.c:407] Config command: default_border pixel 0
+00:00:00.984 [INFO] [sway/commands.c:430] After replacement: default_border pixel 0
+00:00:00.984 [DEBUG] [sway/config.c:819] Read line 6: default_floating_border normal 0
+00:00:00.984 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 0
+00:00:00.984 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 0
+00:00:00.984 [DEBUG] [sway/config.c:819] Read line 7: title_align center
+00:00:00.984 [INFO] [sway/commands.c:407] Config command: title_align center
+00:00:00.984 [INFO] [sway/commands.c:430] After replacement: title_align center
+00:00:00.984 [DEBUG] [sway/config.c:819] Read line 8: titlebar_padding 8 1
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: titlebar_padding 8 1
+00:00:00.985 [INFO] [sway/commands.c:430] After replacement: titlebar_padding 8 1
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 9: titlebar_border_thickness 0
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: titlebar_border_thickness 0
+00:00:00.985 [INFO] [sway/commands.c:430] After replacement: titlebar_border_thickness 0
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 10: 
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 11: # Class                border  title bg text    indicator child border
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 12: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:00.985 [INFO] [sway/commands.c:430] After replacement: client.focused #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 13: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:00.985 [INFO] [sway/commands.c:430] After replacement: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 14: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:00.985 [INFO] [sway/commands.c:430] After replacement: client.unfocused #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:00.985 [DEBUG] [sway/config.c:819] Read line 15: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:00.985 [INFO] [sway/commands.c:407] Config command: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: client.urgent #282828 #282828 #fb4934 #282828 #282828
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 16: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: client.placeholder #282828 #282828 #bdae93 #282828 #282828
+00:00:00.986 [INFO] [sway/commands/client.c:80] Warning: client.placeholder is ignored by sway
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 8: bindsym --release button2 floating toggle
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: bindsym --release button2 floating toggle
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: bindsym --release button2 floating toggle
+00:00:00.986 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound button2 to command `floating toggle` for device '*'
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 9: default_border normal 2
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: default_border normal 2
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: default_border normal 2
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 10: default_floating_border normal 2
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 2
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 2
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 11: gaps inner 0
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: gaps inner 0
+00:00:00.986 [INFO] [sway/commands.c:430] After replacement: gaps inner 0
+00:00:00.986 [DEBUG] [sway/config.c:819] Read line 12: gaps outer 0
+00:00:00.986 [INFO] [sway/commands.c:407] Config command: gaps outer 0
+00:00:00.987 [INFO] [sway/commands.c:430] After replacement: gaps outer 0
+00:00:00.987 [DEBUG] [sway/config.c:819] Read line 13: corner_radius 0
+00:00:00.987 [INFO] [sway/commands.c:407] Config command: corner_radius 0
+00:00:00.987 [INFO] [sway/commands.c:430] After replacement: corner_radius 0
+00:00:00.987 [DEBUG] [sway/config.c:819] Read line 14: shadows disable
+00:00:00.987 [INFO] [sway/commands.c:407] Config command: shadows disable
+00:00:00.987 [INFO] [sway/commands.c:430] After replacement: shadows disable
+00:00:00.987 [DEBUG] [sway/config.c:819] Read line 15: blur disable
+00:00:00.987 [INFO] [sway/commands.c:407] Config command: blur disable
+00:00:00.987 [INFO] [sway/commands.c:430] After replacement: blur disable
+00:00:00.987 [DEBUG] [sway/config.c:819] Read line 16: animation_duration_ms 0
+00:00:00.987 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 0
+00:00:00.987 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 0
+00:00:00.999 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat seat0
+00:00:00.999 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat *
+00:00:00.999 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[0] = swaybg
+00:00:01.000 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[1] = -o
+00:00:01.000 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[2] = *
+00:00:01.000 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[3] = -c
+00:00:01.000 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[4] = #1d2021
+00:00:01.010 [INFO] [sway/realtime.c:35] Failed to set scheduling priority to 1
+00:00:01.010 [INFO] [sway/server.c:791] Starting backend on wayland display 'wayland-1'
+00:00:01.010 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:01.010 [DEBUG] [sway/desktop/output.c:754] New output 0x7f5754b28360: HEADLESS-1 (non-desktop: 0)
+00:00:01.011 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:01.011 [DEBUG] [wlr] [types/output/cursor.c:67] Disabling hardware cursors on output 'HEADLESS-1' (locks: 1)
+00:00:01.011 [INFO] [wlr] [backend/headless/backend.c:17] Starting headless backend
+00:00:01.011 [DEBUG] [sway/config/output.c:1008] Committing 1 outputs
+00:00:01.011 [DEBUG] [sway/config/output.c:769] Output state for HEADLESS-1
+00:00:01.011 [DEBUG] [sway/config/output.c:771]     enabled:       yes
+00:00:01.011 [DEBUG] [sway/config/output.c:775]     render_format: XR24
+00:00:01.011 [DEBUG] [sway/config/output.c:780]     custom mode:   1440x900@0mHz
+00:00:01.011 [DEBUG] [sway/config/output.c:793]     scale:         1.000000
+00:00:01.011 [DEBUG] [sway/config/output.c:796]     subpixel:      unknown
+00:00:01.011 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:164] Preparing test commit for 1 outputs with explicit modifiers
+00:00:01.011 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:01.012 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format XR24 (0x34325258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.012 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:185] Test commit for 1 outputs succeeded
+00:00:01.014 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.024 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.024 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.027 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.027 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.028 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format AB24 (0x34324241), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.028 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.029 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.029 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.030 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format XB24 (0x34324258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:01.030 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:01.058 [DEBUG] [sway/config/output.c:1071] Commit of 1 outputs succeeded
+00:00:01.058 [DEBUG] [sway/config/output.c:1086] Finalizing config for HEADLESS-1
+00:00:01.059 [DEBUG] [sway/tree/workspace.c:444] Workspace: Generating new workspace name for output HEADLESS-1
+00:00:01.059 [DEBUG] [sway/tree/output.c:170] Creating default workspace 1
+00:00:01.059 [DEBUG] [sway/tree/workspace.c:185] Adding workspace 1 for output HEADLESS-1
+00:00:01.059 [DEBUG] [sway/desktop/layer_shell.c:148] Usable area changed, rearranging output
+00:00:01.059 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:01.059 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.059 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:01.059 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:01.059 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e74af0 committing with 2 instructions
+00:00:01.059 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e74af0
+00:00:01.542 [DEBUG] [wlr] [xcursor/wlr_xcursor.c:233] Loaded cursor theme 'simp1e-cursors-gruvbox-dark' at size 24 (171 available cursors)
+00:00:01.543 [INFO] [sway/server.c:803] Running compositor on wayland display 'wayland-1'
+2026-09-07 22:35:43 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+00:00:01.550 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5742873f60 (res 0x7f5743e4eeb0)
+00:00:01.551 [DEBUG] [wlr] [types/wlr_layer_shell_v1.c:502] new layer_surface 0x7f5751afc3e0 (res 0x7f5743e14370)
+00:00:01.551 [DEBUG] [sway/desktop/layer_shell.c:504] new layer surface: namespace wallpaper layer 0 anchor 0 size 0x0 margin 0,0,0,0,
+00:00:01.555 [DEBUG] [sway/input/input-manager.c:421] adding virtual pointer: '0:0:wlr_virtual_pointer_v1'
+00:00:01.555 [DEBUG] [sway/input/seat.c:946] adding device 0:0:wlr_virtual_pointer_v1 to seat seat0
+00:00:01.555 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:01.599 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:01.618 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.621 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.668 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.673 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.753 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.771 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.838 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.852 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.912 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.917 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+00:00:01.981 [DEBUG] [sway/ipc-server.c:196] New client: fd 32
+00:00:01.993 [INFO] [sway/ipc-server.c:570] IPC Client 32 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:02.084 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.118 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.208 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.229 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.306 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.306 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5742875ee0 (res 0x7f57435585b0)
+00:00:02.306 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f57428762c0 (res 0x7f5743558a30)
+00:00:02.306 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f5742fa5920 (res 0x7f5743558d90)
+00:00:02.307 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:02.307 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f5742a395a0 (res 0x7f57435576d0)
+00:00:02.307 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f57428766b0 (res 0x7f57435577f0)
+00:00:02.326 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.481 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:02.481 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:02.481 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f668 horizontally
+00:00:02.482 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7c200 committing with 3 instructions
+00:00:02.482 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:02.493 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:02.709 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7c200 is ready
+00:00:02.709 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7c200
+00:00:02.831 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.834 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:02.895 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.907 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.917 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:02.937 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:02.937 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:02.937 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:02.937 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:02.937 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:02.937 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7e340 committing with 2 instructions
+00:00:02.938 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7e340
+00:00:02.952 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.167 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.183 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.210 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.212 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top'
+00:00:03.212 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:03.212 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:03.212 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:03.212 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7df00 committing with 2 instructions
+00:00:03.213 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7df00
+00:00:03.239 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.456 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.471 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.501 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.510 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:03.510 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:03.510 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:03.510 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:03.510 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7e480 committing with 2 instructions
+00:00:03.510 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7e480
+00:00:03.528 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.743 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.743 [INFO] [sway/commands.c:287] Handling command 'titlebar_position sideways'
+00:00:03.744 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.763 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.811 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.821 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.855 [INFO] [sway/commands.c:287] Handling command 'titlebar_position'
+00:00:03.860 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.886 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.900 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.920 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.920 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top bottom'
+00:00:03.921 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:03.939 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:03.969 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.024 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.085 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.155 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.164 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.248 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.259 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.362 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.383 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.448 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.465 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:04.531 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.553 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.630 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:04.647 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:04.659 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5742877a80 (res 0x7f574353f1c0)
+00:00:04.660 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5742877e60 (res 0x7f574353f640)
+00:00:04.660 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f574284fe30 (res 0x7f574353f9a0)
+00:00:04.660 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:04.660 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f5742a393c0 (res 0x7f57435362e0)
+00:00:04.660 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5742878240 (res 0x7f5743536400)
+00:00:04.743 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:04.743 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:04.743 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f668 horizontally
+00:00:04.743 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bcd0 committing with 4 instructions
+00:00:04.753 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:04.774 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:04.857 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7bcd0 is ready
+00:00:04.857 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bcd0
+00:00:05.004 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.016 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.033 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.036 [INFO] [sway/commands.c:287] Handling command 'layout splith'
+00:00:05.036 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.251 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.277 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.290 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.328 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.342 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.342 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:05.343 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:05.343 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7c000 committing with 4 instructions
+00:00:05.343 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7c000
+00:00:05.370 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.574 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:05.578 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604cd0 committing with 4 instructions
+00:00:05.578 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604cd0
+00:00:05.947 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:05.980 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:05.994 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:06.000 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:06.007 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:06.011 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7c540 committing with 4 instructions
+00:00:06.012 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7c540
+00:00:06.021 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:06.021 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:06.021 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f5f8 horizontally
+00:00:06.022 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604a10 committing with 3 instructions
+00:00:06.042 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:06.042 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:06.042 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f6a8 horizontally
+00:00:06.104 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604a10 is ready
+00:00:06.104 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604a10
+00:00:06.106 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b990 committing with 3 instructions
+00:00:06.106 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b990
+00:00:06.252 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:06.261 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:06.278 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:06.289 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:06.335 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:06.344 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7c540 committing with 4 instructions
+00:00:06.345 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7c540
+00:00:06.719 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:06.742 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:06.758 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:06.779 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:06.799 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:06.809 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:06.816 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:06.862 [DEBUG] [sway/commands/bind.c:621] running command for binding: floating toggle
+00:00:06.862 [INFO] [sway/commands.c:287] Handling command 'floating toggle'
+00:00:06.862 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:06.862 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:06.862 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f518 horizontally
+00:00:06.862 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b990 committing with 3 instructions
+00:00:07.080 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7b990 is ready
+00:00:07.081 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b990
+00:00:07.089 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604ed0 committing with 1 instructions
+00:00:07.090 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604ed0
+00:00:07.235 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.262 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.285 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.303 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.311 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:07.320 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:07.331 [DEBUG] [sway/commands/bind.c:621] running command for binding: floating toggle
+00:00:07.332 [INFO] [sway/commands.c:287] Handling command 'floating toggle'
+00:00:07.332 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:07.332 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:07.332 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f518 horizontally
+00:00:07.332 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226048d0 committing with 3 instructions
+00:00:07.526 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f57226048d0 is ready
+00:00:07.526 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226048d0
+00:00:07.592 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:07.724 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:07.751 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:07.763 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:07.796 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:07.828 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:07.828 [INFO] [sway/commands.c:287] Handling command 'layout tabbed'
+00:00:07.829 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:07.830 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:07.830 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:07.830 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b990 committing with 4 instructions
+00:00:07.878 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:07.978 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7b990 is ready
+00:00:07.978 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b990
+00:00:08.086 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:08.106 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:08.182 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:08.228 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:08.256 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:08.263 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:08.275 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604810 committing with 5 instructions
+00:00:08.275 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604810
+00:00:08.697 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:08.725 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:08.742 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b6d0 committing with 5 instructions
+00:00:08.742 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b6d0
+00:00:09.157 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.190 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:09.226 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.226 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top'
+00:00:09.226 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:09.226 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:09.226 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:09.226 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b990 committing with 4 instructions
+00:00:09.227 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b990
+00:00:09.245 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:09.457 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.482 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:09.533 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.549 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:09.587 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.587 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:09.587 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:09.587 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:09.587 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:09.587 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7b6d0 committing with 4 instructions
+00:00:09.588 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7b6d0
+00:00:09.597 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:09.808 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:09.808 [INFO] [sway/commands.c:287] Handling command 'layout stacking'
+00:00:09.808 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:09.808 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:09.808 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:09.809 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604810 committing with 4 instructions
+00:00:09.843 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:10.024 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604810 is ready
+00:00:10.024 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604810
+00:00:10.081 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:10.110 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:10.147 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:10.164 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:10.175 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226048d0 committing with 5 instructions
+00:00:10.175 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226048d0
+00:00:10.566 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:10.611 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:10.629 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bd90 committing with 5 instructions
+00:00:10.629 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bd90
+00:00:11.025 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.042 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.060 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.063 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top'
+00:00:11.063 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.063 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:11.063 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:11.063 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604810 committing with 4 instructions
+00:00:11.063 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604810
+00:00:11.075 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.286 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.315 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.333 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.347 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.382 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.382 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:11.382 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.382 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:11.382 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:11.382 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226049d0 committing with 4 instructions
+00:00:11.383 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226049d0
+00:00:11.394 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.600 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:11.620 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-b
+00:00:11.620 [INFO] [sway/commands.c:287] Handling command 'move container to workspace holding-proof'
+00:00:11.620 [DEBUG] [sway/tree/workspace.c:185] Adding workspace holding-proof for output HEADLESS-1
+00:00:11.620 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.620 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fae8 horizontally
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:11.621 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:11.621 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604810 committing with 6 instructions
+00:00:11.626 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:11.749 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604810 is ready
+00:00:11.749 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604810
+00:00:11.768 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:11.851 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:11.851 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:11.851 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:11.851 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.072 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.073 [INFO] [sway/commands.c:287] Handling command 'hide_edge_borders --i3 none'
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fae8 horizontally
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:12.073 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fae8 horizontally
+00:00:12.074 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604890 committing with 5 instructions
+00:00:12.074 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604890
+00:00:12.092 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.313 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.313 [INFO] [sway/commands.c:287] Handling command 'layout tabbed'
+00:00:12.314 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:12.314 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:12.314 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:12.314 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bdd0 committing with 3 instructions
+00:00:12.314 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bdd0
+00:00:12.325 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.531 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.554 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.579 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:12.579 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:12.580 [INFO] [sway/commands.c:287] Handling command 'border pixel 2'
+00:00:12.580 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604810 committing with 1 instructions
+00:00:12.612 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:12.783 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604810 is ready
+00:00:12.783 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604810
+00:00:12.824 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:12.842 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:12.893 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:12.893 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:12.893 [INFO] [sway/commands.c:287] Handling command 'border none'
+00:00:12.893 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604910 committing with 1 instructions
+00:00:12.905 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:13.039 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604910 is ready
+00:00:13.039 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604910
+00:00:13.115 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.133 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:13.148 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.148 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:13.148 [INFO] [sway/commands.c:287] Handling command 'border normal 2'
+00:00:13.148 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7c000 committing with 1 instructions
+00:00:13.159 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:13.276 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7c000 is ready
+00:00:13.276 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7c000
+00:00:13.378 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:13.394 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:13.425 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:13.425 [INFO] [sway/commands.c:287] Handling command 'layout stacking'
+00:00:13.426 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:13.426 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:13.426 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:13.426 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7e100 committing with 3 instructions
+00:00:13.426 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7e100
+00:00:13.431 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:13.643 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:13.650 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:13.664 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:13.664 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:13.664 [INFO] [sway/commands.c:287] Handling command 'border pixel 2'
+00:00:13.664 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722604a90 committing with 1 instructions
+00:00:13.675 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:13.767 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722604a90 is ready
+00:00:13.767 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722604a90
+00:00:13.884 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.932 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:13.953 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:13.953 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:13.954 [INFO] [sway/commands.c:287] Handling command 'border none'
+00:00:13.954 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226048d0 committing with 1 instructions
+00:00:13.966 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.057 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f57226048d0 is ready
+00:00:14.057 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226048d0
+00:00:14.183 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:14.199 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:14.245 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:14.245 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:14.245 [INFO] [sway/commands.c:287] Handling command 'border normal 2'
+00:00:14.245 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bc50 committing with 1 instructions
+00:00:14.266 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:14.354 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5742e7bc50 is ready
+00:00:14.354 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bc50
+00:00:14.469 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.491 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.529 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.529 [INFO] [sway/commands.c:287] Handling command 'hide_edge_borders none'
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fae8 horizontally
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:14.529 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fae8 horizontally
+00:00:14.529 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bb90 committing with 5 instructions
+00:00:14.529 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bb90
+00:00:14.544 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:14.760 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:14.760 [INFO] [sway/commands.c:287] Handling command 'workspace floating-proof'
+00:00:14.760 [DEBUG] [sway/tree/workspace.c:185] Adding workspace floating-proof for output HEADLESS-1
+00:00:14.761 [DEBUG] [sway/tree/workspace.c:741] Switching to workspace 0x7f57428505f0:floating-proof
+00:00:14.761 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:14.761 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:14.761 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e7bcd0 committing with 4 instructions
+00:00:14.761 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e7bcd0
+00:00:14.773 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:14.781 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.020 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.041 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.108 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.125 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.209 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.224 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:15.291 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.331 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.391 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.403 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5722792030 (res 0x7f5743df5010)
+00:00:15.403 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5722792420 (res 0x7f5743df5910)
+00:00:15.403 [DEBUG] [wlr] [types/xdg_shell/wlr_xdg_surface.c:441] new xdg_surface 0x7f5742850910 (res 0x7f5743df5c70)
+00:00:15.404 [DEBUG] [sway/desktop/xdg_shell.c:585] New xdg_shell toplevel title='(null)' app_id='(null)'
+00:00:15.404 [DEBUG] [wlr] [types/wlr_xdg_decoration_v1.c:220] new xdg_toplevel_decoration 0x7f5742a394b0 (res 0x7f5743558250)
+00:00:15.404 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5722792810 (res 0x7f5743558370)
+00:00:15.422 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.547 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:15.547 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:15.547 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8f668 horizontally
+00:00:15.547 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607cf0 committing with 3 instructions
+00:00:15.554 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:15.586 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:15.666 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722607cf0 is ready
+00:00:15.666 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607cf0
+00:00:15.718 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:15.805 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.831 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.844 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:15.844 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:15.845 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:15.845 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:15.845 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:15.845 [INFO] [sway/commands.c:287] Handling command 'resize set width 640 px height 380 px'
+00:00:15.845 [INFO] [sway/commands.c:287] Handling command 'move position 160 px 180 px'
+00:00:15.845 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606660 committing with 2 instructions
+00:00:15.862 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:15.906 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722606660 is ready
+00:00:15.908 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606660
+00:00:15.917 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:15.917 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226066a0 committing with 1 instructions
+00:00:15.917 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226066a0
+00:00:16.068 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:16.080 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:16.133 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:16.133 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top'
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:16.133 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:16.134 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.134 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:16.134 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226063a0 committing with 7 instructions
+00:00:16.134 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226063a0
+00:00:16.173 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:16.381 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:16.409 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:16.440 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:16.443 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:16.443 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:16.444 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:16.444 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226062e0 committing with 7 instructions
+00:00:16.444 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226062e0
+00:00:16.471 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:16.690 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:16.711 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:16.748 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226079f0 committing with 1 instructions
+00:00:16.748 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226079f0
+00:00:16.750 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:16.751 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607af0 committing with 1 instructions
+00:00:16.751 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607af0
+00:00:16.757 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226064a0 committing with 1 instructions
+00:00:16.758 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226064a0
+00:00:16.759 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:16.981 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:17.026 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:17.037 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.040 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606460 committing with 1 instructions
+00:00:17.040 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606460
+00:00:17.043 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606520 committing with 1 instructions
+00:00:17.076 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.087 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722606520 is ready
+00:00:17.087 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606520
+00:00:17.096 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.096 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607ab0 committing with 1 instructions
+00:00:17.096 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607ab0
+00:00:17.289 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.305 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.315 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.320 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226060a0 committing with 1 instructions
+00:00:17.320 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226060a0
+00:00:17.321 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226061e0 committing with 1 instructions
+00:00:17.324 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.521 [DEBUG] [sway/desktop/transaction.c:1153] Transaction 0x7f57226061e0 timed out (1 waiting)
+00:00:17.522 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226061e0
+00:00:17.526 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.526 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226064e0 committing with 1 instructions
+00:00:17.526 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226064e0
+00:00:17.548 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:17.567 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:17.600 [DEBUG] [sway/ipc-server.c:196] New client: fd 39
+00:00:17.601 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:17.601 [INFO] [sway/commands.c:287] Handling command 'fullscreen enable'
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fad8 horizontally
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fad8 horizontally
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:17.601 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:17.601 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607d30 committing with 7 instructions
+00:00:17.612 [INFO] [sway/ipc-server.c:570] IPC Client 39 disconnected
+00:00:17.727 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722607d30 is ready
+00:00:17.727 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607d30
+00:00:17.728 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226065a0 committing with 1 instructions
+00:00:17.728 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226065a0
+00:00:17.728 [DEBUG] [wlr] [types/output/output.c:1004] Direct scan-out disabled by lock
+00:00:17.733 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:17.748 [DEBUG] [wlr] [types/output/output.c:1004] Direct scan-out disabled by lock
+00:00:17.824 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:17.859 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:17.914 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 2)
+00:00:17.938 [DEBUG] [wlr] [types/output/output.c:1004] Direct scan-out disabled by lock
+00:00:19.564 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:21.565 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:21.568 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:21.568 [INFO] [sway/commands.c:287] Handling command 'fullscreen disable'
+00:00:21.568 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace '1' at 0.000000, 0.000000
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fad8 horizontally
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fad8 horizontally
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:21.569 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:21.569 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606120 committing with 7 instructions
+00:00:21.570 [DEBUG] [wlr] [types/output/output.c:1004] Direct scan-out disabled by lock
+00:00:21.584 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:21.622 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722606120 is ready
+00:00:21.622 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606120
+00:00:21.624 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:21.624 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226066a0 committing with 1 instructions
+00:00:21.624 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226066a0
+00:00:21.799 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:21.839 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:21.868 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:21.868 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:21.869 [INFO] [sway/commands.c:287] Handling command 'border pixel 2'
+00:00:21.869 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606360 committing with 1 instructions
+00:00:21.869 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606360
+00:00:21.871 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:21.881 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.092 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.125 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.164 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.164 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:22.165 [INFO] [sway/commands.c:287] Handling command 'border pixel 0'
+00:00:22.165 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607bf0 committing with 1 instructions
+00:00:22.165 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607bf0
+00:00:22.197 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.418 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.465 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.530 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.530 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:22.530 [INFO] [sway/commands.c:287] Handling command 'border none'
+00:00:22.530 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606220 committing with 1 instructions
+00:00:22.531 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606220
+00:00:22.554 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.773 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.840 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:22.869 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:22.872 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:22.873 [INFO] [sway/commands.c:287] Handling command 'border normal 0'
+00:00:22.873 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226060e0 committing with 1 instructions
+00:00:22.873 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226060e0
+00:00:22.903 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:23.130 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:23.151 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:23.188 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:23.188 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:23.188 [INFO] [sway/commands.c:287] Handling command 'move container to workspace floating-proof'
+00:00:23.189 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace '1'
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:23.189 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:23.189 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607ab0 committing with 8 instructions
+00:00:23.189 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607ab0
+00:00:23.206 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:23.420 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:23.420 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:23.421 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:23.421 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607cb0 committing with 4 instructions
+00:00:23.421 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607cb0
+00:00:23.468 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:23.678 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:23.679 [INFO] [sway/commands.c:287] Handling command 'layout stacking'
+00:00:23.680 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:23.680 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:23.680 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:23.680 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607c70 committing with 4 instructions
+00:00:23.681 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607c70
+00:00:23.702 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:23.909 [DEBUG] [sway/ipc-server.c:196] New client: fd 33
+00:00:23.912 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-b
+00:00:23.913 [INFO] [sway/commands.c:287] Handling command 'move container to workspace floating-proof'
+00:00:23.913 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace 'holding-proof'
+00:00:23.913 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722606560 committing with 5 instructions
+00:00:23.939 [INFO] [sway/ipc-server.c:570] IPC Client 33 disconnected
+00:00:24.137 [DEBUG] [sway/desktop/transaction.c:1153] Transaction 0x7f5722606560 timed out (1 waiting)
+00:00:24.137 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722606560
+00:00:24.220 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:24.220 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-b
+00:00:24.221 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:24.221 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:24.221 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:24.221 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb48 horizontally
+00:00:24.221 [INFO] [sway/commands.c:287] Handling command 'border normal 2'
+00:00:24.222 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607ab0 committing with 5 instructions
+00:00:24.265 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:24.416 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722607ab0 is ready
+00:00:24.416 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607ab0
+00:00:24.430 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f57226060a0 committing with 1 instructions
+00:00:24.430 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f57226060a0
+00:00:24.452 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.453 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:24.480 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:24.504 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.535 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:24.555 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.557 [INFO] [sway/commands.c:287] Handling command 'titlebar_position top'
+00:00:24.557 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:24.557 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:24.557 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:24.557 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e74ab0 committing with 5 instructions
+00:00:24.559 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e74ab0
+00:00:24.596 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:24.808 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.826 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:24.871 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.886 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:24.920 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:24.920 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:24.920 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:24.920 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:24.920 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:24.920 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607870 committing with 5 instructions
+00:00:24.929 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607870
+00:00:24.994 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:25.215 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:25.216 [INFO] [sway/commands.c:287] Handling command 'reload'
+00:00:25.355 [DEBUG] [sway/config.c:512] Performing configuration file validation
+00:00:25.355 [DEBUG] [sway/config.c:518] xwayland will remain disabled
+00:00:25.355 [DEBUG] [sway/config.c:523] primary_selection will remain enabled
+00:00:25.355 [INFO] [sway/config.c:460] Loading config from /tmp/spaceghost-screen-corners/titlebar-final/sway.conf
+00:00:25.356 [DEBUG] [sway/config.c:819] Read line 1: xwayland disable
+00:00:25.356 [INFO] [sway/commands.c:407] Config command: xwayland disable
+00:00:25.356 [INFO] [sway/commands.c:430] After replacement: xwayland disable
+00:00:25.356 [DEBUG] [sway/config.c:819] Read line 2: output HEADLESS-1 mode 1440x900
+00:00:25.356 [INFO] [sway/commands.c:407] Config command: output HEADLESS-1 mode 1440x900
+00:00:25.356 [INFO] [sway/commands.c:430] After replacement: output HEADLESS-1 mode 1440x900
+00:00:25.356 [DEBUG] [sway/commands.c:462] Subcommand: mode 1440x900
+00:00:25.356 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (1440x900@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:25.356 [DEBUG] [sway/config.c:819] Read line 3: output * bg #1d2021 solid_color
+00:00:25.356 [INFO] [sway/commands.c:407] Config command: output * bg #1d2021 solid_color
+00:00:25.356 [INFO] [sway/commands.c:430] After replacement: output * bg #1d2021 solid_color
+00:00:25.356 [DEBUG] [sway/commands.c:462] Subcommand: bg #1d2021 solid_color
+00:00:25.356 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg #1d2021 solid_color) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:25.356 [DEBUG] [sway/config.c:819] Read line 4: seat seat0 fallback true
+00:00:25.356 [INFO] [sway/commands.c:407] Config command: seat seat0 fallback true
+00:00:25.356 [INFO] [sway/commands.c:430] After replacement: seat seat0 fallback true
+00:00:25.356 [DEBUG] [sway/commands.c:462] Subcommand: fallback true
+00:00:25.356 [DEBUG] [sway/config/seat.c:65] Adding non-wildcard seat config
+00:00:25.356 [DEBUG] [sway/config/seat.c:82] Config stored for seat seat0
+00:00:25.356 [DEBUG] [sway/config.c:819] Read line 5: focus_follows_mouse no
+00:00:25.356 [INFO] [sway/commands.c:407] Config command: focus_follows_mouse no
+00:00:25.356 [INFO] [sway/commands.c:430] After replacement: focus_follows_mouse no
+00:00:25.357 [DEBUG] [sway/config.c:819] Read line 6: mouse_warping none
+00:00:25.357 [INFO] [sway/commands.c:407] Config command: mouse_warping none
+00:00:25.357 [INFO] [sway/commands.c:430] After replacement: mouse_warping none
+00:00:25.357 [DEBUG] [sway/config.c:819] Read line 7: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.357 [INFO] [sway/commands.c:407] Config command: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.357 [INFO] [sway/commands.c:430] After replacement: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.413 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.413 [DEBUG] [sway/config.c:819] Read line 1: # Gruvbox Dark window chrome; keep session commands and shortcuts in sway/config.
+00:00:25.413 [DEBUG] [sway/config.c:819] Read line 2: # Tiled windows keep their clean edges; floating, stacked and tabbed views get titles.
+00:00:25.413 [DEBUG] [sway/config.c:819] Read line 3: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.413 [INFO] [sway/commands.c:407] Config command: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.413 [INFO] [sway/commands.c:430] After replacement: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.413 [DEBUG] [sway/commands.c:462] Subcommand: xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.413 [DEBUG] [sway/config/seat.c:45] Merging seat * config on seat0
+00:00:25.413 [DEBUG] [sway/config/seat.c:78] Adding seat * config
+00:00:25.413 [DEBUG] [sway/config/seat.c:82] Config stored for seat *
+00:00:25.413 [DEBUG] [sway/config.c:819] Read line 4: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.413 [INFO] [sway/commands.c:407] Config command: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.413 [INFO] [sway/commands.c:430] After replacement: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.414 [DEBUG] [sway/config.c:819] Read line 5: default_border pixel 0
+00:00:25.414 [INFO] [sway/commands.c:407] Config command: default_border pixel 0
+00:00:25.414 [INFO] [sway/commands.c:430] After replacement: default_border pixel 0
+00:00:25.414 [DEBUG] [sway/config.c:819] Read line 6: default_floating_border normal 0
+00:00:25.414 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 0
+00:00:25.414 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 0
+00:00:25.414 [DEBUG] [sway/config.c:819] Read line 7: title_align center
+00:00:25.414 [INFO] [sway/commands.c:407] Config command: title_align center
+00:00:25.414 [INFO] [sway/commands.c:430] After replacement: title_align center
+00:00:25.436 [DEBUG] [sway/config.c:819] Read line 8: titlebar_padding 8 1
+00:00:25.436 [INFO] [sway/commands.c:407] Config command: titlebar_padding 8 1
+00:00:25.436 [INFO] [sway/commands.c:430] After replacement: titlebar_padding 8 1
+00:00:25.436 [DEBUG] [sway/config.c:819] Read line 9: titlebar_border_thickness 0
+00:00:25.436 [INFO] [sway/commands.c:407] Config command: titlebar_border_thickness 0
+00:00:25.436 [INFO] [sway/commands.c:430] After replacement: titlebar_border_thickness 0
+00:00:25.436 [DEBUG] [sway/config.c:819] Read line 10: 
+00:00:25.436 [DEBUG] [sway/config.c:819] Read line 11: # Class                border  title bg text    indicator child border
+00:00:25.436 [DEBUG] [sway/config.c:819] Read line 12: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.436 [INFO] [sway/commands.c:407] Config command: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.436 [INFO] [sway/commands.c:430] After replacement: client.focused #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.441 [DEBUG] [sway/config.c:819] Read line 13: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.441 [INFO] [sway/commands.c:407] Config command: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.441 [INFO] [sway/commands.c:430] After replacement: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.441 [DEBUG] [sway/config.c:819] Read line 14: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.441 [INFO] [sway/commands.c:407] Config command: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.441 [INFO] [sway/commands.c:430] After replacement: client.unfocused #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.463 [DEBUG] [sway/config.c:819] Read line 15: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:25.463 [INFO] [sway/commands.c:407] Config command: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:25.463 [INFO] [sway/commands.c:430] After replacement: client.urgent #282828 #282828 #fb4934 #282828 #282828
+00:00:25.463 [DEBUG] [sway/config.c:819] Read line 16: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:25.463 [INFO] [sway/commands.c:407] Config command: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:25.463 [INFO] [sway/commands.c:430] After replacement: client.placeholder #282828 #282828 #bdae93 #282828 #282828
+00:00:25.463 [INFO] [sway/commands/client.c:80] Warning: client.placeholder is ignored by sway
+00:00:25.463 [DEBUG] [sway/config.c:819] Read line 8: bindsym --release button2 floating toggle
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: bindsym --release button2 floating toggle
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: bindsym --release button2 floating toggle
+00:00:25.464 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound button2 to command `floating toggle` for device '*'
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 9: default_border normal 2
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: default_border normal 2
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: default_border normal 2
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 10: default_floating_border normal 2
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 2
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 2
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 11: gaps inner 0
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: gaps inner 0
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: gaps inner 0
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 12: gaps outer 0
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: gaps outer 0
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: gaps outer 0
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 13: corner_radius 0
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: corner_radius 0
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: corner_radius 0
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 14: shadows disable
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: shadows disable
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: shadows disable
+00:00:25.464 [DEBUG] [sway/config.c:819] Read line 15: blur disable
+00:00:25.464 [INFO] [sway/commands.c:407] Config command: blur disable
+00:00:25.464 [INFO] [sway/commands.c:430] After replacement: blur disable
+00:00:25.465 [DEBUG] [sway/config.c:819] Read line 16: animation_duration_ms 0
+00:00:25.465 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 0
+00:00:25.465 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 0
+00:00:25.465 [DEBUG] [sway/config.c:819] Read line 17: 
+00:00:25.465 [DEBUG] [sway/config.c:819] Read line 18: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.465 [INFO] [sway/commands.c:407] Config command: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.465 [INFO] [sway/commands.c:430] After replacement: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.521 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.521 [DEBUG] [sway/config.c:819] Read line 1: # SwayFX 0.6 only. Include after the shared Sway configuration.
+00:00:25.521 [DEBUG] [sway/config.c:819] Read line 2: # Warm charcoal glass; compact corners keep floating titlebars proportional.
+00:00:25.521 [DEBUG] [sway/config.c:819] Read line 3: corner_radius 6
+00:00:25.521 [INFO] [sway/commands.c:407] Config command: corner_radius 6
+00:00:25.521 [INFO] [sway/commands.c:430] After replacement: corner_radius 6
+00:00:25.521 [DEBUG] [sway/config.c:819] Read line 4: smart_corner_radius enable
+00:00:25.521 [INFO] [sway/commands.c:407] Config command: smart_corner_radius enable
+00:00:25.522 [INFO] [sway/commands.c:430] After replacement: smart_corner_radius enable
+00:00:25.522 [DEBUG] [sway/config.c:819] Read line 5: blur enable
+00:00:25.522 [INFO] [sway/commands.c:407] Config command: blur enable
+00:00:25.522 [INFO] [sway/commands.c:430] After replacement: blur enable
+00:00:25.522 [DEBUG] [sway/config.c:819] Read line 6: blur_xray disable
+00:00:25.522 [INFO] [sway/commands.c:407] Config command: blur_xray disable
+00:00:25.522 [INFO] [sway/commands.c:430] After replacement: blur_xray disable
+00:00:25.522 [DEBUG] [sway/config.c:819] Read line 7: blur_passes 2
+00:00:25.523 [INFO] [sway/commands.c:407] Config command: blur_passes 2
+00:00:25.523 [INFO] [sway/commands.c:430] After replacement: blur_passes 2
+00:00:25.523 [DEBUG] [sway/config.c:819] Read line 8: blur_radius 4
+00:00:25.523 [INFO] [sway/commands.c:407] Config command: blur_radius 4
+00:00:25.523 [INFO] [sway/commands.c:430] After replacement: blur_radius 4
+00:00:25.524 [DEBUG] [sway/config.c:819] Read line 9: blur_noise 0.018
+00:00:25.524 [INFO] [sway/commands.c:407] Config command: blur_noise 0.018
+00:00:25.524 [INFO] [sway/commands.c:430] After replacement: blur_noise 0.018
+00:00:25.524 [DEBUG] [sway/config.c:819] Read line 10: blur_brightness 0.95
+00:00:25.530 [INFO] [sway/commands.c:407] Config command: blur_brightness 0.95
+00:00:25.530 [INFO] [sway/commands.c:430] After replacement: blur_brightness 0.95
+00:00:25.531 [DEBUG] [sway/config.c:819] Read line 11: blur_contrast 1.03
+00:00:25.531 [INFO] [sway/commands.c:407] Config command: blur_contrast 1.03
+00:00:25.531 [INFO] [sway/commands.c:430] After replacement: blur_contrast 1.03
+00:00:25.531 [DEBUG] [sway/config.c:819] Read line 12: blur_saturation 1.00
+00:00:25.531 [INFO] [sway/commands.c:407] Config command: blur_saturation 1.00
+00:00:25.532 [INFO] [sway/commands.c:430] After replacement: blur_saturation 1.00
+00:00:25.532 [DEBUG] [sway/config.c:819] Read line 13: shadows enable
+00:00:25.532 [INFO] [sway/commands.c:407] Config command: shadows enable
+00:00:25.532 [INFO] [sway/commands.c:430] After replacement: shadows enable
+00:00:25.532 [DEBUG] [sway/config.c:819] Read line 14: shadows_on_csd enable
+00:00:25.532 [INFO] [sway/commands.c:407] Config command: shadows_on_csd enable
+00:00:25.532 [INFO] [sway/commands.c:430] After replacement: shadows_on_csd enable
+00:00:25.532 [DEBUG] [sway/config.c:819] Read line 15: shadow_blur_radius 24
+00:00:25.532 [INFO] [sway/commands.c:407] Config command: shadow_blur_radius 24
+00:00:25.532 [INFO] [sway/commands.c:430] After replacement: shadow_blur_radius 24
+00:00:25.532 [DEBUG] [sway/config.c:819] Read line 16: shadow_color #1d2021c0
+00:00:25.532 [INFO] [sway/commands.c:407] Config command: shadow_color #1d2021c0
+00:00:25.532 [INFO] [sway/commands.c:430] After replacement: shadow_color #1d2021c0
+00:00:25.533 [DEBUG] [sway/config.c:819] Read line 17: shadow_inactive_color #1d202180
+00:00:25.533 [INFO] [sway/commands.c:407] Config command: shadow_inactive_color #1d202180
+00:00:25.533 [INFO] [sway/commands.c:430] After replacement: shadow_inactive_color #1d202180
+00:00:25.533 [DEBUG] [sway/config.c:819] Read line 18: shadow_offset 0 6
+00:00:25.533 [INFO] [sway/commands.c:407] Config command: shadow_offset 0 6
+00:00:25.533 [INFO] [sway/commands.c:430] After replacement: shadow_offset 0 6
+00:00:25.533 [DEBUG] [sway/config.c:819] Read line 19: default_dim_inactive 0.03
+00:00:25.533 [INFO] [sway/commands.c:407] Config command: default_dim_inactive 0.03
+00:00:25.533 [INFO] [sway/commands.c:430] After replacement: default_dim_inactive 0.03
+00:00:25.533 [DEBUG] [sway/config.c:819] Read line 20: dim_inactive_colors.unfocused #282828ff
+00:00:25.533 [INFO] [sway/commands.c:407] Config command: dim_inactive_colors.unfocused #282828ff
+00:00:25.536 [INFO] [sway/commands.c:430] After replacement: dim_inactive_colors.unfocused #282828ff
+00:00:25.536 [DEBUG] [sway/config.c:819] Read line 21: titlebar_separator disable
+00:00:25.536 [INFO] [sway/commands.c:407] Config command: titlebar_separator disable
+00:00:25.536 [INFO] [sway/commands.c:430] After replacement: titlebar_separator disable
+00:00:25.536 [DEBUG] [sway/config.c:819] Read line 22: animation_duration_ms 140
+00:00:25.536 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 140
+00:00:25.536 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 140
+00:00:25.536 [DEBUG] [sway/config.c:819] Read line 23: 
+00:00:25.537 [DEBUG] [sway/config.c:819] Read line 24: layer_effects "waybar" {
+00:00:25.537 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "waybar"'
+00:00:25.537 [DEBUG] [sway/config.c:819] Read line 25:     blur enable
+00:00:25.537 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur enable
+00:00:25.537 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur enable
+00:00:25.537 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:25.537 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur enable' added
+00:00:25.537 [DEBUG] [sway/config.c:819] Read line 26:     blur_xray enable
+00:00:25.537 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur_xray enable
+00:00:25.537 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur_xray enable
+00:00:25.537 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:25.537 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:25.537 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_xray enable' added
+00:00:25.537 [DEBUG] [sway/config.c:819] Read line 27:     blur_ignore_transparent enable
+00:00:25.537 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur_ignore_transparent enable
+00:00:25.537 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur_ignore_transparent enable
+00:00:25.537 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_xray enable'. Replacing with: 'blur_ignore_transparent enable'
+00:00:25.537 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_ignore_transparent enable'
+00:00:25.537 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_ignore_transparent enable' added
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 28:     shadows enable
+00:00:25.538 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" shadows enable
+00:00:25.538 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" shadows enable
+00:00:25.538 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_ignore_transparent enable'. Replacing with: 'shadows enable'
+00:00:25.538 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:25.538 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'shadows enable' added
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 29:     corner_radius 0
+00:00:25.538 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" corner_radius 0
+00:00:25.538 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" corner_radius 0
+00:00:25.538 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'shadows enable'. Replacing with: 'corner_radius 0'
+00:00:25.538 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.538 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'corner_radius 0' added
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 30: }
+00:00:25.538 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "waybar"'
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 31: layer_effects "swaync-control-center" {
+00:00:25.538 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "swaync-control-center"'
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 32:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 33:     blur disable
+00:00:25.538 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" blur disable
+00:00:25.538 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" blur disable
+00:00:25.538 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:25.538 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur disable' added
+00:00:25.538 [DEBUG] [sway/config.c:819] Read line 34:     blur_xray disable
+00:00:25.538 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" blur_xray disable
+00:00:25.539 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" blur_xray disable
+00:00:25.539 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:25.539 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:25.539 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur_xray disable' added
+00:00:25.539 [DEBUG] [sway/config.c:819] Read line 35:     shadows disable
+00:00:25.539 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" shadows disable
+00:00:25.539 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" shadows disable
+00:00:25.539 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:25.539 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:25.539 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'shadows disable' added
+00:00:25.539 [DEBUG] [sway/config.c:819] Read line 36:     corner_radius 0
+00:00:25.539 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" corner_radius 0
+00:00:25.539 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" corner_radius 0
+00:00:25.543 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:25.543 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.543 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'corner_radius 0' added
+00:00:25.543 [DEBUG] [sway/config.c:819] Read line 37: }
+00:00:25.543 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "swaync-control-center"'
+00:00:25.543 [DEBUG] [sway/config.c:819] Read line 38: layer_effects "swaync-notification-window" {
+00:00:25.543 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "swaync-notification-window"'
+00:00:25.543 [DEBUG] [sway/config.c:819] Read line 39:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:25.543 [DEBUG] [sway/config.c:819] Read line 40:     blur disable
+00:00:25.544 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" blur disable
+00:00:25.544 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" blur disable
+00:00:25.544 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:25.544 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur disable' added
+00:00:25.544 [DEBUG] [sway/config.c:819] Read line 41:     blur_xray disable
+00:00:25.544 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" blur_xray disable
+00:00:25.544 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" blur_xray disable
+00:00:25.544 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:25.544 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:25.544 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur_xray disable' added
+00:00:25.544 [DEBUG] [sway/config.c:819] Read line 42:     shadows disable
+00:00:25.544 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" shadows disable
+00:00:25.544 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" shadows disable
+00:00:25.544 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:25.544 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:25.544 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'shadows disable' added
+00:00:25.544 [DEBUG] [sway/config.c:819] Read line 43:     corner_radius 0
+00:00:25.544 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" corner_radius 0
+00:00:25.544 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" corner_radius 0
+00:00:25.544 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:25.544 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.544 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'corner_radius 0' added
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 44: }
+00:00:25.545 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "swaync-notification-window"'
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 45: layer_effects "launcher" {
+00:00:25.545 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "launcher"'
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 46:     blur enable
+00:00:25.545 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" blur enable
+00:00:25.545 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" blur enable
+00:00:25.545 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:25.545 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur enable' added
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 47:     blur_xray enable
+00:00:25.545 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" blur_xray enable
+00:00:25.545 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" blur_xray enable
+00:00:25.545 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:25.545 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:25.545 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur_xray enable' added
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 48:     shadows enable
+00:00:25.545 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" shadows enable
+00:00:25.545 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" shadows enable
+00:00:25.545 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur_xray enable'. Replacing with: 'shadows enable'
+00:00:25.545 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:25.545 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'shadows enable' added
+00:00:25.545 [DEBUG] [sway/config.c:819] Read line 49:     corner_radius 12
+00:00:25.545 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" corner_radius 12
+00:00:25.545 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" corner_radius 12
+00:00:25.546 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'shadows enable'. Replacing with: 'corner_radius 12'
+00:00:25.546 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 12'
+00:00:25.546 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'corner_radius 12' added
+00:00:25.546 [DEBUG] [sway/config.c:819] Read line 50: }
+00:00:25.546 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "launcher"'
+00:00:25.546 [DEBUG] [sway/config.c:819] Read line 51: 
+00:00:25.546 [DEBUG] [sway/config.c:819] Read line 52: # GTK changes the strip corners for fullscreen and floating windows.
+00:00:25.546 [DEBUG] [sway/config.c:819] Read line 53: layer_effects "oldbook-decoration" {
+00:00:25.546 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "oldbook-decoration"'
+00:00:25.546 [DEBUG] [sway/config.c:819] Read line 54:     corner_radius 0
+00:00:25.546 [INFO] [sway/commands.c:407] Config command: layer_effects "oldbook-decoration" corner_radius 0
+00:00:25.546 [INFO] [sway/commands.c:430] After replacement: layer_effects "oldbook-decoration" corner_radius 0
+00:00:25.546 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.550 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'oldbook-decoration' 'corner_radius 0' added
+00:00:25.550 [DEBUG] [sway/config.c:819] Read line 55: }
+00:00:25.550 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "oldbook-decoration"'
+00:00:25.550 [DEBUG] [sway/config.c:819] Read line 19: titlebar_position bottom
+00:00:25.550 [INFO] [sway/commands.c:407] Config command: titlebar_position bottom
+00:00:25.550 [INFO] [sway/commands.c:430] After replacement: titlebar_position bottom
+00:00:25.550 [DEBUG] [sway/config.c:819] Read line 20: default_border normal 0
+00:00:25.551 [INFO] [sway/commands.c:407] Config command: default_border normal 0
+00:00:25.551 [INFO] [sway/commands.c:430] After replacement: default_border normal 0
+00:00:25.551 [DEBUG] [sway/config.c:819] Read line 21: default_floating_border normal 0
+00:00:25.551 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 0
+00:00:25.551 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 0
+00:00:25.661 [DEBUG] [sway/config.c:512] Performing configuration file reload
+00:00:25.661 [DEBUG] [sway/config.c:518] xwayland will remain disabled
+00:00:25.661 [DEBUG] [sway/config.c:523] primary_selection will remain enabled
+00:00:25.666 [DEBUG] [sway/input/seat.c:645] Resetting output mapping for input device 0:0:wlr_virtual_pointer_v1
+00:00:25.666 [INFO] [sway/config.c:460] Loading config from /tmp/spaceghost-screen-corners/titlebar-final/sway.conf
+00:00:25.666 [DEBUG] [sway/config.c:819] Read line 1: xwayland disable
+00:00:25.666 [INFO] [sway/commands.c:407] Config command: xwayland disable
+00:00:25.666 [INFO] [sway/commands.c:430] After replacement: xwayland disable
+00:00:25.666 [DEBUG] [sway/config.c:819] Read line 2: output HEADLESS-1 mode 1440x900
+00:00:25.666 [INFO] [sway/commands.c:407] Config command: output HEADLESS-1 mode 1440x900
+00:00:25.667 [INFO] [sway/commands.c:430] After replacement: output HEADLESS-1 mode 1440x900
+00:00:25.667 [DEBUG] [sway/commands.c:462] Subcommand: mode 1440x900
+00:00:25.667 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (1440x900@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:25.667 [DEBUG] [sway/config.c:819] Read line 3: output * bg #1d2021 solid_color
+00:00:25.667 [INFO] [sway/commands.c:407] Config command: output * bg #1d2021 solid_color
+00:00:25.667 [INFO] [sway/commands.c:430] After replacement: output * bg #1d2021 solid_color
+00:00:25.667 [DEBUG] [sway/commands.c:462] Subcommand: bg #1d2021 solid_color
+00:00:25.667 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg #1d2021 solid_color) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:25.667 [DEBUG] [sway/config.c:819] Read line 4: seat seat0 fallback true
+00:00:25.667 [INFO] [sway/commands.c:407] Config command: seat seat0 fallback true
+00:00:25.667 [INFO] [sway/commands.c:430] After replacement: seat seat0 fallback true
+00:00:25.667 [DEBUG] [sway/commands.c:462] Subcommand: fallback true
+00:00:25.667 [DEBUG] [sway/config/seat.c:65] Adding non-wildcard seat config
+00:00:25.667 [DEBUG] [sway/config/seat.c:82] Config stored for seat seat0
+00:00:25.667 [DEBUG] [sway/config.c:819] Read line 5: focus_follows_mouse no
+00:00:25.667 [INFO] [sway/commands.c:407] Config command: focus_follows_mouse no
+00:00:25.667 [INFO] [sway/commands.c:430] After replacement: focus_follows_mouse no
+00:00:25.667 [DEBUG] [sway/config.c:819] Read line 6: mouse_warping none
+00:00:25.667 [INFO] [sway/commands.c:407] Config command: mouse_warping none
+00:00:25.667 [INFO] [sway/commands.c:430] After replacement: mouse_warping none
+00:00:25.667 [DEBUG] [sway/config.c:819] Read line 7: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.668 [INFO] [sway/commands.c:407] Config command: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.668 [INFO] [sway/commands.c:430] After replacement: include /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.730 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/desktop/.config/sway/theme.conf
+00:00:25.730 [DEBUG] [sway/config.c:819] Read line 1: # Gruvbox Dark window chrome; keep session commands and shortcuts in sway/config.
+00:00:25.730 [DEBUG] [sway/config.c:819] Read line 2: # Tiled windows keep their clean edges; floating, stacked and tabbed views get titles.
+00:00:25.730 [DEBUG] [sway/config.c:819] Read line 3: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.730 [INFO] [sway/commands.c:407] Config command: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.730 [INFO] [sway/commands.c:430] After replacement: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.730 [DEBUG] [sway/commands.c:462] Subcommand: xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:25.730 [DEBUG] [sway/config/seat.c:45] Merging seat * config on seat0
+00:00:25.730 [DEBUG] [sway/config/seat.c:78] Adding seat * config
+00:00:25.730 [DEBUG] [sway/config/seat.c:82] Config stored for seat *
+00:00:25.731 [DEBUG] [sway/config.c:819] Read line 4: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.731 [INFO] [sway/commands.c:407] Config command: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.731 [INFO] [sway/commands.c:430] After replacement: font pango:JetBrainsMono Nerd Font 9.5
+00:00:25.731 [DEBUG] [sway/config.c:819] Read line 5: default_border pixel 0
+00:00:25.731 [INFO] [sway/commands.c:407] Config command: default_border pixel 0
+00:00:25.731 [INFO] [sway/commands.c:430] After replacement: default_border pixel 0
+00:00:25.731 [DEBUG] [sway/config.c:819] Read line 6: default_floating_border normal 0
+00:00:25.731 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 0
+00:00:25.731 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 0
+00:00:25.731 [DEBUG] [sway/config.c:819] Read line 7: title_align center
+00:00:25.731 [INFO] [sway/commands.c:407] Config command: title_align center
+00:00:25.731 [INFO] [sway/commands.c:430] After replacement: title_align center
+00:00:25.754 [DEBUG] [sway/config.c:819] Read line 8: titlebar_padding 8 1
+00:00:25.755 [INFO] [sway/commands.c:407] Config command: titlebar_padding 8 1
+00:00:25.755 [INFO] [sway/commands.c:430] After replacement: titlebar_padding 8 1
+00:00:25.755 [DEBUG] [sway/config.c:819] Read line 9: titlebar_border_thickness 0
+00:00:25.755 [INFO] [sway/commands.c:407] Config command: titlebar_border_thickness 0
+00:00:25.755 [INFO] [sway/commands.c:430] After replacement: titlebar_border_thickness 0
+00:00:25.755 [DEBUG] [sway/config.c:819] Read line 10: 
+00:00:25.755 [DEBUG] [sway/config.c:819] Read line 11: # Class                border  title bg text    indicator child border
+00:00:25.755 [DEBUG] [sway/config.c:819] Read line 12: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.755 [INFO] [sway/commands.c:407] Config command: client.focused          #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.755 [INFO] [sway/commands.c:430] After replacement: client.focused #3c3836 #3c3836 #fabd2f #fabd2f #282828
+00:00:25.759 [DEBUG] [sway/config.c:819] Read line 13: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.759 [INFO] [sway/commands.c:407] Config command: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.759 [INFO] [sway/commands.c:430] After replacement: client.focused_inactive #282828 #282828 #bdae93 #282828 #282828
+00:00:25.759 [DEBUG] [sway/config.c:819] Read line 14: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.759 [INFO] [sway/commands.c:407] Config command: client.unfocused        #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.759 [INFO] [sway/commands.c:430] After replacement: client.unfocused #1d2021 #1d2021 #928374 #1d2021 #1d2021
+00:00:25.776 [DEBUG] [sway/config.c:819] Read line 15: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:25.776 [INFO] [sway/commands.c:407] Config command: client.urgent           #282828 #282828 #fb4934 #282828 #282828
+00:00:25.776 [INFO] [sway/commands.c:430] After replacement: client.urgent #282828 #282828 #fb4934 #282828 #282828
+00:00:25.776 [DEBUG] [sway/config.c:819] Read line 16: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:25.776 [INFO] [sway/commands.c:407] Config command: client.placeholder      #282828 #282828 #bdae93 #282828 #282828
+00:00:25.776 [INFO] [sway/commands.c:430] After replacement: client.placeholder #282828 #282828 #bdae93 #282828 #282828
+00:00:25.776 [INFO] [sway/commands/client.c:80] Warning: client.placeholder is ignored by sway
+00:00:25.776 [DEBUG] [sway/config.c:819] Read line 8: bindsym --release button2 floating toggle
+00:00:25.776 [INFO] [sway/commands.c:407] Config command: bindsym --release button2 floating toggle
+00:00:25.776 [INFO] [sway/commands.c:430] After replacement: bindsym --release button2 floating toggle
+00:00:25.776 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound button2 to command `floating toggle` for device '*'
+00:00:25.776 [DEBUG] [sway/config.c:819] Read line 9: default_border normal 2
+00:00:25.776 [INFO] [sway/commands.c:407] Config command: default_border normal 2
+00:00:25.777 [INFO] [sway/commands.c:430] After replacement: default_border normal 2
+00:00:25.777 [DEBUG] [sway/config.c:819] Read line 10: default_floating_border normal 2
+00:00:25.777 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 2
+00:00:25.777 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 2
+00:00:25.777 [DEBUG] [sway/config.c:819] Read line 11: gaps inner 0
+00:00:25.777 [INFO] [sway/commands.c:407] Config command: gaps inner 0
+00:00:25.777 [INFO] [sway/commands.c:430] After replacement: gaps inner 0
+00:00:25.777 [DEBUG] [sway/config.c:819] Read line 12: gaps outer 0
+00:00:25.777 [INFO] [sway/commands.c:407] Config command: gaps outer 0
+00:00:25.777 [INFO] [sway/commands.c:430] After replacement: gaps outer 0
+00:00:25.777 [DEBUG] [sway/config.c:819] Read line 13: corner_radius 0
+00:00:25.786 [INFO] [sway/commands.c:407] Config command: corner_radius 0
+00:00:25.786 [INFO] [sway/commands.c:430] After replacement: corner_radius 0
+00:00:25.786 [DEBUG] [sway/config.c:819] Read line 14: shadows disable
+00:00:25.786 [INFO] [sway/commands.c:407] Config command: shadows disable
+00:00:25.786 [INFO] [sway/commands.c:430] After replacement: shadows disable
+00:00:25.786 [DEBUG] [sway/config.c:819] Read line 15: blur disable
+00:00:25.786 [INFO] [sway/commands.c:407] Config command: blur disable
+00:00:25.786 [INFO] [sway/commands.c:430] After replacement: blur disable
+00:00:25.787 [DEBUG] [sway/config.c:819] Read line 16: animation_duration_ms 0
+00:00:25.787 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 0
+00:00:25.787 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 0
+00:00:25.787 [DEBUG] [sway/config.c:819] Read line 17: 
+00:00:25.787 [DEBUG] [sway/config.c:819] Read line 18: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.787 [INFO] [sway/commands.c:407] Config command: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.787 [INFO] [sway/commands.c:430] After replacement: include /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.823 [INFO] [sway/config.c:460] Loading config from /home/jack/.files/alpine/desktop/.config/swayfx/effects.conf
+00:00:25.824 [DEBUG] [sway/config.c:819] Read line 1: # SwayFX 0.6 only. Include after the shared Sway configuration.
+00:00:25.824 [DEBUG] [sway/config.c:819] Read line 2: # Warm charcoal glass; compact corners keep floating titlebars proportional.
+00:00:25.824 [DEBUG] [sway/config.c:819] Read line 3: corner_radius 6
+00:00:25.824 [INFO] [sway/commands.c:407] Config command: corner_radius 6
+00:00:25.824 [INFO] [sway/commands.c:430] After replacement: corner_radius 6
+00:00:25.824 [DEBUG] [sway/config.c:819] Read line 4: smart_corner_radius enable
+00:00:25.824 [INFO] [sway/commands.c:407] Config command: smart_corner_radius enable
+00:00:25.824 [INFO] [sway/commands.c:430] After replacement: smart_corner_radius enable
+00:00:25.824 [DEBUG] [sway/config.c:819] Read line 5: blur enable
+00:00:25.824 [INFO] [sway/commands.c:407] Config command: blur enable
+00:00:25.824 [INFO] [sway/commands.c:430] After replacement: blur enable
+00:00:25.825 [DEBUG] [sway/config.c:819] Read line 6: blur_xray disable
+00:00:25.825 [INFO] [sway/commands.c:407] Config command: blur_xray disable
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_xray disable
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 7: blur_passes 2
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_passes 2
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_passes 2
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 8: blur_radius 4
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_radius 4
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_radius 4
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 9: blur_noise 0.018
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_noise 0.018
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_noise 0.018
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 10: blur_brightness 0.95
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_brightness 0.95
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_brightness 0.95
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 11: blur_contrast 1.03
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_contrast 1.03
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_contrast 1.03
+00:00:25.826 [DEBUG] [sway/config.c:819] Read line 12: blur_saturation 1.00
+00:00:25.826 [INFO] [sway/commands.c:407] Config command: blur_saturation 1.00
+00:00:25.826 [INFO] [sway/commands.c:430] After replacement: blur_saturation 1.00
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 13: shadows enable
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadows enable
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadows enable
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 14: shadows_on_csd enable
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadows_on_csd enable
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadows_on_csd enable
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 15: shadow_blur_radius 24
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadow_blur_radius 24
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadow_blur_radius 24
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 16: shadow_color #1d2021c0
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadow_color #1d2021c0
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadow_color #1d2021c0
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 17: shadow_inactive_color #1d202180
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadow_inactive_color #1d202180
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadow_inactive_color #1d202180
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 18: shadow_offset 0 6
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: shadow_offset 0 6
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: shadow_offset 0 6
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 19: default_dim_inactive 0.03
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: default_dim_inactive 0.03
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: default_dim_inactive 0.03
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 20: dim_inactive_colors.unfocused #282828ff
+00:00:25.827 [INFO] [sway/commands.c:407] Config command: dim_inactive_colors.unfocused #282828ff
+00:00:25.827 [INFO] [sway/commands.c:430] After replacement: dim_inactive_colors.unfocused #282828ff
+00:00:25.827 [DEBUG] [sway/config.c:819] Read line 21: titlebar_separator disable
+00:00:25.828 [INFO] [sway/commands.c:407] Config command: titlebar_separator disable
+00:00:25.828 [INFO] [sway/commands.c:430] After replacement: titlebar_separator disable
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 22: animation_duration_ms 140
+00:00:25.828 [INFO] [sway/commands.c:407] Config command: animation_duration_ms 140
+00:00:25.828 [INFO] [sway/commands.c:430] After replacement: animation_duration_ms 140
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 23: 
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 24: layer_effects "waybar" {
+00:00:25.828 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "waybar"'
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 25:     blur enable
+00:00:25.828 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur enable
+00:00:25.828 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur enable
+00:00:25.828 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:25.828 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur enable' added
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 26:     blur_xray enable
+00:00:25.828 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur_xray enable
+00:00:25.828 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur_xray enable
+00:00:25.828 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:25.828 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:25.828 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_xray enable' added
+00:00:25.828 [DEBUG] [sway/config.c:819] Read line 27:     blur_ignore_transparent enable
+00:00:25.828 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" blur_ignore_transparent enable
+00:00:25.828 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" blur_ignore_transparent enable
+00:00:25.828 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_xray enable'. Replacing with: 'blur_ignore_transparent enable'
+00:00:25.829 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_ignore_transparent enable'
+00:00:25.829 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_ignore_transparent enable' added
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 28:     shadows enable
+00:00:25.829 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" shadows enable
+00:00:25.829 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" shadows enable
+00:00:25.829 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_ignore_transparent enable'. Replacing with: 'shadows enable'
+00:00:25.829 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:25.829 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'shadows enable' added
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 29:     corner_radius 0
+00:00:25.829 [INFO] [sway/commands.c:407] Config command: layer_effects "waybar" corner_radius 0
+00:00:25.829 [INFO] [sway/commands.c:430] After replacement: layer_effects "waybar" corner_radius 0
+00:00:25.829 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'shadows enable'. Replacing with: 'corner_radius 0'
+00:00:25.829 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.829 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'corner_radius 0' added
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 30: }
+00:00:25.829 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "waybar"'
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 31: layer_effects "swaync-control-center" {
+00:00:25.829 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "swaync-control-center"'
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 32:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 33:     blur disable
+00:00:25.829 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" blur disable
+00:00:25.829 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" blur disable
+00:00:25.829 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:25.829 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur disable' added
+00:00:25.829 [DEBUG] [sway/config.c:819] Read line 34:     blur_xray disable
+00:00:25.830 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" blur_xray disable
+00:00:25.830 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" blur_xray disable
+00:00:25.830 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:25.830 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:25.830 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur_xray disable' added
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 35:     shadows disable
+00:00:25.830 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" shadows disable
+00:00:25.830 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" shadows disable
+00:00:25.830 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:25.830 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:25.830 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'shadows disable' added
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 36:     corner_radius 0
+00:00:25.830 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-control-center" corner_radius 0
+00:00:25.830 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-control-center" corner_radius 0
+00:00:25.830 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:25.830 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.830 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'corner_radius 0' added
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 37: }
+00:00:25.830 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "swaync-control-center"'
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 38: layer_effects "swaync-notification-window" {
+00:00:25.830 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "swaync-notification-window"'
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 39:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:25.830 [DEBUG] [sway/config.c:819] Read line 40:     blur disable
+00:00:25.830 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" blur disable
+00:00:25.831 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" blur disable
+00:00:25.831 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:25.831 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur disable' added
+00:00:25.831 [DEBUG] [sway/config.c:819] Read line 41:     blur_xray disable
+00:00:25.831 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" blur_xray disable
+00:00:25.831 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" blur_xray disable
+00:00:25.831 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:25.831 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:25.831 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur_xray disable' added
+00:00:25.831 [DEBUG] [sway/config.c:819] Read line 42:     shadows disable
+00:00:25.831 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" shadows disable
+00:00:25.831 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" shadows disable
+00:00:25.831 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:25.831 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:25.831 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'shadows disable' added
+00:00:25.831 [DEBUG] [sway/config.c:819] Read line 43:     corner_radius 0
+00:00:25.831 [INFO] [sway/commands.c:407] Config command: layer_effects "swaync-notification-window" corner_radius 0
+00:00:25.831 [INFO] [sway/commands.c:430] After replacement: layer_effects "swaync-notification-window" corner_radius 0
+00:00:25.831 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:25.831 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.831 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'corner_radius 0' added
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 44: }
+00:00:25.832 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "swaync-notification-window"'
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 45: layer_effects "launcher" {
+00:00:25.832 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "launcher"'
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 46:     blur enable
+00:00:25.832 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" blur enable
+00:00:25.832 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" blur enable
+00:00:25.832 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:25.832 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur enable' added
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 47:     blur_xray enable
+00:00:25.832 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" blur_xray enable
+00:00:25.832 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" blur_xray enable
+00:00:25.832 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:25.832 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:25.832 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur_xray enable' added
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 48:     shadows enable
+00:00:25.832 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" shadows enable
+00:00:25.832 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" shadows enable
+00:00:25.832 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur_xray enable'. Replacing with: 'shadows enable'
+00:00:25.832 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:25.832 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'shadows enable' added
+00:00:25.832 [DEBUG] [sway/config.c:819] Read line 49:     corner_radius 12
+00:00:25.832 [INFO] [sway/commands.c:407] Config command: layer_effects "launcher" corner_radius 12
+00:00:25.832 [INFO] [sway/commands.c:430] After replacement: layer_effects "launcher" corner_radius 12
+00:00:25.832 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'shadows enable'. Replacing with: 'corner_radius 12'
+00:00:25.832 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 12'
+00:00:25.833 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'corner_radius 12' added
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 50: }
+00:00:25.833 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "launcher"'
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 51: 
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 52: # GTK changes the strip corners for fullscreen and floating windows.
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 53: layer_effects "oldbook-decoration" {
+00:00:25.833 [DEBUG] [sway/config.c:873] Entering block 'layer_effects "oldbook-decoration"'
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 54:     corner_radius 0
+00:00:25.833 [INFO] [sway/commands.c:407] Config command: layer_effects "oldbook-decoration" corner_radius 0
+00:00:25.833 [INFO] [sway/commands.c:430] After replacement: layer_effects "oldbook-decoration" corner_radius 0
+00:00:25.833 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:25.833 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'oldbook-decoration' 'corner_radius 0' added
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 55: }
+00:00:25.833 [DEBUG] [sway/config.c:890] Exiting block 'layer_effects "oldbook-decoration"'
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 19: titlebar_position bottom
+00:00:25.833 [INFO] [sway/commands.c:407] Config command: titlebar_position bottom
+00:00:25.833 [INFO] [sway/commands.c:430] After replacement: titlebar_position bottom
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 20: default_border normal 0
+00:00:25.833 [INFO] [sway/commands.c:407] Config command: default_border normal 0
+00:00:25.833 [INFO] [sway/commands.c:430] After replacement: default_border normal 0
+00:00:25.833 [DEBUG] [sway/config.c:819] Read line 21: default_floating_border normal 0
+00:00:25.833 [INFO] [sway/commands.c:407] Config command: default_floating_border normal 0
+00:00:25.833 [INFO] [sway/commands.c:430] After replacement: default_floating_border normal 0
+00:00:25.834 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat seat0
+00:00:25.834 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:25.834 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:25.834 [DEBUG] [sway/input/input-manager.c:637] applying seat config for seat *
+00:00:25.834 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:25.834 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:25.834 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[0] = swaybg
+00:00:25.834 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[1] = -o
+00:00:25.834 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[2] = *
+00:00:25.834 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[3] = -c
+00:00:25.834 [DEBUG] [sway/config/output.c:1292] spawn_swaybg cmd[4] = #1d2021
+00:00:25.919 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:25.919 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:25.919 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fc48 horizontally
+00:00:25.938 [DEBUG] [sway/config/output.c:1008] Committing 1 outputs
+00:00:25.938 [DEBUG] [sway/config/output.c:769] Output state for HEADLESS-1
+00:00:25.938 [DEBUG] [sway/config/output.c:771]     enabled:       yes
+00:00:25.938 [DEBUG] [sway/config/output.c:775]     render_format: XR24
+00:00:25.938 [DEBUG] [sway/config/output.c:780]     custom mode:   1440x900@0mHz
+00:00:25.938 [DEBUG] [sway/config/output.c:793]     scale:         1.000000
+00:00:25.938 [DEBUG] [sway/config/output.c:796]     subpixel:      unknown
+00:00:25.938 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:164] Preparing test commit for 1 outputs with explicit modifiers
+00:00:25.938 [DEBUG] [wlr] [types/wlr_output_swapchain_manager.c:185] Test commit for 1 outputs succeeded
+00:00:25.950 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:25.950 [DEBUG] [wlr] [render/swapchain.c:103] Allocating new swapchain buffer
+00:00:25.951 [DEBUG] [wlr] [render/allocator/gbm.c:118] Allocated 1440x900 GBM buffer with format XR24 (0x34325258), modifier INVALID (0x00FFFFFFFFFFFFFF)
+00:00:25.951 [DEBUG] [wlr] [render/fx_renderer/fx_framebuffer.c:153] Created GL FBO for buffer 1440x900
+00:00:25.956 [DEBUG] [sway/config/output.c:1071] Commit of 1 outputs succeeded
+00:00:25.956 [DEBUG] [sway/config/output.c:1086] Finalizing config for HEADLESS-1
+00:00:25.956 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:25.956 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:25.956 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fb38 horizontally
+00:00:25.956 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5742e747b0 committing with 5 instructions
+00:00:25.958 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5742e747b0
+00:00:26.000 [DEBUG] [sway/input/seat.c:695] Applying input mapping to 0:0:wlr_virtual_pointer_v1
+00:00:26.079 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+2026-09-07 22:36:08 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+00:00:26.104 [DEBUG] [wlr] [types/wlr_compositor.c:785] New wlr_surface 0x7f5743544b60 (res 0x7f5743534370)
+00:00:26.105 [DEBUG] [wlr] [types/wlr_layer_shell_v1.c:502] new layer_surface 0x7f5751afcb60 (res 0x7f57435346d0)
+00:00:26.105 [DEBUG] [sway/desktop/layer_shell.c:504] new layer surface: namespace wallpaper layer 0 anchor 0 size 0x0 margin 0,0,0,0,
+00:00:26.225 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:26.225 [INFO] [sway/commands.c:287] Handling command 'titlebar_position bottom'
+00:00:26.225 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.225 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:26.225 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8faf8 horizontally
+00:00:26.225 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c220 committing with 5 instructions
+00:00:26.227 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c220
+00:00:26.312 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:26.453 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:26.454 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-a
+00:00:26.454 [INFO] [sway/commands.c:287] Handling command 'move container to workspace holding-proof'
+00:00:26.454 [DEBUG] [sway/tree/workspace.c:185] Adding workspace holding-proof for output HEADLESS-1
+00:00:26.454 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.454 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:26.455 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:26.455 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c6a0 committing with 7 instructions
+00:00:26.456 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c6a0
+00:00:26.499 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:26.720 [DEBUG] [sway/ipc-server.c:196] New client: fd 35
+00:00:26.720 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:26.721 [INFO] [sway/commands.c:287] Handling command 'border normal 0'
+00:00:26.721 [INFO] [sway/commands.c:287] Handling command 'resize set width 890 px height 450 px'
+00:00:26.721 [INFO] [sway/commands.c:287] Handling command 'move position 80 px 130 px'
+00:00:26.721 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c560 committing with 1 instructions
+00:00:26.737 [INFO] [sway/ipc-server.c:570] IPC Client 35 disconnected
+00:00:26.811 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f572260c560 is ready
+00:00:26.811 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c560
+00:00:26.813 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c660 committing with 1 instructions
+00:00:26.814 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c660
+00:00:26.951 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:26.951 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-b
+00:00:26.952 [INFO] [sway/commands.c:287] Handling command 'move container to workspace floating-proof'
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'holding-proof' at 0.000000, 0.000000
+00:00:26.952 [DEBUG] [sway/tree/arrange.c:76] Arranging 0x7ffe2cb8fab8 horizontally
+00:00:26.952 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c0e0 committing with 5 instructions
+00:00:26.953 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c0e0
+00:00:26.959 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:27.181 [DEBUG] [sway/ipc-server.c:196] New client: fd 37
+00:00:27.181 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-b
+00:00:27.182 [INFO] [sway/commands.c:287] Handling command 'floating enable'
+00:00:27.182 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:27.182 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:27.182 [INFO] [sway/commands.c:287] Handling command 'border normal 0'
+00:00:27.182 [INFO] [sway/commands.c:287] Handling command 'resize set width 740 px height 390 px'
+00:00:27.182 [INFO] [sway/commands.c:287] Handling command 'move position 600 px 420 px'
+00:00:27.182 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f5722607a30 committing with 3 instructions
+00:00:27.192 [INFO] [sway/ipc-server.c:570] IPC Client 37 disconnected
+00:00:27.258 [DEBUG] [sway/desktop/transaction.c:1281] Transaction 0x7f5722607a30 is ready
+00:00:27.258 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f5722607a30
+00:00:27.280 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:27.281 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c620 committing with 1 instructions
+00:00:27.281 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c620
+00:00:27.419 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:27.419 [DEBUG] [sway/criteria.c:841] Found pair: app_id=titlebar-float
+00:00:27.420 [INFO] [sway/commands.c:287] Handling command 'focus'
+00:00:27.424 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c2a0 committing with 1 instructions
+00:00:27.424 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c2a0
+00:00:27.427 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:27.429 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:27.645 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:27.686 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:27.710 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:27.753 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:28.298 [DEBUG] [wlr] [types/output/render.c:142] Disabling direct scan-out on output 'HEADLESS-1' (locks: 2)
+00:00:32.869 [DEBUG] [wlr] [types/output/render.c:142] Enabling direct scan-out on output 'HEADLESS-1' (locks: 1)
+00:00:32.896 [DEBUG] [sway/ipc-server.c:196] New client: fd 38
+00:00:32.934 [INFO] [sway/ipc-server.c:570] IPC Client 38 disconnected
+00:00:32.955 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:32.955 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:32.955 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260bfa0 committing with 4 instructions
+00:00:32.956 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260bfa0
+00:00:32.991 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+00:00:33.163 [DEBUG] [sway/tree/arrange.c:274] Usable area for ws: 1440x900@0,0
+00:00:33.163 [DEBUG] [sway/tree/arrange.c:308] Arranging workspace 'floating-proof' at 0.000000, 0.000000
+00:00:33.163 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c460 committing with 2 instructions
+00:00:33.163 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c460
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+00:00:33.296 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace 'holding-proof'
+00:00:33.296 [DEBUG] [sway/desktop/transaction.c:1195] Transaction 0x7f572260c020 committing with 3 instructions
+00:00:33.296 [DEBUG] [sway/desktop/transaction.c:1090] Applying transaction 0x7f572260c020
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+00:00:33.409 [DEBUG] [sway/input/input-manager.c:208] removing device: '0:0:wlr_virtual_pointer_v1'
+00:00:33.409 [DEBUG] [sway/input/seat.c:966] removing device 0:0:wlr_virtual_pointer_v1 from seat seat0
+00:00:33.410 [DEBUG] [wlr] [types/output/cursor.c:428] Falling back to software cursor on output 'HEADLESS-1'
+00:00:33.410 [INFO] [sway/main.c:401] Shutting down sway
+00:00:33.413 [DEBUG] [sway/tree/output.c:293] Disabling output 'HEADLESS-1'
+00:00:33.413 [DEBUG] [sway/tree/workspace.c:307] Destroying workspace 'floating-proof'
+00:00:33.413 [DEBUG] [sway/tree/output.c:310] Destroying output 'HEADLESS-1'

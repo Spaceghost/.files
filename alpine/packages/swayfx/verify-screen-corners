@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+"""Verify final output masks in a private SwayFX session, never the live desktop."""
+import argparse
+import json
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+import time
+import struct
+import math
+import select
+import shlex
+
+class Image:
+    @staticmethod
+    def open(path):
+        image = Image()
+        image.size = struct.unpack("!II", path.read_bytes()[16:24])
+        image.data = subprocess.check_output(["ffmpeg", "-v", "error", "-i", str(path), "-f", "rawvideo", "-pix_fmt", "rgb24", "-"])
+        return image
+
+    def convert(self, mode):
+        return self
+
+    def getpixel(self, point):
+        x, y = point
+        offset = (y * self.size[0] + x) * 3
+        return tuple(self.data[offset:offset+3])
+
+    def corner(self):
+        return [self.getpixel((x, y)) for y in range(20) for x in range(20)]
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--binary', type=Path, required=True)
+parser.add_argument('--output', type=Path, required=True)
+args = parser.parse_args()
+binary = args.binary.resolve(strict=True)
+output = args.output.absolute()
+output.mkdir(parents=True, exist_ok=False)
+config = output / 'sway.conf'
+config.write_text('xwayland disable\noutput * mode 640x480\noutput * bg #ffffff solid_color\n')
+fixture = output / 'overlay.py'
+fixture.write_text('''import gi
+gi.require_version("Gtk", "3.0")
+gi.require_version("GtkLayerShell", "0.1")
+from gi.repository import Gtk, GtkLayerShell
+w = Gtk.Window()
+GtkLayerShell.init_for_window(w)
+GtkLayerShell.set_layer(w, GtkLayerShell.Layer.OVERLAY)
+for edge in (GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM,
+             GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT):
+    GtkLayerShell.set_anchor(w, edge, True)
+area = Gtk.DrawingArea()
+w.add(area)
+area.connect("draw", lambda widget, cr: (cr.set_source_rgb(1, 1, 1), cr.paint(), True)[-1])
+w.show_all()
+Gtk.main()
+''')
+base = Path(__file__).resolve().parent
+protocol = base / 'tests/pointer.xml'
+for mode, name in [('client-header', 'pointer.h'), ('private-code', 'pointer.c')]:
+    subprocess.run(['wayland-scanner', mode, str(protocol), str(output / name)], check=True)
+flags = shlex.split(subprocess.check_output(['pkg-config', '--cflags', '--libs', 'wayland-client'], text=True))
+subprocess.run(['cc', '-Wall', '-Wextra', '-Werror', '-I' + str(output),
+                '-o', str(output / 'pointer'), str(base / 'tests/titlebar-pointer.c'),
+                str(output / 'pointer.c'), *flags], check=True)
+with tempfile.TemporaryDirectory(prefix='screen-corners-runtime-') as runtime:
+    env = dict(os.environ, XDG_RUNTIME_DIR=runtime, WLR_BACKENDS='headless',
+               WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='gles2',
+               WLR_RENDERER_ALLOW_SOFTWARE='1', WLR_RENDER_DRM_DEVICE='/dev/dri/renderD128',
+               SPACEGHOST_SCREEN_CORNER_RADIUS='20')
+    for key in ('WAYLAND_DISPLAY', 'SWAYSOCK', 'DISPLAY'):
+        env.pop(key, None)
+    clients = []
+    evidence = []
+    with (output / 'compositor.log').open('w') as log:
+        compositor = subprocess.Popen([str(binary), '-d', '-c', str(config)],
+                                      env=env, stdout=log, stderr=log)
+        try:
+            for _ in range(100):
+                sockets = list(Path(runtime).glob('sway-ipc*.sock'))
+                displays = [p for p in Path(runtime).glob('wayland-*') if p.is_socket()]
+                if sockets and displays:
+                    env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                    break
+                if compositor.poll() is not None:
+                    raise RuntimeError('Private compositor exited; see log')
+                time.sleep(0.1)
+            else:
+                raise RuntimeError('No private compositor socket')
+
+            def ipc(command):
+                result = subprocess.run(['swaymsg', '-r', command], env=env,
+                                        text=True, capture_output=True, check=True)
+                if not all(item.get('success') for item in json.loads(result.stdout)):
+                    raise RuntimeError(result.stdout)
+
+            def capture(name, radius):
+                time.sleep(0.35)
+                path = output / (name + '.png')
+                subprocess.run(['grim', '-c', str(path)], env=env, check=True)
+                im = Image.open(path).convert('RGB')
+                width, height = im.size
+                # Exact opaque corner pixels, and untouched pixels past the arc.
+                for x, y in ((0, 0), (width-1, 0), (0, height-1), (width-1, height-1)):
+                    assert im.getpixel((x, y)) == (0, 0, 0), (name, x, y, im.getpixel((x, y)))
+                # Pixels wholly outside the circle must be black. Boundary
+                # pixels contain partial circle coverage; allow antialiasing
+                # regardless of the output's rotation or rasterization axis.
+                for row in range(radius):
+                    for column in range(radius):
+                        if math.hypot(radius-column-1, radius-row-1) < radius:
+                            continue
+                        for x, y in ((column, row), (width-column-1, row),
+                                     (column, height-row-1), (width-column-1, height-row-1)):
+                            assert im.getpixel((x, y)) == (0, 0, 0), (name, 'content above mask', x, y)
+                for x, y in ((radius+2, 0), (width-radius-3, 0),
+                             (radius+2, height-1), (width-radius-3, height-1)):
+                    assert min(im.getpixel((x, y))) > 240, (name, x, y, im.getpixel((x, y)))
+                assert name == 'cursor-at-corner' or min(im.getpixel((radius//2, radius//2))) > 240, (name, 'cutout is not circular')
+                evidence.append({'case': name, 'size': im.size, 'corners_black': True})
+                return im
+
+            time.sleep(2)
+            capture('background', 20)
+            clients.append(subprocess.Popen(['foot', '--config=/dev/null', '--app-id=corner-proof',
+                           '--override=colors-dark.background=ffffff', 'sleep', '120'],
+                           env=env, stdout=log, stderr=log))
+            time.sleep(2)
+            assert clients[-1].poll() is None, 'Fullscreen fixture failed'
+            ipc('[app_id="corner-proof"] fullscreen enable')
+            capture('fullscreen', 20)
+            clients.append(subprocess.Popen(['python3', str(fixture)], env=env,
+                                             stdout=log, stderr=log))
+            time.sleep(2)
+            assert clients[-1].poll() is None, 'Overlay fixture failed'
+            capture('late-overlay', 20)
+            pointer = subprocess.Popen([str(output / 'pointer'), '640', '480'], env=env,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                       stderr=log, text=True)
+            clients.append(pointer)
+
+            def reply(expected):
+                assert select.select([pointer.stdout], [], [], 10)[0], 'Pointer timed out'
+                assert pointer.stdout.readline().strip() == expected, 'Pointer failed'
+
+            def point(x, y):
+                pointer.stdin.write(f'move {x} {y}\n')
+                pointer.stdin.flush()
+                reply('ok')
+
+            reply('ready')
+            point(300, 200)
+            visible = capture('cursor-visible', 20)
+            assert any(min(visible.getpixel((x, y))) < 200 for y in range(200, 230)
+                       for x in range(300, 330)), 'Cursor is not actually visible'
+            point(0, 0)
+            capture('cursor-at-corner', 20)
+            point(300, 200)
+            before = capture('before-redraw', 20)
+            for offset in range(8):
+                point(301 + offset, 200)
+                time.sleep(0.04)
+            after = capture('after-redraw', 20)
+            assert before.corner() == after.corner(), 'Antialiasing accumulated'
+            ipc('output HEADLESS-1 scale 2')
+            capture('scale-2', 40)
+            ipc('output HEADLESS-1 transform 90')
+            capture('rotated', 40)
+            ipc('output HEADLESS-1 mode 800x600')
+            capture('resized', 40)
+            ipc('reload')
+            capture('reload', 20)
+            clients.append(subprocess.Popen(['swaylock', '-c', 'ffffff'], env=env,
+                                             stdout=log, stderr=log))
+            time.sleep(0.5)
+            assert clients[-1].poll() is None, 'Lock fixture failed'
+            capture('session-lock', 20)
+            (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+        finally:
+            for client in reversed(clients):
+                if client.poll() is None:
+                    client.terminate()
+                    client.wait(timeout=5)
+            if compositor.poll() is None:
+                compositor.terminate()
+                compositor.wait(timeout=5)
+print(output / 'evidence.json')
