@@ -1,0 +1,51 @@
+{
+  "old_lock": "alpine/packages/locks/09db96fb3d4b20c4b7dc.json",
+  "old_lock_sha256": "09db96fb3d4b20c4b7dc557dac94286e7c39655af9b593693709cfd148ca9747",
+  "new_lock": "alpine/packages/locks/c66a59a07dc3f7c8d5cb.json",
+  "new_lock_sha256": "c66a59a07dc3f7c8d5cbacb3b795e3a2f64c392bf1a666071a356f3c7dcbdcff",
+  "package_count": 1119,
+  "compared_fields": [
+    "name",
+    "version",
+    "arch",
+    "apk_identity"
+  ],
+  "installed_identities_match": true,
+  "all_artifacts_present_in_fossil": true,
+  "new_artifact_signature_and_readback_verified": true,
+  "new_and_replaced_entries": [
+    {
+      "apk_identity": "Q1CDjR05pVBYn01wo4gkJg+bo25U8=",
+      "name": "oldbook-waybar-art",
+      "version": "1.0.0-r6",
+      "arch": "x86_64",
+      "artifact_arch": "x86_64",
+      "filename": "oldbook-waybar-art-1.0.0-r6.apk",
+      "sha256": "c3337cc121e97d30a47f38fd27eb3e8e8015e128edd73c1cc20b85f29fa70273",
+      "artifact": "sha256/c3337cc121e97d30a47f38fd27eb3e8e8015e128edd73c1cc20b85f29fa70273/oldbook-waybar-art-1.0.0-r6.apk"
+    },
+    {
+      "apk_identity": "Q1REvpQat5pLpAJQqoiyW2wobnz60=",
+      "name": "rclone",
+      "version": "1.74.4-r1",
+      "arch": "x86_64",
+      "artifact_arch": "x86_64",
+      "filename": "rclone-1.74.4-r1.apk",
+      "sha256": "a2a7f1c629a9df0131873b5155436b5d19c0804d966fa687ab3d3a6ca38545a1",
+      "artifact": "sha256/a2a7f1c629a9df0131873b5155436b5d19c0804d966fa687ab3d3a6ca38545a1/rclone-1.74.4-r1.apk"
+    },
+    {
+      "apk_identity": "Q1jYsVNY8bIysF6VrwjE8BK6FNtDU=",
+      "name": "rclone-zsh-completion",
+      "version": "1.74.4-r1",
+      "arch": "x86_64",
+      "artifact_arch": "noarch",
+      "filename": "rclone-zsh-completion-1.74.4-r1.apk",
+      "sha256": "5d9583c4ae5e5759dcd0b92ffef9ffee3c7c00c76cbd3cc2dff89542557eff54",
+      "artifact": "sha256/5d9583c4ae5e5759dcd0b92ffef9ffee3c7c00c76cbd3cc2dff89542557eff54/rclone-zsh-completion-1.74.4-r1.apk"
+    }
+  ],
+  "unrelated_installed_identities_unchanged": true,
+  "world_repositories_public_keys_match_current_host": true,
+  "exact_missing_artifact_fetch": "rclone=1.74.4-r1 and rclone-zsh-completion=1.74.4-r1 fetched after local/Fossil cache searches; no package upgrades from fetch"
+}

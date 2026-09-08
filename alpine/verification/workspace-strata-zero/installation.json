@@ -1,0 +1,21 @@
+{
+  "version": "1.0.0-r6",
+  "package_count": 1119,
+  "installed": {
+    "apk_identity": "Q1CDjR05pVBYn01wo4gkJg+bo25U8=",
+    "name": "oldbook-waybar-art",
+    "version": "1.0.0-r6",
+    "arch": "x86_64"
+  },
+  "binary_sha256": "2c2a92972276144526d3950075379b24852fba3638e337eb6cc12cd5a5f7da73",
+  "unrelated_installed_identities_unchanged": true,
+  "command": [
+    "doas",
+    "-n",
+    "apk",
+    "add",
+    "--no-network",
+    "/home/jack/.local/state/oldbook/build/waybar-strata-r6-a/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r6.apk"
+  ],
+  "waybar_restarted": false
+}

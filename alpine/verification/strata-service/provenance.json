@@ -1,0 +1,85 @@
+{
+  "scope": "historical workspace-zero candidate; no validation of later concurrent changes",
+  "service_sha256": "8e9cc3daa0607ec52171fa87a78184a46b94be7dcf550d753f2d31ebbf563519",
+  "native_check_groups": 7,
+  "focused_unit_tests": 22,
+  "artifacts": [
+    {
+      "path": "evidence.json",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "97b015bb17f8d9a9b1ea031201b5986146de15cfd38f491633a74ae05080b6b8",
+      "saved_sha256": "97b015bb17f8d9a9b1ea031201b5986146de15cfd38f491633a74ae05080b6b8",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "fixtures.jsonl",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "077e7252e8e3cf7c3b6c6b21d904131d7b482e2850b1764a302de79c22383d0f",
+      "saved_sha256": "73e103b75f03ebe275c916eda9b240c8ab133ab0451f7c88796d61b8013b5c84",
+      "sanitization": "temporary run directory replaced with <PRIVATE_RUN>"
+    },
+    {
+      "path": "runtime.log",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "eda39530a4582b96bae71fd5fc1b5f8772ad7852fca5b753df969a836cc3e451",
+      "saved_sha256": "eda39530a4582b96bae71fd5fc1b5f8772ad7852fca5b753df969a836cc3e451",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "service.log",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "09edfb7bbfd32777758fa189259d4ef3cbfc7be7e5a90af93fef00cf95d1558e",
+      "saved_sha256": "09edfb7bbfd32777758fa189259d4ef3cbfc7be7e5a90af93fef00cf95d1558e",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "strata-workspace-zero.png",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "33cf8a50de25348afb6871173ba3e0b40c11c8915655a500f7d51abfeb3c6ac4",
+      "saved_sha256": "33cf8a50de25348afb6871173ba3e0b40c11c8915655a500f7d51abfeb3c6ac4",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "sway.conf",
+      "source_run": "strata-service-abrupt-final-20260907",
+      "source_sha256": "66977f193e8f75db62567855d274d2d66ffa3d6b608c05f8c93ff774fc898f4b",
+      "saved_sha256": "66977f193e8f75db62567855d274d2d66ffa3d6b608c05f8c93ff774fc898f4b",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "prior-graceful/evidence.json",
+      "source_run": "strata-service-native-verified-20260907",
+      "source_sha256": "bf44aa62210f001cbc00d8dd3302aa27fb3e15ff14261c51b6ae6e5da47d8b49",
+      "saved_sha256": "bf44aa62210f001cbc00d8dd3302aa27fb3e15ff14261c51b6ae6e5da47d8b49",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "prior-graceful/fixtures.jsonl",
+      "source_run": "strata-service-native-verified-20260907",
+      "source_sha256": "f7f0f52db7a3d33d5be13bbf286a0714535dddaccca4d152adb1366f85f8e8c4",
+      "saved_sha256": "3f4def97d74c8589d0a89d8f77f7189aa3d6009e0876abe844b5637f0df5462c",
+      "sanitization": "temporary run directory replaced with <PRIVATE_RUN>"
+    },
+    {
+      "path": "prior-graceful/runtime.log",
+      "source_run": "strata-service-native-verified-20260907",
+      "source_sha256": "3668d5df255c8f3746df1bdf1b78bd1d9b08886be328e8a924112b9e4708667e",
+      "saved_sha256": "3668d5df255c8f3746df1bdf1b78bd1d9b08886be328e8a924112b9e4708667e",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "prior-graceful/service.log",
+      "source_run": "strata-service-native-verified-20260907",
+      "source_sha256": "cdf6a5599291f7b08f5a558158f45960e5e2a28722dcb8b45d0db6dcfbcc99e8",
+      "saved_sha256": "cdf6a5599291f7b08f5a558158f45960e5e2a28722dcb8b45d0db6dcfbcc99e8",
+      "sanitization": "unchanged"
+    },
+    {
+      "path": "prior-graceful/sway.conf",
+      "source_run": "strata-service-native-verified-20260907",
+      "source_sha256": "66977f193e8f75db62567855d274d2d66ffa3d6b608c05f8c93ff774fc898f4b",
+      "saved_sha256": "66977f193e8f75db62567855d274d2d66ffa3d6b608c05f8c93ff774fc898f4b",
+      "sanitization": "unchanged"
+    }
+  ]
+}

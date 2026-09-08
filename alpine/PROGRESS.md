@@ -731,3 +731,19 @@ or establish physical-radio, OpenRC, surviving-writer or reboot acceptance.
   then oldbook-theme use <id> --no-reload to rebuild HOME. Deployment backups
   retain the previous configuration. Rendered profiles are local derived files.
   Unrelated pending desktop, security and publication edits are preserved.
+
+## STRATA workspace-zero service verification — 2026-09-07
+
+The workspace-zero supervisor passed 22 unit tests and seven isolated native
+behavior groups, including pinning, relaunch, singleton launch and compositor
+crash cleanup. Live activation observed one review window on zero, a held
+daemon lock and HTTP 200 from the local Fossil endpoint. The browser restarted
+under the final supervisor using its existing profile. Native bar r6 passed
+45 GTK checks, two identical signed offline builds, installation and live
+module mapping. Exact sources, screenshots and runtime evidence are retained
+in `alpine/verification/strata-service/` and `workspace-strata-zero/`.
+
+Concurrent changes subsequently mapped Strata to workspace 10 using the 0 key.
+The user clarification (actual workspace 0 versus workspace 10) and validation
+of those later edits are pending; the retained zero evidence does not validate
+those edits. No real logout/login cycle was performed.
