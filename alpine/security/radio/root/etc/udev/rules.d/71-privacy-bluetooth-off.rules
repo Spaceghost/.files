@@ -1,0 +1,4 @@
+# Soft-block Bluetooth after Linux/eudev observes an add or state change.
+# The soft=0 match makes the change event caused by blocking a no-op.
+# This rule never matches WLAN and makes no pre-Linux RF-silence claim.
+ACTION=="add|change", SUBSYSTEM=="rfkill", ATTR{type}=="bluetooth", ATTR{soft}=="0", ATTR{soft}="1"

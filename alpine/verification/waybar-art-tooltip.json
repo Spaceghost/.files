@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "date": "2026-09-07",
+  "red": {
+    "production_payload_sha256": "d5b4ae1c7683592bdcc5e50ee5209a965d4f518e2e6ea723042033436686973d",
+    "pango_result": "g-markup-error-quark: Entity did not end with a semicolon",
+    "cause": "raw ampersand in control help invalidated the complete Pango tooltip"
+  },
+  "green": {
+    "helper_sha256": "9e226a64496a0b72a686aebfc672c510131c450c418b020f1e8d022f660b1bcf",
+    "module_sha256": "3b2356a2fae1bf00dc2298c6ea2d1fc3588239fab4334e6e4b84c6a7d5135826",
+    "isolated": "private XDG_RUNTIME_DIR, HOME, D-Bus, pixman Sway and virtual pointer",
+    "native_hover_states": [
+      {
+        "name": "rotating",
+        "class": "rotating",
+        "tooltip_sha256": "c8049de88e50cadb04b76df01d0e261f7e98ebb931dff4ee6c02757c366e7227",
+        "screenshot": "rotating.png",
+        "screenshot_sha256": "03d704be84baf42d207d69d15e65c9037460a9f4a77a4283848e064a8ad4fb9d",
+        "markup_warning": false
+      },
+      {
+        "name": "paused",
+        "class": "paused",
+        "tooltip_sha256": "5307632a9c787703466ec08cac979e813c44d0469b364d3fcee56786f2ee18ad",
+        "screenshot": "paused.png",
+        "screenshot_sha256": "a2f15adaddea2a992b2033624529ab632a9eee15a5ad5251967eba4f97f36cb6",
+        "markup_warning": false
+      },
+      {
+        "name": "generating",
+        "class": "generating",
+        "tooltip_sha256": "2dfd43d42581929334d2bf74b3d544e651764b6e1c534cc83c5039f46b8d193f",
+        "screenshot": "generating.png",
+        "screenshot_sha256": "d0d10739470c98bc977159095b9cc30d708c252d70d923bbe8e282d164e9e41e",
+        "markup_warning": false
+      }
+    ],
+    "gtk_markup_warnings": 0,
+    "visual_review": "rotating and generating screenshots show the complete title, story, mode, collection and control room; paused payload also parsed and used the paused native class",
+    "retained_screenshot": "alpine/verification/waybar-art-tooltip.png"
+  },
+  "host_mutations": 0,
+  "generation_calls": 0,
+  "full_output": "/home/jack/.local/state/alpine-rice/verify/waybar-art-tooltip-r1-final"
+}

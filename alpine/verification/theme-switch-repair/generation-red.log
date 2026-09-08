@@ -1,0 +1,90 @@
+test_destination_changed_during_generation_never_receives_artwork (test_themed_artwork.ThemedArtworkTests.test_destination_changed_during_generation_never_receives_artwork) ... ok
+test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) ... 
+  test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) (selection='spaceghost') ... FAIL
+  test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) (selection='active') ... FAIL
+test_gallery_adds_theme_and_general_generation_after_existing_controls (test_themed_artwork.ThemedArtworkTests.test_gallery_adds_theme_and_general_generation_after_existing_controls) ... ok
+test_manual_active_theme_records_palette_and_saves_nested_pair (test_themed_artwork.ThemedArtworkTests.test_manual_active_theme_records_palette_and_saves_nested_pair) ... ok
+test_nonactivating_generation_does_not_switch_theme_or_painting (test_themed_artwork.ThemedArtworkTests.test_nonactivating_generation_does_not_switch_theme_or_painting) ... ok
+test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art (test_themed_artwork.ThemedArtworkTests.test_recursive_gallery_keeps_legacy_and_skips_tampered_or_escaping_art) ... ok
+test_symlinked_theme_configuration_never_reserves_or_generates (test_themed_artwork.ThemedArtworkTests.test_symlinked_theme_configuration_never_reserves_or_generates) ... ok
+test_theme_activation_failure_preserves_painting_and_does_not_select_it (test_themed_artwork.ThemedArtworkTests.test_theme_activation_failure_preserves_painting_and_does_not_select_it) ... FAIL
+test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available (test_themed_artwork.ThemedArtworkTests.test_timer_filters_theme_while_browsing_and_selection_keep_old_art_available) ... ok
+test_unsafe_or_unknown_theme_does_not_reserve_attempt (test_themed_artwork.ThemedArtworkTests.test_unsafe_or_unknown_theme_does_not_reserve_attempt) ... ok
+test_unthemed_activation_selects_painting_without_replacing_desktop_theme (test_themed_artwork.ThemedArtworkTests.test_unthemed_activation_selects_painting_without_replacing_desktop_theme) ... ok
+test_unthemed_generation_uses_general_folder_without_active_palette (test_themed_artwork.ThemedArtworkTests.test_unthemed_generation_uses_general_folder_without_active_palette) ... ok
+test_cancelled_phrase_menu_does_not_launch (test_new_themes.NewThemeTests.test_cancelled_phrase_menu_does_not_launch) ... ok
+test_existing_themes_are_selected_in_a_separate_picker (test_new_themes.NewThemeTests.test_existing_themes_are_selected_in_a_separate_picker) ... ok
+test_generated_name_matching_an_action_still_paints_that_theme (test_new_themes.NewThemeTests.test_generated_name_matching_an_action_still_paints_that_theme) ... ok
+test_invalid_model_output_never_writes_descriptor (test_new_themes.NewThemeTests.test_invalid_model_output_never_writes_descriptor) ... ok
+test_new_theme_command_launches_random_theme_and_activates_debut_art (test_new_themes.NewThemeTests.test_new_theme_command_launches_random_theme_and_activates_debut_art) ... ok
+test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline) ... ok
+test_phrase_menu_passes_literal_text_to_background_job (test_new_themes.NewThemeTests.test_phrase_menu_passes_literal_text_to_background_job) ... ok
+test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) ... ok
+test_random_and_phrase_prompts (test_new_themes.NewThemeTests.test_random_and_phrase_prompts) ... ok
+test_save_unique_discoverable_collection_without_replacing_existing (test_new_themes.NewThemeTests.test_save_unique_discoverable_collection_without_replacing_existing) ... ok
+test_symlink_theme_directory_is_rejected (test_new_themes.NewThemeTests.test_symlink_theme_directory_is_rejected) ... ok
+test_theme_design_receives_saved_artwork_guidance (test_new_themes.NewThemeTests.test_theme_design_receives_saved_artwork_guidance) ... ok
+
+======================================================================
+FAIL: test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) (selection='spaceghost')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_themed_artwork.py", line 111, in test_existing_theme_generation_applies_saved_theme_before_exact_painting
+    self.assertEqual(actions, [['use', expected], ['select', entry['id']]])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [['select', '2026-09-07-spaceghost-observato[19 chars]63']] != [['use', 'spaceghost'], ['select', '2026-09-[42 chars]63']]
+
+First differing element 0:
+['select', '2026-09-07-spaceghost-observatory-night-d3712792a963']
+['use', 'spaceghost']
+
+Second list contains 1 additional elements.
+First extra element 1:
+['select', '2026-09-07-spaceghost-observatory-night-d3712792a963']
+
++ [['use', 'spaceghost'],
+- [['select', '2026-09-07-spaceghost-observatory-night-d3712792a963']]
+? ^
+
++  ['select', '2026-09-07-spaceghost-observatory-night-d3712792a963']]
+? ^
+
+
+======================================================================
+FAIL: test_existing_theme_generation_applies_saved_theme_before_exact_painting (test_themed_artwork.ThemedArtworkTests.test_existing_theme_generation_applies_saved_theme_before_exact_painting) (selection='active')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_themed_artwork.py", line 111, in test_existing_theme_generation_applies_saved_theme_before_exact_painting
+    self.assertEqual(actions, [['use', expected], ['select', entry['id']]])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: [['select', '2026-09-07-gruvbox-dark-press-r[14 chars]63']] != [['use', 'gruvbox-dark'], ['select', '2026-0[39 chars]63']]
+
+First differing element 0:
+['select', '2026-09-07-gruvbox-dark-press-room-d3712792a963']
+['use', 'gruvbox-dark']
+
+Second list contains 1 additional elements.
+First extra element 1:
+['select', '2026-09-07-gruvbox-dark-press-room-d3712792a963']
+
++ [['use', 'gruvbox-dark'],
+- [['select', '2026-09-07-gruvbox-dark-press-room-d3712792a963']]
+? ^
+
++  ['select', '2026-09-07-gruvbox-dark-press-room-d3712792a963']]
+? ^
+
+
+======================================================================
+FAIL: test_theme_activation_failure_preserves_painting_and_does_not_select_it (test_themed_artwork.ThemedArtworkTests.test_theme_activation_failure_preserves_painting_and_does_not_select_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_themed_artwork.py", line 122, in test_theme_activation_failure_preserves_painting_and_does_not_select_it
+    self.assertEqual(generator.run_once(manual=True, activate=True, theme='spaceghost'), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 24 tests in 0.969s
+
+FAILED (failures=3)

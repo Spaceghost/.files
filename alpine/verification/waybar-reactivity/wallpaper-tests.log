@@ -1,0 +1,14 @@
+test_cron_keeps_unrelated_jobs_and_is_idempotent (test_wallpapers.WallpaperTests.test_cron_keeps_unrelated_jobs_and_is_idempotent) ... ok
+test_gallery_rejects_traversal_and_modified_hash (test_wallpapers.WallpaperTests.test_gallery_rejects_traversal_and_modified_hash) ... ok
+test_generated_image_must_be_new_native_landscape (test_wallpapers.WallpaperTests.test_generated_image_must_be_new_native_landscape) ... ok
+test_generation_environment_excludes_api_keys_and_session_overrides (test_wallpapers.WallpaperTests.test_generation_environment_excludes_api_keys_and_session_overrides) ... ok
+test_native_request_is_sandboxed_and_has_no_dangerous_flags (test_wallpapers.WallpaperTests.test_native_request_is_sandboxed_and_has_no_dangerous_flags) ... ok
+test_pause_preserves_art_and_next_updates_only_after_sway_success (test_wallpapers.WallpaperTests.test_pause_preserves_art_and_next_updates_only_after_sway_success) ... ok
+test_rejects_malformed_cron_block (test_wallpapers.WallpaperTests.test_rejects_malformed_cron_block) ... ok
+test_reserved_day_never_launches_codex_again (test_wallpapers.WallpaperTests.test_reserved_day_never_launches_codex_again) ... ok
+test_workspace_rotation_restores_image_pause_and_timer_independently (test_wallpapers.WallpaperTests.test_workspace_rotation_restores_image_pause_and_timer_independently) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.058s
+
+OK

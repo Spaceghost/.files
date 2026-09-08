@@ -1,0 +1,11 @@
+[Unit]
+Description=MBP Intel notification center
+PartOf=mbp-intel-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/swaync
+Restart=on-failure
+RestartSec=2
+

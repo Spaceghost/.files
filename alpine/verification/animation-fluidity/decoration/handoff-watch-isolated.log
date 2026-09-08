@@ -1,0 +1,15 @@
+test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll (test_decoration_watch.DecorationWatchTests.test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll) ... ok
+test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit (test_decoration_watch.DecorationWatchTests.test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit) ... ok
+test_close_interrupts_blocked_tree_read_and_does_not_restart (test_decoration_watch.DecorationWatchTests.test_close_interrupts_blocked_tree_read_and_does_not_restart) ... ok
+test_disconnect_reconnects_and_shutdown_closes_both_connections (test_decoration_watch.DecorationWatchTests.test_disconnect_reconnects_and_shutdown_closes_both_connections) ... ok
+test_oversized_frame_is_rejected_without_reading_its_body (test_decoration_watch.DecorationWatchTests.test_oversized_frame_is_rejected_without_reading_its_body) ... ok
+test_partial_frames_reuse_connection_and_suppress_unchanged_trees (test_decoration_watch.DecorationWatchTests.test_partial_frames_reuse_connection_and_suppress_unchanged_trees) ... ok
+test_request_processing_does_not_add_another_poll_interval_while_moving (test_decoration_watch.DecorationWatchTests.test_request_processing_does_not_add_another_poll_interval_while_moving) ... ok
+test_semantic_event_refreshes_before_long_idle_poll (test_decoration_watch.DecorationWatchTests.test_semantic_event_refreshes_before_long_idle_poll) ... ok
+test_stationary_attached_caption_releases_half_the_poll_budget (test_decoration_watch.DecorationWatchTests.test_stationary_attached_caption_releases_half_the_poll_budget) ... ok
+test_title_changes_do_not_keep_the_motion_poll_budget_running (test_decoration_watch.DecorationWatchTests.test_title_changes_do_not_keep_the_motion_poll_budget_running) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.465s
+
+OK

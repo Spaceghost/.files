@@ -1,0 +1,530 @@
+{
+  "status": "passed",
+  "source_config_sha256": "04656658a33e941a0a8c438ee43d7c91dee26678e4847f9f0930ff12541c8bb0",
+  "verifier_sha256": "cf7a1c42e10ee18e8111c8d243cf51bcb0dfc2feb5b9f4d4850a6542b0b8ee07",
+  "bindings": {
+    "1": "workspace number \"1: Ghost\"",
+    "2": "workspace number \"2: Orbit\"",
+    "3": "workspace number \"3: Lab\"",
+    "4": "workspace number \"4: Signal\"",
+    "5": "workspace number \"5: Lounge\"",
+    "6": "workspace number 6",
+    "7": "workspace number 7",
+    "8": "workspace number 8",
+    "9": "workspace number 9",
+    "Shift+1": "move container to workspace number \"1: Ghost\"",
+    "Shift+2": "move container to workspace number \"2: Orbit\"",
+    "Shift+3": "move container to workspace number \"3: Lab\"",
+    "Shift+4": "move container to workspace number \"4: Signal\"",
+    "Shift+5": "move container to workspace number \"5: Lounge\"",
+    "Shift+6": "move container to workspace number 6",
+    "Shift+7": "move container to workspace number 7",
+    "Shift+8": "move container to workspace number 8",
+    "Shift+9": "move container to workspace number 9",
+    "Shift+0": "move container to workspace number \"10: Strata\""
+  },
+  "rules": [
+    "assign [app_id=\"^oldbook-strata$\"] workspace number \"10: Strata\"",
+    "no_focus [app_id=\"^oldbook-strata$\"]"
+  ],
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/expo.py": "bb9b9a181e806488bcf661b85f1bab91cfc12a51e546973bda299a2483e731ee",
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": "f765bee716bbfa2f143907b17be967ecf9c9999705fe1e3a88dbe852fbdf10cd",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "alpine/tests/verify_decoration_attachment.py": "60c737a02f53b3b0a8fe8aa9348f064e6156f26f42bbaa98684f486c1d6d6f4a"
+  },
+  "checks": [
+    {
+      "name": "focus-1-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-2-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-3-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-4-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-5-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "expo-4-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "expo-10-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "showdesktop-4-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "showdesktop-10-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "move-4-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-existing-4-keeps-name",
+      "passed": true
+    },
+    {
+      "name": "move-10-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "focus-existing-10-keeps-name",
+      "passed": true
+    },
+    {
+      "name": "custom-four-reused-without-rename-or-duplicate",
+      "passed": true
+    },
+    {
+      "name": "strata-assignment-named-from-init",
+      "passed": true
+    },
+    {
+      "name": "strata-background-assignment-preserves-control-focus",
+      "passed": true
+    }
+  ],
+  "scenarios": {
+    "focus-1-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 6,
+          "num": 1,
+          "name": "1: Ghost"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 6,
+          "num": 1,
+          "name": "1: Ghost"
+        },
+        "old": {
+          "id": 5,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 5,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "focus-2-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 8,
+          "num": 2,
+          "name": "2: Orbit"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 8,
+          "num": 2,
+          "name": "2: Orbit"
+        },
+        "old": {
+          "id": 7,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 7,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "focus-3-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 10,
+          "num": 3,
+          "name": "3: Lab"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 10,
+          "num": 3,
+          "name": "3: Lab"
+        },
+        "old": {
+          "id": 9,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 9,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "focus-4-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 12,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 12,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": {
+          "id": 11,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 11,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "focus-5-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 14,
+          "num": 5,
+          "name": "5: Lounge"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 14,
+          "num": 5,
+          "name": "5: Lounge"
+        },
+        "old": {
+          "id": 13,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 13,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "expo-4-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 16,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 16,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": {
+          "id": 15,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 15,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "expo-10-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 18,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 18,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": {
+          "id": 17,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 17,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "showdesktop-4-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 20,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 20,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": {
+          "id": 19,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 19,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "showdesktop-10-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 22,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": null
+      },
+      {
+        "change": "focus",
+        "current": {
+          "id": 22,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": {
+          "id": 21,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 21,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "move-4-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 25,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": null
+      }
+    ],
+    "focus-existing-4": [
+      {
+        "change": "focus",
+        "current": {
+          "id": 25,
+          "num": 4,
+          "name": "4: Signal"
+        },
+        "old": {
+          "id": 23,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 23,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "move-10-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 27,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": null
+      }
+    ],
+    "focus-existing-10": [
+      {
+        "change": "focus",
+        "current": {
+          "id": 27,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": {
+          "id": 26,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 26,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "custom-four-revisit": [
+      {
+        "change": "focus",
+        "current": {
+          "id": 29,
+          "num": 4,
+          "name": "4: My Custom Label"
+        },
+        "old": {
+          "id": 30,
+          "num": 99,
+          "name": "99: Control"
+        }
+      },
+      {
+        "change": "empty",
+        "current": {
+          "id": 30,
+          "num": 99,
+          "name": "99: Control"
+        },
+        "old": null
+      }
+    ],
+    "strata-assignment-named-from-init": [
+      {
+        "change": "init",
+        "current": {
+          "id": 33,
+          "num": 10,
+          "name": "10: Strata"
+        },
+        "old": null
+      }
+    ]
+  },
+  "host_changes": 0,
+  "naming_daemon_started": false,
+  "isolation": "private Sway, HOME, XDG directories and D-Bus; synthetic Foot window",
+  "launcher_commands": {
+    "expo-4-named-from-init": "workspace number \"4: Signal\"",
+    "expo-10-named-from-init": "workspace number \"10: Strata\"",
+    "showdesktop-4-named-from-init": "workspace number \"4: Signal\"",
+    "showdesktop-10-named-from-init": "workspace number \"10: Strata\""
+  },
+  "final_workspaces": [
+    {
+      "id": 33,
+      "num": 10,
+      "name": "10: Strata",
+      "focused": false
+    },
+    {
+      "id": 31,
+      "num": 99,
+      "name": "99: Control",
+      "focused": true
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,109 @@
+{
+  "geometry_unchanged": true,
+  "before": {
+    "2147483646": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "4": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "19": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "34": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "35": {
+      "x": 311,
+      "y": 192,
+      "width": 803,
+      "height": 518
+    },
+    "38": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "28": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    }
+  },
+  "after": {
+    "2147483646": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "4": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "19": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "34": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "35": {
+      "x": 311,
+      "y": 192,
+      "width": 803,
+      "height": 518
+    },
+    "38": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    },
+    "28": {
+      "x": 7,
+      "y": 7,
+      "width": 1426,
+      "height": 862
+    }
+  },
+  "notification_surface": {
+    "namespace": "swaync-notification-window",
+    "layer": "overlay",
+    "extent": {
+      "width": 380,
+      "height": 876,
+      "x": 1060,
+      "y": 0
+    },
+    "effects": {
+      "blur": false,
+      "blur_xray": false,
+      "blur_ignore_transparent": false,
+      "shadows": false,
+      "corner_radius": 0
+    }
+  },
+  "explanation": "Only the card is painted. No whole-surface blur or shadow. User DND state preserved."
+}

@@ -1,0 +1,10 @@
+test_disabled_current_entry_is_not_shown_again (test_desktop_journal.JournalTests.test_disabled_current_entry_is_not_shown_again) ... ok
+test_manual_entry_is_stored_verbatim_and_backup_is_readable (test_desktop_journal.JournalTests.test_manual_entry_is_stored_verbatim_and_backup_is_readable) ... ok
+test_migration_is_once_only_and_preserves_disabled_entries (test_desktop_journal.JournalTests.test_migration_is_once_only_and_preserves_disabled_entries) ... ok
+test_rotation_survives_reopen_with_three_quips_then_one_journal (test_desktop_journal.JournalTests.test_rotation_survives_reopen_with_three_quips_then_one_journal) ... ok
+test_seed_has_real_dated_journal_entries_and_the_original_quips (test_desktop_journal.JournalTests.test_seed_has_real_dated_journal_entries_and_the_original_quips) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.010s
+
+OK

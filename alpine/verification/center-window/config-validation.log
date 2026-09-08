@@ -1,0 +1,1403 @@
+00:00:00.000 [INFO] [sway/main.c:308] swayfx version 0.6 (based on sway version 1.12.0)
+00:00:00.000 [INFO] [sway/main.c:309] wlroots version 0.20.2
+00:00:00.000 [INFO] [sway/main.c:310] scenefx version 0.5.0
+00:00:00.003 [INFO] [sway/main.c:78] Linux oldbook 6.18.49-0-lts #1-Alpine SMP PREEMPT_DYNAMIC 2026-09-07 07:20:48 x86_64 Linux
+00:00:00.004 [INFO] [sway/main.c:94] Contents of /etc/os-release:
+00:00:00.004 [INFO] [sway/main.c:78] NAME="Alpine Linux"
+00:00:00.004 [INFO] [sway/main.c:78] ID=alpine
+00:00:00.004 [INFO] [sway/main.c:78] VERSION_ID=3.25.0_alpha20260805
+00:00:00.004 [INFO] [sway/main.c:78] PRETTY_NAME="Alpine Linux edge"
+00:00:00.004 [INFO] [sway/main.c:78] HOME_URL="https://alpinelinux.org/"
+00:00:00.004 [INFO] [sway/main.c:78] BUG_REPORT_URL="https://gitlab.alpinelinux.org/alpine/aports/-/issues"
+00:00:00.004 [INFO] [sway/main.c:66] LD_LIBRARY_PATH=
+00:00:00.004 [INFO] [sway/main.c:66] LD_PRELOAD=
+00:00:00.004 [INFO] [sway/main.c:66] PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+00:00:00.004 [INFO] [sway/main.c:66] SWAYSOCK=/run/user/1000/sway-ipc.1000.3175.sock
+00:00:00.004 [INFO] [sway/main.c:339] Starting swayfx version 0.6 (based on sway version 1.12.0
+00:00:00.004 [DEBUG] [sway/server.c:248] Initializing Wayland server
+00:00:00.005 [INFO] [wlr] [backend/wayland/backend.c:591] Creating wayland backend
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_fixes v1
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_shm v2
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_linux_dmabuf_v1 v5
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_compositor v6
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_subcompositor v1
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_data_device_manager v3
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_gamma_control_manager_v1 v1
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_output_manager_v1 v3
+00:00:00.008 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_idle_notifier_v1 v2
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_idle_inhibit_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_layer_shell_v1 v5
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: xdg_wm_base v5
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_tablet_manager_v2 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: org_kde_kwin_server_decoration_manager v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_decoration_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_relative_pointer_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_pointer_constraints_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_presentation v2
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_alpha_modifier_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_output_manager_v1 v4
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_output_power_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_input_method_manager_v2 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_text_input_manager_v3 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_foreign_toplevel_list_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_foreign_toplevel_manager_v1 v3
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_session_lock_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_workspace_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_drm_lease_device_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_drm_lease_device_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_export_dmabuf_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_screencopy_manager_v1 v3
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_image_copy_capture_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_output_image_capture_source_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_data_control_manager_v1 v2
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_data_control_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_security_context_manager_v1 v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_viewporter v1
+00:00:00.009 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_single_pixel_buffer_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_content_type_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_fractional_scale_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_foreign_toplevel_image_capture_source_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_tearing_control_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_exporter_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_importer_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_exporter_v2 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zxdg_importer_v2 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: xdg_activation_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: xdg_toplevel_tag_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_cursor_shape_manager_v1 v2
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wp_color_representation_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_virtual_keyboard_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwlr_virtual_pointer_manager_v1 v2
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_keyboard_shortcuts_inhibit_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_pointer_gestures_v1 v3
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: ext_transient_seat_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_seat v9
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: zwp_primary_selection_device_manager_v1 v1
+00:00:00.010 [DEBUG] [wlr] [backend/wayland/backend.c:355] Remote wayland global: wl_output v4
+00:00:00.014 [DEBUG] [wlr] [backend/wayland/seat.c:326] seat 'seat0' offering pointer
+00:00:00.014 [DEBUG] [wlr] [backend/wayland/seat.c:337] seat 'seat0' offering keyboard
+00:00:00.022 [DEBUG] [wlr] [backend/wayland/backend.c:696] Opening DRM render node /dev/dri/renderD128
+00:00:00.023 [INFO] [wlr] [render/egl.c:205] Supported EGL client extensions: EGL_EXT_client_extensions EGL_EXT_device_base EGL_EXT_device_enumeration EGL_EXT_device_query EGL_EXT_platform_base EGL_KHR_client_get_all_proc_addresses EGL_KHR_debug EGL_EXT_platform_device EGL_EXT_explicit_device EGL_EXT_platform_wayland EGL_KHR_platform_wayland EGL_EXT_platform_x11 EGL_KHR_platform_x11 EGL_EXT_platform_xcb EGL_MESA_platform_gbm EGL_KHR_platform_gbm EGL_MESA_platform_surfaceless
+00:00:00.032 [DEBUG] [wlr] [render/egl.c:526] Using EGL device /dev/dri/card0
+ac_compute_device_uuid's output is based on invalid pci bus info.
+00:00:00.112 [INFO] [wlr] [render/egl.c:369] Using EGL 1.5
+00:00:00.112 [INFO] [wlr] [render/egl.c:370] Supported EGL display extensions: EGL_ANDROID_blob_cache EGL_EXT_config_select_group EGL_EXT_create_context_robustness EGL_EXT_image_dma_buf_import EGL_EXT_image_dma_buf_import_modifiers EGL_EXT_query_reset_notification_strategy EGL_EXT_surface_compression EGL_KHR_cl_event2 EGL_KHR_config_attribs EGL_KHR_context_flush_control EGL_KHR_create_context EGL_KHR_create_context_no_error EGL_KHR_fence_sync EGL_KHR_get_all_proc_addresses EGL_KHR_gl_colorspace EGL_KHR_gl_renderbuffer_image EGL_KHR_gl_texture_2D_image EGL_KHR_gl_texture_3D_image EGL_KHR_gl_texture_cubemap_image EGL_KHR_image_base EGL_KHR_no_config_context EGL_KHR_reusable_sync EGL_KHR_surfaceless_context EGL_EXT_pixel_format_float EGL_KHR_wait_sync EGL_MESA_configless_context EGL_MESA_gl_interop EGL_MESA_image_dma_buf_export EGL_MESA_query_driver EGL_MESA_x11_native_visual_id 
+00:00:00.112 [INFO] [wlr] [render/egl.c:372] Supported EGL device extensions: EGL_EXT_device_drm EGL_EXT_device_drm_render_node EGL_EXT_device_query_name EGL_EXT_device_persistent_id
+00:00:00.112 [INFO] [wlr] [render/egl.c:374] EGL vendor: Mesa Project
+00:00:00.112 [INFO] [wlr] [render/egl.c:376] EGL driver name: radeonsi
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:120] Supported DMA-BUF formats:
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   AB4H (0x48344241)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   XB4H (0x48344258)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   AB48 (0x38344241)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   XB48 (0x38344258)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   AR30 (0x30335241)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:169]   XR30 (0x30335258)
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.113 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AB30 (0x30334241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   XB30 (0x30334258)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AR24 (0x34325241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AB24 (0x34324241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   XR24 (0x34325258)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   XB24 (0x34324258)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AR15 (0x35315241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AB15 (0x35314241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AR12 (0x32315241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:169]   AB12 (0x32314241)
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.114 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   RG16 (0x36314752)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   R8 (0x20203852)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   R16 (0x20363152)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   GR88 (0x38385247)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   GR32 (0x32335247)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   R  H (0x48202052)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   R  F (0x46202052)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   GR H (0x48205247)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   GR F (0x46205247)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:169]   AB8F (0x46384241)
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.115 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YUV9 (0x39565559)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YU11 (0x31315559)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YU12 (0x32315559)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YU16 (0x36315559)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YU24 (0x34325559)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YVU9 (0x39555659)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YV11 (0x31315659)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YV12 (0x32315659)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YV16 (0x36315659)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:169]   YV24 (0x34325659)
+00:00:00.116 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S010 (0x30313053)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S210 (0x30313253)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S410 (0x30313453)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S012 (0x32313053)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S212 (0x32313253)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S412 (0x32313453)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S016 (0x36313053)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S216 (0x36313253)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   S416 (0x36313453)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:169]   NV12 (0x3231564E)
+00:00:00.117 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   NV21 (0x3132564E)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   P010 (0x30313050)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   P012 (0x32313050)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   P016 (0x36313050)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   P030 (0x30333050)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   NV16 (0x3631564E)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   NV61 (0x3136564E)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   NV24 (0x3432564E)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   NV42 (0x3234564E)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:169]   AYUV (0x56555941)
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.118 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   XYUV (0x56555958)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   Y410 (0x30313459)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   Y412 (0x32313459)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   Y416 (0x36313459)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   YUYV (0x56595559)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   YVYU (0x55595659)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   UYVY (0x59565955)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   VYUY (0x59555956)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   Y210 (0x30313259)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:169]   Y212 (0x32313259)
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.119 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.120 [DEBUG] [wlr] [render/egl.c:169]   Y216 (0x36313259)
+00:00:00.120 [DEBUG] [wlr] [render/egl.c:103]     INVALID (0x00FFFFFFFFFFFFFF): ✓ texture  ✓ render
+00:00:00.120 [DEBUG] [wlr] [render/egl.c:103]     LINEAR (0x0000000000000000): ✓ texture  ✓ render
+00:00:00.120 [DEBUG] [wlr] [render/egl.c:189] EGL DMA-BUF format modifiers unsupported
+00:00:00.130 [DEBUG] [wlr] [render/egl.c:439] Created EGL context using OpenGL ES 2.0
+00:00:00.131 [DEBUG] [wlr] [render/egl.c:578] Using EGL_PLATFORM_DEVICE_EXT
+00:00:00.131 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:473] Creating scenefx FX renderer
+00:00:00.131 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:474] Using OpenGL ES 3.2 Mesa 26.1.6
+00:00:00.131 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:475] GL vendor: AMD
+00:00:00.131 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:476] GL renderer:  (radeonsi, verde, ACO, DRM 2.51, 6.18.49-0-lts)
+00:00:00.131 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:477] Supported FX extensions: GL_EXT_blend_minmax GL_EXT_multi_draw_arrays GL_EXT_texture_filter_anisotropic GL_EXT_texture_compression_s3tc GL_EXT_texture_compression_dxt1 GL_EXT_texture_compression_rgtc GL_EXT_texture_format_BGRA8888 GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth24 GL_OES_element_index_uint GL_OES_fbo_render_mipmap GL_OES_mapbuffer GL_OES_rgb8_rgba8 GL_OES_standard_derivatives GL_OES_stencil8 GL_OES_texture_3D GL_OES_texture_float GL_OES_texture_float_linear GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_texture_npot GL_OES_vertex_half_float GL_EXT_draw_instanced GL_EXT_texture_sRGB_decode GL_OES_EGL_image GL_OES_depth_texture GL_OES_packed_depth_stencil GL_EXT_texture_type_2_10_10_10_REV GL_NV_conditional_render GL_OES_get_program_binary GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_read_format_bgra GL_EXT_texture_storage GL_NV_pack_subimage GL_NV_texture_barrier GL_EXT_frag_depth GL_NV_fbo_color_attachments GL_OES_EGL_image_external GL_OES_EGL_sync GL_OES_vertex_array_object GL_OES_viewport_array GL_ANGLE_pack_reverse_row_order GL_ANGLE_texture_compression_dxt3 GL_ANGLE_texture_compression_dxt5 GL_EXT_occlusion_query_boolean GL_EXT_robustness GL_EXT_sRGB GL_EXT_texture_rg GL_EXT_unpack_subimage GL_NV_draw_buffers GL_NV_read_buffer GL_NV_read_depth GL_NV_read_depth_stencil GL_NV_read_stencil GL_APPLE_sync GL_EXT_draw_buffers GL_EXT_instanced_arrays GL_EXT_map_buffer_range GL_EXT_shadow_samplers GL_KHR_debug GL_KHR_robustness GL_KHR_texture_compression_astc_ldr GL_NV_generate_mipmap_sRGB GL_NV_pixel_buffer_object GL_OES_depth_texture_cube_map GL_OES_required_internalformat GL_OES_surfaceless_context GL_EXT_color_buffer_float GL_EXT_debug_label GL_EXT_sRGB_write_control GL_EXT_separate_shader_objects GL_EXT_shader_group_vote GL_EXT_shader_implicit_conversions GL_EXT_shader_integer_mix GL_EXT_tessellation_point_size GL_EXT_tessellation_shader GL_ANDROID_extension_pack_es31a GL_EXT_base_instance GL_EXT_compressed_ETC1_RGB8_sub_texture GL_EXT_copy_image GL_EXT_draw_buffers_indexed GL_EXT_draw_elements_base_vertex GL_EXT_gpu_shader5 GL_EXT_multi_draw_indirect GL_EXT_polygon_offset_clamp GL_EXT_primitive_bounding_box GL_EXT_render_snorm GL_EXT_shader_io_blocks GL_EXT_texture_border_clamp GL_EXT_texture_buffer GL_EXT_texture_cube_map_array GL_EXT_texture_norm16 GL_EXT_texture_view GL_KHR_blend_equation_advanced GL_KHR_context_flush_control GL_KHR_robust_buffer_access_behavior GL_NV_image_formats GL_NV_shader_noperspective_interpolation GL_OES_copy_image GL_OES_draw_buffers_indexed GL_OES_draw_elements_base_vertex GL_OES_gpu_shader5 GL_OES_primitive_bounding_box GL_OES_sample_shading GL_OES_sample_variables GL_OES_shader_io_blocks GL_OES_shader_multisample_interpolation GL_OES_tessellation_point_size GL_OES_tessellation_shader GL_OES_texture_border_clamp GL_OES_texture_buffer GL_OES_texture_cube_map_array GL_OES_texture_stencil8 GL_OES_texture_storage_multisample_2d_array GL_OES_texture_view GL_EXT_blend_func_extended GL_EXT_buffer_storage GL_EXT_float_blend GL_EXT_geometry_point_size GL_EXT_geometry_shader GL_EXT_shader_samples_identical GL_EXT_texture_sRGB_R8 GL_KHR_no_error GL_KHR_texture_compression_astc_sliced_3d GL_OES_EGL_image_external_essl3 GL_OES_geometry_point_size GL_OES_geometry_shader GL_OES_shader_image_atomic GL_EXT_clear_texture GL_EXT_clip_cull_distance GL_EXT_conservative_depth GL_EXT_disjoint_timer_query GL_EXT_texture_compression_s3tc_srgb GL_EXT_window_rectangles GL_MESA_shader_integer_functions GL_EXT_clip_control GL_EXT_color_buffer_half_float GL_EXT_memory_object GL_EXT_memory_object_fd GL_EXT_texture_compression_bptc GL_EXT_texture_mirror_clamp_to_edge GL_KHR_parallel_shader_compile GL_NV_alpha_to_coverage_dither_control GL_EXT_EGL_image_storage GL_EXT_texture_shadow_lod GL_INTEL_blackhole_render GL_MESA_framebuffer_flip_y GL_NV_compute_shader_derivatives GL_EXT_demote_to_helper_invocation GL_EXT_depth_clamp GL_EXT_texture_query_lod GL_KHR_shader_subgroup GL_MESA_sampler_objects GL_EXT_EGL_image_storage_compression GL_EXT_texture_storage_compression GL_MESA_bgra GL_MESA_texture_const_bandwidth GL_EXT_shader_clock 
+00:00:00.132 [DEBUG] [wlr] [render/fx_renderer/fx_renderer.c:533] GPU reset notifications are enabled
+00:00:00.186 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:585] FX RENDERER: Shaders Initialized Successfully
+00:00:00.190 [DEBUG] [wlr] [render/allocator/allocator.c:115] Trying to create gbm allocator
+00:00:00.220 [DEBUG] [wlr] [render/allocator/gbm.c:188] Created GBM allocator with backend drm
+00:00:00.221 [DEBUG] [wlr] [render/allocator/gbm.c:191] Using DRM node /dev/dri/renderD128
+00:00:00.221 [DEBUG] [wlr] [types/wlr_drm_lease_v1.c:679] No DRM backend supplied, failed to create wlr_drm_lease_v1_manager
+00:00:00.221 [DEBUG] [sway/server.c:499] Failed to create wlr_drm_lease_device_v1
+00:00:00.221 [INFO] [sway/server.c:500] VR will not be available
+00:00:00.221 [INFO] [wlr] [wayland] unable to lock lockfile /run/user/1000/wayland-1.lock, maybe another compositor is running
+00:00:00.221 [INFO] [wlr] [backend/headless/backend.c:60] Creating headless backend
+00:00:00.247 [INFO] [sway/config.c:459] Loading config from /home/jack/.config/swayfx/config
+00:00:00.247 [DEBUG] [sway/config.c:818] Read line 1: # Shared desktop plus the effects supported by SwayFX.
+00:00:00.248 [DEBUG] [sway/config.c:818] Read line 2: include ~/.config/sway/config
+00:00:00.248 [INFO] [sway/commands.c:406] Config command: include ~/.config/sway/config
+00:00:00.248 [INFO] [sway/commands.c:429] After replacement: include ~/.config/sway/config
+00:00:00.255 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/config
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 1: # Spaceghost / Oldbook Sway session — MacBookPro11,5 internal panel (2880x1800, 2x).
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 2: # The deployer expands this overlay into HOME; wallpaper is supplied separately.
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 3: set $mod Mod4
+00:00:00.255 [INFO] [sway/commands.c:406] Config command: set $mod Mod4
+00:00:00.255 [INFO] [sway/commands.c:429] After replacement: set $mod Mod4
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 4: set $term foot
+00:00:00.255 [INFO] [sway/commands.c:406] Config command: set $term foot
+00:00:00.255 [INFO] [sway/commands.c:429] After replacement: set $term foot
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 5: set $menu ~/.local/bin/oldbook-menu
+00:00:00.255 [INFO] [sway/commands.c:406] Config command: set $menu ~/.local/bin/oldbook-menu
+00:00:00.255 [INFO] [sway/commands.c:429] After replacement: set $menu ~/.local/bin/oldbook-menu
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 6: set $lock ~/.local/bin/oldbook-lock
+00:00:00.255 [INFO] [sway/commands.c:406] Config command: set $lock ~/.local/bin/oldbook-lock
+00:00:00.255 [INFO] [sway/commands.c:429] After replacement: set $lock ~/.local/bin/oldbook-lock
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 7: set $wallpaper ~/.local/share/oldbook/wallpaper.png
+00:00:00.255 [INFO] [sway/commands.c:406] Config command: set $wallpaper ~/.local/share/oldbook/wallpaper.png
+00:00:00.255 [INFO] [sway/commands.c:429] After replacement: set $wallpaper ~/.local/share/oldbook/wallpaper.png
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 8: 
+00:00:00.255 [DEBUG] [sway/config.c:818] Read line 9: # Palette and window chrome are switchable without changing shortcuts.
+00:00:00.256 [DEBUG] [sway/config.c:818] Read line 10: gaps inner 3
+00:00:00.256 [INFO] [sway/commands.c:406] Config command: gaps inner 3
+00:00:00.256 [INFO] [sway/commands.c:429] After replacement: gaps inner 3
+00:00:00.256 [DEBUG] [sway/config.c:818] Read line 11: gaps outer 4
+00:00:00.256 [INFO] [sway/commands.c:406] Config command: gaps outer 4
+00:00:00.256 [INFO] [sway/commands.c:429] After replacement: gaps outer 4
+00:00:00.256 [DEBUG] [sway/config.c:818] Read line 12: include ~/.config/sway/theme.conf
+00:00:00.256 [INFO] [sway/commands.c:406] Config command: include ~/.config/sway/theme.conf
+00:00:00.256 [INFO] [sway/commands.c:429] After replacement: include ~/.config/sway/theme.conf
+00:00:00.266 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/themes/profiles/the-minted-eclipse-48db56180baf/.config/sway/theme.conf
+00:00:00.266 [DEBUG] [sway/config.c:818] Read line 1: # Gruvbox Dark window chrome; keep session commands and shortcuts in sway/config.
+00:00:00.266 [DEBUG] [sway/config.c:818] Read line 2: # Tiled windows keep their clean edges; floating, stacked and tabbed views get titles.
+00:00:00.266 [DEBUG] [sway/config.c:818] Read line 3: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.266 [INFO] [sway/commands.c:406] Config command: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.266 [INFO] [sway/commands.c:429] After replacement: seat * xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.266 [DEBUG] [sway/commands.c:461] Subcommand: xcursor_theme simp1e-cursors-gruvbox-dark 24
+00:00:00.266 [DEBUG] [sway/config/seat.c:78] Adding seat * config
+00:00:00.266 [DEBUG] [sway/config/seat.c:82] Config stored for seat *
+00:00:00.266 [DEBUG] [sway/config.c:818] Read line 4: font pango:DejaVu Serif 9.5
+00:00:00.266 [INFO] [sway/commands.c:406] Config command: font pango:DejaVu Serif 9.5
+00:00:00.266 [INFO] [sway/commands.c:429] After replacement: font pango:DejaVu Serif 9.5
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 5: default_border pixel 0
+00:00:00.326 [INFO] [sway/commands.c:406] Config command: default_border pixel 0
+00:00:00.326 [INFO] [sway/commands.c:429] After replacement: default_border pixel 0
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 6: default_floating_border normal 0
+00:00:00.326 [INFO] [sway/commands.c:406] Config command: default_floating_border normal 0
+00:00:00.326 [INFO] [sway/commands.c:429] After replacement: default_floating_border normal 0
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 7: title_align center
+00:00:00.326 [INFO] [sway/commands.c:406] Config command: title_align center
+00:00:00.326 [INFO] [sway/commands.c:429] After replacement: title_align center
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 8: titlebar_padding 8 1
+00:00:00.326 [INFO] [sway/commands.c:406] Config command: titlebar_padding 8 1
+00:00:00.326 [INFO] [sway/commands.c:429] After replacement: titlebar_padding 8 1
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 9: titlebar_border_thickness 0
+00:00:00.326 [INFO] [sway/commands.c:406] Config command: titlebar_border_thickness 0
+00:00:00.326 [INFO] [sway/commands.c:429] After replacement: titlebar_border_thickness 0
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 10: 
+00:00:00.326 [DEBUG] [sway/config.c:818] Read line 11: # Class                border  title bg text    indicator child border
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 12: client.focused          #242c2b #242c2b #D46B3F #D46B3F #10191B
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: client.focused          #242c2b #242c2b #D46B3F #D46B3F #10191B
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: client.focused #242c2b #242c2b #D46B3F #D46B3F #10191B
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 13: client.focused_inactive #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: client.focused_inactive #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: client.focused_inactive #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 14: client.unfocused        #0c1214 #0c1214 #88897c #0c1214 #0c1214
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: client.unfocused        #0c1214 #0c1214 #88897c #0c1214 #0c1214
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: client.unfocused #0c1214 #0c1214 #88897c #0c1214 #0c1214
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 15: client.urgent           #10191B #10191B #d77b70 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: client.urgent           #10191B #10191B #d77b70 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: client.urgent #10191B #10191B #d77b70 #10191B #10191B
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 16: client.placeholder      #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: client.placeholder      #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: client.placeholder #10191B #10191B #bd77c0 #10191B #10191B
+00:00:00.327 [INFO] [sway/commands/client.c:80] Warning: client.placeholder is ignored by sway
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 17: 
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 18: gaps inner 10
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: gaps inner 10
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: gaps inner 10
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 19: gaps outer 11
+00:00:00.327 [INFO] [sway/commands.c:406] Config command: gaps outer 11
+00:00:00.327 [INFO] [sway/commands.c:429] After replacement: gaps outer 11
+00:00:00.327 [DEBUG] [sway/config.c:818] Read line 13: smart_gaps off
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: smart_gaps off
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: smart_gaps off
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 14: focus_follows_mouse yes
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: focus_follows_mouse yes
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: focus_follows_mouse yes
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 15: mouse_warping output
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: mouse_warping output
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: mouse_warping output
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 16: focus_on_window_activation smart
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: focus_on_window_activation smart
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: focus_on_window_activation smart
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 17: 
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 18: # Stable, native panel settings.  Do not apply an unverified external display mode.
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 19: output eDP-1 mode 2880x1800@60Hz scale 2 position 0 0
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: output eDP-1 mode 2880x1800@60Hz scale 2 position 0 0
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: output eDP-1 mode 2880x1800@60Hz scale 2 position 0 0
+00:00:00.328 [DEBUG] [sway/commands.c:461] Subcommand: mode 2880x1800@60Hz scale 2 position 0 0
+00:00:00.328 [DEBUG] [sway/commands.c:461] Subcommand: scale 2 position 0 0
+00:00:00.328 [DEBUG] [sway/commands.c:461] Subcommand: position 0 0
+00:00:00.328 [DEBUG] [sway/config/output.c:279] Config stored for output eDP-1 (enabled: -1) (2880x1800@60.000000Hz position 0,0 scale 2.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.328 [DEBUG] [sway/config.c:818] Read line 20: output * bg $wallpaper fill
+00:00:00.328 [INFO] [sway/commands.c:406] Config command: output * bg $wallpaper fill
+00:00:00.328 [INFO] [sway/commands.c:429] After replacement: output * bg ~/.local/share/oldbook/wallpaper.png fill
+00:00:00.328 [DEBUG] [sway/commands.c:461] Subcommand: bg ~/.local/share/oldbook/wallpaper.png fill
+00:00:00.336 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg /home/jack/.local/share/oldbook/wallpaper.png fill) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.336 [DEBUG] [sway/config.c:818] Read line 21: 
+00:00:00.336 [DEBUG] [sway/config.c:818] Read line 22: input type:touchpad {
+00:00:00.336 [DEBUG] [sway/config.c:872] Entering block 'input type:touchpad'
+00:00:00.336 [DEBUG] [sway/config.c:818] Read line 23:     tap enabled
+00:00:00.336 [INFO] [sway/commands.c:406] Config command: input type:touchpad tap enabled
+00:00:00.336 [INFO] [sway/commands.c:429] After replacement: input type:touchpad tap enabled
+00:00:00.336 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.336 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.336 [DEBUG] [sway/commands.c:461] Subcommand: tap enabled
+00:00:00.336 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.363 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.363 [DEBUG] [sway/config.c:818] Read line 24:     tap_button_map lrm
+00:00:00.363 [INFO] [sway/commands.c:406] Config command: input type:touchpad tap_button_map lrm
+00:00:00.363 [INFO] [sway/commands.c:429] After replacement: input type:touchpad tap_button_map lrm
+00:00:00.363 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.363 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.363 [DEBUG] [sway/commands.c:461] Subcommand: tap_button_map lrm
+00:00:00.363 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.388 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.388 [DEBUG] [sway/config.c:818] Read line 25:     natural_scroll enabled
+00:00:00.388 [INFO] [sway/commands.c:406] Config command: input type:touchpad natural_scroll enabled
+00:00:00.388 [INFO] [sway/commands.c:429] After replacement: input type:touchpad natural_scroll enabled
+00:00:00.389 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.389 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.389 [DEBUG] [sway/commands.c:461] Subcommand: natural_scroll enabled
+00:00:00.389 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.412 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.412 [DEBUG] [sway/config.c:818] Read line 26:     dwt enabled
+00:00:00.412 [INFO] [sway/commands.c:406] Config command: input type:touchpad dwt enabled
+00:00:00.412 [INFO] [sway/commands.c:429] After replacement: input type:touchpad dwt enabled
+00:00:00.412 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.412 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.412 [DEBUG] [sway/commands.c:461] Subcommand: dwt enabled
+00:00:00.412 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.435 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.435 [DEBUG] [sway/config.c:818] Read line 27:     click_method clickfinger
+00:00:00.435 [INFO] [sway/commands.c:406] Config command: input type:touchpad click_method clickfinger
+00:00:00.435 [INFO] [sway/commands.c:429] After replacement: input type:touchpad click_method clickfinger
+00:00:00.435 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.435 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.435 [DEBUG] [sway/commands.c:461] Subcommand: click_method clickfinger
+00:00:00.435 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.455 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.455 [DEBUG] [sway/config.c:818] Read line 28:     middle_emulation enabled
+00:00:00.456 [INFO] [sway/commands.c:406] Config command: input type:touchpad middle_emulation enabled
+00:00:00.456 [INFO] [sway/commands.c:429] After replacement: input type:touchpad middle_emulation enabled
+00:00:00.456 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.456 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.456 [DEBUG] [sway/commands.c:461] Subcommand: middle_emulation enabled
+00:00:00.456 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.482 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.482 [DEBUG] [sway/config.c:818] Read line 29:     accel_profile adaptive
+00:00:00.482 [INFO] [sway/commands.c:406] Config command: input type:touchpad accel_profile adaptive
+00:00:00.482 [INFO] [sway/commands.c:429] After replacement: input type:touchpad accel_profile adaptive
+00:00:00.482 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.482 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.482 [DEBUG] [sway/commands.c:461] Subcommand: accel_profile adaptive
+00:00:00.482 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.512 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.512 [DEBUG] [sway/config.c:818] Read line 30:     pointer_accel 0.2
+00:00:00.512 [INFO] [sway/commands.c:406] Config command: input type:touchpad pointer_accel 0.2
+00:00:00.512 [INFO] [sway/commands.c:429] After replacement: input type:touchpad pointer_accel 0.2
+00:00:00.512 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.512 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.512 [DEBUG] [sway/commands.c:461] Subcommand: pointer_accel 0.2
+00:00:00.512 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.542 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.542 [DEBUG] [sway/config.c:818] Read line 31: }
+00:00:00.542 [DEBUG] [sway/config.c:889] Exiting block 'input type:touchpad'
+00:00:00.542 [DEBUG] [sway/config.c:818] Read line 32: include ~/.config/sway/gestures.conf
+00:00:00.542 [INFO] [sway/commands.c:406] Config command: include ~/.config/sway/gestures.conf
+00:00:00.542 [INFO] [sway/commands.c:429] After replacement: include ~/.config/sway/gestures.conf
+00:00:00.549 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/gestures.conf
+00:00:00.549 [DEBUG] [sway/config.c:818] Read line 1: # Apple / libinput touchpads. Two-finger gestures stay with applications.
+00:00:00.549 [DEBUG] [sway/config.c:818] Read line 2: input type:touchpad {
+00:00:00.549 [DEBUG] [sway/config.c:872] Entering block 'input type:touchpad'
+00:00:00.549 [DEBUG] [sway/config.c:818] Read line 3:     tap enabled
+00:00:00.550 [INFO] [sway/commands.c:406] Config command: input type:touchpad tap enabled
+00:00:00.550 [INFO] [sway/commands.c:429] After replacement: input type:touchpad tap enabled
+00:00:00.550 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.550 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.550 [DEBUG] [sway/commands.c:461] Subcommand: tap enabled
+00:00:00.550 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.575 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.575 [DEBUG] [sway/config.c:818] Read line 4:     tap_button_map lrm
+00:00:00.575 [INFO] [sway/commands.c:406] Config command: input type:touchpad tap_button_map lrm
+00:00:00.575 [INFO] [sway/commands.c:429] After replacement: input type:touchpad tap_button_map lrm
+00:00:00.575 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.576 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.576 [DEBUG] [sway/commands.c:461] Subcommand: tap_button_map lrm
+00:00:00.576 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.600 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.600 [DEBUG] [sway/config.c:818] Read line 5:     drag enabled
+00:00:00.600 [INFO] [sway/commands.c:406] Config command: input type:touchpad drag enabled
+00:00:00.600 [INFO] [sway/commands.c:429] After replacement: input type:touchpad drag enabled
+00:00:00.600 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.600 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.600 [DEBUG] [sway/commands.c:461] Subcommand: drag enabled
+00:00:00.600 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.622 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.622 [DEBUG] [sway/config.c:818] Read line 6:     drag_lock disabled
+00:00:00.622 [INFO] [sway/commands.c:406] Config command: input type:touchpad drag_lock disabled
+00:00:00.622 [INFO] [sway/commands.c:429] After replacement: input type:touchpad drag_lock disabled
+00:00:00.622 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.623 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.623 [DEBUG] [sway/commands.c:461] Subcommand: drag_lock disabled
+00:00:00.623 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.651 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.651 [DEBUG] [sway/config.c:818] Read line 7:     natural_scroll enabled
+00:00:00.651 [INFO] [sway/commands.c:406] Config command: input type:touchpad natural_scroll enabled
+00:00:00.651 [INFO] [sway/commands.c:429] After replacement: input type:touchpad natural_scroll enabled
+00:00:00.651 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.651 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.651 [DEBUG] [sway/commands.c:461] Subcommand: natural_scroll enabled
+00:00:00.651 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.681 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.681 [DEBUG] [sway/config.c:818] Read line 8:     scroll_method two_finger
+00:00:00.681 [INFO] [sway/commands.c:406] Config command: input type:touchpad scroll_method two_finger
+00:00:00.681 [INFO] [sway/commands.c:429] After replacement: input type:touchpad scroll_method two_finger
+00:00:00.681 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.681 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.681 [DEBUG] [sway/commands.c:461] Subcommand: scroll_method two_finger
+00:00:00.681 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.706 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.706 [DEBUG] [sway/config.c:818] Read line 9:     click_method clickfinger
+00:00:00.706 [INFO] [sway/commands.c:406] Config command: input type:touchpad click_method clickfinger
+00:00:00.706 [INFO] [sway/commands.c:429] After replacement: input type:touchpad click_method clickfinger
+00:00:00.706 [DEBUG] [sway/commands/input.c:58] entering input block: type:touchpad
+00:00:00.706 [DEBUG] [sway/config/input.c:15] new_input_config(type:touchpad)
+00:00:00.706 [DEBUG] [sway/commands.c:461] Subcommand: click_method clickfinger
+00:00:00.707 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.729 [DEBUG] [sway/config/input.c:366] Config stored for input type:touchpad
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 10: }
+00:00:00.729 [DEBUG] [sway/config.c:889] Exiting block 'input type:touchpad'
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 11: 
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 12: # Natural direction: push the desktop left to reach the next one.
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 13: bindgesture swipe:3:left workspace next
+00:00:00.729 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:3:left workspace next
+00:00:00.729 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:3:left workspace next
+00:00:00.729 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:3:left to command `workspace next`
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 14: bindgesture swipe:3:right workspace prev
+00:00:00.729 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:3:right workspace prev
+00:00:00.729 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:3:right workspace prev
+00:00:00.729 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:3:right to command `workspace prev`
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 15: bindgesture swipe:4:left workspace next
+00:00:00.729 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:4:left workspace next
+00:00:00.729 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:4:left workspace next
+00:00:00.729 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:4:left to command `workspace next`
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 16: bindgesture swipe:4:right workspace prev
+00:00:00.729 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:4:right workspace prev
+00:00:00.729 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:4:right workspace prev
+00:00:00.729 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:4:right to command `workspace prev`
+00:00:00.729 [DEBUG] [sway/config.c:818] Read line 17: bindgesture swipe:3:up exec ~/.local/bin/oldbook-expo show
+00:00:00.729 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:3:up exec ~/.local/bin/oldbook-expo show
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:3:up exec ~/.local/bin/oldbook-expo show
+00:00:00.730 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:3:up to command `exec ~/.local/bin/oldbook-expo show`
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 18: bindgesture swipe:3:down exec ~/.local/bin/oldbook-expo close
+00:00:00.730 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:3:down exec ~/.local/bin/oldbook-expo close
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:3:down exec ~/.local/bin/oldbook-expo close
+00:00:00.730 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:3:down to command `exec ~/.local/bin/oldbook-expo close`
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 19: 
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 20: # Four fingers away clears the desktop, four fingers back brings every window
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 21: # home to the position it left.  Three fingers keep the workspace picker.
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 22: bindgesture swipe:4:up exec ~/.local/bin/oldbook-showdesktop show
+00:00:00.730 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:4:up exec ~/.local/bin/oldbook-showdesktop show
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:4:up exec ~/.local/bin/oldbook-showdesktop show
+00:00:00.730 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:4:up to command `exec ~/.local/bin/oldbook-showdesktop show`
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 23: bindgesture swipe:4:down exec ~/.local/bin/oldbook-showdesktop restore
+00:00:00.730 [INFO] [sway/commands.c:406] Config command: bindgesture swipe:4:down exec ~/.local/bin/oldbook-showdesktop restore
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture swipe:4:down exec ~/.local/bin/oldbook-showdesktop restore
+00:00:00.730 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound swipe:4:down to command `exec ~/.local/bin/oldbook-showdesktop restore`
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 24: bindgesture pinch:4:inward exec ~/.local/bin/oldbook-menu
+00:00:00.730 [INFO] [sway/commands.c:406] Config command: bindgesture pinch:4:inward exec ~/.local/bin/oldbook-menu
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture pinch:4:inward exec ~/.local/bin/oldbook-menu
+00:00:00.730 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound pinch:4:inward to command `exec ~/.local/bin/oldbook-menu`
+00:00:00.730 [DEBUG] [sway/config.c:818] Read line 25: bindgesture pinch:4:outward exec ~/.local/bin/oldbook-expo close
+00:00:00.730 [INFO] [sway/commands.c:406] Config command: bindgesture pinch:4:outward exec ~/.local/bin/oldbook-expo close
+00:00:00.730 [INFO] [sway/commands.c:429] After replacement: bindgesture pinch:4:outward exec ~/.local/bin/oldbook-expo close
+00:00:00.731 [DEBUG] [sway/commands/gesture.c:65] bindgesture - Bound pinch:4:outward to command `exec ~/.local/bin/oldbook-expo close`
+00:00:00.731 [DEBUG] [sway/config.c:818] Read line 26: bindsym Mod4+e exec ~/.local/bin/oldbook-expo toggle
+00:00:00.731 [INFO] [sway/commands.c:406] Config command: bindsym Mod4+e exec ~/.local/bin/oldbook-expo toggle
+00:00:00.731 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+e exec ~/.local/bin/oldbook-expo toggle
+00:00:00.731 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+e to command `exec ~/.local/bin/oldbook-expo toggle` for device '*'
+00:00:00.731 [DEBUG] [sway/config.c:818] Read line 33: 
+00:00:00.731 [DEBUG] [sway/config.c:818] Read line 34: input type:keyboard {
+00:00:00.731 [DEBUG] [sway/config.c:872] Entering block 'input type:keyboard'
+00:00:00.731 [DEBUG] [sway/config.c:818] Read line 35:     xkb_layout us
+00:00:00.731 [INFO] [sway/commands.c:406] Config command: input type:keyboard xkb_layout us
+00:00:00.731 [INFO] [sway/commands.c:429] After replacement: input type:keyboard xkb_layout us
+00:00:00.731 [DEBUG] [sway/commands/input.c:58] entering input block: type:keyboard
+00:00:00.731 [DEBUG] [sway/config/input.c:15] new_input_config(type:keyboard)
+00:00:00.731 [DEBUG] [sway/commands.c:461] Subcommand: xkb_layout us
+00:00:00.731 [DEBUG] [sway/commands/input/xkb_layout.c:17] set-xkb_layout for config: type:keyboard layout: us
+00:00:00.731 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.763 [DEBUG] [sway/config/input.c:366] Config stored for input type:keyboard
+00:00:00.763 [DEBUG] [sway/config.c:818] Read line 36:     xkb_options caps:escape
+00:00:00.763 [INFO] [sway/commands.c:406] Config command: input type:keyboard xkb_options caps:escape
+00:00:00.763 [INFO] [sway/commands.c:429] After replacement: input type:keyboard xkb_options caps:escape
+00:00:00.763 [DEBUG] [sway/commands/input.c:58] entering input block: type:keyboard
+00:00:00.763 [DEBUG] [sway/config/input.c:15] new_input_config(type:keyboard)
+00:00:00.763 [DEBUG] [sway/commands.c:461] Subcommand: xkb_options caps:escape
+00:00:00.763 [DEBUG] [sway/commands/input/xkb_options.c:17] set-xkb_options for config: type:keyboard options: caps:escape
+00:00:00.763 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.795 [DEBUG] [sway/config/input.c:366] Config stored for input type:keyboard
+00:00:00.796 [DEBUG] [sway/config.c:818] Read line 37:     xkb_capslock disabled
+00:00:00.797 [INFO] [sway/commands.c:406] Config command: input type:keyboard xkb_capslock disabled
+00:00:00.797 [INFO] [sway/commands.c:429] After replacement: input type:keyboard xkb_capslock disabled
+00:00:00.797 [DEBUG] [sway/commands/input.c:58] entering input block: type:keyboard
+00:00:00.797 [DEBUG] [sway/config/input.c:15] new_input_config(type:keyboard)
+00:00:00.797 [DEBUG] [sway/commands.c:461] Subcommand: xkb_capslock disabled
+00:00:00.797 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.829 [DEBUG] [sway/config/input.c:366] Config stored for input type:keyboard
+00:00:00.829 [DEBUG] [sway/config.c:818] Read line 38:     xkb_numlock enabled
+00:00:00.829 [INFO] [sway/commands.c:406] Config command: input type:keyboard xkb_numlock enabled
+00:00:00.829 [INFO] [sway/commands.c:429] After replacement: input type:keyboard xkb_numlock enabled
+00:00:00.829 [DEBUG] [sway/commands/input.c:58] entering input block: type:keyboard
+00:00:00.829 [DEBUG] [sway/config/input.c:15] new_input_config(type:keyboard)
+00:00:00.829 [DEBUG] [sway/commands.c:461] Subcommand: xkb_numlock enabled
+00:00:00.829 [DEBUG] [sway/config/input.c:15] new_input_config(temp)
+00:00:00.861 [DEBUG] [sway/config/input.c:366] Config stored for input type:keyboard
+00:00:00.861 [DEBUG] [sway/config.c:818] Read line 39: }
+00:00:00.862 [DEBUG] [sway/config.c:889] Exiting block 'input type:keyboard'
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 40: 
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 41: # Super+Enter is defined once in local.d/terminal.conf.
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 42: bindsym $mod+Shift+Return exec $term
+00:00:00.863 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+Return exec $term
+00:00:00.863 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+Return exec foot
+00:00:00.863 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+Return to command `exec foot` for device '*'
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 43: bindsym $mod+d exec $menu
+00:00:00.863 [INFO] [sway/commands.c:406] Config command: bindsym $mod+d exec $menu
+00:00:00.863 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+d exec ~/.local/bin/oldbook-menu
+00:00:00.863 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+d to command `exec ~/.local/bin/oldbook-menu` for device '*'
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 44: bindsym $mod+Shift+d exec ~/.local/bin/oldbook-control
+00:00:00.863 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+d exec ~/.local/bin/oldbook-control
+00:00:00.863 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+d exec ~/.local/bin/oldbook-control
+00:00:00.863 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+d to command `exec ~/.local/bin/oldbook-control` for device '*'
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 45: bindsym $mod+g exec ~/.local/bin/oldbook-wallpaper pick
+00:00:00.863 [INFO] [sway/commands.c:406] Config command: bindsym $mod+g exec ~/.local/bin/oldbook-wallpaper pick
+00:00:00.863 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+g exec ~/.local/bin/oldbook-wallpaper pick
+00:00:00.863 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+g to command `exec ~/.local/bin/oldbook-wallpaper pick` for device '*'
+00:00:00.863 [DEBUG] [sway/config.c:818] Read line 46: bindsym $mod+Shift+g exec ~/.local/bin/oldbook-conky toggle
+00:00:00.863 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+g exec ~/.local/bin/oldbook-conky toggle
+00:00:00.863 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+g exec ~/.local/bin/oldbook-conky toggle
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+g to command `exec ~/.local/bin/oldbook-conky toggle` for device '*'
+00:00:00.864 [DEBUG] [sway/config.c:818] Read line 47: bindsym $mod+slash exec ~/.local/bin/oldbook-scripture find
+00:00:00.864 [INFO] [sway/commands.c:406] Config command: bindsym $mod+slash exec ~/.local/bin/oldbook-scripture find
+00:00:00.864 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+slash exec ~/.local/bin/oldbook-scripture find
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+slash to command `exec ~/.local/bin/oldbook-scripture find` for device '*'
+00:00:00.864 [DEBUG] [sway/config.c:818] Read line 48: bindsym $mod+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
+00:00:00.864 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
+00:00:00.864 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+Right exec ~/.local/bin/oldbook-wallpaper next
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+Right to command `exec ~/.local/bin/oldbook-wallpaper next` for device '*'
+00:00:00.864 [DEBUG] [sway/config.c:818] Read line 49: bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
+00:00:00.864 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
+00:00:00.864 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+Left exec ~/.local/bin/oldbook-wallpaper prev
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+Left to command `exec ~/.local/bin/oldbook-wallpaper prev` for device '*'
+00:00:00.864 [DEBUG] [sway/config.c:818] Read line 50: bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
+00:00:00.864 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
+00:00:00.864 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+p exec ~/.local/bin/oldbook-wallpaper pause
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+p to command `exec ~/.local/bin/oldbook-wallpaper pause` for device '*'
+00:00:00.864 [DEBUG] [sway/config.c:818] Read line 51: bindsym $mod+Shift+n exec swaync-client -t
+00:00:00.864 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+n exec swaync-client -t
+00:00:00.864 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+n exec swaync-client -t
+00:00:00.864 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+n to command `exec swaync-client -t` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 52: bindsym $mod+i exec ~/.local/bin/oldbook-workspaces ai-next
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+i exec ~/.local/bin/oldbook-workspaces ai-next
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+i exec ~/.local/bin/oldbook-workspaces ai-next
+00:00:00.865 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+i to command `exec ~/.local/bin/oldbook-workspaces ai-next` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 53: bindsym $mod+n exec ~/.local/bin/oldbook-agents
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+n exec ~/.local/bin/oldbook-agents
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+n exec ~/.local/bin/oldbook-agents
+00:00:00.865 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+n to command `exec ~/.local/bin/oldbook-agents` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 54: bindsym $mod+Ctrl+n exec ~/.local/bin/oldbook-agents quick
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+n exec ~/.local/bin/oldbook-agents quick
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+n exec ~/.local/bin/oldbook-agents quick
+00:00:00.865 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+n to command `exec ~/.local/bin/oldbook-agents quick` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 55: bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+i exec ~/.local/bin/oldbook-workspaces ai-menu
+00:00:00.865 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+i to command `exec ~/.local/bin/oldbook-workspaces ai-menu` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 56: bindsym $mod+Shift+q kill
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+q kill
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+q kill
+00:00:00.865 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+q to command `kill` for device '*'
+00:00:00.865 [DEBUG] [sway/config.c:818] Read line 57: bindsym $mod+Ctrl+Shift+c reload
+00:00:00.865 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+Shift+c reload
+00:00:00.865 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+Shift+c reload
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+Shift+c to command `reload` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 58: bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+00:00:00.866 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+00:00:00.866 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+e exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+e to command `exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 59: bindsym $mod+Escape exec $lock
+00:00:00.866 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Escape exec $lock
+00:00:00.866 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Escape exec ~/.local/bin/oldbook-lock
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Escape to command `exec ~/.local/bin/oldbook-lock` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 60: bindsym $mod+Shift+r mode "resize"
+00:00:00.866 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+r mode "resize"
+00:00:00.866 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+r mode "resize"
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+r to command `mode "resize"` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 61: 
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 62: # Vim navigation is also directional on the physical arrow keys.
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 63: bindsym $mod+h focus left
+00:00:00.866 [INFO] [sway/commands.c:406] Config command: bindsym $mod+h focus left
+00:00:00.866 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+h focus left
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+h to command `focus left` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 64: bindsym $mod+j focus down
+00:00:00.866 [INFO] [sway/commands.c:406] Config command: bindsym $mod+j focus down
+00:00:00.866 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+j focus down
+00:00:00.866 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+j to command `focus down` for device '*'
+00:00:00.866 [DEBUG] [sway/config.c:818] Read line 65: bindsym $mod+k focus up
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+k focus up
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+k focus up
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+k to command `focus up` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 66: bindsym $mod+l focus right
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+l focus right
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+l focus right
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+l to command `focus right` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 67: bindsym $mod+Left focus left
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Left focus left
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Left focus left
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Left to command `focus left` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 68: bindsym $mod+Down focus down
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Down focus down
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Down focus down
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Down to command `focus down` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 69: bindsym $mod+Up focus up
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Up focus up
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Up focus up
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Up to command `focus up` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 70: bindsym $mod+Right focus right
+00:00:00.867 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Right focus right
+00:00:00.867 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Right focus right
+00:00:00.867 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Right to command `focus right` for device '*'
+00:00:00.867 [DEBUG] [sway/config.c:818] Read line 71: bindsym $mod+Shift+h move left
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+h move left
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+h move left
+00:00:00.868 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+h to command `move left` for device '*'
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 72: bindsym $mod+Shift+j move down
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+j move down
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+j move down
+00:00:00.868 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+j to command `move down` for device '*'
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 73: bindsym $mod+Shift+k move up
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+k move up
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+k move up
+00:00:00.868 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+k to command `move up` for device '*'
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 74: bindsym $mod+Shift+l move right
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+l move right
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+l move right
+00:00:00.868 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+l to command `move right` for device '*'
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 75: 
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 76: # The number reuses existing custom workspaces; the full label names new ones
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 77: # immediately, before the application naming service receives any event.
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 78: bindsym $mod+1 workspace number "1: Ghost"
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+1 workspace number "1: Ghost"
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+1 workspace number "1: Ghost"
+00:00:00.868 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+1 to command `workspace number "1: Ghost"` for device '*'
+00:00:00.868 [DEBUG] [sway/config.c:818] Read line 79: bindsym $mod+2 workspace number "2: Orbit"
+00:00:00.868 [INFO] [sway/commands.c:406] Config command: bindsym $mod+2 workspace number "2: Orbit"
+00:00:00.868 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+2 workspace number "2: Orbit"
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+2 to command `workspace number "2: Orbit"` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 80: bindsym $mod+3 workspace number "3: Lab"
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+3 workspace number "3: Lab"
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+3 workspace number "3: Lab"
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+3 to command `workspace number "3: Lab"` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 81: bindsym $mod+4 workspace number "4: Signal"
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+4 workspace number "4: Signal"
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+4 workspace number "4: Signal"
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+4 to command `workspace number "4: Signal"` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 82: bindsym $mod+5 workspace number "5: Lounge"
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+5 workspace number "5: Lounge"
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+5 workspace number "5: Lounge"
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+5 to command `workspace number "5: Lounge"` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 83: bindsym $mod+6 workspace number 6
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+6 workspace number 6
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+6 workspace number 6
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+6 to command `workspace number 6` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 84: bindsym $mod+7 workspace number 7
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+7 workspace number 7
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+7 workspace number 7
+00:00:00.869 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+7 to command `workspace number 7` for device '*'
+00:00:00.869 [DEBUG] [sway/config.c:818] Read line 85: bindsym $mod+8 workspace number 8
+00:00:00.869 [INFO] [sway/commands.c:406] Config command: bindsym $mod+8 workspace number 8
+00:00:00.869 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+8 workspace number 8
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+8 to command `workspace number 8` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 86: bindsym $mod+9 workspace number 9
+00:00:00.870 [INFO] [sway/commands.c:406] Config command: bindsym $mod+9 workspace number 9
+00:00:00.870 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+9 workspace number 9
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+9 to command `workspace number 9` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 87: bindsym $mod+0 exec ~/.local/bin/oldbook-strata
+00:00:00.870 [INFO] [sway/commands.c:406] Config command: bindsym $mod+0 exec ~/.local/bin/oldbook-strata
+00:00:00.870 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+0 exec ~/.local/bin/oldbook-strata
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+0 to command `exec ~/.local/bin/oldbook-strata` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 88: bindsym $mod+Shift+1 move container to workspace number "1: Ghost"
+00:00:00.870 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+1 move container to workspace number "1: Ghost"
+00:00:00.870 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+1 move container to workspace number "1: Ghost"
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+1 to command `move container to workspace number "1: Ghost"` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 89: bindsym $mod+Shift+2 move container to workspace number "2: Orbit"
+00:00:00.870 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+2 move container to workspace number "2: Orbit"
+00:00:00.870 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+2 move container to workspace number "2: Orbit"
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+2 to command `move container to workspace number "2: Orbit"` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 90: bindsym $mod+Shift+3 move container to workspace number "3: Lab"
+00:00:00.870 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+3 move container to workspace number "3: Lab"
+00:00:00.870 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+3 move container to workspace number "3: Lab"
+00:00:00.870 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+3 to command `move container to workspace number "3: Lab"` for device '*'
+00:00:00.870 [DEBUG] [sway/config.c:818] Read line 91: bindsym $mod+Shift+4 move container to workspace number "4: Signal"
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+4 move container to workspace number "4: Signal"
+00:00:00.871 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+4 move container to workspace number "4: Signal"
+00:00:00.871 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+4 to command `move container to workspace number "4: Signal"` for device '*'
+00:00:00.871 [DEBUG] [sway/config.c:818] Read line 92: bindsym $mod+Shift+5 move container to workspace number "5: Lounge"
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+5 move container to workspace number "5: Lounge"
+00:00:00.871 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+5 move container to workspace number "5: Lounge"
+00:00:00.871 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+5 to command `move container to workspace number "5: Lounge"` for device '*'
+00:00:00.871 [DEBUG] [sway/config.c:818] Read line 93: bindsym $mod+Shift+6 move container to workspace number 6
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+6 move container to workspace number 6
+00:00:00.871 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+6 move container to workspace number 6
+00:00:00.871 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+6 to command `move container to workspace number 6` for device '*'
+00:00:00.871 [DEBUG] [sway/config.c:818] Read line 94: bindsym $mod+Shift+7 move container to workspace number 7
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+7 move container to workspace number 7
+00:00:00.871 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+7 move container to workspace number 7
+00:00:00.871 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+7 to command `move container to workspace number 7` for device '*'
+00:00:00.871 [DEBUG] [sway/config.c:818] Read line 95: bindsym $mod+Shift+8 move container to workspace number 8
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+8 move container to workspace number 8
+00:00:00.871 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+8 move container to workspace number 8
+00:00:00.871 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+8 to command `move container to workspace number 8` for device '*'
+00:00:00.871 [DEBUG] [sway/config.c:818] Read line 96: bindsym $mod+Shift+9 move container to workspace number 9
+00:00:00.871 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+9 move container to workspace number 9
+00:00:00.872 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+9 move container to workspace number 9
+00:00:00.872 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+9 to command `move container to workspace number 9` for device '*'
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 97: bindsym $mod+Shift+0 move container to workspace number "10: Strata"
+00:00:00.872 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+0 move container to workspace number "10: Strata"
+00:00:00.872 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+0 move container to workspace number "10: Strata"
+00:00:00.872 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+0 to command `move container to workspace number "10: Strata"` for device '*'
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 98: 
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 99: # STRATA uses the 0 key and workspace 10, after workspaces 1 through 9.
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 100: assign [app_id="^oldbook-strata$"] workspace number "10: Strata"
+00:00:00.872 [INFO] [sway/commands.c:406] Config command: assign [app_id="^oldbook-strata$"] workspace number "10: Strata"
+00:00:00.872 [INFO] [sway/commands.c:429] After replacement: assign [app_id="^oldbook-strata$"] workspace number "10: Strata"
+00:00:00.872 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^oldbook-strata$
+00:00:00.872 [DEBUG] [sway/commands/assign.c:58] assign: '[app_id="^oldbook-strata$"]' -> '10: Strata' added
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 101: no_focus [app_id="^oldbook-strata$"]
+00:00:00.872 [INFO] [sway/commands.c:406] Config command: no_focus [app_id="^oldbook-strata$"]
+00:00:00.872 [INFO] [sway/commands.c:429] After replacement: no_focus [app_id="^oldbook-strata$"]
+00:00:00.872 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^oldbook-strata$
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 102: 
+00:00:00.872 [DEBUG] [sway/config.c:818] Read line 103: bindsym $mod+b splith
+00:00:00.872 [INFO] [sway/commands.c:406] Config command: bindsym $mod+b splith
+00:00:00.872 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+b splith
+00:00:00.872 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+b to command `splith` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 104: bindsym $mod+v splitv
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+v splitv
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+v splitv
+00:00:00.873 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+v to command `splitv` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 105: bindsym $mod+f fullscreen toggle
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+f fullscreen toggle
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+f fullscreen toggle
+00:00:00.873 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+f to command `fullscreen toggle` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 106: bindsym $mod+space floating toggle
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+space floating toggle
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+space floating toggle
+00:00:00.873 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+space to command `floating toggle` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 107: bindsym $mod+Shift+space focus mode_toggle
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+space focus mode_toggle
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+space focus mode_toggle
+00:00:00.873 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+space to command `focus mode_toggle` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 108: bindsym $mod+a focus parent
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+a focus parent
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+a focus parent
+00:00:00.873 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+a to command `focus parent` for device '*'
+00:00:00.873 [DEBUG] [sway/config.c:818] Read line 109: bindsym $mod+Shift+a focus child
+00:00:00.873 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+a focus child
+00:00:00.873 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+a focus child
+00:00:00.874 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+a to command `focus child` for device '*'
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 110: bindsym $mod+Tab workspace back_and_forth
+00:00:00.874 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Tab workspace back_and_forth
+00:00:00.874 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Tab workspace back_and_forth
+00:00:00.874 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Tab to command `workspace back_and_forth` for device '*'
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 111: 
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 112: # Caption only: middle click toggles tiled/floating. Left drag and right resize
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 113: # remain native; clicks in application content keep their usual meaning.
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 114: bindsym --release button2 floating toggle
+00:00:00.874 [INFO] [sway/commands.c:406] Config command: bindsym --release button2 floating toggle
+00:00:00.874 [INFO] [sway/commands.c:429] After replacement: bindsym --release button2 floating toggle
+00:00:00.874 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound button2 to command `floating toggle` for device '*'
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 115: 
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 116: bindsym Print exec ~/.local/bin/oldbook-screenshot full
+00:00:00.874 [INFO] [sway/commands.c:406] Config command: bindsym Print exec ~/.local/bin/oldbook-screenshot full
+00:00:00.874 [INFO] [sway/commands.c:429] After replacement: bindsym Print exec ~/.local/bin/oldbook-screenshot full
+00:00:00.874 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Print to command `exec ~/.local/bin/oldbook-screenshot full` for device '*'
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 117: bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
+00:00:00.874 [INFO] [sway/commands.c:406] Config command: bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
+00:00:00.874 [INFO] [sway/commands.c:429] After replacement: bindsym Shift+Print exec ~/.local/bin/oldbook-screenshot area
+00:00:00.874 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Shift+Print to command `exec ~/.local/bin/oldbook-screenshot area` for device '*'
+00:00:00.874 [DEBUG] [sway/config.c:818] Read line 118: bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
+00:00:00.874 [INFO] [sway/commands.c:406] Config command: bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym Ctrl+Print exec ~/.local/bin/oldbook-screenshot window
+00:00:00.875 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Ctrl+Print to command `exec ~/.local/bin/oldbook-screenshot window` for device '*'
+00:00:00.875 [DEBUG] [sway/config.c:818] Read line 119: bindsym XF86AudioRaiseVolume exec ~/.local/bin/oldbook-audio up
+00:00:00.875 [INFO] [sway/commands.c:406] Config command: bindsym XF86AudioRaiseVolume exec ~/.local/bin/oldbook-audio up
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym XF86AudioRaiseVolume exec ~/.local/bin/oldbook-audio up
+00:00:00.875 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86AudioRaiseVolume to command `exec ~/.local/bin/oldbook-audio up` for device '*'
+00:00:00.875 [DEBUG] [sway/config.c:818] Read line 120: bindsym XF86AudioLowerVolume exec ~/.local/bin/oldbook-audio down
+00:00:00.875 [INFO] [sway/commands.c:406] Config command: bindsym XF86AudioLowerVolume exec ~/.local/bin/oldbook-audio down
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym XF86AudioLowerVolume exec ~/.local/bin/oldbook-audio down
+00:00:00.875 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86AudioLowerVolume to command `exec ~/.local/bin/oldbook-audio down` for device '*'
+00:00:00.875 [DEBUG] [sway/config.c:818] Read line 121: bindsym XF86AudioMute exec ~/.local/bin/oldbook-audio mute
+00:00:00.875 [INFO] [sway/commands.c:406] Config command: bindsym XF86AudioMute exec ~/.local/bin/oldbook-audio mute
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym XF86AudioMute exec ~/.local/bin/oldbook-audio mute
+00:00:00.875 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86AudioMute to command `exec ~/.local/bin/oldbook-audio mute` for device '*'
+00:00:00.875 [DEBUG] [sway/config.c:818] Read line 122: bindsym XF86AudioMicMute exec ~/.local/bin/oldbook-audio mic-mute
+00:00:00.875 [INFO] [sway/commands.c:406] Config command: bindsym XF86AudioMicMute exec ~/.local/bin/oldbook-audio mic-mute
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym XF86AudioMicMute exec ~/.local/bin/oldbook-audio mic-mute
+00:00:00.875 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86AudioMicMute to command `exec ~/.local/bin/oldbook-audio mic-mute` for device '*'
+00:00:00.875 [DEBUG] [sway/config.c:818] Read line 123: bindsym XF86MonBrightnessUp exec ~/.local/bin/oldbook-brightness up
+00:00:00.875 [INFO] [sway/commands.c:406] Config command: bindsym XF86MonBrightnessUp exec ~/.local/bin/oldbook-brightness up
+00:00:00.875 [INFO] [sway/commands.c:429] After replacement: bindsym XF86MonBrightnessUp exec ~/.local/bin/oldbook-brightness up
+00:00:00.876 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86MonBrightnessUp to command `exec ~/.local/bin/oldbook-brightness up` for device '*'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 124: bindsym XF86MonBrightnessDown exec ~/.local/bin/oldbook-brightness down
+00:00:00.876 [INFO] [sway/commands.c:406] Config command: bindsym XF86MonBrightnessDown exec ~/.local/bin/oldbook-brightness down
+00:00:00.876 [INFO] [sway/commands.c:429] After replacement: bindsym XF86MonBrightnessDown exec ~/.local/bin/oldbook-brightness down
+00:00:00.876 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86MonBrightnessDown to command `exec ~/.local/bin/oldbook-brightness down` for device '*'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 125: 
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 126: mode "resize" {
+00:00:00.876 [DEBUG] [sway/config.c:872] Entering block 'mode "resize"'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 127:     bindsym h resize shrink width 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym h resize shrink width 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym h resize shrink width 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands.c:461] Subcommand: bindsym h resize shrink width 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound h to command `resize shrink width 10 px or 5 ppt` for device '*'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 128:     bindsym j resize grow height 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym j resize grow height 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym j resize grow height 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands.c:461] Subcommand: bindsym j resize grow height 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound j to command `resize grow height 10 px or 5 ppt` for device '*'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 129:     bindsym k resize shrink height 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym k resize shrink height 10 px or 5 ppt
+00:00:00.876 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym k resize shrink height 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands.c:461] Subcommand: bindsym k resize shrink height 10 px or 5 ppt
+00:00:00.876 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound k to command `resize shrink height 10 px or 5 ppt` for device '*'
+00:00:00.876 [DEBUG] [sway/config.c:818] Read line 130:     bindsym l resize grow width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym l resize grow width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym l resize grow width 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands.c:461] Subcommand: bindsym l resize grow width 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound l to command `resize grow width 10 px or 5 ppt` for device '*'
+00:00:00.877 [DEBUG] [sway/config.c:818] Read line 131:     bindsym Left resize shrink width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Left resize shrink width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Left resize shrink width 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Left resize shrink width 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Left to command `resize shrink width 10 px or 5 ppt` for device '*'
+00:00:00.877 [DEBUG] [sway/config.c:818] Read line 132:     bindsym Down resize grow height 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Down resize grow height 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Down resize grow height 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Down resize grow height 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Down to command `resize grow height 10 px or 5 ppt` for device '*'
+00:00:00.877 [DEBUG] [sway/config.c:818] Read line 133:     bindsym Up resize shrink height 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Up resize shrink height 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Up resize shrink height 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Up resize shrink height 10 px or 5 ppt
+00:00:00.877 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Up to command `resize shrink height 10 px or 5 ppt` for device '*'
+00:00:00.877 [DEBUG] [sway/config.c:818] Read line 134:     bindsym Right resize grow width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Right resize grow width 10 px or 5 ppt
+00:00:00.877 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Right resize grow width 10 px or 5 ppt
+00:00:00.878 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Right resize grow width 10 px or 5 ppt
+00:00:00.878 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Right to command `resize grow width 10 px or 5 ppt` for device '*'
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 135:     bindsym Return mode "default"
+00:00:00.878 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Return mode "default"
+00:00:00.878 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Return mode "default"
+00:00:00.878 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Return mode "default"
+00:00:00.878 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Return to command `mode "default"` for device '*'
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 136:     bindsym Escape mode "default"
+00:00:00.878 [INFO] [sway/commands.c:406] Config command: mode "resize" bindsym Escape mode "default"
+00:00:00.878 [INFO] [sway/commands.c:429] After replacement: mode "resize" bindsym Escape mode "default"
+00:00:00.878 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Escape mode "default"
+00:00:00.878 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Escape to command `mode "default"` for device '*'
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 137: }
+00:00:00.878 [DEBUG] [sway/config.c:889] Exiting block 'mode "resize"'
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 138: 
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 139: for_window [app_id="oldbook-agent"] floating enable, resize set width 1100 px height 700 px, move position center
+00:00:00.878 [INFO] [sway/commands.c:406] Config command: for_window [app_id="oldbook-agent"] floating enable, resize set width 1100 px height 700 px, move position center
+00:00:00.878 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="oldbook-agent"] floating enable, resize set width 1100 px height 700 px, move position center
+00:00:00.878 [DEBUG] [sway/criteria.c:841] Found pair: app_id=oldbook-agent
+00:00:00.878 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="oldbook-agent"]' -> 'floating enable, resize set width 1100 px height 700 px, move position center' added
+00:00:00.878 [DEBUG] [sway/config.c:818] Read line 140: for_window [app_id="oldbook-decoration-settings"] floating enable, move position center
+00:00:00.878 [INFO] [sway/commands.c:406] Config command: for_window [app_id="oldbook-decoration-settings"] floating enable, move position center
+00:00:00.878 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="oldbook-decoration-settings"] floating enable, move position center
+00:00:00.878 [DEBUG] [sway/criteria.c:841] Found pair: app_id=oldbook-decoration-settings
+00:00:00.879 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="oldbook-decoration-settings"]' -> 'floating enable, move position center' added
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 141: for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
+00:00:00.879 [INFO] [sway/commands.c:406] Config command: for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
+00:00:00.879 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="pavucontrol"] floating enable, resize set width 900 px height 700 px, move position center
+00:00:00.879 [DEBUG] [sway/criteria.c:841] Found pair: app_id=pavucontrol
+00:00:00.879 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="pavucontrol"]' -> 'floating enable, resize set width 900 px height 700 px, move position center' added
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 142: for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
+00:00:00.879 [INFO] [sway/commands.c:406] Config command: for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
+00:00:00.879 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="org.pwmt.zathura"] inhibit_idle fullscreen
+00:00:00.879 [DEBUG] [sway/criteria.c:841] Found pair: app_id=org.pwmt.zathura
+00:00:00.879 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="org.pwmt.zathura"]' -> 'inhibit_idle fullscreen' added
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 143: for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt
+00:00:00.879 [INFO] [sway/commands.c:406] Config command: for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt
+00:00:00.879 [INFO] [sway/commands.c:429] After replacement: for_window [title="Picture-in-Picture"] sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt
+00:00:00.879 [DEBUG] [sway/criteria.c:841] Found pair: title=Picture-in-Picture
+00:00:00.879 [DEBUG] [sway/commands/for_window.c:34] for_window: '[title="Picture-in-Picture"]' -> 'sticky enable, floating enable, resize set width 720 px height 405 px, move position 70 ppt 8 ppt' added
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 144: 
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 145: # oldbook-session is per-UID idempotent: reloads reuse the existing services.
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 146: # Pithos keeps playing with its window tucked away until the music bar opens it.
+00:00:00.879 [DEBUG] [sway/config.c:818] Read line 147: for_window [app_id="^(io[.]github[.]Pithos|pithos)$"] move scratchpad
+00:00:00.879 [INFO] [sway/commands.c:406] Config command: for_window [app_id="^(io[.]github[.]Pithos|pithos)$"] move scratchpad
+00:00:00.880 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="^(io[.]github[.]Pithos|pithos)$"] move scratchpad
+00:00:00.880 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^(io[.]github[.]Pithos|pithos)$
+00:00:00.880 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="^(io[.]github[.]Pithos|pithos)$"]' -> 'move scratchpad' added
+00:00:00.880 [DEBUG] [sway/config.c:818] Read line 148: for_window [class="^Pithos$"] move scratchpad
+00:00:00.880 [INFO] [sway/commands.c:406] Config command: for_window [class="^Pithos$"] move scratchpad
+00:00:00.880 [INFO] [sway/commands.c:429] After replacement: for_window [class="^Pithos$"] move scratchpad
+00:00:00.880 [DEBUG] [sway/criteria.c:841] Found pair: class=^Pithos$
+00:00:00.880 [DEBUG] [sway/commands/for_window.c:34] for_window: '[class="^Pithos$"]' -> 'move scratchpad' added
+00:00:00.880 [DEBUG] [sway/config.c:818] Read line 149: 
+00:00:00.880 [DEBUG] [sway/config.c:818] Read line 150: exec_always --no-startup-id ~/.local/bin/oldbook-session
+00:00:00.880 [INFO] [sway/commands.c:406] Config command: exec_always --no-startup-id ~/.local/bin/oldbook-session
+00:00:00.880 [INFO] [sway/commands.c:429] After replacement: exec_always --no-startup-id ~/.local/bin/oldbook-session
+00:00:00.880 [DEBUG] [sway/config.c:862] Deferring command `exec_always --no-startup-id ~/.local/bin/oldbook-session'
+00:00:00.880 [DEBUG] [sway/config.c:818] Read line 151: include ~/.config/sway/local.d/*
+00:00:00.880 [INFO] [sway/commands.c:406] Config command: include ~/.config/sway/local.d/*
+00:00:00.880 [INFO] [sway/commands.c:429] After replacement: include ~/.config/sway/local.d/*
+00:00:00.899 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/25-decoration.conf
+00:00:00.899 [DEBUG] [sway/config.c:818] Read line 1: # Always return workspace captions to the bottom, regardless of current mode.
+00:00:00.899 [DEBUG] [sway/config.c:818] Read line 2: bindsym $mod+Ctrl+b exec ~/.local/bin/oldbook-decoration bottom
+00:00:00.899 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+b exec ~/.local/bin/oldbook-decoration bottom
+00:00:00.899 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+b exec ~/.local/bin/oldbook-decoration bottom
+00:00:00.899 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+b to command `exec ~/.local/bin/oldbook-decoration bottom` for device '*'
+00:00:00.899 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/agent-switcher.conf
+00:00:00.899 [DEBUG] [sway/config.c:818] Read line 1: # Agent-only Alt+Tab. Repeated bindings signal one transient popup; releasing
+00:00:00.899 [DEBUG] [sway/config.c:818] Read line 2: # either final Alt key accepts its highlighted window and Escape cancels.
+00:00:00.899 [DEBUG] [sway/config.c:818] Read line 3: bindsym Mod1+Tab exec ~/.local/bin/oldbook-agent-switcher next
+00:00:00.899 [INFO] [sway/commands.c:406] Config command: bindsym Mod1+Tab exec ~/.local/bin/oldbook-agent-switcher next
+00:00:00.899 [INFO] [sway/commands.c:429] After replacement: bindsym Mod1+Tab exec ~/.local/bin/oldbook-agent-switcher next
+00:00:00.900 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod1+Tab to command `exec ~/.local/bin/oldbook-agent-switcher next` for device '*'
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 4: bindsym Mod1+Shift+Tab exec ~/.local/bin/oldbook-agent-switcher previous
+00:00:00.900 [INFO] [sway/commands.c:406] Config command: bindsym Mod1+Shift+Tab exec ~/.local/bin/oldbook-agent-switcher previous
+00:00:00.900 [INFO] [sway/commands.c:429] After replacement: bindsym Mod1+Shift+Tab exec ~/.local/bin/oldbook-agent-switcher previous
+00:00:00.900 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod1+Shift+Tab to command `exec ~/.local/bin/oldbook-agent-switcher previous` for device '*'
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 5: 
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 6: # Once the popup maps it enters this mode, so Tab repeats are ordered in its
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 7: # own GTK event stream with the final Alt release. Escape also recovers the
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 8: # default mode if the popup has exited unexpectedly.
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 9: mode "agent-switcher" {
+00:00:00.900 [DEBUG] [sway/config.c:872] Entering block 'mode "agent-switcher"'
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 10:     bindsym Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [INFO] [sway/commands.c:406] Config command: mode "agent-switcher" bindsym Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [INFO] [sway/commands.c:429] After replacement: mode "agent-switcher" bindsym Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Escape to command `exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"` for device '*'
+00:00:00.900 [DEBUG] [sway/config.c:818] Read line 11:     bindsym Mod1+Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [INFO] [sway/commands.c:406] Config command: mode "agent-switcher" bindsym Mod1+Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [INFO] [sway/commands.c:429] After replacement: mode "agent-switcher" bindsym Mod1+Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.900 [DEBUG] [sway/commands.c:461] Subcommand: bindsym Mod1+Escape exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"
+00:00:00.901 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod1+Escape to command `exec ~/.local/bin/oldbook-agent-switcher cancel, mode "default"` for device '*'
+00:00:00.901 [DEBUG] [sway/config.c:818] Read line 12: }
+00:00:00.901 [DEBUG] [sway/config.c:889] Exiting block 'mode "agent-switcher"'
+00:00:00.902 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/center.conf
+00:00:00.902 [DEBUG] [sway/config.c:818] Read line 1: # Center the active window in usable desktop space and bring it forward.
+00:00:00.902 [DEBUG] [sway/config.c:818] Read line 2: bindsym $mod+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [INFO] [sway/commands.c:406] Config command: bindsym $mod+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+c to command `exec ~/.local/bin/oldbook-center` for device '*'
+00:00:00.903 [DEBUG] [sway/config.c:818] Read line 3: bindsym $mod+Shift+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+c exec ~/.local/bin/oldbook-center
+00:00:00.903 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+c to command `exec ~/.local/bin/oldbook-center` for device '*'
+00:00:00.903 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/clipboard.conf
+00:00:00.903 [DEBUG] [sway/config.c:818] Read line 1: # Leave Super+V available for vertical splits.
+00:00:00.903 [DEBUG] [sway/config.c:818] Read line 2: bindsym $mod+Shift+v exec ~/.local/bin/oldbook-clipboard pick
+00:00:00.903 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+v exec ~/.local/bin/oldbook-clipboard pick
+00:00:00.903 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+v exec ~/.local/bin/oldbook-clipboard pick
+00:00:00.903 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+v to command `exec ~/.local/bin/oldbook-clipboard pick` for device '*'
+00:00:00.903 [DEBUG] [sway/config.c:818] Read line 3: bindsym $mod+Ctrl+Shift+v exec ~/.local/bin/oldbook-clipboard delete
+00:00:00.903 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Ctrl+Shift+v exec ~/.local/bin/oldbook-clipboard delete
+00:00:00.903 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Ctrl+Shift+v exec ~/.local/bin/oldbook-clipboard delete
+00:00:00.904 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Ctrl+Shift+v to command `exec ~/.local/bin/oldbook-clipboard delete` for device '*'
+00:00:00.904 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/dropdown.conf
+00:00:00.904 [DEBUG] [sway/config.c:818] Read line 1: # Keep the console on ` and the system monitor on ~ (Shift+` on this keyboard).
+00:00:00.904 [DEBUG] [sway/config.c:818] Read line 2: bindsym $mod+grave exec ~/.local/bin/oldbook-dropdown
+00:00:00.904 [INFO] [sway/commands.c:406] Config command: bindsym $mod+grave exec ~/.local/bin/oldbook-dropdown
+00:00:00.904 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+grave exec ~/.local/bin/oldbook-dropdown
+00:00:00.904 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+grave to command `exec ~/.local/bin/oldbook-dropdown` for device '*'
+00:00:00.904 [DEBUG] [sway/config.c:818] Read line 3: bindsym $mod+asciitilde exec ~/.local/bin/oldbook-dropdown monitor
+00:00:00.904 [INFO] [sway/commands.c:406] Config command: bindsym $mod+asciitilde exec ~/.local/bin/oldbook-dropdown monitor
+00:00:00.904 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+asciitilde exec ~/.local/bin/oldbook-dropdown monitor
+00:00:00.904 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+asciitilde to command `exec ~/.local/bin/oldbook-dropdown monitor` for device '*'
+00:00:00.904 [DEBUG] [sway/config.c:818] Read line 4: # Retain the legacy Foot rule so an existing shell stays recoverable.
+00:00:00.904 [DEBUG] [sway/config.c:818] Read line 5: for_window [app_id="^(com[.]oldbook[.](dropdown|monitor)|oldbook-dropdown)$"] floating enable, border pixel 0, move scratchpad
+00:00:00.905 [INFO] [sway/commands.c:406] Config command: for_window [app_id="^(com[.]oldbook[.](dropdown|monitor)|oldbook-dropdown)$"] floating enable, border pixel 0, move scratchpad
+00:00:00.905 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="^(com[.]oldbook[.](dropdown|monitor)|oldbook-dropdown)$"] floating enable, border pixel 0, move scratchpad
+00:00:00.905 [DEBUG] [sway/criteria.c:841] Found pair: app_id=^(com[.]oldbook[.](dropdown|monitor)|oldbook-dropdown)$
+00:00:00.905 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="^(com[.]oldbook[.](dropdown|monitor)|oldbook-dropdown)$"]' -> 'floating enable, border pixel 0, move scratchpad' added
+00:00:00.905 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/keyboard-backlight.conf
+00:00:00.905 [DEBUG] [sway/config.c:818] Read line 1: # hid_apple auto mode on this MacBook sends these from F5/F6 without Fn.
+00:00:00.905 [DEBUG] [sway/config.c:818] Read line 2: # Fn+F5/F6 retain their application function-key behavior.
+00:00:00.905 [DEBUG] [sway/config.c:818] Read line 3: bindsym --locked XF86KbdBrightnessDown exec ~/.local/bin/oldbook-keyboard-backlight down
+00:00:00.905 [INFO] [sway/commands.c:406] Config command: bindsym --locked XF86KbdBrightnessDown exec ~/.local/bin/oldbook-keyboard-backlight down
+00:00:00.905 [INFO] [sway/commands.c:429] After replacement: bindsym --locked XF86KbdBrightnessDown exec ~/.local/bin/oldbook-keyboard-backlight down
+00:00:00.905 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86KbdBrightnessDown to command `exec ~/.local/bin/oldbook-keyboard-backlight down` for device '*'
+00:00:00.905 [DEBUG] [sway/config.c:818] Read line 4: bindsym --locked XF86KbdBrightnessUp exec ~/.local/bin/oldbook-keyboard-backlight up
+00:00:00.905 [INFO] [sway/commands.c:406] Config command: bindsym --locked XF86KbdBrightnessUp exec ~/.local/bin/oldbook-keyboard-backlight up
+00:00:00.905 [INFO] [sway/commands.c:429] After replacement: bindsym --locked XF86KbdBrightnessUp exec ~/.local/bin/oldbook-keyboard-backlight up
+00:00:00.905 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86KbdBrightnessUp to command `exec ~/.local/bin/oldbook-keyboard-backlight up` for device '*'
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 5: bindsym --locked XF86KbdLightOnOff exec ~/.local/bin/oldbook-keyboard-backlight toggle
+00:00:00.906 [INFO] [sway/commands.c:406] Config command: bindsym --locked XF86KbdLightOnOff exec ~/.local/bin/oldbook-keyboard-backlight toggle
+00:00:00.906 [INFO] [sway/commands.c:429] After replacement: bindsym --locked XF86KbdLightOnOff exec ~/.local/bin/oldbook-keyboard-backlight toggle
+00:00:00.906 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound XF86KbdLightOnOff to command `exec ~/.local/bin/oldbook-keyboard-backlight toggle` for device '*'
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 6: 
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 7: # Preserve the chosen level, including off, across logins; first use starts at 25%.
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 8: exec --no-startup-id ~/.local/bin/oldbook-keyboard-backlight restore
+00:00:00.906 [INFO] [sway/commands.c:406] Config command: exec --no-startup-id ~/.local/bin/oldbook-keyboard-backlight restore
+00:00:00.906 [INFO] [sway/commands.c:429] After replacement: exec --no-startup-id ~/.local/bin/oldbook-keyboard-backlight restore
+00:00:00.906 [DEBUG] [sway/config.c:862] Deferring command `exec --no-startup-id ~/.local/bin/oldbook-keyboard-backlight restore'
+00:00:00.906 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/resize.conf
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 1: # Resize the focused window from its center, 20 logical pixels per edge.
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 2: # The unshifted = key and the shifted + symbol both grow the window.
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 3: bindsym $mod+equal exec ~/.local/bin/oldbook-resize grow
+00:00:00.906 [INFO] [sway/commands.c:406] Config command: bindsym $mod+equal exec ~/.local/bin/oldbook-resize grow
+00:00:00.906 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+equal exec ~/.local/bin/oldbook-resize grow
+00:00:00.906 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+equal to command `exec ~/.local/bin/oldbook-resize grow` for device '*'
+00:00:00.906 [DEBUG] [sway/config.c:818] Read line 4: bindsym $mod+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.906 [INFO] [sway/commands.c:406] Config command: bindsym $mod+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.906 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+plus to command `exec ~/.local/bin/oldbook-resize grow` for device '*'
+00:00:00.907 [DEBUG] [sway/config.c:818] Read line 5: bindsym $mod+Shift+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Shift+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Shift+plus exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Shift+plus to command `exec ~/.local/bin/oldbook-resize grow` for device '*'
+00:00:00.907 [DEBUG] [sway/config.c:818] Read line 6: bindsym $mod+minus exec ~/.local/bin/oldbook-resize shrink
+00:00:00.907 [INFO] [sway/commands.c:406] Config command: bindsym $mod+minus exec ~/.local/bin/oldbook-resize shrink
+00:00:00.907 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+minus exec ~/.local/bin/oldbook-resize shrink
+00:00:00.907 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+minus to command `exec ~/.local/bin/oldbook-resize shrink` for device '*'
+00:00:00.907 [DEBUG] [sway/config.c:818] Read line 7: bindsym $mod+KP_Add exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [INFO] [sway/commands.c:406] Config command: bindsym $mod+KP_Add exec ~/.local/bin/oldbook-resize grow
+00:00:00.907 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+KP_Add exec ~/.local/bin/oldbook-resize grow
+00:00:00.910 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+KP_Add to command `exec ~/.local/bin/oldbook-resize grow` for device '*'
+00:00:00.911 [DEBUG] [sway/config.c:818] Read line 8: bindsym $mod+KP_Subtract exec ~/.local/bin/oldbook-resize shrink
+00:00:00.912 [INFO] [sway/commands.c:406] Config command: bindsym $mod+KP_Subtract exec ~/.local/bin/oldbook-resize shrink
+00:00:00.913 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+KP_Subtract exec ~/.local/bin/oldbook-resize shrink
+00:00:00.913 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+KP_Subtract to command `exec ~/.local/bin/oldbook-resize shrink` for device '*'
+00:00:00.914 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/scripture.conf
+00:00:00.914 [DEBUG] [sway/config.c:818] Read line 1: # Shift+/ produces question on the desktop keyboard layout.
+00:00:00.914 [DEBUG] [sway/config.c:818] Read line 2: bindsym $mod+question exec ~/.local/bin/oldbook-scripture find --all
+00:00:00.914 [INFO] [sway/commands.c:406] Config command: bindsym $mod+question exec ~/.local/bin/oldbook-scripture find --all
+00:00:00.914 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+question exec ~/.local/bin/oldbook-scripture find --all
+00:00:00.914 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+question to command `exec ~/.local/bin/oldbook-scripture find --all` for device '*'
+00:00:00.914 [INFO] [sway/config.c:459] Loading config from /home/jack/.config/sway/local.d/shortcuts.conf
+00:00:00.914 [DEBUG] [sway/config.c:818] Read line 1: # Standalone Superhold; previous app preserved with superhold-rollback.
+00:00:00.914 [DEBUG] [sway/config.c:818] Read line 2: exec_always --no-startup-id /home/jack/.local/bin/superhold daemon
+00:00:00.914 [INFO] [sway/commands.c:406] Config command: exec_always --no-startup-id /home/jack/.local/bin/superhold daemon
+00:00:00.914 [INFO] [sway/commands.c:429] After replacement: exec_always --no-startup-id /home/jack/.local/bin/superhold daemon
+00:00:00.915 [DEBUG] [sway/config.c:862] Deferring command `exec_always --no-startup-id /home/jack/.local/bin/superhold daemon'
+00:00:00.915 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/desktop/.config/sway/local.d/terminal.conf
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 1: # Keep the preferred terminal independent of theme profile changes.
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 2: set $term ghostty
+00:00:00.915 [INFO] [sway/commands.c:406] Config command: set $term ghostty
+00:00:00.915 [INFO] [sway/commands.c:429] After replacement: set $term ghostty
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 3: bindsym $mod+Return exec $term
+00:00:00.915 [INFO] [sway/commands.c:406] Config command: bindsym $mod+Return exec $term
+00:00:00.915 [INFO] [sway/commands.c:429] After replacement: bindsym Mod4+Return exec ghostty
+00:00:00.915 [DEBUG] [sway/commands/bind.c:297] bindsym - Bound Mod4+Return to command `exec ghostty` for device '*'
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 152: 
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 153: # YouTube PiP is controlled from the launcher; its desktop mode uses a bottom layer.
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 154: for_window [app_id="oldbook-youtube"] floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt
+00:00:00.915 [INFO] [sway/commands.c:406] Config command: for_window [app_id="oldbook-youtube"] floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt
+00:00:00.915 [INFO] [sway/commands.c:429] After replacement: for_window [app_id="oldbook-youtube"] floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt
+00:00:00.915 [DEBUG] [sway/criteria.c:841] Found pair: app_id=oldbook-youtube
+00:00:00.915 [DEBUG] [sway/commands/for_window.c:34] for_window: '[app_id="oldbook-youtube"]' -> 'floating enable, sticky enable, border pixel 0, resize set width 480 px height 270 px, move position 65 ppt 65 ppt' added
+00:00:00.915 [DEBUG] [sway/config.c:818] Read line 155: no_focus [app_id="oldbook-youtube"]
+00:00:00.916 [INFO] [sway/commands.c:406] Config command: no_focus [app_id="oldbook-youtube"]
+00:00:00.916 [INFO] [sway/commands.c:429] After replacement: no_focus [app_id="oldbook-youtube"]
+00:00:00.916 [DEBUG] [sway/criteria.c:841] Found pair: app_id=oldbook-youtube
+00:00:00.919 [DEBUG] [sway/config.c:818] Read line 3: include ~/.config/swayfx/effects.conf
+00:00:00.919 [INFO] [sway/commands.c:406] Config command: include ~/.config/swayfx/effects.conf
+00:00:00.919 [INFO] [sway/commands.c:429] After replacement: include ~/.config/swayfx/effects.conf
+00:00:00.933 [INFO] [sway/config.c:459] Loading config from /home/jack/.files/alpine/themes/profiles/the-minted-eclipse-48db56180baf/.config/swayfx/effects.conf
+00:00:00.933 [DEBUG] [sway/config.c:818] Read line 1: # SwayFX 0.6 only. Include after the shared Sway configuration.
+00:00:00.933 [DEBUG] [sway/config.c:818] Read line 2: # Warm charcoal glass; compact corners keep floating titlebars proportional.
+00:00:00.933 [DEBUG] [sway/config.c:818] Read line 3: corner_radius 6
+00:00:00.933 [INFO] [sway/commands.c:406] Config command: corner_radius 6
+00:00:00.933 [INFO] [sway/commands.c:429] After replacement: corner_radius 6
+00:00:00.933 [DEBUG] [sway/config.c:818] Read line 4: smart_corner_radius enable
+00:00:00.933 [INFO] [sway/commands.c:406] Config command: smart_corner_radius enable
+00:00:00.933 [INFO] [sway/commands.c:429] After replacement: smart_corner_radius enable
+00:00:00.933 [DEBUG] [sway/config.c:818] Read line 5: blur enable
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur enable
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur enable
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 6: blur_xray disable
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_xray disable
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_xray disable
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 7: blur_passes 2
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_passes 2
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_passes 2
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 8: blur_radius 3
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_radius 3
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_radius 3
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 9: blur_noise 0.018
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_noise 0.018
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_noise 0.018
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 10: blur_brightness 0.95
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_brightness 0.95
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_brightness 0.95
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 11: blur_contrast 1.03
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_contrast 1.03
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_contrast 1.03
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 12: blur_saturation 1.00
+00:00:00.934 [INFO] [sway/commands.c:406] Config command: blur_saturation 1.00
+00:00:00.934 [INFO] [sway/commands.c:429] After replacement: blur_saturation 1.00
+00:00:00.934 [DEBUG] [sway/config.c:818] Read line 13: shadows enable
+00:00:00.937 [INFO] [sway/commands.c:406] Config command: shadows enable
+00:00:00.937 [INFO] [sway/commands.c:429] After replacement: shadows enable
+00:00:00.937 [DEBUG] [sway/config.c:818] Read line 14: shadows_on_csd enable
+00:00:00.937 [INFO] [sway/commands.c:406] Config command: shadows_on_csd enable
+00:00:00.937 [INFO] [sway/commands.c:429] After replacement: shadows_on_csd enable
+00:00:00.937 [DEBUG] [sway/config.c:818] Read line 15: shadow_blur_radius 24
+00:00:00.937 [INFO] [sway/commands.c:406] Config command: shadow_blur_radius 24
+00:00:00.937 [INFO] [sway/commands.c:429] After replacement: shadow_blur_radius 24
+00:00:00.937 [DEBUG] [sway/config.c:818] Read line 16: shadow_color #0c1214c0
+00:00:00.938 [INFO] [sway/commands.c:406] Config command: shadow_color #0c1214c0
+00:00:00.938 [INFO] [sway/commands.c:429] After replacement: shadow_color #0c1214c0
+00:00:00.938 [DEBUG] [sway/config.c:818] Read line 17: shadow_inactive_color #0c121480
+00:00:00.938 [INFO] [sway/commands.c:406] Config command: shadow_inactive_color #0c121480
+00:00:00.938 [INFO] [sway/commands.c:429] After replacement: shadow_inactive_color #0c121480
+00:00:00.938 [DEBUG] [sway/config.c:818] Read line 18: shadow_offset 0 6
+00:00:00.938 [INFO] [sway/commands.c:406] Config command: shadow_offset 0 6
+00:00:00.938 [INFO] [sway/commands.c:429] After replacement: shadow_offset 0 6
+00:00:00.938 [DEBUG] [sway/config.c:818] Read line 19: default_dim_inactive 0.03
+00:00:00.938 [INFO] [sway/commands.c:406] Config command: default_dim_inactive 0.03
+00:00:00.938 [INFO] [sway/commands.c:429] After replacement: default_dim_inactive 0.03
+00:00:00.939 [DEBUG] [sway/config.c:818] Read line 20: dim_inactive_colors.unfocused #10191Bff
+00:00:00.939 [INFO] [sway/commands.c:406] Config command: dim_inactive_colors.unfocused #10191Bff
+00:00:00.939 [INFO] [sway/commands.c:429] After replacement: dim_inactive_colors.unfocused #10191Bff
+00:00:00.939 [DEBUG] [sway/config.c:818] Read line 21: titlebar_separator disable
+00:00:00.939 [INFO] [sway/commands.c:406] Config command: titlebar_separator disable
+00:00:00.939 [INFO] [sway/commands.c:429] After replacement: titlebar_separator disable
+00:00:00.939 [DEBUG] [sway/config.c:818] Read line 22: animation_duration_ms 140
+00:00:00.939 [INFO] [sway/commands.c:406] Config command: animation_duration_ms 140
+00:00:00.939 [INFO] [sway/commands.c:429] After replacement: animation_duration_ms 140
+00:00:00.942 [DEBUG] [sway/config.c:818] Read line 23: 
+00:00:00.942 [DEBUG] [sway/config.c:818] Read line 24: layer_effects "waybar" {
+00:00:00.942 [DEBUG] [sway/config.c:872] Entering block 'layer_effects "waybar"'
+00:00:00.942 [DEBUG] [sway/config.c:818] Read line 25:     blur enable
+00:00:00.942 [INFO] [sway/commands.c:406] Config command: layer_effects "waybar" blur enable
+00:00:00.942 [INFO] [sway/commands.c:429] After replacement: layer_effects "waybar" blur enable
+00:00:00.942 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:00.942 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur enable' added
+00:00:00.942 [DEBUG] [sway/config.c:818] Read line 26:     blur_xray enable
+00:00:00.942 [INFO] [sway/commands.c:406] Config command: layer_effects "waybar" blur_xray enable
+00:00:00.942 [INFO] [sway/commands.c:429] After replacement: layer_effects "waybar" blur_xray enable
+00:00:00.942 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:00.943 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:00.943 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_xray enable' added
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 27:     blur_ignore_transparent enable
+00:00:00.943 [INFO] [sway/commands.c:406] Config command: layer_effects "waybar" blur_ignore_transparent enable
+00:00:00.943 [INFO] [sway/commands.c:429] After replacement: layer_effects "waybar" blur_ignore_transparent enable
+00:00:00.943 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_xray enable'. Replacing with: 'blur_ignore_transparent enable'
+00:00:00.943 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_ignore_transparent enable'
+00:00:00.943 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'blur_ignore_transparent enable' added
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 28:     shadows enable
+00:00:00.943 [INFO] [sway/commands.c:406] Config command: layer_effects "waybar" shadows enable
+00:00:00.943 [INFO] [sway/commands.c:429] After replacement: layer_effects "waybar" shadows enable
+00:00:00.943 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'blur_ignore_transparent enable'. Replacing with: 'shadows enable'
+00:00:00.943 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:00.943 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'shadows enable' added
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 29:     corner_radius 0
+00:00:00.943 [INFO] [sway/commands.c:406] Config command: layer_effects "waybar" corner_radius 0
+00:00:00.943 [INFO] [sway/commands.c:429] After replacement: layer_effects "waybar" corner_radius 0
+00:00:00.943 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'waybar' already exists: 'shadows enable'. Replacing with: 'corner_radius 0'
+00:00:00.943 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:00.943 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'waybar' 'corner_radius 0' added
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 30: }
+00:00:00.943 [DEBUG] [sway/config.c:889] Exiting block 'layer_effects "waybar"'
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 31: layer_effects "swaync-control-center" {
+00:00:00.943 [DEBUG] [sway/config.c:872] Entering block 'layer_effects "swaync-control-center"'
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 32:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:00.943 [DEBUG] [sway/config.c:818] Read line 33:     blur disable
+00:00:00.943 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-control-center" blur disable
+00:00:00.943 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-control-center" blur disable
+00:00:00.944 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:00.944 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur disable' added
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 34:     blur_xray disable
+00:00:00.944 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-control-center" blur_xray disable
+00:00:00.944 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-control-center" blur_xray disable
+00:00:00.944 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:00.944 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:00.944 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'blur_xray disable' added
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 35:     shadows disable
+00:00:00.944 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-control-center" shadows disable
+00:00:00.944 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-control-center" shadows disable
+00:00:00.944 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:00.944 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:00.944 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'shadows disable' added
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 36:     corner_radius 0
+00:00:00.944 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-control-center" corner_radius 0
+00:00:00.944 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-control-center" corner_radius 0
+00:00:00.944 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-control-center' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:00.944 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:00.944 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-control-center' 'corner_radius 0' added
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 37: }
+00:00:00.944 [DEBUG] [sway/config.c:889] Exiting block 'layer_effects "swaync-control-center"'
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 38: layer_effects "swaync-notification-window" {
+00:00:00.944 [DEBUG] [sway/config.c:872] Entering block 'layer_effects "swaync-notification-window"'
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 39:     # The layer includes empty space; style only the actual cards in GTK CSS.
+00:00:00.944 [DEBUG] [sway/config.c:818] Read line 40:     blur disable
+00:00:00.944 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-notification-window" blur disable
+00:00:00.945 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-notification-window" blur disable
+00:00:00.945 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:00.945 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur disable' added
+00:00:00.945 [DEBUG] [sway/config.c:818] Read line 41:     blur_xray disable
+00:00:00.945 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-notification-window" blur_xray disable
+00:00:00.945 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-notification-window" blur_xray disable
+00:00:00.945 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur disable'. Replacing with: 'blur_xray disable'
+00:00:00.945 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray disable'
+00:00:00.945 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'blur_xray disable' added
+00:00:00.945 [DEBUG] [sway/config.c:818] Read line 42:     shadows disable
+00:00:00.945 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-notification-window" shadows disable
+00:00:00.945 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-notification-window" shadows disable
+00:00:00.945 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'blur_xray disable'. Replacing with: 'shadows disable'
+00:00:00.945 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows disable'
+00:00:00.945 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'shadows disable' added
+00:00:00.945 [DEBUG] [sway/config.c:818] Read line 43:     corner_radius 0
+00:00:00.945 [INFO] [sway/commands.c:406] Config command: layer_effects "swaync-notification-window" corner_radius 0
+00:00:00.945 [INFO] [sway/commands.c:429] After replacement: layer_effects "swaync-notification-window" corner_radius 0
+00:00:00.945 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'swaync-notification-window' already exists: 'shadows disable'. Replacing with: 'corner_radius 0'
+00:00:00.947 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:00.947 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'swaync-notification-window' 'corner_radius 0' added
+00:00:00.947 [DEBUG] [sway/config.c:818] Read line 44: }
+00:00:00.947 [DEBUG] [sway/config.c:889] Exiting block 'layer_effects "swaync-notification-window"'
+00:00:00.947 [DEBUG] [sway/config.c:818] Read line 45: layer_effects "launcher" {
+00:00:00.947 [DEBUG] [sway/config.c:872] Entering block 'layer_effects "launcher"'
+00:00:00.947 [DEBUG] [sway/config.c:818] Read line 46:     blur enable
+00:00:00.947 [INFO] [sway/commands.c:406] Config command: layer_effects "launcher" blur enable
+00:00:00.947 [INFO] [sway/commands.c:429] After replacement: layer_effects "launcher" blur enable
+00:00:00.947 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur enable'
+00:00:00.947 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur enable' added
+00:00:00.947 [DEBUG] [sway/config.c:818] Read line 47:     blur_xray enable
+00:00:00.947 [INFO] [sway/commands.c:406] Config command: layer_effects "launcher" blur_xray enable
+00:00:00.947 [INFO] [sway/commands.c:429] After replacement: layer_effects "launcher" blur_xray enable
+00:00:00.947 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur enable'. Replacing with: 'blur_xray enable'
+00:00:00.948 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur_xray enable'
+00:00:00.948 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'blur_xray enable' added
+00:00:00.948 [DEBUG] [sway/config.c:818] Read line 48:     shadows enable
+00:00:00.948 [INFO] [sway/commands.c:406] Config command: layer_effects "launcher" shadows enable
+00:00:00.948 [INFO] [sway/commands.c:429] After replacement: layer_effects "launcher" shadows enable
+00:00:00.948 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'blur_xray enable'. Replacing with: 'shadows enable'
+00:00:00.948 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'shadows enable'
+00:00:00.948 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'shadows enable' added
+00:00:00.948 [DEBUG] [sway/config.c:818] Read line 49:     corner_radius 12
+00:00:00.951 [INFO] [sway/commands.c:406] Config command: layer_effects "launcher" corner_radius 12
+00:00:00.951 [INFO] [sway/commands.c:429] After replacement: layer_effects "launcher" corner_radius 12
+00:00:00.951 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'launcher' already exists: 'shadows enable'. Replacing with: 'corner_radius 12'
+00:00:00.952 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 12'
+00:00:00.952 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'launcher' 'corner_radius 12' added
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 50: }
+00:00:00.952 [DEBUG] [sway/config.c:889] Exiting block 'layer_effects "launcher"'
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 51: 
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 52: # GTK changes the strip corners for fullscreen and floating windows.
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 53: layer_effects "oldbook-decoration" {
+00:00:00.952 [DEBUG] [sway/config.c:872] Entering block 'layer_effects "oldbook-decoration"'
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 54:     corner_radius 0
+00:00:00.952 [INFO] [sway/commands.c:406] Config command: layer_effects "oldbook-decoration" corner_radius 0
+00:00:00.952 [INFO] [sway/commands.c:429] After replacement: layer_effects "oldbook-decoration" corner_radius 0
+00:00:00.952 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'corner_radius 0'
+00:00:00.952 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'oldbook-decoration' 'corner_radius 0' added
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 55: }
+00:00:00.952 [DEBUG] [sway/config.c:889] Exiting block 'layer_effects "oldbook-decoration"'
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 4: 
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 5: # Workspace captions are provided by oldbook-decoration at the screen edge.
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 6: titlebar_position bottom
+00:00:00.952 [INFO] [sway/commands.c:406] Config command: titlebar_position bottom
+00:00:00.952 [INFO] [sway/commands.c:429] After replacement: titlebar_position bottom
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 7: default_border pixel 0
+00:00:00.952 [INFO] [sway/commands.c:406] Config command: default_border pixel 0
+00:00:00.952 [INFO] [sway/commands.c:429] After replacement: default_border pixel 0
+00:00:00.952 [DEBUG] [sway/config.c:818] Read line 8: default_floating_border pixel 0
+00:00:00.953 [INFO] [sway/commands.c:406] Config command: default_floating_border pixel 0
+00:00:00.953 [INFO] [sway/commands.c:429] After replacement: default_floating_border pixel 0
+00:00:00.953 [DEBUG] [sway/config.c:818] Read line 9: 
+00:00:00.953 [DEBUG] [sway/config.c:818] Read line 10: for_window [all] border pixel 0
+00:00:00.953 [INFO] [sway/commands.c:406] Config command: for_window [all] border pixel 0
+00:00:00.953 [INFO] [sway/commands.c:429] After replacement: for_window [all] border pixel 0
+00:00:00.953 [DEBUG] [sway/commands/for_window.c:34] for_window: '[all]' -> 'border pixel 0' added

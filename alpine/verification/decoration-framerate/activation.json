@@ -1,0 +1,23 @@
+{
+  "old_pid": 21932,
+  "new_pid": 26971,
+  "outputs": [
+    {
+      "name": "eDP-1",
+      "refresh_millihz": 59990,
+      "captions": 1
+    }
+  ],
+  "settings_unchanged": true,
+  "settings": {
+    "position": "bottom",
+    "opacity": 0.67,
+    "corner_radius": 7
+  },
+  "live_helper": "/home/jack/.local/bin/oldbook-decoration",
+  "log": "/home/jack/.local/state/oldbook/decoration/framerate-activation.log",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "d640952cf583a4f39c7089ad9ceabe1c9096099cc586068dae9d3134b76da0dd",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "f68cf027a2c1dcac34d6311fcee1e8c1c8d9b918aa5f56fd3eff5b2a2804fd6d"
+  }
+}

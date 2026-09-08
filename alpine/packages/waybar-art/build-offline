@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Build the workspace artwork widget as a signed APK with networking disabled."""
+import argparse
+import hashlib
+import os
+from pathlib import Path
+import pwd
+import shlex
+import shutil
+import subprocess
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--work', required=True, type=Path, help='New build directory')
+args = parser.parse_args()
+if os.geteuid() == 0:
+    parser.error('Run as the ordinary build user with a configured abuild signing key')
+recipe = Path(__file__).resolve().parent
+work = args.work.absolute()
+work.mkdir(parents=True, exist_ok=False)
+stage = work / 'mbp-intel' / 'mbp-intel-waybar-art'
+stage.mkdir(parents=True)
+for name in ('APKBUILD', 'art.c', 'help.c', 'help.h', 'waybar_cffi_module.h', 'LICENSE.Waybar'):
+    shutil.copy2(recipe / name, stage / name)
+user = pwd.getpwuid(os.getuid()).pw_name
+command = ['abuild','-d','-K','-P',str(work/'apks'),'-s',str(work/'distfiles')]
+isolated = ['doas','-n','unshare','--net','--','su',user,'-s','/bin/sh','-c',
+            'cd '+shlex.quote(str(stage))+' && exec '+shlex.join(command)]
+with (work/'build.log').open('w') as log:
+    result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
+if result.returncode:
+    raise SystemExit(f'Build failed; see {work / "build.log"}')
+apk = next((work/'apks'/'mbp-intel').glob('*/mbp-intel-waybar-art-*.apk'))
+print(apk)
+print('SHA-256',hashlib.sha256(apk.read_bytes()).hexdigest())

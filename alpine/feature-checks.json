@@ -1,0 +1,653 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "id": "THEME-COMPLETE",
+      "paths": [
+        "alpine/themes/*",
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/wallpapers/theme_catalog.py",
+        "alpine/desktop/.local/bin/mbp-intel-theme",
+        "alpine/desktop/.local/bin/mbp-intel-gtk-settings",
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py",
+        "alpine/desktop/.config/gtk-*/*",
+        "alpine/desktop/.config/qt6ct/*",
+        "alpine/desktop/.local/share/lxqt/*",
+        "alpine/themes/profiles/*",
+        "projects/superhold-guide/*",
+        "projects/superhold/*"
+      ],
+      "tests": [
+        "test_application_theme_refresh.py",
+        "test_complete_themes.py",
+        "test_lxqt_theme.py",
+        "test_overlay_theme.py",
+        "test_theme_picker.py",
+        "test_theme_refresh.py",
+        "test_theme_session.py",
+        "test_theme_sway_reload.py",
+        "test_theme_switch.py"
+      ],
+      "evidence": [
+        "verification/complete-themes/"
+      ]
+    },
+    {
+      "id": "GHOST-BRAND",
+      "paths": [
+        "alpine/themes/profiles/*/.config/waybar/*",
+        "alpine/desktop/.config/waybar/*",
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/desktop/.config/waybar/style.css"
+      ],
+      "tests": [
+        "test_ghost_branding.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "LOCK-THEME",
+      "paths": [
+        "alpine/themes/*",
+        "alpine/desktop/.local/bin/mbp-intel-lock",
+        "alpine/desktop/.config/swaylock/*",
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py"
+      ],
+      "tests": [
+        "test_lock.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "GALLERY-ACTIONS",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
+        "alpine/desktop/.config/waybar/*",
+        "alpine/themes/profiles/*/.config/waybar/*",
+        "alpine/packages/waybar-art/*",
+        "alpine/wallpapers/*",
+        "alpine/packages/waybar-art/art.c"
+      ],
+      "tests": [
+        "test_gallery_picker.py",
+        "test_gallery_prompts.py",
+        "test_manual_artwork.py",
+        "test_new_themes.py",
+        "test_theme_picker.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "GALLERY-ACTIVATION",
+      "paths": [
+        "alpine/wallpapers/*",
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
+        "alpine/desktop/.local/bin/mbp-intel-theme",
+        "alpine/bin/deploy-home",
+        "alpine/wallpapers/generate.py"
+      ],
+      "tests": [
+        "test_generation_retries.py",
+        "test_manual_artwork.py",
+        "test_new_themes.py",
+        "test_theme_completion_notification.py",
+        "test_themed_artwork.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "TERMINAL-SURFACE",
+      "paths": [
+        "alpine/desktop/.config/foot/*",
+        "alpine/desktop/.config/foot/foot.ini",
+        "alpine/desktop/.config/ghostty/*",
+        "alpine/desktop/.config/ghostty/config",
+        "alpine/desktop/.config/sway/local.d/terminal.conf",
+        "alpine/desktop/.local/bin/mbp-intel-console",
+        "alpine/desktop/.local/bin/mbp-intel-refresh-terminal-theme",
+        "alpine/packages/ghostty/*",
+        "alpine/themes/profiles/*/.config/foot/*",
+        "alpine/themes/profiles/*/.config/ghostty/*",
+        "alpine/wallpapers/desktop_theme.py"
+      ],
+      "tests": [
+        "test_terminal_theme.py",
+        "test_theme_switch.py"
+      ],
+      "evidence": [
+        "verification/workspace-chrome/"
+      ]
+    },
+    {
+      "id": "NOTIFICATION-PLACEMENT",
+      "paths": [
+        "alpine/desktop/.config/swayfx/effects.conf",
+        "alpine/desktop/.config/swaync/*",
+        "alpine/desktop/.config/swaync/config.json",
+        "alpine/packages/swayfx/*",
+        "alpine/themes/profiles/*/.config/swayfx/effects.conf",
+        "alpine/themes/profiles/*/.config/swaync/*",
+        "alpine/wallpapers/desktop_theme.py"
+      ],
+      "tests": [],
+      "evidence": [
+        "verification/notifications/",
+        "verification/notification-overlay/"
+      ]
+    },
+    {
+      "id": "BAR-LAYOUT",
+      "paths": [
+        "alpine/desktop/.config/waybar/*",
+        "alpine/desktop/.config/waybar/config.jsonc",
+        "alpine/desktop/.local/bin/mbp-intel-pithos",
+        "alpine/desktop/.local/bin/mbp-intel-waybar-dim",
+        "alpine/packages/waybar-art/*",
+        "alpine/packages/waybar-art/art.c",
+        "alpine/themes/profiles/*/.config/waybar/*",
+        "alpine/wallpapers/desktop_theme.py"
+      ],
+      "tests": [
+        "test_bar_ipc_recovery.py",
+        "test_pithos_controls.py",
+        "test_waybar_dim.py"
+      ],
+      "evidence": [
+        "verification/waybar-reactivity/README.md"
+      ]
+    },
+    {
+      "id": "WORKSPACE-IDENTITY",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-workspaces",
+        "alpine/desktop/.local/bin/mbp-intel-strata",
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.config/waybar/*",
+        "alpine/themes/profiles/*/.config/waybar/*",
+        "alpine/packages/waybar-art/*",
+        "alpine/desktop/.local/lib/mbp_intel/workspace_model.py",
+        "alpine/desktop/.local/lib/mbp_intel/workspace_defaults.py",
+        "alpine/packages/waybar-art/help.c"
+      ],
+      "tests": [
+        "test_strata.py",
+        "test_workspace_defaults.py",
+        "test_workspaces.py"
+      ],
+      "evidence": [
+        "verification/workspace-ready/README.md",
+        "verification/workspace-titlecase/README.md",
+        "verification/workspace-ten/README.md"
+      ]
+    },
+    {
+      "id": "WINDOW-SWITCHING",
+      "paths": [
+        "alpine/desktop/.config/sway/local.d/*switcher.conf",
+        "alpine/desktop/.config/sway/local.d/apple-overview.conf",
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/desktop/.local/lib/mbp_intel/window_switching.py"
+      ],
+      "tests": [
+        "test_carousel.py",
+        "test_carousel_handoff.py",
+        "test_carousel_responsiveness.py",
+        "test_carousel_view.py",
+        "test_window_switching.py"
+      ],
+      "evidence": [
+        "verification/window-navigation/README.md"
+      ]
+    },
+    {
+      "id": "WINDOW-RESIZE",
+      "paths": [
+        "alpine/desktop/.local/lib/mbp_intel/centered_resize.py",
+        "alpine/desktop/.local/bin/mbp-intel-window*",
+        "alpine/desktop/.config/sway/config",
+        "alpine/desktop/.config/sway/local.d/*",
+        "alpine/desktop/.local/bin/mbp-intel-resize",
+        "alpine/desktop/.local/bin/mbp-intel-center",
+        "alpine/desktop/.config/sway/local.d/resize.conf"
+      ],
+      "tests": [
+        "test_centered_resize.py"
+      ],
+      "evidence": [
+        "verification/near-full-resize/README.md",
+        "verification/center-window/README.md",
+        "verification/hover-raise/README.md"
+      ]
+    },
+    {
+      "id": "EXPOSE-LIFECYCLE",
+      "paths": [
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.config/sway/gestures.conf",
+        "alpine/desktop/.local/bin/mbp-intel-expo",
+        "alpine/desktop/.local/bin/mbp-intel-showdesktop",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop*",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py"
+      ],
+      "tests": [
+        "test_expo.py",
+        "test_showdesktop.py",
+        "test_showdesktop_lifecycle.py",
+        "test_ui_startup.py"
+      ],
+      "evidence": [
+        "verification/showdesktop-recovery/README.md"
+      ]
+    },
+    {
+      "id": "CAROUSEL-STILLS",
+      "paths": [
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/window_switching.py",
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
+        "alpine/tests/verify_carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/carousel_view.py"
+      ],
+      "tests": [
+        "test_carousel.py",
+        "test_carousel_handoff.py",
+        "test_carousel_view.py"
+      ],
+      "evidence": [
+        "verification/carousel-quality/README.md"
+      ]
+    },
+    {
+      "id": "KEYBOARD-GLOW",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-keyboard-backlight",
+        "alpine/desktop/.local/bin/mbp-intel-control",
+        "alpine/desktop/.config/sway/local.d/keyboard-backlight.conf",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
+        "alpine/tests/test_keyboard_backlight.py"
+      ],
+      "tests": [
+        "test_keyboard_backlight.py",
+        "test_shortcut_sources.py"
+      ],
+      "evidence": [
+        "verification/keyboard-breathing/README.md"
+      ]
+    },
+    {
+      "id": "APPLE-KEYS",
+      "paths": [
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.config/sway/config",
+        "alpine/desktop/.config/sway/local.d/apple-overview.conf",
+        "alpine/desktop/.local/bin/mbp-intel-keyboard-backlight"
+      ],
+      "tests": [
+        "test_apple_overview.py",
+        "test_shortcut_sources.py"
+      ],
+      "evidence": [
+        "verification/apple-overview/README.md",
+        "verification/keyboard-backlight/README.md"
+      ]
+    },
+    {
+      "id": "DECORATION-STYLE",
+      "paths": [
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/bin/mbp-intel-decoration*",
+        "alpine/desktop/.config/mbp-intel/decoration.json",
+        "alpine/themes/*",
+        "alpine/desktop/.local/lib/mbp_intel/overlay_theme.py",
+        "alpine/desktop/.local/bin/mbp-intel-decoration",
+        "alpine/desktop/.local/bin/mbp-intel-decoration-settings"
+      ],
+      "tests": [
+        "test_decoration.py",
+        "test_decoration_watch.py",
+        "test_overlay_theme.py",
+        "test_decoration_handoff.py"
+      ],
+      "evidence": [
+        "verification/decoration-context/"
+      ]
+    },
+    {
+      "id": "DECORATION-PLACEMENT",
+      "paths": [
+        "alpine/desktop/.config/mbp-intel/decoration.json",
+        "alpine/desktop/.config/swayfx/effects.conf",
+        "alpine/desktop/.local/bin/mbp-intel-decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_placement.py",
+        "alpine/themes/profiles/*/.config/swayfx/effects.conf"
+      ],
+      "tests": [
+        "test_decoration_placement.py",
+        "test_decoration_watch.py",
+        "test_decoration_handoff.py"
+      ],
+      "evidence": [
+        "verification/decoration-transition/README.md",
+        "verification/decoration-monitor/README.md"
+      ]
+    },
+    {
+      "id": "MOTION",
+      "paths": [
+        "alpine/desktop/.config/swayfx/effects.conf",
+        "alpine/desktop/.local/bin/mbp-intel-decoration",
+        "alpine/desktop/.local/lib/mbp_intel/carousel*",
+        "alpine/desktop/.local/lib/mbp_intel/carousel_view.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_motion.py",
+        "alpine/desktop/.local/lib/mbp_intel/decoration_watch.py",
+        "alpine/themes/profiles/*/.config/swayfx/effects.conf",
+        "alpine/bin/mbp-intel-ui-priority",
+        "alpine/desktop/.local/lib/mbp_intel/ui_priority.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/desktop/.local/lib/mbp_intel/graphics_warmup.py"
+      ],
+      "tests": [
+        "test_carousel_view.py",
+        "test_decoration_motion.py",
+        "test_decoration_watch.py",
+        "test_ui_priority.py",
+        "test_ui_command.py",
+        "test_carousel_responsiveness.py",
+        "test_decoration_handoff.py",
+        "test_ui_priority_request.py",
+        "test_ui_startup.py"
+      ],
+      "evidence": [
+        "verification/decoration-framerate/README.md",
+        "verification/carousel-quality/native-README.md",
+        "verification/animation-responsiveness/README.md",
+        "verification/animation-fluidity/decoration/README.md"
+      ]
+    },
+    {
+      "id": "SHORTCUT-HELP",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-shortcuts",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut*",
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.config/waybar/*",
+        "alpine/desktop/.local/bin/mbp-intel-wallpaper",
+        "alpine/desktop/.config/sway/local.d/shortcuts.conf",
+        "alpine/desktop/.local/lib/mbp_intel/shortcut_sources.py",
+        "alpine/packages/superhold-guide/manifest.json",
+        "projects/superhold-guide/*",
+        "projects/superhold/*"
+      ],
+      "tests": [
+        "test_manual_artwork.py",
+        "test_shortcut_hold.py",
+        "test_shortcut_service.py",
+        "test_shortcut_sources.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "SESSION-OWNERSHIP",
+      "paths": [
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.local/bin/mbp-intel-carousel",
+        "alpine/desktop/.local/bin/mbp-intel-notification-led",
+        "alpine/desktop/.local/bin/mbp-intel-session",
+        "alpine/desktop/.local/bin/mbp-intel-showdesktop",
+        "alpine/desktop/.local/bin/mbp-intel-strata",
+        "alpine/desktop/.local/bin/mbp-intel-video-background",
+        "alpine/desktop/.local/lib/mbp_intel/carousel.py",
+        "alpine/desktop/.local/lib/mbp_intel/showdesktop.py",
+        "alpine/desktop/.local/lib/mbp_intel/ui_command.py",
+        "alpine/bin/mbp-intel-ui-priority",
+        "alpine/bin/install-desktop-system",
+        "alpine/desktop/.local/lib/mbp_intel/ui_priority.py",
+        "alpine/desktop/.local/lib/mbp_intel/graphics_warmup.py"
+      ],
+      "tests": [
+        "test_ai_notification_stream.py",
+        "test_notification_led.py",
+        "test_session.py",
+        "test_showdesktop_lifecycle.py",
+        "test_strata.py",
+        "test_video_background.py",
+        "test_ui_priority.py",
+        "test_ui_command.py",
+        "test_ui_priority_request.py",
+        "test_ui_startup.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "CODEX-PACKAGING",
+      "paths": [
+        "alpine/packages/cascadia/testing/codex/*",
+        "alpine/packages/codex/*",
+        "alpine/bin/install-codex",
+        "alpine/packages/current-lock",
+        "alpine/packages/locks/*",
+        "alpine/bin/package-archive",
+        "alpine/packages/cascadia/testing/codex/APKBUILD",
+        "alpine/packages/cascadia/testing/codex/manifest.json"
+      ],
+      "tests": [
+        "test_package_archive.py",
+        "test_source_archive.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "DEPLOY-RECOVERY",
+      "paths": [
+        "alpine/bin/deploy-home",
+        "alpine/bin/check-features",
+        "alpine/feature-checks.json",
+        "alpine/FEATURES.md",
+        "alpine/AGENTS.md",
+        "alpine/desktop/*",
+        "alpine/themes/profiles/*"
+      ],
+      "tests": [
+        "test_deploy.py",
+        "test_feature_contracts.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "CONKY-READING",
+      "paths": [
+        "alpine/desktop/.config/conky/*",
+        "alpine/desktop/.local/lib/mbp_intel/conky*",
+        "alpine/desktop/.local/bin/mbp-intel-conky",
+        "alpine/desktop/.local/bin/mbp-intel-conky-click",
+        "alpine/themes/profiles/*/.config/conky/*",
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/desktop/.local/lib/mbp_intel/conky_policy.py",
+        "alpine/desktop/.local/lib/mbp_intel/conky_layout.py",
+        "alpine/desktop/.config/conky/panels.json",
+        "alpine/tests/test_conky_clicks.py",
+        "alpine/tests/verify_conky_clicks.py",
+        "alpine/verification/conky-clicks/*"
+      ],
+      "tests": [
+        "test_conky_clicks.py",
+        "test_conky_layout.py",
+        "test_conky_policy.py",
+        "test_desktop_space.py"
+      ],
+      "evidence": [
+        "verification/conky-clicks/README.md"
+      ]
+    },
+    {
+      "id": "JOURNAL",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-journal",
+        "alpine/desktop/.local/lib/mbp_intel/journal*",
+        "alpine/assets/journal/*",
+        "alpine/desktop/.config/conky/*",
+        "alpine/themes/profiles/*/.config/conky/*",
+        "alpine/desktop/.local/lib/mbp_intel/desktop_journal.py"
+      ],
+      "tests": [
+        "test_conky_policy.py",
+        "test_desktop_journal.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "SCRIPTURE",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-scripture*",
+        "alpine/desktop/.local/bin/mbp-intel-conky-click",
+        "alpine/desktop/.local/lib/mbp_intel/conky_click.lua",
+        "alpine/desktop/.local/lib/mbp_intel/conky_layout.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture*",
+        "alpine/assets/scripture/*",
+        "alpine/desktop/.config/conky/*",
+        "alpine/themes/profiles/*/.config/conky/*",
+        "alpine/desktop/.config/sway/*",
+        "alpine/desktop/.local/lib/mbp_intel/scripture.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture_history.py",
+        "alpine/desktop/.local/lib/mbp_intel/scripture_generation.py",
+        "alpine/tests/test_scripture*.py",
+        "alpine/tests/verify_scripture_header.py",
+        "alpine/verification/scripture-header/*",
+        "alpine/verification/scripture-local-generation/*",
+        "alpine/desktop/.config/mbp-intel/ollama.json",
+        "alpine/tests/verify_scripture_inline.py",
+        "alpine/verification/scripture-inline/*"
+      ],
+      "tests": [
+        "test_conky_policy.py",
+        "test_scripture_generation.py",
+        "test_scripture_history.py",
+        "test_scripture_library.py",
+        "test_scripture_local.py",
+        "test_scripture_selection.py",
+        "test_scripture_study.py",
+        "test_conky_clicks.py",
+        "test_scripture_bar_theme.py",
+        "test_scripture_runtime_policy.py",
+        "test_scripture_search.py"
+      ],
+      "evidence": [
+        "verification/scripture-history/README.md",
+        "verification/scripture-header/README.md",
+        "verification/scripture-local-generation/README.md",
+        "verification/scripture-inline/README.md"
+      ]
+    },
+    {
+      "id": "TMUX-CONTROLS",
+      "paths": [
+        "alpine/desktop/.config/tmux/*",
+        "alpine/desktop/.tmux.conf",
+        "alpine/themes/profiles/*/.tmux.conf",
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/desktop/.config/tmux/mbp-intel.conf",
+        "alpine/desktop/.local/lib/mbp_intel/app_identity.py"
+      ],
+      "tests": [
+        "test_agent_switcher.py",
+        "test_app_identity.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "DROPDOWN-WINDOWS",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-dropdown",
+        "alpine/desktop/.config/sway/local.d/dropdown.conf",
+        "alpine/desktop/.local/lib/mbp_intel/decoration*"
+      ],
+      "tests": [
+        "test_app_identity.py",
+        "test_decoration_placement.py"
+      ],
+      "evidence": [
+        "verification/console-monitor-foot/README.md",
+        "verification/dropdown-current-workspace/README.md",
+        "verification/decoration-monitor/README.md"
+      ]
+    },
+    {
+      "id": "CLIPBOARD",
+      "paths": [
+        "alpine/desktop/.local/bin/mbp-intel-clipboard",
+        "alpine/desktop/.config/sway/local.d/clipboard.conf"
+      ],
+      "tests": [
+        "test_clipboard.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "ARTWORK-ARCHIVE",
+      "paths": [
+        "alpine/wallpapers/*",
+        "alpine/assets/gallery/*",
+        "alpine/bin/archive-source",
+        "alpine/wallpapers/gallery.json",
+        "alpine/wallpapers/generate.py",
+        "alpine/wallpapers/prompt_catalog.py"
+      ],
+      "tests": [
+        "test_fresh_scenes.py",
+        "test_generation_retries.py",
+        "test_prompt_catalog.py",
+        "test_wallpaper_checkpoint.py",
+        "test_wallpapers.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "PACKAGE-CLOSURE",
+      "paths": [
+        "alpine/packages/*",
+        "alpine/bin/package-archive",
+        "alpine/bin/source-archive",
+        "alpine/packages/current-lock",
+        "alpine/bin/backup-repository"
+      ],
+      "tests": [
+        "test_fossil_bootstrap.py",
+        "test_package_archive.py",
+        "test_source_archive.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "PERSONAL-DESKTOP",
+      "paths": [
+        "alpine/packages/*",
+        "alpine/FEATURES.md",
+        "alpine/AGENTS.md",
+        "docs/superpowers/decisions/2026-09-07-personal-desktop-package.md"
+      ],
+      "tests": [],
+      "evidence": []
+    },
+    {
+      "id": "SCREEN-CORNERS",
+      "paths": [
+        "alpine/packages/swayfx/*",
+        "alpine/desktop/.local/bin/mbp-intel-sway"
+      ],
+      "tests": [],
+      "evidence": [
+        "verification/screen-corners/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+ERROR: unable to select packages:
+  oldbook-waybar-art (no such package):
+    required by: world[oldbook-waybar-art=1.0.0-r8]
+WARNING: File '/home/jack/.local/share/oldbook/apks/cliphist-0.7.0-r7.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/oldbook-waybar-art-1.0.0-r8.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-anyio-4.12.1-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-anyio-pyc-4.12.1-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-certifi-2026.7.22-r0.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-certifi-pyc-2026.7.22-r0.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-curio-1.6-r4.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-curio-pyc-1.6-r4.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-h11-0.16.0-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-h11-pyc-0.16.0-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-httpcore-1.0.9-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-httpcore-pyc-1.0.9-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-httpx-0.28.1-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-httpx-pyc-0.28.1-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-idna-3.19-r0.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-idna-pyc-3.19-r0.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-pylast-5.5.0-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-pylast-pyc-5.5.0-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-sniffio-1.3.1-r2.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/py3-sniffio-pyc-1.3.1-r2.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/rclone-1.74.4-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/rclone-zsh-completion-1.74.4-r1.apk' is unaccessible
+WARNING: File '/home/jack/.local/share/oldbook/apks/wl-clip-persist-0.5.0-r0.apk' is unaccessible
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/bin/package-archive", line 374, in <module>
+    main()
+    ~~~~^^
+  File "/home/jack/.files/alpine/bin/package-archive", line 358, in main
+    snapshot(a.cache);return
+    ~~~~~~~~^^^^^^^^^
+  File "/home/jack/.files/alpine/bin/package-archive", line 116, in snapshot
+    validate_artifacts(installed, artifacts)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/bin/package-archive", line 92, in validate_artifacts
+    raise RuntimeError('Archive package count differs from installed closure')
+RuntimeError: Archive package count differs from installed closure

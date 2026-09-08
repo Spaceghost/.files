@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Oldbook theme review — first comparison</title>
+<style>
+  :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #1d2021; color: #ebdbb2; }
+  body { margin: 0 auto; padding: 24px; max-width: 1920px; }
+  h1 { font-size: 1.5rem; margin: 0 0 12px; }
+  p { line-height: 1.5; max-width: 80ch; }
+  .comparison { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  figure { margin: 0; }
+  h2 { font-size: 1.1rem; margin: 0 0 6px; }
+  figcaption p { margin: 0 0 12px; }
+  img { display: block; width: 100%; height: auto; }
+  a { color: #fabd2f; }
+  .status { color: #b8bb26; }
+  @media (max-width: 950px) { .comparison { grid-template-columns: 1fr; } }
+</style>
+<h1>Theme review: first comparison</h1>
+<p>Gruvbox is a confirmed keeper. Space Ghost Violet and Waxen Meridian are waiting for your review.
+Click a preview to inspect it at full size. Decisions are recorded in the
+<a href="../../../docs/superpowers/decisions/2026-09-07-theme-review.md">theme review notes</a>.</p>
+<div class="comparison">
+  <figure>
+    <figcaption><h2>Gruvbox Dark</h2><p class="status">Keep — confirmed</p></figcaption>
+    <a href="gruvbox-dark.png"><img src="gruvbox-dark.png" alt="Gruvbox Dark native preview with warm amber Yosemite artwork and a translucent charcoal terminal"></a>
+  </figure>
+  <figure>
+    <figcaption><h2>Space Ghost Violet</h2><p>Unreviewed</p></figcaption>
+    <a href="spaceghost.png"><img src="spaceghost.png" alt="Space Ghost Violet native preview with purple rocket rollout artwork and a rounded dark violet terminal"></a>
+  </figure>
+  <figure>
+    <figcaption><h2>Waxen Meridian</h2><p>Unreviewed — active at audit time</p></figcaption>
+    <a href="waxen-meridian-373c11cb12f0.png"><img src="waxen-meridian-373c11cb12f0.png" alt="Waxen Meridian native preview with a stormy medieval clock tower and a dark charcoal terminal"></a>
+  </figure>
+</div>
+<p>Captured on September 7, 2026 in an isolated native compositor using each theme's wallpaper,
+Foot profile and a simplified Waybar. The previews show a desktop sample; they do not cover every
+application or measure animation performance.</p>
+</html>

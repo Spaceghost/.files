@@ -1,0 +1,50 @@
+[2026-09-07 18:58:14.423] [debug] [src/conky.cc:2192:load_config_file] [init::load_config] reading contents from config file '/tmp/desktop-space-izyhfd8f/home/.local/state/oldbook/conky/masthead.conf'
+[2026-09-07 18:58:14.423] [debug] [src/output/wl.cc:45:lua_setter] [init] wayland output enabled
+[2026-09-07 18:58:14.423] [info ] [src/lua/x11-settings.cc:67:lua_setter] drawing to single buffer
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:39:log_missing] [init] HTTP display output disabled, recompile with 'BUILD_HTTP' to enable
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'wayland'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'x11'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'file'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'ncurses'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'console'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'wayland'
+[2026-09-07 18:58:14.423] [debug] [src/output/display-wayland.cc:250:detect] [init] wayland display output 'wayland' enabled in config
+[2026-09-07 18:58:14.423] [debug] [src/output/display-output.cc:105:initialize_display_outputs] [init] detected display output 'wayland'
+[2026-09-07 18:58:14.426] [debug] [src/lua/fonts.cc:64:setup_fonts] [init] setting up fonts
+[2026-09-07 18:58:14.427] [debug] [src/lua/fonts.cc:84:load_fonts] [init] loading fonts
+[2026-09-07 18:58:14.443] [debug] [src/conky.cc:2192:load_config_file] [init::load_config] reading contents from config file '/tmp/desktop-space-izyhfd8f/home/.local/state/oldbook/conky/ghost.conf'
+[2026-09-07 18:58:14.443] [debug] [src/output/wl.cc:45:lua_setter] [init] wayland output enabled
+[2026-09-07 18:58:14.444] [info ] [src/lua/x11-settings.cc:67:lua_setter] drawing to single buffer
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:39:log_missing] [init] HTTP display output disabled, recompile with 'BUILD_HTTP' to enable
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'wayland'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'x11'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'file'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'ncurses'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:97:initialize_display_outputs] [init] found display output 'console'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'wayland'
+[2026-09-07 18:58:14.449] [debug] [src/output/display-wayland.cc:250:detect] [init] wayland display output 'wayland' enabled in config
+[2026-09-07 18:58:14.449] [debug] [src/output/display-output.cc:105:initialize_display_outputs] [init] detected display output 'wayland'
+[2026-09-07 18:58:14.450] [debug] [src/lua/fonts.cc:64:setup_fonts] [init] setting up fonts
+[2026-09-07 18:58:14.450] [debug] [src/lua/fonts.cc:84:load_fonts] [init] loading fonts
+[2026-09-07 18:58:14.460] [debug] [src/output/display-output.cc:113:initialize_display_outputs] [init] initialized display output 'wayland'
+[2026-09-07 18:58:14.460] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'x11'
+[2026-09-07 18:58:14.461] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'file'
+[2026-09-07 18:58:14.461] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'ncurses'
+[2026-09-07 18:58:14.461] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'console'
+[2026-09-07 18:58:14.461] [info ] [src/conky.cc:1898:get_system_details] 'unknown' wayland session running
+[2026-09-07 18:58:14.464] [debug] [src/lua/fonts.cc:84:load_fonts] [main_loop::update_text] loading fonts
+[2026-09-07 18:58:14.465] [debug] [src/output/display-wayland.cc:472:window_update_struts] [main_loop] defining struts
+[2026-09-07 18:58:14.465] [debug] [src/lua/fonts.cc:64:setup_fonts] [main_loop::draw] setting up fonts
+[2026-09-07 18:58:14.466] [debug] [src/lua/fonts.cc:64:setup_fonts] [main_loop::draw] setting up fonts
+[2026-09-07 18:58:14.493] [debug] [src/output/display-output.cc:113:initialize_display_outputs] [init] initialized display output 'wayland'
+[2026-09-07 18:58:14.493] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'x11'
+[2026-09-07 18:58:14.493] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'file'
+[2026-09-07 18:58:14.493] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'ncurses'
+[2026-09-07 18:58:14.493] [debug] [src/output/display-output.cc:103:initialize_display_outputs] [init] testing display output 'console'
+[2026-09-07 18:58:14.493] [info ] [src/conky.cc:1898:get_system_details] 'unknown' wayland session running
+[2026-09-07 18:58:14.496] [debug] [src/lua/fonts.cc:84:load_fonts] [main_loop::update_text] loading fonts
+[2026-09-07 18:58:14.498] [debug] [src/output/display-wayland.cc:472:window_update_struts] [main_loop] defining struts
+[2026-09-07 18:58:14.498] [debug] [src/lua/fonts.cc:64:setup_fonts] [main_loop::draw] setting up fonts
+[2026-09-07 18:58:14.499] [debug] [src/lua/fonts.cc:64:setup_fonts] [main_loop::draw] setting up fonts
+[2026-09-07 18:58:27.875] [info ] [src/conky.cc:2007:main_loop] received termination signal, shutting down
+[2026-09-07 18:58:27.879] [info ] [src/conky.cc:2007:main_loop] received termination signal, shutting down

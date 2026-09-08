@@ -1,0 +1,38 @@
+{
+  "checksum_scope": "MD5 is supplemental; OpenSnitch can match missing or disabled checksums. SHA256 is audit evidence, not an enforced rule operand.",
+  "executables": [
+    {
+      "md5": "331f776980bbd0b2a9dda21d6003150b",
+      "mode": "0o755",
+      "owner_gid": 0,
+      "owner_uid": 0,
+      "path": "/usr/bin/flatpak",
+      "sha256": "3064bedd97d428a1fc6166c5a318868209ed3143c43e58a9aac8e93f7ddb0ce7",
+      "size": 1220776
+    },
+    {
+      "md5": "de8eb54ac847bcaeb80219d9936ff91c",
+      "mode": "0o755",
+      "owner_gid": 0,
+      "owner_uid": 0,
+      "path": "/usr/bin/op",
+      "sha256": "fb74255538b33372d89e3d8d254a9a7b4e86452a585a74ef436cbde1be08a5d3",
+      "size": 42950416
+    }
+  ],
+  "installation": "Staged only. A trusted installer must verify this manifest, executable identities and policy, then install only rules/*.json as root:root mode 0600.",
+  "resolvers": [
+    "75.75.75.75",
+    "75.75.76.76"
+  ],
+  "rules": {
+    "mbp-intel-bootstrap-1000-12bcde99245f7f4a4a46ee726d7070628521f706eb43b4b3335c77d8d5696109-dns-0.json": "91667c9fa6a3d622c392287b1752fea47355753cd1b1462fb386e2309bf7da4a",
+    "mbp-intel-bootstrap-1000-12bcde99245f7f4a4a46ee726d7070628521f706eb43b4b3335c77d8d5696109-dns-1.json": "4feee90f1dd2902c2adfb00809b4e3d6e4ec40155c92a47bc379ea2b501596d3",
+    "mbp-intel-bootstrap-1000-12bcde99245f7f4a4a46ee726d7070628521f706eb43b4b3335c77d8d5696109-https.json": "a3f027811c870bf75bb03d5220aa81ebcdf0ebb62cfd91b1451c15150ba61f05",
+    "mbp-intel-bootstrap-1000-a14670f2dc8f9aa385ad79048604f578a459b1604dc11a00def44534e8926acf-dns-0.json": "364036332970f6f6ba27e4034fb1e1ef6af3f5028be290d8ade0730c56469a75",
+    "mbp-intel-bootstrap-1000-a14670f2dc8f9aa385ad79048604f578a459b1604dc11a00def44534e8926acf-dns-1.json": "ee6f20bea5c0528c7108ee78752d0acc73aa428f780ea7d6e9b8f72361552d4d",
+    "mbp-intel-bootstrap-1000-a14670f2dc8f9aa385ad79048604f578a459b1604dc11a00def44534e8926acf-https.json": "d0ebd47988b4c80a84c752907ba91a5a9bb6de5a2a09dfd44ee44e215b769507"
+  },
+  "schema": 1,
+  "uid": 1000
+}

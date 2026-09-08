@@ -1,0 +1,367 @@
+--- a/include/sway/commands.h
++++ b/include/sway/commands.h
+@@ -218,6 +218,7 @@
+ sway_cmd cmd_title_format;
+ sway_cmd cmd_titlebar_border_thickness;
+ sway_cmd cmd_titlebar_padding;
++sway_cmd cmd_titlebar_position;
+ sway_cmd cmd_titlebar_separator;
+ sway_cmd cmd_unbindcode;
+ sway_cmd cmd_unbindswitch;
+--- a/include/sway/config.h
++++ b/include/sway/config.h
+@@ -512,6 +512,7 @@
+ 	float shadow_offset_x, shadow_offset_y;
+ 
+ 	bool titlebar_separator;
++	bool titlebar_bottom;
+ 	bool scratchpad_minimize;
+ 
+ 	list_t *layer_criteria;
+--- a/include/sway/tree/container.h
++++ b/include/sway/tree/container.h
+@@ -66,6 +66,10 @@
+ 	double content_x, content_y;
+ 	double content_width, content_height;
+ };
++
++/** Whether a normal window title is below its content in the given state.
++ * Grouped tabbed/stacked headers retain their existing top placement. */
++bool container_has_bottom_titlebar(struct sway_container *con, bool current);
+ 
+ struct sway_container {
+ 	struct sway_node node;
+--- /dev/null
++++ b/sway/commands/titlebar_position.c
+@@ -0,0 +1,21 @@
++#include <string.h>
++#include "sway/commands.h"
++#include "sway/config.h"
++#include "sway/tree/arrange.h"
++
++struct cmd_results *cmd_titlebar_position(int argc, char **argv) {
++	struct cmd_results *error = checkarg(argc, "titlebar_position", EXPECTED_EQUAL_TO, 1);
++	if (error) {
++		return error;
++	}
++	if (strcmp(argv[0], "top") == 0) {
++		config->titlebar_bottom = false;
++	} else if (strcmp(argv[0], "bottom") == 0) {
++		config->titlebar_bottom = true;
++	} else {
++		return cmd_results_new(CMD_INVALID,
++			"Expected 'titlebar_position top|bottom'");
++	}
++	arrange_root();
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
+--- a/sway/commands.c
++++ b/sway/commands.c
+@@ -113,6 +113,7 @@
+ 	{ "title_align", cmd_title_align },
+ 	{ "titlebar_border_thickness", cmd_titlebar_border_thickness },
+ 	{ "titlebar_padding", cmd_titlebar_padding },
++	{ "titlebar_position", cmd_titlebar_position },
+ 	{ "titlebar_separator", cmd_titlebar_separator },
+ 	{ "unbindcode", cmd_unbindcode },
+ 	{ "unbindgesture", cmd_unbindgesture },
+--- a/sway/config.c
++++ b/sway/config.c
+@@ -373,6 +373,7 @@
+ 	color_to_rgba(config->shadow_inactive_color, 0x0000007F);
+ 
+ 	config->titlebar_separator = true;
++	config->titlebar_bottom = false;
+ 	config->scratchpad_minimize = false;
+ 
+ 	if (!(config->layer_criteria = create_list())) {
+--- a/sway/desktop/output.c
++++ b/sway/desktop/output.c
+@@ -277,6 +277,9 @@
+ 	}
+ 	int corner_radius = closest_con && container_has_corner_radius(closest_con) ?
+ 		closest_con->corner_radius : 0;
++	struct fx_corner_radii content_corners =
++		container_has_bottom_titlebar(closest_con, true) ?
++		corner_radii_top(corner_radius) : corner_radii_bottom(corner_radius);
+ 
+ 	if (node->type == WLR_SCENE_NODE_BUFFER) {
+ 		struct wlr_scene_buffer *buffer = wlr_scene_buffer_from_node(node);
+@@ -320,7 +323,7 @@
+ 
+ 		bool is_subsurface = surface && surface->surface && wlr_subsurface_try_from_wlr_surface(surface->surface);
+ 		wlr_scene_buffer_set_corner_radii(buffer, has_titlebar && !is_subsurface ?
+-			corner_radii_bottom(corner_radius) : corner_radii_all(corner_radius));
++			content_corners : corner_radii_all(corner_radius));
+ 		
+ 		if (is_subsurface) {
+ 			return;
+@@ -337,7 +340,7 @@
+ 		wlr_scene_blur_set_strength(blur, opacity);
+ 		wlr_scene_node_set_enabled(node, closest_con->blur_enabled);
+ 		wlr_scene_blur_set_corner_radii(blur, has_titlebar ?
+-			corner_radii_bottom(corner_radius) : corner_radii_all(corner_radius));
++			content_corners : corner_radii_all(corner_radius));
+ 	}
+ }
+ 
+--- a/sway/desktop/transaction.c
++++ b/sway/desktop/transaction.c
+@@ -579,18 +579,21 @@
+ 		int vert_border_offset = corner_radius;
+ 		int border_top = container_titlebar_height();
+ 		int border_width = con->current.border_thickness;
++		bool bottom_titlebar = title_bar && container_has_bottom_titlebar(con, true);
++		wlr_scene_node_set_enabled(&con->border.bottom->node, !bottom_titlebar);
+ 
+ 		if (title_bar && con->current.border != B_NORMAL) {
+ 			wlr_scene_node_set_enabled(&con->title_bar.tree->node, false);
+ 			wlr_scene_node_set_enabled(&con->border.top->node, true);
+ 		} else {
+-			wlr_scene_node_set_enabled(&con->border.top->node, false);
++			wlr_scene_node_set_enabled(&con->border.top->node, bottom_titlebar);
+ 		}
+ 
+ 		if (con->current.border == B_NORMAL) {
+ 			vert_border_offset = 0;
+ 			if (title_bar) {
+-				arrange_title_bar(con, 0, 0, width, border_top);
++				arrange_title_bar(con, 0, bottom_titlebar ? height - border_top : 0,
++					width, border_top);
+ 			} else {
+ 				border_top = 0;
+ 				// should be handled by the parent container
+@@ -615,8 +618,15 @@
+ 		int border_bottom = con->current.border_bottom ? border_width : 0;
+ 		int border_left = con->current.border_left ? border_width : 0;
+ 		int border_right = con->current.border_right ? border_width : 0;
+-
+-		int vert_border_height = MAX(0, height - border_top - border_bottom - vert_border_offset - corner_radius);
++		int bottom_corner_offset = corner_radius;
++		if (bottom_titlebar) {
++			border_bottom = border_top;
++			border_top = con->current.border_top ? border_width : 0;
++			vert_border_offset = corner_radius;
++			bottom_corner_offset = 0;
++		}
++
++		int vert_border_height = MAX(0, height - border_top - border_bottom - vert_border_offset - bottom_corner_offset);
+ 		wlr_scene_rect_set_size(con->border.left, border_left, vert_border_height);
+ 		wlr_scene_rect_set_size(con->border.right, border_right, vert_border_height);
+ 
+@@ -691,7 +701,8 @@
+ 			bool has_titlebar = !title_bar || con->current.border == B_NORMAL;
+ 			wlr_scene_rect_set_corner_radii(
+ 				con->dim_rect,
+-				has_titlebar ? corner_radii_bottom(con->corner_radius) : corner_radii_all(con->corner_radius)
++				has_titlebar ? (bottom_titlebar ? corner_radii_top(con->corner_radius) :
++					corner_radii_bottom(con->corner_radius)) : corner_radii_all(con->corner_radius)
+ 			);
+ 		}
+ 
+--- a/sway/input/seatop_default.c
++++ b/sway/input/seatop_default.c
+@@ -723,7 +723,9 @@
+ 	bool on_border = edge != WLR_EDGE_NONE;
+ 	bool on_titlebar = cont && !on_border && !surface;
+ 	bool on_titlebar_border = cont && on_border &&
+-		cursor->cursor->y < cont->pending.content_y;
++		(container_has_bottom_titlebar(cont, false) ?
++			cursor->cursor->y >= cont->pending.content_y + cont->pending.content_height :
++			cursor->cursor->y < cont->pending.content_y);
+ 	bool on_contents = cont && !on_border && surface;
+ 	bool on_workspace = node && node->type == N_WORKSPACE;
+ 	float scroll_factor =
+--- a/sway/input/seatop_move_tiling.c
++++ b/sway/input/seatop_move_tiling.c
+@@ -134,6 +134,9 @@
+ 		node_get_box(node, &box);
+ 		n_children = 1;
+ 		avoid_index = -1;
++		if (container_has_bottom_titlebar(con, false)) {
++			box.y += box.height - title_height;
++		}
+ 	}
+ 	if (layout == L_STACKED && cursor->y < box.y + title_height * n_children) {
+ 		// Drop into stacked titlebars.
+@@ -143,7 +146,7 @@
+ 		split_border(cursor->y, box.y, title_height * n_children,
+ 			n_children, avoid_index, &title_box->y, after);
+ 		return true;
+-	} else if (layout != L_STACKED && cursor->y < box.y + title_height) {
++	} else if (layout != L_STACKED && cursor->y >= box.y && cursor->y < box.y + title_height) {
+ 		// Drop into side-by-side titlebars.
+ 		title_box->width = DROP_SPLIT_INDICATOR;
+ 		title_box->height = title_height;
+--- a/sway/ipc-json.c
++++ b/sway/ipc-json.c
+@@ -644,6 +644,10 @@
+ 	}
+ 	deco_rect->width = c->pending.width;
+ 	deco_rect->height = container_titlebar_height();
++	if (container_has_bottom_titlebar(c, false)) {
++		deco_rect->y += c->pending.height - deco_rect->height;
++		return;
++	}
+ 
+ 	if (!container_is_floating(c)) {
+ 		if (parent_layout == L_TABBED) {
+@@ -678,7 +682,8 @@
+ 	bool has_titlebar = c->title_bar.tree->node.enabled;
+ 	struct wlr_box window_box = {
+ 		c->pending.content_x - c->pending.x,
+-		has_titlebar ? 0 : c->pending.content_y - c->pending.y,
++		has_titlebar && !container_has_bottom_titlebar(c, false) ?
++			0 : c->pending.content_y - c->pending.y,
+ 		c->pending.content_width,
+ 		c->pending.content_height
+ 	};
+@@ -899,10 +904,13 @@
+ 		struct wlr_box deco_rect = {0, 0, 0, 0};
+ 		get_deco_rect(node->sway_container, &deco_rect);
+ 		size_t count = 1;
+-		if (container_parent_layout(node->sway_container) == L_STACKED) {
++		if (!container_is_floating(node->sway_container) &&
++				container_parent_layout(node->sway_container) == L_STACKED) {
+ 			count = container_get_siblings(node->sway_container)->length;
+ 		}
+-		box.y += deco_rect.height * count;
++		if (!container_has_bottom_titlebar(node->sway_container, false)) {
++			box.y += deco_rect.height * count;
++		}
+ 		box.height -= deco_rect.height * count;
+ 	}
+ 
+--- a/sway/meson.build
++++ b/sway/meson.build
+@@ -142,6 +142,7 @@
+ 	'commands/title_format.c',
+ 	'commands/titlebar_border_thickness.c',
+ 	'commands/titlebar_padding.c',
++	'commands/titlebar_position.c',
+ 	'commands/titlebar_separator.c',
+ 	'commands/unmark.c',
+ 	'commands/urgent.c',
+--- a/sway/sway.5.scd
++++ b/sway/sway.5.scd
+@@ -859,6 +859,12 @@
+ *titlebar_separator* enable|disable
+ 	Allows to remove the border between titlebar and window content.
+ 
++*titlebar_position* top|bottom
++	Places normal per-window title bars above or below the window content.
++	The default is _top_. Grouped tabbed and stacked headers remain above
++	their contents. Pixel borders, client decorations, and fullscreen windows
++	are unaffected.
++
+ *for_window* <criteria> <command>
+ 	Whenever a window that matches _criteria_ appears, run list of commands.
+ 	See *CRITERIA* for more details.
+--- a/sway/tree/container.c
++++ b/sway/tree/container.c
+@@ -319,9 +319,35 @@
+ 	}
+ }
+ 
++bool container_has_bottom_titlebar(struct sway_container *con, bool current) {
++	if (!con || !con->view || !config->titlebar_bottom) {
++		return false;
++	}
++	struct sway_container_state *state = current ? &con->current : &con->pending;
++	if (state->border != B_NORMAL || state->fullscreen_mode != FULLSCREEN_NONE) {
++		return false;
++	}
++	enum sway_container_layout layout = L_NONE;
++	if (state->parent) {
++		layout = current ? state->parent->current.layout : state->parent->pending.layout;
++	} else if (state->workspace) {
++		list_t *floating = current ? state->workspace->current.floating : state->workspace->floating;
++		if (list_find(floating, con) != -1) {
++			return true;
++		}
++		layout = current ? state->workspace->current.layout : state->workspace->layout;
++	}
++	// Group headers are owned and positioned by their parent, even for a
++	// lone tab with a normal border. Keep their geometry and input unchanged.
++	return layout != L_TABBED && layout != L_STACKED;
++}
++
+ static struct fx_corner_radii get_titlebar_corners(struct sway_container *con) {
+ 	int radius = container_has_corner_radius(con) ? con->corner_radius +
+ 		con->current.border_thickness - config->titlebar_border_thickness : 0;
++	if (container_has_bottom_titlebar(con, true)) {
++		return corner_radii_bottom(radius);
++	}
+ 	struct fx_corner_radii corners = corner_radii_top(radius);
+ 
+ 	enum sway_container_layout layout;
+@@ -452,6 +478,8 @@
+ 	int thickness = config->titlebar_border_thickness;
+ 	int bg_width = width - thickness * 2;
+ 	int bg_height = height - thickness * (config->titlebar_separator ? 2 : 1);
++	int bg_y = container_has_bottom_titlebar(con, true) &&
++		!config->titlebar_separator ? 0 : thickness;
+ 
+ 	struct fx_corner_radii corners = get_titlebar_corners(con);
+ 
+@@ -462,11 +490,11 @@
+ 	int right_width = MAX(thickness + bg_width - right_x, 0);
+ 
+ 	arrange_titlebar_bg_rect(con->title_bar.background_left,
+-		thickness, thickness, left_width, bg_height,
++		thickness, bg_y, left_width, bg_height,
+ 		right_width > 0 ? fx_corner_radii_filter(corners, corner_radii_left(1)) : corners,
+ 		&left_cut);
+ 	arrange_titlebar_bg_rect(con->title_bar.background_right,
+-		right_x, thickness, right_width, bg_height,
++		right_x, bg_y, right_width, bg_height,
+ 		left_width > 0 ? fx_corner_radii_filter(corners, corner_radii_right(1)) : corners,
+ 		&right_cut);
+ 
+@@ -476,7 +504,7 @@
+ 		.corners = corners,
+ 		.area = {
+ 			.x = thickness,
+-			.y = thickness,
++			.y = bg_y,
+ 			.width = bg_width,
+ 			.height = bg_height,
+ 		},
+@@ -1149,17 +1177,23 @@
+ 	}
+ 	size_t border_width = 0;
+ 	size_t top = 0;
++	size_t bottom = 0;
+ 
+ 	if (con->pending.border != B_CSD && !con->pending.fullscreen_mode) {
+ 		border_width = con->pending.border_thickness * (con->pending.border != B_NONE);
+ 		top = con->pending.border == B_NORMAL ?
+ 			container_titlebar_height() : border_width;
++		bottom = border_width;
++		if (container_has_bottom_titlebar(con, false)) {
++			bottom = top;
++			top = border_width;
++		}
+ 	}
+ 
+ 	con->pending.x = con->pending.content_x - border_width;
+ 	con->pending.y = con->pending.content_y - top;
+ 	con->pending.width = con->pending.content_width + border_width * 2;
+-	con->pending.height = top + con->pending.content_height + border_width;
++	con->pending.height = top + con->pending.content_height + bottom;
+ 	node_set_dirty(&con->node);
+ }
+ 
+--- a/sway/tree/view.c
++++ b/sway/tree/view.c
+@@ -450,6 +450,10 @@
+ 			y = con->pending.y + y_offset;
+ 			height = con->pending.height - y_offset
+ 				- con->pending.border_thickness * con->pending.border_bottom;
++		} else if (container_has_bottom_titlebar(con, false)) {
++			int top = con->pending.border_thickness * con->pending.border_top;
++			y = con->pending.y + top;
++			height = con->pending.height - container_titlebar_height() - top;
+ 		} else {
+ 			y = con->pending.y + container_titlebar_height();
+ 			height = con->pending.height - container_titlebar_height()

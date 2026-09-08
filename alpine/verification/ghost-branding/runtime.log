@@ -1,0 +1,43 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:01:38 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+[2026-09-07 22:01:38.896] [info] Using configuration file /tmp/ghost-badge-native-verified-20260907/waybar.json
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.1' (uid=1000 pid=8432 comm="waybar --config /tmp/ghost-badge-native-verified-2")
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.2' (uid=1000 pid=8528 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.portal.Documents' requested by ':1.2' (uid=1000 pid=8528 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Successfully activated service 'org.freedesktop.portal.Documents'
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.2' (uid=1000 pid=8528 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.761: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.763: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.765: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.809: Failed to connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.2' (uid=1000 pid=8528 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:01:39 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:01:39 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.845: Failed to create screenshot proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.2' (uid=1000 pid=8528 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:01:39 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:01:39 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:8528): xdg-desktop-portal-WARNING **: 22:01:39.893: Failed to create screen cast proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[8352]: [session uid=1000 pid=8352 pidfd=4] Successfully activated service 'org.freedesktop.portal.Desktop'
+[2026-09-07 22:01:39.918] [info] Using CSS file /tmp/ghost-badge-native-verified-20260907/base.css
+[2026-09-07 22:01:39.994] [warning] Requested height: 32 is less than the minimum height: 35 required by the modules
+[2026-09-07 22:01:39.994] [info] Bar configured (width: 500, height: 35) for output: HEADLESS-1
+[2026-09-07 22:01:41.720] [info] Using configuration file /tmp/ghost-badge-native-verified-20260907/waybar.json
+[2026-09-07 22:01:41.744] [info] Using CSS file /tmp/ghost-badge-native-verified-20260907/waxen-meridian.css
+[2026-09-07 22:01:41.905] [warning] Requested height: 32 is less than the minimum height: 35 required by the modules
+[2026-09-07 22:01:41.905] [info] Bar configured (width: 500, height: 35) for output: HEADLESS-1
+Gdk-Message: 22:01:42.055: Error reading events from display: Broken pipe
+
+(/usr/libexec/xdg-document-portal:8544): GLib-GIO-WARNING **: 22:01:42.177: Error releasing name org.freedesktop.portal.Documents: The connection is closed

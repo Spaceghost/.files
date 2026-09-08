@@ -1,0 +1,17 @@
+#!/usr/bin/python3 -S
+"""Slide the focused workspace's windows off screen, and slide them back."""
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../lib/mbp_intel'))
+if __name__ == '__main__':
+    from ui_command import fast_command
+    if fast_command('showdesktop', sys.argv[1:]):
+        sys.exit(0)
+    import site
+    if sys.flags.no_site:
+        site.main()
+    from showdesktop import main
+    action = sys.argv[1] if len(sys.argv) > 1 else 'toggle'
+    if action not in ('toggle', 'show', 'restore', 'restore-or-carousel', 'daemon'):
+        sys.exit('Usage: mbp-intel-showdesktop [toggle|show|restore|restore-or-carousel|daemon]')
+    main(action)

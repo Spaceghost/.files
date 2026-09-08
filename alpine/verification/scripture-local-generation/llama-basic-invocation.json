@@ -1,0 +1,43 @@
+{
+  "started_utc": "2026-09-08T05:52:55.003107+00:00",
+  "command": [
+    "/home/jack/.local/share/oldbook/llama.cpp/runtime-0.4.0-r0/usr/bin/llama-completion",
+    "-m",
+    "/home/jack/.local/share/oldbook/ollama/models/blobs/sha256-183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4",
+    "-p",
+    "Return exactly OK.",
+    "-n",
+    "8",
+    "-t",
+    "4",
+    "-tb",
+    "4",
+    "-c",
+    "4096",
+    "-ngl",
+    "0",
+    "--single-turn",
+    "--no-display-prompt",
+    "--simple-io",
+    "--color",
+    "off",
+    "--temp",
+    "0",
+    "--offline",
+    "--perf"
+  ],
+  "cwd": "/home/jack/.local/share/oldbook/llama.cpp/runtime-0.4.0-r0/usr/lib",
+  "environment": {
+    "LANG": "C.UTF-8",
+    "LC_ALL": "C.UTF-8",
+    "PATH": "/usr/local/bin:/usr/bin:/bin",
+    "HOME": "/home/jack/.local/state/oldbook/ollama/profile",
+    "LD_LIBRARY_PATH": "/home/jack/.local/share/oldbook/llama.cpp/runtime-0.4.0-r0/usr/lib:/home/jack/.local/share/oldbook/llama.cpp/runtime-0.4.0-r0/usr/lib/llama.cpp",
+    "OPENBLAS_NUM_THREADS": "4",
+    "OMP_NUM_THREADS": "4"
+  },
+  "total_limit_seconds": 120,
+  "binary_sha256": "c9ad7186c811fe65f045c1a153197ed42e21a82bfced72a661aad3e6d8518ebe",
+  "model_sha256": "183715c435899236895da3869489cc30ac241476b4971a20285b1a462818a5b4",
+  "study_saved": false
+}

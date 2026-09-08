@@ -1,0 +1,170 @@
+test_cancelled_phrase_menu_does_not_launch (test_new_themes.NewThemeTests.test_cancelled_phrase_menu_does_not_launch) ... ok
+test_existing_themes_are_selected_in_a_separate_picker (test_new_themes.NewThemeTests.test_existing_themes_are_selected_in_a_separate_picker) ... ok
+test_generated_name_matching_an_action_still_paints_that_theme (test_new_themes.NewThemeTests.test_generated_name_matching_an_action_still_paints_that_theme) ... ok
+test_invalid_model_output_never_writes_descriptor (test_new_themes.NewThemeTests.test_invalid_model_output_never_writes_descriptor) ... ok
+test_new_theme_command_launches_random_theme_and_activates_debut_art (test_new_themes.NewThemeTests.test_new_theme_command_launches_random_theme_and_activates_debut_art) ... ok
+test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline (test_new_themes.NewThemeTests.test_new_theme_debut_uses_requested_scene_and_existing_artwork_pipeline) ... ok
+test_phrase_menu_passes_literal_text_to_background_job (test_new_themes.NewThemeTests.test_phrase_menu_passes_literal_text_to_background_job) ... ok
+test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) ... usage: oldbook-wallpaper [-h] [--theme THEME]
+                         [{status,next,prev,pause,pick,daemon,refresh,generate,new-theme,select,edit-prompts,delete}]
+                         [artwork_id]
+oldbook-wallpaper: error: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+
+  test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='Foggy observatory, etched brass and quiet typography', code=0) ... ERROR
+usage: oldbook-wallpaper [-h] [--theme THEME]
+                         [{status,next,prev,pause,pick,daemon,refresh,generate,new-theme,select,edit-prompts,delete}]
+                         [artwork_id]
+oldbook-wallpaper: error: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+  test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='', code=0) ... ERROR
+usage: oldbook-wallpaper [-h] [--theme THEME]
+                         [{status,next,prev,pause,pick,daemon,refresh,generate,new-theme,select,edit-prompts,delete}]
+                         [artwork_id]
+oldbook-wallpaper: error: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+  test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='ignored', code=1) ... ERROR
+test_random_and_phrase_prompts (test_new_themes.NewThemeTests.test_random_and_phrase_prompts) ... ok
+test_save_unique_discoverable_collection_without_replacing_existing (test_new_themes.NewThemeTests.test_save_unique_discoverable_collection_without_replacing_existing) ... ok
+test_symlink_theme_directory_is_rejected (test_new_themes.NewThemeTests.test_symlink_theme_directory_is_rejected) ... ok
+test_theme_design_receives_saved_artwork_guidance (test_new_themes.NewThemeTests.test_theme_design_receives_saved_artwork_guidance) ... ok
+
+======================================================================
+ERROR: test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='Foggy observatory, etched brass and quiet typography', code=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/argparse.py", line 2047, in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2302, in _parse_known_args
+    stop_index = consume_positionals(start_index)
+  File "/usr/lib/python3.14/argparse.py", line 2254, in consume_positionals
+    take_action(action, args)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2108, in take_action
+    argument_values = self._get_values(action, argument_strings)
+  File "/usr/lib/python3.14/argparse.py", line 2625, in _get_values
+    self._check_value(action, value)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2696, in _check_value
+    raise ArgumentError(action, msg % args)
+argparse.ArgumentError: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_new_themes.py", line 98, in test_prompted_theme_command_accepts_description_and_cancel_is_inert
+    art.main()
+    ~~~~~~~~^^
+  File "/home/jack/.files/alpine/desktop/.local/bin/oldbook-wallpaper", line 590, in main
+    args = parser.parse_args()
+  File "/usr/lib/python3.14/argparse.py", line 2008, in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2018, in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2049, in _parse_known_args2
+    self.error(str(err))
+    ~~~~~~~~~~^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2785, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2772, in exit
+    _sys.exit(status)
+    ~~~~~~~~~^^^^^^^^
+SystemExit: 2
+
+======================================================================
+ERROR: test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='', code=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/argparse.py", line 2047, in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2302, in _parse_known_args
+    stop_index = consume_positionals(start_index)
+  File "/usr/lib/python3.14/argparse.py", line 2254, in consume_positionals
+    take_action(action, args)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2108, in take_action
+    argument_values = self._get_values(action, argument_strings)
+  File "/usr/lib/python3.14/argparse.py", line 2625, in _get_values
+    self._check_value(action, value)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2696, in _check_value
+    raise ArgumentError(action, msg % args)
+argparse.ArgumentError: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_new_themes.py", line 98, in test_prompted_theme_command_accepts_description_and_cancel_is_inert
+    art.main()
+    ~~~~~~~~^^
+  File "/home/jack/.files/alpine/desktop/.local/bin/oldbook-wallpaper", line 590, in main
+    args = parser.parse_args()
+  File "/usr/lib/python3.14/argparse.py", line 2008, in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2018, in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2049, in _parse_known_args2
+    self.error(str(err))
+    ~~~~~~~~~~^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2785, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2772, in exit
+    _sys.exit(status)
+    ~~~~~~~~~^^^^^^^^
+SystemExit: 2
+
+======================================================================
+ERROR: test_prompted_theme_command_accepts_description_and_cancel_is_inert (test_new_themes.NewThemeTests.test_prompted_theme_command_accepts_description_and_cancel_is_inert) (answer='ignored', code=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/usr/lib/python3.14/argparse.py", line 2047, in _parse_known_args2
+    namespace, args = self._parse_known_args(args, namespace, intermixed)
+                      ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2302, in _parse_known_args
+    stop_index = consume_positionals(start_index)
+  File "/usr/lib/python3.14/argparse.py", line 2254, in consume_positionals
+    take_action(action, args)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2108, in take_action
+    argument_values = self._get_values(action, argument_strings)
+  File "/usr/lib/python3.14/argparse.py", line 2625, in _get_values
+    self._check_value(action, value)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2696, in _check_value
+    raise ArgumentError(action, msg % args)
+argparse.ArgumentError: argument action: invalid choice: 'prompt-theme' (choose from 'status', 'next', 'prev', 'pause', 'pick', 'daemon', 'refresh', 'generate', 'new-theme', 'select', 'edit-prompts', 'delete')
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_new_themes.py", line 98, in test_prompted_theme_command_accepts_description_and_cancel_is_inert
+    art.main()
+    ~~~~~~~~^^
+  File "/home/jack/.files/alpine/desktop/.local/bin/oldbook-wallpaper", line 590, in main
+    args = parser.parse_args()
+  File "/usr/lib/python3.14/argparse.py", line 2008, in parse_args
+    args, argv = self.parse_known_args(args, namespace)
+                 ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2018, in parse_known_args
+    return self._parse_known_args2(args, namespace, intermixed=False)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2049, in _parse_known_args2
+    self.error(str(err))
+    ~~~~~~~~~~^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2785, in error
+    self.exit(2, _('%(prog)s: error: %(message)s\n') % args)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/argparse.py", line 2772, in exit
+    _sys.exit(status)
+    ~~~~~~~~~^^^^^^^^
+SystemExit: 2
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.050s
+
+FAILED (errors=3)

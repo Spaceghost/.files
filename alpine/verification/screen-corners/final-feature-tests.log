@@ -1,0 +1,131 @@
+Review alpine/FEATURES.md for these pinned behaviors:
+  NOTIFICATION-PLACEMENT — manual/native review required
+  DEPLOY-RECOVERY — 2 check files
+  PACKAGE-CLOSURE — 3 check files
+  PERSONAL-DESKTOP — manual/native review required
+  SCREEN-CORNERS — manual/native review required
+5 unique check files. Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.
+test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback (test_deploy.DeployTest.test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_database_backup_manifest_does_not_block_deployment_or_rollback (test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... ok
+test_existing_legacy_overlay_symlink_does_not_create_alias (test_deploy.DeployTest.test_existing_legacy_overlay_symlink_does_not_create_alias) ... ok
+test_explicit_legacy_overlay_config_is_not_replaced_by_alias (test_deploy.DeployTest.test_explicit_legacy_overlay_config_is_not_replaced_by_alias) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_malformed_deployment_headers_block_before_replacing_user_files (test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... ok
+test_only_rejects_missing_and_unsafe_selections_before_target_changes (test_deploy.DeployTest.test_only_rejects_missing_and_unsafe_selections_before_target_changes) ... ok
+test_only_selects_exact_config_pair_and_excludes_unrelated_files (test_deploy.DeployTest.test_only_selects_exact_config_pair_and_excludes_unrelated_files) ... ok
+test_partial_deployment_rolls_back_all_originals (test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_superhold_config_alias_shares_edits_and_restores_legacy_file (test_deploy.DeployTest.test_superhold_config_alias_shares_edits_and_restores_legacy_file) ... ok
+test_portable_profiles_precede_oldbook_with_legacy_fallback (test_deploy.WrapperMigrationTest.test_portable_profiles_precede_oldbook_with_legacy_fallback) ... ok
+test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display) ... ERROR
+
+======================================================================
+ERROR: test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 341, in test_wrapper_reads_superhold_runtime_status_without_a_display
+    result = subprocess.run([str(repo / 'alpine/desktop/.local/bin/oldbook-shortcuts'),
+        'status', '--socket', str(session)],
+        env={'PATH': os.environ['PATH'], 'HOME': directory,
+             'XDG_CONFIG_HOME': directory, 'XDG_RUNTIME_DIR': directory},
+        capture_output=True, text=True, timeout=3)
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/alpine/desktop/.local/bin/oldbook-shortcuts', 'status', '--socket', '/tmp/tmpv5wh_z73/sway-ipc.test.sock']' timed out after 3 seconds
+
+----------------------------------------------------------------------
+Ran 20 tests in 7.239s
+
+FAILED (errors=1)
+test_all_checks_are_existing_files_and_ids_are_unique (test_feature_contracts.FeatureImpact.test_all_checks_are_existing_files_and_ids_are_unique) ... ok
+test_deleted_profile_still_has_impact_without_an_existing_file (test_feature_contracts.FeatureImpact.test_deleted_profile_still_has_impact_without_an_existing_file) ... ok
+test_installed_guide_source_is_in_scope_across_project_directories (test_feature_contracts.FeatureImpact.test_installed_guide_source_is_in_scope_across_project_directories) ... ok
+test_mode_binding_change_reviews_keys_and_window_switching_together (test_feature_contracts.FeatureImpact.test_mode_binding_change_reviews_keys_and_window_switching_together) ... ok
+test_path_normalization_keeps_hidden_files_and_rejects_escape (test_feature_contracts.FeatureImpact.test_path_normalization_keeps_hidden_files_and_rejects_escape) ... ok
+test_shared_checks_run_once_and_a_failure_fails_the_review (test_feature_contracts.FeatureImpact.test_shared_checks_run_once_and_a_failure_fails_the_review) ... ok
+test_theme_template_change_reviews_brand_lock_and_caption_contracts (test_feature_contracts.FeatureImpact.test_theme_template_change_reviews_brand_lock_and_caption_contracts) ... ok
+test_unknown_feature_is_rejected_instead_of_running_nothing (test_feature_contracts.FeatureImpact.test_unknown_feature_is_rejected_instead_of_running_nothing) ... ok
+test_unmapped_change_is_reported_without_claiming_coverage (test_feature_contracts.FeatureImpact.test_unmapped_change_is_reported_without_claiming_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 9.122s
+
+OK
+test_bootstrap_command_is_executable (test_fossil_bootstrap.FossilBootstrapTests.test_bootstrap_command_is_executable) ... ok
+test_failure_removes_partial_repository_and_checkout (test_fossil_bootstrap.FossilBootstrapTests.test_failure_removes_partial_repository_and_checkout) ... ok
+test_help_documents_safe_defaults (test_fossil_bootstrap.FossilBootstrapTests.test_help_documents_safe_defaults) ... ok
+test_imports_git_history_and_opens_requested_branch (test_fossil_bootstrap.FossilBootstrapTests.test_imports_git_history_and_opens_requested_branch) ... ok
+test_refuses_an_existing_repository_or_checkout (test_fossil_bootstrap.FossilBootstrapTests.test_refuses_an_existing_repository_or_checkout) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 16.156s
+
+OK
+test_cache_symlink_is_rejected (test_package_archive.PackageArchiveTest.test_cache_symlink_is_rejected) ... ok
+test_corrupt_cached_apk_is_rejected_without_overwrite (test_package_archive.PackageArchiveTest.test_corrupt_cached_apk_is_rejected_without_overwrite) ... ok
+test_corrupt_fossil_export_is_not_published_and_retry_succeeds (test_package_archive.PackageArchiveTest.test_corrupt_fossil_export_is_not_published_and_retry_succeeds) ... Verified 1 archived APKs
+ok
+test_failed_install_preserves_evidence_and_target_can_retry (test_package_archive.PackageArchiveTest.test_failed_install_preserves_evidence_and_target_can_retry) ... Verified 1 archived APKs
+Verified 1 archived APKs
+Compared package versions, native architectures and APK identities: 1
+ok
+test_host_identity_failure_retains_backup_and_does_not_publish_locked_world (test_package_archive.PackageArchiveTest.test_host_identity_failure_retains_backup_and_does_not_publish_locked_world) ... Exact package closure restored and compared: /tmp/tmp39ul3e4v/root
+Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmphc74grih/host/var/backups/oldbook/install-host-jmlga854
+ok
+test_host_install_requires_root_before_export (test_package_archive.PackageArchiveTest.test_host_install_requires_root_before_export) ... ok
+test_host_preserves_extras_and_private_backup_and_applies_locked_world (test_package_archive.PackageArchiveTest.test_host_preserves_extras_and_private_backup_and_applies_locked_world) ... Verified 1 archived APKs
+Host configuration and APK database backup: /tmp/tmpy2j6chyx/host/var/backups/oldbook/install-host-wj6zhwu1
+Locked APK identities verified; extra installed packages retained: extra
+Host package set is not an exact closure match.
+ok
+test_host_signature_failure_leaves_configuration_and_database_untouched (test_package_archive.PackageArchiveTest.test_host_signature_failure_leaves_configuration_and_database_untouched) ... Verified 1 archived APKs
+ok
+test_host_simulation_rejects_removals_before_install (test_package_archive.PackageArchiveTest.test_host_simulation_rejects_removals_before_install) ... Verified 1 archived APKs
+ok
+test_lock_rejects_corrupt_key_before_restore (test_package_archive.PackageArchiveTest.test_lock_rejects_corrupt_key_before_restore) ... ok
+test_lock_rejects_duplicate_package (test_package_archive.PackageArchiveTest.test_lock_rejects_duplicate_package) ... ok
+test_lock_rejects_modified_metadata_even_with_valid_json (test_package_archive.PackageArchiveTest.test_lock_rejects_modified_metadata_even_with_valid_json) ... ok
+test_lock_rejects_path_traversal_before_restore (test_package_archive.PackageArchiveTest.test_lock_rejects_path_traversal_before_restore) ... ok
+test_missing_fetch_does_not_resolve_cached_custom_package (test_package_archive.PackageArchiveTest.test_missing_fetch_does_not_resolve_cached_custom_package) ... ok
+test_missing_or_extra_package_is_rejected (test_package_archive.PackageArchiveTest.test_missing_or_extra_package_is_rejected) ... ok
+test_noarch_restore_matches_identity_despite_original_index_arch (test_package_archive.PackageArchiveTest.test_noarch_restore_matches_identity_despite_original_index_arch) ... Compared package versions, native architectures and APK identities: 1
+ok
+test_nonempty_target_is_never_modified (test_package_archive.PackageArchiveTest.test_nonempty_target_is_never_modified) ... ok
+test_same_name_version_and_arch_with_wrong_identity_is_rejected (test_package_archive.PackageArchiveTest.test_same_name_version_and_arch_with_wrong_identity_is_rejected) ... ok
+test_snapshot_accepts_noarch_only_when_control_identity_matches (test_package_archive.PackageArchiveTest.test_snapshot_accepts_noarch_only_when_control_identity_matches) ... ok
+test_snapshot_rejects_same_version_from_different_signed_build (test_package_archive.PackageArchiveTest.test_snapshot_rejects_same_version_from_different_signed_build) ... ok
+test_wrong_native_architecture_is_rejected (test_package_archive.PackageArchiveTest.test_wrong_native_architecture_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.627s
+
+OK
+test_corrupt_cache_is_preserved_and_rejected (test_source_archive.SourceArchiveTests.test_corrupt_cache_is_preserved_and_rejected) ... ok
+test_corrupt_export_never_publishes_destination (test_source_archive.SourceArchiveTests.test_corrupt_export_never_publishes_destination) ... ok
+test_manifest_rejects_path_traversal_and_digest_alias (test_source_archive.SourceArchiveTests.test_manifest_rejects_path_traversal_and_digest_alias) ... ok
+test_symlink_cache_and_symlink_artifacts_are_rejected (test_source_archive.SourceArchiveTests.test_symlink_cache_and_symlink_artifacts_are_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.075s
+
+OK
+Failed feature checks: test_deploy.py

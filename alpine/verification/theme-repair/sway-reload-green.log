@@ -1,0 +1,13 @@
+test_fragmented_reply_cannot_extend_the_total_deadline (test_theme_sway_reload.ThemeSwayReloadTests.test_fragmented_reply_cannot_extend_the_total_deadline) ... ok
+test_missing_session_never_discovers_another_compositor (test_theme_sway_reload.ThemeSwayReloadTests.test_missing_session_never_discovers_another_compositor) ... ok
+test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit) ... ok
+test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload) ... ok
+test_rejected_command_retains_the_compositor_error (test_theme_sway_reload.ThemeSwayReloadTests.test_rejected_command_retains_the_compositor_error) ... ok
+test_response_must_contain_boolean_command_success (test_theme_sway_reload.ThemeSwayReloadTests.test_response_must_contain_boolean_command_success) ... ok
+test_truncated_reply_reports_disconnection (test_theme_sway_reload.ThemeSwayReloadTests.test_truncated_reply_reports_disconnection) ... ok
+test_wrong_frame_magic_or_reply_type_is_rejected (test_theme_sway_reload.ThemeSwayReloadTests.test_wrong_frame_magic_or_reply_type_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 5.588s
+
+OK

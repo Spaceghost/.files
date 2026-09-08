@@ -1,0 +1,414 @@
+test_brand_protection_does_not_swallow_neighboring_selectors (test_ghost_branding.GhostBrandingTests.test_brand_protection_does_not_swallow_neighboring_selectors) ... FAIL
+test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) ... 
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/desktop/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/comet-at-the-caravanserai-4989aec33526/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/gruvbox-dark/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/sewer-starwatch-07c121dd7cd0/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/spectral-wave-cd18e6a0360e/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-astronomer-s-vigil-1d4ee5cd93a8/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-brass-meridian-64b7a7433eec/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-centurion-s-vigil-4d98e9fac66d/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-falconer-s-comet-3e46b19483f2/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-ivory-joust-b5e55e707df7/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-lanterns-of-acre-5d2e5b9dcc98/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-luminous-sounding-f6a096b4e759/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-minted-eclipse-48db56180baf/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-saffron-undertow-8cc254254d8a/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-watch-at-dusk-04211d0d1b2b/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/tidepool-astronautics-4c7a6f4c0829/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/vespersteel-archive-968881e8a08a/.config/waybar/style.css') ... FAIL
+  test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/waxen-meridian-373c11cb12f0/.config/waybar/style.css') ... FAIL
+test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) ... 
+  test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='spaceghost') ... FAIL
+  test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='gruvbox-dark') ... FAIL
+  test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='waxen-meridian-373c11cb12f0') ... FAIL
+
+======================================================================
+FAIL: test_brand_protection_does_not_swallow_neighboring_selectors (test_ghost_branding.GhostBrandingTests.test_brand_protection_does_not_swallow_neighboring_selectors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 63, in test_brand_protection_does_not_swallow_neighboring_selectors
+    self.assertEqual(badge(result)['color'], '#fabd2f')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '#123456' != '#fabd2f'
+- #123456
++ #fabd2f
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/desktop/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/comet-at-the-caravanserai-4989aec33526/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/gruvbox-dark/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 28, in assert_brand
+    self.assertEqual(normal['color'], '#fff6ff')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '#fbf1c7' != '#fff6ff'
+- #fbf1c7
++ #fff6ff
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/sewer-starwatch-07c121dd7cd0/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/spectral-wave-cd18e6a0360e/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-astronomer-s-vigil-1d4ee5cd93a8/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-brass-meridian-64b7a7433eec/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-centurion-s-vigil-4d98e9fac66d/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-falconer-s-comet-3e46b19483f2/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-ivory-joust-b5e55e707df7/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-lanterns-of-acre-5d2e5b9dcc98/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-luminous-sounding-f6a096b4e759/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-minted-eclipse-48db56180baf/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-saffron-undertow-8cc254254d8a/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/the-watch-at-dusk-04211d0d1b2b/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/tidepool-astronautics-4c7a6f4c0829/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/vespersteel-archive-968881e8a08a/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) (profile='alpine/themes/profiles/waxen-meridian-373c11cb12f0/.config/waybar/style.css')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 43, in test_existing_profiles_and_base_keep_original_badge
+    self.assert_brand(path.read_text())
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='spaceghost')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 51, in test_generated_distinct_palettes_keep_badge_while_bar_changes
+    self.assert_brand(css)
+    ~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='gruvbox-dark')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 51, in test_generated_distinct_palettes_keep_badge_while_bar_changes
+    self.assert_brand(css)
+    ~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+======================================================================
+FAIL: test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) (theme='waxen-meridian-373c11cb12f0')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 51, in test_generated_distinct_palettes_keep_badge_while_bar_changes
+    self.assert_brand(css)
+    ~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/jack/.files/alpine/tests/test_ghost_branding.py", line 27, in assert_brand
+    self.assertEqual(normal['font-size'], '21px')
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '18px' != '21px'
+- 18px
+?  -
++ 21px
+? +
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.698s
+
+FAILED (failures=23)

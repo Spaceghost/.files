@@ -1,0 +1,49 @@
+test_floating_window_uses_its_workspace_not_its_old_center (test_centered_resize.NearFullResize.test_floating_window_uses_its_workspace_not_its_old_center) ... FAIL
+test_fullscreen_tiled_window_floats_and_centers_constrained_size (test_centered_resize.NearFullResize.test_fullscreen_tiled_window_floats_and_centers_constrained_size) ... FAIL
+test_grow_still_uses_the_existing_centered_step (test_centered_resize.NearFullResize.test_grow_still_uses_the_existing_centered_step) ... ok
+test_no_focused_window_does_nothing (test_centered_resize.NearFullResize.test_no_focused_window_does_nothing) ... ok
+test_small_workspace_keeps_twenty_four_pixel_margins (test_centered_resize.NearFullResize.test_small_workspace_keeps_twenty_four_pixel_margins) ... FAIL
+test_tiny_workspace_never_requests_zero_or_negative_dimensions (test_centered_resize.NearFullResize.test_tiny_workspace_never_requests_zero_or_negative_dimensions) ... FAIL
+
+======================================================================
+FAIL: test_floating_window_uses_its_workspace_not_its_old_center (test_centered_resize.NearFullResize.test_floating_window_uses_its_workspace_not_its_old_center)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_centered_resize.py", line 56, in test_floating_window_uses_its_workspace_not_its_old_center
+    self.assertIn('resize set 1440 px 810 px', commands[0])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'resize set 1440 px 810 px' not found in '[con_id=7] resize set 560 px 360 px'
+
+======================================================================
+FAIL: test_fullscreen_tiled_window_floats_and_centers_constrained_size (test_centered_resize.NearFullResize.test_fullscreen_tiled_window_floats_and_centers_constrained_size)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_centered_resize.py", line 65, in test_fullscreen_tiled_window_floats_and_centers_constrained_size
+    self.assertIn('fullscreen disable, floating enable, resize set 1440 px 774 px',
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                  commands[0])
+                  ^^^^^^^^^^^^
+AssertionError: 'fullscreen disable, floating enable, resize set 1440 px 774 px' not found in '[con_id=7] fullscreen disable, floating enable, resize set 560 px 360 px'
+
+======================================================================
+FAIL: test_small_workspace_keeps_twenty_four_pixel_margins (test_centered_resize.NearFullResize.test_small_workspace_keeps_twenty_four_pixel_margins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_centered_resize.py", line 73, in test_small_workspace_keeps_twenty_four_pixel_margins
+    self.assertIn('resize set 352 px 252 px', commands[0])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'resize set 352 px 252 px' not found in '[con_id=7] resize set 560 px 360 px'
+
+======================================================================
+FAIL: test_tiny_workspace_never_requests_zero_or_negative_dimensions (test_centered_resize.NearFullResize.test_tiny_workspace_never_requests_zero_or_negative_dimensions)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_centered_resize.py", line 79, in test_tiny_workspace_never_requests_zero_or_negative_dimensions
+    self.assertIn('resize set 1 px 1 px', commands[0])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'resize set 1 px 1 px' not found in '[con_id=7] resize set 560 px 360 px'
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.033s
+
+FAILED (failures=4)

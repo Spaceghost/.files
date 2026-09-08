@@ -1,0 +1,27 @@
+{
+  "old_waybar_pid": 26778,
+  "new_waybar_pids": [
+    26230
+  ],
+  "windows_unchanged": false,
+  "library_sha256": "2e9075cf0ca82d4ad182f82f286cbe1732bdcb45fbaa2f24c3440e318a4f8795",
+  "agent_status": {
+    "text": "\u2726 3",
+    "tooltip": "<b>AI SESSIONS</b>\n1: Ghost \u00b7 Codex \u00b7 recent completion\n2: Orbit \u00b7 Codex (tmux)\n3: Lab \u00b7 Codex \u00b7 recent completion\n\nLeft: next AI window \u00b7 Right: sessions and launchers\nSuper+left / Super+Ctrl+N: new uncontained Codex \u00b7 Astra ultra \u00b7 tmux",
+    "class": "complete"
+  },
+  "window_comparison_note": "Live desktop changed during restart; before/after equality was false. No window commands were issued by activation. Preservation cannot be asserted from this concurrent live sample.",
+  "agent_status_final": {
+    "text": "\u2726 3",
+    "tooltip": "<b>AI SESSIONS</b>\n1: Ghost \u00b7 Codex \u00b7 recent completion\n2: Orbit \u00b7 Codex (tmux) \u00b7 recent completion\n3: Lab \u00b7 Codex \u00b7 recent completion\n\nLeft: next AI window \u00b7 Right: sessions and launchers\nSuper+left / Super+Ctrl+N: new uncontained Codex \u00b7 Astra ultra \u00b7 tmux",
+    "class": "complete"
+  },
+  "tracker_snapshot_age_seconds": 0.442,
+  "running_library_mapping": [
+    "7f5729b38000-7f5729b3b000 r--p 00000000 fd:02 16680457                   /usr/lib/waybar/oldbook-art.so",
+    "7f5729b3b000-7f5729b3d000 r-xp 00003000 fd:02 16680457                   /usr/lib/waybar/oldbook-art.so",
+    "7f5729b3d000-7f5729b3e000 r--p 00005000 fd:02 16680457                   /usr/lib/waybar/oldbook-art.so",
+    "7f5729b3e000-7f5729b3f000 r--p 00006000 fd:02 16680457                   /usr/lib/waybar/oldbook-art.so",
+    "7f5729b3f000-7f5729b40000 rw-p 00007000 fd:02 16680457                   /usr/lib/waybar/oldbook-art.so"
+  ]
+}

@@ -1,0 +1,182 @@
+#!/usr/bin/env python3
+"""Render an offline Ghost Observatory concept in a private SwayFX session."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import tempfile
+import time
+
+BASE = Path(__file__).resolve().parent
+REPO = BASE.parents[3]
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', type=Path, default=Path('/usr/bin/swayfx'))
+    parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
+    parser.add_argument('--render-device', default='/dev/dri/renderD128')
+    args = parser.parse_args()
+    binary = args.binary.resolve(strict=True)
+    output = args.output.absolute()
+    output.mkdir(parents=True, exist_ok=False)
+    desktop = REPO / 'alpine/desktop/.config'
+    art = REPO / 'alpine/assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png'
+    metadata = json.loads(art.with_suffix('.json').read_text())
+    assert hashlib.sha256(art.read_bytes()).hexdigest() == metadata['sha256']
+    bar = json.loads((desktop / 'waybar/config.jsonc').read_text())
+    bar.update(output='HEADLESS-1', height=44, spacing=3,
+               **{'margin-top': 14, 'margin-left': 18, 'margin-right': 18,
+                  'fixed-center': False})
+    (output / 'waybar.json').write_text(json.dumps(bar, indent=2) + '\n')
+    (output / 'waybar.css').write_text((desktop / 'waybar/style.css').read_text()
+                                     + '\n' + (BASE / 'waybar.css').read_text())
+    config = output / 'sway.conf'
+    config.write_text(f'''xwayland disable
+output HEADLESS-1 mode 1440x900
+output * bg "{art}" fill
+seat seat0 fallback true
+focus_follows_mouse no
+mouse_warping none
+include "{desktop / 'sway/theme.conf'}"
+include "{BASE / 'sway.conf'}"
+for_window [app_id="observatory-.*"] floating enable
+workspace 1:observatory
+''')
+    processes = []
+    with tempfile.TemporaryDirectory(prefix='ghost-observatory-runtime-') as runtime:
+        env = os.environ.copy()
+        env.update(XDG_RUNTIME_DIR=runtime, WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
+                   WLR_RENDERER='gles2', WLR_RENDERER_ALLOW_SOFTWARE='1',
+                   WLR_RENDER_DRM_DEVICE=args.render_device, NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
+        pulse = Path('/run/user') / str(os.getuid()) / 'pulse/native'
+        if pulse.exists():
+            env['PULSE_SERVER'] = 'unix:' + str(pulse)
+        for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'DBUS_SESSION_BUS_ADDRESS'):
+            env.pop(key, None)
+        with (output / 'runtime.log').open('w') as log:
+            def spawn(command):
+                process = subprocess.Popen(command, env=env, stdout=log, stderr=log,
+                                           start_new_session=True)
+                processes.append(process)
+                return process
+
+            def ipc(command, kind=None):
+                invocation = ['swaymsg', '-r']
+                if kind:
+                    invocation.extend(['-t', kind])
+                if command:
+                    invocation.append(command)
+                data = json.loads(subprocess.check_output(invocation, env=env, text=True))
+                if not kind and not all(item.get('success') for item in data):
+                    raise RuntimeError(data)
+                return data
+
+            def walk(node):
+                yield node
+                for child in node.get('nodes', []) + node.get('floating_nodes', []):
+                    yield from walk(child)
+
+            try:
+                bus_socket = Path(runtime) / 'bus'
+                bus_config = Path(runtime) / 'bus.conf'
+                bus_config.write_text(f'''<busconfig><type>session</type>
+<listen>unix:path={bus_socket}</listen><auth>EXTERNAL</auth>
+<policy context="default"><allow send_destination="*"/>
+<allow receive_sender="*"/><allow own="*"/></policy></busconfig>''')
+                spawn(['dbus-daemon', '--nofork', '--config-file=' + str(bus_config)])
+                for _ in range(100):
+                    if bus_socket.exists():
+                        break
+                    time.sleep(.02)
+                else:
+                    raise RuntimeError('Private D-Bus did not start')
+                env['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=' + str(bus_socket)
+                subprocess.run([str(binary), '--validate', '-c', str(config)], env=env,
+                               stdout=log, stderr=log, check=True)
+                compositor = spawn([str(binary), '-c', str(config)])
+                for _ in range(100):
+                    sockets = list(Path(runtime).glob('sway-ipc*.sock'))
+                    displays = [p for p in Path(runtime).glob('wayland-*') if p.suffix != '.lock']
+                    if sockets and displays:
+                        env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                        break
+                    if compositor.poll() is not None:
+                        raise RuntimeError('Private compositor exited; see runtime.log')
+                    time.sleep(.05)
+                else:
+                    raise RuntimeError('Private compositor did not start')
+                panel = spawn(['waybar', '-c', str(output / 'waybar.json'), '-s', str(output / 'waybar.css')])
+                layout = [
+                    ('field', '01  /  FIELD NOTES', (54, 100, 575, 290)),
+                    ('desk', '02  /  THE OBSERVATORY · RESEARCH DESK', (713, 164, 662, 467)),
+                    ('signal', '03  /  INCOMING TRANSMISSION', (723, 645, 640, 230)),
+                ]
+                for name, title, geometry in layout:
+                    app_id = 'observatory-' + name
+                    process = spawn(['foot', '-c', str(desktop / 'foot/foot.ini'),
+                        '--override=resize-by-cells=no', '--override=pad=24x18',
+                        '--override=font=JetBrainsMono Nerd Font:size=11',
+                        '--override=colors-dark.alpha=0.96', '--app-id=' + app_id,
+                        '--title=' + title, 'python3', str(BASE / 'client.py'), name])
+                    for _ in range(100):
+                        if any(n.get('app_id') == app_id for n in walk(ipc(None, 'get_tree'))):
+                            break
+                        if process.poll() is not None:
+                            raise RuntimeError('Preview Foot exited; see runtime.log')
+                        time.sleep(.05)
+                    else:
+                        raise RuntimeError('Preview Foot did not map')
+                    time.sleep(.2)
+                    x, y, width, height = geometry
+                    ipc(f'[app_id="{app_id}"] floating enable, border normal 0, '
+                        f'resize set width {width} px height {height} px, move absolute position {x} px {y} px')
+                    time.sleep(.2)
+                ipc('[app_id="observatory-desk"] focus')
+                for _ in range(150):
+                    if 'Bar configured' in (output / 'runtime.log').read_text():
+                        break
+                    if panel.poll() is not None:
+                        raise RuntimeError('Preview Waybar exited; see runtime.log')
+                    time.sleep(.2)
+                else:
+                    raise RuntimeError('Preview Waybar did not configure; see runtime.log')
+                time.sleep(1.3)
+                # Apply final positions after the bar reserves its work area
+                # and the clients acknowledge their initial configure events.
+                for name, _, geometry in layout:
+                    x, y, width, height = geometry
+                    ipc(f'[app_id="observatory-{name}"] resize set width {width} px '
+                        f'height {height} px, move absolute position {x} px {y} px')
+                    ipc(f'[app_id="observatory-{name}"] title_format "%title"')
+                time.sleep(1.3)
+                # Repaint the complete private output after moving the cards.
+                ipc('output HEADLESS-1 power off')
+                time.sleep(.1)
+                ipc('output HEADLESS-1 power on')
+                time.sleep(.5)
+                subprocess.run(['grim', str(output / 'ghost-observatory.png')], env=env, check=True)
+                (output / 'tree.json').write_text(json.dumps(ipc(None, 'get_tree'), indent=2) + '\n')
+                (output / 'evidence.json').write_text(json.dumps({
+                    'status': 'rendered', 'binary': str(binary),
+                    'binary_sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
+                    'artwork_sha256': metadata['sha256'], 'live_session_changes': 0,
+                    'content': 'Synthetic terminal copy; real compositor, Foot, Waybar and system telemetry',
+                }, indent=2) + '\n')
+            finally:
+                for process in reversed(processes):
+                    if process.poll() is None:
+                        os.killpg(process.pid, signal.SIGTERM)
+                        try:
+                            process.wait(timeout=5)
+                        except subprocess.TimeoutExpired:
+                            os.killpg(process.pid, signal.SIGKILL)
+                            process.wait(timeout=5)
+    print(output / 'ghost-observatory.png')
+
+
+if __name__ == '__main__':
+    main()

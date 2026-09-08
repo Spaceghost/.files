@@ -1,0 +1,18 @@
+{
+  "focused_tests_passed": 12,
+  "full_suite_passed": 260,
+  "full_suite_total": 262,
+  "full_suite_failures": [
+    "test_status_command_uses_package_imports_without_loading_gtk",
+    "test_status_marks_a_crashed_process_record_stale"
+  ],
+  "failure_scope": "Existing shortcut service status tests; no shortcut files changed",
+  "real_headless_playback": "passed desktop1, PiP, EOF hold, pause, resume, review decisions",
+  "disposable_home_deployment": "passed",
+  "live_service": "restarted with prior enabled state preserved",
+  "selected_account": "Existing main Firefox profile; only profile reference stored",
+  "online_library_verification": "blocked by host DNS: www.youtube.com and google.com EAI_AGAIN",
+  "screenshot": "Actual launcher menu in isolated Sway with an empty queue",
+  "private_library_metadata_in_evidence": false,
+  "youtube_session_cookie_markers_readable": true
+}

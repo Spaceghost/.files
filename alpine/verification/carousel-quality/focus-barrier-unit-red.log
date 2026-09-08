@@ -1,0 +1,59 @@
+test_close_discards_pending_keyboard_ready_callback (test_carousel_handoff.CarouselHandoffTests.test_close_discards_pending_keyboard_ready_callback) ... ERROR
+test_empty_modifiers_before_keyboard_enter_never_commit (test_carousel_handoff.CarouselHandoffTests.test_empty_modifiers_before_keyboard_enter_never_commit) ... FAIL
+test_escape_bindings_have_only_synchronous_mode_handoff (test_carousel_handoff.CarouselHandoffTests.test_escape_bindings_have_only_synchronous_mode_handoff) ... ok
+test_focus_loss_after_protocol_sync_cancels_pending_initial_check (test_carousel_handoff.CarouselHandoffTests.test_focus_loss_after_protocol_sync_cancels_pending_initial_check) ... ERROR
+test_quick_release_before_keyboard_enter_commits_after_protocol_sync (test_carousel_handoff.CarouselHandoffTests.test_quick_release_before_keyboard_enter_commits_after_protocol_sync) ... FAIL
+test_real_mode_event_closes_popup_without_a_cancel_command (test_carousel_handoff.CarouselHandoffTests.test_real_mode_event_closes_popup_without_a_cancel_command) ... ok
+
+======================================================================
+ERROR: test_close_discards_pending_keyboard_ready_callback (test_carousel_handoff.CarouselHandoffTests.test_close_discards_pending_keyboard_ready_callback)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 133, in test_close_discards_pending_keyboard_ready_callback
+    self.activate(popup)
+    ~~~~~~~~~~~~~^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 100, in activate
+    callback = popup.window.connect.call_args.args[1]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'args'
+
+======================================================================
+ERROR: test_focus_loss_after_protocol_sync_cancels_pending_initial_check (test_carousel_handoff.CarouselHandoffTests.test_focus_loss_after_protocol_sync_cancels_pending_initial_check)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 124, in test_focus_loss_after_protocol_sync_cancels_pending_initial_check
+    self.activate(popup)
+    ~~~~~~~~~~~~~^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 100, in activate
+    callback = popup.window.connect.call_args.args[1]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'args'
+
+======================================================================
+FAIL: test_empty_modifiers_before_keyboard_enter_never_commit (test_carousel_handoff.CarouselHandoffTests.test_empty_modifiers_before_keyboard_enter_never_commit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 106, in test_empty_modifiers_before_keyboard_enter_never_commit
+    controller.action.assert_not_called()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 947, in assert_not_called
+    raise AssertionError(msg)
+AssertionError: Expected 'mock' to not have been called. Called 1 times.
+Calls: [call('commit')].
+
+======================================================================
+FAIL: test_quick_release_before_keyboard_enter_commits_after_protocol_sync (test_carousel_handoff.CarouselHandoffTests.test_quick_release_before_keyboard_enter_commits_after_protocol_sync)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_carousel_handoff.py", line 115, in test_quick_release_before_keyboard_enter_commits_after_protocol_sync
+    controller.action.assert_not_called()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/unittest/mock.py", line 947, in assert_not_called
+    raise AssertionError(msg)
+AssertionError: Expected 'mock' to not have been called. Called 1 times.
+Calls: [call('commit')].
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.044s
+
+FAILED (failures=2, errors=2)

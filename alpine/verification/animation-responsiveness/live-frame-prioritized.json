@@ -1,0 +1,36 @@
+{
+  "source": "physical live carousel after critical renderer workers received UI priority; no screenshots or window metadata",
+  "open_reported_ms": 1893.38581300035,
+  "first_tick_reported_ms": null,
+  "samples": [
+    {
+      "action": "opening",
+      "frames": 0,
+      "timestamps_us": []
+    },
+    {
+      "action": "next",
+      "frames": 1,
+      "timestamps_us": [
+        24092492374
+      ]
+    },
+    {
+      "action": "previous",
+      "frames": 1,
+      "timestamps_us": [
+        24092492374
+      ]
+    }
+  ],
+  "active_intervals_ms": {
+    "count": 0,
+    "median": null,
+    "p95": null
+  },
+  "load": [
+    52.63525390625,
+    49.7158203125,
+    39.58935546875
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "packages": [
+    {
+      "apk_identity": "Q1wkExFfUMrrHc+5ZgYGHxz+6iwqk=",
+      "name": "cliphist",
+      "version": "0.7.0-r7",
+      "arch": "x86_64",
+      "sha256": "7fcd4650df16daf76c2a9b8fc2d68d88bb49b8264366c847a50fe86780fcf99d",
+      "artifact": "sha256/7fcd4650df16daf76c2a9b8fc2d68d88bb49b8264366c847a50fe86780fcf99d/cliphist-0.7.0-r7.apk",
+      "filename": "cliphist-0.7.0-r7.apk"
+    },
+    {
+      "apk_identity": "Q1oJQpfDIAFWB04GHKOTXCAI3KIH8=",
+      "name": "wl-clip-persist",
+      "version": "0.5.0-r0",
+      "arch": "x86_64",
+      "sha256": "910b6e476fbe9a45ec870a35345940ec87c547d9688dc2b29c754378b05e10be",
+      "artifact": "sha256/910b6e476fbe9a45ec870a35345940ec87c547d9688dc2b29c754378b05e10be/wl-clip-persist-0.5.0-r0.apk",
+      "filename": "wl-clip-persist-0.5.0-r0.apk"
+    }
+  ],
+  "repository": "https://dl-cdn.alpinelinux.org/alpine/edge/testing",
+  "tag": "testing",
+  "verification": "APK signatures and archive identities match the installed packages. Full closure snapshot blocked by unrelated missing local APK artifacts; see alpine/verification/clipboard/package-snapshot.log."
+}

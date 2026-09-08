@@ -1,0 +1,123 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 20:59:52 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+[2026-09-07 20:59:53.798] [info] Using configuration file /tmp/waybar-freeze-private-5boyps59/config/waybar/config.jsonc
+[2026-09-07 20:59:53.801] [info] Unable to receive desktop appearance: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.portal.Desktop was not provided by any .service files
+[2026-09-07 20:59:53.801] [info] Using CSS file /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 20:59:53.802] [debug] Parsing imports for file: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 20:59:53.802] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/waybar-state.css
+[2026-09-07 20:59:53.813] [debug] Found config file: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 20:59:53.813] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 20:59:53.813] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 20:59:53.816] [debug] Received SIGCHLD in signalThread
+[2026-09-07 20:59:53.816] [debug] Output detection done: HEADLESS-1 (Headless output 1)
+[2026-09-07 20:59:53.829] [debug] GTK widget tree:
+window#waybar.background.top.HEADLESS-1.mode-default:dir(ltr)
+  decoration:dir(ltr)
+  box.horizontal:dir(ltr)
+    box.horizontal.modules-left:dir(ltr)
+      widget:dir(ltr)
+        widget:dir(ltr)
+          label#custom-art.module:dir(ltr)
+      widget:dir(ltr)
+        box#workspaces.horizontal.module:dir(ltr)
+    box.horizontal.modules-center:dir(ltr)
+    box.horizontal.modules-right:dir(ltr)
+      widget:dir(ltr)
+        label#clock.module:dir(ltr)
+
+[2026-09-07 20:59:53.838] [debug] Received SIGCHLD in signalThread
+[2026-09-07 20:59:53.839] [info] Bar configured (width: 1440, height: 32) for output: HEADLESS-1
+[2026-09-07 20:59:57.052] [debug] Reloading style, file changed: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 20:59:57.253] [debug] Reloading style, file changed: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 20:59:57.357] [debug] Reloading style, file changed: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 20:59:58.922] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:03.921] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:08.577] [info] Reloading...
+[2026-09-07 21:00:08.580] [info] Using configuration file /tmp/waybar-freeze-private-5boyps59/config/waybar/config.jsonc
+[2026-09-07 21:00:08.580] [info] Using CSS file /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:08.584] [debug] Parsing imports for file: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:08.584] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/waybar-state.css
+[2026-09-07 21:00:08.598] [debug] Found config file: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:08.598] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:08.598] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:08.602] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:08.602] [debug] Output detection done: HEADLESS-1 (Headless output 1)
+[2026-09-07 21:00:08.607] [debug] GTK widget tree:
+window#waybar.background.top.HEADLESS-1.mode-default:dir(ltr)
+  decoration:dir(ltr)
+  box.horizontal:dir(ltr)
+    box.horizontal.modules-left:dir(ltr)
+      widget:dir(ltr)
+        widget:dir(ltr)
+          label#custom-art.module:dir(ltr)
+      widget:dir(ltr)
+        box#workspaces.horizontal.module:dir(ltr)
+    box.horizontal.modules-center:dir(ltr)
+    box.horizontal.modules-right:dir(ltr)
+      widget:dir(ltr)
+        label#clock.module:dir(ltr)
+
+[2026-09-07 21:00:08.610] [info] Bar configured (width: 1440, height: 32) for output: HEADLESS-1
+[2026-09-07 21:00:08.617] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:09.078] [info] Reloading...
+[2026-09-07 21:00:09.081] [info] Using configuration file /tmp/waybar-freeze-private-5boyps59/config/waybar/config.jsonc
+[2026-09-07 21:00:09.081] [info] Using CSS file /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.086] [debug] Parsing imports for file: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.086] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/waybar-state.css
+[2026-09-07 21:00:09.101] [debug] Found config file: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:09.101] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:09.101] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.109] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:09.111] [debug] Output detection done: HEADLESS-1 (Headless output 1)
+[2026-09-07 21:00:09.116] [debug] GTK widget tree:
+window#waybar.background.top.HEADLESS-1.mode-default:dir(ltr)
+  decoration:dir(ltr)
+  box.horizontal:dir(ltr)
+    box.horizontal.modules-left:dir(ltr)
+      widget:dir(ltr)
+        widget:dir(ltr)
+          label#custom-art.module:dir(ltr)
+      widget:dir(ltr)
+        box#workspaces.horizontal.module:dir(ltr)
+    box.horizontal.modules-center:dir(ltr)
+    box.horizontal.modules-right:dir(ltr)
+      widget:dir(ltr)
+        label#clock.module:dir(ltr)
+
+[2026-09-07 21:00:09.119] [info] Bar configured (width: 1440, height: 32) for output: HEADLESS-1
+[2026-09-07 21:00:09.126] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:09.578] [info] Reloading...
+[2026-09-07 21:00:09.581] [info] Using configuration file /tmp/waybar-freeze-private-5boyps59/config/waybar/config.jsonc
+[2026-09-07 21:00:09.581] [info] Using CSS file /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.587] [debug] Parsing imports for file: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.587] [debug] Try expanding: $XDG_CONFIG_HOME/waybar/waybar-state.css
+[2026-09-07 21:00:09.602] [debug] Found config file: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:09.602] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/waybar-state.css
+[2026-09-07 21:00:09.602] [debug] Adding file to watch list: /tmp/waybar-freeze-private-5boyps59/config/waybar/style.css
+[2026-09-07 21:00:09.610] [debug] Received SIGCHLD in signalThread
+[2026-09-07 21:00:09.613] [debug] Output detection done: HEADLESS-1 (Headless output 1)
+[2026-09-07 21:00:09.618] [debug] GTK widget tree:
+window#waybar.background.top.HEADLESS-1.mode-default:dir(ltr)
+  decoration:dir(ltr)
+  box.horizontal:dir(ltr)
+    box.horizontal.modules-left:dir(ltr)
+      widget:dir(ltr)
+        widget:dir(ltr)
+          label#custom-art.module:dir(ltr)
+      widget:dir(ltr)
+        box#workspaces.horizontal.module:dir(ltr)
+    box.horizontal.modules-center:dir(ltr)
+    box.horizontal.modules-right:dir(ltr)
+      widget:dir(ltr)
+        label#clock.module:dir(ltr)
+
+[2026-09-07 21:00:09.621] [info] Bar configured (width: 1440, height: 32) for output: HEADLESS-1
+[2026-09-07 21:00:09.629] [debug] Received SIGCHLD in signalThread
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

@@ -1,0 +1,40 @@
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
+pkgname=openresolv
+pkgver=3.17.4
+pkgrel=1
+pkgdesc="Native DNS provider management with an opt-in host PID lock bridge"
+url="https://github.com/NetworkConfiguration/openresolv"
+arch="noarch"
+license="BSD-2-Clause"
+checkdepends="python3"
+subpackages="$pkgname-doc"
+source="openresolv-$pkgver.tar.xz
+    host-pid-lock.patch
+    detect_init-remove-irrelevant.patch
+    test-host-pid-lock.py"
+options="!net"
+export SOURCE_DATE_EPOCH=1766616122
+
+build() {
+    ./configure --build="$CBUILD" --host="$CHOST" \
+        --prefix=/usr --sysconfdir=/etc --sbindir=/usr/sbin \
+        --libexecdir=/usr/lib/resolvconf --rundir=/run
+    make
+}
+
+check() {
+    sh -n resolvconf
+    python3 -B "$srcdir/test-host-pid-lock.py" "$builddir" -v
+}
+
+package() {
+    make DESTDIR="$pkgdir" install
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/openresolv/LICENSE"
+}
+
+sha512sums="
+7a2ee73551509250ace0d526b001d67f8a35da33a1a63ce1e3c01bb319a37d41204f72263e491549637ab89fcc23371132551f1ec6e42e84d61fc069699ce075  openresolv-3.17.4.tar.xz
+5664a6e9557b7807b2beddd8b0e0dee512aca8d5b2be978045104361c0994741f64acaea6590f19cf4fc933c8f80bf61716cb4bf1d0ffa997196a7eb151d3673  host-pid-lock.patch
+60663daa0b98eed825186a950b6022b3ef11b897f8c27e63682242bef7db6a1ac5ae75f01c860d5d3f71452d2c3e6a8c76555bda3546ad265471025392e5b1d6  detect_init-remove-irrelevant.patch
+e7f42585cbb3f3188b3335fea0e062f67fba741f4e3edcc74018acf90eb242a93241b8e510940615b0b3d9e28f5820589b3b00735f487213e5ab80760b0991c9  test-host-pid-lock.py
+"

@@ -1,0 +1,34 @@
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
+pkgname=mbp-intel-waybar-art
+pkgver=1.0.0
+pkgrel=9
+pkgdesc="Space Ghost artwork controls and contextual hover help for Waybar"
+url="https://github.com/Alexays/Waybar"
+arch="all"
+license="MIT"
+depends="waybar"
+makedepends="build-base pkgconf gtk+3.0-dev json-glib-dev"
+source="art.c help.c help.h waybar_cffi_module.h LICENSE.Waybar"
+builddir="$srcdir"
+options="!check !net"
+export SOURCE_DATE_EPOCH=1788739200
+
+build() {
+    # Library paths and build timestamps never enter the output.
+    # shellcheck disable=SC2086
+    ${CC:-cc} $CFLAGS -std=c11 -D_GNU_SOURCE -Wall -Wextra -Werror -fPIC -shared \
+        -o mbp-intel-art.so art.c help.c $LDFLAGS $(pkg-config --cflags --libs gtk+-3.0 json-glib-1.0)
+}
+
+package() {
+    install -Dm755 mbp-intel-art.so "$pkgdir/usr/lib/waybar/mbp-intel-art.so"
+    install -Dm644 LICENSE.Waybar "$pkgdir/usr/share/licenses/$pkgname/LICENSE.Waybar"
+}
+
+sha512sums="
+fcf8b5cfc72f79cbd971debfd7f05ca7cacaa55121e1bc528137ab85cb0349214798465212d00d7bb59f30e3669d5cbff0c2b2ac6afdae0992404cfe73fe93ce  art.c
+7acb46f1151abaa3c0cee367b90ad062546d8fe0569c499d0e549e9bb2c7015ed34fc3af0ae9b90e40f9fed6466e559fd4a6b72851e1de9b5ea59f3f2a4c52d9  help.c
+8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4  help.h
+b8c6443fa11d6ee1a003353cb39a34cade33e1966ae78ff732b8b520e99c55c844ab8f3a60cdcc8cc370445056abdf673f6010be3507204ef67f3b6fb0e227dd  waybar_cffi_module.h
+fa6ecdf25061a065be6b12dc19c227b362243e25f493d73142e5585a94ebfbe59d87b3d1bd108ce33d17d681a9ed17ee702f1f158fd825419742b8575464f3e2  LICENSE.Waybar
+"

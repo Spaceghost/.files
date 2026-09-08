@@ -1,0 +1,24 @@
+--- a/ui/setup.py
++++ b/ui/setup.py
+@@ -25,14 +25,14 @@
+       author='Simone "evilsocket" Margaritelli',
+       author_email='evilsocket@protonmail.com',
+       license='GPL-3.0',
+-      packages=find_packages(),
++      packages=find_packages(exclude=('tests', 'tests.*')),
+       include_package_data = True,
+       package_data={'': ['*.*']},
+-      data_files=[('/usr/share/applications', ['resources/opensnitch_ui.desktop']),
+-               ('/usr/share/kservices5', ['resources/kcm_opensnitch.desktop']),
+-               ('/usr/share/icons/hicolor/scalable/apps', ['resources/icons/opensnitch-ui.svg']),
+-               ('/usr/share/icons/hicolor/48x48/apps', ['resources/icons/48x48/opensnitch-ui.png']),
+-               ('/usr/share/icons/hicolor/64x64/apps', ['resources/icons/64x64/opensnitch-ui.png']),
+-               ('/usr/share/metainfo', ['resources/io.github.evilsocket.opensnitch.appdata.xml'])],
++      data_files=[('share/applications', ['resources/opensnitch_ui.desktop']),
++               ('share/kservices5', ['resources/kcm_opensnitch.desktop']),
++               ('share/icons/hicolor/scalable/apps', ['resources/icons/opensnitch-ui.svg']),
++               ('share/icons/hicolor/48x48/apps', ['resources/icons/48x48/opensnitch-ui.png']),
++               ('share/icons/hicolor/64x64/apps', ['resources/icons/64x64/opensnitch-ui.png']),
++               ('share/metainfo', ['resources/io.github.evilsocket.opensnitch.appdata.xml'])],
+       scripts = [ 'bin/opensnitch-ui' ],
+       zip_safe=False)

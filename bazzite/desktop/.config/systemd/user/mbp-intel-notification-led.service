@@ -1,0 +1,11 @@
+[Unit]
+Description=MBP Intel AI attention indicator
+PartOf=mbp-intel-session.target
+After=mbp-intel-swaync.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/mbp-intel-notification-led
+Restart=on-failure
+RestartSec=2
+

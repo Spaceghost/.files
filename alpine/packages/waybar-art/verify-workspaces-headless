@@ -1,0 +1,362 @@
+#!/usr/bin/env python3
+"""Inspect workspace typography on native Waybar in a private Sway session."""
+
+import argparse
+import base64
+import hashlib
+import json
+import os
+from pathlib import Path
+import shlex
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+
+
+REPO = Path(__file__).resolve().parents[3]
+PRIVATE_BUS = "MBP_INTEL_WORKSPACE_CHECK_PRIVATE_BUS"
+INSPECTOR = r'''
+#include <gtk/gtk.h>
+#include <pango/pango.h>
+#include <string.h>
+
+static char *color_text(const GdkRGBA *color) {
+    return g_strdup_printf("#%04x%04x%04x", (unsigned)(color->red * 65535 + .5),
+                           (unsigned)(color->green * 65535 + .5),
+                           (unsigned)(color->blue * 65535 + .5));
+}
+
+static void visit(GtkWidget *widget, gpointer output) {
+    GString *result = output;
+    GtkWidget *button = NULL;
+    gboolean workspace = FALSE;
+    for (GtkWidget *parent = widget; parent; parent = gtk_widget_get_parent(parent)) {
+        if (GTK_IS_BUTTON(parent)) button = parent;
+        if (strcmp(gtk_widget_get_name(parent), "workspaces") == 0) workspace = TRUE;
+    }
+    if (workspace && button && GTK_IS_LABEL(widget)) {
+        const char *text = gtk_label_get_text(GTK_LABEL(widget));
+        char *encoded = g_base64_encode((const guchar *)text, strlen(text));
+        GtkStyleContext *style = gtk_widget_get_style_context(widget);
+        GtkStyleContext *button_style = gtk_widget_get_style_context(button);
+        PangoFontDescription *font = NULL;
+        gtk_style_context_get(style, gtk_style_context_get_state(style), "font", &font, NULL);
+        int weight = font ? pango_font_description_get_weight(font) : PANGO_WEIGHT_NORMAL;
+        if (font) pango_font_description_free(font);
+        GdkRGBA fallback, active, secondary;
+        gtk_style_context_get_color(style, gtk_style_context_get_state(style), &fallback);
+        if (!gtk_style_context_lookup_color(style, "mbp_intel_workspace_active", &active))
+            active = fallback;
+        if (!gtk_style_context_lookup_color(style, "mbp_intel_workspace_secondary", &secondary))
+            secondary = fallback;
+        char *active_text = color_text(&active), *secondary_text = color_text(&secondary);
+        g_string_append_printf(result,
+            "{\"text_base64\":\"%s\",\"focused\":%s,\"active\":\"%s\","
+            "\"secondary\":\"%s\",\"ranges\":[", encoded,
+            gtk_style_context_has_class(button_style, "focused") ? "true" : "false",
+            active_text, secondary_text);
+        PangoAttrList *attributes = gtk_label_get_attributes(GTK_LABEL(widget));
+        PangoAttrList *empty = attributes ? NULL : pango_attr_list_new();
+        PangoAttrIterator *iterator = pango_attr_list_get_iterator(attributes ? attributes : empty);
+        gboolean first = TRUE;
+        do {
+            int start, end;
+            pango_attr_iterator_range(iterator, &start, &end);
+            PangoAttribute *attribute = pango_attr_iterator_get(iterator, PANGO_ATTR_WEIGHT);
+            int range_weight = attribute ? ((PangoAttrInt *)attribute)->value : weight;
+            attribute = pango_attr_iterator_get(iterator, PANGO_ATTR_FOREGROUND);
+            char *foreground;
+            if (attribute) {
+                PangoColor color = ((PangoAttrColor *)attribute)->color;
+                foreground = g_strdup_printf("#%04x%04x%04x", color.red, color.green, color.blue);
+            } else foreground = color_text(&fallback);
+            g_string_append_printf(result,
+                "%s{\"start\":%d,\"end\":%d,\"weight\":%d,\"color\":\"%s\"}",
+                first ? "" : ",", start, end, range_weight, foreground);
+            first = FALSE;
+            g_free(foreground);
+        } while (pango_attr_iterator_next(iterator));
+        pango_attr_iterator_destroy(iterator);
+        if (empty) pango_attr_list_unref(empty);
+        g_string_append(result, "]}\n");
+        g_free(encoded);
+        g_free(active_text);
+        g_free(secondary_text);
+    }
+    if (GTK_IS_CONTAINER(widget)) gtk_container_foreach(GTK_CONTAINER(widget), visit, result);
+}
+
+static gboolean inspect(gpointer unused) {
+    (void)unused;
+    const char *path = g_getenv("MBP_INTEL_WORKSPACE_ATTRIBUTE_OUTPUT");
+    if (!path) return G_SOURCE_REMOVE;
+    GString *output = g_string_new(NULL);
+    GList *windows = gtk_window_list_toplevels();
+    for (GList *item = windows; item; item = item->next) visit(item->data, output);
+    g_list_free(windows);
+    if (output->len) g_file_set_contents(path, output->str, output->len, NULL);
+    g_string_free(output, TRUE);
+    return G_SOURCE_CONTINUE;
+}
+
+__attribute__((constructor)) static void begin_inspection(void) {
+    g_timeout_add(100, inspect, NULL);
+}
+'''
+
+
+def stop(process):
+    if process is None or process.poll() is not None:
+        return
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+        process.wait(timeout=5)
+    except ProcessLookupError:
+        pass
+    except subprocess.TimeoutExpired:
+        os.killpg(process.pid, signal.SIGKILL)
+        process.wait(timeout=5)
+
+
+def wait_for(callback, description, process=None):
+    deadline = time.monotonic() + 10
+    while time.monotonic() < deadline:
+        result = callback()
+        if result:
+            return result
+        if process is not None and process.poll() is not None:
+            raise RuntimeError(f"{description}: process exited with {process.returncode}")
+        time.sleep(.05)
+    raise AssertionError(f"Timed out waiting for {description}")
+
+
+def validate_labels(labels, focused):
+    for label in labels:
+        text = label["text"]
+        assert label["focused"] == (text == focused), label
+        prefix, separator, process = text.partition(" · ")
+        assert separator and process, text
+        number_length = len(prefix.split(":", 1)[0].encode())
+        prefix_length = len(prefix.encode())
+        process_start = len((prefix + separator).encode())
+
+        def attributes(index):
+            return next(part for part in label["ranges"]
+                        if part["start"] <= index < part["end"])
+
+        for index in range(len(text.encode())):
+            style = attributes(index)
+            if index < number_length or label["focused"] and index < prefix_length:
+                assert style["weight"] >= 700, (text, index, style)
+            elif index >= process_start or not label["focused"] and index >= number_length:
+                assert style["weight"] < 600, (text, index, style)
+            if label["focused"] and index < prefix_length:
+                assert style["color"] == label["active"], (text, index, style)
+            if index >= process_start:
+                assert style["color"] == label["secondary"], (text, index, style)
+
+
+def run(args):
+    module = args.module.resolve(strict=True)
+    out = args.output.resolve()
+    out.mkdir(parents=True, exist_ok=False)
+    private = out / "private"
+    private.mkdir()
+    runtime = private / "run"
+    runtime.mkdir(mode=0o700)
+    home = private / "home"
+    home.mkdir()
+    config_home = home / ".config"
+    config_home.mkdir()
+    env = dict(os.environ, HOME=str(home), XDG_RUNTIME_DIR=str(runtime),
+               XDG_CONFIG_HOME=str(config_home), XDG_STATE_HOME=str(private / "state"),
+               XDG_CACHE_HOME=str(private / "cache"), XDG_DATA_HOME=str(private / "data"),
+               WLR_BACKENDS="headless", WLR_HEADLESS_OUTPUTS="1", WLR_RENDERER="pixman",
+               NO_AT_BRIDGE="1", GTK_USE_PORTAL="0", G_MESSAGES_DEBUG="all")
+    for key in ("SWAYSOCK", "WAYLAND_DISPLAY", "DISPLAY", "LD_PRELOAD"):
+        env.pop(key, None)
+    inspector = out / "workspace-inspector.c"
+    inspector.write_text(INSPECTOR)
+    library = out / "workspace-inspector.so"
+    flags = shlex.split(subprocess.check_output(
+        ["pkg-config", "--cflags", "--libs", "gtk+-3.0"], text=True))
+    subprocess.run(["cc", "-shared", "-fPIC", "-Wall", "-Wextra", "-Werror",
+                    str(inspector), "-o", str(library), *flags], check=True)
+    stub = private / "art-status"
+    stub.write_text("#!/bin/sh\nprintf '%s\\n' '{\"text\":\"ART\",\"tooltip\":\"Synthetic gallery\"}'\n")
+    stub.chmod(0o755)
+    sway_config = out / "sway.conf"
+    sway_config.write_text(
+        "xwayland disable\noutput HEADLESS-1 mode 1440x480\n"
+        "output HEADLESS-1 bg #13091f solid_color\nseat seat0 fallback true\n"
+        "focus_follows_mouse no\nmouse_warping none\ndefault_border pixel 0\n")
+    names = ["1: GHOST · Foot", "2: ORBIT · Music", "3: LAB · Editor"]
+    config = {
+        "name": "top", "layer": "top", "position": "top", "height": 36,
+        "modules-left": ["cffi/art", "sway/workspaces"],
+        "cffi/art": {"module_path": str(module), "command": str(stub)},
+        "sway/workspaces": {"format": "{value}", "disable-markup": True,
+                            "all-outputs": False},
+    }
+    waybar_config = out / "waybar.json"
+    waybar_config.write_text(json.dumps(config, indent=2) + "\n")
+    observations = private / "native-attributes.jsonl"
+    evidence = {"status": "running", "module": str(module),
+                "module_sha256": hashlib.sha256(module.read_bytes()).hexdigest(),
+                "isolation": "private D-Bus, HOME, XDG paths, headless Sway",
+                "host_changes": 0, "states": []}
+    processes = []
+    with (out / "runtime.log").open("w") as log:
+        try:
+            sway = subprocess.Popen([args.sway, "-c", str(sway_config)], env=env,
+                                    stdout=log, stderr=log, start_new_session=True)
+            processes.append(sway)
+
+            def sockets_ready():
+                sockets = list(runtime.glob("sway-ipc*.sock"))
+                displays = [path for path in runtime.glob("wayland-*") if path.suffix != ".lock"]
+                if sockets and displays:
+                    env.update(SWAYSOCK=str(sockets[0]), WAYLAND_DISPLAY=displays[0].name)
+                    return True
+                return False
+
+            wait_for(sockets_ready, "private compositor", sway)
+            subprocess.run(["dbus-update-activation-environment", "HOME", "XDG_RUNTIME_DIR",
+                            "XDG_CONFIG_HOME", "XDG_STATE_HOME", "XDG_CACHE_HOME", "XDG_DATA_HOME",
+                            "SWAYSOCK", "WAYLAND_DISPLAY", "NO_AT_BRIDGE", "GTK_USE_PORTAL"],
+                           env=env, check=True, stdout=log, stderr=log)
+
+            def command(value):
+                result = json.loads(subprocess.check_output(["swaymsg", "-r", value], env=env))
+                assert all(item.get("success") for item in result), result
+
+            def client_ready(app_id):
+                tree = json.loads(subprocess.check_output(["swaymsg", "-r", "-t", "get_tree"], env=env))
+
+                def contains(node):
+                    return node.get("app_id") == app_id or any(
+                        contains(child) for child in node.get("nodes", []) + node.get("floating_nodes", []))
+
+                return contains(tree)
+
+            for index, name in enumerate(names):
+                command("workspace " + json.dumps(name, ensure_ascii=False))
+                app_id = "workspace-fixture-" + str(index)
+                terminal = subprocess.Popen(
+                    ["foot", "--config=/dev/null", "--app-id=" + app_id,
+                     "--title=PRIVATE WORKSPACE TYPOGRAPHY PREVIEW", "-e", "sleep", "120"],
+                    env=env, stdout=log, stderr=log, start_new_session=True)
+                processes.append(terminal)
+                wait_for(lambda: client_ready(app_id), "synthetic workspace client", terminal)
+
+            def native_labels():
+                try:
+                    labels = [json.loads(line) for line in observations.read_text().splitlines()]
+                    for label in labels:
+                        label["text"] = base64.b64decode(label.pop("text_base64")).decode()
+                    return labels
+                except (OSError, json.JSONDecodeError):
+                    return []
+
+            for theme in ("spaceghost", "gruvbox-dark"):
+                source = REPO / "alpine/themes/profiles" / theme / ".config/waybar"
+                target = out / theme
+                target.mkdir()
+                for style in source.glob("*.css"):
+                    shutil.copyfile(style, target / style.name)
+                (target / "waybar-state.css").write_text("/* Private preview: undimmed. */\n")
+                style = target / "style.css"
+                palette = json.loads((REPO / "alpine/themes" / (theme + ".json")).read_text())["palette"]
+                command("output HEADLESS-1 bg " + palette["background"] + " solid_color")
+                command("workspace " + json.dumps(names[0], ensure_ascii=False))
+                observations.unlink(missing_ok=True)
+                bar_env = dict(env, LD_PRELOAD=str(library),
+                               MBP_INTEL_WORKSPACE_ATTRIBUTE_OUTPUT=str(observations))
+                bar = subprocess.Popen(["waybar", "-c", str(waybar_config), "-s", str(style)],
+                                       env=bar_env, stdout=log, stderr=log, start_new_session=True)
+                processes.append(bar)
+                for stage, focused in (("active-1", names[0]), ("active-2", names[1]),
+                                       ("literal-rename", "2: ÓRBIT <moon> · Music & Radio")):
+                    if stage == "literal-rename":
+                        command("rename workspace " + json.dumps(names[1], ensure_ascii=False) +
+                                " to " + json.dumps(focused, ensure_ascii=False))
+                        names[1] = focused
+                    else:
+                        command("workspace " + json.dumps(focused, ensure_ascii=False))
+
+                    def state_ready():
+                        labels = native_labels()
+                        if {label["text"] for label in labels} != set(names):
+                            return None
+                        if [label["text"] for label in labels if label["focused"]] != [focused]:
+                            return None
+                        try:
+                            validate_labels(labels, focused)
+                        except (AssertionError, StopIteration):
+                            return None
+                        return labels
+
+                    labels = wait_for(state_ready, theme + " " + stage + " native typography", bar)
+                    time.sleep(.25)
+                    screenshot = target / (stage + ".png")
+                    subprocess.run(["grim", "-g", "0,0 980x36", str(screenshot)], env=env, check=True)
+                    evidence["states"].append({"theme": theme, "stage": stage,
+                        "focused": focused, "labels": labels,
+                        "style_sha256": hashlib.sha256(style.read_bytes()).hexdigest(),
+                        "screenshot": str(screenshot.relative_to(out))})
+                stop(bar)
+                processes.remove(bar)
+                command("rename workspace " + json.dumps(names[1], ensure_ascii=False) +
+                        ' to "2: ORBIT · Music"')
+                names[1] = "2: ORBIT · Music"
+            runtime_log = (out / "runtime.log").read_text()
+            assert "Failed to set text" not in runtime_log and "Entity did not end" not in runtime_log
+            evidence["status"] = "passed"
+            print(json.dumps({"status": "passed", "module_sha256": evidence["module_sha256"],
+                              "native_states": len(evidence["states"]),
+                              "screenshots": [state["screenshot"] for state in evidence["states"]],
+                              "evidence": str(out / "evidence.json")}, indent=2))
+        except BaseException as error:
+            evidence["status"] = "failed"
+            evidence["error"] = str(error)
+            raise
+        finally:
+            for process in reversed(processes):
+                stop(process)
+            (out / "evidence.json").write_text(json.dumps(evidence, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--module", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--sway", default="/usr/local/bin/sway")
+    arguments = parser.parse_args()
+    if os.environ.get(PRIVATE_BUS) != "1":
+        if arguments.output.exists():
+            parser.error("--output must name a new directory")
+        with tempfile.TemporaryDirectory(prefix="workspace-private-bus-") as directory:
+            private = Path(directory)
+            for path in ("home", "run", "config", "state", "cache", "data"):
+                (private / path).mkdir(mode=0o700)
+            bus_env = dict(os.environ, **{PRIVATE_BUS: "1"})
+            bus_env.update(HOME=str(private / "home"), XDG_RUNTIME_DIR=str(private / "run"),
+                           XDG_CONFIG_HOME=str(private / "config"),
+                           XDG_STATE_HOME=str(private / "state"), XDG_CACHE_HOME=str(private / "cache"),
+                           XDG_DATA_HOME=str(private / "data"), NO_AT_BRIDGE="1", GTK_USE_PORTAL="0")
+            for key in ("DBUS_SESSION_BUS_ADDRESS", "WAYLAND_DISPLAY", "DISPLAY", "SWAYSOCK", "LD_PRELOAD"):
+                bus_env.pop(key, None)
+            bus_log = private / "dbus.log"
+            with bus_log.open("w") as log:
+                code = subprocess.call(["dbus-run-session", "--", sys.executable,
+                                        str(Path(__file__).resolve()), *sys.argv[1:]],
+                                       env=bus_env, stderr=log)
+            if arguments.output.is_dir():
+                shutil.copyfile(bus_log, arguments.output / "dbus.log")
+            if code:
+                print(bus_log.read_text()[-5000:], file=sys.stderr)
+            raise SystemExit(code)
+    run(arguments)

@@ -1,0 +1,15 @@
+{
+  "unit_test_results": {
+    "test_apple_overview.py": 4,
+    "test_shortcut_sources.py": 22,
+    "status": "passed"
+  },
+  "real_gui_checks": 8,
+  "source_sha256": {
+    "alpine/desktop/.config/sway/local.d/apple-overview.conf": "508ea4ab61a2b119f22bf3bac99f729ced5a4aa66a96387e41d0f58ec1579406",
+    "alpine/desktop/.config/sway/local.d/window-switcher.conf": "f761c54f0bbd269093e1f600a6c3e211cdc016139b12184b9aa01b9303428522",
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "1bfea85759bb3d41db907b72129f0e1025d4c4bc36d775c202ef121a0de12ceb",
+    "alpine/tests/test_apple_overview.py": "42f807ab6543fb63d500a839c9be7569b1b598e1605f4933d38b672e60fe88b1",
+    "alpine/tests/verify_apple_overview.py": "a82604a96c738b1bc1f30110b0ea63653c3ac609aed45aef6111f449d019ea1e"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "production-fragments-parse-together",
+      "passed": true
+    },
+    {
+      "name": "real-carousel-daemon-is-warm-before-keypress",
+      "passed": true
+    },
+    {
+      "name": "mission-control-maps-real-overview-layer",
+      "passed": true
+    },
+    {
+      "name": "second-mission-control-unmaps-overview-and-restores-default-mode",
+      "passed": true
+    },
+    {
+      "name": "launchpad-unmaps-overview-and-maps-fuzzel-in-default-mode",
+      "passed": true
+    },
+    {
+      "name": "fuzzel-receives-escape-and-restores-window-focus",
+      "passed": true
+    },
+    {
+      "name": "raw-F3-reaches-application-without-desktop-action",
+      "passed": true
+    },
+    {
+      "name": "raw-F4-reaches-application-without-desktop-action",
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "alpine/desktop/.config/sway/local.d/apple-overview.conf": "e0de78a3c2b0990be26b7382091dfee39ffe593f16a9aff6820c5adc731ff6d7",
+    "alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "alpine/tests/verify_apple_overview.py": "28c589833cd50bda7327a4afb590623f67326de1eb6fe83685e6432203787772",
+    "alpine/tests/verify_decoration_attachment.py": "9e999aaab9e0483e4318b02d8eec60aa1f1f0911024b2db8ef1ec7fcda4d9131",
+    "alpine/tests/verify_carousel.py": "14c28d2be475b8a23255c7752993f04a5bd9694629bc26dccea43d670a790bd8",
+    "alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42",
+    "alpine/desktop/.local/lib/oldbook/carousel_view.py": "8fb593bd48fe910c99d1871bda484c8083c8c72dafde3467c2029d98859a8e0e",
+    "alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d"
+  },
+  "host_changes": 0,
+  "physical_keyboard_events_read": 0,
+  "scope": "Real warm carousel and private Fuzzel dmenu with one synthetic entry; native layer mapping, keyboard handoff and mode recovery.",
+  "carousel_pid": 17596,
+  "real_flow_keyboard": "one persistent wtype device through F4/Escape handoff",
+  "fuzzel_exit_code": 2,
+  "application_key_bytes_hex": {
+    "F3": "1b4f52",
+    "F4": "1b4f53"
+  },
+  "dispatch_trace": [
+    "oldbook-menu "
+  ],
+  "final_mode": "default",
+  "final_carousel_state": [
+    {
+      "pid": 17596,
+      "ready": true,
+      "open": false,
+      "selected_id": null,
+      "candidate_ids": [],
+      "modifier": null,
+      "preview_ids": [],
+      "preview_dimensions": {},
+      "frames": 9,
+      "frame_times": [
+        21568634847,
+        21568701515,
+        21568738626,
+        21568772324,
+        21568804750,
+        21568821268,
+        21568837875,
+        21568870532,
+        21568886754
+      ]
+    }
+  ],
+  "final_launcher_exit": "2",
+  "binding_trace": [
+    {
+      "kind": 2147483653,
+      "event": {
+        "change": "run",
+        "binding": {
+          "command": "exec ~/.local/bin/oldbook-carousel show",
+          "event_state_mask": [],
+          "input_codes": [],
+          "input_code": 0,
+          "symbols": [
+            "XF86LaunchA"
+          ],
+          "symbol": "XF86LaunchA",
+          "input_type": "keyboard"
+        }
+      }
+    },
+    {
+      "kind": 2147483650,
+      "event": {
+        "change": "window-switcher",
+        "pango_markup": false
+      }
+    },
+    {
+      "kind": 2147483650,
+      "event": {
+        "change": "default",
+        "pango_markup": false
+      }
+    },
+    {
+      "kind": 2147483653,
+      "event": {
+        "change": "run",
+        "binding": {
+          "command": "exec ~/.local/bin/oldbook-carousel cancel, mode \"default\"",
+          "event_state_mask": [],
+          "input_codes": [],
+          "input_code": 0,
+          "symbols": [
+            "XF86LaunchA"
+          ],
+          "symbol": "XF86LaunchA",
+          "input_type": "keyboard"
+        }
+      }
+    },
+    {
+      "kind": 2147483653,
+      "event": {
+        "change": "run",
+        "binding": {
+          "command": "exec ~/.local/bin/oldbook-carousel show",
+          "event_state_mask": [],
+          "input_codes": [],
+          "input_code": 0,
+          "symbols": [
+            "XF86LaunchA"
+          ],
+          "symbol": "XF86LaunchA",
+          "input_type": "keyboard"
+        }
+      }
+    },
+    {
+      "kind": 2147483650,
+      "event": {
+        "change": "window-switcher",
+        "pango_markup": false
+      }
+    },
+    {
+      "kind": 2147483650,
+      "event": {
+        "change": "default",
+        "pango_markup": false
+      }
+    },
+    {
+      "kind": 2147483653,
+      "event": {
+        "change": "run",
+        "binding": {
+          "command": "exec ~/.local/bin/oldbook-carousel cancel, mode \"default\", exec ~/.local/bin/oldbook-menu",
+          "event_state_mask": [],
+          "input_codes": [],
+          "input_code": 0,
+          "symbols": [
+            "XF86LaunchB"
+          ],
+          "symbol": "XF86LaunchB",
+          "input_type": "keyboard"
+        }
+      }
+    }
+  ],
+  "cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

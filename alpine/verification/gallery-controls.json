@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "fuzzel_version": "1.14.1",
+  "backend": "isolated Sway headless",
+  "output_size_px": [
+    1440,
+    900
+  ],
+  "requested_lines": 28,
+  "painting_count": 18,
+  "action_count": 13,
+  "total_option_count": 31,
+  "screenshot": "alpine/verification/gallery-controls.png",
+  "menu_bounds_px": [
+    382,
+    76,
+    1058,
+    824
+  ],
+  "menu_size_px": [
+    676,
+    748
+  ],
+  "vertical_clearance_px": {
+    "top": 76,
+    "bottom": 76
+  },
+  "visible_actions": [
+    "next artwork",
+    "previous artwork",
+    "pause or resume rotation",
+    "help and gallery controls",
+    "open command deck",
+    "edit artwork prompts",
+    "generate new artwork and switch",
+    "random new theme",
+    "new theme from a phrase or title",
+    "generate unthemed artwork and switch"
+  ],
+  "limits": [
+    "The 18 paintings retain their original relative order before all actions.",
+    "The final three theme-specific generation entries remain reachable by scrolling below the 28-line viewport.",
+    "The isolated session did not send host input or invoke a wallpaper action."
+  ]
+}

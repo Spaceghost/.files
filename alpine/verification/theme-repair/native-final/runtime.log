@@ -1,0 +1,47 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:04:07 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+[2026-09-07 22:04:08.034] [info] Using configuration file /tmp/oldbook-theme-switch-7ozr_w9m/home/.config/waybar/config.jsonc
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=13542 comm="waybar --config /tmp/oldbook-theme-switch-7ozr_w9m")
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.1' (uid=1000 pid=13581 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.portal.Documents' requested by ':1.1' (uid=1000 pid=13581 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Successfully activated service 'org.freedesktop.portal.Documents'
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.1' (uid=1000 pid=13581 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.667: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.670: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.672: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.745: Failed to connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=13581 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:04:09 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:04:09 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.831: Failed to create screenshot proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=13581 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:04:09 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:04:09 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:13581): xdg-desktop-portal-WARNING **: 22:04:09.998: Failed to create screen cast proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[13538]: [session uid=1000 pid=13538 pidfd=4] Successfully activated service 'org.freedesktop.portal.Desktop'
+[2026-09-07 22:04:10.038] [info] Using CSS file /tmp/oldbook-theme-switch-7ozr_w9m/home/.config/waybar/style.css
+[2026-09-07 22:04:10.414] [warning] Requested height: 32 is less than the minimum height: 40 required by the modules
+[2026-09-07 22:04:10.414] [info] Bar configured (width: 1272, height: 40) for output: HEADLESS-1
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+[2026-09-07 22:04:13.963] [info] Reloading...
+[2026-09-07 22:04:13.968] [info] Using configuration file /tmp/oldbook-theme-switch-7ozr_w9m/home/.config/waybar/config.jsonc
+[2026-09-07 22:04:13.968] [info] Using CSS file /tmp/oldbook-theme-switch-7ozr_w9m/home/.config/waybar/style.css
+2026-09-07 22:04:13 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+[2026-09-07 22:04:14.032] [warning] Requested height: 32 is less than the minimum height: 35 required by the modules
+[2026-09-07 22:04:14.032] [info] Bar configured (width: 1272, height: 35) for output: HEADLESS-1
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

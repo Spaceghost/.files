@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "verified_at_utc": "2026-09-07T14:53:05.527996+00:00",
+  "package": {
+    "apk_identity": "Q17MlMYxunqoQzIp9CaVBBnO7CCRU=",
+    "arch": "x86_64",
+    "artifact": "sha256/dd36652eac2e42e11aea9d6df68f39ae4f4453d807460d3da86fe4ef3373f06e/openresolv-3.17.4-r0.apk",
+    "artifact_arch": "noarch",
+    "filename": "openresolv-3.17.4-r0.apk",
+    "name": "openresolv",
+    "sha256": "dd36652eac2e42e11aea9d6df68f39ae4f4453d807460d3da86fe4ef3373f06e",
+    "version": "3.17.4-r0"
+  },
+  "archive_audit": {
+    "install_or_trigger_scripts": false,
+    "resolv_conf_payload": false,
+    "service_payload": false,
+    "declared_dependencies": [],
+    "executed_installed_trigger": "busybox-1.38.0-r4 applet symlink installer",
+    "sources": [
+      "https://raw.githubusercontent.com/alpinelinux/aports/master/main/openresolv/APKBUILD",
+      "https://pkgs.alpinelinux.org/package/edge/main/x86_64/openresolv"
+    ]
+  },
+  "installation": {
+    "exit_code": 0,
+    "resolver_contents_unchanged": true,
+    "resolver_link_unchanged": true,
+    "radio_states_unchanged": true,
+    "existing_wpa_and_dhcp_commands_unchanged": true,
+    "address_comparison_limit": "Raw ip JSON hashes differ; IPv6 lifetime fields were not normalized in this comparison. This check does not establish address equality.",
+    "resolver_takeover_run": false,
+    "services_restarted": false
+  },
+  "reproducibility": {
+    "current_lock": "alpine/packages/locks/b251f76eb8c7567cb22d.json",
+    "signed_archives_verified": 1080,
+    "live_installed_package_identities_match": true,
+    "live_world_and_repositories_match": true,
+    "comparison_note": "Host comparison uses stored installed arch; restored-root comparison uses artifact_arch. Signed noarch APKs may appear as x86_64 in a repository-installed database."
+  },
+  "limits": [
+    "No new full empty-root restore is claimed for this added dependency. The prior 1079-package lock has independent offline restore proof.",
+    "Routine lease application and initial resolver takeover still require isolated integration tests and controlled activation."
+  ]
+}

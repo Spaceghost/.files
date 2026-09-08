@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Superhold
+GenericName=Contextual Shortcut Guide
+Comment=Hold a modifier to see shortcuts for the current application and desktop
+Exec=superhold daemon
+TryExec=superhold
+Icon=input-keyboard
+Terminal=false
+Categories=Utility;Accessibility;
+Keywords=shortcuts;keyboard;help;
+StartupNotify=false

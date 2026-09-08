@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0-r8",
+  "package_count": 1119,
+  "installed": {
+    "apk_identity": "Q1I8SvLt4V5W80gtWF/hLcETb/wYA=",
+    "name": "oldbook-waybar-art",
+    "version": "1.0.0-r8",
+    "arch": "x86_64"
+  },
+  "binary_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+  "unrelated_installed_identities_unchanged": true,
+  "network": "disabled",
+  "command": [
+    "doas",
+    "-n",
+    "apk",
+    "add",
+    "--no-network",
+    "/home/jack/.local/state/oldbook/build/waybar-titlecase-r8-a/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r8.apk"
+  ],
+  "waybar_restarted": false
+}

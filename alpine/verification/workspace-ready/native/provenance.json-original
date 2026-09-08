@@ -1,0 +1,14 @@
+{
+  "source_run": "workspace-creation-final-20260907",
+  "artifacts_sha256": {
+    "evidence.json": "112850961ed913f24dbc856b6df64dc252d55538eda6202b8b23351b7cf25aa1",
+    "runtime.log": "b37e7cc203173fbd5e372b093e3b31dfec11bcae5cf1961b9671914b722b4661",
+    "sway.conf": "b63937f4d36c6bb1a89fc9811b38cda29c2cbfe087513bebf2fd96cbad969d6f",
+    "workspace-creation.png": "62093782745c7a3754bd6f8bdab5df882ea417a1b6ae1058071ae79f73c4f284"
+  },
+  "sanitization": "Private synthetic data only; files copied unchanged after review.",
+  "check_count": 16,
+  "passed_checks": 16,
+  "measurement": "Ordered native Sway workspace IPC events; screenshot shows synthetic Foot only.",
+  "scope": "Direct commands extracted from config bindings; physical key events and naming daemon are not used."
+}

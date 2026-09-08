@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "package": "openresolv-3.17.4-r1",
+  "apk_sha256": "d0f82483fa7845e0aad466de6816257b1b08f9737c9f7398efe490b5755ce4c6",
+  "resolver_sha256": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3",
+  "exit_code": 0,
+  "capability": "1",
+  "capability_exit_code": 0,
+  "host_checks": {
+    "namespaces": true,
+    "addresses_digest": true,
+    "routes_digest": true,
+    "dns_digest": true,
+    "radio_states": true,
+    "dhcp_clients": true,
+    "resolver_config_sha256": true,
+    "ipv6_routes": true
+  },
+  "host_state_unchanged": true,
+  "only_changed_existing_payload": "usr/sbin/resolvconf",
+  "removed_payload_paths": [],
+  "install_or_trigger_scripts": false,
+  "resolver_takeover_run": false,
+  "services_restarted": false,
+  "output": "(1/1) Upgrading openresolv (3.17.4-r0 -> 3.17.4-r1)\nExecuting busybox-1.38.0-r4.trigger\nOK: 3774.0 MiB in 1080 packages\n"
+}

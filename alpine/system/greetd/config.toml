@@ -1,0 +1,16 @@
+# Autologin straight into the Sway session. The encrypted root passphrase is the
+# real gate on this laptop, so a second password prompt buys nothing and costs a
+# visible console. greetd owns vt1; gettys stay on vt2-vt5 as a rescue path.
+[terminal]
+vt = 1
+
+# Used at boot.
+[initial_session]
+command = "/usr/local/bin/sway"
+user = "jack"
+
+# Used again after the session exits, so logging out returns to the desktop
+# rather than to a console.
+[default_session]
+command = "/usr/local/bin/sway"
+user = "jack"

@@ -1,0 +1,33 @@
+>>> oldbook-waybar-art: Building oldbook/oldbook-waybar-art 1.0.0-r6 (using abuild 3.18.0_rc5-r1) started Mon, 07 Sep 2026 19:25:45 -0700
+>>> oldbook-waybar-art: Validating /home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/APKBUILD...
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/art.c: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/help.c: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/help.h: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/waybar_cffi_module.h: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/LICENSE.Waybar: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/art.c: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/help.c: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/help.h: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/waybar_cffi_module.h: OK
+/home/jack/.local/state/oldbook/build/waybar-strata-r6-b/oldbook/oldbook-waybar-art/LICENSE.Waybar: OK
+>>> oldbook-waybar-art: Entering fakeroot...
+>>> oldbook-waybar-art*: Running postcheck for oldbook-waybar-art
+>>> oldbook-waybar-art*: Preparing package oldbook-waybar-art...
+>>> oldbook-waybar-art*: Stripping binaries
+>>> oldbook-waybar-art*: Scanning shared objects
+>>> oldbook-waybar-art*: Tracing dependencies...
+	waybar
+	so:libc.musl-x86_64.so.1
+	so:libgio-2.0.so.0
+	so:libglib-2.0.so.0
+	so:libgobject-2.0.so.0
+	so:libgtk-3.so.0
+	so:libjson-glib-1.0.so.0
+	so:libpango-1.0.so.0
+>>> oldbook-waybar-art*: Package size: 30.9 KB
+>>> oldbook-waybar-art*: Compressing data...
+>>> oldbook-waybar-art*: Create checksum...
+>>> oldbook-waybar-art*: Create oldbook-waybar-art-1.0.0-r6.apk
+>>> oldbook-waybar-art: Build complete at Mon, 07 Sep 2026 19:25:58 -0700 elapsed time 0h 0m 13s
+>>> oldbook-waybar-art: Updating the oldbook/x86_64 repository index...
+>>> oldbook-waybar-art: Signing the index...

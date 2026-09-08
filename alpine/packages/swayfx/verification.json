@@ -1,0 +1,50 @@
+{
+  "date": "2026-09-07",
+  "package_signature": "Both signed packages pass apk verify against the installed local public key",
+  "network": "Both compilations ran in unshare --net using archived source and the versioned patch",
+  "independent_builds": [
+    "swayfx-bottom-r1-a/mbp-intel/swayfx",
+    "swayfx-bottom-r1-b/mbp-intel/swayfx"
+  ],
+  "signed_apks_identical": true,
+  "signed_apk_sha256": "a3d37bf21b7cfb63b69237c12d7ef7003754ad01e05def5c727d37bf332afab4",
+  "executable_sha256": "ec6973644284dc52ece0bbd3e6fba4725be28f6212d7f5f62e687edd12a508f1",
+  "interpreter": "/lib/ld-musl-x86_64.so.1",
+  "headless_renderers": [
+    "AMD renderD128: existing effects renderer/parser proof",
+    "Intel renderD129: 22 bottom-titlebar interaction and rendering checks"
+  ],
+  "checks": [
+    "default top titlebar",
+    "normal tiled bottom geometry",
+    "dynamic top/bottom preserves client and outer geometry",
+    "invalid position and argument counts leave state unchanged",
+    "bottom tiled title click focuses correct client",
+    "tiled divider pointer resize",
+    "tabbed headers remain above clients and select correct tabs",
+    "stacking headers remain above clients and select correct tabs",
+    "lone tabbed normal header stays top; pixel/none hide it",
+    "lone stacking normal header stays top; pixel/none hide it",
+    "normal floating bottom geometry and dynamic toggle",
+    "bottom floating title drag moves client",
+    "floating side border pointer resize",
+    "floating bottom edge pointer resize",
+    "fullscreen actual client pixels reach bottom and right edges",
+    "fullscreen hides title and restores bottom decoration",
+    "pixel 2 keeps titlebar absent",
+    "pixel 0 keeps titlebar absent",
+    "none keeps titlebar absent",
+    "normal zero-border style restores bottom titlebar",
+    "stacked workspace with two floaters counts one titlebar each",
+    "actual Gruvbox Foot palette with SwayFX effects and bottom titlebars",
+    "Stock Sway and installed SwayFX full desktop configurations validate",
+    "Installed executable matches extracted verified APK"
+  ],
+  "details": "bottom-titlebar-verification.json",
+  "limits": [
+    "Stock Sway remains running; bottom captions and effects activate at the next normal SwayFX login.",
+    "Headless checks do not test physical display takeover, suspend/resume or battery performance.",
+    "Normal window captions move below; grouped tab and stack headers retain upstream placement.",
+    "Build uses the locked official shared libraries; those libraries were not rebuilt in this check."
+  ]
+}

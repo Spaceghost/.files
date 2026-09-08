@@ -1,0 +1,176 @@
+{
+  "status": "passed",
+  "checks": [
+    "own-hide-switch-keeps-guard-and-hidden-state",
+    "return-gesture-restores-same-windows-without-carousel",
+    "bare-return-gesture-dispatches-carousel-show",
+    "external-navigation-retains-empty-destination-and-releases-windows",
+    "navigation-before-hide-swap-cancels-animation",
+    "navigation-during-hide-cancels-animation",
+    "navigation-during-restore-cannot-steal-focus-later",
+    "other-output-navigation-restores-origin-and-retains-destination",
+    "daemon-stop-restores-origin-and-clears-capture",
+    "missing-helper-starts-one-guard-before-hiding",
+    "replacement-helper-recovers-hidden-state-without-carousel"
+  ],
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-showdesktop": "3b76d8beda0eb3e0c34888365a24a2dd95d0fbc0a81d8738c3dc3f06de5e315d",
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354"
+  },
+  "verifier_sha256": "bd6f79c9938860a7e3a9bb9da4885bdec1e38e60bc2a4b1511e05459523e7fa0",
+  "host_changes": 0,
+  "isolation": "private Sway, D-Bus, HOME and XDG directories",
+  "fixtures": "two synthetic Foot windows; private carousel dispatch recorder",
+  "fixture_windows": [
+    {
+      "id": 7,
+      "rect": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "id": 8,
+      "rect": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    }
+  ],
+  "geometry_checks": [
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    },
+    {
+      "7": {
+        "x": 250,
+        "y": 205,
+        "width": 324,
+        "height": 240
+      },
+      "8": {
+        "x": 420,
+        "y": 305,
+        "width": 324,
+        "height": 240
+      }
+    }
+  ],
+  "empty_destination": {
+    "id": 11,
+    "num": 2,
+    "name": "2: Empty destination"
+  },
+  "carousel_calls": [
+    [
+      "show"
+    ]
+  ],
+  "source_unchanged_at_end": {
+    "alpine/desktop/.local/bin/oldbook-showdesktop": true,
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": true,
+    "alpine/desktop/.local/bin/oldbook-workspaces": true,
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": true
+  }
+}

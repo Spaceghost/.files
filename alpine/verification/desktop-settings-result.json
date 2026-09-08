@@ -1,0 +1,44 @@
+{
+  "date": "2026-09-07",
+  "unit_tests": {
+    "command": "python3 -m unittest discover -s alpine/tests -v",
+    "passed": 512,
+    "seconds": 66.437,
+    "log_sha256": "e00b064923c17a8f49fad1bc7ae13adca99e2492090e37ba8eeb92604b4d132f"
+  },
+  "native_checks": {
+    "decoration_preferences": 9,
+    "decoration_theme_and_geometry": "Spaceghost/Gruvbox bottom, right edge, fullscreen tiled square, floating rounded",
+    "music_actions": [
+      "GhostPlanet:Previous",
+      "GhostPlanet:PlayPause",
+      "GhostPlanet:Next"
+    ],
+    "notification_layering": "TOP below overlay; unchanged terminal focus and geometry"
+  },
+  "live_preferences": {
+    "position": "bottom",
+    "opacity": 0.67,
+    "corner_radius": 7
+  },
+  "compositor_reload": "success",
+  "deployment_backup": "1788826717244561542",
+  "preview_home": "/tmp/oldbook-decoration-deploy-x087wk6m",
+  "limits": [
+    "No live lock was triggered",
+    "No physical multi-monitor hotplug test"
+  ],
+  "artwork_clicks": {
+    "left": "gallery",
+    "right": "next",
+    "modifier_and_pointer_checks": 16,
+    "paid_generation_calls": 0,
+    "installed_version": "1.0.0-r3",
+    "library_sha256": "64f4892b417cfe2441b40b9091a38a3d5a2b567f250601731df8c49436c420a6"
+  },
+  "package_lock": "alpine/packages/locks/0b39a04f417c70933a4e.json",
+  "package_count": 1099,
+  "live_bar_r3_mapping_verified": true,
+  "native_music_verifier": "alpine/tests/verify_waybar_music.py --output /tmp/new-music-proof",
+  "native_settings_verifier": "alpine/tests/verify_decoration_settings.py --output /tmp/new-decoration-proof"
+}

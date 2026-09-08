@@ -1,0 +1,335 @@
+{
+  "date": "2026-09-07",
+  "recorded_at_utc": "2026-09-07T13:21:38.911170+00:00",
+  "feature": "Hold to Help 0.1.0 standalone Qt contextual shortcut guide for Sway/SwayFX and X11",
+  "scope": "Native isolated displays and synthetic applications; no physical host keys injected by these checks.",
+  "source_release": {
+    "path": "/home/jack/.local/state/oldbook/releases/hold-to-help-0.1.0.tar.gz",
+    "sha256": "5a87cd9744374b4740ffe7dc366d173492e59a66f5f66bd4567d0124a12b90d5",
+    "artifact": "sha256/5a87cd9744374b4740ffe7dc366d173492e59a66f5f66bd4567d0124a12b90d5/hold-to-help-0.1.0.tar.gz",
+    "manifest": "projects/hold-to-help/SOURCE_MANIFEST",
+    "manifest_sha256": "8de541eb0baea49659fcd278b8dc078ac9596c5018474b7588e416bb6346c136",
+    "manifest_entries": 36,
+    "archive_entries": 36,
+    "archive_exactly_matches_manifest": true,
+    "archive_file_bytes_match_reviewed_checkout": true,
+    "sorted_regular_files_only": true,
+    "fixed_ownership_and_epoch": 1788739200,
+    "public_release_performed": false
+  },
+  "tests": {
+    "package_unit_tests": {
+      "passed": 108,
+      "command": "PYTHONPATH=projects/hold-to-help python3 -m unittest discover -s projects/hold-to-help/tests -q",
+      "verified_at_utc": "2026-09-07T13:18:39.196639+00:00",
+      "source_sha256": {
+        "projects/hold-to-help/hold_to_help/__init__.py": "a5df6381cfcbe9250272f94e2c2a169a19b6265efd4bf0da802c9f7e26537879",
+        "projects/hold-to-help/hold_to_help/__main__.py": "87949e957f53a99c1a19d4707535cfd0018db77a260aa41702e9f5c0f36310f2",
+        "projects/hold-to-help/hold_to_help/cli.py": "67e110e0e586a694a4735a455dee25001ec3d9b39a1965a71e13caf123f7e897",
+        "projects/hold-to-help/hold_to_help/config.py": "2168c308a9f95c99416658f21babf0625b260ffb1438fd9bc5c683c498e67a69",
+        "projects/hold-to-help/hold_to_help/hold.py": "9ebd00288dd999adb54d1a822fd7c87cb8df8cb574cd076e634f2b375fe4578e",
+        "projects/hold-to-help/hold_to_help/profiles.py": "0ef1e15065fcf7d05a9301d2696147fd122c11c0ee50705a58279fcb1cfd56ae",
+        "projects/hold-to-help/hold_to_help/service.py": "a4baf6b12986b6dd343b1554f005610e592d650bea9e8c09d35e3ba9907dc34d",
+        "projects/hold-to-help/hold_to_help/sources.py": "0489b8c270cc16d2ed095712e0eb6db31d2d67763bbb1a480708175c6ed8dd44",
+        "projects/hold-to-help/hold_to_help/x11.py": "6cb008bfd205cc5b25acc6f5f28d328b1b8c44cda3889c5105b7e5b1288f61fc",
+        "projects/hold-to-help/tests/test_config.py": "e28e8885629f2a7aa6b9846326bbcdbf2f3d22326249a1723cd99e280ff1e811",
+        "projects/hold-to-help/tests/test_hold.py": "61becc04a788439e9e24ffed7f03ec46118c3838c1ce3f2a19af8b3f4e6b0301",
+        "projects/hold-to-help/tests/test_service.py": "433bd5c65d2031338fa9a4df65a67169e1933b3341db8ada6440ddbe8cd830da",
+        "projects/hold-to-help/tests/test_session_guards.py": "6c0a170472d2393e149cf8002b119c0fb4eadde7ac61449a3162959fdcac89f7",
+        "projects/hold-to-help/tests/test_sources.py": "d634b170da78c1e4bc6a289f8e1d7569a337628edf8382411240304aef24cc5c",
+        "projects/hold-to-help/tests/test_sources_portable.py": "8c039c66385873f615ce2b2a892d561773ff226450eb46769b8b9607c9e4b44d",
+        "projects/hold-to-help/tests/test_x11.py": "46825aa4892158eaaccabc03750b0203f3472a0d10e32bbc44be1accb7796be1",
+        "projects/hold-to-help/tools/verify-x11-daemon.py": "bf09c81d368b33e39c294ea7725a3f988bbba95c5fc8517b81bd43a4a40924d7"
+      }
+    },
+    "lxqt_configuration": {
+      "passed": 3,
+      "skipped": 0,
+      "command": "python3 -m unittest discover -s alpine/tests -p test_lxqt_theme.py -v",
+      "log": "/home/jack/.local/state/oldbook/verification/hold-to-help-lxqt-config-tests.log",
+      "log_sha256": "f2bd69562192faf13510e2780f5c31626eba7be56a09d4652435ab534d83a470",
+      "native_plugin_loaded": true,
+      "initial": {
+        "window_color": "#282828",
+        "font": "Inter",
+        "point_size": 11,
+        "icons": "Oldbook-Gruvbox"
+      },
+      "private_config_change_followed": {
+        "window_color": "#101010",
+        "font_point_size": 13
+      },
+      "ten_configurable_palette_roles_match_existing_qt6ct": true,
+      "host_configuration_modified_by_test": false
+    }
+  },
+  "runtime": {
+    "wayland_layer_shell": {
+      "status": "passed",
+      "live_session_changes": 0,
+      "checks": [
+        {
+          "stage": "first-output",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "second-output",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "repeat-hold",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "wayland-protocol",
+          "surfaces": [
+            "[13:15:24.537399] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#31, wl_surface#26, wl_output#23, 3, \"hold-to-help\")",
+            "[13:15:26.143678] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#37, wl_surface#34, wl_output#21, 3, \"hold-to-help\")",
+            "[13:15:27.764102] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#27, wl_surface#34, wl_output#21, 3, \"hold-to-help\")"
+          ],
+          "keyboard_interactivity": 0,
+          "exclusive_zone": 0
+        }
+      ],
+      "dependencies": {
+        "sway": "/usr/local/bin/sway",
+        "swaymsg": "/usr/bin/swaymsg",
+        "foot": "/usr/bin/foot",
+        "grim": "/usr/bin/grim"
+      },
+      "library": "/home/jack/.local/state/oldbook/build/hold-to-help-layer-shell/libhold-to-help-layer-shell.so",
+      "library_sha256": "c5db8fc1233d494646641de9b833f77b4c6703c7186d41c3a4c8af3ae7c5504a"
+    },
+    "x11_daemon": {
+      "private_display": true,
+      "host_input_unchanged": true,
+      "triggers": {
+        "super": {
+          "config_selected_trigger": "super",
+          "tap_stays_hidden": true,
+          "held_shows_context": true,
+          "same_flush_chord_cancels_until_release": true,
+          "fresh_hold_after_chord": true,
+          "pointer_wheel_keeps_visible": true,
+          "release_hides_seconds": 0.015681205000873888,
+          "focus_preserved": true,
+          "duplicate_daemon_excluded": true,
+          "xdg_profiles_and_ewmh_context": true,
+          "autorepeat_keeps_visible": true,
+          "screensaver_cancels_until_fresh_hold": true,
+          "physical_caps_remapped_escape": false
+        },
+        "capslock": {
+          "config_selected_trigger": "capslock",
+          "tap_stays_hidden": true,
+          "held_shows_context": true,
+          "same_flush_chord_cancels_until_release": true,
+          "fresh_hold_after_chord": true,
+          "pointer_wheel_keeps_visible": true,
+          "release_hides_seconds": 0.01552473599804216,
+          "focus_preserved": true,
+          "duplicate_daemon_excluded": true,
+          "xdg_profiles_and_ewmh_context": true,
+          "autorepeat_keeps_visible": true,
+          "screensaver_cancels_until_fresh_hold": true,
+          "physical_caps_remapped_escape": true
+        }
+      },
+      "stalled_display_setup_fails_within_seconds": 1.6074193759995978
+    },
+    "lxqt_native_theme": {
+      "backend": "xcb",
+      "platform_theme": "lxqt",
+      "initial_window_color": "#282828",
+      "font": "Inter,11,-1,5,400,0,0,0,0,0,0,0,0,0,0,1,,0,0",
+      "visible_surface": true,
+      "wm_hints_input": false,
+      "focus_preserved_show_scroll_palette_hide": true,
+      "physical_wheel_scrolled": true,
+      "palette_event_repaint": "#123456",
+      "hidden_surface_unmapped": true,
+      "synthetic_context_only": true
+    },
+    "installed_wayland_bridge": {
+      "status": "passed",
+      "live_session_changes": 0,
+      "checks": [
+        {
+          "stage": "first-output",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "second-output",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "repeat-hold",
+          "focused": [
+            "hold-to-help-focus-proof"
+          ]
+        },
+        {
+          "stage": "wayland-protocol",
+          "surfaces": [
+            "[13:24:49.223331] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#31, wl_surface#26, wl_output#23, 3, \"hold-to-help\")",
+            "[13:24:50.828651] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#37, wl_surface#34, wl_output#21, 3, \"hold-to-help\")",
+            "[13:24:52.356250] {Default Queue}  -> zwlr_layer_shell_v1#30.get_layer_surface(new id zwlr_layer_surface_v1#27, wl_surface#34, wl_output#21, 3, \"hold-to-help\")"
+          ],
+          "keyboard_interactivity": 0,
+          "exclusive_zone": 0
+        }
+      ],
+      "dependencies": {
+        "sway": "/usr/local/bin/sway",
+        "swaymsg": "/usr/bin/swaymsg",
+        "foot": "/usr/bin/foot",
+        "grim": "/usr/bin/grim"
+      },
+      "library": "/usr/lib/hold-to-help/libhold-to-help-layer-shell.so",
+      "library_sha256": "6845669c7f9e1779f2346f977ac1aafb5b7c89a9daa07052f511981c754cf0bf"
+    }
+  },
+  "tested_environment": {
+    "installed_packages": {
+      "layer-shell-qt": "6.7.4-r0",
+      "lxqt-qtplugin": "2.4.0-r1",
+      "py3-qt6": "6.11.0-r0",
+      "py3-xlib": "0.33-r5",
+      "python3": "3.14.7-r0",
+      "qt6-qtbase": "6.11.1-r2",
+      "xkbcomp": "1.5.0-r0"
+    },
+    "qt_runtime": "6.11.1",
+    "pyqt_compile_qt": "6.11.0",
+    "pyqt": "6.11.0"
+  },
+  "desktop_coverage": {
+    "sway": "Native layer-shell placement on both private SwayFX outputs; repeated show/hide preserves application keyboard focus and reserves no workspace space.",
+    "x11": "Actual CLI under private Xvfb/Openbox: physical Super and remapped Caps Lock, tap/hold/chord/repeat/release, pointer wheel, singleton, screensaver suppression, EWMH context and XDG profiles.",
+    "lxqt": "Installed LXQt Qt platform plugin tested on native X11 with the versioned local Gruvbox palette and Inter font; configuration parser tests cover partial LXQt/Openbox shortcut tables.",
+    "profiles": "Application profiles are explicitly partial documented baselines or user additions. Plugins, web pages, application remappings and unexposed shortcuts are not exhaustively discoverable.",
+    "other_wayland": "Other Wayland compositors are not supported by the current backend."
+  },
+  "screenshot": {
+    "path": "alpine/verification/hold-to-help.png",
+    "sha256": "4a49c5d0e9a550c54ac5e1d2c5a5b589ee565bca5401f28c61523eb2eebac5c2",
+    "width": 2464,
+    "height": 900,
+    "source": "/home/jack/.local/state/oldbook/verification/hold-to-help-wayland-portable-2/first-output.png",
+    "context": "Actual native Qt/layer-shell rendering across two private SwayFX outputs, with synthetic Space Ghost editor shortcuts and a throwaway Foot focus target.",
+    "synthetic_context_only": true,
+    "image_generated_or_edited": false
+  },
+  "evidence_sources": {
+    "wayland": {
+      "path": "/home/jack/.local/state/oldbook/verification/hold-to-help-wayland-portable-2/evidence.json",
+      "sha256": "223f4c7baf47eb7f3935c39e0c23411e33e32feeb9f5290477e0dd2d86c5c6fc"
+    },
+    "x11_daemon": {
+      "path": "/home/jack/.local/state/oldbook/verification/hold-to-help-x11-daemon-final/evidence.json",
+      "sha256": "3a2c47d9b4d324a46fa895c42d29a1a5bd6b9d5550ae78c12425859b8cc0183d"
+    },
+    "core": {
+      "path": "/home/jack/.local/state/oldbook/verification/hold-to-help-x11-daemon-final/core-verification.json",
+      "sha256": "4192e7460a8beec65ce436dfab7ef7dbbf5a39a7340d0d43c15ab325fcde313c"
+    },
+    "lxqt_native": {
+      "path": "/home/jack/.local/state/oldbook/verification/hold-to-help-x11-lxqt-final-render/evidence.json",
+      "sha256": "12c4b9b1b6487d01222cf3d560f8f8890e8f30a5808684cdc560322b5006bab6"
+    }
+  },
+  "limitations": [
+    "A human physically holding the trigger in the active desktop has not been observed for this standalone release.",
+    "A complete LXQt desktop session was not started or tested; native X11/Openbox and the actual LXQt platform theme plugin were tested separately.",
+    "The declared minimum Qt 6.10 and layer-shell-qt 6.6 versions were checked against upstream interfaces but were not compiled or run here; tested versions are recorded above.",
+    "The ten configurable LXQt palette roles match qt6ct; LXQt derives its remaining and disabled colors natively.",
+    "Existing Sway include parsing combines loaded main configuration with current included files, so Sway should be reloaded after editing includes.",
+    "Real keyboard hotplug, VT switching, and reboot persistence were not repeated by these isolated checks."
+  ],
+  "package_installation_and_reproducible_builds": {
+    "manifest": "alpine/packages/hold-to-help/manifest.json",
+    "verification": {
+      "unit_tests": 108,
+      "source_archives_identical": true,
+      "offline_apk_builds": 2,
+      "apks_identical": true,
+      "signature_verified": true,
+      "build_network": "unshare --net; abuild -d",
+      "tested_arch": "x86_64",
+      "tested_alpine": "edge",
+      "tested_qt": "6.11.1-r2",
+      "tested_layer_shell_qt": "6.7.4-r0"
+    },
+    "packages": [
+      {
+        "filename": "hold-to-help-0.1.0-r0.apk",
+        "sha256": "b3a9bb7f09b1a69f03276fc44d30368ffe377fde63769cc832e6ca70c6dc2572",
+        "artifact": "sha256/b3a9bb7f09b1a69f03276fc44d30368ffe377fde63769cc832e6ca70c6dc2572/hold-to-help-0.1.0-r0.apk"
+      },
+      {
+        "filename": "hold-to-help-doc-0.1.0-r0.apk",
+        "sha256": "f4c04ee1425a29bc78e99ccfeb4f8b9b88f40b44aa1ba5876834f36c76fbc089",
+        "artifact": "sha256/f4c04ee1425a29bc78e99ccfeb4f8b9b88f40b44aa1ba5876834f36c76fbc089/hold-to-help-doc-0.1.0-r0.apk"
+      }
+    ],
+    "installed": [
+      {
+        "name": "hold-to-help",
+        "version": "0.1.0-r0",
+        "apk_identity": "Q1KbLWAAQqpZVBfz1vge+ANN65Mv4=",
+        "arch": "x86_64"
+      },
+      {
+        "name": "hold-to-help-doc",
+        "version": "0.1.0-r0",
+        "apk_identity": "Q1Yz+oE/mTEcalgv+lmwvii84SdWM=",
+        "arch": "noarch"
+      }
+    ],
+    "live_session_migration": {
+      "new_pid": 29013,
+      "old_pid": 28806,
+      "old_service_exited": true,
+      "locked_hidden": true,
+      "device_count": 2,
+      "trigger": "super",
+      "qt_platform_theme": "qt6ct",
+      "configuration_journal": "/home/jack/.local/state/oldbook/backups/1788787342977574389",
+      "workspace_source": "/home/jack/.files/projects/hold-to-help",
+      "installed_version": "Hold to Help 0.1.0"
+    },
+    "installed_python_matches_source": true
+  },
+  "package_restore": {
+    "status": "passed",
+    "lock": "alpine/packages/locks/10265f085b5a34747518.json",
+    "packages": 1079,
+    "network": "unshare --net and apk --no-network",
+    "target": "/home/jack/.local/state/alpine-rice/restore-root-10265f085b5a34747518",
+    "compared": [
+      "name",
+      "version",
+      "native architecture",
+      "APK control identity"
+    ],
+    "restored_cli_version": "Hold to Help 0.1.0",
+    "restored_native_bridge_load": "passed",
+    "log_sha256": "74a411779d5cac146988f9d8d9380d2466eeab0d730cf6055d09210ce145b3e5",
+    "boot_test": false
+  },
+  "local_lxqt_deployment": {
+    "journal": "/home/jack/.local/state/oldbook/backups/1788786488018123781",
+    "configuration": "alpine/desktop/.config/lxqt/lxqt.conf",
+    "preset": "alpine/desktop/.local/share/lxqt/palettes/Gruvbox-Dark"
+  }
+}

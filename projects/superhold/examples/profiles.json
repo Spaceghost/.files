@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "example-editor": {
+      "name": "Example Editor",
+      "aliases": ["example-editor"],
+      "coverage": "User-maintained shortcuts; check your application's version and settings.",
+      "rows": [
+        {"key": "Ctrl+S", "description": "Save the current document"}
+      ]
+    }
+  }
+}

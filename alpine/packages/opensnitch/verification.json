@@ -1,0 +1,172 @@
+{
+  "source_commit": "b404c4c6316760fa7bc415509d3f8d747f7dc9cc",
+  "source_date_epoch": 1765715806,
+  "current_r1": {
+    "packages": {
+      "opensnitch-1.8.0-r1.apk": {
+        "sha256": "7d2f61f2b72b4d5384538d5051d8c989a316175ddedb20316dbc3d5f59657643",
+        "size": 7048436,
+        "fossil_uv": "sha256/7d2f61f2b72b4d5384538d5051d8c989a316175ddedb20316dbc3d5f59657643/opensnitch-1.8.0-r1.apk",
+        "dependencies": [
+          "nftables",
+          "so:libc.musl-x86_64.so.1",
+          "so:libnetfilter_queue.so.1",
+          "so:libnfnetlink.so.0"
+        ]
+      },
+      "opensnitch-openrc-1.8.0-r1.apk": {
+        "sha256": "0d1dbcdd3045960a9199dcdd2441ce2d3dc177fa9f10e9e9e270a5a312dbc25f",
+        "size": 2337,
+        "fossil_uv": "sha256/0d1dbcdd3045960a9199dcdd2441ce2d3dc177fa9f10e9e9e270a5a312dbc25f/opensnitch-openrc-1.8.0-r1.apk",
+        "dependencies": []
+      },
+      "opensnitch-ui-1.8.0-r1.apk": {
+        "sha256": "ea62330c5a4bb5b77e374fd594829b6c7a8b1757dce982b7281e3eb2f19fa57e",
+        "size": 784720,
+        "fossil_uv": "sha256/ea62330c5a4bb5b77e374fd594829b6c7a8b1757dce982b7281e3eb2f19fa57e/opensnitch-ui-1.8.0-r1.apk",
+        "dependencies": [
+          "python3",
+          "py3-qt6",
+          "py3-grpcio",
+          "py3-protobuf",
+          "py3-slugify",
+          "py3-inotify",
+          "py3-notify2",
+          "qt6-qtwayland",
+          "qt6-qtbase-sqlite",
+          "python3~3.14"
+        ]
+      }
+    },
+    "daemon_binary_sha256": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142",
+    "signature_verified_with": "jack-6a9e83bd.rsa.pub",
+    "build": {
+      "exit_code": 0,
+      "elapsed": "2m55s",
+      "network_namespace_isolated": false,
+      "dependency_networking": "disabled with GOTOOLCHAIN=local, GOPROXY=off, GOSUMDB=off and vendored inputs",
+      "package_test": "TestExternalOutputQueueSkipsNativeQueue passed"
+    },
+    "regression_tests": {
+      "red": "a stale mangle_output interception rule was accepted when the DNS rule was absent",
+      "green": [
+        "TestExternalOutputQueueRequiresDNSRule",
+        "TestExternalOutputQueueSkipsNativeQueue"
+      ],
+      "privileged_tests_used_disposable_network_namespaces": true
+    },
+    "packet_tests": {
+      "passed": [
+        "baseline namespace connectivity",
+        "new egress denied before daemon starts",
+        "default-deny without GUI",
+        "approved curl allowed; different Python executable denied",
+        "UDP allow rule is constrained by executable, protocol and port",
+        "rule changes hot-reload to deny",
+        "persistent gate denies new egress after graceful SIGTERM",
+        "persistent gate denies new egress after SIGKILL",
+        "independent queue remains installed without bypass"
+      ],
+      "ip_versions_tested": [
+        4,
+        6
+      ],
+      "transports_tested": [
+        "TCP",
+        "UDP"
+      ],
+      "host_network_unchanged": true,
+      "retained_result": {
+        "file": "packet-verification-r1.json",
+        "sha256": "51040fc4d05f2174a9fedd378dc09f3529e98747ef23d0cbf4393ccf7cbc3ea8",
+        "extracted_daemon_sha256": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142"
+      }
+    }
+  },
+  "historical_r0": {
+    "packages": {
+      "opensnitch-1.8.0-r0.apk": {
+        "sha256": "521efe1f31c6129e338198d238a3dd7decbe568ba16f44d1e348af4012f4b463",
+        "size": 7049062,
+        "dependencies": [
+          "nftables",
+          "so:libc.musl-x86_64.so.1",
+          "so:libnetfilter_queue.so.1",
+          "so:libnfnetlink.so.0"
+        ]
+      },
+      "opensnitch-openrc-1.8.0-r0.apk": {
+        "sha256": "e16faabbd5f2559a7b5b7ac113992fa0ce66ac0a4e6d35c77fb421575cdec616",
+        "size": 2335
+      },
+      "opensnitch-ui-1.8.0-r0.apk": {
+        "sha256": "211de96930ed88b87ee75a0f5222b1cf0c6c3010866b9145e67bc0449369c505",
+        "size": 784719,
+        "dependencies": [
+          "python3",
+          "py3-qt6",
+          "py3-grpcio",
+          "py3-protobuf",
+          "py3-slugify",
+          "py3-inotify",
+          "py3-notify2",
+          "qt6-qtwayland",
+          "qt6-qtbase-sqlite",
+          "python3~3.14"
+        ]
+      }
+    },
+    "offline_build": {
+      "exit_code": 0,
+      "network_namespace_isolated": true,
+      "all_signed_apks_byte_identical_to_previous_build": true,
+      "log": "abuild-offline-confirmed.log"
+    },
+    "packet_tests": {
+      "passed": [
+        "baseline namespace connectivity",
+        "new egress denied before daemon starts",
+        "default-deny without GUI",
+        "approved curl allowed; different Python executable denied",
+        "UDP allow rule is constrained by executable, protocol and port",
+        "rule changes hot-reload to deny",
+        "persistent gate denies new egress after graceful SIGTERM",
+        "persistent gate denies new egress after SIGKILL",
+        "independent queue remains installed without bypass"
+      ],
+      "ip_versions_tested": [
+        4,
+        6
+      ],
+      "transports_tested": [
+        "TCP",
+        "UDP"
+      ],
+      "host_network_unchanged": true
+    },
+    "gui_smoke_test": {
+      "passed": true,
+      "artifact": "opensnitch-ui-1.8.0-r0.apk",
+      "qt_backend": "offscreen",
+      "sqlite_initialized": true,
+      "grpc_connection": true,
+      "socket_mode": "0640",
+      "runtime_directory_mode": "0700",
+      "visible_desktop_test": false
+    }
+  },
+  "build_toolchain": {
+    "abuild": "3.18.0_rc5-r1",
+    "gcc": "15.2.0-r9",
+    "go": "1.27.1-r0",
+    "musl-dev": "1.2.6-r3",
+    "protoc": "31.1-r3",
+    "py3-build": "1.4.2-r0",
+    "py3-grpcio-tools": "1.83.0-r0",
+    "py3-protobuf": "6.33.5-r1",
+    "py3-setuptools": "84.0.0-r0",
+    "python3": "3.14.7-r0"
+  },
+  "shellcheck": "passed; OpenRC framework variables excluded with SC2034; APKBUILD checked with abuild errexit context and caller variables excluded with SC2034/SC2154",
+  "live_host_firewall_activated": false
+}

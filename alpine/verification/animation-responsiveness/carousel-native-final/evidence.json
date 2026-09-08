@@ -1,0 +1,194 @@
+{
+  "status": "passed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "f761c54f0bbd269093e1f600a6c3e211cdc016139b12184b9aa01b9303428522",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "6cdbc16e29a685b3ba50cc6f971e2d71d17fa2c44cfc3006b43bb9be3e13aa29",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "e443fd1b766d60d34e90088ba556e749147e5bc7d5d91fa5f7eb0ee97b44e66d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/ui_command.py": "e94a420d2c5beb0e842abdbabd926c05872fc4b0b5fc93f542108130ed79486f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/ui_priority.py": "dc192c23e33fcfb63863c2d8078963355fe14e2cbac68c3f8ce560510adc044b",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "f5e822cd0833abacba9a70330bbfcbb3a8f3521f7dce9615188c60878c1e9a24",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "6340c292636584774371a2152f5f17d4d5834278c8fbcf63c2700909b5ae79cc"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "escape-1-closes-via-mode-event",
+    "escape-1-reopen-survives-delayed-cancel",
+    "escape-2-closes-via-mode-event",
+    "escape-2-reopen-survives-delayed-cancel",
+    "escape-3-closes-via-mode-event",
+    "escape-3-reopen-survives-delayed-cancel",
+    "production-source-hashes-stable"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 24510
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "escape_handoff": true,
+  "verifier_sha256": "3237d517593b3209ef6d2ba275ad2bf30f8a44d22d5ce1139f85ba91902889e8",
+  "private_cancel_delay_seconds": 0.75,
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "compositor_readiness": {
+    "attempts": 1,
+    "barrier": "GET_VERSION response",
+    "version": {
+      "human_readable": "0.6",
+      "sway_original_version": "1.12.0",
+      "variant": "sway",
+      "major": 0,
+      "minor": 6,
+      "patch": 0,
+      "loaded_config_file_name": "/home/jack/.files/alpine/verification/animation-responsiveness/carousel-native-final/sway.conf"
+    }
+  },
+  "private_compositor_priority": {
+    "check": false,
+    "uid": 1000,
+    "processes": [
+      {
+        "pid": 24329,
+        "name": "swayfx",
+        "target_nice": -10,
+        "threads": [
+          {
+            "tid": 24329,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24334,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24335,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24336,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24337,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24338,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24339,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24340,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24341,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24342,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24343,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24344,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24345,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24351,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24353,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24354,
+            "nice": 19,
+            "policy": 3,
+            "applied": false
+          },
+          {
+            "tid": 24368,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          },
+          {
+            "tid": 24378,
+            "nice": -10,
+            "policy": 1073741824,
+            "applied": true
+          }
+        ]
+      }
+    ]
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "checked_at": "2026-09-08T03:09:48.873375+00:00",
+  "model": "MacBookPro11,5",
+  "kernel": "6.18.49-0-lts",
+  "led": "/sys/class/leds/smc::kbd_backlight",
+  "maximum": 255,
+  "hid_apple_fnmode": "3",
+  "checks": [
+    {
+      "action": "restore",
+      "before": 64,
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    },
+    {
+      "action": "down",
+      "before": 64,
+      "after": 39,
+      "saved": 39,
+      "passed": true
+    },
+    {
+      "action": "up",
+      "before": 39,
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    },
+    {
+      "action": "toggle",
+      "before": 64,
+      "after": 0,
+      "saved": 0,
+      "passed": true
+    },
+    {
+      "action": "restore",
+      "before": 0,
+      "after": 0,
+      "saved": 0,
+      "passed": true
+    },
+    {
+      "action": "toggle",
+      "before": 0,
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    },
+    {
+      "action": "restore",
+      "before": 64,
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    },
+    {
+      "action": "restore",
+      "before": 0,
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    },
+    {
+      "action": "invalid",
+      "exit_status": 64,
+      "unchanged": true,
+      "passed": true
+    },
+    {
+      "action": "concurrent up/down",
+      "after": 64,
+      "saved": 64,
+      "passed": true
+    }
+  ],
+  "physical_keypress_verified": false,
+  "verification_notes": [
+    "Initial check expected a rounded 26-unit delta; brightnessctl uses a 25-unit relative 10% step at maximum 255. Corrected the check expectation after observing 64 -> 39. Hardware was restored to 64 after the initial assertion."
+  ],
+  "final_level": 64,
+  "saved_level": 64,
+  "advertised_keys": {
+    "KEY_F5": true,
+    "KEY_F6": true,
+    "KEY_KBDILLUMTOGGLE": true,
+    "KEY_KBDILLUMDOWN": true,
+    "KEY_KBDILLUMUP": true,
+    "KEY_FN": true
+  },
+  "live_sway_binding_dispatch": {
+    "wayland_display": "wayland-1",
+    "checks": [
+      {
+        "symbol": "XF86KbdBrightnessDown",
+        "before": 64,
+        "after": 39,
+        "saved": 39,
+        "passed": true
+      },
+      {
+        "symbol": "XF86KbdBrightnessUp",
+        "before": 39,
+        "after": 64,
+        "saved": 64,
+        "passed": true
+      }
+    ],
+    "method": "wtype virtual keyboard illumination events; no input events read",
+    "passed": true
+  },
+  "fragment_parser_validation": {
+    "command": "sway --validate --config <temporary file including keyboard-backlight.conf>",
+    "exit_status": 0
+  },
+  "shellcheck": {
+    "exit_status": 0
+  },
+  "shell_syntax": {
+    "command": "sh -n alpine/desktop/.local/bin/oldbook-keyboard-backlight",
+    "exit_status": 0
+  },
+  "existing_shortcut_source_tests": {
+    "passed": 22,
+    "failed": 0
+  },
+  "locked_session_keypress_verified": false,
+  "shortcut_labels": {
+    "passed": true,
+    "labels": {
+      "XF86KbdBrightnessDown": "Decrease keyboard backlight",
+      "XF86KbdBrightnessUp": "Increase keyboard backlight",
+      "XF86KbdLightOnOff": "Toggle keyboard backlight"
+    }
+  },
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-keyboard-backlight": "dfdd167b2114f209602076e960c0b55396ce0109e25b66a894562400cad37a22",
+    "alpine/desktop/.config/sway/local.d/keyboard-backlight.conf": "f132ad13bf35a1fb674929e9b15a69ba64847b852eb548bf1300b548eb08ea9a",
+    "alpine/desktop/.local/lib/oldbook/shortcut_sources.py": "524670a23c3dc67d012054e529a6a95aeace672c9c360231c06f89a006024503",
+    "alpine/desktop/README.md": "4f9bf515d9841ab348b3cd113ef10d14c61518ee68c80eebd89cce97e86c9f5e"
+  }
+}

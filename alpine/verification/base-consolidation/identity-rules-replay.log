@@ -1,0 +1,6 @@
+path-rule mismatches: 0 []
+content pairs: 408 mismatches: 4
+   alpine/FEATURES.md -> (same) | line 541: got '' want '| Desktop identity string `oldbook` | `mbp-intel` (`mbp_intel` for Python and CS'
+   alpine/PROGRESS.md -> (same) | length differs: candidate 969, actual 1007
+   bazzite/bin/oldbook-bazzite-profile -> bazzite/bin/mbp-intel-bazzite-profile | line 165: got "                raise RuntimeError('Cannot route Bazzite command deck from mbp-i" want "                raise RuntimeError('Cannot route Bazzite command deck from mbp_i"
+   bazzite/desktop/.config/systemd/user/oldbook-session.target -> bazzite/desktop/.config/systemd/user/mbp-intel-session.target | line 5: got 'Wants=mbp-intel-desktop-settings.service' want 'Wants=oldbook-desktop-settings.service'

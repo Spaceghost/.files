@@ -1,0 +1,110 @@
+{
+  "status": "failed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "8fb593bd48fe910c99d1871bda484c8083c8c72dafde3467c2029d98859a8e0e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42"
+  },
+  "checks": [],
+  "states": {},
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "verifier_sha256": "4d95153b5b67a28a76791f1ca2e5136040271d6a444223f2c20d4dbb8b9843bb",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "error": "timed out",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 370, in run\n    trace = FocusTrace(sway_socket)\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 50, in __init__\n    reply = self.ipc.requests([(2, '[\"window\",\"workspace\"]')])[0]\n            ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jack/.files/alpine/tests/verify_decoration_attachment.py\", line 67, in requests\n    magic, size, returned = IPC_HEADER.unpack(self.read(IPC_HEADER.size, deadline))\n                                              ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jack/.files/alpine/tests/verify_decoration_attachment.py\", line 51, in read\n    part = self.connection.recv(size - len(data))\nTimeoutError: timed out\n",
+  "last_outputs": [
+    {
+      "id": 3,
+      "type": "output",
+      "orientation": "none",
+      "percent": 1.0,
+      "urgent": false,
+      "marks": [],
+      "layout": "output",
+      "border": "none",
+      "current_border_width": 0,
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "deco_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "window_rect": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 0,
+        "height": 0
+      },
+      "name": "HEADLESS-1",
+      "window": null,
+      "nodes": [],
+      "floating_nodes": [],
+      "focus": [
+        4
+      ],
+      "fullscreen_mode": 0,
+      "sticky": false,
+      "floating": null,
+      "scratchpad_state": null,
+      "primary": false,
+      "make": "Unknown",
+      "model": "Unknown",
+      "serial": "Unknown",
+      "modes": [],
+      "features": {
+        "adaptive_sync": false,
+        "hdr": false
+      },
+      "non_desktop": false,
+      "active": true,
+      "dpms": true,
+      "power": true,
+      "scale": 2.0,
+      "scale_filter": "nearest",
+      "transform": "normal",
+      "adaptive_sync_status": "disabled",
+      "layer_shell_surfaces": [],
+      "current_workspace": "1",
+      "current_mode": {
+        "width": 2880,
+        "height": 1800,
+        "refresh": 0
+      },
+      "max_render_time": 0,
+      "allow_tearing": false,
+      "hdr": false,
+      "focused": true,
+      "subpixel_hinting": "unknown"
+    }
+  ],
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

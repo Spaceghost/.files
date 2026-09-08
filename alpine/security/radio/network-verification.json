@@ -1,0 +1,967 @@
+{
+  "schema": 1,
+  "scope": "Staged NativeNetwork and owned LeaseApplier under private network, PID and mount namespaces. The installed radio owner/CLI remains unchanged.",
+  "suite": {
+    "command": "doas -n python3 -B -m unittest discover -s alpine/security/radio/tests -v",
+    "passed": 131,
+    "duration_seconds": 7.311,
+    "components": [
+      "legacy controller and installers",
+      "pure lease parser",
+      "persistent DHCP transport and process lifetime",
+      "owned network state and bounded native command runner"
+    ]
+  },
+  "proofs": {
+    "stock_pid_lock_negative": {
+      "worker_returncode": 0,
+      "messages": [
+        {
+          "namespaces": {
+            "mnt": "mnt:[4026533256]",
+            "net": "net:[4026533258]",
+            "pid": "pid:[4026533257]"
+          },
+          "phase": "namespace_ready"
+        },
+        {
+          "holder_alive": true,
+          "holder_pid": 49,
+          "lock_survived": false,
+          "phase": "live_outer_lock",
+          "provider_written": true,
+          "returncode": 0,
+          "stderr": "sh: can't kill pid 49: No such process\nresolvconf: clearing stale lock pid 49\nresolvconf: could not detect a useable init system\n"
+        },
+        {
+          "lock_survived": true,
+          "phase": "stale_inner_pid1_lock",
+          "provider_written": false,
+          "returncode": -9,
+          "stderr": ""
+        }
+      ],
+      "worker_stderr": "",
+      "host_state_unchanged": true,
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_resolver_pid_lock.py": "dedc9438fe0f3190333febd208bf4412fb579a9eed04ba2538bee00918eb5131",
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/usr/sbin/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0",
+        "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f",
+        "/home/jack/.local/state/mbp-intel/verification/resolver-stock-3.17.4/resolvconf": "b2d4d5c9d04f4f3bf5c79e7094ad5a617cadf52f6ce578330b16d01cbd9052a0"
+      },
+      "source_unchanged": true,
+      "cleanup": {
+        "remaining_namespace_members": []
+      }
+    },
+    "patched_native_lock_coexistence": {
+      "schema_version": 1,
+      "worker_returncode": 0,
+      "messages": [
+        {
+          "namespaces": {
+            "mnt": "mnt:[4026533256]",
+            "net": "net:[4026533258]",
+            "pid": "pid:[4026533257]"
+          },
+          "phase": "namespace_ready"
+        },
+        {
+          "elapsed_seconds": 0.752001991000725,
+          "name": "nested_writer_preserves_live_ordinary_lock",
+          "phase": "case"
+        },
+        {
+          "name": "nested_writer_recovers_stale_ordinary_lock",
+          "phase": "case"
+        },
+        {
+          "identity": {
+            "inner_pid": 105,
+            "lock_pid": 105,
+            "outer_pid": 104,
+            "owner_pid": 103,
+            "pid_namespace": "pid:[4026533449]"
+          },
+          "name": "ordinary_writer_respects_nested_host_pid_lock",
+          "phase": "case"
+        },
+        {
+          "identity": {
+            "inner_pid": 155,
+            "lock_pid": 155,
+            "outer_pid": 154,
+            "owner_pid": 153,
+            "pid_namespace": "pid:[4026533449]"
+          },
+          "name": "ordinary_writer_recovers_killed_nested_host_pid",
+          "phase": "case"
+        },
+        {
+          "identity": {
+            "inner_pid": 208,
+            "lock_pid": 208,
+            "outer_pid": 207,
+            "owner_pid": 206,
+            "pid_namespace": "pid:[4026533448]"
+          },
+          "name": "nested_writer_recovers_killed_nested_host_pid",
+          "phase": "case"
+        },
+        {
+          "invalid_cases": 10,
+          "name": "invalid_bridge_context_refused_before_mutation",
+          "phase": "case"
+        },
+        {
+          "cases": [
+            {
+              "elapsed_seconds": 0.752001991000725,
+              "name": "nested_writer_preserves_live_ordinary_lock"
+            },
+            {
+              "name": "nested_writer_recovers_stale_ordinary_lock"
+            },
+            {
+              "identity": {
+                "inner_pid": 105,
+                "lock_pid": 105,
+                "outer_pid": 104,
+                "owner_pid": 103,
+                "pid_namespace": "pid:[4026533449]"
+              },
+              "name": "ordinary_writer_respects_nested_host_pid_lock"
+            },
+            {
+              "identity": {
+                "inner_pid": 155,
+                "lock_pid": 155,
+                "outer_pid": 154,
+                "owner_pid": 153,
+                "pid_namespace": "pid:[4026533449]"
+              },
+              "name": "ordinary_writer_recovers_killed_nested_host_pid"
+            },
+            {
+              "identity": {
+                "inner_pid": 208,
+                "lock_pid": 208,
+                "outer_pid": 207,
+                "owner_pid": 206,
+                "pid_namespace": "pid:[4026533448]"
+              },
+              "name": "nested_writer_recovers_killed_nested_host_pid"
+            },
+            {
+              "invalid_cases": 10,
+              "name": "invalid_bridge_context_refused_before_mutation"
+            }
+          ],
+          "phase": "complete"
+        }
+      ],
+      "worker_stderr": "",
+      "host_state_unchanged": true,
+      "host_checks": {
+        "namespaces": true,
+        "addresses_digest": true,
+        "routes_digest": true,
+        "dns_digest": true,
+        "radio_states": true,
+        "dhcp_clients": true,
+        "ipv6_routes_digest": true
+      },
+      "host_address_changed_fields": [],
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_resolver_bridge.py": "80d48308406d34944a29d3f24e5fad397d22dd6d2756903eb7f340e6866b305a",
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/tmp/openresolv-source-p3nhpf7n/patched/resolvconf": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "da097760b763e1a8bd3c70866caca1532b29131c1304f925d6a658712b41b67f",
+        "/usr/lib/resolvconf/libc": "9cb875f9a224d0ad1a42033d7b91b04fa4d845051c51d16f1728e507bd50ab6f"
+      },
+      "source_unchanged": true,
+      "cleanup": {
+        "remaining_namespace_members": []
+      },
+      "elapsed_seconds": 1.4408636990010564,
+      "status": "passed"
+    },
+    "native_lease_application": {
+      "schema_version": 1,
+      "source_sha256": {
+        "/home/jack/.files/alpine/security/radio/tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+        "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/network.py": "da097760b763e1a8bd3c70866caca1532b29131c1304f925d6a658712b41b67f",
+        "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+        "/tmp/openresolv-source-p3nhpf7n/patched/resolvconf": "6fa3705c99cc449573ccbbc9bc0ae3d44c7262fe3cd04b7726b2c1a8815afcc3"
+      },
+      "source_unchanged": true,
+      "host_checks": {
+        "namespaces": true,
+        "addresses_digest": true,
+        "routes_digest": true,
+        "dns_digest": true,
+        "radio_states": true,
+        "dhcp_clients": true,
+        "ipv6_routes_digest": true
+      },
+      "host_state_unchanged": true,
+      "host_address_changed_fields": [],
+      "elapsed_seconds": 12.189343375001044,
+      "verified_at_utc": "2026-09-07T15:24:22Z",
+      "namespaces": {
+        "mnt": "mnt:[4026532993]",
+        "net": "net:[4026532995]",
+        "pid": "pid:[4026532994]"
+      },
+      "cleanup": {
+        "remaining_namespace_members": []
+      },
+      "worker_exit_status": 0,
+      "messages": [
+        {
+          "namespaces": {
+            "mnt": "mnt:[4026532993]",
+            "net": "net:[4026532995]",
+            "pid": "pid:[4026532994]"
+          },
+          "phase": "namespace_ready"
+        },
+        {
+          "addresses": [
+            "192.0.2.17/24",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53",
+            "192.0.2.53"
+          ],
+          "elapsed_seconds": 0.9331113230000483,
+          "name": "initial_ipv4_and_native_dns",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "192.0.2.17/24",
+                "family": 4,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 192.0.2.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 1,
+            "routes": [
+              {
+                "destination": "192.0.2.0/24",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "192.0.2.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "192.0.2.17/24",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53",
+            "192.0.2.53"
+          ],
+          "elapsed_seconds": 0.8886168280005222,
+          "name": "same_address_renewal",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "192.0.2.17/24",
+                "family": 4,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 192.0.2.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 2,
+            "routes": [
+              {
+                "destination": "192.0.2.0/24",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "192.0.2.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "192.0.2.17/24",
+            "2001:db8:1::17/64",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53",
+            "192.0.2.53"
+          ],
+          "elapsed_seconds": 1.245053728001949,
+          "name": "home_static_ipv6",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "192.0.2.17/24",
+                "family": 4,
+                "protocol": 196
+              },
+              {
+                "cidr": "2001:db8:1::17/64",
+                "family": 6,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 192.0.2.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 3,
+            "routes": [
+              {
+                "destination": "192.0.2.0/24",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "192.0.2.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "2001:db8:1::/64",
+                "family": 6,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "2001:db8:1::17"
+              },
+              {
+                "destination": "default",
+                "family": 6,
+                "gateway": "fe80::1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": null
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "198.51.100.17/24",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53"
+          ],
+          "elapsed_seconds": 2.3424072339985287,
+          "name": "hotspot_removes_only_owned_ipv6",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "198.51.100.17/24",
+                "family": 4,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 198.51.100.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 4,
+            "routes": [
+              {
+                "destination": "198.51.100.0/24",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "198.51.100.17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "198.51.100.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "198.51.100.17"
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "192.0.2.17/24",
+            "2001:db8:1::17/64",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53",
+            "192.0.2.53"
+          ],
+          "elapsed_seconds": 2.0625146399979712,
+          "name": "home_restores_static_ipv6",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "192.0.2.17/24",
+                "family": 4,
+                "protocol": 196
+              },
+              {
+                "cidr": "2001:db8:1::17/64",
+                "family": 6,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 192.0.2.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 5,
+            "routes": [
+              {
+                "destination": "192.0.2.0/24",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "2001:db8:1::/64",
+                "family": 6,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "2001:db8:1::17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "192.0.2.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "default",
+                "family": 6,
+                "gateway": "fe80::1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": null
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53"
+          ],
+          "elapsed_seconds": 1.7125128429979668,
+          "name": "removal_preserves_other_address_routes_and_dns",
+          "owned": null,
+          "phase": "case"
+        },
+        {
+          "addresses": [
+            "192.0.2.17/32",
+            "203.0.113.17/24",
+            "fe80::805c:67ff:feca:73d5/64"
+          ],
+          "dns": [
+            "198.51.100.53",
+            "192.0.2.53"
+          ],
+          "elapsed_seconds": 1.1075574610003969,
+          "name": "host_lease_off_prefix_gateway",
+          "owned": {
+            "addresses": [
+              {
+                "cidr": "192.0.2.17/32",
+                "family": 4,
+                "protocol": 196
+              }
+            ],
+            "dns_contents": [
+              "nameserver 192.0.2.53\n"
+            ],
+            "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "ifindex": 2,
+            "interface": "lease-test0",
+            "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+            "revision": 6,
+            "routes": [
+              {
+                "destination": "192.0.2.17/32",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "192.0.2.1/32",
+                "family": 4,
+                "gateway": null,
+                "metric": 42700,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              },
+              {
+                "destination": "default",
+                "family": 4,
+                "gateway": "192.0.2.1",
+                "metric": 42701,
+                "protocol": 196,
+                "source": "192.0.2.17"
+              }
+            ]
+          },
+          "phase": "case"
+        },
+        {
+          "cases": [
+            {
+              "addresses": [
+                "192.0.2.17/24",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53",
+                "192.0.2.53"
+              ],
+              "elapsed_seconds": 0.9331113230000483,
+              "name": "initial_ipv4_and_native_dns",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "192.0.2.17/24",
+                    "family": 4,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 192.0.2.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 1,
+                "routes": [
+                  {
+                    "destination": "192.0.2.0/24",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "192.0.2.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  }
+                ]
+              }
+            },
+            {
+              "addresses": [
+                "192.0.2.17/24",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53",
+                "192.0.2.53"
+              ],
+              "elapsed_seconds": 0.8886168280005222,
+              "name": "same_address_renewal",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "192.0.2.17/24",
+                    "family": 4,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 192.0.2.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 2,
+                "routes": [
+                  {
+                    "destination": "192.0.2.0/24",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "192.0.2.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  }
+                ]
+              }
+            },
+            {
+              "addresses": [
+                "192.0.2.17/24",
+                "2001:db8:1::17/64",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53",
+                "192.0.2.53"
+              ],
+              "elapsed_seconds": 1.245053728001949,
+              "name": "home_static_ipv6",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "192.0.2.17/24",
+                    "family": 4,
+                    "protocol": 196
+                  },
+                  {
+                    "cidr": "2001:db8:1::17/64",
+                    "family": 6,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 192.0.2.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 3,
+                "routes": [
+                  {
+                    "destination": "192.0.2.0/24",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "192.0.2.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "2001:db8:1::/64",
+                    "family": 6,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "2001:db8:1::17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 6,
+                    "gateway": "fe80::1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": null
+                  }
+                ]
+              }
+            },
+            {
+              "addresses": [
+                "198.51.100.17/24",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53"
+              ],
+              "elapsed_seconds": 2.3424072339985287,
+              "name": "hotspot_removes_only_owned_ipv6",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "198.51.100.17/24",
+                    "family": 4,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 198.51.100.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 4,
+                "routes": [
+                  {
+                    "destination": "198.51.100.0/24",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "198.51.100.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "198.51.100.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "198.51.100.17"
+                  }
+                ]
+              }
+            },
+            {
+              "addresses": [
+                "192.0.2.17/24",
+                "2001:db8:1::17/64",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53",
+                "192.0.2.53"
+              ],
+              "elapsed_seconds": 2.0625146399979712,
+              "name": "home_restores_static_ipv6",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "192.0.2.17/24",
+                    "family": 4,
+                    "protocol": 196
+                  },
+                  {
+                    "cidr": "2001:db8:1::17/64",
+                    "family": 6,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 192.0.2.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 5,
+                "routes": [
+                  {
+                    "destination": "192.0.2.0/24",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "2001:db8:1::/64",
+                    "family": 6,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "2001:db8:1::17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "192.0.2.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 6,
+                    "gateway": "fe80::1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": null
+                  }
+                ]
+              }
+            },
+            {
+              "addresses": [
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53"
+              ],
+              "elapsed_seconds": 1.7125128429979668,
+              "name": "removal_preserves_other_address_routes_and_dns",
+              "owned": null
+            },
+            {
+              "addresses": [
+                "192.0.2.17/32",
+                "203.0.113.17/24",
+                "fe80::805c:67ff:feca:73d5/64"
+              ],
+              "dns": [
+                "198.51.100.53",
+                "192.0.2.53"
+              ],
+              "elapsed_seconds": 1.1075574610003969,
+              "name": "host_lease_off_prefix_gateway",
+              "owned": {
+                "addresses": [
+                  {
+                    "cidr": "192.0.2.17/32",
+                    "family": 4,
+                    "protocol": 196
+                  }
+                ],
+                "dns_contents": [
+                  "nameserver 192.0.2.53\n"
+                ],
+                "generation": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "ifindex": 2,
+                "interface": "lease-test0",
+                "provider": "privacyctl.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.lease-test0",
+                "revision": 6,
+                "routes": [
+                  {
+                    "destination": "192.0.2.17/32",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "192.0.2.1/32",
+                    "family": 4,
+                    "gateway": null,
+                    "metric": 42700,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  },
+                  {
+                    "destination": "default",
+                    "family": 4,
+                    "gateway": "192.0.2.1",
+                    "metric": 42701,
+                    "protocol": 196,
+                    "source": "192.0.2.17"
+                  }
+                ]
+              }
+            }
+          ],
+          "phase": "complete"
+        }
+      ],
+      "worker_stderr": "",
+      "status": "passed"
+    }
+  },
+  "not_claimed": [
+    "Live resolver takeover, WPA/DHCP ownership migration or radio policy activation.",
+    "Full radio owner service and CLI integration.",
+    "Reboot or resume proof.",
+    "Native cache/service subscriber compatibility; only the reviewed libc-only configuration is accepted."
+  ],
+  "runner_limits": {
+    "apply_seconds": 3,
+    "remove_seconds": 3,
+    "per_command_seconds": 0.75,
+    "aggregate_output_bytes": 262144,
+    "cleanup_seconds": 0.4,
+    "replacement_requires_teardown": true
+  },
+  "partial_ownership": "NetworkError.owned or read-only applier.current after interruption; block radios before cleanup."
+}

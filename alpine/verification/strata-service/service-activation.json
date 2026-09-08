@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "source_sha256": "8e9cc3daa0607ec52171fa87a78184a46b94be7dcf550d753f2d31ebbf563519",
+  "daemon_pid": 8847,
+  "retired_processes": [
+    {
+      "pid": 17007,
+      "role": "--serve"
+    },
+    {
+      "pid": 23599,
+      "role": "--daemon"
+    }
+  ],
+  "retired_fossil_pid": 17008,
+  "fossil_pid": 8860,
+  "before": [
+    {
+      "window": 343,
+      "workspace": 0
+    }
+  ],
+  "after": [
+    {
+      "window": 348,
+      "workspace": 0
+    }
+  ],
+  "browser_restarted_for_final_supervisor": true,
+  "profile_preserved": true,
+  "daemon_lock_held": true,
+  "http_status": 200,
+  "final_bindings_applied": true
+}

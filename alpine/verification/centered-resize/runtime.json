@@ -1,0 +1,183 @@
+{
+  "isolation": "private HOME/runtime, headless Sway, no session bus",
+  "keyboard_driver": "wtype single-level symbolic keymap; explicit Shift+plus tested, physical Shift+= mapping unobserved",
+  "checks": {
+    "floating_grow_center": true,
+    "floating_shrink_restores": true,
+    "other_window_unchanged": true,
+    "minimum_width_does_not_block_height": true,
+    "maximum_width_does_not_block_height": true,
+    "tiled_center_retained": true,
+    "fullscreen_disabled": true,
+    "fullscreen_center_retained": true,
+    "super_equal": true,
+    "super_shift_plus": true,
+    "super_plus": true,
+    "super_minus": true,
+    "super_keypad_add": true,
+    "super_keypad_subtract": true
+  },
+  "floating": {
+    "before": {
+      "x": 210,
+      "y": 170,
+      "width": 600,
+      "height": 400
+    },
+    "grow": {
+      "x": 190,
+      "y": 150,
+      "width": 640,
+      "height": 440
+    },
+    "shrink": {
+      "x": 210,
+      "y": 170,
+      "width": 600,
+      "height": 400
+    }
+  },
+  "minimum": {
+    "before": {
+      "x": 472,
+      "y": 270,
+      "width": 75,
+      "height": 200
+    },
+    "after": {
+      "x": 472,
+      "y": 290,
+      "width": 75,
+      "height": 160
+    }
+  },
+  "maximum": {
+    "before": {
+      "x": -210,
+      "y": -30,
+      "width": 1440,
+      "height": 800
+    },
+    "after": {
+      "x": -210,
+      "y": -50,
+      "width": 1440,
+      "height": 840
+    }
+  },
+  "tiled": {
+    "before": {
+      "x": 720,
+      "y": 0,
+      "width": 720,
+      "height": 900
+    },
+    "after": {
+      "x": 740,
+      "y": 20,
+      "width": 680,
+      "height": 860
+    }
+  },
+  "fullscreen": {
+    "before": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "after": {
+      "x": 20,
+      "y": 20,
+      "width": 1400,
+      "height": 860
+    },
+    "mode": 0
+  },
+  "keys": {
+    "super_equal": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 190,
+        "y": 150,
+        "width": 640,
+        "height": 440
+      }
+    },
+    "super_shift_plus": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 190,
+        "y": 150,
+        "width": 640,
+        "height": 440
+      }
+    },
+    "super_plus": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 190,
+        "y": 150,
+        "width": 640,
+        "height": 440
+      }
+    },
+    "super_minus": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 230,
+        "y": 190,
+        "width": 560,
+        "height": 360
+      }
+    },
+    "super_keypad_add": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 190,
+        "y": 150,
+        "width": 640,
+        "height": 440
+      }
+    },
+    "super_keypad_subtract": {
+      "before": {
+        "x": 210,
+        "y": 170,
+        "width": 600,
+        "height": 400
+      },
+      "after": {
+        "x": 230,
+        "y": 190,
+        "width": 560,
+        "height": 360
+      }
+    }
+  }
+}

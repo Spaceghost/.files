@@ -1,0 +1,11 @@
+[Unit]
+Description=MBP Intel Waybar panel
+PartOf=mbp-intel-session.target
+After=mbp-intel-swaync.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/waybar
+Restart=on-failure
+RestartSec=2
+

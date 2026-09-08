@@ -1,0 +1,80 @@
+{
+  "command": "python3 -m unittest discover -s alpine/security/radio/tests -p 'test_*.py' -v",
+  "executor": {
+    "python": "3.14.7",
+    "root": false,
+    "uid": 1000
+  },
+  "limitations": [
+    "Root-only tests were skipped and are not claimed as passing.",
+    "No native namespace fault fixture was run.",
+    "No OpenRC service, physical radio, WPA, DHCP, firewall, suspend, reboot or live migration was activated or verified.",
+    "This checkpoint does not establish native orphan crash/restart recovery or deployed-kernel descendant-death behavior."
+  ],
+  "log": {
+    "lines": 372,
+    "path_at_run": "/tmp/mbp-intel-radio-checkpoint-tests.log",
+    "persisted_in_repository": true,
+    "repository_path": "verification/checkpoint-unit-tests.log",
+    "sha256": "6dacc146958c8aee2bdca95a7702c62f2fa628a819ec39f1a9c062a3e3159b9f"
+  },
+  "recorded_at": "2026-09-07T19:12:36Z",
+  "result": {
+    "discovered": 365,
+    "duration_seconds": 1.373,
+    "errors": 0,
+    "failures": 0,
+    "passed": 270,
+    "skipped_root_only": 95
+  },
+  "scope": "Source-stable non-root Python unit-test discovery for the staged radio tree",
+  "source_stability": {
+    "fossil_checkout_changed_for_unrelated_desktop_checkpoint": true,
+    "hashed_scope": "All 39 Python source and test files under alpine/security/radio, excluding __pycache__",
+    "radio_hashes_equal_before_after": true,
+    "sha256": {
+      "root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+      "root/usr/local/lib/privacyctl_runtime/adapter.py": "48f30eb4f26627fb1b8751e776cded0bf754427dd92deedff27a081a03d8204e",
+      "root/usr/local/lib/privacyctl_runtime/dhcp.py": "0848a26a21d303d82e819896a12098e710ce59965eeac80acd2b05aa29494a34",
+      "root/usr/local/lib/privacyctl_runtime/hook.py": "b27ef3a44460dd65b16e179bc62c38a10feff1225c06eb5d9f1da08cc713840c",
+      "root/usr/local/lib/privacyctl_runtime/ipc.py": "f9b318cf3c2bfb2974e5d61ee7f2c0a807cc83ddd91961ee9dc6b38ab0b18af4",
+      "root/usr/local/lib/privacyctl_runtime/journal.py": "582f6ea16911bcc89dc3f7eaac86c83a1adf39e15342db06ccd0e8f37eddbbb7",
+      "root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+      "root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+      "root/usr/local/lib/privacyctl_runtime/link.py": "835d48c26bce4913541f1153d582136bb162f76bea08d44be6da540e18af05f5",
+      "root/usr/local/lib/privacyctl_runtime/network.py": "3ecd3bc425a1453b2a94eda844d33b68be4dd5397ce15f194e14161db3f993ae",
+      "root/usr/local/lib/privacyctl_runtime/recovery.py": "0580e8fe6e9b5b1c3fcca278ffb0782b8be14663800ee984493a1a94816130bb",
+      "root/usr/local/lib/privacyctl_runtime/runner.py": "26f6d908d69e3db4905e174f1e047cecab483d4c7cf40e61c048e78591709a2c",
+      "root/usr/local/lib/privacyctl_runtime/service.py": "9f10c784979515c9625247a1a29764df0617049abb980a100199d1450f10c810",
+      "root/usr/local/lib/privacyctl_runtime/writers.py": "cb4cb9d9190934ea8fb4ffab2622aefb293596942ad941dade2d87d3e331e4b1",
+      "tests/fixtures/dhcp_event.py": "d916540b508a8bbf66f4be1eb8fbb81948171f4092a067f54f4edc185c6d638d",
+      "tests/fixtures/dhcp_manager.py": "96569cdcaa52d7d2ef3261ca3ddfff9c412b8aa8507a89b7176aea6cf90010f0",
+      "tests/test_bluetooth_install.py": "7d992623121a8dc739a0c1d909bf1a6c47b9384aac84b419bc7fd544d31d8e95",
+      "tests/test_dhcp.py": "c18a62a9d74561fa0d0ac0060171aa4dfdaccef3b14282c8196bd88ad1cf5b6d",
+      "tests/test_dhcp_journal.py": "115ccb8dcc1b9e8049330f5944ad6a91d8bcfa20b14c64a0bcfa42f2cac3d67b",
+      "tests/test_install.py": "ada89435c90cddf0df198c22b08591be16d346017ca9d4774ad75db02ea2b003",
+      "tests/test_ipc.py": "c589cc04930f629c838c653931ad3db1342af08561f97b19530b45ca45f49788",
+      "tests/test_journal.py": "18ea2cbc93494dc0e7e236602e385969613172027a8f1110381f753faecf06a0",
+      "tests/test_lease.py": "4c53219723e346ee5c3af3f216970b88c50a2ae6d6570798f5fc335f78be8cbc",
+      "tests/test_link.py": "626e9303430ce58b432622517a06daf090825461c146c47b2d62a7b4cd62d8ef",
+      "tests/test_network.py": "17de95f6b931b2f6552e53bb92e3f6d3e8d1fb791094e98e5928af96f5dd9754",
+      "tests/test_network_journal.py": "009387180839ff38b9e5c326a2baec1b1ba82debf10d4f077c1ca1ba42277c1c",
+      "tests/test_owner_adapter.py": "fd79ed999ea28132c68c36575eed6edd50bc32916c6032ace3333d086861e3b6",
+      "tests/test_owner_runner.py": "3524fb0ff95084ea45982cc6cea30bfe6d42a19b8e007b8513d843ae0aae0c71",
+      "tests/test_privacyctl.py": "842cf2afbdabf4f124d06acfbe0c0b2c07ef7f4b3b98961aad8db9758325c2ab",
+      "tests/test_recovery.py": "c791038793369599224b7bfc5aeb87c905ef6750493a354d2f94dc86af55a2b3",
+      "tests/test_service.py": "acd418479f382a5554752eeb4e5e70b097dd59b7331a729f12e325352deb2cf4",
+      "tests/test_startup_recovery.py": "e485beccf00c14e831e5915985a05a61a65544f2318ee6dd375d152e1bbebb1a",
+      "tests/test_writers.py": "36abfa74e2d81ac67796ad7487be633292049450199f9eec15021ec7796b1c3b",
+      "tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+      "tests/verify_network_applier.py": "b94a567e1f70569eb23016c0ea387a5e2f29e68a8bad25492a27beadff83aa63",
+      "tests/verify_radio_owner.py": "c953caca12a4fcac9f5fa1c98a6990d734cb11ca38c4c7d64fa28cc7c6a2e83e",
+      "tests/verify_radio_owner_failures.py": "5c9a0341ff42527980e2b38481087b35cc79953d308720e87f317aa78fc58d78",
+      "tests/verify_resolver_bridge.py": "80d48308406d34944a29d3f24e5fad397d22dd6d2756903eb7f340e6866b305a",
+      "tests/verify_resolver_pid_lock.py": "dedc9438fe0f3190333febd208bf4412fb579a9eed04ba2538bee00918eb5131"
+    }
+  },
+  "status": "passed",
+  "version": 1,
+  "working_directory": ".files"
+}

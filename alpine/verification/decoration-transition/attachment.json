@@ -1,0 +1,81 @@
+{
+  "status": "passed",
+  "checks": [
+    "attached-bottom",
+    "hover-target-bottom",
+    "hover-handoffs-have-no-intermediate-geometry",
+    "hover-return-bottom",
+    "drag-tracks-before-release",
+    "drag-renders-intermediate-animation-frame",
+    "dragged-bottom",
+    "small-bottom",
+    "moved-resized-bottom",
+    "attached-right",
+    "small-right",
+    "right-size-restored",
+    "fullscreen-forces-bottom",
+    "fullscreen-preserves-preferred-edge-and-compositor-square-corners",
+    "fullscreen-tiled-bottom-corners-render-square",
+    "fullscreen-exit-restores-right",
+    "floating-fullscreen-forces-bottom",
+    "floating-fullscreen-retains-rounded-bottom-corners",
+    "floating-fullscreen-exit-restores-right",
+    "negative-output-origin",
+    "origin-restored",
+    "middle-click-tiles-target",
+    "float-restores-attachment",
+    "empty-workspace-edge",
+    "workspace-return-attachment",
+    "tiled-focus-restores-workspace-edge",
+    "floating-focus-restores-attachment",
+    "destroy-restores-workspace-edge"
+  ],
+  "drag_follow_ms": 144.9,
+  "fullscreen_square_pixels": {
+    "left_corner": [
+      24,
+      35,
+      41
+    ],
+    "left_inset": [
+      24,
+      35,
+      41
+    ],
+    "right_corner": [
+      24,
+      35,
+      41
+    ],
+    "right_inset": [
+      24,
+      35,
+      41
+    ]
+  },
+  "floating_fullscreen_round_pixels": {
+    "left_corner": [
+      62,
+      50,
+      83
+    ],
+    "left_inset": [
+      28,
+      32,
+      41
+    ],
+    "right_corner": [
+      62,
+      50,
+      83
+    ],
+    "right_inset": [
+      28,
+      32,
+      41
+    ]
+  },
+  "helper_sha256": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+  "raw_evidence": "/tmp/decoration-mode-attachment",
+  "isolation": "Private headless SwayFX session; no user windows manipulated."
+}

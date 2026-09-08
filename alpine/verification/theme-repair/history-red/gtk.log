@@ -1,0 +1,35 @@
+{
+  "checks": [],
+  "failures": [
+    "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/test_scripture_history_theme.py\", line 97, in verify\n    assert color(reader) == '#ffccaa', ('open reader kept the old palette', color(reader))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: ('open reader kept the old palette', '#ddeeff')\n"
+  ],
+  "source_sha256": "3d6ca01ce2d513c7b13a02ea36a6025004130efc450b1e41c1e71346a3cbe8cd",
+  "computed_foreground": "#ddeeff",
+  "status": "failed"
+}
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=16477 comm="/usr/bin/python3 /home/jack/.files/alpine/tests/te")
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.1' (uid=1000 pid=16517 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.portal.Documents' requested by ':1.1' (uid=1000 pid=16517 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Successfully activated service 'org.freedesktop.portal.Documents'
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.1' (uid=1000 pid=16517 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.426: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.430: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.434: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.513: Failed to connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=16517 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:05:52 [ERROR] - wayland: failed to connect to display
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.545: Failed to create screenshot proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=16517 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:05:52 [ERROR] - wayland: failed to connect to display
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:16517): xdg-desktop-portal-WARNING **: 22:05:52.606: Failed to create screen cast proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[16476]: [session uid=1000 pid=16476 pidfd=5] Successfully activated service 'org.freedesktop.portal.Desktop'

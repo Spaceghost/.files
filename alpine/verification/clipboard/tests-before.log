@@ -1,0 +1,103 @@
+test_cancel_does_not_replace_clipboard (test_clipboard.ClipboardTests.test_cancel_does_not_replace_clipboard) ... FAIL
+test_database_is_private_and_history_is_deduplicated (test_clipboard.ClipboardTests.test_database_is_private_and_history_is_deduplicated) ... FAIL
+test_delete_removes_only_selected_entry_and_clear_empties_history (test_clipboard.ClipboardTests.test_delete_removes_only_selected_entry_and_clear_empties_history) ... FAIL
+test_failed_decode_does_not_clear_clipboard (test_clipboard.ClipboardTests.test_failed_decode_does_not_clear_clipboard) ... FAIL
+test_recall_preserves_binary_bytes (test_clipboard.ClipboardTests.test_recall_preserves_binary_bytes) ... FAIL
+test_recall_preserves_multiline_unicode_and_trailing_newlines (test_clipboard.ClipboardTests.test_recall_preserves_multiline_unicode_and_trailing_newlines) ... FAIL
+test_sensitive_and_empty_events_do_not_enter_history (test_clipboard.ClipboardTests.test_sensitive_and_empty_events_do_not_enter_history) ... FAIL
+
+======================================================================
+FAIL: test_cancel_does_not_replace_clipboard (test_clipboard.ClipboardTests.test_cancel_does_not_replace_clipboard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 65, in test_cancel_does_not_replace_clipboard
+    self.run_helper("store", b"history item")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_database_is_private_and_history_is_deduplicated (test_clipboard.ClipboardTests.test_database_is_private_and_history_is_deduplicated)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 90, in test_database_is_private_and_history_is_deduplicated
+    self.run_helper("store", b"same")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_delete_removes_only_selected_entry_and_clear_empties_history (test_clipboard.ClipboardTests.test_delete_removes_only_selected_entry_and_clear_empties_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 80, in test_delete_removes_only_selected_entry_and_clear_empties_history
+    self.run_helper("store", b"older")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_failed_decode_does_not_clear_clipboard (test_clipboard.ClipboardTests.test_failed_decode_does_not_clear_clipboard)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 72, in test_failed_decode_does_not_clear_clipboard
+    self.run_helper("store", b"history item")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_recall_preserves_binary_bytes (test_clipboard.ClipboardTests.test_recall_preserves_binary_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 54, in test_recall_preserves_binary_bytes
+    self.run_helper("store", payload)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_recall_preserves_multiline_unicode_and_trailing_newlines (test_clipboard.ClipboardTests.test_recall_preserves_multiline_unicode_and_trailing_newlines)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 48, in test_recall_preserves_multiline_unicode_and_trailing_newlines
+    self.run_helper("store", payload)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+======================================================================
+FAIL: test_sensitive_and_empty_events_do_not_enter_history (test_clipboard.ClipboardTests.test_sensitive_and_empty_events_do_not_enter_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 60, in test_sensitive_and_empty_events_do_not_enter_history
+    self.run_helper("store", b"synthetic-secret", CLIPBOARD_STATE=state)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/tests/test_clipboard.py", line 43, in run_helper
+    self.assertEqual(result.returncode, 0, result.stderr.decode())
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 0 : python3: can't open file '/home/jack/.files/alpine/desktop/.local/bin/oldbook-clipboard': [Errno 2] No such file or directory
+
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.749s
+
+FAILED (failures=7)

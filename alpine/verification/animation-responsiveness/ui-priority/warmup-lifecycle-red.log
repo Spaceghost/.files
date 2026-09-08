@@ -1,0 +1,37 @@
+test_keeper_survives_the_event_loop_and_closes_on_failure (test_ui_startup.ShowdesktopStartupTests.test_keeper_survives_the_event_loop_and_closes_on_failure) ... /usr/lib/python3.14/traceback.py:270: ResourceWarning: unclosed <socket.socket fd=4, family=1, type=1, proto=0>
+  tb.tb_frame.clear()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ERROR
+test_optional_warmup_failure_still_serves_gestures (test_ui_startup.ShowdesktopStartupTests.test_optional_warmup_failure_still_serves_gestures) ... ERROR
+/usr/lib/python3.14/unittest/case.py:668: ResourceWarning: unclosed <socket.socket fd=4, family=1, type=1, proto=0>
+  with outcome.testPartExecutor(self):
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+
+======================================================================
+ERROR: test_keeper_survives_the_event_loop_and_closes_on_failure (test_ui_startup.ShowdesktopStartupTests.test_keeper_survives_the_event_loop_and_closes_on_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ui_startup.py", line 29, in test_keeper_survives_the_event_loop_and_closes_on_failure
+    showdesktop.serve(None, None, None, None)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py", line 563, in serve
+    subscription.connect(str(sway))
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory
+
+======================================================================
+ERROR: test_optional_warmup_failure_still_serves_gestures (test_ui_startup.ShowdesktopStartupTests.test_optional_warmup_failure_still_serves_gestures)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ui_startup.py", line 40, in test_optional_warmup_failure_still_serves_gestures
+    showdesktop.serve(None, None, None, None)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py", line 563, in serve
+    subscription.connect(str(sway))
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.505s
+
+FAILED (errors=2)

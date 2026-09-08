@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "checks": [
+    "background-starts-on-ten-without-focus-steal",
+    "duplicate-daemon-keeps-one-browser-and-server",
+    "moved-strata-returns-to-ten-ordinary-firefox-unchanged",
+    "concurrent-launchers-focus-and-reuse-existing-browser",
+    "browser-relaunches-on-ten-without-focus-steal",
+    "abrupt-session-shutdown-cleans-service-with-stale-socket",
+    "initially-stale-socket-exits-without-launching-children"
+  ],
+  "host_changes": 0,
+  "isolation": "private HOME, XDG directories, D-Bus, Sway and HTTP port",
+  "external_fixtures": "Fossil HTTP fixture and Foot with exact browser app_id",
+  "shutdown": "abrupt",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-strata": "e8cd439dd00f6e36f4a3f39a81f62884303975585bb65107f625f364b4297095",
+    "alpine/desktop/.local/bin/oldbook-workspaces": "5b1877cb5d80f1515992ce528d86f38e8c59aa473d4881696af60953340e0a9f",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "907f98cdf0b46b0695b742c72838eb65f96c56abdd85f1a5134f2ba90847b6a4"
+  },
+  "verifier_sha256": "d349149172fc42a26d9191850ab0a90a8bab1e022449a14e84f7ab81f5667c29",
+  "private_port": 33021,
+  "final_views": [
+    {
+      "id": 6,
+      "app_id": "firefox",
+      "workspace": 2,
+      "focused": true
+    },
+    {
+      "id": 11,
+      "app_id": "oldbook-strata",
+      "workspace": 10,
+      "focused": false
+    }
+  ],
+  "replacement_id": 11,
+  "stale_socket_after_compositor_death": true
+}

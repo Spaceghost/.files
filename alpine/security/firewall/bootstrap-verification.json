@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "verified_at_utc": "2026-09-07 12:04:22 UTC",
+  "source_sha256": {
+    "alpine/security/firewall/bootstrap-rules": "eb77697306323d0e7ae5c706db7c11d11ddd0d5fe1aed7a74b3297809c328f6b",
+    "alpine/security/firewall/test_bootstrap_rules.py": "939b46412320aecba2cbebb6c4c7be7fecf56710b9cc2f3acc4e00f32b035b6b",
+    "alpine/security/firewall/test-netns.py": "4a5740d0e28bb6912e4593ab156d93da4969191ac1b986d90f231af4660e1fcc",
+    "/usr/bin/opensnitchd": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142"
+  },
+  "unit_tests": {
+    "command": "python3 -m unittest discover -s alpine/security/firewall -p 'test_bootstrap_rules.py' -v",
+    "passed": 14
+  },
+  "packet_tests": {
+    "command": "doas -n python3 alpine/security/firewall/test-netns.py --daemon /usr/bin/opensnitchd",
+    "passed": [
+      "baseline namespace connectivity",
+      "new egress denied before daemon starts",
+      "default-deny without GUI",
+      "generated HTTPS rules allow exact executable and UID on TCP 443 only",
+      "generated HTTPS rules deny wrong UID, different executable and wrong port",
+      "generated HTTPS rules deny an incorrect populated executable checksum",
+      "generated HTTPS checksum rule restores access after exact hash is restored",
+      "approved curl allowed; different Python executable denied",
+      "UDP allow rule is constrained by executable, protocol and port",
+      "rule changes hot-reload to deny",
+      "persistent gate denies new egress after graceful SIGTERM",
+      "persistent gate denies new egress after SIGKILL",
+      "independent queue remains installed without bypass"
+    ],
+    "ip_versions_tested": [
+      4,
+      6
+    ],
+    "transports_tested": [
+      "TCP",
+      "UDP"
+    ],
+    "host_network_unchanged": true
+  },
+  "scope": "Private bootstrap staging and isolated namespace packet verification only. This does not assert live-host activation, TLS security, GUI prompting, or boot ordering.",
+  "findings": [
+    "OpenSnitch 1.8.0 registers MD5 by default; SHA256 remains audit-only metadata.",
+    "Missing or disabled checksum matching is not fail-closed; populated wrong MD5 was tested and denied.",
+    "OpenSnitch 1.8.0 live rule reload responds to writes/removals, not atomic rename-over-existing."
+  ]
+}

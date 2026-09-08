@@ -1,0 +1,114 @@
+/* Gruvbox Dark: shared GTK 3/4 semantic palette. */
+@define-color accent_bg_color #D8755B;
+@define-color accent_fg_color #0d1014;
+@define-color accent_color #D8755B;
+@define-color window_bg_color #11161B;
+@define-color window_fg_color #E7E1D5;
+@define-color view_bg_color #0d1014;
+@define-color view_fg_color #E7E1D5;
+@define-color headerbar_bg_color #1d2125;
+@define-color headerbar_fg_color #E7E1D5;
+@define-color headerbar_border_color #404344;
+@define-color headerbar_backdrop_color #11161B;
+@define-color headerbar_shade_color rgba(13, 16, 20, 0.36);
+@define-color headerbar_darker_shade_color rgba(13, 16, 20, 0.9);
+@define-color card_bg_color #262a2e;
+@define-color card_fg_color #E7E1D5;
+@define-color card_shade_color rgba(13, 16, 20, 0.36);
+@define-color popover_bg_color #1d2125;
+@define-color popover_fg_color #E7E1D5;
+@define-color popover_shade_color rgba(13, 16, 20, 0.25);
+@define-color dialog_bg_color #1d2125;
+@define-color dialog_fg_color #E7E1D5;
+@define-color sidebar_bg_color #1d2125;
+@define-color sidebar_fg_color #E7E1D5;
+@define-color sidebar_backdrop_color #11161B;
+@define-color sidebar_shade_color rgba(13, 16, 20, 0.25);
+@define-color sidebar_border_color #404344;
+@define-color thumbnail_bg_color #262a2e;
+@define-color thumbnail_fg_color #E7E1D5;
+@define-color destructive_bg_color #d87d74;
+@define-color destructive_fg_color #0d1014;
+@define-color destructive_color #d87d74;
+@define-color success_bg_color #9cc874;
+@define-color success_fg_color #0d1014;
+@define-color success_color #9cc874;
+@define-color warning_bg_color #D8755B;
+@define-color warning_fg_color #0d1014;
+@define-color warning_color #D8755B;
+@define-color error_bg_color #d87d74;
+@define-color error_fg_color #0d1014;
+@define-color error_color #d87d74;
+@define-color shade_color rgba(13, 16, 20, 0.25);
+@define-color scrollbar_outline_color #0d1014;
+@define-color panel_bg_color #0d1014;
+@define-color panel_fg_color #E7E1D5;
+/* GTK applications that use the traditional theme color names. */
+@define-color theme_bg_color @window_bg_color;
+@define-color theme_fg_color @window_fg_color;
+@define-color theme_base_color @view_bg_color;
+@define-color theme_text_color @view_fg_color;
+@define-color theme_selected_bg_color @accent_bg_color;
+@define-color theme_selected_fg_color @accent_fg_color;
+@define-color insensitive_fg_color #91908b;
+@define-color borders #404344;
+selection { background-color: #404344; color: #ece7dd; }
+
+/* Current libadwaita and GTK 4 use CSS custom properties. */
+:root {
+  --accent-bg-color: @accent_bg_color;
+  --accent-fg-color: @accent_fg_color;
+  --accent-color: @accent_color;
+  --window-bg-color: @window_bg_color;
+  --window-fg-color: @window_fg_color;
+  --view-bg-color: @view_bg_color;
+  --view-fg-color: @view_fg_color;
+  --headerbar-bg-color: @headerbar_bg_color;
+  --headerbar-fg-color: @headerbar_fg_color;
+  --headerbar-border-color: @headerbar_border_color;
+  --headerbar-backdrop-color: @headerbar_backdrop_color;
+  --headerbar-shade-color: @headerbar_shade_color;
+  --headerbar-darker-shade-color: @headerbar_darker_shade_color;
+  --card-bg-color: @card_bg_color;
+  --card-fg-color: @card_fg_color;
+  --card-shade-color: @card_shade_color;
+  --popover-bg-color: @popover_bg_color;
+  --popover-fg-color: @popover_fg_color;
+  --popover-shade-color: @popover_shade_color;
+  --dialog-bg-color: @dialog_bg_color;
+  --dialog-fg-color: @dialog_fg_color;
+  --sidebar-bg-color: @sidebar_bg_color;
+  --sidebar-fg-color: @sidebar_fg_color;
+  --sidebar-backdrop-color: @sidebar_backdrop_color;
+  --sidebar-shade-color: @sidebar_shade_color;
+  --sidebar-border-color: @sidebar_border_color;
+  --thumbnail-bg-color: @thumbnail_bg_color;
+  --thumbnail-fg-color: @thumbnail_fg_color;
+  --destructive-bg-color: @destructive_bg_color;
+  --destructive-fg-color: @destructive_fg_color;
+  --destructive-color: @destructive_color;
+  --success-bg-color: @success_bg_color;
+  --success-fg-color: @success_fg_color;
+  --success-color: @success_color;
+  --warning-bg-color: @warning_bg_color;
+  --warning-fg-color: @warning_fg_color;
+  --warning-color: @warning_color;
+  --error-bg-color: @error_bg_color;
+  --error-fg-color: @error_fg_color;
+  --error-color: @error_color;
+  --shade-color: @shade_color;
+  --scrollbar-outline-color: @scrollbar_outline_color;
+  --secondary-sidebar-bg-color: #11161B;
+  --secondary-sidebar-fg-color: #E7E1D5;
+  --secondary-sidebar-backdrop-color: #11161B;
+  --secondary-sidebar-border-color: #404344;
+  --secondary-sidebar-shade-color: rgba(13, 16, 20, 0.25);
+  --active-toggle-bg-color: #404344;
+  --active-toggle-fg-color: #E7E1D5;
+  --overview-bg-color: #0d1014;
+  --overview-fg-color: #E7E1D5;
+  --border-color: #404344;
+}
+
+button, entry, popover > contents { border-radius: 16px; }
+button { padding: 3px 6px; }

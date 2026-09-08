@@ -1,0 +1,10 @@
+{
+  "local_ollama_pids": [],
+  "config": {
+    "local_server_enabled": false,
+    "inference_host": "alienware"
+  },
+  "blocked_cli_returncode": 1,
+  "message": "oldbook-scripture-local: Local Ollama is disabled. Use the Alienware GPU runtime; this launcher will not fall back to the MacBook CPU.",
+  "endpoint_configured": false
+}

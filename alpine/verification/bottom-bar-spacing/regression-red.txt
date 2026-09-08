@@ -1,0 +1,14 @@
+............F.........
+======================================================================
+FAIL: test_waybar_reservation_does_not_shift_wallpaper_coordinates (test_conky_layout.ConfigTests.test_waybar_reservation_does_not_shift_wallpaper_coordinates)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_conky_layout.py", line 151, in test_waybar_reservation_does_not_shift_wallpaper_coordinates
+    self.assertEqual(actual_y, placement['y'])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 782 != 740
+
+----------------------------------------------------------------------
+Ran 22 tests in 0.075s
+
+FAILED (failures=1)

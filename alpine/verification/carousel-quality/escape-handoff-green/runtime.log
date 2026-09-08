@@ -1,0 +1,17 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:02:47 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+00:00:17.953 [ERROR] [sway/ipc-server.c:528] IPC Client socket error, removing client
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f188d2c0d70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f188d2c0d70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f188d2c0d70
+warn: input.c:813: compositor sent keyboard_leave event without a keyboard_enter event: surface=0x7f188d2c0d70
+ err: render.c:4371: TIOCSWINSZ: Bad file descriptor
+00:00:18.203 [ERROR] [sway/ipc-server.c:205] IPC Client socket error, removing client
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

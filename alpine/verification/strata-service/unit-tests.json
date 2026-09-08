@@ -1,0 +1,12 @@
+{
+  "command": "python3 -m unittest discover -s alpine/tests -p test_strata.py -v",
+  "exit_code": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-strata": "8e9cc3daa0607ec52171fa87a78184a46b94be7dcf550d753f2d31ebbf563519",
+    "alpine/tests/test_strata.py": "502b8c2e701f695cc24be17742a1064478563e78d71fb1d26a9c28227779fe28"
+  },
+  "source_unchanged": true,
+  "tests": 22,
+  "elapsed_seconds": 0.129,
+  "status": "passed"
+}

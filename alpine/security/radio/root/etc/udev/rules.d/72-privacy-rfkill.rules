@@ -1,0 +1,4 @@
+# Keep RF writes behind the privileged controller; Waybar may read status.
+# Run after 70-uaccess.rules adds the tag, before 73-seat-late.rules queues
+# elogind-uaccess-command; a later rule would leave that ACL grant queued.
+SUBSYSTEM=="misc", KERNEL=="rfkill", TAG-="uaccess", OWNER="root", GROUP="root", MODE="0644"

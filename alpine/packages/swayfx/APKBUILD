@@ -1,0 +1,57 @@
+# Maintainer: MBP Intel local package <mbp-intel@localhost.invalid>
+pkgname=swayfx
+pkgver=0.6
+pkgrel=3
+_commit=fd71a6bdc061bd633b488ae7b83e8a6981d22f86
+pkgdesc="SwayFX effects compositor alongside stock Sway"
+url="https://github.com/wlrfx/swayfx"
+arch="x86_64"
+license="MIT"
+depends="sway"
+makedepends="meson samurai pkgconf scenefx-dev wlroots0.20-dev wayland-dev
+    wayland-protocols pcre2-dev json-c-dev pango-dev cairo-dev libinput-dev
+    libevdev-dev libdrm-dev libxcb-dev xcb-util-wm-dev eudev-dev pixman-dev
+    libxkbcommon-dev"
+source="swayfx-$pkgver.tar.gz
+    bottom-titlebar.patch
+    hover-raise.patch
+    screen-corners.patch
+    swayfx.desktop
+    mbp-intel-effects.conf"
+builddir="$srcdir/swayfx-$_commit"
+options="!net"
+export SOURCE_DATE_EPOCH=1785905137
+
+build() {
+    meson setup output \
+        --prefix=/usr --sysconfdir=/etc --libdir=lib \
+        --buildtype=plain --wrap-mode=nodownload \
+        -Ddefault-wallpaper=false -Dman-pages=disabled \
+        -Dswaybar=false -Dswaynag=false -Dtray=disabled \
+        -Dgdk-pixbuf=disabled \
+        -Dbash-completions=false -Dfish-completions=false -Dzsh-completions=false
+    meson compile -C output
+}
+
+check() {
+    output/sway/sway --version
+    meson test -C output --print-errorlogs
+}
+
+package() {
+    # Deliberately package only uniquely named paths; never replace /usr/bin/sway.
+    install -Dm755 output/sway/sway "$pkgdir/usr/bin/swayfx"
+    install -Dm644 "$srcdir/swayfx.desktop" "$pkgdir/usr/share/wayland-sessions/swayfx.desktop"
+    install -Dm644 "$srcdir/mbp-intel-effects.conf" "$pkgdir/usr/share/swayfx/mbp-intel-effects.conf"
+    install -Dm644 sway/sway.5.scd "$pkgdir/usr/share/doc/swayfx/swayfx.5.scd"
+    install -Dm644 LICENSE "$pkgdir/usr/share/licenses/swayfx/LICENSE"
+}
+
+sha512sums="
+6cf61acf5d41e1e2d7c4e384cf772aa093e91ac8857f07af72c197ce4bbc31c2d6ed7e89c2cfc47e06497ab2551aeaaa092d7fb706e763f8b894f52bee589554  swayfx-0.6.tar.gz
+4bb6d6bdcaca871d96cdda12cf912f3f8af0003d787249b7a5351aaf3d4edb2a6585d80ae5b9055e5dd51384e8dd5d39b2b156e5bc172e4c4b62e28230b28178  bottom-titlebar.patch
+9bf813a491b3dc2f92c57db8a895bbdb972f0e2521d3b37158ed2cc7ef4ae55a55a2ad8fbc52dfbcc41efc72b704b3748e6d19eba0e2c26e4190db026569afb8  hover-raise.patch
+9ebfcd0380e2e3872f52f755f052eb1cb85179de996e4f03cf542a12442864d97e87687432e1935a0574654046afc5cae5da491cf363ecfe6a729b4bb43cc142  screen-corners.patch
+88c6122aacf801e13458dc59dff5f9d68f2af208239ad04cb2c16fc87ee12f24cdc92a8510bec7bfc0a477de51939cc97829373940bf0758b7528effe6495f7d  swayfx.desktop
+912a7fc13da6799dfb60f6bf9b0eb2711580632a74f21230f94f764999583e717819b286e62435dbf6efccac7ef72eb94f33d2c513cb139bcd1c232730c1eb3f  mbp-intel-effects.conf
+"

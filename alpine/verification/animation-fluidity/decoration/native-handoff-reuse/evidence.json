@@ -1,0 +1,416 @@
+{
+  "status": "failed",
+  "checks": [],
+  "states": {
+    "attached-bottom-failed": {
+      "output": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 900
+      },
+      "captions": [],
+      "caption_global_rect": null,
+      "clients": {
+        "attachment-tiled": {
+          "id": 5,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "focused": false,
+          "fullscreen_mode": 0,
+          "floating": "auto_off"
+        },
+        "attachment-floating": {
+          "id": 6,
+          "rect": {
+            "x": 200,
+            "y": 160,
+            "width": 620,
+            "height": 360
+          },
+          "focused": true,
+          "fullscreen_mode": 0,
+          "floating": "user_on"
+        }
+      },
+      "workspaces": [
+        {
+          "id": 4,
+          "type": "workspace",
+          "orientation": "horizontal",
+          "percent": null,
+          "urgent": false,
+          "marks": [],
+          "layout": "splith",
+          "border": "none",
+          "current_border_width": 0,
+          "rect": {
+            "x": 0,
+            "y": 32,
+            "width": 1440,
+            "height": 868
+          },
+          "deco_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "window_rect": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "geometry": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0
+          },
+          "name": "1",
+          "window": null,
+          "nodes": [],
+          "floating_nodes": [
+            {
+              "id": 6,
+              "type": "floating_con",
+              "orientation": "none",
+              "percent": 0.17857142857142858,
+              "urgent": false,
+              "marks": [],
+              "focused": true,
+              "layout": "none",
+              "border": "pixel",
+              "current_border_width": 0,
+              "rect": {
+                "x": 200,
+                "y": 160,
+                "width": 620,
+                "height": 360
+              },
+              "deco_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 0,
+                "height": 0
+              },
+              "window_rect": {
+                "x": 0,
+                "y": 0,
+                "width": 620,
+                "height": 360
+              },
+              "geometry": {
+                "x": 0,
+                "y": 0,
+                "width": 700,
+                "height": 500
+              },
+              "name": "Floating attachment preview",
+              "window": null,
+              "nodes": [],
+              "floating_nodes": [],
+              "focus": [],
+              "fullscreen_mode": 0,
+              "sticky": false,
+              "floating": "user_on",
+              "scratchpad_state": "none",
+              "pid": 30293,
+              "app_id": "attachment-floating",
+              "foreign_toplevel_identifier": "829e9a158d771464769ee387c5b3d381",
+              "visible": true,
+              "max_render_time": 0,
+              "allow_tearing": false,
+              "shell": "xdg_shell",
+              "inhibit_idle": false,
+              "sandbox_engine": null,
+              "sandbox_app_id": null,
+              "sandbox_instance_id": null,
+              "tag": null,
+              "idle_inhibitors": {
+                "user": "none",
+                "application": "none"
+              }
+            }
+          ],
+          "focus": [
+            6,
+            5
+          ],
+          "fullscreen_mode": 1,
+          "sticky": false,
+          "floating": null,
+          "scratchpad_state": null,
+          "num": 1,
+          "output": "HEADLESS-1",
+          "representation": "H[attachment-tiled]",
+          "focused": true,
+          "visible": true
+        }
+      ]
+    }
+  },
+  "screenshots": [],
+  "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
+  "host_config_changes": 0,
+  "prioritize_private_ui": true,
+  "verifier_sha256": "831652ff11845e47d68d37068c73675b44eeccc92713e65ec708b2f13fbc68b4",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "0c2cfbafef35fa85c063a27f3797129460238310dce95f139add4fa40e6a6282",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230",
+    "alpine/desktop/.local/lib/oldbook/decoration_motion.py": "f67bed21fed21eadf6fc5b40c5da0a1af62a5263acdd5f3718ca3cd94cb5cea3",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "a20217bb856a1abfc28127ef9d480bf98c812c5740dbe278c31d39569d24340f",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "alpine/desktop/.local/lib/oldbook/ui_priority.py": "dc192c23e33fcfb63863c2d8078963355fe14e2cbac68c3f8ce560510adc044b"
+  },
+  "private_ui_priority_attempts": [
+    {
+      "check": false,
+      "uid": 1000,
+      "processes": [
+        {
+          "pid": 30059,
+          "name": "swayfx",
+          "target_nice": -10,
+          "threads": [
+            {
+              "tid": 30059,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30096,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30097,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30098,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30099,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30100,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30101,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30102,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30103,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30104,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30105,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30109,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30113,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30121,
+              "nice": 19,
+              "policy": 3,
+              "applied": false
+            },
+            {
+              "tid": 30125,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30155,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30158,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            },
+            {
+              "tid": 30168,
+              "nice": -10,
+              "policy": 1073741824,
+              "applied": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "private_ui_priority": [
+    {
+      "pid": 30059,
+      "name": "swayfx",
+      "target_nice": -10,
+      "threads": [
+        {
+          "tid": 30059,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30096,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30097,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30098,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30099,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30100,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30101,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30102,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30103,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30104,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30105,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30109,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30113,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30121,
+          "nice": 19,
+          "policy": 3,
+          "applied": false
+        },
+        {
+          "tid": 30125,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30155,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30158,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        },
+        {
+          "tid": 30168,
+          "nice": -10,
+          "policy": 1073741824,
+          "applied": true
+        }
+      ]
+    }
+  ],
+  "error": "bottom caption did not attach flush without reserving workspace space",
+  "private_survivors": [],
+  "host_load_context": "The parent agent reported stopping the existing local Ollama server and runner during/near this run at user request. This run may straddle that CPU-load change; no local AI process was started by this verifier."
+}

@@ -1,0 +1,49 @@
+{
+  "status": "passed",
+  "backup": "/home/jack/.local/state/oldbook/backups/scripture-hourly-activation-20260908T041657Z",
+  "bar_before": 11350,
+  "bar_after": 12738,
+  "singleton": [
+    12738
+  ],
+  "conky_before": {
+    "masthead": 11318,
+    "scripture": 11344,
+    "gallery": 11320,
+    "power": 11321
+  },
+  "conky_after": {
+    "masthead": 11318,
+    "scripture": 12724,
+    "gallery": 11320,
+    "power": 11321
+  },
+  "other_conky_processes_unchanged": true,
+  "scripture_execpi_seconds": 3600,
+  "saved_deadline_check_seconds": 60,
+  "rendered_current_id_matches": true,
+  "database_before": {
+    "integrity": "ok",
+    "entries": 5,
+    "additions": 0,
+    "current_id": 7,
+    "next_at": 1788843237.3854046
+  },
+  "database_after": {
+    "integrity": "ok",
+    "entries": 5,
+    "additions": 0,
+    "current_id": 7,
+    "next_at": 1788843237.3854046
+  },
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-scripture-bar": "4da52ead043dd559612db0cfc7d8c9d98b3d8fa26853baa69798265dd35a7cae",
+    "alpine/desktop/.local/bin/oldbook-scripture": "369734be5a553a0189c202852fd45878d657fd0e096857968c41fde0543dbaa4",
+    "alpine/desktop/.local/lib/oldbook/scripture_history.py": "f33d9bdc0fcf4958b6f09bb240dae0545b22995b6e239dfe1392c5a34a4a9ab0",
+    "alpine/desktop/.local/lib/oldbook/scripture_history_reader.py": "3d6ca01ce2d513c7b13a02ea36a6025004130efc450b1e41c1e71346a3cbe8cd",
+    "alpine/desktop/.local/lib/oldbook/conky_policy.py": "ccc2394c376852376616f0e06177474d0d5ece0581c8cdb091dbfae8c0302d81",
+    "alpine/desktop/.config/conky/panels.json": "26533433e7c2843386e159f2402d0bc47586eae00c18ad9a2a1007b0c8dde272"
+  },
+  "desktop_interaction": "No windows were opened or focused; only Scripture card and Scripture bar restarted.",
+  "limitations": "Hourly boundary verified with controlled clocks; no physical one-hour wait. Native reader screenshots use synthetic private-session content."
+}

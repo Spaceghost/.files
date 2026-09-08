@@ -1,0 +1,177 @@
+{
+  "source_sha256": "ec382be4afc7daeb7cb988a02abba6b1e4af26108c0dcc7a8fbb69c2bb15589b",
+  "recipe_sha256": {
+    "APKBUILD": "6bf6286721e9557a781642c231fd7ae5bc365891c6427970bf73b09bf9b8d76a",
+    "bottom-titlebar.patch": "9e551c75e11247312e294b1cd749fb731a54e86eb65e86b00e6dd6491b176deb",
+    "hover-raise.patch": "4da0d3e6cca46c8197f93894f0f9b52dff7eff65f33879bb0deee2fc865cc05b",
+    "build-offline": "c322e8f8092b6fdefbba3ed1123c678088ab22454e075d36222f1cd49111be43"
+  },
+  "packaged_source_matches_verified_prototype": true,
+  "input_package_lock": "alpine/packages/locks/368a9c51ce0830f4e791.json",
+  "build_dependencies": [
+    {
+      "name": "abuild",
+      "version": "3.18.0_rc5-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q1xcLJzULXAH7TclEriWTLjQZUYWM="
+    },
+    {
+      "name": "binutils",
+      "version": "2.45.1-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q1tBTXwtew4zm3f71LoerNJwckJXI="
+    },
+    {
+      "name": "cairo-dev",
+      "version": "1.18.4-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q1qVmMlJA/I/52TBaIrDIFRh9LxF8="
+    },
+    {
+      "name": "eudev-dev",
+      "version": "3.2.14-r7",
+      "arch": "x86_64",
+      "apk_identity": "Q1kDI7T05dCQgUcEJoA05JEhrOVq0="
+    },
+    {
+      "name": "g++",
+      "version": "15.2.0-r9",
+      "arch": "x86_64",
+      "apk_identity": "Q1+t5vLcS5lQdb60QYpskdLt3HGRc="
+    },
+    {
+      "name": "gcc",
+      "version": "15.2.0-r9",
+      "arch": "x86_64",
+      "apk_identity": "Q1HkXWUZP8tHm8OLfC2N5hhVtrnjo="
+    },
+    {
+      "name": "json-c-dev",
+      "version": "0.19-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q13UxGHkppEE77VWvDf84/WAgkNsQ="
+    },
+    {
+      "name": "libdrm-dev",
+      "version": "2.4.134-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1ko+hB8JFcgsLozkd5f30r7Alu7s="
+    },
+    {
+      "name": "libevdev-dev",
+      "version": "1.13.6-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1XSSskdncHghOiTqz665lidVCwP0="
+    },
+    {
+      "name": "libinput-dev",
+      "version": "1.31.3-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1VwYG8pZGy6UsMRDco7pGPXsaGMA="
+    },
+    {
+      "name": "libxcb-dev",
+      "version": "1.17.0-r2",
+      "arch": "x86_64",
+      "apk_identity": "Q1wc0eK4dnJ/J2XGEYORwy1W9FN9s="
+    },
+    {
+      "name": "libxkbcommon-dev",
+      "version": "1.13.2-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1HLT7DgC42PQGTwbtnaV3ngc4Bxc="
+    },
+    {
+      "name": "meson",
+      "version": "1.12.0-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1Sp1ySsrocj8cQeeVTOIZYgIIwM0="
+    },
+    {
+      "name": "musl-dev",
+      "version": "1.2.6-r3",
+      "arch": "x86_64",
+      "apk_identity": "Q1BoRsVUADUKxHVnCs35OvK0MIqUg="
+    },
+    {
+      "name": "pango-dev",
+      "version": "1.57.1-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1gxre5w6eAopQyilnFpSPFxeS4Iw="
+    },
+    {
+      "name": "pcre2-dev",
+      "version": "10.48-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q11+fp1dtJZ7eDpPwppH9c/oSdh0M="
+    },
+    {
+      "name": "pixman-dev",
+      "version": "0.46.4-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1GDrTci3wkqmdalQGpwX3xWtpeZY="
+    },
+    {
+      "name": "pkgconf",
+      "version": "3.0.7-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1Vv/4x0GRGFapBXDR6zwCFZS9nN4="
+    },
+    {
+      "name": "samurai",
+      "version": "1.3-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1jNU+6Kntmy6NH3oAXI8hKKKGl14="
+    },
+    {
+      "name": "scenefx",
+      "version": "0.5-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1LPnVsPV77AMRe5PrSODPbfjV5Yc="
+    },
+    {
+      "name": "scenefx-dev",
+      "version": "0.5-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1LfIVfBhq2yywaOqQYCBRGxWRhZA="
+    },
+    {
+      "name": "wayland-dev",
+      "version": "1.26.0-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q16wVCy8ooxVkhoQOImAHh4swTF20="
+    },
+    {
+      "name": "wayland-protocols",
+      "version": "1.49-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1HsMKmibyWflTTNHMafbhKzlCDbo="
+    },
+    {
+      "name": "wlroots0.20",
+      "version": "0.20.2-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q1+TpwhQzCSwacj34oXoTUdZspD7Q="
+    },
+    {
+      "name": "wlroots0.20-dev",
+      "version": "0.20.2-r1",
+      "arch": "x86_64",
+      "apk_identity": "Q1zgxMy5LEpNz2TQMzt5BVSy+iOXM="
+    },
+    {
+      "name": "xcb-util-wm-dev",
+      "version": "0.4.2-r0",
+      "arch": "x86_64",
+      "apk_identity": "Q1Y18gI3XjhIO/LDtvpWqL21fSZvE="
+    }
+  ],
+  "network_isolated": true,
+  "installed_package_changes": 0,
+  "archive_export_hash_verified": true,
+  "notes": [
+    "Prototype passed10 native checks. Final source additionally blocks held-pointer-button starts.",
+    "One final build staging attempt failed before compilation because a checksum update also changed the source list; corrected before producing the archived package.",
+    "Only final APK471a36a1e34b is archived as the supported r2 candidate; earlier prototype outputs remain disposable /tmp files."
+  ]
+}

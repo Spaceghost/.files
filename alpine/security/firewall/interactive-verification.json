@@ -1,0 +1,119 @@
+{
+  "date": "2026-09-07",
+  "status": "active; both services enabled in boot",
+  "daemon_pid": 25292,
+  "confirmation": "root-owned watchdog confirmed only after network, GUI mapping, authenticated Codex and rule-preservation checks",
+  "baseline": {
+    "results": [
+      "IPv4 new output allow, fresh executable path UID 1000, port 18443",
+      "IPv4 unsolicited input allow",
+      "IPv6 new output allow, fresh executable path UID 1000, port 18443",
+      "IPv6 unsolicited input allow"
+    ],
+    "local_server_controls_passed": true,
+    "output_expectation": "allow",
+    "output_port": 18443,
+    "output_timeout_seconds": 3,
+    "probe_executable": "/tmp/mbp-intel-host-packets-rhkuvmsk/mbp-intel-unapproved-network-probe",
+    "firewall_rules_modified": false,
+    "external_network_used": false,
+    "temporary_link_removed": true
+  },
+  "live_packets": {
+    "results": [
+      "IPv4 new output deny, fresh executable path UID 1000, port 18443",
+      "IPv4 unsolicited input deny",
+      "IPv6 new output deny, fresh executable path UID 1000, port 18443",
+      "IPv6 unsolicited input deny"
+    ],
+    "local_server_controls_passed": true,
+    "output_expectation": "either",
+    "output_port": 18443,
+    "output_timeout_seconds": 30,
+    "probe_executable": "/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe",
+    "firewall_rules_modified": false,
+    "external_network_used": false,
+    "temporary_link_removed": true
+  },
+  "gui_popup": {
+    "observed": [
+      {
+        "id": 227,
+        "name": "OpenSnitch v1.8.0",
+        "app_id": "opensnitch_ui",
+        "visible": true,
+        "focused": true,
+        "rect": {
+          "x": 440,
+          "y": 308,
+          "width": 560,
+          "height": 316
+        },
+        "window_properties": null,
+        "workspace": "3: LAB \u00b7 \u2726 Claude"
+      }
+    ],
+    "screen_locked": true,
+    "unlocked_human_click_tested": false,
+    "automated_decisions_sent": false,
+    "effective_default_action": "Deny",
+    "default_duration": "12h",
+    "settings_changed": false,
+    "observation_limit": "Mapped visible/focused Qt popup confirmed through Sway IPC; screen lock covered it in the physical screenshot."
+  },
+  "codex": {
+    "binary": "/opt/codex/0.153.4/cli/bin/codex",
+    "uid": 1000,
+    "model": "gpt-5.6-luna",
+    "exit_code": 0,
+    "authenticated_response": true,
+    "tools_enabled": false,
+    "saved_login_used": true
+  },
+  "curl": {
+    "application": "/usr/bin/curl",
+    "uid": 1000,
+    "url": "https://github.com/evilsocket/opensnitch",
+    "exit_code": 0,
+    "http_status_and_new_connections": "200 1",
+    "scope": "retained application and port443 permissions"
+  },
+  "preservation": {
+    "all_original_rules_byte_identical": true,
+    "original_rule_count": 28,
+    "settings": {
+      "/etc/opensnitchd/default-config.json": "byte-identical",
+      "/etc/xdg/opensnitch/settings.conf": "global settings unchanged; GUI geometry may update normally",
+      "/home/jack/.config/opensnitch/settings.conf": "global settings unchanged; GUI geometry may update normally"
+    },
+    "canary_file_absent": true
+  },
+  "rules_manifest_sha256": "9bacb44c243d5c514aba1a208baab2c7b32ea72a268a6d0b68b9b02922d5b4ac",
+  "private_backup": "/var/lib/mbp_intel/firewall-backups/interactive-20260907-24c3c9f84033",
+  "canary_cleanup": {
+    "name": "deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe",
+    "path": "/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe",
+    "method": "Replace only unique temporary canary rule with disabled Always rule, then remove through observed daemon file watcher",
+    "file_removed": true,
+    "existing_rule_files_touched": false,
+    "permissions_granted": false
+  },
+  "canary_daemon_log": [
+    "[2026-09-07 12:48:13]  IMP  Added new rule: deny if process.path is '/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe'",
+    "[2026-09-07 12:51:37]  IMP  Ruleset changed due to deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe.json, reloading ...",
+    "[2026-09-07 12:51:38]  IMP  Rule deleted deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe.json",
+    "[2026-09-07 12:51:38]  INF  Delete() rule: [Disabled] deny-12h-simple-tmp-mbp-intel-host-packets-n-bdkjcx-mbp-intel-unapproved-network-probe: if(process.path is '/tmp/mbp-intel-host-packets-n_bdkjcx/mbp-intel-unapproved-network-probe'){ deny always }"
+  ],
+  "retained_policy_exceptions": [
+    "user.id=0 allows root programs",
+    "dest.port=443 allows matching traffic from all programs",
+    "Existing named application permissions are preserved"
+  ],
+  "unit_tests_passed": 29,
+  "limits": [
+    "No reboot proof.",
+    "An unlocked human Allow/Deny click was not tested.",
+    "Broad retained permissions intentionally suppress prompts for matching traffic.",
+    "Established flows remain permitted by design."
+  ]
+}

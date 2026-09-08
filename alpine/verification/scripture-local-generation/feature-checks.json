@@ -1,0 +1,25 @@
+{
+  "command": "alpine/bin/check-features --run alpine/desktop/.local/bin/oldbook-scripture-local alpine/desktop/.local/lib/oldbook/scripture_generation.py",
+  "status": "passed",
+  "exit_code": 0,
+  "tests_per_file": {
+    "test_conky_policy.py": 6,
+    "test_deploy.py": 20,
+    "test_feature_contracts.py": 8,
+    "test_scripture_generation.py": 18,
+    "test_scripture_history.py": 17,
+    "test_scripture_library.py": 24,
+    "test_scripture_local.py": 9,
+    "test_scripture_selection.py": 6,
+    "test_scripture_study.py": 10
+  },
+  "total": 118,
+  "verified_at": 1788844183.1714163,
+  "sha256": {
+    "alpine/desktop/.local/bin/oldbook-scripture-local": "9e858b546aca104ae8d7e739e893c27a06f26cae38e3e384161395c1630e06c7",
+    "alpine/desktop/.local/lib/oldbook/scripture_generation.py": "0c2976146f0b8c8f053f52bdc8d7a40537810587ce832362ae650c757e510561",
+    "alpine/tests/test_scripture_local.py": "dc7cd70a98cd501ab2e137cba25a742f6c87b6e9d70e3981d7e0b94653790e5a",
+    "alpine/tests/test_scripture_generation.py": "ee004d746c8cf15552be8406e0f89811182095cb967442ef289e34e7bc8f6a9b"
+  },
+  "limit": "Fixtures verify storage, validation and owned-process cleanup. The real local model run is recorded separately."
+}

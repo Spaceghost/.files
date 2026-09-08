@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "status": "six isolated packet cases passed; live rules preserved",
+  "verified_at_utc": "2026-09-07T17:31:40Z",
+  "command": "python3 -B alpine/security/firewall/verify-radio-policy.py --output /absolute/new/evidence-directory",
+  "harness_sha256": "00b6c09081dd8af2932290985690049405870ac7a103efbfdb064c08763f0eed",
+  "evidence": {
+    "artifact": "sha256/b80da91b4244a2d650476f9a2394096eac0686826ac0dc3bbf165ee3baa4de57/radio-packet-policy-verified.json",
+    "sha256": "b80da91b4244a2d650476f9a2394096eac0686826ac0dc3bbf165ee3baa4de57"
+  },
+  "source_sha256": {
+    "/home/jack/.files/alpine/security/firewall/verify-radio-policy.py": "00b6c09081dd8af2932290985690049405870ac7a103efbfdb064c08763f0eed",
+    "/home/jack/.files/alpine/security/radio/tests/verify_dhcp_network.py": "bb9070db4db51b1a513cb6e7471e7aa800e46c2bb995d997ebfb64c10237dc4b",
+    "/home/jack/.files/alpine/security/firewall/mbp-intel.nft": "66ee6314cf652650c09e332f417464d88957ae6dc65f58c3221a640bc45a6ce0",
+    "/home/jack/.files/alpine/security/firewall/default-config.json": "3abace925e29fe4a07d1497e20eb6369664e5d6acae88fea5eefd7782f0ccf33",
+    "/home/jack/.files/alpine/security/firewall/system-fw.json": "e96f83b1cfd1110613f52ab5f977eb19d8c795860212313c89b1abdb6a90a3f5",
+    "/usr/bin/opensnitchd": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142",
+    "/usr/sbin/nft": "a472d48713d43bf303845b87699a10083eabecaa5641eed51599996f30e5d5d9",
+    "/bin/busybox": "d84aa94f417914d8107fb26e46f32abfcc1bdfec30291d0f724313d288d2502b",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/__init__.py": "062aa322bda16a34d4bf3f436d46d71da13a1b9e580ac73d6c31f4802f65b479",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/dhcp.py": "84fc00759ee7cbf1943e7fe26582ae516b2949a4403e528fdad5437c17551df8",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/lease.py": "79e0c05bbae01713778009b37bb82fd5b4b682e1a554859e8336d8714cdc64ba",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/launch.py": "231532e16f3d467e03d2e1254eaa02f723926e53026cabb9c4f851c606db0ade",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/lib/privacyctl_runtime/hook.py": "8fdcba813da12f647437bfaa8f6fcea93d88df1035040fd6585e7e7e8894f1dd",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-launch": "ee9857880a292f835baf65ba3417a17ef5fbdf517f72aab07e816d1de54e81de",
+    "/home/jack/.files/alpine/security/radio/root/usr/local/libexec/privacyctl-dhcp-event": "9c242a9ab5bc9a59a02a8081561b3859bc6450a7799ebd7ddca77262bd93500f"
+  },
+  "cases": [
+    {
+      "after_bound": {
+        "dhcp_after": 0,
+        "dhcp_before": 0,
+        "ns254_after": 0,
+        "ns254_before": 0,
+        "ns255_after": 0,
+        "ns255_before": 0
+      },
+      "after_renewal": {
+        "dhcp_after": 1,
+        "dhcp_before": 1,
+        "ns254_after": 0,
+        "ns254_before": 0,
+        "ns255_after": 1,
+        "ns255_before": 1
+      },
+      "before": {
+        "dhcp_after": 0,
+        "dhcp_before": 0,
+        "ns254_after": 0,
+        "ns254_before": 0,
+        "ns255_after": 0,
+        "ns255_before": 0
+      },
+      "executable": "/bin/busybox",
+      "name": "raw_acquisition_and_same_client_unicast_renewal_without_daemon",
+      "receive_destination_evidence": "IP_PKTINFO ipi_addr",
+      "same_client": true,
+      "server_packets": {
+        "discover": 1,
+        "dns_tcp": 0,
+        "dns_udp": 0,
+        "rebind_broadcast": 0,
+        "renew_unicast": 1,
+        "select": 1
+      },
+      "unicast_ack_accepted": true
+    },
+    {
+      "name": "fresh_dns_denied_without_queue_consumer"
+    },
+    {
+      "dad_counters": {
+        "dhcp_after": 1,
+        "dhcp_before": 1,
+        "ns254_after": 0,
+        "ns254_before": 0,
+        "ns255_after": 2,
+        "ns255_before": 2
+      },
+      "name": "dad_and_ndp_exception_with_no_daemon",
+      "ndp_counters": {
+        "dhcp_after": 1,
+        "dhcp_before": 1,
+        "ns254_after": 0,
+        "ns254_before": 1,
+        "ns255_after": 4,
+        "ns255_before": 4
+      },
+      "non255_is_not_universally_denied_with_other_application_rules": true,
+      "send_outcomes": [
+        {
+          "errno": null,
+          "hoplimit": 255,
+          "send_succeeded": true
+        },
+        {
+          "errno": 1,
+          "hoplimit": 254,
+          "send_succeeded": false
+        }
+      ],
+      "tentative_observed": true
+    },
+    {
+      "name": "fresh_dns_denied_by_empty_opensnitch_policy"
+    },
+    {
+      "accepted": [
+        {
+          "executable": "/run/radio-packet-proof/probe-python",
+          "ok": true,
+          "pid_namespace": "pid:[4026533257]",
+          "uid": 65534
+        },
+        {
+          "executable": "/run/radio-packet-proof/probe-python",
+          "ok": true,
+          "pid_namespace": "pid:[4026533773]",
+          "uid": 65534
+        },
+        {
+          "executable": "/run/radio-packet-proof/probe-python",
+          "ok": true,
+          "pid_namespace": "pid:[4026533257]",
+          "uid": 65534
+        },
+        {
+          "executable": "/run/radio-packet-proof/probe-python",
+          "ok": true,
+          "pid_namespace": "pid:[4026533773]",
+          "uid": 65534
+        }
+      ],
+      "name": "exact_dns_rule_allows_only_selected_executable_uid_resolver",
+      "nested_pid_namespace_identity_matches": true,
+      "tested_transports": [
+        "udp",
+        "tcp"
+      ],
+      "wrong_resolver_and_executable_and_uid_denied": true
+    },
+    {
+      "bypass": false,
+      "name": "daemon_death_denies_fresh_dns",
+      "queue_count": 3,
+      "remaining_queue_consumers": 0
+    }
+  ],
+  "elapsed_seconds": 28.167478098002903,
+  "host_checks": {
+    "namespaces": true,
+    "addresses_digest": true,
+    "routes_digest": true,
+    "dns_digest": true,
+    "radio_states": true,
+    "dhcp_clients": true,
+    "-4_routes_digest": true,
+    "-6_routes_digest": true,
+    "firewall_digest": true,
+    "private_rules_digest": true
+  },
+  "remaining_namespace_members": [],
+  "module_barrier": {
+    "attempted_paths": [
+      "/run/radio-packet-proof/empty-ebpf/opensnitch-dns.o"
+    ],
+    "directory_root_private_and_empty": true,
+    "module_loaded": false,
+    "phase": "module_barrier",
+    "startup_listener_call_disabled": false
+  },
+  "historical_failed_fixture_runs": [
+    {
+      "artifact": "sha256/f8f87eea6174db09a0260f8de41381f2a2c5203936fe3c727fc5c331036c32bd/radio-packet-policy-first.json",
+      "sha256": "f8f87eea6174db09a0260f8de41381f2a2c5203936fe3c727fc5c331036c32bd",
+      "reason": "Synthetic nft observer had adjacent closing braces without a newline; no cases completed.",
+      "status": "failed"
+    },
+    {
+      "artifact": "sha256/6e881729bbfb2189c43802f1238243eb2c0a463ad0f71d602b8ddaf2f2e99e4d/radio-packet-policy-syntax-fixed.json",
+      "sha256": "6e881729bbfb2189c43802f1238243eb2c0a463ad0f71d602b8ddaf2f2e99e4d",
+      "reason": "Fixture ran DHCPManager as PID1, which production launcher correctly refuses; no cases completed.",
+      "status": "failed"
+    },
+    {
+      "artifact": "sha256/a50ad26ae50720d3abda927a43d71cd486da1693b3f6ce4d14772fd4cd178b16/radio-packet-policy-driver-fixed.json",
+      "sha256": "a50ad26ae50720d3abda927a43d71cd486da1693b3f6ce4d14772fd4cd178b16",
+      "reason": "Two cases passed; fixture treated expected blocked hoplimit-254 send EPERM as an unexpected error.",
+      "status": "failed"
+    },
+    {
+      "artifact": "sha256/99e7f364c2e98e6fdaaad1173929764cf7d339655cda3ba519041829af7f9363/radio-packet-policy-ndp-fixed.json",
+      "sha256": "99e7f364c2e98e6fdaaad1173929764cf7d339655cda3ba519041829af7f9363",
+      "reason": "Four cases passed; wildcard UDP test server replied from wrong source address. DNS BPF startup also attempted default paths and failed to load a module; final fixture uses an explicit private empty path.",
+      "status": "failed"
+    }
+  ],
+  "limitations": [
+    "Uses synthetic DHCP/DNS servers, veth links and controlled rules, not physical radio association or live trusted profiles.",
+    "IPv4 UDP/TCP DNS and IPv6 neighbor discovery are exercised; no IPv6 DNS or mismatched destination-port negative test is claimed.",
+    "Existing live broad root/443 grants were preserved and are not copied into the fixture.",
+    "OpenSnitch 1.8.0 DNS listener startup is unconditional; an explicit empty ModulesPath prevents kernel module loading in this fixture.",
+    "No production owner integration with OpenRC, automatic orphan recovery, live network migration, reboot or suspend is proved."
+  ]
+}

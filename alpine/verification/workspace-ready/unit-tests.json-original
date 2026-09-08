@@ -1,0 +1,34 @@
+{
+  "runs": [
+    {
+      "pattern": "test_workspace*.py",
+      "exit_code": 0,
+      "log": "test_workspaceall.log"
+    },
+    {
+      "pattern": "test_expo.py",
+      "exit_code": 0,
+      "log": "test_expo.log"
+    },
+    {
+      "pattern": "test_showdesktop.py",
+      "exit_code": 0,
+      "log": "test_showdesktop.log"
+    },
+    {
+      "pattern": "test_strata.py",
+      "exit_code": 0,
+      "log": "test_strata.log"
+    }
+  ],
+  "source_sha256": {
+    "alpine/desktop/.config/sway/config": "04656658a33e941a0a8c438ee43d7c91dee26678e4847f9f0930ff12541c8bb0",
+    "alpine/desktop/.local/bin/oldbook-workspaces": "73744fe640941243d8752507eeccf95192cd853db38ab61a9654bf6145700a06",
+    "alpine/desktop/.local/bin/oldbook-strata": "4ea8dc24ffc53a4407918effe63cfa7928f118f21d457dd94648e09c14ba1ab7",
+    "alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "alpine/desktop/.local/lib/oldbook/expo.py": "bb9b9a181e806488bcf661b85f1bab91cfc12a51e546973bda299a2483e731ee",
+    "alpine/desktop/.local/lib/oldbook/showdesktop.py": "f765bee716bbfa2f143907b17be967ecf9c9999705fe1e3a88dbe852fbdf10cd"
+  },
+  "note": "All focused tests rerun against the final naming, creation, migration and bounded IPC retry implementation.",
+  "count": 99
+}

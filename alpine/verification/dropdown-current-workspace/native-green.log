@@ -1,0 +1,55 @@
+{
+  "isolation": "private HOME, XDG directories, non-activating session bus, headless Sway",
+  "app_id": "com.oldbook.dropdown",
+  "first_container": 5,
+  "reopened_container": 9,
+  "geometry": {
+    "x": 43,
+    "y": 39,
+    "width": 1354,
+    "height": 468
+  },
+  "offset_geometry": {
+    "x": 1483,
+    "y": 139,
+    "width": 1354,
+    "height": 468
+  },
+  "checks": {
+    "native_wayland": true,
+    "hide_show_preserves_shell": true,
+    "focused_when_shown": true,
+    "undecorated": true,
+    "exit_then_reopen": true,
+    "offset_output": true,
+    "keyboard_input": true,
+    "new_window_shortcut_unbound": true
+  },
+  "workspace_checks": {
+    "monitor_first_toggle_recalls_other_workspace": true,
+    "monitor_local_toggle_hides": true,
+    "monitor_retains_foot_and_btop": true,
+    "console_recall_independent": true
+  },
+  "monitor_workspace_moves": [
+    {
+      "workspace": "2",
+      "container": 6,
+      "foot_pid": 9440,
+      "btop_pid": 9445
+    },
+    {
+      "workspace": "10",
+      "container": 6,
+      "foot_pid": 9440,
+      "btop_pid": 9445
+    }
+  ],
+  "seconds": {
+    "cold_start": 7.197,
+    "hide": 0.669,
+    "show": 0.574,
+    "reopen": 2.832
+  },
+  "screenshot": "alpine/verification/ghostty-dropdown/headless.png"
+}

@@ -1,0 +1,13 @@
+{
+  "status": "incomplete",
+  "backup": "/home/jack/.local/state/oldbook/backups/scripture-hourly-activation-20260908T041104Z",
+  "bar_before": 597,
+  "bar_after": 5702,
+  "failure": "Final process check found stale Scripture PID 3151, absent before activation. Its log recorded Wayland output closed unexpectedly at 21:08:31; explicit activation began at 21:11:04. Existing refresh_panel returned silently on the missing PID.",
+  "recovery": "Add scoped missing-PID revival and retry using existing Scripture config; repeat activation verification.",
+  "other_conky_pids_observed_alive": [
+    2595,
+    2597,
+    2598
+  ]
+}

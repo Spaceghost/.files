@@ -1,0 +1,1028 @@
+#!/usr/bin/env python3
+"""Contextual shortcut guide, settings, and per-Sway-session service lifecycle."""
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import stat
+import struct
+import subprocess
+import sys
+import time
+
+
+IPC_HEADER = struct.Struct('=6sII')
+IPC_GET_OUTPUTS = 3
+IPC_GET_TREE = 4
+IPC_SUBSCRIBE = 2
+STATUS_VERSION = 1
+
+
+class AlreadyRunning(RuntimeError):
+    """The service already owns this Sway session."""
+
+
+def _owned_private_directory(path, create=False):
+    if create:
+        path.mkdir(mode=0o700, exist_ok=True)
+    try:
+        info = path.stat(follow_symlinks=False)
+    except OSError as error:
+        raise RuntimeError(f'owned private directory is unavailable: {path}') from error
+    if (not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+            or stat.S_IMODE(info.st_mode) != 0o700):
+        raise RuntimeError(f'expected an owned private directory: {path}')
+
+
+def _owned_socket(path):
+    try:
+        info = path.stat(follow_symlinks=False)
+    except OSError as error:
+        raise RuntimeError(f'Sway socket is unavailable: {path}') from error
+    if not stat.S_ISSOCK(info.st_mode) or info.st_uid != os.getuid():
+        raise RuntimeError(f'Sway socket must be an owned Unix socket: {path}')
+    return info
+
+
+def find_sway_socket(runtime, explicit=None):
+    """Resolve and validate one session socket without consulting another UID."""
+    configured = explicit or os.environ.get('SWAYSOCK')
+    if configured:
+        candidates = [Path(configured)]
+    else:
+        candidates = sorted(runtime.glob(f'sway-ipc.{os.getuid()}.*.sock'),
+                            key=lambda item: item.stat().st_mtime, reverse=True)
+    for candidate in candidates:
+        try:
+            _owned_socket(candidate)
+            return candidate
+        except RuntimeError:
+            continue
+    raise RuntimeError('no owned Sway session socket')
+
+
+def _process_identity(pid):
+    try:
+        process = Path('/proc') / str(int(pid))
+        if process.stat().st_uid != os.getuid():
+            return None
+        fields = process.joinpath('stat').read_text().rsplit(')', 1)[1].split()
+        if fields[0] in ('Z', 'X'):
+            return None
+        return {
+            'pid': int(pid),
+            'start_time': fields[19],
+            'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
+        }
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def _socket_identity(path):
+    info = _owned_socket(path)
+    return {
+        'socket': str(path),
+        'device': info.st_dev,
+        'inode': info.st_ino,
+        'created_ns': info.st_ctime_ns,
+    }
+
+
+class SessionLease:
+    """An advisory lock and status record keyed to one socket inode."""
+
+    def __init__(self, runtime, sway_socket):
+        self.runtime = Path(runtime)
+        self.sway_socket = Path(sway_socket)
+        identity = _socket_identity(self.sway_socket)
+        material = json.dumps(identity, sort_keys=True).encode('utf-8')
+        self.socket_id = hashlib.sha256(material).hexdigest()[:16]
+        self.directory = self.runtime / 'superhold'
+        self.lock_path = self.directory / f'{self.socket_id}.lock'
+        self.status_path = self.directory / f'{self.socket_id}.json'
+        self._descriptor = None
+        self._started_at = None
+
+    def _write_status(self, state, **details):
+        record = {
+            'version': STATUS_VERSION,
+            'state': state,
+            'pid': os.getpid(),
+            'process': _process_identity(os.getpid()),
+            'sway_socket': str(self.sway_socket),
+            'socket_id': self.socket_id,
+            'started_at': self._started_at,
+            'updated_at': time.time(),
+        }
+        record.update(details)
+        temporary = self.status_path.with_name(
+            f'.{self.status_path.name}.{os.getpid()}.{time.monotonic_ns()}.tmp')
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL
+                             | os.O_CLOEXEC | os.O_NOFOLLOW, 0o600)
+        try:
+            with os.fdopen(descriptor, 'w') as stream:
+                json.dump(record, stream, sort_keys=True)
+                stream.write('\n')
+            temporary.replace(self.status_path)
+        except BaseException:
+            temporary.unlink(missing_ok=True)
+            raise
+
+    def acquire(self):
+        _owned_private_directory(self.runtime)
+        _owned_socket(self.sway_socket)
+        _owned_private_directory(self.directory, create=True)
+        descriptor = os.open(self.lock_path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC
+                             | os.O_NOFOLLOW, 0o600)
+        info = os.fstat(descriptor)
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid()
+                or stat.S_IMODE(info.st_mode) != 0o600):
+            os.close(descriptor)
+            raise RuntimeError(f'unsafe service lock: {self.lock_path}')
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as error:
+            os.close(descriptor)
+            raise AlreadyRunning('shortcut service already runs for this Sway session') from error
+        self._descriptor = descriptor
+        self._started_at = time.time()
+        try:
+            self._write_status('starting', visible=False, device_count=0)
+        except BaseException:
+            fcntl.flock(self._descriptor, fcntl.LOCK_UN)
+            os.close(self._descriptor)
+            self._descriptor = None
+            raise
+        return self
+
+    def update(self, state, **details):
+        if self._descriptor is not None:
+            self._write_status(state, **details)
+
+    def close(self):
+        if self._descriptor is None:
+            return
+        try:
+            self._write_status('stopped', visible=False, device_count=0)
+        finally:
+            fcntl.flock(self._descriptor, fcntl.LOCK_UN)
+            os.close(self._descriptor)
+            self._descriptor = None
+
+
+def screen_locked(runtime, wayland_socket):
+    """Accept only the readiness record for this live compositor and process."""
+    record = Path(runtime) / 'mbp-intel-screen-lock/ready.json'
+    try:
+        if record.is_symlink() or not record.is_file():
+            return False
+        saved = json.loads(record.read_text())
+        process = saved['process']
+        return (saved['compositor'] == _socket_identity(Path(wayland_socket))
+                and process == _process_identity(process['pid']))
+    except RuntimeError:
+        # A readiness record plus a vanished compositor socket is ambiguous;
+        # suppress the overlay until the session liveness path closes it.
+        return True
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def _default_graphical_probe(runtime, wayland_socket):
+    try:
+        _owned_socket(wayland_socket)
+    except RuntimeError:
+        return False
+    session_id = os.environ.get('XDG_SESSION_ID')
+    if session_id:
+        try:
+            result = subprocess.run(
+                ['loginctl', 'show-session', session_id, '--property=Active',
+                 '--property=State', '--property=Type', '--property=LockedHint'],
+                text=True, capture_output=True, timeout=.4, check=False)
+        except (OSError, subprocess.TimeoutExpired):
+            return False
+        values = dict(line.split('=', 1) for line in result.stdout.splitlines()
+                      if '=' in line)
+        return (result.returncode == 0 and values.get('Active') == 'yes'
+                and values.get('State') == 'active' and values.get('Type') == 'wayland'
+                and values.get('LockedHint') != 'yes')
+    virtual_terminal = os.environ.get('XDG_VTNR')
+    if not virtual_terminal or os.environ.get('XDG_SESSION_TYPE') != 'wayland':
+        return False
+    try:
+        active = Path('/sys/class/tty/tty0/active').read_text().strip()
+    except OSError:
+        return False
+    return active == f'tty{virtual_terminal}'
+
+
+class GraphicalSessionGuard:
+    """Cheap lock checks plus a short-lived cached logind/VT activity probe."""
+
+    def __init__(self, runtime, wayland_socket, activity_probe=None, lock_probe=None,
+                 cache_seconds=.25):
+        self.runtime = Path(runtime)
+        self.wayland_socket = Path(wayland_socket)
+        self.activity_probe = activity_probe or (
+            lambda: _default_graphical_probe(self.runtime, self.wayland_socket))
+        self.lock_probe = lock_probe or screen_locked
+        self.cache_seconds = cache_seconds
+        self._active = False
+        self._checked_at = float('-inf')
+        self._future = None
+        self._executor = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix='superhold-session-check')
+        self.locked = False
+        self.closed = False
+
+    @property
+    def ready(self):
+        """Whether the first activity probe has completed, including failure."""
+        return self.closed or self._checked_at != float('-inf')
+
+    def allows_overlay(self, now):
+        if self.closed:
+            return False
+        if self._future is not None and self._future.done():
+            try:
+                self._active = bool(self._future.result())
+            except Exception:
+                self._active = False
+            self._checked_at = now
+            self._future = None
+        if (self._future is None
+                and now - self._checked_at >= self.cache_seconds):
+            self._future = self._executor.submit(self.activity_probe)
+        self.locked = bool(self.lock_probe(self.runtime, self.wayland_socket))
+        return self._active and not self.locked
+
+    def close(self):
+        if self.closed:
+            return
+        self.closed = True
+        if self._future is not None:
+            self._future.cancel()
+        self._executor.shutdown(wait=False, cancel_futures=True)
+
+
+class SocketWatch:
+    """A connected IPC socket whose peer lifetime can be polled without blocking."""
+
+    def __init__(self, connection, path=None):
+        self.connection = connection
+        self.path = Path(path) if path is not None else None
+        self.connection.setblocking(False)
+        self.closed = False
+
+    def alive(self):
+        if self.closed:
+            return False
+        try:
+            self.connection.recv(1, socket.MSG_PEEK)
+        except BlockingIOError:
+            return True
+        except OSError:
+            return False
+        # This subscriber receives only shutdown events, so data and EOF both end it.
+        return False
+
+    def close(self):
+        if not self.closed:
+            self.connection.close()
+            self.closed = True
+
+
+def _send_ipc(connection, kind, payload=''):
+    body = payload.encode('utf-8')
+    connection.sendall(IPC_HEADER.pack(b'i3-ipc', len(body), kind) + body)
+
+
+def _receive_exact(connection, size):
+    chunks = bytearray()
+    while len(chunks) < size:
+        chunk = connection.recv(size - len(chunks))
+        if not chunk:
+            raise ConnectionError('Sway disconnected')
+        chunks.extend(chunk)
+    return bytes(chunks)
+
+
+def _receive_ipc(connection):
+    magic, length, kind = IPC_HEADER.unpack(_receive_exact(connection, IPC_HEADER.size))
+    if magic != b'i3-ipc' or length > 32 * 1024 * 1024:
+        raise ValueError('invalid Sway IPC frame')
+    return kind, json.loads(_receive_exact(connection, length))
+
+
+def connect_sway_watch(path):
+    connection = socket.socket(socket.AF_UNIX)
+    try:
+        connection.settimeout(1)
+        connection.connect(str(path))
+        _send_ipc(connection, IPC_SUBSCRIBE, '["shutdown"]')
+        kind, response = _receive_ipc(connection)
+        if kind != IPC_SUBSCRIBE or not response.get('success'):
+            raise RuntimeError('Sway rejected shutdown subscription')
+        return SocketWatch(connection, path)
+    except BaseException:
+        connection.close()
+        raise
+
+
+def _ipc_request(path, kind):
+    with socket.socket(socket.AF_UNIX) as connection:
+        connection.settimeout(1)
+        connection.connect(str(path))
+        _send_ipc(connection, kind)
+        response_kind, response = _receive_ipc(connection)
+        if response_kind != kind:
+            raise ValueError('unexpected Sway IPC response')
+        return response
+
+
+def _output_rect(path, output_name):
+    if not output_name:
+        return None
+    try:
+        outputs = _ipc_request(path, IPC_GET_OUTPUTS)
+        output = next(item for item in outputs if item.get('name') == output_name)
+        rect = output.get('rect', {})
+        return {key: int(rect[key]) for key in ('x', 'y', 'width', 'height')}
+    except (ConnectionError, OSError, StopIteration, TypeError, ValueError, KeyError):
+        return None
+
+
+def _focused_output_context(path):
+    tree = _ipc_request(path, IPC_GET_TREE)
+    focused = None
+
+    def visit(node, output, depth):
+        nonlocal focused
+        if not isinstance(node, dict):
+            return
+        if node.get('type') == 'output' and node.get('name') not in {'__i3', '__sway'}:
+            output = node.get('name')
+        if node.get('focused') is True and output:
+            if focused is None or depth > focused[0]:
+                focused = (depth, output)
+        for collection in ('nodes', 'floating_nodes'):
+            for child in node.get(collection, ()) if isinstance(
+                    node.get(collection), list) else ():
+                visit(child, output, depth + 1)
+
+    visit(tree, None, 0)
+    output = focused[1] if focused else None
+    return {'output': output, '_output_rect': _output_rect(path, output)}
+
+
+class ContextProvider:
+    """Add focused-output geometry to provider data while still off the UI thread."""
+
+    def __init__(self, provider, sway_socket):
+        self.provider = provider
+        self.sway_socket = Path(sway_socket)
+
+    def snapshot(self):
+        snapshot = self.provider.snapshot()
+        snapshot['_output_rect'] = _output_rect(self.sway_socket, snapshot.get('output'))
+        return snapshot
+
+
+class ServiceController:
+    """Drive input at UI cadence and collect context on disposable generations."""
+
+    def __init__(self, monitor, provider, overlay, liveness, guard,
+                 refresh_seconds=1.0, executor=None, loading_probe=None,
+                 metadata_executor=None):
+        self.monitor = monitor
+        self.provider = provider
+        self.overlay = overlay
+        self.liveness = liveness
+        self.guard = guard
+        self.refresh_seconds = refresh_seconds
+        # One bounded request may outlive a released hold. New generations
+        # replace the single queued request instead of filling every worker
+        # with context that can no longer be rendered.
+        self.executor = executor or ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix='superhold')
+        self._owns_executor = executor is None
+        socket_path = getattr(liveness, 'path', None)
+        self.loading_probe = loading_probe or (
+            (lambda: _focused_output_context(socket_path)) if socket_path else None)
+        self.metadata_executor = metadata_executor or ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix='superhold-output-check')
+        self._owns_metadata_executor = metadata_executor is None
+        self._metadata_future = None
+        self._metadata_generation = None
+        self._loading_context = None
+        self._loading_shown = False
+        self.loading_context_ready = False
+        self._future = None
+        self._future_generation = None
+        self._generation = 0
+        self._holding = False
+        self._loaded_snapshot = None
+        self._next_refresh = float('inf')
+        self.snapshot_ready = False
+        self.closed = False
+        self.graphical_active = False
+
+    @property
+    def visible(self):
+        return (self._holding and self.graphical_active
+                and (self._loading_shown or self.snapshot_ready))
+
+    @property
+    def source_pending(self):
+        return self._holding and self._future is not None
+
+    def _submit_snapshot(self):
+        if self._future is not None:
+            return
+        self.snapshot_ready = False
+        self._future_generation = self._generation
+        self._future = self.executor.submit(self.provider.snapshot)
+
+    def _submit_loading_context(self):
+        if self.loading_probe is not None and self._metadata_future is None:
+            self._metadata_generation = self._generation
+            self._metadata_future = self.metadata_executor.submit(self.loading_probe)
+
+    def _collect_loading_context(self):
+        if self._metadata_future is not None and self._metadata_future.done():
+            generation = self._metadata_generation
+            try:
+                context = self._metadata_future.result()
+                rect = context.get('_output_rect') if isinstance(context, dict) else None
+                if (generation == self._generation and self._holding
+                        and isinstance(context.get('output'), str)
+                        and isinstance(rect, dict)):
+                    self._loading_context = context
+                    self.loading_context_ready = True
+                    if not self.snapshot_ready and not self._loading_shown:
+                        self.overlay.show_loading(context)
+                        self._loading_shown = True
+            except Exception:
+                pass
+            self._metadata_future = None
+            self._metadata_generation = None
+        if (self._holding and not self._loading_shown
+                and not self.snapshot_ready and self._metadata_future is None):
+            self._submit_loading_context()
+
+    def _hide(self, cancel_hold=False):
+        if cancel_hold:
+            self.monitor.state.cancel()
+        if self._holding or cancel_hold:
+            self._generation += 1
+            if self._future is not None and self._future.cancel():
+                self._future = None
+                self._future_generation = None
+            self._loaded_snapshot = None
+            self.snapshot_ready = False
+            if (self._metadata_future is not None
+                    and self._metadata_future.cancel()):
+                self._metadata_future = None
+                self._metadata_generation = None
+            self._loading_context = None
+            self._loading_shown = False
+            self.loading_context_ready = False
+            self._holding = False
+            self.overlay.hide()
+
+    def _collect_snapshot(self, now):
+        if self._future is None or not self._future.done():
+            return
+        future = self._future
+        generation = self._future_generation
+        self._future = None
+        self._future_generation = None
+        if generation != self._generation or not self._holding:
+            if self._holding:
+                self._submit_snapshot()
+            return
+        try:
+            snapshot = future.result()
+        except Exception as error:
+            snapshot = {
+                'app': 'Unavailable',
+                'output': None,
+                'sections': [{
+                    'title': 'Context',
+                    'coverage': 'unavailable',
+                    'rows': [{'key': '—', 'description': str(error)}],
+                }],
+            }
+        if snapshot != self._loaded_snapshot:
+            self.overlay.show(snapshot)
+            self._loaded_snapshot = snapshot
+        self.snapshot_ready = True
+        self._next_refresh = now + self.refresh_seconds
+
+    def tick(self, now):
+        if self.closed:
+            return False
+        if not self.liveness.alive():
+            self.close()
+            return False
+        try:
+            requested = bool(self.monitor.poll(now))
+        except (OSError, RuntimeError):
+            self.close()
+            return False
+        try:
+            self.graphical_active = self.guard.allows_overlay(now)
+        except (OSError, RuntimeError):
+            self.close()
+            return False
+        if not self.graphical_active:
+            self._hide(cancel_hold=True)
+            return True
+        if not requested:
+            self._hide()
+            return True
+        if not self._holding:
+            self._holding = True
+            self._loading_context = None
+            self.loading_context_ready = False
+            if self.loading_probe is None:
+                self.overlay.show_loading(None)
+                self._loading_shown = True
+            else:
+                self._submit_loading_context()
+            self._submit_snapshot()
+        self._collect_loading_context()
+        self._collect_snapshot(now)
+        if (self._holding and self._future is None
+                and now >= self._next_refresh):
+            self._submit_snapshot()
+        return True
+
+    def close(self):
+        if self.closed:
+            return
+        self.closed = True
+        self._generation += 1
+        if self._future is not None:
+            self._future.cancel()
+            self._future = None
+        if self._metadata_future is not None:
+            self._metadata_future.cancel()
+            self._metadata_future = None
+        self.monitor.close()
+        self.overlay.hide()
+        self.overlay.close()
+        self.liveness.close()
+        close_guard = getattr(self.guard, 'close', None)
+        if close_guard is not None:
+            close_guard()
+        if self._owns_executor:
+            self.executor.shutdown(wait=False, cancel_futures=True)
+        if self._owns_metadata_executor:
+            self.metadata_executor.shutdown(wait=False, cancel_futures=True)
+
+
+class GtkShortcutOverlay:
+    """A compact, pointer-interactive layer surface with no keyboard focus."""
+
+    CSS = b'''
+    #superhold-window { background-color: transparent; }
+    #superhold-panel {
+        background-color: @theme_bg_color;
+        border: 2px solid @theme_selected_bg_color;
+        border-radius: 18px;
+        color: @theme_fg_color;
+        padding: 20px;
+    }
+    #superhold-title { color: @theme_fg_color; font-size: 1.5em; font-weight: bold; }
+    #superhold-hint { color: @insensitive_fg_color; font-size: 0.85em; }
+    #superhold-section {
+        background-color: mix(@theme_bg_color, @theme_fg_color, 0.05);
+        border-radius: 10px;
+        padding: 12px;
+    }
+    #superhold-section-title { color: @theme_selected_bg_color; font-size: 1.1em; font-weight: bold; }
+    #superhold-coverage { color: @insensitive_fg_color; font-size: 0.8em; }
+    #superhold-key {
+        background-color: mix(@theme_bg_color, @theme_fg_color, 0.08);
+        border: 1px solid @borders;
+        border-radius: 5px;
+        color: @theme_fg_color;
+        font-family: monospace;
+        font-weight: bold;
+        padding: 3px 7px;
+    }
+    #superhold-description { color: @theme_fg_color; }
+    #superhold-panel scrollbar slider {
+        background-color: @theme_selected_bg_color; min-width: 8px; min-height: 28px;
+    }
+    '''
+
+    def __init__(self, preview_seconds=None, focusable=False):
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('Gdk', '3.0')
+        gi.require_version('GtkLayerShell', '0.1')
+        from gi.repository import Gdk, Gtk, GtkLayerShell
+
+        self.Gdk = Gdk
+        self.Gtk = Gtk
+        self.LayerShell = GtkLayerShell
+        self.preview_seconds = preview_seconds
+        self.focusable = focusable
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
+        self.window.set_name('superhold-window')
+        self.window.set_decorated(False)
+        self.window.set_resizable(False)
+        self.window.set_title('Superhold Shortcut Guide')
+        self.window.set_accept_focus(focusable)
+        self.window.set_focus_on_map(focusable)
+        self.window.set_skip_taskbar_hint(True)
+        if focusable:
+            self.window.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+            self.window.set_position(Gtk.WindowPosition.CENTER)
+        else:
+            GtkLayerShell.init_for_window(self.window)
+            GtkLayerShell.set_namespace(self.window, 'superhold')
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.OVERLAY)
+            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            GtkLayerShell.set_exclusive_zone(self.window, 0)
+            GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.TOP, True)
+            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, 46)
+
+        from superhold.theme import DesktopTheme
+        self._theme = DesktopTheme(self.window)
+        self._css = Gtk.CssProvider()
+        self._css.load_from_data(self.CSS)
+        screen = self.window.get_screen()
+        Gtk.StyleContext.add_provider_for_screen(
+            screen, self._css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.window.connect('destroy', lambda *_args: Gtk.StyleContext.remove_provider_for_screen(
+            screen, self._css))
+
+        self.panel = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=12)
+        self.panel.set_name('superhold-panel')
+        self.window.add(self.panel)
+        self._last_monitor = None
+
+    def _clear(self):
+        for child in self.panel.get_children():
+            self.panel.remove(child)
+
+    def _label(self, text, name, xalign=0):
+        label = self.Gtk.Label(label=str(text))
+        label.set_name(name)
+        label.set_xalign(xalign)
+        label.set_line_wrap(True)
+        label.set_selectable(False)
+        return label
+
+    def _select_monitor(self, output_name=None, output_rect=None):
+        display = self.Gdk.Display.get_default()
+        if display is None:
+            return None
+        monitors = [display.get_monitor(index)
+                    for index in range(display.get_n_monitors())]
+        monitor = next((item for item in monitors
+                        if output_name and output_name.lower() in ' '.join(filter(None, (
+                            item.get_model(), item.get_manufacturer()))).lower()), None)
+        if monitor is None and output_rect:
+            monitor = next((item for item in monitors
+                            if all(getattr(item.get_geometry(), key) == output_rect[key]
+                                   for key in ('x', 'y', 'width', 'height'))), None)
+        if monitor is None and monitors:
+            monitor = display.get_primary_monitor() or monitors[0]
+        if not self.focusable and monitor is not None and monitor != self._last_monitor:
+            self.LayerShell.set_monitor(self.window, monitor)
+            self._last_monitor = monitor
+        return monitor
+
+    def _bound_window(self, monitor):
+        if monitor is None:
+            width, height = 900, 650
+        else:
+            geometry = monitor.get_geometry()
+            width = min(960, max(440, geometry.width - 96))
+            height = min(720, max(300, geometry.height - 96))
+        self.window.set_size_request(width, height)
+
+    def _header(self, title):
+        heading = self.Gtk.Box(orientation=self.Gtk.Orientation.VERTICAL, spacing=3)
+        heading.pack_start(self._label(title, 'superhold-title'), False, False, 0)
+        hint = 'Release Super to close  •  Scroll for more'
+        if self.preview_seconds is not None:
+            hint = f'Preview closes after {self.preview_seconds:g} seconds  •  Scroll for more'
+        heading.pack_start(self._label(
+            hint, 'superhold-hint'),
+            False, False, 0)
+        if self.preview_seconds is not None:
+            close = self.Gtk.Button.new_with_label('Close preview')
+            close.set_can_focus(False)
+            close.set_halign(self.Gtk.Align.END)
+            close.connect('clicked', lambda *_arguments: self.Gtk.main_quit())
+            heading.pack_start(close, False, False, 0)
+        self.panel.pack_start(heading, False, False, 0)
+
+    def show_loading(self, context=None):
+        self._clear()
+        context = context if isinstance(context, dict) else {}
+        self._select_monitor(context.get('output'), context.get('_output_rect'))
+        self.window.set_size_request(540, 150)
+        self.window.resize(540, 150)
+        self._header('Keyboard shortcuts')
+        self.panel.pack_start(self._label(
+            'Loading the focused context…', 'superhold-description'),
+            False, False, 0)
+        self.window.show_all()
+
+    def show(self, snapshot):
+        self._clear()
+        monitor = self._select_monitor(snapshot.get('output'), snapshot.get('_output_rect'))
+        self._bound_window(monitor)
+        app = snapshot.get('app') or 'Current context'
+        self._header(f'{app} shortcuts')
+        scroll = self.Gtk.ScrolledWindow()
+        scroll.set_policy(self.Gtk.PolicyType.NEVER, self.Gtk.PolicyType.AUTOMATIC)
+        scroll.set_overlay_scrolling(False)
+        content = self.Gtk.Box(orientation=self.Gtk.Orientation.VERTICAL, spacing=10)
+        for section in snapshot.get('sections', []):
+            card = self.Gtk.Box(orientation=self.Gtk.Orientation.VERTICAL, spacing=7)
+            card.set_name('superhold-section')
+            section_header = self.Gtk.Box(orientation=self.Gtk.Orientation.HORIZONTAL,
+                                          spacing=10)
+            section_header.pack_start(self._label(
+                section.get('title', 'Shortcuts'), 'superhold-section-title'),
+                True, True, 0)
+            coverage = section.get('coverage', 'unknown')
+            section_header.pack_end(self._label(
+                coverage, 'superhold-coverage', xalign=1), False, False, 0)
+            card.pack_start(section_header, False, False, 0)
+            for row in section.get('rows', []):
+                line = self.Gtk.Box(orientation=self.Gtk.Orientation.HORIZONTAL,
+                                    spacing=12)
+                key = self._label(row.get('key', '—'), 'superhold-key', xalign=.5)
+                key.set_size_request(210, -1)
+                description = self._label(
+                    row.get('description', ''), 'superhold-description')
+                line.pack_start(key, False, False, 0)
+                line.pack_start(description, True, True, 0)
+                card.pack_start(line, False, False, 0)
+            content.pack_start(card, False, False, 0)
+        scroll.add(content)
+        self.panel.pack_start(scroll, True, True, 0)
+        self.window.show_all()
+
+    def hide(self):
+        self.window.hide()
+
+    def close(self):
+        self.window.destroy()
+
+
+def _wayland_socket(runtime):
+    display = os.environ.get('WAYLAND_DISPLAY')
+    if not display:
+        raise RuntimeError('WAYLAND_DISPLAY is required')
+    path = Path(display)
+    return path if path.is_absolute() else runtime / path
+
+
+def _provider(socket_path, profiles_path=None, decorate=False):
+    from superhold.shortcut_sources import ShortcutProvider
+    provider = ShortcutProvider(str(socket_path), profiles_path=profiles_path)
+    return ContextProvider(provider, socket_path) if decorate else provider
+
+
+def dump_snapshot(socket_path, profiles_path=None):
+    print(json.dumps(_provider(socket_path, profiles_path).snapshot(),
+                     ensure_ascii=False, indent=2))
+
+
+def preview(socket_path, profiles_path=None, seconds=5.0):
+    overlay = GtkShortcutOverlay(preview_seconds=seconds)
+    from gi.repository import GLib, Gtk
+    snapshot = _provider(socket_path, profiles_path, decorate=True).snapshot()
+    overlay.show(snapshot)
+    GLib.timeout_add(max(1, int(seconds * 1000)), Gtk.main_quit)
+    try:
+        Gtk.main()
+    finally:
+        overlay.close()
+
+
+def _request_running_guide(lease):
+    try:
+        record = json.loads(lease.status_path.read_text())
+        process = record['process']
+        if record.get('state') not in {'running', 'visible'} or process != _process_identity(process['pid']):
+            return False
+        os.kill(process['pid'], signal.SIGUSR1)
+        return True
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+
+
+def _run_app(runtime, socket_path, config, config_file=None, profiles_path=None, *, once=False):
+    from superhold.config import ConfigError, load_config
+    from superhold.shortcut_hold import EvdevMonitor
+    from superhold.shortcut_actions import NativeShortcutSender
+    from superhold.shortcut_controller import InteractiveController
+    from superhold.shortcut_window import InteractiveOverlay
+
+    lease = SessionLease(runtime, socket_path)
+    try:
+        lease.acquire()
+    except AlreadyRunning:
+        if once and not _request_running_guide(lease):
+            raise RuntimeError('The running guide could not be opened; try again.')
+        return
+    controller = None
+    watch = monitor = overlay = guard = None
+    last_status = None
+    next_config_check = 0
+    last_config_error = None
+    try:
+        import gi
+        gi.require_version('Gtk', '3.0')
+        gi.require_version('Gdk', '3.0')
+        from gi.repository import GLib, Gtk
+        GLib.set_prgname('superhold')
+        watch = connect_sway_watch(socket_path)
+        monitor = EvdevMonitor()
+        wayland_socket = _wayland_socket(runtime)
+        guard = GraphicalSessionGuard(runtime, wayland_socket)
+        sender = NativeShortcutSender(socket_path, key_delay_ms=config.key_delay_ms)
+
+        def open_settings():
+            arguments = [sys.executable, '-m', 'superhold', 'settings']
+            if config_file:
+                arguments.extend(('--config', str(config_file)))
+            environment = dict(os.environ)
+            environment['PYTHONPATH'] = os.pathsep.join(filter(None, (
+                str(Path(__file__).resolve().parents[1]), environment.get('PYTHONPATH'))))
+            subprocess.Popen(arguments, env=environment, start_new_session=True)
+
+        def make_overlay(persistent):
+            guide = InteractiveOverlay(persistent=persistent, on_settings=open_settings)
+            return guide
+
+        overlay = make_overlay(once or config.dismiss_mode == 'focus_loss')
+        provider = _provider(socket_path, profiles_path or config.profiles_path or None, decorate=True)
+        controller = InteractiveController(monitor, provider, overlay, watch, guard,
+                                           config=config, sender=sender)
+        sender.guard = lambda: (sender._default_guard()
+                                and controller.dispatch_safe())
+
+        def wire_overlay():
+            controller.overlay.on_activate = controller.activate
+            controller.overlay.on_dismiss = controller.dismiss
+        wire_overlay()
+
+        def replace_overlay(persistent):
+            nonlocal overlay
+            if overlay.focusable != persistent and not overlay.has_error:
+                overlay.close()
+                overlay = make_overlay(persistent)
+                controller.overlay = overlay
+                wire_overlay()
+
+        def request_open():
+            if not controller.busy and not overlay.has_error:
+                replace_overlay(True)
+                controller.request_open()
+            return False
+
+        def tick():
+            nonlocal last_status, next_config_check, config, last_config_error
+            now = time.monotonic()
+            if (not controller.busy and not controller._open_requested
+                    and not monitor.state.pressed_codes):
+                if now >= next_config_check:
+                    next_config_check = now + 1
+                    try:
+                        updated = load_config(config_file)
+                        if updated != config:
+                            config = updated
+                            controller.configure(config)
+                            controller.provider = _provider(socket_path,
+                                profiles_path or config.profiles_path or None, decorate=True)
+                        last_config_error = None
+                    except ConfigError as error:
+                        if str(error) != last_config_error:
+                            print(f'superhold: keeping previous settings: {error}', file=sys.stderr)
+                            last_config_error = str(error)
+                replace_overlay(once or config.dismiss_mode == 'focus_loss')
+            running = controller.tick(now)
+            status = (controller.visible, controller.source_pending,
+                      controller.graphical_active, monitor.device_count, guard.locked)
+            if status != last_status:
+                lease.update(
+                    'visible' if controller.visible else 'running',
+                    visible=controller.visible, source_pending=controller.source_pending,
+                    graphical_active=controller.graphical_active,
+                    locked=guard.locked, device_count=monitor.device_count)
+                last_status = status
+            if once and not controller.busy and not controller._open_requested and not overlay.has_error:
+                running = False
+            if not running:
+                Gtk.main_quit()
+            return running
+
+        GLib.timeout_add(25, tick)
+        previous_handlers = {}
+        for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+            previous_handlers[signum] = signal.signal(
+                signum, lambda _signum, _frame: GLib.idle_add(Gtk.main_quit))
+        previous_handlers[signal.SIGUSR1] = signal.signal(
+            signal.SIGUSR1, lambda _signum, _frame: GLib.idle_add(request_open))
+        lease.update('running', visible=False, source_pending=False,
+                     graphical_active=False, locked=False, device_count=monitor.device_count)
+        if once:
+            request_open()
+        Gtk.main()
+    finally:
+        for signum, handler in locals().get('previous_handlers', {}).items():
+            signal.signal(signum, handler)
+        if controller is not None:
+            controller.close()
+        else:
+            for resource in (monitor, overlay, watch, guard):
+                if resource is not None:
+                    resource.close()
+        lease.close()
+
+
+def print_status(runtime, socket_path):
+    lease = SessionLease(runtime, socket_path)
+    try:
+        record = json.loads(lease.status_path.read_text())
+    except (OSError, ValueError) as error:
+        raise RuntimeError('no shortcut service status for this Sway session') from error
+    process = record.get('process') if isinstance(record, dict) else None
+    live = False
+    if isinstance(process, dict):
+        live = process == _process_identity(process.get('pid'))
+    record['live'] = live and record.get('state') != 'stopped'
+    if not record['live'] and record.get('state') != 'stopped':
+        record['recorded_state'] = record.get('state')
+        record['state'] = 'stale'
+    print(json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True))
+
+
+def parse_args(arguments=None):
+    from superhold import __version__
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version=f'superhold {__version__}')
+    parser.add_argument('command', nargs='?', choices=('show', 'settings', 'daemon', 'dump', 'preview', 'status'))
+    aliases = parser.add_mutually_exclusive_group()
+    aliases.add_argument('--dump', action='store_true', help='print contextual shortcuts as JSON')
+    aliases.add_argument('--preview', action='store_true', help='show the overlay without input monitoring')
+    parser.add_argument('--seconds', type=float, default=5.0,
+                        help='preview duration in seconds (default: 5)')
+    parser.add_argument('--socket', help='Sway IPC socket (default: SWAYSOCK or owned runtime socket)')
+    parser.add_argument('--profiles', help='optional local application profile file')
+    parser.add_argument('--config', help='settings JSON file (default: XDG superhold/config.json)')
+    args = parser.parse_args(arguments)
+    if (args.dump or args.preview) and args.command:
+        parser.error('choose either a command or a --dump/--preview alias')
+    if args.seconds <= 0:
+        parser.error('--seconds must be greater than zero')
+    args.command = 'dump' if args.dump else 'preview' if args.preview else args.command or 'show'
+    return args
+
+
+def main(arguments=None):
+    args = parse_args(arguments)
+    from superhold.config import load_config
+    if args.command == 'settings':
+        from superhold.settings import show_settings
+        return show_settings(args.config)
+    config = None if args.command == 'status' else load_config(args.config)
+    profiles_path = args.profiles or (config.profiles_path if config else None) or None
+    runtime_name = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime_name:
+        raise RuntimeError('XDG_RUNTIME_DIR is required')
+    runtime = Path(runtime_name)
+    _owned_private_directory(runtime)
+    socket_path = find_sway_socket(runtime, args.socket)
+    if args.command == 'dump':
+        dump_snapshot(socket_path, profiles_path)
+    elif args.command == 'preview':
+        preview(socket_path, profiles_path, args.seconds)
+    elif args.command == 'status':
+        print_status(runtime, socket_path)
+    else:
+        _run_app(runtime, socket_path, config, args.config, args.profiles, once=args.command == 'show')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (ConnectionError, OSError, RuntimeError, ValueError) as error:
+        sys.exit(f'superhold: {error}')

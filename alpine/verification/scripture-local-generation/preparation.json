@@ -1,0 +1,19 @@
+{
+  "utc": "20260908T043109Z",
+  "requested_reference": "2 Corinthians 12:9",
+  "staged_assets": "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/assets",
+  "staged_database": "/home/jack/.local/state/oldbook/scripture-generation-review/20260908T043109Z/study.sqlite3",
+  "planned_source_sha256": "e76714fc7a4524e4fa02847ba5491b285bf531b5342e0980ae7701040882b2fe",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-scripture-study": "01475c63bd29093a795bc0bfefb830b3a12e554ed57bc2a98d92eddf778a3388",
+    "alpine/desktop/.local/lib/oldbook/scripture_generation.py": "b22c6210c2d422dd756ff4506dea2e6610ae8d038054aafafa0d231fa8f9d2d1",
+    "alpine/desktop/.local/lib/oldbook/scripture_study.py": "5f53a7dd451d6b14734f0d3c168c50adf99c86736484d55f4881c346c88010c0"
+  },
+  "initial_local_state": {
+    "ollama_binary": false,
+    "llama_binary": false,
+    "loopback_11434": "connection refused",
+    "model_directories_found": false
+  },
+  "generation_performed": false
+}

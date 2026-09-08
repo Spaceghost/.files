@@ -1,0 +1,33 @@
+# This independent table survives OpenSnitch shutdown. Never add queue bypass.
+# OpenSnitch must use OPENSNITCH_EXTERNAL_OUTPUT_QUEUE=1 to avoid double prompts.
+table inet mbp-intel {
+    chain input {
+        type filter hook input priority -5; policy drop;
+        iifname "lo" accept
+        ct state invalid drop
+        ct state established,related accept
+        udp sport 67 udp dport 68 accept comment "DHCPv4 replies"
+        ip6 saddr fe80::/10 udp sport 547 udp dport 546 accept
+        ip protocol icmp icmp type { destination-unreachable, time-exceeded, parameter-problem } accept
+        meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
+        ip6 hoplimit 255 icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept
+    }
+
+    chain forward {
+        type filter hook forward priority -5; policy drop;
+    }
+
+    chain output {
+        type filter hook output priority -149; policy drop;
+        oifname "lo" accept
+        ct state invalid drop
+        ct state established,related accept
+        udp sport 68 udp dport 67 accept comment "DHCPv4 bootstrap"
+        ip6 daddr ff02::1:2 udp sport 546 udp dport 547 accept
+        ip6 hoplimit 255 icmpv6 type { nd-router-solicit, nd-neighbor-solicit, nd-neighbor-advert } accept
+        # Queue verdict accepts resume after this base chain. Missing/full
+        # userspace queues drop packets. Established allowed flows continue.
+        tcp flags & (fin | syn | rst | ack) == syn queue num 0
+        meta l4proto != tcp ct state new queue num 0
+    }
+}

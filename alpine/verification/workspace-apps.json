@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "verified_at": "2026-09-07T11:00:05Z",
+  "checks": {
+    "live_singleton": true,
+    "turn-complete_panel_class": true,
+    "turn-complete_desktop_notice": true,
+    "turn-complete_caps_led": true,
+    "approval-requested_panel_class": true,
+    "approval-requested_desktop_notice": true,
+    "approval-requested_caps_led": true,
+    "test_record_cleared": true,
+    "test_notifications_removed": true,
+    "approval_hook_stdout_empty": true,
+    "focus_preserved": true
+  },
+  "workspaces": [
+    {
+      "number": 1,
+      "name": "1: GHOST · ✦ Codex"
+    },
+    {
+      "number": 2,
+      "name": "2: ORBIT · Firefox"
+    },
+    {
+      "number": 3,
+      "name": "3: LAB · OpenSnitch"
+    },
+    {
+      "number": 4,
+      "name": "4: SIGNAL · btop"
+    },
+    {
+      "number": 5,
+      "name": "5: LOUNGE · Pithos"
+    }
+  ],
+  "focused_tests": 41,
+  "headless_checks": 12,
+  "codex_config_load": "passed",
+  "sway_config_validation": "passed",
+  "shellcheck": "passed",
+  "disposable_home_deployment": "passed",
+  "hook_trust": "pending user review in /hooks after Codex restart",
+  "chatgpt_completion_detection": "not available from browser titles",
+  "reboot_persistence": "not tested",
+  "full_shared_suite": {
+    "tests": 116,
+    "result": "passed"
+  },
+  "isolated_patch_suite": {
+    "tests": 97,
+    "result": "passed"
+  }
+}

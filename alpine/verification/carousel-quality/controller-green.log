@@ -1,0 +1,19 @@
+test_capture_failure_has_no_foreground_screenshot_fallback (test_carousel.CarouselTests.test_capture_failure_has_no_foreground_screenshot_fallback) ... ok
+test_capture_uses_native_scale_without_a_thumbnail_override (test_carousel.CarouselTests.test_capture_uses_native_scale_without_a_thumbnail_override) ... ok
+test_closed_gesture_discards_late_capture (test_carousel.CarouselTests.test_closed_gesture_discards_late_capture) ... ok
+test_commit_dismisses_before_focus_and_records_selected_window (test_carousel.CarouselTests.test_commit_dismisses_before_focus_and_records_selected_window) ... ok
+test_completed_rgb_payload_is_released_without_live_recapture (test_carousel.CarouselTests.test_completed_rgb_payload_is_released_without_live_recapture) ... ok
+test_each_identity_captured_once_and_reuse_is_distinct (test_carousel.CarouselTests.test_each_identity_captured_once_and_reuse_is_distinct) ... ok
+test_failed_preview_does_not_retry_during_the_same_opening (test_carousel.CarouselTests.test_failed_preview_does_not_retry_during_the_same_opening) ... ok
+test_ipc_handles_partial_and_coalesced_frames (test_carousel.CarouselTests.test_ipc_handles_partial_and_coalesced_frames) ... ok
+test_ipc_rejects_corrupt_or_oversized_frames (test_carousel.CarouselTests.test_ipc_rejects_corrupt_or_oversized_frames) ... ok
+test_mode_takeover_prevents_late_modifier_commit (test_carousel.CarouselTests.test_mode_takeover_prevents_late_modifier_commit) ... ok
+test_preview_decodes_exact_pixel_bytes (test_carousel.CarouselTests.test_preview_decodes_exact_pixel_bytes) ... ok
+test_preview_rejects_truncated_and_excessive_sizes (test_carousel.CarouselTests.test_preview_rejects_truncated_and_excessive_sizes) ... ok
+test_retina_preview_keeps_all_native_pixels (test_carousel.CarouselTests.test_retina_preview_keeps_all_native_pixels) ... ok
+test_runtime_is_scoped_to_compositor (test_carousel.CarouselTests.test_runtime_is_scoped_to_compositor) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.203s
+
+OK

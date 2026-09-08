@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Build pinned openresolv APKs without networking or package installation."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import shlex
+import shutil
+import subprocess
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, required=True)
+    parser.add_argument('--work', type=Path, required=True, help='New build directory')
+    args = parser.parse_args()
+    recipe = Path(__file__).resolve().parent
+    manifest = json.loads((recipe / 'manifest.json').read_text())
+    source = args.source.resolve(strict=True)
+    if hashlib.sha256(source.read_bytes()).hexdigest() != manifest['source']['sha256']:
+        parser.error('source SHA-256 differs from the pinned upstream release')
+    if os.geteuid() == 0:
+        parser.error('run as the ordinary build user; doas only isolates networking')
+    work = args.work.absolute()
+    work.mkdir(parents=True, exist_ok=False)
+    stage = work / 'mbp-intel/openresolv'
+    stage.mkdir(parents=True)
+    for name in ('APKBUILD', 'host-pid-lock.patch', 'detect_init-remove-irrelevant.patch',
+                 'test-host-pid-lock.py'):
+        shutil.copy2(recipe / name, stage / name)
+    shutil.copy2(source, stage / manifest['source']['filename'])
+    user = pwd.getpwuid(os.getuid()).pw_name
+    build = ['abuild', '-d', '-K', '-P', str(work / 'apks'), '-s', str(work / 'distfiles')]
+    command = ['doas', '-n', 'unshare', '--net', '--', 'su', user, '-s', '/bin/sh',
+               '-c', 'cd ' + shlex.quote(str(stage)) + ' && exec ' + shlex.join(build)]
+    with (work / 'build.log').open('w') as log:
+        result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=120)
+    if result.returncode:
+        raise SystemExit('build failed; see ' + str(work / 'build.log'))
+    packages = sorted((work / 'apks/mbp-intel').glob('*/*.apk'))
+    if not packages:
+        raise SystemExit('build produced no APKs')
+    for package in packages:
+        print(hashlib.sha256(package.read_bytes()).hexdigest(), package)
+
+
+if __name__ == '__main__':
+    main()

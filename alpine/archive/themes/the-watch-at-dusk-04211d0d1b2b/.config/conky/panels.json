@@ -1,0 +1,67 @@
+{
+  "font": "DejaVu Sans:size=9",
+  "update_interval": 60,
+  "gap": 5,
+  "panels": [
+    {
+      "id": "masthead",
+      "title": "Masthead",
+      "enabled": true,
+      "priority": 100,
+      "prefer": "top",
+      "width": 372,
+      "height": 80,
+      "text": "${font DejaVu Sans:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet \u00b7 Coast to Coast"
+    },
+    {
+      "id": "scripture",
+      "title": "Scripture",
+      "enabled": true,
+      "priority": 98,
+      "prefer": "top-right",
+      "width": 420,
+      "height": 204,
+      "text": "${color1}\udb80\udcba SCRIPTURE${color2} ${hr 1}\n${execpi 60 ~/.local/bin/oldbook-scripture panel --width 52}"
+    },
+    {
+      "id": "power",
+      "title": "Power",
+      "enabled": true,
+      "priority": 72,
+      "prefer": "right",
+      "width": 286,
+      "height": 80,
+      "text": "${color1}\udb80\udc79 POWER${color2} ${hr 1}\n${color}batt ${color6}${battery_bar 5,150 {{battery}}}${color} ${battery_percent {{battery}}}%\n${color2}${battery {{battery}}}${alignr}${color2}${battery_time {{battery}}}"
+    },
+    {
+      "id": "gallery",
+      "title": "Ghost Gallery",
+      "enabled": true,
+      "priority": 96,
+      "prefer": "bottom",
+      "width": 360,
+      "height": 112,
+      "text": "${color1}\udb83\ude09 GHOST GALLERY${color2} ${hr 1}\n${color}${execi 120 {{bin}} gallery-text}"
+    },
+    {
+      "id": "ghost",
+      "title": "Coast to Coast",
+      "enabled": true,
+      "priority": 58,
+      "prefer": "bottom-right",
+      "width": 360,
+      "height": 140,
+      "text": "${color1}\udb80\udea0 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
+    },
+    {
+      "id": "witness",
+      "title": "Witnesses from outside",
+      "enabled": true,
+      "priority": 60,
+      "prefer": "right",
+      "width": 400,
+      "height": 152,
+      "text": "${color1}\udb80\ude7e WITNESS${color2} ${hr 1}\n${execpi 300 {{scripture}} witness --width 50}"
+    }
+  ]
+}

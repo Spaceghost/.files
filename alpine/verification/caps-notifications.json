@@ -1,0 +1,30 @@
+{
+  "keymap": "CAPS=Escape",
+  "existing_notification_count": 2,
+  "initial_leds": {
+    "input2::capslock": 1,
+    "input0::capslock": 1
+  },
+  "test_notification_leds": {
+    "input2::capslock": 1,
+    "input0::capslock": 1
+  },
+  "sigterm_leds": {
+    "input2::capslock": 0,
+    "input0::capslock": 0
+  },
+  "final_notification_count": 2,
+  "final_leds": {
+    "input2::capslock": 1,
+    "input0::capslock": 1
+  },
+  "singleton_verified": true,
+  "existing_notifications_preserved": true,
+  "helper_tests_passed": 5,
+  "full_alpine_tests_passed": 56,
+  "sway_config_validation": "passed",
+  "shellcheck": "passed",
+  "disposable_home_deployment": "passed twice; second idempotent",
+  "physical_led_observation": false,
+  "reboot_tested": false
+}

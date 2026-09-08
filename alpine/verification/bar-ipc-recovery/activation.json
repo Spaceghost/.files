@@ -1,0 +1,22 @@
+{
+  "status": "passed",
+  "previous_observed_updated_at": 0,
+  "helpers": {
+    "oldbook-workspaces": {
+      "pid": 10225,
+      "activation": "already running after source update"
+    },
+    "oldbook-waybar-dim": {
+      "pid": 10227,
+      "activation": "already running after source update"
+    }
+  },
+  "state_refreshed": true,
+  "workspaces": 4,
+  "ai_windows": 3,
+  "waybar_pid_preserved": 26778,
+  "source_sha256": {
+    "oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "oldbook-waybar-dim": "cfc3f18be6bb863cfb9ded76eac8fd79a5197ebbe379067fd8555550502d9a03"
+  }
+}

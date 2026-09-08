@@ -1,0 +1,152 @@
+{
+  "output": {
+    "id": 3,
+    "type": "output",
+    "orientation": "none",
+    "percent": 1.0,
+    "urgent": false,
+    "marks": [],
+    "layout": "output",
+    "border": "none",
+    "current_border_width": 0,
+    "rect": {
+      "x": 0,
+      "y": 0,
+      "width": 1440,
+      "height": 900
+    },
+    "deco_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "window_rect": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "geometry": {
+      "x": 0,
+      "y": 0,
+      "width": 0,
+      "height": 0
+    },
+    "name": "HEADLESS-1",
+    "window": null,
+    "nodes": [],
+    "floating_nodes": [],
+    "focus": [
+      4
+    ],
+    "fullscreen_mode": 0,
+    "sticky": false,
+    "floating": null,
+    "scratchpad_state": null,
+    "primary": false,
+    "make": "Unknown",
+    "model": "Unknown",
+    "serial": "Unknown",
+    "modes": [],
+    "features": {
+      "adaptive_sync": false,
+      "hdr": false
+    },
+    "non_desktop": false,
+    "active": true,
+    "dpms": true,
+    "power": true,
+    "scale": 1.0,
+    "scale_filter": "nearest",
+    "transform": "normal",
+    "adaptive_sync_status": "disabled",
+    "layer_shell_surfaces": [
+      {
+        "namespace": "top",
+        "layer": "top",
+        "extent": {
+          "width": 1440,
+          "height": 40,
+          "x": 0,
+          "y": 0
+        },
+        "effects": {
+          "blur": false,
+          "blur_xray": false,
+          "blur_ignore_transparent": false,
+          "shadows": false,
+          "corner_radius": 0
+        }
+      }
+    ],
+    "current_workspace": "1",
+    "current_mode": {
+      "width": 1440,
+      "height": 900,
+      "refresh": 0
+    },
+    "max_render_time": 0,
+    "allow_tearing": false,
+    "hdr": false,
+    "focused": true,
+    "subpixel_hinting": "unknown"
+  },
+  "layout": {
+    "wallpaper": "/tmp/desktop-space-ytbzb7ue/home/.local/share/oldbook/current-wallpaper.png",
+    "pairing": "41fd461b6b49a3b0c9d1df0d5fb149d5fe0d78c90ca0864775083582289df42c",
+    "output": "HEADLESS-1",
+    "screen": {
+      "name": "HEADLESS-1",
+      "width": 1440,
+      "height": 900,
+      "top": 60,
+      "bottom": 60,
+      "left": 16,
+      "right": 60,
+      "origin_y": 40
+    },
+    "theme": "vespersteel-archive-968881e8a08a",
+    "generated_utc": "2026-09-08T01:56:05Z",
+    "placements": [
+      {
+        "id": "masthead",
+        "x": 20,
+        "y": 60,
+        "width": 280,
+        "height": 100,
+        "cell": {
+          "left": 1,
+          "top": 3,
+          "columns": 14,
+          "rows": 5
+        },
+        "score": -0.2312,
+        "background": [
+          29,
+          32,
+          33
+        ]
+      },
+      {
+        "id": "ghost",
+        "x": 1160,
+        "y": 720,
+        "width": 220,
+        "height": 120,
+        "cell": {
+          "left": 58,
+          "top": 36,
+          "columns": 11,
+          "rows": 6
+        },
+        "score": -0.5239,
+        "background": [
+          29,
+          32,
+          33
+        ]
+      }
+    ]
+  }
+}

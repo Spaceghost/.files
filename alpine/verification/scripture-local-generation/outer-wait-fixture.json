@@ -1,0 +1,7 @@
+{
+  "test": "pause only verification parent while owned child finishes",
+  "parent_exit": 1,
+  "child_exit": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\n    print(p.wait(timeout=.4),flush=True)\n          ~~~~~~^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 1279, in wait\n    return self._wait(timeout=timeout)\n           ~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.14/subprocess.py\", line 2076, in _wait\n    raise TimeoutExpired(self.args, timeout)\nsubprocess.TimeoutExpired: Command '['/usr/bin/python3', '-c', 'import time;time.sleep(1.2)']' timed out after 0.4 seconds\n",
+  "pass": false
+}

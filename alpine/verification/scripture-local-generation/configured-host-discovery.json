@@ -1,0 +1,31 @@
+{
+  "configured_host": "alienware",
+  "candidates": [
+    "100.83.231.2",
+    "fd7a:115c:a1e0::763a:e703",
+    "100.83.231.2"
+  ],
+  "peer": {
+    "hostname": "alienware",
+    "online": false,
+    "ips": [
+      "100.83.231.2",
+      "fd7a:115c:a1e0::763a:e703"
+    ]
+  },
+  "probes": [
+    {
+      "endpoint": "http://100.83.231.2:11434",
+      "error": "<urlopen error timed out>"
+    },
+    {
+      "endpoint": "http://[fd7a:115c:a1e0::763a:e703]:11434",
+      "error": "<urlopen error timed out>"
+    }
+  ],
+  "ssh_read_only_probe": {
+    "error": "bounded Tailscale SSH probe timed out",
+    "stderr": "",
+    "elapsed_seconds": 8.011
+  }
+}

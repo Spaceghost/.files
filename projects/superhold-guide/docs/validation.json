@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0.dev0",
+  "date": "2026-09-07",
+  "python": "3.14",
+  "tests": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "passed": 125,
+    "failed": 0
+  },
+  "build": {
+    "wheel": true,
+    "sdist": true,
+    "wheel_from_sdist": true
+  },
+  "desktop_entries_validated": 3,
+  "runtime_evidence": [
+    "runtime-interactive-validation.json",
+    "runtime-native-validation.json",
+    "runtime-focus-validation.json"
+  ],
+  "original_installation_changed": false,
+  "host_input_injected": false,
+  "github_new_version_pushed": false,
+  "remaining": [
+    "Create dedicated Spaceghost/superhold repository and grant connector access",
+    "Choose license before distribution",
+    "Full LXQt with Sway and physical input matrix",
+    "Persistent search above fullscreen applications; current unfocused guide dismisses after one second"
+  ],
+  "installation": {
+    "isolated_virtualenv": true,
+    "console_entrypoint": true,
+    "system_GI": true,
+    "native_integration_repeats": 3
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-07",
+  "scope": "Add exact flatpak and op executable rules for UID 1000; do not modify existing rules, daemon configuration, independent nftables gate or services.",
+  "policy": "TCP/TCP6 destination port 443 and TCP/UDP DNS port 53 only to current resolver IPs 75.75.75.75 and 75.75.76.76; exact executable path, UID and supplemental MD5 on each rule.",
+  "staging_review": "Verified exact allow-list, root-owned executable SHA-256 and MD5, manifest rule hashes, protocol/port/resolver boundaries, six new filenames and root:root 0600 installed modes.",
+  "unit_tests": "14 bootstrap rule tests passed.",
+  "runtime_tests": "13 isolated network namespace checks passed; see isolated-netns-test.json. Real packet checks exercise generated HTTPS rules unchanged, DNS boundaries have unit coverage.",
+  "live_watcher": "Reload confirmed for all six file names; see live-watcher.log.",
+  "op_network": "op update --channel stable completed exit 0, latest stable version 2.39.0. No sign-in or vault access.",
+  "flatpak_network": "Parent confirmed successful Flatpak downloads after rule addition (Locale and GL runtime installation progress). Observed PID30524 UID1000 with established TCP443 connection to 151.101.201.91 before confirmation.",
+  "source_sha256": {
+    "/home/jack/.files/alpine/security/firewall/bootstrap-rules": "b859943da6165fd89d56009cf0e856527ce1c702fd501b77694beee4da98f5dc",
+    "/home/jack/.files/alpine/security/firewall/test-netns.py": "4a5740d0e28bb6912e4593ab156d93da4969191ac1b986d90f231af4660e1fcc",
+    "/home/jack/.files/alpine/security/firewall/test_bootstrap_rules.py": "939b46412320aecba2cbebb6c4c7be7fecf56710b9cc2f3acc4e00f32b035b6b",
+    "/usr/bin/opensnitchd": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142"
+  },
+  "checksum_limit": "OpenSnitch MD5 is supplemental, not fail-closed executable identity. SHA-256 is audit evidence."
+}

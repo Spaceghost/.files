@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Create the fixed inert-runtime source archive; never install or activate it."""
+import argparse
+import gzip
+import hashlib
+import io
+import os
+from pathlib import Path
+import stat
+import tarfile
+import tempfile
+
+
+PACKAGE = 'mbp-intel-radio-runtime'
+VERSION = '0.1.0'
+EPOCH = 1788739200
+MANIFEST = 'RUNTIME_SOURCE_MANIFEST'
+MANIFEST_LIMIT = 65536
+FILE_LIMIT = 2 * 1024 * 1024
+MODULES = ('__init__', 'adapter', 'dhcp', 'hook', 'ipc', 'journal', 'launch',
+           'lease', 'link', 'network', 'recovery', 'runner', 'service', 'writers')
+RUNTIME_FILES = {
+    'root/usr/local/sbin/privacyctl': 0o750,
+    'root/usr/local/libexec/privacyctl-dhcp-launch': 0o750,
+    'root/usr/local/libexec/privacyctl-dhcp-event': 0o750,
+    **{f'root/usr/local/lib/privacyctl_runtime/{name}.py': 0o644 for name in MODULES},
+}
+SOURCE_FILES = tuple(sorted((*RUNTIME_FILES, MANIFEST, 'make-runtime-release',
+                             'tests/test_lease.py', 'tests/test_privacyctl.py',
+                             'tests/test_profiles.py', 'tests/test_runtime_release.py')))
+
+
+def file_mode(name):
+    return RUNTIME_FILES.get(name, 0o755 if name == 'make-runtime-release' else 0o644)
+
+
+def read_source(source, name, limit=FILE_LIMIT):
+    path = source / name
+    for parent in path.parents:
+        if parent == source:
+            break
+        if parent.is_symlink():
+            raise ValueError('Source directory symlink is not allowed: ' + name)
+    if path.is_symlink() or not path.is_file():
+        raise ValueError('Expected regular source file: ' + name)
+    descriptor = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK | os.O_CLOEXEC)
+    with os.fdopen(descriptor, 'rb') as stream:
+        info = os.fstat(stream.fileno())
+        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+            raise ValueError('Expected unlinked regular source file: ' + name)
+        if info.st_size > limit:
+            raise ValueError('Source exceeds release size bound: ' + name)
+        data = stream.read(limit + 1)
+        if len(data) > limit:
+            raise ValueError('Source exceeds release size bound: ' + name)
+        return data
+
+
+def source_contents(source):
+    raw = read_source(source, MANIFEST, MANIFEST_LIMIT)
+    try:
+        names = raw.decode('utf-8', 'strict').splitlines()
+    except UnicodeError as error:
+        raise ValueError('Runtime manifest must be UTF-8') from error
+    if len(names) != len(set(names)) or set(names) != set(SOURCE_FILES):
+        raise ValueError('Runtime manifest must contain the exact reviewed source allowlist')
+    modules = source / 'root/usr/local/lib/privacyctl_runtime'
+    if {path.name for path in modules.glob('*.py')} != {name + '.py' for name in MODULES}:
+        raise ValueError('Changed runtime module inventory requires explicit release review')
+    # Read each approved regular file once. Archive bytes never come from a
+    # recursive directory walk or from unlisted workspace/private material.
+    return {name: raw if name == MANIFEST else read_source(source, name)
+            for name in sorted(names)}
+
+
+def make_release(source, destination, epoch=EPOCH):
+    if type(epoch) is not int or not 0 <= epoch <= 0xffffffff:
+        raise ValueError('Epoch must be an unsigned 32-bit integer')
+    source = Path(source).resolve(strict=True)
+    destination = Path(destination).absolute()
+    if destination.resolve().is_relative_to(source):
+        raise ValueError('Release destination must be outside the source directory')
+    contents = source_contents(source)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=destination.parent, prefix='.radio-release-',
+                                         delete=False) as output:
+            temporary = Path(output.name)
+            with gzip.GzipFile(filename='', mode='wb', fileobj=output, mtime=epoch) as compressed:
+                with tarfile.open(fileobj=compressed, mode='w', format=tarfile.USTAR_FORMAT) as archive:
+                    for name, data in contents.items():
+                        member = tarfile.TarInfo(f'{PACKAGE}-{VERSION}/{name}')
+                        member.size = len(data)
+                        member.mode = file_mode(name)
+                        member.uid = member.gid = 0
+                        member.uname = member.gname = 'root'
+                        member.mtime = epoch
+                        archive.addfile(member, io.BytesIO(data))
+            output.flush()
+            os.fsync(output.fileno())
+        temporary.chmod(0o644)
+        os.replace(temporary, destination)
+        temporary = None
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+    return hashlib.sha256(destination.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--epoch', type=int, default=EPOCH)
+    args = parser.parse_args()
+    try:
+        digest = make_release(Path(__file__).resolve().parent, args.output, args.epoch)
+    except (OSError, ValueError, tarfile.TarError) as error:
+        parser.exit(1, f'Runtime release failed: {error}\n')
+    print(f'{digest}  {args.output}')
+
+
+if __name__ == '__main__':
+    main()

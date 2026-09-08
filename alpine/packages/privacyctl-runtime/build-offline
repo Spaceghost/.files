@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Build the pinned inert radio APK without network or package-state changes."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import pwd
+import re
+import shlex
+import shutil
+import subprocess
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, required=True)
+    parser.add_argument('--work', type=Path, required=True, help='New build directory')
+    args = parser.parse_args()
+    recipe = Path(__file__).resolve().parent
+    manifest = json.loads((recipe / 'manifest.json').read_text())
+    expected = manifest['source']['sha256']
+    if not isinstance(expected, str) or not re.fullmatch('[0-9a-f]{64}', expected):
+        parser.error('Runtime source is not frozen and checksum-pinned yet')
+    source = args.source.resolve(strict=True)
+    if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != expected:
+        parser.error('Source SHA-256 differs from the pinned runtime release')
+    if os.geteuid() == 0:
+        parser.error('Run as your build user; doas only creates network isolation')
+    work = args.work.absolute()
+    work.mkdir(parents=True, exist_ok=False)
+    stage = work / 'mbp-intel' / 'mbp-intel-radio-runtime'
+    stage.mkdir(parents=True)
+    shutil.copy2(recipe / 'APKBUILD', stage / 'APKBUILD')
+    shutil.copy2(source, stage / manifest['source']['filename'])
+    user = pwd.getpwuid(os.getuid()).pw_name
+    command = ['abuild', '-d', '-K', '-P', str(work / 'apks'), '-s', str(work / 'distfiles')]
+    isolated = ['doas', '-n', 'unshare', '--net', '--', 'su', user, '-s', '/bin/sh',
+                '-c', 'cd ' + shlex.quote(str(stage)) + ' && exec ' + shlex.join(command)]
+    with (work / 'build.log').open('w') as log:
+        result = subprocess.run(isolated, stdout=log, stderr=subprocess.STDOUT)
+    if result.returncode:
+        raise SystemExit(f'Build failed; see {work / "build.log"}')
+    packages = sorted((work / 'apks' / 'mbp-intel').glob('*/*.apk'))
+    if len(packages) != 1 or packages[0].name != 'mbp-intel-radio-runtime-0.1.0-r0.apk':
+        raise SystemExit('Build must produce exactly the pinned inert runtime APK')
+    print(f'{hashlib.sha256(packages[0].read_bytes()).hexdigest()}  {packages[0]}')
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,131 @@
+{
+  "date": "2026-09-07",
+  "recorded_at_utc": "2026-09-07T17:59:51.139608+00:00",
+  "scope": "Staged durable journal and namespace-init writer primitives; not connected to runtime recovery.",
+  "status": "unit tests passed; integration and native kernel proof pending",
+  "source_sha256": {
+    "root/usr/local/lib/privacyctl_runtime/journal.py": "c1db45fe209853528dc5449717e755fae40db53902f10784d2f4c6419c9dc34a",
+    "root/usr/local/lib/privacyctl_runtime/writers.py": "cb4cb9d9190934ea8fb4ffab2622aefb293596942ad941dade2d87d3e331e4b1",
+    "tests/test_journal.py": "f988a0f7c8f97cb429066a76a5be675005527838f13a150bad290fe5197db99c",
+    "tests/test_writers.py": "36abfa74e2d81ac67796ad7487be633292049450199f9eec15021ec7796b1c3b"
+  },
+  "tests": [
+    {
+      "component": "journal",
+      "passed": 26,
+      "skipped": 0,
+      "command": [
+        "doas",
+        "-n",
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "alpine/security/radio/tests",
+        "-p",
+        "test_journal.py",
+        "-v"
+      ],
+      "log_sha256": "14094cb73b2de795a5276169df09be5bbb35aa9eb0c62e0c5defbb4138ad84e0"
+    },
+    {
+      "component": "writers",
+      "passed": 31,
+      "skipped": 0,
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "alpine/security/radio/tests",
+        "-p",
+        "test_writers.py",
+        "-v"
+      ],
+      "log_sha256": "a912cc68e94baffed1778cbab23560525497a1c4e149876ec3e0b73e7672a3cd"
+    }
+  ],
+  "total_passed": 57,
+  "isolation": {
+    "journal": "Root-owned disposable files; no installed journal or live service state.",
+    "writers": "Temporary proc fixtures and mocked pidfd/select/signal operations; no real process signals or network namespaces."
+  },
+  "coverage": [
+    "Strict bounded JSON schema, duplicate-key rejection and immutable lease identity",
+    "Root-private path validation, replacement conflicts, durable writes and clean-only removal",
+    "Partial writes and file/rename/directory-fsync failure retention",
+    "Same-boot observer PID and target network namespace context",
+    "Held proc directory, PID reuse, real absence versus missing metadata, positive completion proof",
+    "Borrowed and owned pidfd lifetime, pidfd-only signal path, cancellation and bounded waits"
+  ],
+  "limitations": [
+    "Existing lease-dirty marker remains the runtime orphan handling; these helpers do not enable recovery.",
+    "Execution gate registration, conservative resource updates, link cookie lifecycle and owner startup locks remain to be integrated.",
+    "Mocked writer tests do not prove descendant teardown on the deployed kernel.",
+    "Recovery of addresses, routes, resolver output and repeated recovery after injected crashes remains unimplemented.",
+    "No live radio, service, firewall, desktop, installed package or trusted profile changed."
+  ],
+  "evidence": [
+    {
+      "name": "journal-red.log",
+      "sha256": "31fb3ab1eb4035fc1c9aa794e514abe5ff334ae323433f7c21cfb05288526ba7",
+      "artifact": "sha256/31fb3ab1eb4035fc1c9aa794e514abe5ff334ae323433f7c21cfb05288526ba7/radio-orphan-journal-red.log"
+    },
+    {
+      "name": "journal-review-red.log",
+      "sha256": "c3726fb56f1992519984957f10ec7e800ed70614efa97a12534641ed40067da8",
+      "artifact": "sha256/c3726fb56f1992519984957f10ec7e800ed70614efa97a12534641ed40067da8/radio-orphan-journal-review-red.log"
+    },
+    {
+      "name": "root-journal-tests.log",
+      "sha256": "14094cb73b2de795a5276169df09be5bbb35aa9eb0c62e0c5defbb4138ad84e0",
+      "artifact": "sha256/14094cb73b2de795a5276169df09be5bbb35aa9eb0c62e0c5defbb4138ad84e0/radio-orphan-root-journal-tests.log"
+    },
+    {
+      "name": "root-writers-tests.log",
+      "sha256": "a912cc68e94baffed1778cbab23560525497a1c4e149876ec3e0b73e7672a3cd",
+      "artifact": "sha256/a912cc68e94baffed1778cbab23560525497a1c4e149876ec3e0b73e7672a3cd/radio-orphan-root-writers-tests.log"
+    },
+    {
+      "name": "journal-task.md",
+      "sha256": "49ea34eb1002c5a8adcdefd35850ea955981658f25e38b1a0fe34dd8489ae9fd",
+      "artifact": "sha256/49ea34eb1002c5a8adcdefd35850ea955981658f25e38b1a0fe34dd8489ae9fd/radio-orphan-journal-task.md"
+    },
+    {
+      "name": "writers-task.md",
+      "sha256": "90381888fa5c450ecbd289bbc6b2964c5c31e31c0a282f524092b94d70b61a78",
+      "artifact": "sha256/90381888fa5c450ecbd289bbc6b2964c5c31e31c0a282f524092b94d70b61a78/radio-orphan-writers-task.md"
+    },
+    {
+      "name": "journal-review.md",
+      "sha256": "32c228fdb0e2fec612ae8365761932a9bef9991b77b1a87036371c1bca472142",
+      "artifact": "sha256/32c228fdb0e2fec612ae8365761932a9bef9991b77b1a87036371c1bca472142/radio-orphan-journal-review.md"
+    },
+    {
+      "name": "writers-review.md",
+      "sha256": "e5cf40a6a40ace1d32f10c7dc80c41a297eee06f59e53aa08bc011863ac80a10",
+      "artifact": "sha256/e5cf40a6a40ace1d32f10c7dc80c41a297eee06f59e53aa08bc011863ac80a10/radio-orphan-writers-review.md"
+    },
+    {
+      "name": "final-review.md",
+      "sha256": "8da18a0123a0ec37ac08f45319ff9149141e33009855b1a5ea8a447543655abe",
+      "artifact": "sha256/8da18a0123a0ec37ac08f45319ff9149141e33009855b1a5ea8a447543655abe/radio-orphan-final-review.md"
+    }
+  ],
+  "independent_review": {
+    "journal": "approved for staged primitive scope",
+    "writers": "approved for staged primitive scope",
+    "cross_module": "approved; source/schema/evidence/staging checked",
+    "open_critical_or_important_findings": 0,
+    "reviewed_source_sha256": {
+      "root/usr/local/lib/privacyctl_runtime/journal.py": "c1db45fe209853528dc5449717e755fae40db53902f10784d2f4c6419c9dc34a",
+      "root/usr/local/lib/privacyctl_runtime/writers.py": "cb4cb9d9190934ea8fb4ffab2622aefb293596942ad941dade2d87d3e331e4b1",
+      "tests/test_journal.py": "f988a0f7c8f97cb429066a76a5be675005527838f13a150bad290fe5197db99c",
+      "tests/test_writers.py": "36abfa74e2d81ac67796ad7487be633292049450199f9eec15021ec7796b1c3b"
+    }
+  }
+}

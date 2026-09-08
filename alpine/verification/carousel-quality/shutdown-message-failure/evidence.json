@@ -1,0 +1,297 @@
+{
+  "status": "failed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "f9fd5fbf704a40c3e35dfb75360566f19f63e74ba92fb08199edb47b7a3f29fd",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "1f41824098409b79e98e97dbdd99d992775a5a45298e7fd1a29b377e8b2ebb42"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows",
+    "scale-two-previews-preserve-provider-pixels-without-upscaling",
+    "hidden-workspace-preview-renders-without-focus-change",
+    "open-gesture-keeps-still-image-after-real-window-content-changes",
+    "persistent-show-ignores-modifier-release-and-escape-cancels",
+    "new-gesture-refreshes-still-image-at-native-quality",
+    "super-tab-repeat-reverse-frozen-order-and-release-commit",
+    "alt-tab-shares-all-window-order-and-final-release",
+    "alt-shift-tab-uses-reverse-binding",
+    "held-escape-cancels-and-restores-default-mode",
+    "quick-super-and-alt-taps-toggle-last-two-windows",
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits",
+    "next-gesture-discovers-new-window",
+    "rapid-close-reopen-keeps-one-current-preview-generation",
+    "mode-takeover-and-orphaned-mode-escape-recovery",
+    "production-source-hashes-stable"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 29511
+    },
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows": {
+      "pid": 29511,
+      "ready": true,
+      "open": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": null,
+      "preview_ids": [],
+      "preview_dimensions": {},
+      "frames": 0,
+      "frame_times": []
+    },
+    "scale-two-previews-preserve-provider-pixels-without-upscaling": {
+      "actual": {
+        "6": [
+          720,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "5": [
+          720,
+          900
+        ]
+      },
+      "direct_provider": {
+        "5": [
+          720,
+          900
+        ],
+        "6": [
+          720,
+          900
+        ],
+        "8": [
+          1440,
+          900
+        ],
+        "10": [
+          1440,
+          900
+        ]
+      },
+      "logical_rect_times_output_scale": {
+        "5": [
+          1440,
+          1800
+        ],
+        "6": [
+          1440,
+          1800
+        ],
+        "8": [
+          2880,
+          1800
+        ],
+        "10": [
+          2880,
+          1800
+        ]
+      },
+      "physical_letterboxed_card": {
+        "6": [
+          624.0,
+          780.0
+        ],
+        "10": [
+          1248.0,
+          780.0
+        ],
+        "8": [
+          1248.0,
+          780.0
+        ],
+        "5": [
+          624.0,
+          780.0
+        ]
+      },
+      "grim_explicit_scale_one": [
+        1440,
+        900
+      ]
+    },
+    "hidden-workspace-preview-renders-without-focus-change": {
+      "preview_ids": [
+        5,
+        6,
+        8,
+        10
+      ],
+      "cyan_pixels": 971427,
+      "workspace_focus": 1,
+      "focus_events": []
+    },
+    "open-gesture-keeps-still-image-after-real-window-content-changes": {
+      "unchanged_green_pixels": 476231,
+      "new_magenta_pixels": 0,
+      "preview_dimensions_unchanged": true
+    },
+    "new-gesture-refreshes-still-image-at-native-quality": {
+      "new_magenta_pixels": 473803
+    },
+    "super-tab-repeat-reverse-frozen-order-and-release-commit": {
+      "frames": 54,
+      "frame_times_us": [
+        20546654899,
+        20546704900,
+        20546738695,
+        20546755596,
+        20546775603,
+        20546804844,
+        20546821585,
+        20546841115,
+        20546871257,
+        20546888015,
+        20546907106,
+        20546937127,
+        20546953847,
+        20546972844,
+        20547003151,
+        20547019916,
+        20547039273,
+        20547069523,
+        20547086288,
+        20547105653,
+        20547135706,
+        20547152391,
+        20547170977,
+        20548056268,
+        20548106269,
+        20548139161,
+        20548171692,
+        20548191833,
+        20548226830,
+        20548263973,
+        20548297356,
+        20548329570,
+        20548359434,
+        20548392303,
+        20548425685,
+        20548458956,
+        20548495110,
+        20548532119,
+        20548569087,
+        20549261957,
+        20549295291,
+        20549331309,
+        20549364506,
+        20549400704,
+        20549449115,
+        20549482767,
+        20549519659,
+        20549566584,
+        20549599950,
+        20549632084,
+        20549665318,
+        20549701709,
+        20549751315,
+        20549785485
+      ],
+      "active_frame_interval_median_ms": 32.869,
+      "idle_gaps_excluded": 2
+    },
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits": {
+      "removed": 8,
+      "committed": 10,
+      "deferred_new": 11
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "output_scale": 2,
+  "verifier_sha256": "972f32acb0b94a66dc00437c91553bd63badfaef9f97f2a644dd08e18d40bc31",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "targeted_activation_probe": {
+    "include_command": "include \"/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf\"",
+    "include_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command 'include'"
+      }
+    ],
+    "inline_command": "mode \"probe-mode\" { bindsym Escape mode \"default\" }",
+    "inline_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command '{'"
+      }
+    ],
+    "modes_before": [
+      "default",
+      "fixture-other",
+      "window-switcher"
+    ],
+    "modes_after": [
+      "default",
+      "fixture-other",
+      "window-switcher",
+      "probe-mode"
+    ],
+    "probe_mode_created": true,
+    "mode_after_probe": {
+      "name": "default"
+    }
+  },
+  "error": "carousel exited unexpectedly during compositor shutdown: 1",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 642, in run\n    require(daemon_exit == 0 or (daemon_exit == 1 and gdk_disconnect),\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            f'carousel exited unexpectedly during compositor shutdown: {daemon_exit}')\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/jack/.files/alpine/tests/verify_carousel.py\", line 32, in require\n    raise AssertionError(message)\nAssertionError: carousel exited unexpectedly during compositor shutdown: 1\n",
+  "last_state": {
+    "pid": 29511,
+    "ready": true,
+    "open": false,
+    "selected_id": null,
+    "candidate_ids": [],
+    "modifier": null,
+    "preview_ids": [],
+    "preview_dimensions": {},
+    "frames": 4,
+    "frame_times": [
+      20563328124,
+      20563378125,
+      20563511679,
+      20563611757
+    ]
+  },
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "status": "verification-incomplete",
+  "backup": "/home/jack/.local/state/oldbook/backups/scripture-hourly-activation-20260908T041522Z",
+  "failure": "The 2-second startup check ran before the replacement published bar.pid. Later inspection found a live singleton bar 11350 and live Scripture card 11344. Other Conky cards also changed concurrently, indicating an independent layout rebuild.",
+  "recovery": "Allow a bounded 12-second startup publication grace, retain previous evidence, and repeat a final scoped activation."
+}

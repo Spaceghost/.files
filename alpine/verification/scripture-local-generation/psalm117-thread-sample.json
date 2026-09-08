@@ -1,0 +1,237 @@
+{
+  "sample_started_utc": "2026-09-08T05:29:30.015199+00:00",
+  "process_chain": {
+    "wrapper": 11533,
+    "server": 11601,
+    "runner": 13843
+  },
+  "process_start_ticks": {
+    "11533": 2351867,
+    "11601": 2352178,
+    "13843": 2360459
+  },
+  "listener": {
+    "address": "127.0.0.1",
+    "port": 11435,
+    "owned_by_pid": 11601
+  },
+  "mapped_ggml_libraries": [
+    "libggml-base.so",
+    "libggml-cpu-alderlake.so",
+    "libggml-cpu-haswell.so",
+    "libggml-cpu-icelake.so",
+    "libggml-cpu-sandybridge.so",
+    "libggml-cpu-skylakex.so",
+    "libggml-cpu-sse42.so",
+    "libggml-cpu-x64.so"
+  ],
+  "duration_seconds": 5.024,
+  "clock_ticks_per_second": 100,
+  "threads_first": 12,
+  "threads_last": 12,
+  "aggregate_cpu_percent_of_one_core": 41.2,
+  "thread_deltas": [
+    {
+      "tid": 14441,
+      "user_ticks": 154,
+      "system_ticks": 1,
+      "cpu_percent_of_one_core": 30.85,
+      "state_sample_counts": {
+        "R": 6
+      },
+      "wait_channel_sample_counts": {
+        "0": 6
+      },
+      "observed_cpus": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "tid": 14443,
+      "user_ticks": 28,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 5.57,
+      "state_sample_counts": {
+        "R": 6
+      },
+      "wait_channel_sample_counts": {
+        "0": 6
+      },
+      "observed_cpus": [
+        1,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "tid": 13874,
+      "user_ticks": 13,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 2.59,
+      "state_sample_counts": {
+        "R": 6
+      },
+      "wait_channel_sample_counts": {
+        "0": 6
+      },
+      "observed_cpus": [
+        1,
+        3,
+        5,
+        6
+      ]
+    },
+    {
+      "tid": 14442,
+      "user_ticks": 11,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 2.19,
+      "state_sample_counts": {
+        "R": 6
+      },
+      "wait_channel_sample_counts": {
+        "0": 6
+      },
+      "observed_cpus": [
+        1,
+        5,
+        7
+      ]
+    },
+    {
+      "tid": 13890,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        0
+      ]
+    },
+    {
+      "tid": 13891,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "do_epoll_wait": 6
+      },
+      "observed_cpus": [
+        1
+      ]
+    },
+    {
+      "tid": 13873,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        4
+      ]
+    },
+    {
+      "tid": 13875,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        4
+      ]
+    },
+    {
+      "tid": 13843,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        4
+      ]
+    },
+    {
+      "tid": 13876,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        7
+      ]
+    },
+    {
+      "tid": 13881,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        5
+      ]
+    },
+    {
+      "tid": 16892,
+      "user_ticks": 0,
+      "system_ticks": 0,
+      "cpu_percent_of_one_core": 0.0,
+      "state_sample_counts": {
+        "S": 6
+      },
+      "wait_channel_sample_counts": {
+        "futex_do_wait": 6
+      },
+      "observed_cpus": [
+        0
+      ]
+    }
+  ],
+  "collection_scope": "Only owned runner per-thread stat/wchan, library basenames and owning server listener identity; no prompt, generated content, debugger, signals or new inference.",
+  "raw_sample_sha256": "2ec196c6b961106b5fc8fab1ebad41c5a5cbc612642099e31f976486f3f2fcb0",
+  "observations": {
+    "threads_with_cpu_progress": 4,
+    "total_observed_cpu_seconds": 2.07,
+    "dominant_thread_fraction_of_observed_cpu": 0.7488,
+    "active_threads_runnable_at_all_six_snapshots": true,
+    "interpretation": "Several runner threads remained runnable, but collectively received much less than one core of CPU time during the window. One thread accounted for about 75% of observed runner CPU. This is consistent with limited scheduling availability; this sample does not identify its cause.",
+    "uncertainty": "Per-thread counters and wait states do not distinguish useful model arithmetic, spin barriers and schema sampling. Library mappings do not by themselves prove which CPU variant was selected; the generation owner separately verified Haswell in the native log.",
+    "not_a_whole_request_profile": true
+  }
+}

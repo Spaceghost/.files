@@ -1,0 +1,18 @@
+{
+  "signed_apk_base_library_members": [
+    {
+      "name": "usr/lib/ollama/libggml-base.so",
+      "symlink": false,
+      "linkname": ""
+    }
+  ],
+  "missing_soname": "libggml-base.so.0",
+  "repair": {
+    "path": "/home/jack/.local/share/oldbook/ollama/runtime-0.17.7-r1/usr/lib/ollama/libggml-base.so.0",
+    "target": "libggml-base.so",
+    "scope": "private extracted runtime only"
+  },
+  "loader_before_exit": 127,
+  "loader_after_exit": 0,
+  "binary_or_library_bytes_changed": false
+}

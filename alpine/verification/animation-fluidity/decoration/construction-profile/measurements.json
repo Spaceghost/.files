@@ -1,0 +1,306 @@
+{
+  "source_sha256": "4743f794d571905b0b0c30758dfb8a5066bd1126e01677d9da9190dcf4aba9e3",
+  "isolation": "Synthetic contexts; GTK3 widgets constructed and measured with Gtk.Window.show suppressed. No mapped toplevels or gesture/restart commands.",
+  "calls": [
+    {
+      "method": "__init__",
+      "wall_ms": 2192.366,
+      "cpu_ms": 506.146
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 9.691,
+      "cpu_ms": 6.797
+    },
+    {
+      "method": "place",
+      "wall_ms": 1387.404,
+      "cpu_ms": 231.37
+    },
+    {
+      "method": "update",
+      "wall_ms": 1421.298,
+      "cpu_ms": 249.792
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 68.012,
+      "cpu_ms": 7.948
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 132.705,
+      "cpu_ms": 28.566
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 12.129,
+      "cpu_ms": 8.04
+    },
+    {
+      "method": "place",
+      "wall_ms": 13.045,
+      "cpu_ms": 9.552
+    },
+    {
+      "method": "update",
+      "wall_ms": 34.727,
+      "cpu_ms": 23.51
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 10.589,
+      "cpu_ms": 7.996
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 108.738,
+      "cpu_ms": 23.79
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 10.839,
+      "cpu_ms": 7.673
+    },
+    {
+      "method": "place",
+      "wall_ms": 9.018,
+      "cpu_ms": 8.896
+    },
+    {
+      "method": "update",
+      "wall_ms": 27.187,
+      "cpu_ms": 22.388
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 67.304,
+      "cpu_ms": 8.267
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 29.897,
+      "cpu_ms": 24.658
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 10.919,
+      "cpu_ms": 7.866
+    },
+    {
+      "method": "place",
+      "wall_ms": 42.888,
+      "cpu_ms": 10.319
+    },
+    {
+      "method": "update",
+      "wall_ms": 60.258,
+      "cpu_ms": 23.404
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 9.999,
+      "cpu_ms": 6.658
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 41.993,
+      "cpu_ms": 24.665
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 92.995,
+      "cpu_ms": 8.439
+    },
+    {
+      "method": "place",
+      "wall_ms": 69.46,
+      "cpu_ms": 10.157
+    },
+    {
+      "method": "update",
+      "wall_ms": 169.44,
+      "cpu_ms": 24.016
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 32.051,
+      "cpu_ms": 6.98
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 111.938,
+      "cpu_ms": 23.326
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 12.822,
+      "cpu_ms": 6.743
+    },
+    {
+      "method": "place",
+      "wall_ms": 62.835,
+      "cpu_ms": 8.637
+    },
+    {
+      "method": "update",
+      "wall_ms": 86.653,
+      "cpu_ms": 20.219
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 18.166,
+      "cpu_ms": 6.361
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 20.316,
+      "cpu_ms": 19.083
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 9.956,
+      "cpu_ms": 6.764
+    },
+    {
+      "method": "place",
+      "wall_ms": 32.058,
+      "cpu_ms": 8.637
+    },
+    {
+      "method": "update",
+      "wall_ms": 87.582,
+      "cpu_ms": 20.308
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 6.539,
+      "cpu_ms": 6.132
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 25.828,
+      "cpu_ms": 19.468
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 16.714,
+      "cpu_ms": 6.579
+    },
+    {
+      "method": "place",
+      "wall_ms": 8.141,
+      "cpu_ms": 7.716
+    },
+    {
+      "method": "update",
+      "wall_ms": 32.668,
+      "cpu_ms": 18.933
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 27.323,
+      "cpu_ms": 6.165
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 91.368,
+      "cpu_ms": 20.668
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 10.508,
+      "cpu_ms": 6.737
+    },
+    {
+      "method": "place",
+      "wall_ms": 16.941,
+      "cpu_ms": 8.279
+    },
+    {
+      "method": "update",
+      "wall_ms": 64.773,
+      "cpu_ms": 19.929
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 11.143,
+      "cpu_ms": 6.022
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 32.147,
+      "cpu_ms": 20.316
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 7.148,
+      "cpu_ms": 6.459
+    },
+    {
+      "method": "place",
+      "wall_ms": 12.413,
+      "cpu_ms": 8.175
+    },
+    {
+      "method": "update",
+      "wall_ms": 33.44,
+      "cpu_ms": 19.505
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 35.491,
+      "cpu_ms": 6.284
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 68.399,
+      "cpu_ms": 20.804
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 28.447,
+      "cpu_ms": 6.905
+    },
+    {
+      "method": "place",
+      "wall_ms": 10.709,
+      "cpu_ms": 8.004
+    },
+    {
+      "method": "update",
+      "wall_ms": 50.349,
+      "cpu_ms": 19.956
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 9.39,
+      "cpu_ms": 6.23
+    },
+    {
+      "method": "__init__",
+      "wall_ms": 36.638,
+      "cpu_ms": 20.857
+    },
+    {
+      "method": "restyle",
+      "wall_ms": 12.939,
+      "cpu_ms": 6.81
+    },
+    {
+      "method": "place",
+      "wall_ms": 38.45,
+      "cpu_ms": 8.376
+    },
+    {
+      "method": "update",
+      "wall_ms": 66.93,
+      "cpu_ms": 20.421
+    },
+    {
+      "method": "destroy",
+      "wall_ms": 49.013,
+      "cpu_ms": 6.742
+    }
+  ]
+}

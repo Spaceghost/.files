@@ -1,0 +1,9 @@
+{
+  "passed": false,
+  "error": "Fixture ordinary app did not gain focus before initial activation. Original verifier cleanup call had reversed arguments; private clients cleaned explicitly afterward.",
+  "cleanup": {
+    "private_clients_stopped": 5,
+    "forced_clients": 0
+  },
+  "private_survivors": []
+}

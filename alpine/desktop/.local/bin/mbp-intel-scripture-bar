@@ -1,0 +1,450 @@
+#!/usr/bin/env python3
+"""Search offline Scripture directly in the existing desktop bar."""
+import argparse
+from concurrent.futures import ThreadPoolExecutor
+import fcntl
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import subprocess
+import sys
+import time
+
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('GtkLayerShell', '0.1')
+from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango
+
+REPO = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/mbp_intel'))
+from overlay_theme import gtk_css, read_palette
+from desktop_space import read_screen, search_rectangle
+import scripture
+from scripture_search import SearchIndex
+from scripture_bar_ipc import endpoint, request, SCOPES
+
+STATE = Path.home() / '.local/state/mbp-intel/scripture'
+FINDER = REPO / 'alpine/desktop/.local/bin/mbp-intel-scripture'
+WIDTH = 760
+HINT = 'Search Bible · right-click for reflections & study'
+
+
+class SearchBar:
+    def __init__(self):
+        self.editing = False
+        self.acquired_focus = False
+        self.closed = False
+        self.epoch = 0
+        self.activation = 0
+        self.results = []
+        self.pending_search = None
+        self.worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix='scripture-search')
+        self.indexes = {}
+        self.window = Gtk.Window()
+        self.window.set_name('scripture-bar')
+        GtkLayerShell.init_for_window(self.window)
+        GtkLayerShell.set_namespace(self.window, 'mbp-intel-scripture')
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        # Match the planner’s absolute screen coordinates, independent of bars.
+        GtkLayerShell.set_exclusive_zone(self.window, -1)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
+        GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.LEFT, True)
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+        self.window.set_size_request(WIDTH, -1)
+        self.geometry = None
+        self.refresh_geometry()
+        self.geometry_timer = GLib.timeout_add_seconds(1, self.refresh_geometry)
+        self.window.connect('destroy', self.cleanup_geometry)
+
+        button = Gtk.EventBox()
+        button.get_style_context().add_class('bar')
+        row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        row.get_style_context().add_class('entry-row')
+        icon = Gtk.Label(label='')
+        icon.get_style_context().add_class('icon')
+        row.pack_start(icon, False, False, 0)
+        self.label = Gtk.Label(label=HINT)
+        self.label.get_style_context().add_class('hint')
+        self.label.set_xalign(0)
+        self.label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.label.set_max_width_chars(1)
+        self.entry = Gtk.Entry()
+        self.entry.set_has_frame(False)
+        self.entry.get_style_context().add_class('search-entry')
+        self.entry.connect('changed', self.search_changed)
+        self.entry.connect('activate', self.select_result)
+        self.entry.connect('key-press-event', self.key_pressed)
+        self.entry.connect('button-press-event', self.open_finder)
+        self.input_stack = Gtk.Stack()
+        self.input_stack.add_named(self.label, 'hint')
+        self.input_stack.add_named(self.entry, 'entry')
+        row.pack_start(self.input_stack, True, True, 0)
+        shortcut = Gtk.Label(label='Super + /')
+        shortcut.get_style_context().add_class('shortcut')
+        row.pack_start(shortcut, False, False, 0)
+        button.add(row)
+        button.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.ENTER_NOTIFY_MASK
+                          | Gdk.EventMask.LEAVE_NOTIFY_MASK)
+        button.connect('button-press-event', self.open_finder)
+        button.connect('enter-notify-event', lambda *_: self._hover(True))
+        button.connect('leave-notify-event', lambda *_: self._hover(False))
+        self.button = button
+        content = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.result_area = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        self.result_area.set_no_show_all(True)
+        self.result_list = Gtk.ListBox()
+        self.result_list.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.result_list.set_activate_on_single_click(True)
+        self.result_list.connect('row-activated', self.select_result)
+        self.result_list.get_style_context().add_class('search-results')
+        self.status = Gtk.Label(xalign=0)
+        self.status.set_ellipsize(Pango.EllipsizeMode.END)
+        self.status.get_style_context().add_class('search-status')
+        self.result_area.pack_start(self.result_list, False, False, 0)
+        self.result_area.pack_start(self.status, False, False, 0)
+        content.pack_start(self.result_area, False, False, 0)
+        content.pack_start(button, False, False, 0)
+        self.window.add(content)
+        self.window.connect('focus-in-event', self.focus_received)
+        self.window.connect('focus-out-event', self.focus_lost)
+        self.window.connect('destroy', self.cleanup_search)
+
+        self.palette = None
+        self.provider = Gtk.CssProvider()
+        Gtk.StyleContext.add_provider_for_screen(
+            self.window.get_screen(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        self.refresh_theme()
+        self.theme_timer = GLib.timeout_add_seconds(1, self.refresh_theme)
+        self.window.connect('destroy', self.cleanup_theme)
+        # Conky can restart its cache after a layout/theme change. The saved
+        # hourly deadline remains authoritative; tick only redraws a due entry.
+        self.clock_process = None
+        self.clock_timer = GLib.timeout_add_seconds(60, self.refresh_selection)
+        self.window.connect('destroy', self.cleanup_clock)
+        self.refresh_selection()
+        self.window.show_all()
+        self.input_stack.set_visible_child_name('hint')
+        STATE.mkdir(parents=True, exist_ok=True, mode=0o700)
+        (STATE / 'bar.pid').write_text(f'{os.getpid()}\n')
+        self.control_path = endpoint()
+        self.control_path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.control_path.unlink(missing_ok=True)
+        self.control = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self.control.bind(str(self.control_path))
+        self.control.setblocking(False)
+        self.control_watch = GLib.io_add_watch(self.control.fileno(), GLib.IO_IN, self.receive_request)
+        # Retain the existing signal as another activation path.
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGUSR1, self.open_finder)
+
+    def _hover(self, inside):
+        style = self.button.get_style_context()
+        (style.add_class if inside else style.remove_class)('hover')
+        return False
+
+    def refresh_geometry(self):
+        # Keep the entry under the pointer and avoid monitor remaps while typing.
+        if self.editing:
+            return GLib.SOURCE_CONTINUE
+        try:
+            screen = read_screen()
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
+            return GLib.SOURCE_CONTINUE
+        if screen == self.geometry:
+            return GLib.SOURCE_CONTINUE
+        display = Gdk.Display.get_default()
+        for index in range(display.get_n_monitors()):
+            if Gdk.Screen.get_default().get_monitor_plug_name(index) == screen['name']:
+                GtkLayerShell.set_monitor(self.window, display.get_monitor(index))
+                break
+        rectangle = search_rectangle(screen)
+        self.window.set_size_request(rectangle['width'], -1)
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, screen['bottom'])
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rectangle['x'])
+        self.geometry = screen
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_geometry(self, *_arguments):
+        GLib.source_remove(self.geometry_timer)
+
+    def refresh_theme(self):
+        palette = read_palette()
+        if palette == self.palette:
+            return GLib.SOURCE_CONTINUE
+        self.provider.load_from_data(gtk_css('''
+        #scripture-bar { background: transparent; }
+        .bar {
+            background: alpha(@theme_background, 0.72);
+            border: 1px solid alpha(@theme_accent, 0.40);
+            border-radius: 10px;
+        }
+        .bar.hover { border-color: alpha(@theme_accent, 0.85); }
+        .entry-row { padding: 11px 16px; }
+        .icon { color: @theme_accent; font-size: 13px; }
+        .hint {
+            color: @theme_muted;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 12px;
+        }
+        .shortcut {
+            color: @theme_accent;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 11px;
+        }
+        .search-entry {
+            background: transparent; color: @theme_foreground;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 12px;
+            min-height: 0; padding: 0;
+        }
+        .search-results, .search-status {
+            background: alpha(@theme_background, 0.96); color: @theme_foreground;
+            font-family: "JetBrainsMono Nerd Font", monospace; font-size: 12px;
+        }
+        .search-results row { padding: 6px 16px; }
+        .search-results row:selected { background: alpha(@theme_accent, 0.25); }
+        .result-title { color: @theme_accent; }
+        .result-text { color: @theme_muted; font-size: 11px; }
+        .search-status { padding: 6px 16px; }
+        ''', palette))
+        self.palette = palette
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_theme(self, _window):
+        GLib.source_remove(self.theme_timer)
+        Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+
+    def refresh_selection(self):
+        if self.clock_process is None or self.clock_process.poll() is not None:
+            try:
+                self.clock_process = subprocess.Popen(['/usr/bin/python3', str(FINDER), 'tick'],
+                    stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, start_new_session=True)
+            except OSError:
+                pass
+        return GLib.SOURCE_CONTINUE
+
+    def cleanup_clock(self, _window):
+        GLib.source_remove(self.clock_timer)
+
+    def open_finder(self, _widget=None, event=None):
+        right_click = getattr(event, 'button', None) == 3
+        if right_click or not self.editing or event is None:
+            self.activate('reflections' if right_click else 'bible')
+        return GLib.SOURCE_CONTINUE if event is None else right_click
+
+    def receive_request(self, *_arguments):
+        try:
+            payload = json.loads(self.control.recv(4096))
+            scope = payload.get('scope', 'bible')
+            query = payload.get('query', '')
+            translation = payload.get('translation')
+            if (scope in SCOPES and isinstance(query, str) and
+                    (translation is None or isinstance(translation, str))):
+                self.activate(scope, query, translation)
+        except (OSError, ValueError, AttributeError):
+            pass
+        return GLib.SOURCE_CONTINUE
+
+    def activate(self, scope='bible', query='', translation=None):
+        if translation is None:
+            try:
+                translation = (STATE / 'translation').read_text().strip()
+            except OSError:
+                translation = scripture.BUNDLED
+        self.translation = translation or scripture.BUNDLED
+        self.scope = scope
+        self.activation += 1
+        self.editing = True
+        self.acquired_focus = False
+        self.input_stack.set_visible_child_name('entry')
+        self.entry.set_placeholder_text({'bible': 'Search Bible', 'all': 'Search all texts',
+                                         'reflections': 'Search reflections & study'}[scope])
+        self.entry.set_text(query)
+        self.entry.set_position(-1)
+        self.result_area.show()
+        # Keep keyboard ownership only for this explicit editing interval.
+        # This SwayFX clears ON_DEMAND focus on every layer geometry commit.
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP)
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.EXCLUSIVE)
+        self.entry.grab_focus()
+        self.window.queue_draw()
+        if self.window.is_active():
+            self.focus_received()
+        self.search_changed()
+        return GLib.SOURCE_REMOVE
+
+    def focus_received(self, *_arguments):
+        if self.editing:
+            self.acquired_focus = True
+            self.entry.grab_focus()
+        return False
+
+    def focus_lost(self, *_arguments):
+        if self.editing and self.acquired_focus:
+            self.deactivate()
+        return False
+
+    def deactivate(self):
+        self.editing = False
+        self.acquired_focus = False
+        self.epoch += 1
+        self.result_area.hide()
+        self.input_stack.set_visible_child_name('hint')
+        GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+        GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
+        # GTK otherwise retains the expanded result height after hiding it.
+        self.window.resize(1, 1)
+
+    def key_pressed(self, _entry, event):
+        if event.keyval in (Gdk.KEY_Return, Gdk.KEY_KP_Enter):
+            self.select_result()
+            return True
+        if event.keyval == Gdk.KEY_Escape:
+            self.deactivate()
+            return True
+        if event.keyval in (Gdk.KEY_Up, Gdk.KEY_Down):
+            rows = self.result_list.get_children()
+            if rows:
+                selected = self.result_list.get_selected_row()
+                index = selected.get_index() if selected else -1
+                index = (index + (1 if event.keyval == Gdk.KEY_Down else -1)) % len(rows)
+                self.result_list.select_row(rows[index])
+            return True
+        return False
+
+    def search_changed(self, *_arguments):
+        if not self.editing:
+            return
+        self.epoch += 1
+        epoch = self.epoch
+        self.results = []
+        for row in self.result_list.get_children():
+            row.destroy()
+        self.status.set_text('Searching…')
+        self.status.show()
+        if self.pending_search:
+            self.pending_search.cancel()
+        self.pending_search = self.worker.submit(self.search, self.scope, self.translation,
+                                                 self.entry.get_text(), self.activation)
+        def completed(future):
+            if not future.cancelled():
+                try:
+                    result, error = future.result(), ''
+                except Exception as problem:
+                    result, error = [], str(problem)
+                GLib.idle_add(self.show_results, epoch, result, error)
+        self.pending_search.add_done_callback(completed)
+
+    def search(self, scope, translation, query, activation):
+        # Re-read the study catalog on each activation so newly imported study
+        # material appears without restarting the bar. Reuse it while typing.
+        key = (scope, translation, activation)
+        if key not in self.indexes:
+            bible = scripture.Bible.load(REPO / 'alpine/assets/scripture',
+                include_extra=scope == 'all', translation=translation)
+            studies = []
+            if scope != 'bible':
+                from scripture_study import load_entries
+                studies = load_entries(REPO / 'alpine/assets/scripture')
+            self.indexes = {key: SearchIndex(bible, studies, scope)}
+        return self.indexes[key].search(query)
+
+    def show_results(self, epoch, results, error=''):
+        if self.closed or not self.editing or epoch != self.epoch:
+            return GLib.SOURCE_REMOVE
+        self.results = results
+        for result in results:
+            row = Gtk.ListBoxRow()
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            for key, style in (('title', 'result-title'), ('text', 'result-text')):
+                label = Gtk.Label(label=result[key], xalign=0)
+                label.set_ellipsize(Pango.EllipsizeMode.END)
+                label.set_max_width_chars(1)
+                label.get_style_context().add_class(style)
+                box.pack_start(label, False, False, 0)
+            row.add(box)
+            self.result_list.add(row)
+        self.result_list.show_all()
+        self.status.set_text(error or ('No matching passages' if not results else
+                                      '↑ ↓ choose · Enter display · Esc close'))
+        self.status.show()
+        if results:
+            self.result_list.select_row(self.result_list.get_row_at_index(0))
+        self.window.resize(1, 1)
+        return GLib.SOURCE_REMOVE
+
+    def select_result(self, _widget=None, row=None):
+        row = row or self.result_list.get_selected_row()
+        if not self.editing or row is None or row.get_index() >= len(self.results):
+            return
+        result = self.results[row.get_index()]
+        command = ['/usr/bin/python3', str(FINDER), result['action'], result['query'],
+                   '--translation', self.translation]
+        self.deactivate()
+        self.label.set_text('Saving ' + result['reference'] + '…')
+        future = self.worker.submit(subprocess.run, command, stdin=subprocess.DEVNULL,
+                                   capture_output=True, text=True, timeout=20)
+        def completed(future):
+            try:
+                saved = future.result()
+                message = HINT if saved.returncode == 0 else saved.stderr.strip()
+            except Exception as problem:
+                message = str(problem)
+            GLib.idle_add(self.selection_saved, message)
+        future.add_done_callback(completed)
+
+    def selection_saved(self, message):
+        if not self.closed:
+            self.label.set_text(message or HINT)
+        return GLib.SOURCE_REMOVE
+
+    def cleanup_search(self, *_arguments):
+        self.closed = True
+        self.worker.shutdown(wait=False, cancel_futures=True)
+        if hasattr(self, 'control_watch'):
+            GLib.source_remove(self.control_watch)
+            self.control.close()
+            self.control_path.unlink(missing_ok=True)
+
+
+def claim_single_instance():
+    """Hold a lock for this bar's lifetime so a reload cannot stack copies."""
+    path = endpoint().with_suffix('.lock')
+    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    handle = path.open('a+')
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.close()
+        return None
+    return handle
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--activate', choices=SCOPES)
+    parser.add_argument('--query', default='')
+    parser.add_argument('--translation')
+    arguments = parser.parse_args()
+    if arguments.activate and request(arguments.activate, arguments.query, arguments.translation):
+        return 0
+    guard = claim_single_instance()
+    if guard is None:
+        if arguments.activate:
+            # Another starter owns the lock but may still be mapping GTK.
+            for _ in range(40):
+                if request(arguments.activate, arguments.query, arguments.translation):
+                    return 0
+                time.sleep(.05)
+            print('Scripture bar did not accept the search request', file=sys.stderr)
+            return 1
+        return 0
+    bar = SearchBar()
+    if arguments.activate:
+        GLib.idle_add(bar.activate, arguments.activate, arguments.query, arguments.translation)
+    bar.window.connect('destroy', lambda *_: Gtk.main_quit())
+    Gtk.main()
+    guard.close()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

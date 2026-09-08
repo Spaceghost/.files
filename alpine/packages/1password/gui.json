@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "installation": "user",
+  "user": "jack",
+  "app_id": "com.onepassword.OnePassword",
+  "version": "8.12.12",
+  "origin": "flathub",
+  "repository": "https://dl.flathub.org/repo/",
+  "source": "https://support.1password.com/install-linux/",
+  "refs": [
+    {
+      "ref": "com.onepassword.OnePassword/x86_64/stable",
+      "commit": "bfc2e6c4d955c9ec7c309a14e35852a928d5ed38f024aef4fd90e004239030da"
+    },
+    {
+      "ref": "com.onepassword.OnePassword.Locale/x86_64/stable",
+      "commit": "3622be6ca38039b9db4b01127e2b051ac55876c549678c56be03a2df2ae7f2d3"
+    },
+    {
+      "ref": "org.freedesktop.Platform/x86_64/25.08",
+      "commit": "bd44a6230581917d04f89812a4c21090c304d390edb73995af1c2f9fd8abf4e8"
+    },
+    {
+      "ref": "org.freedesktop.Platform.GL.default/x86_64/25.08",
+      "commit": "bcfd828b0c4739753cadb31964f8c1b0f90c8d2bed79bda2c2760438eb48c4b3"
+    },
+    {
+      "ref": "org.freedesktop.Platform.GL.default/x86_64/25.08-extra",
+      "commit": "37b03bfd88271f49ba6eaa00c07155716870497c66759972bc81d67153e35138"
+    },
+    {
+      "ref": "org.freedesktop.Platform.Locale/x86_64/25.08",
+      "commit": "084eff7344f995ade230f234d74e3ee0af227eacff65f2d72cec25078783b03f"
+    },
+    {
+      "ref": "org.freedesktop.Platform.VAAPI.Intel/x86_64/25.08",
+      "commit": "c73910430acf36888478242b85689916dc3ef7e37e194d027d11a953bf5c8b17"
+    },
+    {
+      "ref": "org.freedesktop.Platform.codecs-extra/x86_64/25.08-extra",
+      "commit": "3f422b5306e0c1a1c6855fb36eeff26237d9d9c9a0abcb6d35bd9555ea75efed"
+    }
+  ],
+  "vendor_extra_data": {
+    "name": "1password.tar.gz",
+    "checksum": "b5d86e0497825db7a90cde99f58aacea013994c521ef6b0e26e412bf84288f53",
+    "size": "198731835",
+    "uri": "https://downloads.1password.com/linux/tar/stable/x86_64/1password-8.12.12.x64.tar.gz"
+  },
+  "flatpak_signature_verification": {
+    "gpg-verify": true,
+    "gpg-verify-summary": true
+  },
+  "runtime_verification": {
+    "sandbox_glibc": "2.42",
+    "native_wayland_app_id": "1password",
+    "window_title": "Welcome \u2014 1Password",
+    "desktop_file_validated": true,
+    "live_https_connection_observed": true,
+    "account_authentication_tested": false
+  },
+  "limitations": [
+    "Flatpak native browser/CLI integration and SSH agent are unsupported by upstream.",
+    "Authenticated vault access and reboot persistence are untested.",
+    "Flatpak commits are recorded; a full offline runtime restore is not archived or verified."
+  ],
+  "installed_executable_sha256": "300d4d56181521936697346535660cae932438a3678aafaeec9ff39c162b7608"
+}

@@ -1,0 +1,115 @@
+{
+  "status": "passed",
+  "checks": [
+    "attached-bottom",
+    "monitor-show-over-ordinary-window",
+    "monitor-hide-over-ordinary-window",
+    "normal-ghostty-decorates",
+    "monitor-show-over-normal-ghostty",
+    "monitor-hide-over-normal-ghostty"
+  ],
+  "isolation": "private D-Bus, HOME, XDG directories, headless compositor",
+  "host_config_changes": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "66f3d20d053cf1cc86762ab34543eafe0e18ea8a482106e686c4b256f848b68e",
+    "alpine/desktop/.local/lib/oldbook/decoration.py": "9dca6ea856f1ee438d275e077b13c62a0308564a2313835b9bf071b2bce7c72b",
+    "alpine/desktop/.local/lib/oldbook/decoration_actions.py": "623b517373902d7a6562bbe921524f03c67003bf675ba60e5a66c1028a164e6d",
+    "alpine/desktop/.local/lib/oldbook/decoration_placement.py": "e191a962b1eb831beef947083b0d8952381515921a72567626598efed4e33230",
+    "alpine/desktop/.local/lib/oldbook/decoration_motion.py": "f67bed21fed21eadf6fc5b40c5da0a1af62a5263acdd5f3718ca3cd94cb5cea3",
+    "alpine/desktop/.local/lib/oldbook/decoration_watch.py": "f68cf027a2c1dcac34d6311fcee1e8c1c8d9b918aa5f56fd3eff5b2a2804fd6d",
+    "alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843"
+  },
+  "monitor_fixture": "Foot with production monitor app_id; synthetic content",
+  "normal_ghostty": "Actual /usr/bin/ghostty with its default app_id",
+  "transitions": [
+    {
+      "target_app_id": "attachment-floating",
+      "monitor_action": "show",
+      "caption_target_id": 6,
+      "caption_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "samples": 46,
+      "last_sample_ms": 849.5,
+      "unchanged_caption_geometry": true,
+      "unchanged_caption_target": true,
+      "one_caption_throughout": true,
+      "monitor_focus_matches_visibility": true
+    },
+    {
+      "target_app_id": "attachment-floating",
+      "monitor_action": "hide",
+      "caption_target_id": 6,
+      "caption_rect": {
+        "width": 620,
+        "height": 28,
+        "x": 200,
+        "y": 520
+      },
+      "samples": 38,
+      "last_sample_ms": 859.88,
+      "unchanged_caption_geometry": true,
+      "unchanged_caption_target": true,
+      "one_caption_throughout": true,
+      "monitor_focus_matches_visibility": true
+    },
+    {
+      "target_app_id": "com.mitchellh.ghostty",
+      "monitor_action": "show",
+      "caption_target_id": 8,
+      "caption_rect": {
+        "width": 600,
+        "height": 28,
+        "x": 700,
+        "y": 720
+      },
+      "samples": 32,
+      "last_sample_ms": 861.84,
+      "unchanged_caption_geometry": true,
+      "unchanged_caption_target": true,
+      "one_caption_throughout": true,
+      "monitor_focus_matches_visibility": true
+    },
+    {
+      "target_app_id": "com.mitchellh.ghostty",
+      "monitor_action": "hide",
+      "caption_target_id": 8,
+      "caption_rect": {
+        "width": 600,
+        "height": 28,
+        "x": 700,
+        "y": 720
+      },
+      "samples": 34,
+      "last_sample_ms": 851.19,
+      "unchanged_caption_geometry": true,
+      "unchanged_caption_target": true,
+      "one_caption_throughout": true,
+      "monitor_focus_matches_visibility": true
+    }
+  ],
+  "normal_ghostty_caption": {
+    "app_id": "com.mitchellh.ghostty",
+    "client_rect": {
+      "x": 700,
+      "y": 400,
+      "width": 600,
+      "height": 320
+    },
+    "caption_rect": {
+      "width": 600,
+      "height": 28,
+      "x": 700,
+      "y": 720
+    },
+    "layer": "top"
+  },
+  "method": "Trimmed private native attachment verifier; scratchpad show/hide sampled every 10 ms for 850 ms, then verified again after settling. Default Ghostty app_id; private minimal D-Bus without service activation.",
+  "screenshots": [
+    "monitor-over-ordinary-window.png",
+    "monitor-over-normal-ghostty.png"
+  ]
+}

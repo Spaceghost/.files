@@ -1,0 +1,41 @@
+{
+  "theme_tests": 49,
+  "profile_and_recovery_tests": 3,
+  "conky_tests": 42,
+  "pithos_unit_tests": 13,
+  "application_parsers": {
+    "profiles": 11,
+    "applications": [
+      "Foot",
+      "Fuzzel",
+      "Ghostty"
+    ],
+    "failures": 0
+  },
+  "native_previews": [
+    "spectral-wave.png",
+    "astronomers-vigil.png"
+  ],
+  "music": {
+    "selected": "Selected Coast to Coast",
+    "pithos_controls": "hidden startup, reload, right show/hide, double open without playback: PASS",
+    "actions": [
+      "io.github.Pithos:Previous",
+      "io.github.Pithos:PlayPause",
+      "io.github.Pithos:Next",
+      "io.github.Pithos:tired",
+      "io.github.Pithos:tired",
+      "io.github.Pithos:tired",
+      "io.github.Pithos:ban"
+    ],
+    "screenshots": [
+      "music.png",
+      "tooltip.png",
+      "pithos-open.png"
+    ]
+  },
+  "limitations": [
+    "Native previews cover two themes, not every application in every theme.",
+    "Music verification used a private fake Pithos service and a fixture modifier snapshot; no real songs were rated."
+  ]
+}

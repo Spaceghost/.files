@@ -1,0 +1,361 @@
+#!/usr/bin/python3 -I
+"""Prepare Bluetooth-only eudev blocking, or roll it back with its exact token.
+
+Requires the reviewed root-owned permissions installer named 'install' beside
+this helper and the adjacent 71-privacy-bluetooth-off.rules. No WLAN commands,
+WPA changes, DHCP changes, services or boot memberships are modified.
+"""
+import argparse
+from contextlib import contextmanager
+import fcntl
+import hashlib
+import importlib.machinery
+import importlib.util
+import json
+import os
+from pathlib import Path
+import pwd
+import re
+import secrets
+import stat
+import subprocess
+import sys
+import tempfile
+
+
+RULE = '71-privacy-bluetooth-off.rules'
+TOKEN = re.compile(r'[0-9a-f]{32}')
+RESTORE_PROGRAM = '''
+import json,os,sys
+saved=json.loads(sys.argv[1])
+fd=os.open(saved['syspath'],os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW)
+try:
+ info=os.fstat(fd)
+ if (info.st_ino,info.st_dev)!=(saved['inode'],saved['device']):
+  raise SystemExit('Bluetooth registration changed before restore')
+ for key in ('type','name'):
+  attr=os.open(key,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=fd)
+  try: value=os.read(attr,4096).decode().strip()
+  finally: os.close(attr)
+  if value!=saved[key]:raise SystemExit('Bluetooth identity changed before restore')
+ if saved['type']!='bluetooth' or saved['soft'] not in ('0','1'):
+  raise SystemExit('Invalid Bluetooth restore state')
+ soft=os.open('soft',os.O_WRONLY|os.O_NOFOLLOW,dir_fd=fd)
+ try:
+  if os.write(soft,saved['soft'].encode())!=1:raise SystemExit('Short Bluetooth restore write')
+ finally:os.close(soft)
+finally:os.close(fd)
+'''
+
+
+def trusted(path):
+    path = Path(path).absolute()
+    for parent in (path, *path.parents):
+        info = parent.lstat()
+        if stat.S_ISLNK(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o022:
+            raise RuntimeError(f'unsafe privileged path: {parent}')
+    return path
+
+
+def load_base(path):
+    loader = importlib.machinery.SourceFileLoader('radio_permissions', str(path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+def canonical(value):
+    return json.loads(json.dumps(value, sort_keys=True))
+
+
+def radio_snapshot(root=Path('/sys/class/rfkill')):
+    radios = {}
+    for path in root.glob('rfkill*'):
+        syspath = path.resolve(strict=True)
+        fd = os.open(syspath, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW | os.O_CLOEXEC)
+        try:
+            info = os.fstat(fd)
+            values = {}
+            for key in ('type', 'soft', 'hard', 'name'):
+                attribute = os.open(key, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC, dir_fd=fd)
+                try:
+                    values[key] = os.read(attribute, 4096).decode().strip()
+                finally:
+                    os.close(attribute)
+            if values['soft'] not in ('0', '1') or values['hard'] not in ('0', '1'):
+                raise RuntimeError('invalid rfkill soft/hard state')
+            current = path.stat()
+            if ((current.st_ino, current.st_dev) != (info.st_ino, info.st_dev)
+                    or path.resolve(strict=True) != syspath):
+                raise RuntimeError('rfkill registration changed while taking its snapshot')
+            values.update(syspath=str(syspath), inode=info.st_ino, device=info.st_dev)
+            radios[path.name] = values
+        finally:
+            os.close(fd)
+    if not radios:
+        raise RuntimeError('no rfkill devices found')
+    return radios
+
+
+def run(arguments, **options):
+    return subprocess.run(arguments, capture_output=True, text=True, check=True,
+                          timeout=5, **options)
+
+
+@contextmanager
+def transaction_lock(root):
+    fd = os.open(root / '.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        yield
+    finally:
+        os.close(fd)
+
+
+class Host:
+    def __init__(self, base):
+        self.base = base.Host()
+
+    def snapshot(self):
+        radios = radio_snapshot()
+        try:
+            wifi = self.base.link_identity()
+        except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+            wifi = {'unavailable': str(error)}
+        routes = {}
+        for family in ('-4', '-6'):
+            values = json.loads(run(['/sbin/ip', '-j', family, 'route', 'show',
+                                     'table', 'all', 'dev', 'wlan0']).stdout)
+            # RA expiry counts down with time; route identity still includes
+            # destination, gateway, source, table, metric, protocol and flags.
+            for value in values:
+                value.pop('expires', None)
+            routes[family] = sorted(values, key=lambda item: json.dumps(item, sort_keys=True))
+        return canonical({'radios': radios, 'wifi': wifi, 'routes': routes})
+
+    def no_active_peripherals(self):
+        for path in Path('/sys/class/input').glob('input*'):
+            if (path / 'id/bustype').read_text().strip() == '0005':
+                raise RuntimeError('a Bluetooth input device is present')
+        for path in Path('/proc').glob('[0-9]*'):
+            try:
+                if (path / 'comm').read_text().strip() == 'bluetoothd':
+                    raise RuntimeError('bluetoothd is running; inspect its connections first')
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+        if any(':' in path.name for path in Path('/sys/class/bluetooth').iterdir()):
+            raise RuntimeError('a Bluetooth connection object is present')
+        user = pwd.getpwnam('jack')
+        for kind in ('cards', 'sinks', 'sources'):
+            result = run(['/usr/bin/pactl', '--server=unix:/run/user/1000/pulse/native',
+                          'list', 'short', kind], user=user.pw_uid, group=user.pw_gid,
+                         extra_groups=os.getgrouplist(user.pw_name, user.pw_gid))
+            if 'bluez' in result.stdout.lower():
+                raise RuntimeError('Bluetooth audio is present')
+        return {'bluetooth_inputs': False, 'bluetooth_daemon': False,
+                'bluetooth_connection_objects': False, 'bluetooth_audio': False}
+
+    def reload(self):
+        run(['/sbin/udevadm', 'control', '--reload-rules'])
+
+    def apply(self):
+        self.reload()
+        run(['/sbin/udevadm', 'trigger', '--action=change', '--subsystem-match=rfkill',
+             '--attr-match=type=bluetooth'])
+        run(['/sbin/udevadm', 'settle', '--timeout=4'])
+
+    def restore(self, name, saved):
+        current = self.snapshot()['radios'].get(name)
+        if current is None or any(current[key] != saved[key] for key in
+                                  ('type', 'name', 'syspath', 'inode', 'device')):
+            raise RuntimeError(f'Bluetooth device identity changed: {name}')
+        if saved['type'] != 'bluetooth' or saved['soft'] not in ('0', '1'):
+            raise RuntimeError('invalid saved Bluetooth state')
+        if current['soft'] != saved['soft']:
+            # Bind the bounded child to the saved registration itself. A hot
+            # unplug/replug between the snapshot and write cannot retarget it.
+            run([sys.executable, '-I', '-c', RESTORE_PROGRAM, json.dumps(saved)],
+                start_new_session=True)
+
+
+def wlan_unchanged(before, after):
+    keep = lambda data: {key: value for key, value in data['radios'].items()
+                         if value['type'] != 'bluetooth'}
+    if before['wifi'] != after['wifi'] or before['routes'] != after['routes'] or keep(before) != keep(after):
+        raise RuntimeError('WLAN identity, addresses, routes or radio state changed')
+
+
+def bluetooth_identity(before, after):
+    inventory = lambda data: {name for name, value in data['radios'].items()
+                              if value['type'] == 'bluetooth'}
+    if inventory(before) != inventory(after):
+        raise RuntimeError('Bluetooth device inventory changed')
+    for name, saved in before['radios'].items():
+        if saved['type'] != 'bluetooth':
+            continue
+        current = after['radios'].get(name)
+        if current is None or any(current[key] != saved[key] for key in
+                                  ('type', 'name', 'syspath', 'inode', 'device', 'hard')):
+            raise RuntimeError(f'Bluetooth device or hard-block identity changed: {name}')
+
+
+def bluetooth_matches(before, after, restore=False):
+    bluetooth_identity(before, after)
+    for name, saved in before['radios'].items():
+        if saved['type'] != 'bluetooth':
+            continue
+        current = after['radios'][name]
+        if current['soft'] != (saved['soft'] if restore else '1'):
+            raise RuntimeError(f'Bluetooth soft-block state was not verified: {name}')
+
+
+def rollback(journal, target, content, host, write, rule_identity=None):
+    if (journal / 'rollback.json').exists():
+        return json.loads((journal / 'rollback.json').read_text())
+    saved = json.loads((journal / 'before.json').read_text())
+    if saved['boot_id'] != Path('/proc/sys/kernel/random/boot_id').read_text().strip():
+        raise RuntimeError('rollback belongs to another boot; inspect device identities manually')
+    if saved['rule_sha256'] != hashlib.sha256(content).hexdigest():
+        raise RuntimeError('reviewed rule differs from this journal')
+    if rule_identity is None:
+        rule_identity = json.loads((journal / 'installed-rule.json').read_text())
+    if not {'inode', 'device', 'ctime_ns'} <= rule_identity.keys():
+        raise RuntimeError(f'rule publication was incomplete; inspect {journal}')
+    current = host.snapshot()
+    bluetooth_identity(saved['snapshot'], current)
+    if target.exists() or target.is_symlink():
+        info = target.lstat()
+        if (target.is_symlink() or not target.is_file() or target.read_bytes() != content
+                or info.st_ino != rule_identity['inode'] or info.st_dev != rule_identity['device']
+                or info.st_ctime_ns != rule_identity['ctime_ns']):
+            raise RuntimeError('Bluetooth rule changed externally; preserving it')
+        target.unlink()
+    errors = []
+    try:
+        host.reload()
+    except Exception as error:
+        # Never restore an unblocked state while the block rule may be cached.
+        errors.append(str(error))
+    if not errors:
+        for name, device in saved['snapshot']['radios'].items():
+            if device['type'] == 'bluetooth':
+                try:
+                    host.restore(name, device)
+                except Exception as error:
+                    errors.append(str(error))
+    after = host.snapshot()
+    try:
+        wlan_unchanged(current, after)
+        bluetooth_matches(saved['snapshot'], after, restore=True)
+    except Exception as error:
+        errors.append(str(error))
+    result = {'status': 'rollback_failed' if errors else 'rolled_back',
+              'errors': errors, 'before_rollback': current, 'after_rollback': after}
+    write(journal / ('rollback-failed-' + secrets.token_hex(8) + '.json' if errors else 'rollback.json'), result)
+    if errors:
+        raise RuntimeError(f'Bluetooth rollback needs inspection: {journal}')
+    return result
+
+
+def prepare(source, target, journal_root, host, write):
+    if target.exists() or target.is_symlink():
+        raise RuntimeError('refusing ownership of an existing Bluetooth rule')
+    content = source.read_bytes()
+    peripherals = host.no_active_peripherals()
+    before = host.snapshot()
+    if 'unavailable' in before['wifi']:
+        raise RuntimeError('current WLAN association cannot be verified')
+    if not any(value['type'] == 'bluetooth' for value in before['radios'].values()):
+        raise RuntimeError('no Bluetooth rfkill device is present')
+    token = secrets.token_hex(16)
+    journal = journal_root / token
+    journal.mkdir(mode=0o700)
+    write(journal / 'before.json', {
+        'token': token, 'boot_id': Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
+        'rule_before': None, 'rule_sha256': hashlib.sha256(content).hexdigest(),
+        'snapshot': before, 'peripherals': peripherals,
+    })
+    temporary = None
+    created = False
+    identity = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=target.parent, prefix='.bluetooth-', delete=False) as stream:
+            temporary = Path(stream.name)
+            os.fchmod(stream.fileno(), 0o644)
+            stream.write(content)
+            stream.flush()
+            os.fsync(stream.fileno())
+            info = os.fstat(stream.fileno())
+            identity = {'inode': info.st_ino, 'device': info.st_dev}
+        os.link(temporary, target)
+        created = True
+        temporary.unlink()
+        temporary = None
+        info = target.stat()
+        identity['ctime_ns'] = info.st_ctime_ns
+        write(journal / 'installed-rule.json', identity)
+        host.apply()
+        after = host.snapshot()
+        wlan_unchanged(before, after)
+        bluetooth_matches(before, after)
+        result = {'status': 'prepared', 'token': token, 'journal': str(journal),
+                  'snapshot': after, 'wlan_unchanged': True,
+                  'bluetooth_soft_block_verified': True, 'services_started': False}
+        write(journal / 'prepared.json', result)
+        return result
+    except Exception:
+        if created:
+            rollback(journal, target, content, host, write, rule_identity=identity)
+        raise
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    actions = parser.add_mutually_exclusive_group(required=True)
+    actions.add_argument('--prepare', action='store_true')
+    actions.add_argument('--rollback', metavar='TOKEN')
+    args = parser.parse_args()
+    if os.geteuid() != 0:
+        parser.error('run the reviewed root-owned installed helper as root')
+    if args.rollback and not TOKEN.fullmatch(args.rollback):
+        parser.error('rollback requires the exact opaque token, never a path')
+    os.umask(0o077)
+    executable = trusted(Path(__file__))
+    base_path = trusted(executable.with_name('install'))
+    source = trusted(executable.with_name(RULE))
+    if not all(path.is_file() for path in (executable, base_path, source)):
+        parser.error('installed helpers and rule must be regular files')
+    base = load_base(base_path)
+    target = trusted(Path('/etc/udev/rules.d')) / RULE
+    parent = trusted(Path('/var/lib/mbp_intel'))
+    journal_root = parent / 'bluetooth-preparation'
+    if args.prepare:
+        journal_root.mkdir(mode=0o700, exist_ok=True)
+    trusted(journal_root)
+    if stat.S_IMODE(journal_root.stat().st_mode) != 0o700:
+        parser.error('journal root must be private mode 0700')
+    host = Host(base)
+    with transaction_lock(journal_root):
+        if args.prepare:
+            result = prepare(source, target, journal_root, host, base.write_private)
+        else:
+            journal = trusted(journal_root / args.rollback)
+            if not journal.is_dir() or stat.S_IMODE(journal.stat().st_mode) != 0o700:
+                parser.error('journal directory must be private mode 0700')
+            for path in journal.iterdir():
+                trusted(path)
+                if not path.is_file() or stat.S_IMODE(path.stat().st_mode) != 0o600:
+                    parser.error('journal entries must be private regular files')
+            result = rollback(journal, target, source.read_bytes(), host, base.write_private)
+    print(json.dumps(result, indent=2))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        raise SystemExit(f'Bluetooth preparation: {error}')

@@ -1,0 +1,56 @@
+{
+  "recorded_utc": "2026-09-07T12:26:07.653885+00:00",
+  "source_revision": "4fcdfda1f5caf45ef834688ab13225c7ed2345671bae94ca8010e4e3721ac4ae",
+  "standalone_tests": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "passed": 66,
+    "failed": 0
+  },
+  "build": {
+    "wheel": true,
+    "sdist": true,
+    "build_from_sdist": true
+  },
+  "installation": {
+    "isolated_virtualenv": true,
+    "system_GI_imports": true,
+    "console_entrypoint": true,
+    "all_desktop_assets": true
+  },
+  "config_parsers": {
+    "desktop_files": true,
+    "sway_startup_snippet": true
+  },
+  "scope": {
+    "live_installation_modified": false,
+    "host_input_injected": false,
+    "full_LXQt_session_tested": false
+  },
+  "remaining": [
+    "License selection",
+    "Full LXQt + Sway session and physical input matrix"
+  ],
+  "preview_review_fix": {
+    "timed_preview_hint": true,
+    "mouse_close_button_exits": true,
+    "button_does_not_take_focus": true,
+    "isolated_headless_sway": true,
+    "host_input_used": false
+  },
+  "github_ci": {
+    "initial_run": "https://github.com/Spaceghost/.files/actions/runs/34122287971",
+    "initial_result": "startup_failure: repository permits only Spaceghost-owned actions",
+    "correction": "Use direct public Git checkout and test/build commands in Python containers; repository policy unchanged",
+    "corrected_run": {
+      "url": "https://github.com/Spaceghost/.files/actions/runs/34122749336",
+      "commit": "bc310f48bca97480f68237a8db1f630f12de646b",
+      "conclusion": "success",
+      "python_versions": [
+        "3.10",
+        "3.14"
+      ],
+      "tests_per_job": 66,
+      "wheel_and_sdist_builds": true
+    }
+  }
+}

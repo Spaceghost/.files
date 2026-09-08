@@ -1,0 +1,30 @@
+{
+  "utc": "2026-09-08T06:09:04.089009+00:00",
+  "endpoint": "https://alienware.bishop-bearded.ts.net:11434",
+  "tls_verified": true,
+  "read_only": true,
+  "inference_performed": false,
+  "model": "qwen3.5:27b-text",
+  "remote_model_metadata": false,
+  "details": {
+    "parent_model": "",
+    "format": "gguf",
+    "family": "qwen35",
+    "families": [
+      "qwen35"
+    ],
+    "parameter_size": "26.9B",
+    "quantization_level": "Q3_K_M"
+  },
+  "capabilities": [
+    "tools",
+    "thinking",
+    "completion"
+  ],
+  "model_info": {
+    "general.architecture": "qwen35",
+    "general.file_type": 12,
+    "general.parameter_count": 26895998464
+  },
+  "running_models": []
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "source": "baseline",
+    "elapsed_seconds": 4.087,
+    "passed": false,
+    "load_before": [
+      43.60546875,
+      32.96142578125,
+      23.3486328125
+    ],
+    "tests": 1,
+    "errors": 1,
+    "failures": 0
+  },
+  {
+    "source": "current",
+    "elapsed_seconds": 4.199,
+    "passed": false,
+    "load_before": [
+      42.67578125,
+      32.9453125,
+      23.3955078125
+    ],
+    "tests": 1,
+    "errors": 1,
+    "failures": 0
+  }
+]

@@ -1,0 +1,31 @@
+>>> swayfx: Entering fakeroot...
+>>> swayfx*: Running postcheck for swayfx
+>>> WARNING: swayfx*: Found /usr/share/doc but package name doesn't end with -doc
+>>> swayfx*: Preparing package swayfx...
+>>> swayfx*: Stripping binaries
+>>> swayfx*: Scanning shared objects
+>>> swayfx*: Tracing dependencies...
+	sway
+	so:libc.musl-x86_64.so.1
+	so:libcairo.so.2
+	so:libdrm.so.2
+	so:libevdev.so.2
+	so:libglib-2.0.so.0
+	so:libgobject-2.0.so.0
+	so:libinput.so.10
+	so:libjson-c.so.5
+	so:libpango-1.0.so.0
+	so:libpangocairo-1.0.so.0
+	so:libpcre2-8.so.0
+	so:libpixman-1.so.0
+	so:libscenefx-0.5.so
+	so:libudev.so.1
+	so:libwayland-server.so.0
+	so:libwlroots-0.20.so
+	so:libxcb-icccm.so.4
+	so:libxcb.so.1
+	so:libxkbcommon.so.0
+>>> swayfx*: Package size: 557.8 KB
+>>> swayfx*: Compressing data...
+>>> swayfx*: Create checksum...
+>>> swayfx*: Create swayfx-0.6-r3.apk

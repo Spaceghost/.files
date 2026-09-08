@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "previous_pid": 25862,
+  "pid": 13318,
+  "sway_socket": "/run/user/1000/sway-ipc.1000.3175.sock",
+  "preserved_original_environment_argv_cwd": true,
+  "restarted_only_matching_waybar": true,
+  "mapped_library": "/usr/lib/waybar/oldbook-art.so",
+  "mapped_library_inode": 16680457,
+  "installed_library_inode": 16680457,
+  "mapped_current_inode": true,
+  "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+  "workspace_numbers": [
+    1,
+    2,
+    4,
+    10
+  ],
+  "strata_number": 10,
+  "workspace_zero_absent": true,
+  "screenshot": "alpine/verification/workspace-strata-ten/workspace-ten-live.png",
+  "screenshot_geometry": "4,0 610x32 logical pixels; top-left workspace strip only",
+  "log": "/home/jack/.local/state/oldbook/waybar-workspace-ten.log",
+  "targeted_style_reload": "SIGUSR2 sent to the same Waybar PID once after initial capture showed no bar; a later repaint exposed the configured bar.",
+  "screenshot_visually_verified": true,
+  "screenshot_sha256": "4b4c184492ba693ef2f53476e8838e6e8b334ba50229f5ec5b4922c4395d87c8",
+  "visible_workspace_labels": [
+    "1: GHOST",
+    "2: ORBIT",
+    "4: SIGNAL",
+    "10: STRATA"
+  ],
+  "separate_config_notice": "A red Sway configuration notice below the bar is outside this crop and is being handled separately by the root agent."
+}

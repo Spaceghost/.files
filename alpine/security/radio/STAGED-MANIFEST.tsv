@@ -1,0 +1,28 @@
+# source	target	owner	mode	purpose
+# Runtime rows are installed by inert mbp-intel-radio-runtime=0.1.0-r0; no service or ownership activation.
+# Package boundary: ../../packages/privacyctl-runtime/README.md; policy/service rows remain staged unless marked installed.
+root/usr/local/sbin/privacyctl	/usr/local/sbin/privacyctl	root:root	0750	installed inert runtime APK; fixed privileged controller and supervisor
+root/etc/privacyctl/profiles	/etc/privacyctl/profiles	root:root	0600	staged, unactivated; SSID and saved-network-ID allowlist without credentials
+root/etc/doas.d/privacyctl.conf	/etc/doas.d/privacyctl.conf	root:root	0400	staged, unactivated; exact noninteractive controller commands for jack
+root/etc/init.d/radio-off	/etc/init.d/radio-off	root:root	0755	staged, unactivated; early OpenRC soft-block service
+root/etc/init.d/privacyctl-supervisor	/etc/init.d/privacyctl-supervisor	root:root	0755	staged, unactivated; restarting OpenRC trusted-session fail-off supervisor
+root/etc/elogind/system-sleep/95-radio-off	/etc/elogind/system-sleep/95-radio-off	root:root	0755	staged, unactivated; actual elogind pre-suspend and post-resume block hook
+root/etc/udev/rules.d/71-privacy-bluetooth-off.rules	/etc/udev/rules.d/71-privacy-bluetooth-off.rules	root:root	0644	installed Bluetooth-only preparation; Bluetooth-only soft block on Linux/eudev add or state-change events; WLAN unchanged
+root/etc/udev/rules.d/72-privacy-rfkill.rules	/etc/udev/rules.d/72-privacy-rfkill.rules	root:root	0644	installed permission preparation; remove session uaccess write grant before elogind queues it; preserve radio status reads
+root/etc/wpa_supplicant/privacy-policy.conf	merge into root-only active configuration	root:root	0600	staged, unactivated; non-secret scan and P2P policy
+root/usr/local/lib/privacyctl_runtime/__init__.py	/usr/local/lib/privacyctl_runtime/__init__.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/lease.py	/usr/local/lib/privacyctl_runtime/lease.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/dhcp.py	/usr/local/lib/privacyctl_runtime/dhcp.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/launch.py	/usr/local/lib/privacyctl_runtime/launch.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/hook.py	/usr/local/lib/privacyctl_runtime/hook.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/network.py	/usr/local/lib/privacyctl_runtime/network.py	root:root	0644	installed inert runtime APK; lease ownership library
+root/usr/local/lib/privacyctl_runtime/ipc.py	/usr/local/lib/privacyctl_runtime/ipc.py	root:root	0644	installed inert runtime APK; root-only bounded command transport and cancellation fences
+root/usr/local/lib/privacyctl_runtime/service.py	/usr/local/lib/privacyctl_runtime/service.py	root:root	0644	installed inert runtime APK; persistent radio owner and cooperative DHCP state machine
+root/usr/local/lib/privacyctl_runtime/adapter.py	/usr/local/lib/privacyctl_runtime/adapter.py	root:root	0644	installed inert runtime APK; native policy, emergency off and crash marker integration
+root/usr/local/lib/privacyctl_runtime/runner.py	/usr/local/lib/privacyctl_runtime/runner.py	root:root	0644	installed inert runtime APK; OpenRC owner entrypoint and reciprocal process guardian
+root/usr/local/lib/privacyctl_runtime/journal.py	/usr/local/lib/privacyctl_runtime/journal.py	root:root	0644	installed inert runtime APK; durable recovery evidence shared by owner startup and execution gates
+root/usr/local/lib/privacyctl_runtime/writers.py	/usr/local/lib/privacyctl_runtime/writers.py	root:root	0644	installed inert runtime APK; namespace-init writer identity and completion helpers; surviving-writer proof pending
+root/usr/local/lib/privacyctl_runtime/recovery.py	/usr/local/lib/privacyctl_runtime/recovery.py	root:root	0644	installed inert runtime APK; same-boot exact lease recovery/link-cookie lifecycle and separate different-boot DNS retirement
+root/usr/local/lib/privacyctl_runtime/link.py	/usr/local/lib/privacyctl_runtime/link.py	root:root	0644	installed inert runtime APK; bounded read-only netlink identity and raw alias checks
+root/usr/local/libexec/privacyctl-dhcp-launch	/usr/local/libexec/privacyctl-dhcp-launch	root:root	0750	installed inert runtime APK; private persistent DHCP implementation; not a user command
+root/usr/local/libexec/privacyctl-dhcp-event	/usr/local/libexec/privacyctl-dhcp-event	root:root	0750	installed inert runtime APK; private persistent DHCP implementation; not a user command

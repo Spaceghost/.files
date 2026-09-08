@@ -1,0 +1,26 @@
+#!/usr/bin/env python3
+"""Apply the versioned GTK preferences to applications using desktop settings."""
+import configparser
+import json
+import os
+from pathlib import Path
+import subprocess
+
+settings = configparser.ConfigParser(interpolation=None)
+settings.read(Path.home() / '.config/gtk-3.0/settings.ini')
+if 'Settings' not in settings:
+    raise SystemExit('No managed GTK settings found')
+bus = Path('/run/user') / str(os.getuid()) / 'bus'
+if bus.exists():
+    os.environ.setdefault('DBUS_SESSION_BUS_ADDRESS', 'unix:path=' + str(bus))
+mapping = {'gtk-theme-name': 'gtk-theme', 'gtk-icon-theme-name': 'icon-theme',
+           'gtk-font-name': 'font-name', 'gtk-cursor-theme-name': 'cursor-theme'}
+values = {target: settings['Settings'][source] for source, target in mapping.items()
+          if source in settings['Settings']}
+values['color-scheme'] = 'prefer-dark'
+for key, value in values.items():
+    subprocess.run(['gsettings', 'set', 'org.gnome.desktop.interface', key,
+                    json.dumps(value)], check=True, timeout=5)
+if 'gtk-cursor-theme-size' in settings['Settings']:
+    subprocess.run(['gsettings', 'set', 'org.gnome.desktop.interface', 'cursor-size',
+                    str(settings.getint('Settings', 'gtk-cursor-theme-size'))], check=True, timeout=5)

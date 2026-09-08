@@ -1,0 +1,236 @@
+{
+  "status": "passed",
+  "baseline": false,
+  "host_changes": 0,
+  "source_sha256": {
+    "/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf": "dcfe4a0b9dc4f3dd98576c178573af4eb53e2af759edce9baab9149024b38950",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-carousel": "ddaa5acc8124317aebf14fec4435a047404feb4170dfc639dad207ed70573b5b",
+    "/home/jack/.files/alpine/desktop/.local/bin/oldbook-workspaces": "4641277b12b60af8b2df8e1f29f28486a39eade3088c67080ae7a70361a63c7d",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/window_switching.py": "4050b5645895cbb5fcfb5db0428c16940087d37732f116adcd42ad25d1a1986f",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/overlay_theme.py": "ffcc1f93454551a54008f3728b7695b13fa9af6b245ab2068bcef1233b515843",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/showdesktop.py": "378440a5cc986219a5bc9f3956e70e287a7bb867c776e16bf02bb07c81b0519e",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/workspace_model.py": "6733a2aa5e60b1d6b3128c68212ad16bd09087fdfce59fbfa746b0d775093354",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel_view.py": "90177595776baa46fb0604d3e28a28b0bfeb0ce2b8180870977bf785592bd416",
+    "/home/jack/.files/alpine/desktop/.local/lib/oldbook/carousel.py": "3b145f37ff268dd65b273de2e6fb4a3c0f73bfc92c4c5839b0054db624d23f43"
+  },
+  "checks": [
+    "duplicate-daemon-preserves-single-owner",
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows",
+    "hidden-workspace-preview-renders-without-focus-change",
+    "persistent-show-ignores-modifier-release-and-escape-cancels",
+    "super-tab-repeat-reverse-frozen-order-and-release-commit",
+    "alt-tab-shares-all-window-order-and-final-release",
+    "alt-shift-tab-uses-reverse-binding",
+    "held-escape-cancels-and-restores-default-mode",
+    "quick-super-and-alt-taps-toggle-last-two-windows",
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits",
+    "next-gesture-discovers-new-window",
+    "rapid-close-reopen-keeps-one-current-preview-generation",
+    "mode-takeover-and-orphaned-mode-escape-recovery",
+    "production-source-hashes-stable",
+    "compositor-exit-stops-carousel-daemon"
+  ],
+  "states": {
+    "duplicate-daemon-preserves-single-owner": {
+      "pid": 30968
+    },
+    "global-mru-interleaves-workspaces-and-includes-ordinary-windows": {
+      "pid": 30968,
+      "ready": true,
+      "open": true,
+      "selected_id": 6,
+      "candidate_ids": [
+        6,
+        8,
+        5,
+        10
+      ],
+      "modifier": null,
+      "preview_ids": [],
+      "frames": 0,
+      "frame_times": []
+    },
+    "hidden-workspace-preview-renders-without-focus-change": {
+      "preview_ids": [
+        5,
+        6,
+        8,
+        10
+      ],
+      "cyan_pixels": 240814,
+      "workspace_focus": 1,
+      "focus_events": []
+    },
+    "super-tab-repeat-reverse-frozen-order-and-release-commit": {
+      "frames": 95,
+      "frame_times_us": [
+        18941712750,
+        18941746084,
+        18941762738,
+        18941779363,
+        18941795919,
+        18941812431,
+        18941828887,
+        18941845612,
+        18941862293,
+        18941878961,
+        18941895623,
+        18941912266,
+        18941928858,
+        18941945401,
+        18941961879,
+        18941978313,
+        18941994705,
+        18942011063,
+        18942027386,
+        18942043711,
+        18942060015,
+        18942076331,
+        18942092627,
+        18942108923,
+        18942125212,
+        18942141502,
+        18942157785,
+        18942174061,
+        18942190348,
+        18942206616,
+        18942222885,
+        18943114209,
+        18943130876,
+        18943147531,
+        18943164170,
+        18943180784,
+        18943197388,
+        18943213934,
+        18943230437,
+        18943246904,
+        18943263338,
+        18943279761,
+        18943296186,
+        18943312626,
+        18943329055,
+        18943345526,
+        18943361963,
+        18943378423,
+        18943394885,
+        18943411353,
+        18943427796,
+        18943444297,
+        18943460778,
+        18943477252,
+        18943493735,
+        18943510185,
+        18943526596,
+        18943543043,
+        18943559501,
+        18943575967,
+        18943592436,
+        18943608914,
+        18943625386,
+        18944318364,
+        18944335031,
+        18944351689,
+        18944368318,
+        18944384905,
+        18944401452,
+        18944417946,
+        18944434392,
+        18944450795,
+        18944467207,
+        18944483600,
+        18944500015,
+        18944516452,
+        18944532872,
+        18944549227,
+        18944565571,
+        18944581896,
+        18944598226,
+        18944614585,
+        18944630918,
+        18944647271,
+        18944663589,
+        18944679910,
+        18944696240,
+        18944712591,
+        18944728952,
+        18944745275,
+        18944761644,
+        18944778044,
+        18944794441,
+        18944810822,
+        18944827158
+      ],
+      "active_frame_interval_median_ms": 16.4385,
+      "idle_gaps_excluded": 2
+    },
+    "persistent-frozen-list-removes-closed-selection-and-enter-commits": {
+      "removed": 8,
+      "committed": 10,
+      "deferred_new": 11
+    },
+    "compositor-exit-stops-carousel-daemon": {
+      "exit_status": 1,
+      "gdk_display_disconnect": true
+    }
+  },
+  "isolation": "private HOME/XDG, D-Bus, Sway, Foot and virtual keyboard",
+  "keyboard": "one wtype device owns each full modifier/key/release sequence",
+  "verifier_sha256": "2658cdd5a10bbae208a46b0fe71b288b24d21c035608ad1624fc1b8bb2f3edac",
+  "compositor": {
+    "path": "/usr/bin/swayfx",
+    "sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9"
+  },
+  "fixture_ids": [
+    5,
+    6,
+    8,
+    10
+  ],
+  "fixture_workspaces": [
+    1,
+    1,
+    2,
+    10
+  ],
+  "targeted_activation_probe": {
+    "include_command": "include \"/home/jack/.files/alpine/desktop/.config/sway/local.d/window-switcher.conf\"",
+    "include_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command 'include'"
+      }
+    ],
+    "inline_command": "mode \"probe-mode\" { bindsym Escape mode \"default\" }",
+    "inline_reply": [
+      {
+        "success": false,
+        "parse_error": true,
+        "error": "Unknown/invalid command '{'"
+      }
+    ],
+    "modes_before": [
+      "default",
+      "fixture-other",
+      "window-switcher"
+    ],
+    "modes_after": [
+      "default",
+      "fixture-other",
+      "window-switcher",
+      "probe-mode"
+    ],
+    "probe_mode_created": true,
+    "mode_after_probe": {
+      "name": "default"
+    }
+  },
+  "screenshot_sha256": {
+    "carousel-hidden-previews.png": "7cda703652e229daa0c808a8f97d1ed5a153d8025df3dc2eb0d814b3debe7541"
+  },
+  "cleanup": "private process identities stopped before compositor teardown",
+  "post_bus_cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

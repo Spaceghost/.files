@@ -1,0 +1,47 @@
+{
+  "utc": "2026-09-08T06:07:11.160975+00:00",
+  "read_only": true,
+  "inference_performed": false,
+  "results": [
+    {
+      "endpoint": "https://100.83.231.2:11434",
+      "certificate_verification": true,
+      "error": "URLError: <urlopen error [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1082)>",
+      "elapsed_seconds": 0.531
+    },
+    {
+      "endpoint": "https://[fd7a:115c:a1e0::763a:e703]:11434",
+      "certificate_verification": true,
+      "error": "URLError: <urlopen error [SSL: TLSV1_ALERT_INTERNAL_ERROR] tlsv1 alert internal error (_ssl.c:1082)>",
+      "elapsed_seconds": 0.542
+    },
+    {
+      "endpoint": "https://alienware.bishop-bearded.ts.net:11434",
+      "certificate_verification": true,
+      "status": 200,
+      "models": [
+        {
+          "name": "qwen3.5:27b-text",
+          "size": 13505116318,
+          "digest": "9b65bf078576a9e5ee02b3d608605a9616ef6f866286afe5db9b772eaa1dcef9"
+        },
+        {
+          "name": "hf.co/unsloth/Qwen3.5-27B-GGUF:Q3_K_M",
+          "size": 14432723585,
+          "digest": "3ea23e965604a5f5d69d44bf5964666be97b56903148844c3aa25d70ec2271b9"
+        },
+        {
+          "name": "gpt-oss:20b",
+          "size": 13793441244,
+          "digest": "17052f91a42e97930aa6e28a6c6c06a983e6a58dbb00434885a0cf5313e376f7"
+        },
+        {
+          "name": "qwen3.5:9b",
+          "size": 6594474711,
+          "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+        }
+      ],
+      "elapsed_seconds": 0.624
+    }
+  ]
+}

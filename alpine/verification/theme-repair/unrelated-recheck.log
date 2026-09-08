@@ -1,0 +1,47 @@
+test_deployed_overlay_theme_reads_the_checkout_palette (test_bazzite_profile.BazziteProfileTest.test_deployed_overlay_theme_reads_the_checkout_palette) ... ERROR
+test_hidden_local_fullscreen_does_not_reserve_but_global_does (test_desktop_space.DesktopSpaceTests.test_hidden_local_fullscreen_does_not_reserve_but_global_does) ... FAIL
+test_brand_protection_does_not_swallow_neighboring_selectors (test_ghost_branding.GhostBrandingTests.test_brand_protection_does_not_swallow_neighboring_selectors) ... ok
+test_existing_profiles_and_base_keep_original_badge (test_ghost_branding.GhostBrandingTests.test_existing_profiles_and_base_keep_original_badge) ... ok
+test_generated_distinct_palettes_keep_badge_while_bar_changes (test_ghost_branding.GhostBrandingTests.test_generated_distinct_palettes_keep_badge_while_bar_changes) ... ok
+
+======================================================================
+ERROR: test_deployed_overlay_theme_reads_the_checkout_palette (test_bazzite_profile.BazziteProfileTest.test_deployed_overlay_theme_reads_the_checkout_palette)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_bazzite_profile.py", line 227, in test_deployed_overlay_theme_reads_the_checkout_palette
+    applied = self.run_profile('apply')
+  File "/home/jack/.files/alpine/tests/test_bazzite_profile.py", line 32, in run_profile
+    return subprocess.run(
+           ~~~~~~~~~~~~~~^
+        [str(HELPER), *arguments, '--target', str(self.home)],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        cwd=REPO, text=True, capture_output=True, timeout=20)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 557, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1221, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 2154, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 1268, in _check_timeout
+    raise TimeoutExpired(
+    ...<2 lines>...
+            stderr=b''.join(stderr_seq) if stderr_seq else None)
+subprocess.TimeoutExpired: Command '['/home/jack/.files/bazzite/bin/oldbook-bazzite-profile', 'apply', '--target', '/tmp/tmpwhhuxjvm/home']' timed out after 20 seconds
+
+======================================================================
+FAIL: test_hidden_local_fullscreen_does_not_reserve_but_global_does (test_desktop_space.DesktopSpaceTests.test_hidden_local_fullscreen_does_not_reserve_but_global_does)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_desktop_space.py", line 77, in test_hidden_local_fullscreen_does_not_reserve_but_global_does
+    self.assertEqual(desktop_space.screen_space(output(), tree(floating=True, hidden_fullscreen=mode))['bottom'], bottom)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 16 != 60
+
+----------------------------------------------------------------------
+Ran 5 tests in 21.969s
+
+FAILED (failures=1, errors=1)

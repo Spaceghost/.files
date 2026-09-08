@@ -1,0 +1,13 @@
+test_click_uses_the_frontmost_projected_card (test_carousel_view.Layout.test_click_uses_the_frontmost_projected_card) ... ok
+test_empty_carousel_is_safe (test_carousel_view.Layout.test_empty_carousel_is_safe) ... ok
+test_nearby_cards_are_unique_and_wrap_around_the_selection (test_carousel_view.Layout.test_nearby_cards_are_unique_and_wrap_around_the_selection) ... ok
+test_previews_are_letterboxed_without_changing_aspect (test_carousel_view.Layout.test_previews_are_letterboxed_without_changing_aspect) ... ok
+test_selected_card_faces_forward_and_neighbors_turn_inward (test_carousel_view.Layout.test_selected_card_faces_forward_and_neighbors_turn_inward) ... ok
+test_small_candidate_lists_never_duplicate_a_preview (test_carousel_view.Layout.test_small_candidate_lists_never_duplicate_a_preview) ... ok
+test_motion_tracks_elapsed_time_at_different_refresh_rates (test_carousel_view.Motion.test_motion_tracks_elapsed_time_at_different_refresh_rates) ... ok
+test_resting_selection_does_not_overshoot_its_destination (test_carousel_view.Motion.test_resting_selection_does_not_overshoot_its_destination) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.010s
+
+OK

@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-07",
+  "environment": "isolated headless SwayFX 0.6 and isolated D-Bus session",
+  "output": {
+    "name": "HEADLESS-1",
+    "width": 1280,
+    "height": 720
+  },
+  "notification": {
+    "application": "oldbook-verification",
+    "generic_content_only": true,
+    "terminal_before": {
+      "focused": true,
+      "x": 16,
+      "y": 48,
+      "width": 1248,
+      "height": 656
+    },
+    "terminal_after": {
+      "focused": true,
+      "x": 16,
+      "y": 48,
+      "width": 1248,
+      "height": 656
+    },
+    "overlay_probe": "An exclusive 32px overlay-layer Waybar remained above the top-layer notification; the complete notification began below it.",
+    "screenshot": "top-layer-popup.png"
+  },
+  "history": {
+    "opened_manually": true,
+    "closed_with": "swaync-client -cp -sw",
+    "terminal_geometry_and_focus_unchanged": true,
+    "screenshot": "compact-history-card.png"
+  }
+}

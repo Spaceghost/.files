@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "checks": [
+    "opens-latest-complete-entry",
+    "older-entry-retains-study-sources-license-provenance",
+    "full-material-scrolls-beyond-viewport",
+    "unsaved-note-and-source-stay-with-original-entry-during-navigation",
+    "note-button-appends-to-viewed-entry",
+    "newer-navigation-does-not-move-notes",
+    "history-remains-readable-after-appending"
+  ],
+  "failures": [],
+  "isolation": "private Xvfb, D-Bus, HOME and XDG data; synthetic content only",
+  "network_or_model_calls": 0,
+  "source_sha256": {
+    "alpine/desktop/.local/lib/oldbook/scripture_history.py": "f33d9bdc0fcf4958b6f09bb240dae0545b22995b6e239dfe1392c5a34a4a9ab0",
+    "alpine/desktop/.local/lib/oldbook/scripture_history_reader.py": "3d6ca01ce2d513c7b13a02ea36a6025004130efc450b1e41c1e71346a3cbe8cd"
+  }
+}

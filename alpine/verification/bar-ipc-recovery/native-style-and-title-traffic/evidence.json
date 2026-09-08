@@ -1,0 +1,1169 @@
+{
+  "host_changes": 0,
+  "status": "passed",
+  "checks": [
+    "three-atomic-imported-css-changes-update-without-signal",
+    "clock-and-main-loop-remain-live-in-all-phases"
+  ],
+  "phases": [
+    {
+      "name": "idle-before-style-changes",
+      "elapsed": 3.005,
+      "cpu_percent": 0.0,
+      "first": {
+        "beats": 1,
+        "monotonic_us": 18661702311,
+        "attributes": 9,
+        "clock": "20:59:53",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "last": {
+        "beats": 16,
+        "monotonic_us": 18664705309,
+        "attributes": 15,
+        "clock": "20:59:56",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "samples": [
+        {
+          "beats": 1,
+          "monotonic_us": 18661702311,
+          "attributes": 9,
+          "clock": "20:59:53",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 2,
+          "monotonic_us": 18661902414,
+          "attributes": 15,
+          "clock": "20:59:54",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 3,
+          "monotonic_us": 18662102636,
+          "attributes": 15,
+          "clock": "20:59:54",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 4,
+          "monotonic_us": 18662302899,
+          "attributes": 15,
+          "clock": "20:59:54",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 5,
+          "monotonic_us": 18662503131,
+          "attributes": 15,
+          "clock": "20:59:54",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 6,
+          "monotonic_us": 18662703366,
+          "attributes": 15,
+          "clock": "20:59:54",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 7,
+          "monotonic_us": 18662903485,
+          "attributes": 15,
+          "clock": "20:59:55",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 8,
+          "monotonic_us": 18663103725,
+          "attributes": 15,
+          "clock": "20:59:55",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 9,
+          "monotonic_us": 18663303967,
+          "attributes": 15,
+          "clock": "20:59:55",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 10,
+          "monotonic_us": 18663504110,
+          "attributes": 15,
+          "clock": "20:59:55",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 11,
+          "monotonic_us": 18663704319,
+          "attributes": 15,
+          "clock": "20:59:55",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 12,
+          "monotonic_us": 18663904466,
+          "attributes": 15,
+          "clock": "20:59:56",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 13,
+          "monotonic_us": 18664104765,
+          "attributes": 15,
+          "clock": "20:59:56",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 14,
+          "monotonic_us": 18664304953,
+          "attributes": 15,
+          "clock": "20:59:56",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 15,
+          "monotonic_us": 18664505121,
+          "attributes": 15,
+          "clock": "20:59:56",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "idle-after-style-changes",
+      "elapsed": 3.005,
+      "cpu_percent": 0.33,
+      "first": {
+        "beats": 19,
+        "monotonic_us": 18665305730,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "last": {
+        "beats": 34,
+        "monotonic_us": 18668308539,
+        "attributes": 15,
+        "clock": "21:00:00",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "samples": [
+        {
+          "beats": 19,
+          "monotonic_us": 18665305730,
+          "attributes": 15,
+          "clock": "20:59:57",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 20,
+          "monotonic_us": 18665505951,
+          "attributes": 15,
+          "clock": "20:59:57",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 21,
+          "monotonic_us": 18665706051,
+          "attributes": 15,
+          "clock": "20:59:57",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 22,
+          "monotonic_us": 18665906287,
+          "attributes": 15,
+          "clock": "20:59:58",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 23,
+          "monotonic_us": 18666106544,
+          "attributes": 15,
+          "clock": "20:59:58",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 24,
+          "monotonic_us": 18666306728,
+          "attributes": 15,
+          "clock": "20:59:58",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 25,
+          "monotonic_us": 18666506947,
+          "attributes": 15,
+          "clock": "20:59:58",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 26,
+          "monotonic_us": 18666707055,
+          "attributes": 15,
+          "clock": "20:59:58",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 27,
+          "monotonic_us": 18666907149,
+          "attributes": 15,
+          "clock": "20:59:59",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 28,
+          "monotonic_us": 18667107447,
+          "attributes": 15,
+          "clock": "20:59:59",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 29,
+          "monotonic_us": 18667307478,
+          "attributes": 15,
+          "clock": "20:59:59",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 30,
+          "monotonic_us": 18667507696,
+          "attributes": 15,
+          "clock": "20:59:59",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 31,
+          "monotonic_us": 18667707922,
+          "attributes": 15,
+          "clock": "20:59:59",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 32,
+          "monotonic_us": 18667908087,
+          "attributes": 15,
+          "clock": "21:00:00",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 33,
+          "monotonic_us": 18668108312,
+          "attributes": 15,
+          "clock": "21:00:00",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "four-terminal-titles-at-ten-hz",
+      "elapsed": 5.008,
+      "cpu_percent": 21.17,
+      "first": {
+        "beats": 34,
+        "monotonic_us": 18668308539,
+        "attributes": 15,
+        "clock": "21:00:00",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "last": {
+        "beats": 59,
+        "monotonic_us": 18673310654,
+        "attributes": 807,
+        "clock": "21:00:05",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "samples": [
+        {
+          "beats": 34,
+          "monotonic_us": 18668308539,
+          "attributes": 15,
+          "clock": "21:00:00",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 35,
+          "monotonic_us": 18668508641,
+          "attributes": 39,
+          "clock": "21:00:00",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 36,
+          "monotonic_us": 18668708727,
+          "attributes": 71,
+          "clock": "21:00:00",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 37,
+          "monotonic_us": 18668908797,
+          "attributes": 103,
+          "clock": "21:00:01",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 38,
+          "monotonic_us": 18669108883,
+          "attributes": 135,
+          "clock": "21:00:01",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 39,
+          "monotonic_us": 18669308940,
+          "attributes": 167,
+          "clock": "21:00:01",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 40,
+          "monotonic_us": 18669509043,
+          "attributes": 199,
+          "clock": "21:00:01",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 41,
+          "monotonic_us": 18669709108,
+          "attributes": 231,
+          "clock": "21:00:01",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 42,
+          "monotonic_us": 18669909144,
+          "attributes": 263,
+          "clock": "21:00:02",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 43,
+          "monotonic_us": 18670109219,
+          "attributes": 295,
+          "clock": "21:00:02",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 44,
+          "monotonic_us": 18670309291,
+          "attributes": 327,
+          "clock": "21:00:02",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 45,
+          "monotonic_us": 18670509420,
+          "attributes": 359,
+          "clock": "21:00:02",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 46,
+          "monotonic_us": 18670709500,
+          "attributes": 391,
+          "clock": "21:00:02",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 47,
+          "monotonic_us": 18670909612,
+          "attributes": 423,
+          "clock": "21:00:03",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 48,
+          "monotonic_us": 18671109703,
+          "attributes": 455,
+          "clock": "21:00:03",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 49,
+          "monotonic_us": 18671309729,
+          "attributes": 487,
+          "clock": "21:00:03",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 50,
+          "monotonic_us": 18671509814,
+          "attributes": 519,
+          "clock": "21:00:03",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 51,
+          "monotonic_us": 18671709865,
+          "attributes": 551,
+          "clock": "21:00:03",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 52,
+          "monotonic_us": 18671909991,
+          "attributes": 583,
+          "clock": "21:00:04",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 53,
+          "monotonic_us": 18672110060,
+          "attributes": 615,
+          "clock": "21:00:04",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 54,
+          "monotonic_us": 18672310127,
+          "attributes": 647,
+          "clock": "21:00:04",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 55,
+          "monotonic_us": 18672510221,
+          "attributes": 679,
+          "clock": "21:00:04",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 56,
+          "monotonic_us": 18672710357,
+          "attributes": 711,
+          "clock": "21:00:04",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 57,
+          "monotonic_us": 18672910414,
+          "attributes": 743,
+          "clock": "21:00:05",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 58,
+          "monotonic_us": 18673110490,
+          "attributes": 775,
+          "clock": "21:00:05",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "idle-after-title-stream",
+      "elapsed": 3.006,
+      "cpu_percent": 0.33,
+      "first": {
+        "beats": 59,
+        "monotonic_us": 18673310654,
+        "attributes": 807,
+        "clock": "21:00:05",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "last": {
+        "beats": 74,
+        "monotonic_us": 18676314166,
+        "attributes": 815,
+        "clock": "21:00:08",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "samples": [
+        {
+          "beats": 59,
+          "monotonic_us": 18673310654,
+          "attributes": 807,
+          "clock": "21:00:05",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 60,
+          "monotonic_us": 18673510794,
+          "attributes": 815,
+          "clock": "21:00:05",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 61,
+          "monotonic_us": 18673710984,
+          "attributes": 815,
+          "clock": "21:00:05",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 62,
+          "monotonic_us": 18673911180,
+          "attributes": 815,
+          "clock": "21:00:06",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 63,
+          "monotonic_us": 18674111350,
+          "attributes": 815,
+          "clock": "21:00:06",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 64,
+          "monotonic_us": 18674311616,
+          "attributes": 815,
+          "clock": "21:00:06",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 65,
+          "monotonic_us": 18674511859,
+          "attributes": 815,
+          "clock": "21:00:06",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 66,
+          "monotonic_us": 18674712158,
+          "attributes": 815,
+          "clock": "21:00:06",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 67,
+          "monotonic_us": 18674912343,
+          "attributes": 815,
+          "clock": "21:00:07",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 68,
+          "monotonic_us": 18675112616,
+          "attributes": 815,
+          "clock": "21:00:07",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 69,
+          "monotonic_us": 18675312896,
+          "attributes": 815,
+          "clock": "21:00:07",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 70,
+          "monotonic_us": 18675513171,
+          "attributes": 815,
+          "clock": "21:00:07",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 71,
+          "monotonic_us": 18675713368,
+          "attributes": 815,
+          "clock": "21:00:07",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 72,
+          "monotonic_us": 18675913530,
+          "attributes": 815,
+          "clock": "21:00:08",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 73,
+          "monotonic_us": 18676113898,
+          "attributes": 815,
+          "clock": "21:00:08",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "after-three-explicit-sigusr2-reloads",
+      "elapsed": 3.005,
+      "cpu_percent": 0.0,
+      "first": {
+        "beats": 81,
+        "monotonic_us": 18677715128,
+        "attributes": 873,
+        "clock": "21:00:09",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "last": {
+        "beats": 96,
+        "monotonic_us": 18680718459,
+        "attributes": 873,
+        "clock": "21:00:12",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "samples": [
+        {
+          "beats": 81,
+          "monotonic_us": 18677715128,
+          "attributes": 873,
+          "clock": "21:00:09",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 82,
+          "monotonic_us": 18677915313,
+          "attributes": 873,
+          "clock": "21:00:10",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 83,
+          "monotonic_us": 18678115495,
+          "attributes": 873,
+          "clock": "21:00:10",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 84,
+          "monotonic_us": 18678315811,
+          "attributes": 873,
+          "clock": "21:00:10",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 85,
+          "monotonic_us": 18678515976,
+          "attributes": 873,
+          "clock": "21:00:10",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 86,
+          "monotonic_us": 18678716148,
+          "attributes": 873,
+          "clock": "21:00:10",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 87,
+          "monotonic_us": 18678916381,
+          "attributes": 873,
+          "clock": "21:00:11",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 88,
+          "monotonic_us": 18679116598,
+          "attributes": 873,
+          "clock": "21:00:11",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 89,
+          "monotonic_us": 18679316932,
+          "attributes": 873,
+          "clock": "21:00:11",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 90,
+          "monotonic_us": 18679517060,
+          "attributes": 873,
+          "clock": "21:00:11",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 91,
+          "monotonic_us": 18679717292,
+          "attributes": 873,
+          "clock": "21:00:11",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 92,
+          "monotonic_us": 18679917488,
+          "attributes": 873,
+          "clock": "21:00:12",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 93,
+          "monotonic_us": 18680117718,
+          "attributes": 873,
+          "clock": "21:00:12",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 94,
+          "monotonic_us": 18680318151,
+          "attributes": 873,
+          "clock": "21:00:12",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "beats": 95,
+          "monotonic_us": 18680518245,
+          "attributes": 873,
+          "clock": "21:00:12",
+          "color": [
+            1.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    }
+  ],
+  "module_sha256": "94224b8aa45b38f83c86eda698e96251030ecb0e20ab2a5d1399cfc2e36d8078",
+  "style_sha256": "9af3853970c1d480e5b714c8c5454fd1de9899d6ff44b1e843b591f7a306baf3",
+  "css_changes": [
+    {
+      "color": "green",
+      "before": {
+        "beats": 16,
+        "monotonic_us": 18664705309,
+        "attributes": 15,
+        "clock": "20:59:56",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      },
+      "after": {
+        "beats": 17,
+        "monotonic_us": 18664905443,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "color": "blue",
+      "before": {
+        "beats": 17,
+        "monotonic_us": 18664905443,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          0.0,
+          1.0,
+          0.0
+        ]
+      },
+      "after": {
+        "beats": 18,
+        "monotonic_us": 18665105520,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "color": "red",
+      "before": {
+        "beats": 18,
+        "monotonic_us": 18665105520,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "after": {
+        "beats": 19,
+        "monotonic_us": 18665305730,
+        "attributes": 15,
+        "clock": "20:59:57",
+        "color": [
+          1.0,
+          0.0,
+          0.0
+        ]
+      }
+    }
+  ]
+}

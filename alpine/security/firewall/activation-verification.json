@@ -1,0 +1,105 @@
+{
+  "date": "2026-09-07",
+  "live_status": "rolled-back; application firewall stopped and not enabled at boot",
+  "package": "opensnitch 1.8.0-r1",
+  "daemon_sha256": "792746d0d0fae4b2315d7049d77f02b5b272be81cf60df10213b03692ebd2142",
+  "baseline_before": {
+    "results": [
+      "IPv4 new output allow, curl UID 1000",
+      "IPv4 unsolicited input allow",
+      "IPv6 new output allow, curl UID 1000",
+      "IPv6 unsolicited input allow"
+    ],
+    "local_server_controls_passed": true,
+    "firewall_rules_modified": false,
+    "external_network_used": false,
+    "temporary_link_removed": true
+  },
+  "initial_live_trial": {
+    "results": [
+      "IPv4 new output deny, curl UID 1000",
+      "IPv4 unsolicited input deny",
+      "IPv6 new output deny, curl UID 1000",
+      "IPv6 unsolicited input deny"
+    ],
+    "local_server_controls_passed": true,
+    "firewall_rules_modified": false,
+    "external_network_used": false,
+    "temporary_link_removed": true
+  },
+  "authenticated_codex_after_metadata_fix": {
+    "binary": "/opt/codex/0.153.4/cli/bin/codex",
+    "uid": 1000,
+    "model": "gpt-5.6-luna",
+    "exit_code": 0,
+    "authenticated_response": true,
+    "tools_enabled": false,
+    "saved_login_used": true
+  },
+  "subsequent_verification": "Failed: an outbound curl connection succeeded after new interactive allow rules appeared.",
+  "new_broad_rules_preserved": [
+    "allow-always-simple-0.json: allow all user.id 0",
+    "allow-always-simple-443.json: allow all dest.port 443"
+  ],
+  "other_named_application_rules_preserved": true,
+  "rollback_status": "rolled-back",
+  "rollback_errors": [],
+  "boot_links_added": [],
+  "final_packet_behavior_without_gate": {
+    "results": [
+      "IPv4 new output allow, fresh executable path UID 1000",
+      "IPv4 unsolicited input allow",
+      "IPv6 new output allow, fresh executable path UID 1000",
+      "IPv6 unsolicited input allow"
+    ],
+    "local_server_controls_passed": true,
+    "firewall_rules_modified": false,
+    "external_network_used": false,
+    "temporary_link_removed": true
+  },
+  "later_probe_change": "Fresh copied executable path avoids counting an existing user-approved curl rule as an unknown application. Final version baseline passed; final version has not passed live denial while broad exceptions remain.",
+  "metadata_fix": "Only created/updated RFC3339 policy timestamps changed; matching conditions preserved. Generator unit tests check the fixed policy revision date.",
+  "gui": {
+    "pid": 13769,
+    "previous_pid": 12430,
+    "uid": 1000,
+    "argv": [
+      "/usr/bin/python3",
+      "/usr/bin/opensnitch-ui",
+      "--background",
+      "--socket",
+      "unix:///run/user/1000/opensnitch/osui.sock"
+    ],
+    "socket": "/run/user/1000/opensnitch/osui.sock",
+    "socket_uid": 1000,
+    "socket_mode": "0o640",
+    "runtime_mode": "0o700",
+    "gui_defaults": {
+      "default_action": "0",
+      "default_duration": "6",
+      "disable_popups": "false"
+    },
+    "default_action_meaning": "0 = Deny",
+    "startup_log": "/run/user/1000/opensnitch/ui-startup-vdqs3zzn.log",
+    "startup_log_sha256": "ce23a2d4498390c3c6f7f2a6cbcfde13b3d670d9247ccef00c787bd424d8a92b",
+    "unit_tests_passed": 8,
+    "session_hook_test_passed": true,
+    "shellcheck": "passed",
+    "daemon_firewall_changed_by_gui_task": false
+  },
+  "home_deployment_journal": "/home/jack/.local/state/mbp-intel/backups/1788783372421148538",
+  "limits": [
+    "No reboot proof.",
+    "No radio controls deployed.",
+    "Existing established flows intentionally remain permitted.",
+    "Interactive broad-rule preference is pending.",
+    "An empty daemon-owned inet opensnitch table remains after stop; no filtering chains remain."
+  ],
+  "current_apk_lock": "alpine/packages/locks/ae4f34e18c202f0b71c0.json",
+  "unit_tests": {
+    "firewall": 28,
+    "radio": 23,
+    "gui": 8
+  },
+  "source_hash_scope": "bootstrap-verification.json preserves the earlier namespace run hashes. The subsequent generator change adds valid fixed date metadata only; packet operators are unchanged."
+}

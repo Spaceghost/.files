@@ -1,0 +1,49 @@
+{
+  "before_theme": "waxen-meridian-373c11cb12f0",
+  "theme": "the-bellows-intercept-b503d18336b4",
+  "returncode": 1,
+  "processes": {
+    "waybar": [
+      8427
+    ],
+    "ghostty": [
+      5853,
+      16296
+    ],
+    "foot": [
+      1406,
+      17729,
+      17867,
+      21040,
+      21147,
+      21182,
+      27440,
+      28546,
+      29683
+    ],
+    "btop": [
+      21149
+    ],
+    "firefox": [
+      29211,
+      29316
+    ]
+  },
+  "foreign_backups_unchanged": true,
+  "config_links": {
+    ".config/sway/theme.conf": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/sway/theme.conf",
+    ".config/waybar/style.css": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/waybar/style.css",
+    ".config/foot/foot.ini": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/foot/foot.ini",
+    ".config/ghostty/config": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/ghostty/config",
+    ".config/gtk-3.0/gtk.css": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/gtk-3.0/gtk.css",
+    ".config/btop/btop.conf": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/btop/btop.conf",
+    ".config/qt6ct/qt6ct.conf": "alpine/themes/profiles/the-bellows-intercept-b503d18336b4/.config/qt6ct/qt6ct.conf"
+  },
+  "preserved_processes": {
+    "waybar": true,
+    "ghostty": true,
+    "foot": true,
+    "btop": true,
+    "firefox": true
+  }
+}
