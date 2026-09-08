@@ -23,8 +23,10 @@ A later live check found the regular bar replaced by a diagnostic process using
 restoration attempted under the existing session lock. A subsequent probe used
 `probe2.css` from another Claude session's scratchpad, replacing the normal bar
 again. Concurrent reloads also produced a GLib D-Bus assertion in the recovery
-log. Stable restoration must wait for that session's live probes to stop; the
-original exit cause was not established. Separately, the session regression test reproduced an early exit
+log. At the user's request, the Claude worker was identified through its open
+session scratchpad descriptor and terminated gracefully. Its exit was verified;
+one regular Waybar remained, and a screenshot confirmed the purple bar was
+visible. No further tests were run. The original exit cause was not established. Separately, the session regression test reproduced an early exit
 when `.config/waybar` did not exist: writing `waybar-state.css` failed. Startup
 now creates that directory before writing the stylesheet. The live directory
 already existed, so this is not claimed as the cause of the reported exit.
