@@ -272,6 +272,7 @@ class ManualArtworkTests(unittest.TestCase):
                     for instruction in ('Left: gallery & themes', 'Right: next artwork',
                                         'scroll: browse', 'Middle: pause',
                                         'Super+click: generate & switch',
+                                        'Super+Shift+click: whole new theme',
                                         'Shift+click: edit prompts'):
                         self.assertIn(instruction, visible)
                     for value in ('A <painting> & its frame', 'Its story & <literal> details',

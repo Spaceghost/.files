@@ -2,11 +2,12 @@
 
 All workspaces share one desktop image and one rotation timer. The desktop
 changes artwork every 20 minutes. The Waybar art icon shows the
-current painting and its story: click for the next image, scroll to browse,
-right-click for a gallery picker, and middle-click to pause. **Super/Command +
+current painting and its story: click for the gallery picker, scroll to browse,
+right-click for the next image, and middle-click to pause. **Super/Command +
 left-click** generates a new painting and switches directly to it when ready.
-**Shift + left-click** opens the prompt editor. Both Shift and Super keys work;
-holding Shift and Super together opens the editor. Right/middle clicks and
+**Shift + left-click** opens the prompt editor. **Super/Command + Shift +
+left-click** creates a random new named theme and switches to its first painting.
+Left and right Shift and Super keys work. Right/middle clicks and
 scrolling keep their usual actions even when a modifier is held.
 The gallery also offers **Generate new artwork & switch to it**. The same controls
 work from a terminal:
@@ -17,6 +18,7 @@ oldbook-wallpaper prev
 oldbook-wallpaper pick
 oldbook-wallpaper pause
 oldbook-wallpaper generate
+oldbook-wallpaper new-theme
 oldbook-wallpaper generate --theme none
 oldbook-wallpaper generate --theme gruvbox-dark
 oldbook-wallpaper edit-prompts

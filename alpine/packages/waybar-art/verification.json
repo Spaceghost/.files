@@ -1,35 +1,23 @@
 {
-  "apk_identity": "Q1YbJ1W1AakH3ETkdWejbMavaNT4E=",
+  "apk_identity": "Q1gCeBM/2nhE9wIhqv60RV4T9TJNQ=",
   "apk_signature": "apk verify: OK",
-  "binary_sha256": "64f4892b417cfe2441b40b9091a38a3d5a2b567f250601731df8c49436c420a6",
+  "binary_sha256": "86c0d9dbc4f17079132da3d2edd74be0ed736a3b636149696975172843c8752c",
   "builds": [
     {
-      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r3-a",
+      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r4-a",
       "network": "disabled with unshare --net",
-      "sha256": "3f41c5088aa877e1a4b40ec79d9d7a52b4428513f3324b8fd9db4d3ca3147a47"
+      "sha256": "04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509"
     },
     {
-      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r3-b",
+      "directory": "/home/jack/.local/state/alpine-rice/build/waybar-art-r4-b",
       "network": "disabled with unshare --net",
-      "sha256": "3f41c5088aa877e1a4b40ec79d9d7a52b4428513f3324b8fd9db4d3ca3147a47"
+      "sha256": "04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509"
     }
   ],
   "byte_identical_signed_apks": true,
   "date": "2026-09-07",
-  "headless_output": "/home/jack/.local/state/alpine-rice/verify/waybar-art-r3-installed",
-  "help_checks": [
-    "workspace label plus focus and scroll controls",
-    "focused window title plus picker and tile/float controls",
-    "CPU total and per-core activity plus btop control",
-    "active Sway mode plus exit controls"
-  ],
-  "help_output": "/home/jack/.local/state/alpine-rice/verify/waybar-help-r3-installed",
-  "help_screenshot_sha256": {
-    "cpu.png": "ecd6824bc5ae021b4c4bcb717051dbbcfd92f3c51a5ed414b534f40984aed07d",
-    "mode.png": "efd5528dc3a77b954fea4e2d420c4f98dede9cc1ccb03ac845f433fc44565c7f",
-    "window.png": "fe1ffb17acb6f37ff3735e906c26b56d0f37812880d5b832d38d2b4967a931ed",
-    "workspace.png": "0f6f17af4fd64b4d8e0184667ab14a762e55e6a94fd547a492ca1e8d07d16c10"
-  },
+  "fossil_unversioned_readback_matches": true,
+  "headless_output": "/home/jack/.local/state/alpine-rice/verify/art-r4-final",
   "installed_binary_matches_package": true,
   "interaction_checks": [
     "normal left click opens gallery",
@@ -37,7 +25,10 @@
     "right Command plus left click",
     "left Shift plus left click",
     "right Shift plus left click",
-    "Shift wins over Command plus left click",
+    "left Command and Shift plus left click creates a new theme",
+    "right Command and Shift plus left click creates a new theme",
+    "left Command and right Shift plus left click creates a new theme",
+    "right Command and left Shift plus left click creates a new theme",
     "right click advances artwork",
     "middle click pause",
     "scroll up previous",
@@ -46,24 +37,70 @@
     "middle click with Command remains pause",
     "scroll up with Shift remains previous",
     "scroll down with Command remains next",
+    "right click with Command and Shift remains next",
+    "middle click with Command and Shift remains pause",
+    "scroll up with Command and Shift remains previous",
+    "scroll down with Command and Shift remains next",
     "modifiers stay scoped to artwork",
     "normal click after modifier release opens gallery"
   ],
-  "package": "oldbook-waybar-art-1.0.0-r3.apk",
-  "package_sha256": "3f41c5088aa877e1a4b40ec79d9d7a52b4428513f3324b8fd9db4d3ca3147a47",
+  "live_waybar_maps_installed_library": true,
+  "package": "oldbook-waybar-art-1.0.0-r4.apk",
+  "package_sha256": "04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509",
   "paid_generation_calls": 0,
   "red_tests": [
-    "Before the button swap, normal left click dispatched next instead of opening the gallery.",
-    "Before Shift routing, real left Shift plus left click dispatched next instead of edit-prompts.",
-    "Before keyboard capability filtering, a modifier-only input with Meta held changed a normal left click into generate."
+    "Installed r3 dispatched edit-prompts for Super+Shift+left-click instead of new-theme.",
+    "The CLI rejected new-theme before the new action was added."
   ],
-  "schema": 3,
-  "screenshot_sha256": "e795033e5c1ca2820a415cc00d791e0d6ace710fc7b2316e0d179c9b741f3d4b",
+  "restoration_lock": {
+    "derived_from": "alpine/packages/locks/0b39a04f417c70933a4e.json",
+    "path": "alpine/packages/locks/b10c8acef5a9efa78683.json",
+    "scope": "Only Waybar package entry and world identity changed; not a full host snapshot."
+  },
+  "schema": 4,
+  "screenshot_sha256": "0fa5fad2afd7c4b39b2325f6cd491aa052d2bff030434973bc2aa67154094d92",
+  "shellcheck": "APKBUILD passed with expected abuild external-variable and pkg-config word-splitting warnings excluded (SC2034, SC2154, SC2046)",
   "source_date_epoch": 1788739200,
   "source_sha512": {
-    "art.c": "2bda9585556db94cd148d35b290408079df1744d0b30d0ee9cceace766c2ed497e17a58d36766c2d9766db847aa5c1ffed7588c0d5644632980c092a969a9889",
+    "art.c": "d794d1c7c67446ca7d9f6f505e9353e7a4b0786c75719ccd906b9c4a4fe6de30af48e1c9cf48aa36a704ae678bc78d2135062c235c4146f7be3593d51762ef1f",
     "help.c": "b906e4e02e1cf635e923ceaf3eac95b07207ac7ad54e2d00d51233da7ec03277ceb1e4e553c702c826785eed73a2a050dd7d7dcf59c407abda979b96ca8c1601",
     "help.h": "8056ca25b680cb4e2f42bd73ef5a222cfb088ea669e5bbbf0cd47688b3f739346b4e09b3ab25d7c88dc81850cbe7a50c0d63e89a6dc5366471ccc0e3166d24a4"
   },
-  "tooltip_output": "/home/jack/.local/state/alpine-rice/verify/waybar-art-tooltips-r3-installed"
+  "tooltip_output": "/home/jack/.local/state/alpine-rice/verify/art-r4-tip",
+  "tooltip_variants": [
+    {
+      "class": "rotating",
+      "markup_warning": false,
+      "name": "rotating",
+      "screenshot": "rotating.png",
+      "screenshot_sha256": "0fa5fad2afd7c4b39b2325f6cd491aa052d2bff030434973bc2aa67154094d92",
+      "tooltip_sha256": "5988eaa5a80bf3d034fe79133bd4e2c54a2cbe0384d03f33f7f0c6e2c2542218"
+    },
+    {
+      "class": "paused",
+      "markup_warning": false,
+      "name": "paused",
+      "screenshot": "paused.png",
+      "screenshot_sha256": "4aa4d052ad475bdf4d9238ae0b70002763387da934af46c2a1cf6ff5afe449b1",
+      "tooltip_sha256": "f790bd9ac65459e94799c1d829ef3455b7e4ea1c7bd89bf0720382f18de3da11"
+    },
+    {
+      "class": "generating",
+      "markup_warning": false,
+      "name": "generating",
+      "screenshot": "generating.png",
+      "screenshot_sha256": "c5b975cebda8ace1446261023304afb0f855db8748753328c78d583aae28ebc2",
+      "tooltip_sha256": "07f715718ec1ea2722488b64c98e8a047a845d220f019d27fd3c2dd4a40d0c5c"
+    }
+  ],
+  "transient_verification_failures": [
+    "First pre-install green run saw generate on the final unmodified click; a fresh run and installed-library run passed all 23 checks.",
+    "An initial post-install tooltip test used a runtime path longer than the Unix socket limit; a shorter isolated path passed."
+  ],
+  "unit_tests": {
+    "command": "python3 -m unittest discover -s alpine/tests -v",
+    "count": 555,
+    "log": "/home/jack/.local/state/alpine-rice/verify/waybar-art-r4-unittest.log",
+    "result": "OK"
+  }
 }

@@ -84,6 +84,16 @@ class NewThemeTests(unittest.TestCase):
             art.pick()
         start.assert_called_once_with(new_theme=phrase)
 
+    def test_new_theme_command_launches_random_theme_and_activates_debut_art(self):
+        with tempfile.TemporaryDirectory() as directory, \
+                mock.patch('sys.argv', ['oldbook-wallpaper', 'new-theme']), \
+                mock.patch.object(art, 'GENERATION', Path(directory)), \
+                mock.patch.object(art.subprocess, 'Popen') as launch:
+            art.main()
+        command = launch.call_args.args[0]
+        self.assertIn('--new-theme=', command)
+        self.assertIn('--activate', command)
+
     def test_existing_themes_are_selected_in_a_separate_picker(self):
         from subprocess import CompletedProcess
         menus = []

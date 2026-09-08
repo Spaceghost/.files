@@ -52,7 +52,7 @@ subprocess.run(['cc', '-I'+str(out), '-o', str(out/'pointer-input'),
 (out/'stub').write_text('#!/usr/bin/env python3\nimport json, pathlib, sys\n'
     f'p = pathlib.Path({str(out)!r})\n'
     'if sys.argv[1] == "status":\n'
-    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: gallery · scroll: browse\\nMiddle: pause · right: next\\nSuper + click: generate and switch\\nShift + click: edit prompts"}))\n'
+    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: gallery · scroll: browse\\nMiddle: pause · right: next\\nSuper + click: generate and switch\\nSuper + Shift + click: new theme and first painting\\nShift + click: edit prompts"}))\n'
     'else:\n'
     '    with (p/"actions").open("a") as stream: stream.write(sys.argv[1]+"\\n")\n')
 (out/'stub').chmod(0o755)
@@ -149,7 +149,10 @@ with (out/'runtime.log').open('w') as log:
         check('right Command plus left click', 'generate', modifiers=(126,))
         check('left Shift plus left click', 'edit-prompts', modifiers=(42,))
         check('right Shift plus left click', 'edit-prompts', modifiers=(54,))
-        check('Shift wins over Command plus left click', 'edit-prompts', modifiers=(125, 42))
+        check('left Command and Shift plus left click creates a new theme', 'new-theme', modifiers=(125, 42))
+        check('right Command and Shift plus left click creates a new theme', 'new-theme', modifiers=(126, 54))
+        check('left Command and right Shift plus left click creates a new theme', 'new-theme', modifiers=(125, 54))
+        check('right Command and left Shift plus left click creates a new theme', 'new-theme', modifiers=(126, 42))
         check('right click advances artwork', 'next', button=273)
         check('middle click pause', 'pause', button=274)
         check('scroll up previous', 'prev', scroll='up')
@@ -158,6 +161,10 @@ with (out/'runtime.log').open('w') as log:
         check('middle click with Command remains pause', 'pause', button=274, modifiers=(125,))
         check('scroll up with Shift remains previous', 'prev', scroll='up', modifiers=(54,))
         check('scroll down with Command remains next', 'next', scroll='down', modifiers=(126,))
+        check('right click with Command and Shift remains next', 'next', button=273, modifiers=(125, 42))
+        check('middle click with Command and Shift remains pause', 'pause', button=274, modifiers=(125, 42))
+        check('scroll up with Command and Shift remains previous', 'prev', scroll='up', modifiers=(125, 42))
+        check('scroll down with Command and Shift remains next', 'next', scroll='down', modifiers=(125, 42))
         check('modifiers stay scoped to artwork', 'control', modifiers=(125, 42), x=240)
         check('normal click after modifier release opens gallery', 'pick')
         time.sleep(1)

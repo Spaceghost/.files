@@ -1,9 +1,10 @@
 # Artwork button for Waybar
 
-This small native musl CFFI widget adds two actions to the original artwork
-button: **Command/Super + left click** generates and switches, while **Shift +
-left click** opens the prompt editor. Shift wins when both modifiers are held,
-preventing accidental paid generation. Left click opens the gallery, right
+This small native musl CFFI widget adds three actions to the original artwork
+button: **Command/Super + left click** generates and switches, **Shift +
+left click** opens the prompt editor, and **Command/Super + Shift + left click**
+creates a random named theme and switches to its first painting through the
+gallery's existing new-theme generator. Left click opens the gallery, right
 click advances to the next image, middle click pauses, and scrolling moves to
 the previous or next image. Modifiers do not alter those right, middle, or
 scroll actions. The
@@ -33,7 +34,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r3.apk
+doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r4.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -41,7 +42,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r3 APK identity and archived artifact.
+`manifest.json` records the exact signed r4 APK identity and archived artifact.
 
 ## Verify
 
@@ -81,7 +82,7 @@ This second private compositor uses only a synthetic window title, activates a
 synthetic resize mode, and saves workspace, focused-window, CPU and mode hover
 screenshots without logging desktop window titles.
 
-![Preserved controls and added Command-click help](interaction-preview.png)
+![Artwork controls with the Super+Shift new-theme shortcut](interaction-preview.png)
 
 Upstream: [CFFI ABI documentation](https://github.com/Alexays/Waybar/blob/0.15.0/man/waybar-cffi.5.scd),
 [standard event mapping](https://github.com/Alexays/Waybar/blob/0.15.0/src/AModule.cpp).
