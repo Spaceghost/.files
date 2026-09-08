@@ -394,8 +394,8 @@ def status():
     if state.get('theme_name'):
         tooltip += '\nCollection: ' + html.escape(state['theme_name'])
     # GTK consumes Pango markup, so instructions need escaping just like titles.
-    controls = ('Click: next · scroll: browse (↑ previous / ↓ next)\n'
-                'Middle: pause/resume · right: gallery & themes\n'
+    controls = ('Left: gallery & themes · Right: next artwork\n'
+                'Middle: pause/resume · scroll: browse (↑ previous / ↓ next)\n'
                 'Command/Super+click: generate & switch · always a new painting\n'
                 'Super+Shift+G: desktop panels on/off\n'
                 'Shift+click: edit prompts · “Zorak, fix the script!”\n'

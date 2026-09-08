@@ -21,20 +21,33 @@ tmux source-file ~/.tmux.conf
 swaync-client --reload-css
 ```
 
-Waybar places the focused-app title and media controls immediately before the
-right-hand status group; its center module list is empty.
-It watches CSS changes. Its artwork widget preserves left/right/middle
-click and scroll, and adds Command/Super+left-click generation. New terminal
+Waybar keeps previous, current-track/play-pause, and next media controls in the
+middle section between the left and right control groups. They sit directly on
+the bar without a separate center capsule and hide when no player is available.
+It watches CSS changes. The artwork icon opens the gallery on left-click and
+advances to the next image on right-click. Middle-click pauses rotation; scroll
+selects previous/next. Command/Super + left-click generates and Shift + left-click
+opens the prompt editor. New terminal
 windows read all Foot settings; the refresh command recolors existing Foot
 sessions without sending input or closing applications. Other applications
 that load their theme only at startup use it when next opened.
 
-`sway/theme.conf` contains decorations separately from keybindings. Foot has
-a matching fallback decoration for other compositors. The local SwayFX package
-puts normal window captions below their content; grouped tab and stack headers
-retain their controls. Its soft shadows, rounded corners and bottom captions
-take effect at the next normal desktop login when stock Sway is still running.
-See the [offline compositor recipe](../packages/swayfx/README.md).
+`oldbook-decoration` provides one caption at each workspace's bottom edge.
+The right edge remains available through right-click or the desktop decoration
+editor (`oldbook-decoration-settings`, also Shift + right-click on the caption).
+The editor shows placement, opacity and corner radius alongside the editable
+`~/.config/oldbook/decoration.json`. Changes apply automatically. Both the editor
+and caption follow the active palette, including generated themes; the caption
+uses a translucent gradient without a pixel outline. Fullscreen tiled captions
+are square, while floating and ordinary windows keep the configured rounding.
+Left-click opens the window picker; middle-click toggles the focused window's
+floating state. The caption follows the saved terminal font.
+
+`sway/theme.conf` retains themed native captions as a fallback. Space Ghost uses
+plum and lilac; Gruvbox uses charcoal and amber, with centered terminal-font text.
+The local SwayFX package can place these below individual windows when native
+captions are enabled. Its native drag/resize and middle-click behavior has been
+verified separately. See the [offline compositor recipe](../packages/swayfx/README.md).
 
 ## Ghost Observatory concept
 

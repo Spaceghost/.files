@@ -144,9 +144,10 @@ with (out / 'runtime.log').open('w') as log:
                 payload = json.loads(subprocess.check_output(
                     [str(helper), 'status'], env=env, text=True))
                 required = ('The Ampersand &amp; Observatory',
-                            'Space Ghost &amp; Zorak', 'Click: next',
-                            'Middle: pause', 'Command/Super+click',
-                            'Shift+click: edit prompts', 'Gallery &amp; History')
+                            'Space Ghost &amp; Zorak', 'Left: gallery &amp; themes',
+                            'Right: next artwork', 'Middle: pause',
+                            'Command/Super+click', 'Shift+click: edit prompts',
+                            'Gallery &amp; History')
                 if not all(text in payload.get('tooltip', '') for text in required):
                     raise AssertionError(f'{name}: production tooltip lost required content')
                 if payload.get('class') != name:

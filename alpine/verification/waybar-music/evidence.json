@@ -1,0 +1,15 @@
+{
+  "selected": "Selected Coast to Coast",
+  "actions": [
+    "GhostPlanet:Previous",
+    "GhostPlanet:PlayPause",
+    "GhostPlanet:Next"
+  ],
+  "screenshots": {
+    "music.png": "0205ca64ea2a7c9d023dfbd117519f93d85ba4169be902f873f4cd618d4055d8",
+    "tooltip.png": "f54f2468a6dae108b9a20f710d6e7b267da4969dffeb097b17b194b8f47e0c5b"
+  },
+  "environment": "Private Sway compositor and private D-Bus with two synthetic MPRIS players",
+  "reproduce": "alpine/tests/verify_waybar_music.py --output /tmp/new-music-proof",
+  "config_sha256": "badfb9114af8a5817846ebfb01e6ae63708389cab7116a3d50a98861065aaa8f"
+}

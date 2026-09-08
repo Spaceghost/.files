@@ -153,10 +153,10 @@ static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer data)
     Artwork *art = data;
     if (event->button == 1) {
         Modifiers modifiers = modifiers_pressed(event->state);
-        action(art, modifiers.shift ? "edit-prompts" : modifiers.super ? "generate" : "next");
+        action(art, modifiers.shift ? "edit-prompts" : modifiers.super ? "generate" : "pick");
     }
     else if (event->button == 2) action(art, "pause");
-    else if (event->button == 3) action(art, "pick");
+    else if (event->button == 3) action(art, "next");
     return TRUE;
 }
 

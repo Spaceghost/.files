@@ -9,7 +9,7 @@ Both official bundles contain a private GNU-linked zsh that cannot launch on
 Alpine. The APK preserves it as `zsh.upstream-gnu`, depends on Alpine `zsh`, and
 puts an absolute `/bin/zsh` symlink in each private-shell slot. The bundled
 native `rg` and `bwrap` remain in both resource layouts. Stripping and automatic
-ELF dependency tracing are disabled so abuild neither modifies the signed
+ELF dependency tracing are disabled so abuild neither modifies the
 upstream executables nor mistakes the preserved GNU-only shell for a runtime
 dependency.
 

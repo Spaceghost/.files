@@ -9,23 +9,25 @@
     min-height: 0;
 }
 window#waybar { background: transparent; color: #ede1ff; }
-.modules-left, .modules-center, .modules-right {
+.modules-left, .modules-right {
     background: linear-gradient(180deg, rgba(40, 19, 62, 0.97), rgba(19, 10, 32, 0.97));
     border: 1px solid rgba(180, 133, 220, 0.36);
     border-radius: 13px;
     box-shadow: 0 3px 5px rgba(6, 1, 16, 0.42);
     margin-bottom: 5px;
 }
-.modules-center { border-color: rgba(128, 98, 158, 0.26); padding: 0 12px; }
+.modules-center { background: transparent; margin: 0 8px; padding: 0; }
 .modules-right { padding: 0 5px; }
 #custom-ghost {
+    font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
     font-size: 21px;
+    min-width: 36px;
     color: #fff6ff;
     background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
     text-shadow: 0 0 5px #e3baff;
     border-radius: 10px;
     margin: 3px 5px 3px 3px;
-    padding: 0 11px;
+    padding: 0;
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
 #workspaces { margin: 3px 5px 3px 0; }
@@ -45,10 +47,10 @@ window#waybar { background: transparent; color: #ede1ff; }
 #custom-ai.complete { color: #b9e6cf; background: #25372f; }
 #custom-ai.attention { color: #fff3fa; background: #8d345e; }
 #mode { color: #ffc3e6; padding: 0 9px; }
-#window { color: #c5acd9; font-size: 10px; }
-window#waybar.empty #window { color: #9c81b4; }
-#mpris { color: #f1b6dc; padding-left: 12px; font-size: 10px; }
+#mpris { color: #f1b6dc; padding: 0 7px; font-size: 10px; }
 #mpris.paused { color: #a48ba7; }
+#mpris.previous, #mpris.next { font-size: 15px; padding: 0 8px; }
+#mpris:hover { background: rgba(130, 76, 161, 0.24); }
 #cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
 #pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
     padding: 0 8px;
@@ -80,8 +82,8 @@ window#waybar.empty #window { color: #9c81b4; }
 #pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
     background: rgba(130, 76, 161, 0.32);
 }
-tooltip { background: rgba(28, 14, 44, 0.99); border: 1px solid #77518e; border-radius: 12px; }
-tooltip label { color: #e8d9f3; padding: 12px; font-size: 11px; }
+tooltip { background: rgba(28, 14, 44, 0.99); border: 1px solid #77518e; border-radius: 12px; box-shadow: 0 5px 16px rgba(6, 1, 16, 0.58); }
+tooltip label { color: #e8d9f3; padding: 13px 15px; font-size: 11px; font-weight: 500; }
 @keyframes distress { to { background: #6c284e; } }
 #custom-art { color: #b89ace; font-size: 15px; padding: 0 7px 0 4px; }
 #custom-art:hover { color: #fff1ff; }
@@ -93,12 +95,12 @@ tooltip label { color: #e8d9f3; padding: 12px; font-size: 11px; }
    GTK only sets the hover state on the module boxes, never on the window or
    the row that holds them, so each chrome block answers the pointer itself. */
 window#waybar.top .modules-left,
-window#waybar #context,
+window#waybar.top .modules-center,
 window#waybar #status {
     transition: opacity 130ms ease-out;
 }
 window#waybar.top .modules-left:hover,
-window#waybar #context:hover,
+window#waybar.top .modules-center:hover,
 window#waybar #status:hover {
     opacity: 1;
     transition: opacity 90ms ease-out;

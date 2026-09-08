@@ -269,8 +269,9 @@ class ManualArtworkTests(unittest.TestCase):
                     except Exception as error:
                         self.fail(f'Tooltip cannot render in GTK: {error}')
                     self.assertTrue(valid)
-                    for instruction in ('Click: next', 'scroll: browse', 'Middle: pause',
-                                        'right: gallery', 'Super+click: generate & switch',
+                    for instruction in ('Left: gallery & themes', 'Right: next artwork',
+                                        'scroll: browse', 'Middle: pause',
+                                        'Super+click: generate & switch',
                                         'Shift+click: edit prompts'):
                         self.assertIn(instruction, visible)
                     for value in ('A <painting> & its frame', 'Its story & <literal> details',

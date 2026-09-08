@@ -3,9 +3,10 @@
 This small native musl CFFI widget adds two actions to the original artwork
 button: **Command/Super + left click** generates and switches, while **Shift +
 left click** opens the prompt editor. Shift wins when both modifiers are held,
-preventing accidental paid generation. Existing controls remain: left click
-next, right click gallery, middle click pause, scroll up previous and scroll
-down next. Modifiers do not alter those right, middle, or scroll actions. The
+preventing accidental paid generation. Left click opens the gallery, right
+click advances to the next image, middle click pauses, and scrolling moves to
+the previous or next image. Modifiers do not alter those right, middle, or
+scroll actions. The
 widget displays the complete tooltip, icon and state classes from
 `oldbook-wallpaper status` without rewriting the help text. A bounded startup
 walk also adds contextual hover help to Waybar's workspace, focused-window,
@@ -32,7 +33,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r2.apk
+doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r3.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -40,7 +41,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r2 APK identity and archived artifact.
+`manifest.json` records the exact signed r3 APK identity and archived artifact.
 
 ## Verify
 

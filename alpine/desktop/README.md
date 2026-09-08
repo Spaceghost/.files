@@ -2,7 +2,7 @@
 
 This is the deployable HOME overlay for the Oldbook Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: Gruvbox Dark charcoal surfaces, cream text, and warm amber highlights with Space Ghost artwork. It contains no wallpaper, credential, network profile, or machine secret.
 
-`~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then solid Gruvbox charcoal (`#282828`).
+`~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then the active theme's solid background. Its ring, text and authentication states follow the same palette.
 
 All workspaces now share the same painting and gallery timer. Foot uses 78%
 opacity with 4-pixel padding; Sway keeps a small 4-pixel outer gap. Ghostty is
@@ -14,13 +14,14 @@ The video picker accepts local files and explicit HTTPS URLs. No video starts
 automatically. See the [video guide](../packages/mpvpaper/README.md) and
 [Ghostty notes](../packages/ghostty/README.md).
 
-Waybar keeps the current-window/media capsule against the right-hand status
-group. The far left and right ends are square; the inner corners are rounded.
-A second, click-through Waybar surface sits behind windows at the right edge.
-Its Unicode bars show per-core CPU use and memory, followed by temperature,
-network throughput, root-disk usage and uptime. It reserves no window space.
-To remove this monitor, remove the object named `monitor` from the Waybar config
-array and reload Waybar with SIGUSR2. The top bar remains the first object.
+Waybar's middle section holds music controls between the left and right desktop
+controls. Window titles live in the workspace decoration at the bottom edge.
+Open `oldbook-decoration-settings` to edit placement, opacity and corners beside
+the underlying `~/.config/oldbook/decoration.json`. The right edge remains an
+option; right-click the caption to swap edges or Shift + right-click to open the
+editor. Left-click chooses a window and middle-click toggles floating. The
+borderless caption follows the active theme, with square corners for fullscreen
+tiled windows and the selected rounding otherwise.
 
 ## Runtime dependencies
 
@@ -42,7 +43,7 @@ Run the repository deployment tool after its package and wallpaper stages:
 ~/.files/alpine/bin/deploy-home --target "$HOME"
 ```
 
-Start a new session with `oldbook-sway`; reload a deployed session with `Mod+Shift+C`. Verify the panel, launcher, notification center, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
+Start a new session with `oldbook-sway`; reload a deployed session with `Mod+Shift+C`. Verify the panel, launcher, notification popups and history card, sound, and lock screen in the active session before treating the configuration as accepted. For local machine overrides, place a separate file in `~/.config/sway/local.d/`; this is useful for external displays and intentionally not part of the reproducible overlay.
 
 The configured display mode is the native internal panel. Do not copy it to an external display until its supported modes have been inspected with `swaymsg -t get_outputs`.
 
@@ -57,7 +58,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback |
 | Brightness keys | Kernel backlight steps, with a clear notification if the seat lacks write permission |
 | Click the panel audio icon | Open pavucontrol |
-| Click the notification glyph | Toggle the Spaceghost notification center |
+| Click the notification glyph | Toggle the compact notification history card |
 | Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
 | Shift + left click the artwork icon | Edit shared artwork guidance and scene prompts |
 | `Caps Lock` | Escape (including with Shift); the original Escape key still works |
@@ -68,8 +69,8 @@ application profiles; profiles are useful baselines, not exhaustive shortcut lis
 `oldbook-shortcuts status` reports its state. The default trigger remains Super,
 so Caps Lock retains its Escape behavior and notification indicator.
 
-The artwork icon keeps its original controls and tooltip: left click next,
-right click gallery, middle click pause, and scroll previous/next. Its small
+The artwork icon opens the gallery with left click, advances with right click,
+pauses with middle click, and scrolls previous/next. Its small
 `oldbook-waybar-art` package supplies native modifier handling; see the
 [build and verification guide](../packages/waybar-art/README.md).
 

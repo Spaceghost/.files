@@ -52,7 +52,7 @@ subprocess.run(['cc', '-I'+str(out), '-o', str(out/'pointer-input'),
 (out/'stub').write_text('#!/usr/bin/env python3\nimport json, pathlib, sys\n'
     f'p = pathlib.Path({str(out)!r})\n'
     'if sys.argv[1] == "status":\n'
-    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: next · scroll: browse\\nMiddle: pause · right: gallery\\nSuper + click: generate and switch\\nShift + click: edit prompts"}))\n'
+    '    print(json.dumps({"text":"ART", "class":"rotating", "tooltip":"Click: gallery · scroll: browse\\nMiddle: pause · right: next\\nSuper + click: generate and switch\\nShift + click: edit prompts"}))\n'
     'else:\n'
     '    with (p/"actions").open("a") as stream: stream.write(sys.argv[1]+"\\n")\n')
 (out/'stub').chmod(0o755)
@@ -144,22 +144,22 @@ with (out/'runtime.log').open('w') as log:
                     send(keyboard, f'release {modifier}')
             time.sleep(.5)  # Keep independent clicks outside GTK double-click interval.
 
-        check('normal left click', 'next')
+        check('normal left click opens gallery', 'pick')
         check('left Command plus left click', 'generate', modifiers=(125,))
         check('right Command plus left click', 'generate', modifiers=(126,))
         check('left Shift plus left click', 'edit-prompts', modifiers=(42,))
         check('right Shift plus left click', 'edit-prompts', modifiers=(54,))
         check('Shift wins over Command plus left click', 'edit-prompts', modifiers=(125, 42))
-        check('right click gallery', 'pick', button=273)
+        check('right click advances artwork', 'next', button=273)
         check('middle click pause', 'pause', button=274)
         check('scroll up previous', 'prev', scroll='up')
         check('scroll down next', 'next', scroll='down')
-        check('right click with Shift remains gallery', 'pick', button=273, modifiers=(42,))
+        check('right click with Shift remains next', 'next', button=273, modifiers=(42,))
         check('middle click with Command remains pause', 'pause', button=274, modifiers=(125,))
         check('scroll up with Shift remains previous', 'prev', scroll='up', modifiers=(54,))
         check('scroll down with Command remains next', 'next', scroll='down', modifiers=(126,))
         check('modifiers stay scoped to artwork', 'control', modifiers=(125, 42), x=240)
-        check('normal click after modifier release', 'next')
+        check('normal click after modifier release opens gallery', 'pick')
         time.sleep(1)
         subprocess.run(['grim',str(out/'screenshot.png')],env=env,check=True)
         evidence = {'checks':checks,'paid_generation_calls':0,

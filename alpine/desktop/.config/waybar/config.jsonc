@@ -1,427 +1,324 @@
 [
-{
-  "name": "top",
-  "layer": "top",
-  "position": "top",
-  "height": 32,
-  "spacing": 2,
-  "margin-top": 0,
-  "margin-left": 4,
-  "margin-right": 4,
-  "exclusive": true,
-  "fixed-center": false,
-  "reload_style_on_change": true,
-  "modules-left": [
-    "custom/ghost",
-    "cffi/art",
-    "sway/workspaces",
-    "custom/ai",
-    "sway/mode"
-  ],
-  "modules-center": [],
-  "modules-right": [
-    "group/context",
-    "group/status"
-  ],
-  "group/context": {
-    "orientation": "horizontal",
-    "modules": [
-      "sway/window",
-      "mpris"
-    ]
-  },
-  "group/status": {
-    "orientation": "horizontal",
-    "modules": [
-      "group/telemetry",
-      "group/transmission",
-      "group/sound",
-      "group/power",
-      "custom/notifications",
-      "clock",
-      "tray"
-    ]
-  },
-  "custom/ghost": {
-    "format": "\udb80\udea0",
-    "tooltip-format": "<b>SPACE GHOST \u00b7 COAST TO COAST</b>\nYour local control room. Zorak is not the administrator.\n\nLeft: command deck \u00b7 Right: applications",
-    "on-click": "~/.local/bin/oldbook-control",
-    "on-click-right": "~/.local/bin/oldbook-menu"
-  },
-  "sway/workspaces": {
-    "disable-scroll": false,
-    "warp-on-scroll": false,
-    "all-outputs": false,
-    "format": "{value}",
-    "disable-markup": true
-  },
-  "sway/mode": {
-    "format": "\udb81\ude33 {}"
-  },
-  "sway/window": {
-    "format": "{title}",
-    "max-length": 24,
-    "icon": true,
-    "icon-size": 14,
-    "all-outputs": false,
-    "tooltip": true,
-    "on-click": "~/.local/bin/oldbook-control windows",
-    "rewrite": {
-      "": "TRANSMISSION STANDBY",
-      "(.*) \u2014 Mozilla Firefox": "$1",
-      "(.*) - Mozilla Firefox": "$1"
-    }
-  },
-  "mpris": {
-    "format": "{status_icon} {dynamic}",
-    "format-paused": "\udb80\udfe4 {dynamic}",
-    "dynamic-order": [
-      "title",
-      "artist"
+  {
+    "name": "top",
+    "layer": "overlay",
+    "position": "top",
+    "height": 32,
+    "spacing": 2,
+    "margin-top": 0,
+    "margin-left": 4,
+    "margin-right": 4,
+    "exclusive": true,
+    "fixed-center": false,
+    "reload_style_on_change": true,
+    "modules-left": [
+      "custom/ghost",
+      "cffi/art",
+      "sway/workspaces",
+      "custom/ai",
+      "sway/mode"
     ],
-    "dynamic-len": 23,
-    "title-len": 23,
-    "artist-len": 12,
-    "max-length": 25,
-    "status-icons": {
-      "playing": "\udb80\udf86",
-      "paused": "\udb80\udfe4",
-      "stopped": "\udb81\udcdb"
-    },
-    "tooltip-format": "<b>{title}</b>\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Right: next \u00b7 Middle: previous"
-  },
-  "group/telemetry": {
-    "orientation": "horizontal",
-    "drawer": {
-      "transition-duration": 220,
-      "children-class": "drawer-child",
-      "transition-left-to-right": false
-    },
-    "modules": [
-      "cpu",
-      "memory",
-      "temperature",
-      "disk"
-    ]
-  },
-  "cpu": {
-    "interval": 3,
-    "format": "\udb80\udf5b {usage}%",
-    "on-click": "foot --title=\"Ghost Reactor\" -e btop"
-  },
-  "memory": {
-    "interval": 5,
-    "format": "\udb81\ude1a {percentage}%",
-    "tooltip-format": "<b>MEMORY</b>\n{used:0.1f} / {total:0.1f} GiB\nAvailable: {avail:0.1f} GiB",
-    "on-click": "foot --title=\"Ghost Reactor\" -e btop"
-  },
-  "temperature": {
-    "interval": 5,
-    "critical-threshold": 82,
-    "format": "\udb81\udd04 {temperatureC}\u00b0",
-    "format-critical": "\udb83\ude01 {temperatureC}\u00b0",
-    "tooltip-format": "<b>THERMAL CORE</b>\n{temperatureC}\u00b0C / {temperatureF}\u00b0F"
-  },
-  "disk": {
-    "interval": 60,
-    "path": "/",
-    "format": "\udb80\udeca {percentage_used}%",
-    "tooltip-format": "<b>ROOT STORAGE</b>\n{used} used \u00b7 {free} free",
-    "on-click": "thunar"
-  },
-  "group/transmission": {
-    "orientation": "horizontal",
-    "drawer": {
-      "transition-duration": 220,
-      "children-class": "drawer-child",
-      "transition-left-to-right": false
-    },
-    "modules": [
-      "custom/link",
-      "custom/radio",
-      "custom/firewall"
-    ]
-  },
-  "custom/link": {
-    "exec": "~/.local/bin/oldbook-panel-status network",
-    "return-type": "json",
-    "interval": 3,
-    "on-click": "~/.local/bin/oldbook-control network",
-    "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-control network-report",
-    "max-length": 14
-  },
-  "custom/radio": {
-    "exec": "~/.local/bin/oldbook-panel-status radio",
-    "return-type": "json",
-    "interval": 5,
-    "on-click": "~/.local/bin/oldbook-control network"
-  },
-  "custom/firewall": {
-    "exec": "~/.local/bin/oldbook-panel-status firewall",
-    "return-type": "json",
-    "interval": 5,
-    "on-click": "~/.local/bin/oldbook-control firewall"
-  },
-  "group/sound": {
-    "orientation": "horizontal",
-    "drawer": {
-      "transition-duration": 220,
-      "children-class": "drawer-child",
-      "transition-left-to-right": false
-    },
-    "modules": [
-      "pulseaudio",
-      "pulseaudio#mic"
-    ]
-  },
-  "pulseaudio": {
-    "format": "{icon} {volume}%",
-    "format-muted": "\udb81\udd81",
-    "format-icons": {
-      "headphone": "\udb80\udecb",
-      "headset": "\udb80\udece",
-      "default": [
-        "\udb81\udd7f",
-        "\udb81\udd80",
-        "\udb81\udd7e"
+    "modules-center": [
+      "mpris#previous",
+      "mpris",
+      "mpris#next"
+    ],
+    "modules-right": [
+      "group/status"
+    ],
+    "group/status": {
+      "orientation": "horizontal",
+      "modules": [
+        "group/telemetry",
+        "group/transmission",
+        "group/sound",
+        "group/power",
+        "custom/notifications",
+        "clock",
+        "tray"
       ]
     },
-    "tooltip-format": "<b>SPACE GHOST SOUND SYSTEM</b>\n{desc}\nVolume: {volume}%\n\nScroll: volume \u00b7 Left: mixer \u00b7 Right: mute\nHover to reveal microphone.",
-    "scroll-step": 5,
-    "max-volume": 100,
-    "on-click": "pavucontrol",
-    "on-click-right": "~/.local/bin/oldbook-audio mute"
-  },
-  "pulseaudio#mic": {
-    "format": "{format_source}",
-    "format-source": "\udb80\udf6c {volume}%",
-    "format-source-muted": "\udb80\udf6d off",
-    "tooltip-format": "<b>MICROPHONE</b>\nClick to toggle microphone mute.",
-    "on-click": "~/.local/bin/oldbook-audio mic-mute",
-    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%+",
-    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-"
-  },
-  "group/power": {
-    "orientation": "horizontal",
-    "drawer": {
-      "transition-duration": 220,
-      "children-class": "drawer-child",
-      "transition-left-to-right": false
+    "custom/ghost": {
+      "format": "\udb80\udea0",
+      "tooltip-format": "<b>SPACE GHOST'S COMMAND DECK</b>\nBroadcasting live from the Oldbook. Zorak still does not have root.\n\nLeft: open command deck \u00b7 Right: launch applications",
+      "on-click": "~/.local/bin/oldbook-control",
+      "on-click-right": "~/.local/bin/oldbook-menu"
     },
-    "modules": [
-      "battery",
-      "backlight",
-      "idle_inhibitor"
-    ]
-  },
-  "battery": {
-    "bat": "BAT0",
-    "interval": 20,
-    "states": {
-      "warning": 25,
-      "critical": 10
+    "sway/workspaces": {
+      "disable-scroll": false,
+      "warp-on-scroll": false,
+      "all-outputs": false,
+      "format": "{value}",
+      "disable-markup": true,
+      "smooth-scrolling-threshold": 2
     },
-    "format": "{icon} {capacity}%",
-    "format-charging": "\udb80\udc84 {capacity}%",
-    "format-plugged": "\udb81\udea5 {capacity}%",
-    "format-icons": [
-      "\udb80\udc8e",
-      "\udb80\udc7a",
-      "\udb80\udc7c",
-      "\udb80\udc7e",
-      "\udb80\udc80",
-      "\udb80\udc79"
-    ],
-    "tooltip-format": "<b>POWER RESERVE</b>\n{capacity}% \u00b7 {timeTo}\nPower draw: {power} W\n\nLeft: session controls\nHover for brightness and keep-awake.",
-    "on-click": "~/.local/bin/oldbook-control power"
-  },
-  "backlight": {
-    "format": "\udb80\udcdf {percent}%",
-    "tooltip-format": "<b>MOONLIGHT</b>\nDisplay brightness: {percent}%\nScroll to adjust.",
-    "on-scroll-up": "~/.local/bin/oldbook-brightness up",
-    "on-scroll-down": "~/.local/bin/oldbook-brightness down"
-  },
-  "idle_inhibitor": {
-    "format": "{icon}",
-    "format-icons": {
-      "activated": "\udb80\udd76",
-      "deactivated": "\udb83\udfaa"
+    "sway/mode": {
+      "format": "\udb81\ude33 {}",
+      "tooltip-format": "<b>{} MODE</b>\nh j k l or the arrow keys resize the focused window.\nReturn or Escape returns to the default mode."
     },
-    "tooltip-format-activated": "<b>ON AIR</b>\nKeeping this display awake. Click to resume idle locking.",
-    "tooltip-format-deactivated": "<b>OFF AIR</b>\nAutomatic idle locking is enabled. Click to keep awake."
-  },
-  "custom/notifications": {
-    "exec": "swaync-client -swb",
-    "return-type": "json",
-    "format": "{icon}",
-    "format-icons": {
-      "notification": "\udb84\udd6b",
-      "none": "\udb80\udc9a",
-      "dnd-notification": "\udb80\udc9b",
-      "dnd-none": "\udb80\udc9b",
-      "inhibited-notification": "\udb80\udc9b",
-      "inhibited-none": "\udb80\udc9b",
-      "dnd-inhibited-notification": "\udb80\udc9b",
-      "dnd-inhibited-none": "\udb80\udc9b"
+    "mpris#previous": {
+      "format": "\uf048",
+      "format-paused": "\uf048",
+      "format-stopped": "\uf048",
+      "tooltip-format": "REWIND THE TRANSMISSION\n{title}\n{artist}\n\nClick: previous track",
+      "on-click": "playerctl --player=playerctld previous",
+      "on-click-middle": "playerctl --player=playerctld previous",
+      "on-click-right": "playerctl --player=playerctld previous"
     },
-    "tooltip": true,
-    "tooltip-format": "<b>INCOMING TRANSMISSIONS</b>\nLeft: notification center\nRight: toggle Do Not Disturb",
-    "on-click": "swaync-client -t -sw",
-    "on-click-right": "swaync-client -d -sw",
-    "restart-interval": 3
-  },
-  "clock": {
-    "interval": 1,
-    "format": "{:%a %H:%M}",
-    "format-alt": "{:%d %b \u00b7 %H:%M:%S}",
-    "tooltip-format": "<tt><small>{calendar}</small></tt>\nClick: date and seconds \u00b7 Scroll: browse months",
-    "calendar": {
-      "mode": "month",
-      "weeks-pos": "right",
-      "on-scroll": 1,
-      "format": {
-        "months": "<span color=\"#ebdbb2\"><b>{}</b></span>",
-        "weekdays": "<span color=\"#928374\">{}</span>",
-        "today": "<span color=\"#fabd2f\"><b><u>{}</u></b></span>"
-      }
+    "mpris": {
+      "format": "{status_icon} {dynamic}",
+      "format-paused": "{status_icon} {dynamic}",
+      "format-stopped": "{status_icon} {dynamic}",
+      "dynamic-order": [
+        "title",
+        "artist"
+      ],
+      "dynamic-len": 48,
+      "title-len": 48,
+      "artist-len": 18,
+      "max-length": 64,
+      "status-icons": {
+        "playing": "\uf04c",
+        "paused": "\uf04b",
+        "stopped": "\uf04b"
+      },
+      "tooltip-format": "NOW TRANSMITTING\n{title}\n{artist}\n{player} \u00b7 {status}\n\nLeft: play/pause \u00b7 Middle: previous \u00b7 Right: next\nScroll: seek five seconds",
+      "on-scroll-up": "playerctl --player=playerctld position 5+",
+      "on-scroll-down": "playerctl --player=playerctld position 5-",
+      "smooth-scrolling-threshold": 2
     },
-    "actions": {
-      "on-scroll-up": "shift_down",
-      "on-scroll-down": "shift_up"
+    "mpris#next": {
+      "format": "\uf051",
+      "format-paused": "\uf051",
+      "format-stopped": "\uf051",
+      "tooltip-format": "FAST-FORWARD THE TRANSMISSION\n{title}\n{artist}\n\nClick: next track",
+      "on-click": "playerctl --player=playerctld next",
+      "on-click-middle": "playerctl --player=playerctld next",
+      "on-click-right": "playerctl --player=playerctld next"
     },
-    "timezone": "America/Los_Angeles"
-  },
-  "tray": {
-    "icon-size": 15,
-    "spacing": 8
-  },
-  "cffi/art": {
-    "module_path": "/usr/lib/waybar/oldbook-art.so"
-  },
-  "custom/ai": {
-    "exec": "~/.local/bin/oldbook-workspaces status",
-    "return-type": "json",
-    "interval": 2,
-    "on-click": "~/.local/bin/oldbook-workspaces ai-next",
-    "on-click-right": "~/.local/bin/oldbook-workspaces ai-menu"
+    "group/telemetry": {
+      "orientation": "horizontal",
+      "drawer": {
+        "transition-duration": 220,
+        "children-class": "drawer-child",
+        "transition-left-to-right": false
+      },
+      "modules": [
+        "cpu",
+        "memory",
+        "temperature",
+        "disk"
+      ]
+    },
+    "cpu": {
+      "interval": 3,
+      "format": "\udb80\udf5b {usage}%",
+      "on-click": "foot --title=\"Ghost Reactor\" -e btop",
+      "tooltip-format": "<b>GHOST REACTOR \u00b7 PROCESSOR</b>\nLoad: {usage}%\nRunning average: {avg_frequency} GHz\n\nClick: open btop\nHover to reveal memory, thermal core and archive.",
+      "on-click-right": "foot --title=\"Ghost Reactor\" -e btop"
+    },
+    "memory": {
+      "interval": 5,
+      "format": "\udb81\ude1a {percentage}%",
+      "tooltip-format": "GHOST REACTOR \u00b7 MEMORY\n{used:0.1f} / {total:0.1f} GiB\nAvailable: {avail:0.1f} GiB\n\nClick: open btop",
+      "on-click": "foot --title=\"Ghost Reactor\" -e btop"
+    },
+    "temperature": {
+      "interval": 5,
+      "critical-threshold": 82,
+      "format": "\udb81\udd04 {temperatureC}\u00b0",
+      "format-critical": "\udb83\ude01 {temperatureC}\u00b0",
+      "tooltip-format": "<b>GHOST REACTOR \u00b7 THERMAL CORE</b>\n{temperatureC}\u00b0C / {temperatureF}\u00b0F\nDistress signal begins at 82\u00b0C.\n\nClick: open btop",
+      "on-click": "foot --title=\"Ghost Reactor\" -e btop"
+    },
+    "disk": {
+      "interval": 60,
+      "path": "/",
+      "format": "\udb80\udeca {percentage_used}%",
+      "tooltip-format": "OLD BOOK ARCHIVE\nRoot storage: {used} used \u00b7 {free} free\n\nClick: open files",
+      "on-click": "thunar"
+    },
+    "group/transmission": {
+      "orientation": "horizontal",
+      "drawer": {
+        "transition-duration": 220,
+        "children-class": "drawer-child",
+        "transition-left-to-right": false
+      },
+      "modules": [
+        "custom/link",
+        "custom/radio",
+        "custom/firewall"
+      ]
+    },
+    "custom/link": {
+      "exec": "~/.local/bin/oldbook-panel-status network",
+      "return-type": "json",
+      "interval": 3,
+      "on-click": "~/.local/bin/oldbook-control network",
+      "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-control network-report",
+      "max-length": 14
+    },
+    "custom/radio": {
+      "exec": "~/.local/bin/oldbook-panel-status radio",
+      "return-type": "json",
+      "interval": 5,
+      "on-click": "~/.local/bin/oldbook-control network"
+    },
+    "custom/firewall": {
+      "exec": "~/.local/bin/oldbook-panel-status firewall",
+      "return-type": "json",
+      "interval": 5,
+      "on-click": "~/.local/bin/oldbook-control firewall"
+    },
+    "group/sound": {
+      "orientation": "horizontal",
+      "drawer": {
+        "transition-duration": 220,
+        "children-class": "drawer-child",
+        "transition-left-to-right": false
+      },
+      "modules": [
+        "pulseaudio",
+        "pulseaudio#mic"
+      ]
+    },
+    "pulseaudio": {
+      "format": "{icon} {volume}%",
+      "format-muted": "\udb81\udd81",
+      "format-icons": {
+        "headphone": "\udb80\udecb",
+        "headset": "\udb80\udece",
+        "default": [
+          "\udb81\udd7f",
+          "\udb81\udd80",
+          "\udb81\udd7e"
+        ]
+      },
+      "tooltip-format": "<b>SPACE GHOST SOUND SYSTEM</b>\nOutput level: {volume}%\n\nScroll: volume \u00b7 Left: mixer \u00b7 Right: mute\nHover to reveal microphone.",
+      "scroll-step": 5,
+      "max-volume": 100,
+      "on-click": "pavucontrol",
+      "on-click-right": "~/.local/bin/oldbook-audio mute",
+      "smooth-scrolling-threshold": 1
+    },
+    "pulseaudio#mic": {
+      "format": "{format_source}",
+      "format-source": "\udb80\udf6c {volume}%",
+      "format-source-muted": "\udb80\udf6d off",
+      "tooltip-format": "<b>MICROPHONE CHANNEL</b>\nInput level: {volume}%\n\nClick: mute/unmute \u00b7 Scroll: adjust input level",
+      "on-click": "~/.local/bin/oldbook-audio mic-mute",
+      "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%+",
+      "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ 5%-",
+      "smooth-scrolling-threshold": 1
+    },
+    "group/power": {
+      "orientation": "horizontal",
+      "drawer": {
+        "transition-duration": 220,
+        "children-class": "drawer-child",
+        "transition-left-to-right": false
+      },
+      "modules": [
+        "battery",
+        "backlight",
+        "idle_inhibitor"
+      ]
+    },
+    "battery": {
+      "bat": "BAT0",
+      "interval": 20,
+      "states": {
+        "warning": 25,
+        "critical": 10
+      },
+      "format": "{icon} {capacity}%",
+      "format-charging": "\udb80\udc84 {capacity}%",
+      "format-plugged": "\udb81\udea5 {capacity}%",
+      "format-icons": [
+        "\udb80\udc8e",
+        "\udb80\udc7a",
+        "\udb80\udc7c",
+        "\udb80\udc7e",
+        "\udb80\udc80",
+        "\udb80\udc79"
+      ],
+      "tooltip-format": "<b>POWER RESERVE</b>\n{capacity}% \u00b7 {timeTo}\nPower draw: {power} W\n\nLeft: session controls\nHover for brightness and keep-awake.",
+      "on-click": "~/.local/bin/oldbook-control power"
+    },
+    "backlight": {
+      "format": "\udb80\udcdf {percent}%",
+      "tooltip-format": "MOONLIGHT CONTROL\nDisplay brightness: {percent}%\n\nScroll: brighten/dim the display",
+      "on-scroll-up": "~/.local/bin/oldbook-brightness up",
+      "on-scroll-down": "~/.local/bin/oldbook-brightness down",
+      "smooth-scrolling-threshold": 1
+    },
+    "idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "\udb80\udd76",
+        "deactivated": "\udb83\udfaa"
+      },
+      "tooltip-format-activated": "<b>ON AIR</b>\nKeeping this display awake. Click to resume idle locking.",
+      "tooltip-format-deactivated": "<b>OFF AIR</b>\nAutomatic idle locking is enabled. Click to keep awake."
+    },
+    "custom/notifications": {
+      "exec": "~/.local/bin/oldbook-panel-status notifications",
+      "return-type": "json",
+      "format": "{icon}",
+      "format-icons": {
+        "notification": "\udb84\udd6b",
+        "none": "\udb80\udc9a",
+        "dnd-notification": "\udb80\udc9b",
+        "dnd-none": "\udb80\udc9b",
+        "inhibited-notification": "\udb80\udc9b",
+        "inhibited-none": "\udb80\udc9b",
+        "dnd-inhibited-notification": "\udb80\udc9b",
+        "dnd-inhibited-none": "\udb80\udc9b"
+      },
+      "tooltip": true,
+      "on-click": "swaync-client -t -sw",
+      "on-click-right": "swaync-client -d -sw",
+      "restart-interval": 3
+    },
+    "clock": {
+      "interval": 60,
+      "format": "{:%a %H:%M}",
+      "format-alt": "{:%a %d %b \u00b7 %H:%M}",
+      "tooltip-format": "<b>COAST TO COAST TIME</b>\n<tt><small>{calendar}</small></tt>\nLos Angeles is keeping the clock.\n\nLeft: full date \u00b7 Right: month or year\nMiddle: back to today \u00b7 Scroll: browse",
+      "calendar": {
+        "mode": "month",
+        "weeks-pos": "right",
+        "on-scroll": 1,
+        "format": {
+          "months": "<span color=\"#ebdbb2\"><b>{}</b></span>",
+          "weekdays": "<span color=\"#928374\">{}</span>",
+          "today": "<span color=\"#fabd2f\"><b><u>{}</u></b></span>"
+        }
+      },
+      "actions": {
+        "on-scroll-up": "shift_down",
+        "on-scroll-down": "shift_up",
+        "on-click-right": "mode",
+        "on-click-middle": "shift_reset"
+      },
+      "timezone": "America/Los_Angeles",
+      "smooth-scrolling-threshold": 2
+    },
+    "tray": {
+      "icon-size": 15,
+      "spacing": 8
+    },
+    "cffi/art": {
+      "module_path": "/usr/lib/waybar/oldbook-art.so"
+    },
+    "custom/ai": {
+      "exec": "~/.local/bin/oldbook-workspaces status",
+      "return-type": "json",
+      "interval": 2,
+      "on-click": "~/.local/bin/oldbook-workspaces ai-next",
+      "on-click-right": "~/.local/bin/oldbook-workspaces ai-menu"
+    },
+    "expand-center": false
   }
-},
-{
-  "name": "monitor",
-  "layer": "bottom",
-  "position": "right",
-  "width": 208,
-  "spacing": 0,
-  "margin-top": 48,
-  "margin-right": 10,
-  "margin-bottom": 12,
-  "exclusive": false,
-  "passthrough": true,
-  "reload_style_on_change": true,
-  "modules-left": [
-    "custom/conky-title",
-    "cpu#monitor",
-    "memory#monitor",
-    "temperature#monitor",
-    "network#monitor",
-    "disk#monitor",
-    "custom/uptime",
-    "custom/conky-footer"
-  ],
-  "custom/conky-title": {
-    "format": "╭─ SYSTEM // OLD BOOK ─╮",
-    "tooltip": false
-  },
-  "cpu#monitor": {
-    "interval": 2,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "format": "{icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}  CPU {usage:>3}%",
-    "format-icons": [
-      "▁",
-      "▂",
-      "▃",
-      "▄",
-      "▅",
-      "▆",
-      "▇",
-      "█"
-    ],
-    "tooltip": false
-  },
-  "memory#monitor": {
-    "interval": 5,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "format": "{icon}  RAM {percentage:>3}%",
-    "format-icons": [
-      "▱▱▱▱▱▱▱▱",
-      "▰▱▱▱▱▱▱▱",
-      "▰▰▱▱▱▱▱▱",
-      "▰▰▰▱▱▱▱▱",
-      "▰▰▰▰▱▱▱▱",
-      "▰▰▰▰▰▱▱▱",
-      "▰▰▰▰▰▰▱▱",
-      "▰▰▰▰▰▰▰▱",
-      "▰▰▰▰▰▰▰▰"
-    ],
-    "tooltip": false
-  },
-  "temperature#monitor": {
-    "interval": 5,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "critical-threshold": 82,
-    "format": "{icon}         TEMP {temperatureC:>2}°C",
-    "format-critical": "█         TEMP {temperatureC:>2}°C",
-    "format-icons": [
-      "▁",
-      "▂",
-      "▃",
-      "▄",
-      "▅",
-      "▆",
-      "▇",
-      "█"
-    ],
-    "tooltip": false
-  },
-  "network#monitor": {
-    "interval": 2,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "format": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
-    "format-wifi": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
-    "format-ethernet": "↓{bandwidthDownBytes}/s  ↑{bandwidthUpBytes}/s  NET",
-    "format-linked": "◇──────────────  NET LINK",
-    "format-disconnected": "◇───────────  NET OFFLINE",
-    "tooltip": false
-  },
-  "disk#monitor": {
-    "interval": 60,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "path": "/",
-    "format": "◈────────────  DISK {percentage_used:>3}%",
-    "tooltip": false
-  },
-  "custom/uptime": {
-    "exec": "awk '{d=int($1/86400); h=int(($1%86400)/3600); m=int(($1%3600)/60); if (d > 0) printf \"%dd %02dh\", d, h; else printf \"%dh %02dm\", h, m}' /proc/uptime",
-    "format": "⌁─────────────  UP {text}",
-    "interval": 60,
-    "min-length": 24,
-    "align": 0.0,
-    "justify": "left",
-    "tooltip": false
-  },
-  "custom/conky-footer": {
-    "format": "╰──────────────────────╯",
-    "tooltip": false
-  }
-}
 ]

@@ -3,7 +3,10 @@
 The workspace has one caption per output, showing the selected workspace's
 focused window. Normal windows use zero-width pixel borders. The caption starts
 at the bottom; `oldbook-decoration right`, `bottom`, or `toggle` changes its edge
-and saves the choice in the user's state directory. Right-click does the same.
+and saves the choice in `~/.config/oldbook/decoration.json`. The legacy state
+position is migrated and synchronized. Right-click does the same; Shift +
+right-click opens `oldbook-decoration-settings`, which shows the controls and
+editable JSON together. Opacity and radius changes apply on the next poll.
 The right edge spells the title vertically, replacing `|` with an em dash and
 keeping combining accents together. Long vertical titles are shortened to the
 available height; hovering shows the full title. Left-click opens the window
@@ -12,15 +15,12 @@ picker, and middle-click toggles the focused window's floating state.
 Font family and point size follow Foot's configured font (currently JetBrains
 Mono Nerd Font, 9.5 pt). The active palette supplies the borderless gradient.
 The strip has compact padding and four rounded corners. Fullscreen tiled chrome
-is square; normal fullscreen compositor stacking covers the workspace strip.
+is square. The strip uses the overlay layer so it remains visible in fullscreen.
 Floating and ordinary windows retain the theme's rounding. The helper does not
 capture keyboard focus, and a lock prevents duplicate instances on reload.
 
-The middle Waybar island uses its natural content width, with an 8-pixel gap on
-either side and slight padding. Its title can grow into available space and
-ellipsizes under pressure; the left workspace controls retain their natural
-width. An empty workspace hides the middle island. The old standby text is
-removed. Waybar's fixed-center mode is disabled and expand-center is false.
+The center title island was removed at the user's request. That space now holds
+music controls; the workspace caption carries the focused window title.
 
 Foot profiles use alpha 0.78 with alpha-mode=all so application-painted cells
 remain transparent as well. Existing terminals were repainted using the owned-PTY
