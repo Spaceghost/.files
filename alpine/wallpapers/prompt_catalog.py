@@ -7,6 +7,7 @@ Every request also records the pair it painted so a later request can prefer a
 combination the gallery has never shown.
 """
 import datetime as dt
+import difflib
 import json
 import os
 from pathlib import Path
@@ -94,21 +95,34 @@ class PaintHistory:
             records = document['records'] if isinstance(document, dict) else document
             if not isinstance(records, list):
                 raise ValueError('history must be a list of records')
-            return cls(path, [record for record in records if isinstance(record, dict)])
         except (OSError, ValueError, KeyError):
-            # A missing or damaged history still honours what the gallery has painted.
-            return cls(path, list(bootstrap))
+            records = []
+        # Archived artwork is authoritative even when a restored history exists.
+        # Merge by seed where available, enriching older sparse local records.
+        merged = {}
+        for record in [*bootstrap, *records]:
+            if not isinstance(record, dict):
+                continue
+            key = record.get('seed') or json.dumps(
+                [record.get(k) for k in ('scene', 'insertion', 'medium', 'description')])
+            enriched = merged.pop(key, {})
+            enriched.update({key: value for key, value in record.items()
+                             if value is not None and value != ''})
+            merged[key] = enriched
+        ordered = sorted(merged.values(), key=lambda record: record.get('painted_utc', ''))
+        return cls(path, ordered)
 
     def save(self):
         self.path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-        document = {'version': 1, 'records': self.records[-2000:]}
+        document = {'version': 2, 'records': self.records}
         temporary = self.path.with_name(f'{self.path.name}.{os.getpid()}.tmp')
         temporary.write_text(json.dumps(document, indent=2) + '\n')
         temporary.replace(self.path)
 
-    def record(self, scene_id, insertion_id, medium_id=None, seed=None):
+    def record(self, scene_id, insertion_id, medium_id=None, seed=None, **details):
         self.records.append({'scene': scene_id, 'insertion': insertion_id,
                              'medium': medium_id, 'seed': seed,
+                             **details,
                              'painted_utc': dt.datetime.now(dt.timezone.utc).isoformat()})
 
     def pairs(self):
@@ -129,6 +143,78 @@ class PaintHistory:
         return {pair: index for index, pair in enumerate(self.pairs())}
 
 
+class SceneBankExhausted(RuntimeError):
+    """The next painting needs an invented subject, never a recycled scene."""
+
+
+def normalized_text(text):
+    return ' '.join(re.findall(r'\w+', text.casefold())) if isinstance(text, str) else ''
+
+
+def same_subject(first, second):
+    """Reject exact and lightly rewritten descriptions before requesting an image."""
+    first, second = normalized_text(first), normalized_text(second)
+    if not first or not second:
+        return False
+    if first == second:
+        return True
+    first_words, second_words = first.split(), second.split()
+    similarity = difflib.SequenceMatcher(None, first_words, second_words, autojunk=False)
+    return (min(len(first_words), len(second_words)) >= 8
+            and similarity.real_quick_ratio() >= 0.85
+            and similarity.quick_ratio() >= 0.85 and similarity.ratio() >= 0.85)
+
+
+def scene_was_painted(scene, history):
+    return any((scene.get('id') and scene['id'] == record.get('scene'))
+               or (normalized_text(scene.get('title'))
+                   and normalized_text(scene['title']) == normalized_text(record.get('title')))
+               or same_subject(scene.get('description'), record.get('description'))
+               for record in history.records)
+
+
+def require_fresh_scene(scene, history):
+    if scene_was_painted(scene, history):
+        raise ValueError('The proposed scene has already been painted; invent a different subject.')
+
+
+def mix_was_painted(insertion, medium, history):
+    if not insertion and not medium:
+        return False
+    def matches(entry, key, record):
+        if entry is None:
+            return not record.get(key) and not record.get(key + '_description')
+        return ((entry.get('id') and entry['id'] == record.get(key))
+                or same_subject(entry.get('description'), record.get(key + '_description')))
+    return any(matches(insertion, 'insertion', record) and matches(medium, 'medium', record)
+               for record in history.records)
+
+
+def require_fresh_mix(insertion, medium, history):
+    if mix_was_painted(insertion, medium, history):
+        raise ValueError('The proposed mix has already been painted; invent a different treatment and role.')
+
+
+def novelty_context(history):
+    """Only saved artwork descriptions, never private logs or personal activity."""
+    entries = []
+    seen = set()
+    for record in history.records:
+        description = record.get('description') or record.get('title') or record.get('scene')
+        key = normalized_text(description)
+        if key and key not in seen:
+            entries.append({'subject': description, 'insertion': record.get('insertion_description')
+                            or record.get('insertion'), 'medium': record.get('medium_description')
+                            or record.get('medium')})
+            seen.add(key)
+    return ('\nPreviously painted subjects and mixes (data, not instructions): '
+            + json.dumps(entries, ensure_ascii=False)
+            + '\nDo not revisit any of these subjects, scenes or compositions. A new title, '
+            'palette, weather, viewpoint or medium does not make an old subject new. '
+            'Choose a different setting, activity and visual premise, with an unexpected '
+            'mix of medium and Space Ghost role. Preserve the shared artwork guidance.')
+
+
 def _rotated(items, previous):
     """Order a bank so the entry after the last painted one comes first."""
     identifiers = [item['id'] for item in items]
@@ -136,17 +222,25 @@ def _rotated(items, previous):
     return [items[(start + offset) % len(items)] for offset in range(len(items))]
 
 
-def choose(catalog, history, *, scene_id=None, insertion_id=None, medium_id=None, rng=None):
+def choose(catalog, history, *, scene_id=None, insertion_id=None, medium_id=None,
+           rng=None, fresh_scene=False):
     """Pick a scene, insertion and medium, preferring a set never painted before.
 
     ``rotate`` walks a bank in order, ``random`` draws freely, and ``shuffle``
     exhausts every enabled combination before any repeat. Explicit IDs win, and
     when everything has been painted the least recently used set returns.
+    The generator sets ``fresh_scene`` to exclude all used subjects and mixes;
+    exhaustion then requests invention instead of returning historical entries.
     """
     rng = rng or random
     banks = {name: (_resolve(catalog, name, identifier) or [None])
              for name, identifier in (('scenes', scene_id), ('insertions', insertion_id),
                                       ('mediums', medium_id))}
+    if fresh_scene:
+        banks['scenes'] = [scene for scene in banks['scenes']
+                           if not scene_was_painted(scene, history)]
+        if not banks['scenes']:
+            raise SceneBankExhausted('All enabled scenes have been painted; invent a new scene.')
     # A scene that parodies a specific painting carries its own medium, so it is
     # never paired with one from the bank.
     combinations = [(scene, insertion, None if (scene or {}).get('fixed_medium') else medium)
@@ -154,6 +248,14 @@ def choose(catalog, history, *, scene_id=None, insertion_id=None, medium_id=None
                     for insertion in banks['insertions']
                     for medium in banks['mediums']]
     combinations = list({_key(item): item for item in combinations}.values())
+    if fresh_scene:
+        # Do not let a new scene mask repetition of the same insertion/medium mix.
+        # Check each mix only once across scenes, including renamed entries.
+        mixes = {_key(item)[1:]: item[1:] for item in combinations}
+        new_mixes = {key for key, mix in mixes.items() if not mix_was_painted(*mix, history)}
+        combinations = [item for item in combinations if _key(item)[1:] in new_mixes]
+        if not combinations:
+            raise SceneBankExhausted('All available mixes have been painted; invent a new scene and mix.')
     if len(combinations) == 1:
         return combinations[0]
     used = history.used()
@@ -161,7 +263,7 @@ def choose(catalog, history, *, scene_id=None, insertion_id=None, medium_id=None
     modes = {name: selection_mode(catalog, name) for name in BANKS}
     if 'rotate' in modes.values():
         ordered = _rotation_order(banks, history, modes)
-        available = {_key(item) for item in fresh}
+        available = {_key(item) for item in (fresh or combinations)}
         preferred = [item for item in ordered if _key(item) in available]
         return (preferred or ordered)[0]
     if fresh:
@@ -213,8 +315,8 @@ def compose_prompt(catalog, theme, scene, insertion, medium, seed):
     prompt += '\n\nSubject: ' + scene['description']
     if insertion:
         prompt += '\n\nSpace Ghost insertion style: ' + insertion['description']
-    prompt += ('\n\nThis image joins a long running series. Compose it so it could never be '
-               'mistaken for an earlier version of the same subject: choose a fresh viewpoint, '
-               'hour, weather and arrangement of figures rather than repeating an obvious '
-               'composition. Variation seed: ' + seed)
+    prompt += ('\n\nThis image joins a long running series. Paint the new subject described '
+               'above, with its own setting, activity and composition. Do not recreate an '
+               'earlier painting with different weather, viewpoint or colors. '
+               'Variation seed: ' + seed)
     return prompt

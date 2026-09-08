@@ -4,7 +4,7 @@ All workspaces share one desktop image and one rotation timer. The desktop
 changes artwork every 20 minutes. The Waybar art icon shows the
 current painting and its story: click for the gallery picker, scroll to browse,
 right-click for the next image, and middle-click to pause. **Super/Command +
-left-click** generates a new painting and switches directly to it when ready.
+left-click** paints an unpainted scene with a fresh mix and switches directly to it when ready.
 **Shift + left-click** opens the prompt editor. **Super/Command + Shift +
 left-click** creates a random new named theme and switches to its first painting.
 Left and right Shift and Super keys work. Right/middle clicks and
@@ -77,19 +77,31 @@ Each entry has an `enabled` switch, so any of them can be taken out of the
 rotation without deleting its wording. `scene_selection`, `insertion_selection`
 and `medium_selection` choose how the next one is picked:
 
-- `shuffle` (the default) uses every entry before any repeat.
-- `random` draws freely each time.
-- `rotate` walks straight through the list in order.
+- `shuffle` (the default) and `random` choose among eligible unused entries.
+- `rotate` walks through the eligible entries in order.
 
-Whatever the mode, a combination the gallery has already painted is skipped
-while an unpainted one remains, and each request carries a fresh variation seed
-and an instruction to compose the scene so it could not be mistaken for an
-earlier version. Super/Command+click therefore always paints the current theme
-and always paints something new. What has been painted is recorded in
-`~/.local/state/oldbook/wallpaper-generation/history.json`; when every
-combination has been used the least recently painted one returns.
+Generation excludes every previously painted scene, across all themes. Changing
+the insertion, medium, title, palette or variation seed does not make an old
+scene eligible. The insertion/medium mix must also be unused. When the enabled
+catalog has no fresh scene and mix left, the existing Codex login invents a new
+subject, role and treatment in a text-only step before requesting the image.
+There is no exhausted-bank reset to old scenes or mixes. Explicit `--scene`
+selection also refuses a used scene or mix.
 
-Every sidecar records the scene, the insertion style and the variation seed
+The designer receives previous subjects and mixes. Exact and lightly rewritten
+duplicates are rejected before painting, including new themes that repeat a
+previous scene or art direction. A rejected proposal gets up to three text-only
+retries; failure leaves the current wallpaper in place. This checks prompt
+novelty; visual resemblance in model-generated images cannot be guaranteed.
+
+History lives in `~/.local/state/oldbook/wallpaper-generation/history.json` without
+the former 2,000-record cutoff. Each request merges saved gallery sidecars,
+curated artwork and local generation records, so restoring an older history
+does not make saved scenes new again. Deleting a painting does not erase its
+history. Failed image attempts remain excluded because an image may have been
+produced remotely; a failed text-only design does not reserve a subject.
+
+Every sidecar records the scene ID, scene and mix descriptions, and variation seed
 alongside the full prompt. The prompt editor (**Shift+click** on the artwork
 icon) edits both banks and their selection modes on separate tabs.
 
@@ -158,7 +170,8 @@ if the theme descriptor is edited later.
 
 ## Paint on demand
 
-Manual requests run in the background and use the next scene from `prompts.json`.
+Manual requests run in the background and use an unpainted scene from
+`prompts.json`, or invent a fresh scene and mix when the catalog is exhausted.
 The artwork icon shows an hourglass while painting; notifications announce the
 start, completion or failure. Repeated clicks during generation report that it
 is busy without queuing more images. The daily job and manual commands share

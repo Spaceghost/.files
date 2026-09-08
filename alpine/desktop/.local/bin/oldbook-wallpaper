@@ -395,7 +395,7 @@ def status():
     # GTK consumes Pango markup, so instructions need escaping just like titles.
     controls = ('Left: gallery & themes · Right: next artwork\n'
                 'Middle: pause/resume · scroll: browse (↑ previous / ↓ next)\n'
-                'Command/Super+click: generate & switch · always a new painting\n'
+                'Command/Super+click: generate & switch · new scene and mix\n'
                 'Super+Shift+click: whole new theme · debut painting included\n'
                 'Super+Shift+G: desktop panels on/off\n'
                 'Shift+click: edit prompts · “Zorak, fix the script!”\n'

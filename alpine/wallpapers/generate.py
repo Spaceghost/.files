@@ -44,22 +44,64 @@ def clean_environment():
     return env
 
 
-def bootstrap_history():
-    """Seed the never-repeat history from records written before it existed."""
-    seeded = []
-    for record in records():
+def bootstrap_history(config=None):
+    """Recover old subjects from saved artwork as well as local reservations."""
+    scenes = (config or {}).get('scenes', [])
+    documents = []
+    paths = [*records(), *sorted((REPO / 'alpine/assets/gallery').rglob('*.json'))]
+    gallery_config = REPO / 'alpine/wallpapers/gallery.json'
+    if gallery_config.is_file() and not has_symlink(gallery_config, REPO):
         try:
-            previous = json.loads(record.read_text())
+            documents.extend(json.loads(gallery_config.read_text()).get('entries', []))
+        except (OSError, ValueError):
+            pass
+    for record in paths:
+        if record.is_relative_to(REPO) and has_symlink(record, REPO):
+            continue
+        try:
+            documents.append(json.loads(record.read_text()))
         except (OSError, ValueError):
             continue
-        if previous.get('scene'):
-            seeded.append({'scene': previous['scene'], 'insertion': previous.get('insertion'),
-                           'painted_utc': previous.get('started_utc', '')})
+    seeded = []
+    for previous in documents:
+        if not isinstance(previous, dict):
+            continue
+        # A failed text design has never requested an image. Failed image attempts
+        # are retained conservatively: the remote image may have completed.
+        if previous.get('status') in ('failed', 'reserved') and not (
+                previous.get('attempts', {}).get('image') or previous.get('file')):
+            continue
+        description = previous.get('description', '')
+        title = previous.get('title', '')
+        identity = previous.get('scene')
+        match = next((scene for scene in scenes if (
+            previous.get('id') == scene['id']
+            or prompt_catalog.same_subject(description, scene['description'])
+            or (title and prompt_catalog.normalized_text(title)
+                == prompt_catalog.normalized_text(scene['title'])))), None)
+        if match:
+            identity = match['id']
+        if not identity and (description or title):
+            identity = 'archive-' + hashlib.sha256((description or title).encode()).hexdigest()[:16]
+        if not identity:
+            continue
+        treatment = {}
+        for name in ('insertion', 'medium'):
+            matched = next((item for item in (config or {}).get(name + 's', [])
+                            if item['id'] == previous.get(name)), {})
+            treatment[name + '_description'] = (previous.get(name + '_description')
+                                                or matched.get('description', ''))
+        seeded.append({'scene': identity, 'title': title, 'description': description,
+                       'insertion': previous.get('insertion'), 'medium': previous.get('medium'),
+                       'theme_style': previous.get('theme_style', ''),
+                       **treatment,
+                       'seed': previous.get('variation_seed') or previous.get('seed'),
+                       'painted_utc': previous.get('generated_utc') or previous.get('started_utc', '')})
     return seeded
 
 
-def load_history():
-    return prompt_catalog.PaintHistory.load(STATE / 'history.json', bootstrap_history())
+def load_history(config=None):
+    return prompt_catalog.PaintHistory.load(STATE / 'history.json', bootstrap_history(config))
 
 
 def validate_image(path, generated_root, started):
@@ -233,7 +275,8 @@ def retry_generation(operation, *, record, metadata, lock, phase, title, log):
             if attempt == 4:
                 raise
             delay = 2 ** attempt
-            notify(f'Retrying {"theme design" if phase == "theme" else "painting"} · {attempt}/3',
+            phase_name = {'theme': 'theme design', 'scene': 'scene design', 'image': 'painting'}[phase]
+            notify(f'Retrying {phase_name} · {attempt}/3',
                    f'{title}. Trying again in {delay} seconds.')
             time.sleep(delay)
 
@@ -332,6 +375,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 print(f'{day}: daily job already reserved; no new job.')
                 return 0
         config = prompt_catalog.load_catalog(REPO / 'alpine/wallpapers/prompts.json')
+        history = load_history(config)
         metadata = {'day': day, 'manual': manual,
                     'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()}
         if new_theme is not None:
@@ -348,7 +392,8 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
                     raise RuntimeError('Theme generation requires existing Codex ChatGPT login.')
                 selected_theme = retry_generation(
-                    lambda log: design_theme(REPO, config, env, log, new_theme, codex_command),
+                    lambda log: design_theme(REPO, config, env, log, new_theme, codex_command,
+                                             history=history),
                     record=record, metadata=metadata, lock=lock, phase='theme',
                     title='Designing ' + (new_theme or 'a random theme'),
                     log=record.with_suffix('.theme.jsonl'))
@@ -363,20 +408,52 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
         gallery /= 'general' if selected_theme['id'] == 'none' else 'themes/' + selected_theme['id']
         if has_symlink(gallery, REPO):
             raise RuntimeError('Artwork destination must be a regular directory in the gallery')
-        history = load_history()
+        # Keep restored/deleted subjects remembered independently of gallery files.
+        history.save()
         if new_theme is not None:
-            scene = {'id': 'debut', 'title': selected_theme['name'],
+            scene = {'id': 'scene-' + hashlib.sha256(selected_theme['scene'].encode()).hexdigest()[:16],
+                     'title': selected_theme['name'],
                      'description': selected_theme['scene'], 'fixed_medium': True}
+            prompt_catalog.require_fresh_scene(scene, history)
             insertion, medium = None, None
         else:
-            scene, insertion, medium = prompt_catalog.choose(
-                config, history, scene_id=scene_override, insertion_id=insertion_override,
-                medium_id=medium_override)
+            try:
+                scene, insertion, medium = prompt_catalog.choose(
+                    config, history, scene_id=scene_override, insertion_id=insertion_override,
+                    medium_id=medium_override, fresh_scene=True)
+            except prompt_catalog.SceneBankExhausted as error:
+                if scene_override:
+                    raise RuntimeError(str(error) + ' Omit --scene to invent a fresh subject and mix.') from None
+                from new_themes import design_scene
+                try:
+                    env = clean_environment()
+                    login = subprocess.run(['codex', 'login', 'status'], env=env,
+                                           capture_output=True, text=True, timeout=20)
+                    if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
+                        raise RuntimeError('Scene design requires existing Codex ChatGPT login.')
+                    notify('Space Ghost is inventing a new scene…',
+                           'Designing a fresh subject and mix beyond the existing catalog.')
+                    scene, insertion, medium = retry_generation(
+                        lambda log: design_scene(config, selected_theme, history, env, log,
+                                                 codex_command, insertion_override, medium_override),
+                        record=record, metadata=metadata, lock=lock, phase='scene',
+                        title='Inventing a new scene and mix', log=record.with_suffix('.scene.jsonl'))
+                    prompt_catalog.require_fresh_scene(scene, history)
+                    prompt_catalog.require_fresh_mix(insertion, medium, history)
+                except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
+                    metadata.update(status='failed', phase='scene', error=str(error))
+                    atomic_json(record, metadata)
+                    notify('Scene design hit a snag', str(error)[:300])
+                    raise
         seed = prompt_catalog.variation_seed()
         started = time.time()
         metadata.update({'day': day, 'status': 'reserved', 'scene': scene['id'], 'manual': manual,
+                    'title': scene['title'], 'description': scene['description'],
                     'new_theme': new_theme is not None,
                     'insertion': insertion['id'] if insertion else None,
+                    'insertion_description': insertion['description'] if insertion else '',
+                    'medium_description': medium['description'] if medium else '',
+                    'theme_style': selected_theme['image_style'],
                     'medium': medium['id'] if medium else None, 'variation_seed': seed,
                     'model': config['model'], 'theme': selected_theme['id'], 'theme_name': selected_theme['name'],
                     'started_utc': dt.datetime.now(dt.timezone.utc).isoformat()})
@@ -409,7 +486,11 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 raise RuntimeError('Artwork destination must remain a regular directory in the gallery')
             gallery.mkdir(parents=True, exist_ok=True)
             history.record(scene['id'], insertion['id'] if insertion else None,
-                           medium['id'] if medium else None, seed)
+                           medium['id'] if medium else None, seed,
+                           title=scene['title'], description=scene['description'],
+                           theme_style=selected_theme['image_style'],
+                           insertion_description=insertion['description'] if insertion else '',
+                           medium_description=medium['description'] if medium else '')
             history.save()
             stem = f'{day}-{selected_theme["id"]}-{scene["id"]}-{digest[:12]}'
             destination = gallery / f'{stem}.png'
@@ -419,10 +500,13 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             shutil.copyfile(source, temporary)
             temporary.replace(destination)
             entry = {'id': stem, 'title': scene['title'], 'description': scene['description'],
+                     'scene': scene['id'],
                      'insertion': insertion['id'] if insertion else None,
                      'insertion_title': insertion['title'] if insertion else '',
+                     'insertion_description': insertion['description'] if insertion else '',
                      'medium': medium['id'] if medium else None,
                      'medium_title': medium['title'] if medium else '',
+                     'medium_description': medium['description'] if medium else '',
                      'variation_seed': seed,
                      'file': str(destination.relative_to(REPO)), 'sha256': digest,
                      'width': width, 'height': height, 'prompt': prompt,
