@@ -97,6 +97,45 @@ class PublicationTests(unittest.TestCase):
             publisher.publish(self.checkout, self.mirror, str(self.remote), 'alpine-oldbook')
         self.assertEqual(before, self.command('git', 'rev-parse', 'alpine-oldbook', cwd=self.remote))
 
+    def test_remote_branch_publishes_beside_a_diverged_branch_of_the_same_name(self):
+        publisher.publish(self.checkout, self.mirror, str(self.remote), 'alpine-oldbook')
+        other = self.root / 'other'
+        self.command('git', 'clone', '--branch', 'alpine-oldbook', self.remote, other)
+        self.command('git', 'config', 'user.name', 'Test', cwd=other)
+        self.command('git', 'config', 'user.email', 'test@example.invalid', cwd=other)
+        (other / 'remote-change').write_text('another line\n')
+        self.command('git', 'add', 'remote-change', cwd=other)
+        self.command('git', 'commit', '-m', 'Remote edit', cwd=other)
+        self.command('git', 'push', 'origin', 'alpine-oldbook', cwd=other)
+        diverged = self.command('git', 'rev-parse', 'alpine-oldbook', cwd=self.remote)
+        (self.checkout / 'config').write_text('ours\n')
+        self.command('fossil', 'commit', '--nosync', '--no-warnings', '-m', 'Our change')
+        commit = publisher.publish(self.checkout, self.mirror, str(self.remote), 'alpine-oldbook',
+                                   remote_branch='alpine-oldbook-live')
+        self.assertEqual(self.command('git', 'rev-parse', 'alpine-oldbook-live',
+                                      cwd=self.remote).strip(), commit)
+        self.assertEqual(self.command('git', 'show', 'alpine-oldbook-live:config',
+                                      cwd=self.remote), 'ours\n')
+        self.assertEqual(diverged, self.command('git', 'rev-parse', 'alpine-oldbook',
+                                                cwd=self.remote))
+        receipt = json.loads((self.mirror / '.git/oldbook-published.json').read_text())
+        self.assertEqual(receipt['branch'], 'alpine-oldbook')
+        self.assertEqual(receipt['remote_branch'], 'alpine-oldbook-live')
+
+    def test_publishing_the_same_commit_under_a_new_name_is_not_skipped(self):
+        state = self.root / 'scheduler-state'
+        self.assertEqual(publisher.scheduled(self.checkout, self.mirror, str(self.remote),
+                                             'alpine-oldbook', state), 0)
+        commit = self.command('git', 'rev-parse', 'alpine-oldbook', cwd=self.remote).strip()
+        # The receipt records the destination too, so an unchanged commit still
+        # publishes when it has never been sent under this name.
+        self.assertEqual(publisher.scheduled(self.checkout, self.mirror, str(self.remote),
+                                             'alpine-oldbook', state, 'alpine-oldbook-live'), 0)
+        self.assertEqual(self.command('git', 'rev-parse', 'alpine-oldbook-live',
+                                      cwd=self.remote).strip(), commit)
+        status = json.loads((state / 'status.json').read_text())
+        self.assertEqual(status['remote_branch'], 'alpine-oldbook-live')
+
     def test_separate_push_destination_is_rejected(self):
         publisher.publish(self.checkout, self.mirror, str(self.remote), 'alpine-oldbook')
         unintended = self.root / 'unintended.git'

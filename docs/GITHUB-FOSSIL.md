@@ -39,6 +39,22 @@ main branch, disables Fossil autopush, and pushes only
 ID. Use `--checkout`, `--mirror`, `--remote`, or `--branch` only when those
 locations intentionally differ.
 
+A Fossil branch may be published under a different name with
+`--remote-branch`. This is for the case where the remote branch of the same
+name has moved on independently and must not be rewritten: a second machine or
+another session's line. The push is never forced, so a diverged branch is
+rejected rather than overwritten, and the branch beside it fast-forwards:
+
+```sh
+alpine/bin/publish-git-mirror --remote-branch alpine-oldbook-live
+```
+
+The receipt records the destination as well as the commit, so the same commit
+still publishes the first time it is sent under a new name. On 2026-09-08 the
+Fossil branch had two open leaves, this desktop's and another session's
+renamed line; GitHub's `alpine-oldbook` carries the latter, and this desktop
+publishes to `alpine-oldbook-live`, which the other line folds from.
+
 Keep the mirror's untracked `.mirror_state/` directory intact. Fossil uses it
 to map prior exports and append only new history. A failed Git push can be
 retried with the same command even when no new Fossil check-in exists.

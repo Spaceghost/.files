@@ -196,7 +196,8 @@ def read_json(path):
         return {}
 
 
-def publish(checkout, mirror, remote, branch, export_only=False, only_if_changed=False):
+def publish(checkout, mirror, remote, branch, export_only=False, only_if_changed=False,
+            remote_branch=None):
     checkout = Path(checkout).resolve()
     mirror = Path(mirror).expanduser().resolve()
     if mirror == checkout or checkout in mirror.parents or mirror in checkout.parents:
@@ -209,11 +210,14 @@ def publish(checkout, mirror, remote, branch, export_only=False, only_if_changed
         if not acquired:
             print('Another publisher holds the mirror lock; retry on the next run.')
             return None
-        return publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed)
+        return publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed,
+                              remote_branch or branch)
 
 
-def publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed):
+def publish_locked(checkout, mirror, remote, branch, export_only, only_if_changed,
+                   remote_branch):
     run(['git', 'check-ref-format', '--branch', branch], checkout, capture=True)
+    run(['git', 'check-ref-format', '--branch', remote_branch], checkout, capture=True)
     # Fossil updates this mirror and its private incremental-export state.
     run(['fossil', 'git', 'export', mirror, '--autopush', 'off',
          '--mainbranch', 'base'], checkout)
@@ -231,29 +235,36 @@ def publish_locked(checkout, mirror, remote, branch, export_only, only_if_change
     if push_urls != [remote]:
         raise ValueError('Effective Git push destination differs; inspect github push URLs.')
     ref = 'refs/heads/' + branch
+    # The Fossil branch and the branch it is published as need not share a name:
+    # a line that must not rewrite the remote branch of its own name goes beside it.
+    destination = 'refs/heads/' + remote_branch
+    refspec = ref + ':' + destination
     # Explicit refspec also avoids touching old branches with translated SHAs.
-    run(['git', 'config', '--replace-all', 'remote.github.push', ref + ':' + ref], mirror)
+    run(['git', 'config', '--replace-all', 'remote.github.push', refspec], mirror)
     run(['git', 'config', 'push.default', 'nothing'], mirror)
     local = run(['git', 'rev-parse', ref], mirror, capture=True).stdout.strip()
+    named = branch if remote_branch == branch else f'{branch} as {remote_branch}'
     if export_only:
-        print(f'Exported {branch}: {local}; not pushed')
+        print(f'Exported {named}: {local}; not pushed')
         return local
     receipt = mirror / '.git/oldbook-published.json'
     identity = {'remote': remote, 'branch': branch, 'commit': local}
+    if remote_branch != branch:
+        identity['remote_branch'] = remote_branch
     if only_if_changed and read_json(receipt) == identity:
-        print(f'Already published {branch}: {local}')
+        print(f'Already published {named}: {local}')
         return local
-    run(['git', 'push', '--no-follow-tags', 'github', ref + ':' + ref], mirror)
-    published = run(['git', 'ls-remote', '--heads', 'github', ref], mirror,
+    run(['git', 'push', '--no-follow-tags', 'github', refspec], mirror)
+    published = run(['git', 'ls-remote', '--heads', 'github', destination], mirror,
                     capture=True).stdout.split()
-    if len(published) != 2 or published != [local, ref]:
+    if len(published) != 2 or published != [local, destination]:
         raise RuntimeError('Remote branch changed or could not be verified after push.')
     write_json(receipt, identity)
-    print(f'Published {branch}: {local}')
+    print(f'Published {named}: {local}')
     return local
 
 
-def scheduled(checkout, mirror, remote, branch, state):
+def scheduled(checkout, mirror, remote, branch, state, remote_branch=None):
     state = Path(state).expanduser()
     state.mkdir(parents=True, exist_ok=True, mode=0o700)
     with exclusive_lock(state / 'schedule.lock') as acquired:
@@ -264,9 +275,12 @@ def scheduled(checkout, mirror, remote, branch, state):
                 contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
             now = dt.datetime.now(dt.timezone.utc).isoformat()
             status = {'checked_at': now, 'branch': branch}
+            if remote_branch and remote_branch != branch:
+                status['remote_branch'] = remote_branch
             print(f'\n[{now}] Check committed changes')
             try:
-                commit = publish(checkout, mirror, remote, branch, only_if_changed=True)
+                commit = publish(checkout, mirror, remote, branch, only_if_changed=True,
+                                 remote_branch=remote_branch)
                 status.update(status='ok' if commit else 'busy', commit=commit)
             except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
                 detail = bounded_text(str(error), 4096)
@@ -284,6 +298,9 @@ def main():
     ) / 'fossil/files-git-mirror')
     parser.add_argument('--remote', default=DEFAULT_REMOTE)
     parser.add_argument('--branch', default='alpine-oldbook')
+    parser.add_argument('--remote-branch',
+                        help='publish the branch under a different name on the remote; '
+                             'defaults to --branch')
     parser.add_argument('--export-only', action='store_true',
                         help='configure/update the local mirror without pushing')
     parser.add_argument('--scheduled', action='store_true',
@@ -297,8 +314,9 @@ def main():
     try:
         if args.scheduled:
             raise SystemExit(scheduled(args.checkout, args.mirror, args.remote,
-                                       args.branch, args.state_dir))
-        publish(args.checkout, args.mirror, args.remote, args.branch, args.export_only)
+                                       args.branch, args.state_dir, args.remote_branch))
+        publish(args.checkout, args.mirror, args.remote, args.branch, args.export_only,
+                remote_branch=args.remote_branch)
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         parser.exit(1, f'publish-git-mirror: {error}\n')
 
