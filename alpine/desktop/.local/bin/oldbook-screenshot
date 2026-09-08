@@ -6,6 +6,7 @@ picture_root=${XDG_PICTURES_DIR:-"$HOME/Pictures"}
 target_dir="$picture_root/Screenshots"
 mkdir -p -- "$target_dir"
 target="$target_dir/spaceghost-$(date '+%Y-%m-%d_%H-%M-%S').png"
+shutter=${OLDBOOK_SHUTTER_SOUND:-/usr/share/sounds/freedesktop/stereo/camera-shutter.oga}
 
 case "$mode" in
     full)
@@ -26,8 +27,20 @@ case "$mode" in
         ;;
 esac
 
+# The flash and the shutter follow the capture, so neither lands in the picture.
+# Both are optional: a missing daemon, player or sound never fails the screenshot.
+if command -v oldbook-osd >/dev/null 2>&1; then
+    oldbook-osd flash >/dev/null 2>&1 || true
+fi
+if [ -r "$shutter" ] && command -v pw-play >/dev/null 2>&1; then
+    pw-play "$shutter" >/dev/null 2>&1 &
+fi
+
 wl-copy --type image/png < "$target"
-if command -v swappy >/dev/null 2>&1; then
+# Satty reads ~/.config/satty/config.toml; the capture path doubles as its save target.
+if command -v satty >/dev/null 2>&1; then
+    satty --filename "$target" --output-filename "$target" >/dev/null 2>&1 &
+elif command -v swappy >/dev/null 2>&1; then
     swappy -f "$target" &
 fi
 notify-send -i camera-photo 'Screenshot saved' "$target"
