@@ -9,6 +9,9 @@ attempt per day through the existing Codex login and extra paintings on request.
 
 ![Gruvbox Space Ghost artwork](assets/gallery/themes/gruvbox-dark/2026-09-07-gruvbox-dark-yosemite-f932fef36c22.png)
 
+[The rice, catalogued](RICE.md) lists every piece of eyecandy on this desktop,
+old and new, with its trigger, its file, its off switch and its evidence.
+
 ## Edit the desktop
 
 `alpine/desktop/` mirrors your HOME. The deployment tool links each file into
@@ -34,6 +37,14 @@ swaymsg reload
 | Rotation and generated painting prompts | `wallpapers/gallery.json`, `wallpapers/prompts.json` |
 | Active artwork theme and palette | `themes/current`, `themes/gruvbox-dark.json` |
 | Window titles and borders | `desktop/.config/sway/theme.conf` |
+| Feedback pill and screenshot shutter | `desktop/.local/bin/oldbook-osd`, `oldbook-screenshot`, `desktop/.config/satty/config.toml` |
+| Lock screen scene and locker | `desktop/.local/bin/oldbook-lock`, `desktop/.local/lib/oldbook/lock_scene.py` |
+| Power deck tiles | `desktop/.config/wlogout/`, `desktop/.local/bin/oldbook-power` |
+| Wallpaper crossfade | `desktop/.local/bin/oldbook-background`, `desktop/.local/lib/oldbook/background_fade.py` |
+| Terminal splash and Ghostty shaders | `desktop/.config/fastfetch/`, `desktop/.config/ghostty/shaders/` |
+| Boot console palette, getty banner, banner initramfs | `system/boot/`, `system/mkinitfs/`, `bin/install-boot-console` |
+| Sun, moon, night light, nocturnes | `~/.config/oldbook/location.json`, `desktop/.local/lib/oldbook/astro.py`, `nocturne.py` |
+| Keyboard glow modes | `desktop/.local/bin/oldbook-keyboard-backlight`, `desktop/.config/sway/local.d/keyboard-backlight.conf` |
 
 Waybar reloads CSS automatically; `pkill -USR2 -u "$(id -u)" -x waybar` reloads
 its JSON. Restart an application to load its changed theme. Re-running the
@@ -51,9 +62,26 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
   to dismiss it. Scroll without moving keyboard focus. The physical Caps Lock
   trigger is also configurable in [Hold to Help](../projects/hold-to-help/README.md).
 - **Super+Shift+D:** Ghost command deck; the panel's Ghost badge opens it too.
-- **Super+G:** painting picker. **Super+Ctrl+Left/Right:** previous/next painting.
+- **Super+G:** painting picker with thumbnails. **Super+Ctrl+Left/Right:** previous/next
+  painting, crossfaded; `oldbook-wallpaper next --from X,Y` reveals from a point.
 - **Super+Shift+P:** pause/resume rotation. **Super+Shift+N:** notifications.
-- **Super+Escape:** lock. **Super+F:** fullscreen toggle; leave fullscreen to see the panel.
+- **Super+Escape:** lock; the desktop dissolves into the current painting with the
+  clock, caption and Scripture. **Super+F:** fullscreen toggle; leave fullscreen to see the panel.
+- **Super+Shift+E / click the battery:** power deck (lock, suspend, log out, reboot,
+  shut down); Escape closes.
+- **Click the notification glyph:** media card, sound and brightness sliders, quick
+  actions, then the compact history.
+- **Volume, mic and brightness keys:** the new level shows on the bottom-centre pill;
+  a muted state greys it.
+- **Print / Shift+Print / Ctrl+Print:** capture, then a cream flash and shutter click;
+  Satty opens for annotation (Enter copies, Ctrl+S overwrites).
+- **Alt+F6:** ambient keyboard glow from the room's light; **Alt+Shift+F6:** breathe on
+  air, where keystrokes fill the lungs. Shift+F5 returns to steady light.
+- **Night light:** command deck → Night light, or `oldbook-sun-light toggle`; needs
+  `~/.config/oldbook/location.json` (copy `location.example.json`). `oldbook-astro status`
+  prints today's sun and moon; the masthead shows them once the file exists.
+- **New terminal:** the Space Ghost splash appears once per terminal (not in tmux);
+  `oldbook-splash` shows it again and `OLDBOOK_SPLASH_LOGO=none` silences it.
 - Hover the CPU, network, sound and battery modules to reveal their controls.
 - **Super/Command+click the artwork icon:** generate a painting and switch to it.
   The gallery includes the same command, browsing, pause, help, and the full command deck.
