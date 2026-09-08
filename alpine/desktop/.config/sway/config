@@ -7,8 +7,12 @@ set $lock ~/.local/bin/oldbook-lock
 set $wallpaper ~/.files/alpine/assets/spaceghost.png
 
 # Palette and window chrome are switchable without changing shortcuts.
-gaps inner 6
-gaps outer 7
+# Sway insets a workspace by outer+inner but separates two windows by inner
+# alone, so 6/7 left a 6px channel down the middle inside a 13px frame. Putting
+# the whole 13 in inner makes the gap between windows match the gap at the
+# edges, and outer 0 keeps those edges exactly where they were.
+gaps inner 13
+gaps outer 0
 include ~/.config/sway/theme.conf
 smart_gaps off
 focus_follows_mouse yes
