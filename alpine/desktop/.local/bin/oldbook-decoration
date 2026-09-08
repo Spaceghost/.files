@@ -534,6 +534,7 @@ def daemon():
                         if node.get('type') == 'output' and 'rect' in node}
         monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
                     for i in range(display.get_n_monitors())}
+        immediate = set()
         for name in list(captions):
             placement = placements.get(name)
             if (name not in monitors or placement is None or captions[name].edge != placement['edge']
@@ -543,7 +544,14 @@ def daemon():
                 for old in tuple(retired):
                     if old.monitor == previous.monitor:
                         old.destroy()
-                previous.retire()
+                if placement is not None and previous.attachment_mode != placement['mode']:
+                    # Tile/float and fullscreen changes are discrete compositor
+                    # moves. Crossfading leaves the old strip behind while the
+                    # new caption catches up. Hand off like a focus change.
+                    previous.destroy()
+                    immediate.add(name)
+                else:
+                    previous.retire()
         for name, monitor in monitors.items():
             placement = placements.get(name)
             if placement is None:
@@ -558,7 +566,7 @@ def daemon():
                 caption.destroy()
                 captions[name] = Caption(monitor, placement, animate_entry=False)
             if name not in captions:
-                captions[name] = Caption(monitor, placement)
+                captions[name] = Caption(monitor, placement, animate_entry=name not in immediate)
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
                                   last_tree, style, placement, output_rects[name])
         return False
