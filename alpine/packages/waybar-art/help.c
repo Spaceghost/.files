@@ -74,10 +74,10 @@ static guint workspace_base_end(const char *text, guint number_end) {
      * otherwise cannot distinguish a generated process from a custom name;
      * keep that ambiguous suffix subdued instead of emphasizing a process. */
     static const char *named[] = {
-        "1: GHOST", "2: ORBIT", "3: LAB", "4: SIGNAL", "5: LOUNGE", "6: STRATA",
+        "0: STRATA", "1: GHOST", "2: ORBIT", "3: LAB", "4: SIGNAL", "5: LOUNGE", "10: STRATA",
     };
     for (guint i = 0; i < G_N_ELEMENTS(named); ++i)
-        if (strcmp(text, named[i]) == 0) return (guint)strlen(text);
+        if (g_ascii_strcasecmp(text, named[i]) == 0) return (guint)strlen(text);
     if (number_end && text[number_end] == ':') return number_end;
     return (guint)strlen(text);
 }

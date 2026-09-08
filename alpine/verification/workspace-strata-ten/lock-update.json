@@ -1,0 +1,31 @@
+{
+  "old_lock": "alpine/packages/locks/c66a59a07dc3f7c8d5cb.json",
+  "old_lock_sha256": "c66a59a07dc3f7c8d5cbacb3b795e3a2f64c392bf1a666071a356f3c7dcbdcff",
+  "new_lock": "alpine/packages/locks/2866c8caaa0d133d4cc2.json",
+  "new_lock_sha256": "2866c8caaa0d133d4cc24131f13b31be18fbefe4c7f0631201c65c37bdeccfa2",
+  "package_count": 1119,
+  "compared_fields": [
+    "name",
+    "version",
+    "arch",
+    "apk_identity"
+  ],
+  "installed_identities_match": true,
+  "all_artifacts_present_in_fossil": true,
+  "new_artifact_signature_and_readback_verified": true,
+  "new_and_replaced_entries": [
+    {
+      "apk_identity": "Q1zaxuiP8v8BCbkE4QJoIcoU4kxg0=",
+      "name": "oldbook-waybar-art",
+      "version": "1.0.0-r7",
+      "arch": "x86_64",
+      "artifact_arch": "x86_64",
+      "filename": "oldbook-waybar-art-1.0.0-r7.apk",
+      "sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b",
+      "artifact": "sha256/4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b/oldbook-waybar-art-1.0.0-r7.apk"
+    }
+  ],
+  "unrelated_installed_identities_unchanged": true,
+  "world_repositories_public_keys_match_current_host": true,
+  "world_change": "Only the oldbook-waybar-art APK identity pin changed."
+}

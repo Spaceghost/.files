@@ -41,7 +41,7 @@ runtime dependencies. Restore the package lock before rebuilding exact inputs.
 
 ```sh
 alpine/packages/waybar-art/build-offline --work /tmp/waybar-art-build
-doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r5.apk
+doas apk add /tmp/waybar-art-build/apks/oldbook/x86_64/oldbook-waybar-art-1.0.0-r7.apk
 ```
 
 The helper creates a fresh work directory and builds with networking disabled,
@@ -49,7 +49,7 @@ using the build user's private abuild key outside the checkout. The library is
 installed at `/usr/lib/waybar/oldbook-art.so`; configuration remains symlinked to
 `alpine/desktop/.config/waybar/config.jsonc`. Source edits require rebuilding the
 package and restarting Waybar. `verification.json` records two-build hashes.
-`manifest.json` records the exact signed r5 APK identity and archived artifact.
+`manifest.json` records the exact signed r7 APK identity and archived artifact.
 
 ## Verify
 

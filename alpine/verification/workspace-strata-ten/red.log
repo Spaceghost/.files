@@ -1,0 +1,5 @@
+{"exit_code": -6, "binary": "/home/jack/.local/state/oldbook/build/waybar-strata-r7-before/red-gtk", "isolation": "private Xvfb, D-Bus, HOME and XDG directories; no host windows", "fatal_gtk_warnings": true, "core_dumps": false}
+**
+ERROR:alpine/packages/waybar-art/tests/workspace-emphasis.c:36:expect_weight: assertion failed (((PangoAttrInt *)attribute)->value == (int)expected): (400 == 700)
+Bail out! ERROR:alpine/packages/waybar-art/tests/workspace-emphasis.c:36:expect_weight: assertion failed (((PangoAttrInt *)attribute)->value == (int)expected): (400 == 700)
+

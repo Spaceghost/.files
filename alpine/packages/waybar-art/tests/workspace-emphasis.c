@@ -132,11 +132,54 @@ int main(int argc, char **argv) {
     expect_color(second_label, separator - 1, "#ffeeaa");
     expect_color(second_label, separator + 4, "#887766");
 
-    GtkWidget *third = add_workspace(workspaces, "3: LAB");
+    GtkWidget *third = add_workspace(workspaces, "10: STRATA");
     GtkLabel *third_label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(third)));
     gtk_style_context_add_class(gtk_widget_get_style_context(third), "focused");
     settle();
+    expect_weight(third_label, 0, PANGO_WEIGHT_BOLD);
+    expect_weight(third_label, 1, PANGO_WEIGHT_BOLD);
+    expect_weight(third_label, 4, PANGO_WEIGHT_BOLD);
+    expect_color(third_label, 0, "#ffeeaa");
+    expect_color(third_label, 4, "#ffeeaa");
+    gtk_style_context_remove_class(gtk_widget_get_style_context(third), "focused");
+    settle();
+    expect_weight(third_label, 0, PANGO_WEIGHT_BOLD);
+    expect_weight(third_label, 1, PANGO_WEIGHT_BOLD);
+    expect_weight(third_label, 4, PANGO_WEIGHT_NORMAL);
+    expect_color(third_label, 0, "#aaaaaa");
+    expect_color(third_label, 4, "#aaaaaa");
+    gtk_style_context_add_class(gtk_widget_get_style_context(third), "focused");
+    gtk_button_set_label(GTK_BUTTON(third), "0: STRATA");
+    settle();
+    third_label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(third)));
     expect_weight(third_label, 3, PANGO_WEIGHT_BOLD);
+    expect_color(third_label, 3, "#ffeeaa");
+    const char *titlecase[] = {
+        "0: Strata", "1: Ghost", "2: Orbit", "3: Lab", "4: Signal", "5: Lounge", "10: Strata",
+    };
+    for (guint i = 0; i < G_N_ELEMENTS(titlecase); ++i) {
+        gtk_button_set_label(GTK_BUTTON(third), titlecase[i]);
+        gtk_style_context_add_class(gtk_widget_get_style_context(third), "focused");
+        settle();
+        third_label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(third)));
+        guint digits = (guint)strspn(titlecase[i], "0123456789");
+        guint name_index = digits + 2;
+        g_assert_cmpstr(gtk_label_get_text(third_label), ==, titlecase[i]);
+        checks++;
+        expect_weight(third_label, 0, PANGO_WEIGHT_BOLD);
+        expect_weight(third_label, digits - 1, PANGO_WEIGHT_BOLD);
+        expect_weight(third_label, name_index, PANGO_WEIGHT_BOLD);
+        expect_color(third_label, 0, "#ffeeaa");
+        expect_color(third_label, name_index, "#ffeeaa");
+        gtk_style_context_remove_class(gtk_widget_get_style_context(third), "focused");
+        settle();
+        expect_weight(third_label, 0, PANGO_WEIGHT_BOLD);
+        expect_weight(third_label, digits - 1, PANGO_WEIGHT_BOLD);
+        expect_weight(third_label, name_index, PANGO_WEIGHT_NORMAL);
+        expect_color(third_label, 0, "#aaaaaa");
+        expect_color(third_label, name_index, "#aaaaaa");
+    }
+    gtk_style_context_add_class(gtk_widget_get_style_context(third), "focused");
     gtk_button_set_label(GTK_BUTTON(third), "7: Foot");
     settle();
     third_label = GTK_LABEL(gtk_bin_get_child(GTK_BIN(third)));

@@ -3,26 +3,25 @@
   "arch": "x86_64",
   "packages": [
     {
-      "apk_identity": "Q1ryQq8LpDRRNqzvyHie3lj7MwHPw=",
+      "apk_identity": "Q1zaxuiP8v8BCbkE4QJoIcoU4kxg0=",
       "arch": "x86_64",
-      "artifact": "sha256/077ca2e6838cae9b169c9bd2e110b8eb3c8fc9701ea4aea30aca31eb1a16f176/oldbook-waybar-art-1.0.0-r5.apk",
+      "artifact": "sha256/4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b/oldbook-waybar-art-1.0.0-r7.apk",
       "artifact_arch": "x86_64",
-      "binary_sha256": "62c099bb1f44f4b58e85fb575d6705f25c645a07f340730f3ff1db5c0ddc0a7a",
-      "filename": "oldbook-waybar-art-1.0.0-r5.apk",
+      "binary_sha256": "eab5f93adda44e85b6729f8c7cedd5ba6b49a0ed515da317f46c9ce9e4bf45f5",
+      "filename": "oldbook-waybar-art-1.0.0-r7.apk",
       "name": "oldbook-waybar-art",
-      "sha256": "077ca2e6838cae9b169c9bd2e110b8eb3c8fc9701ea4aea30aca31eb1a16f176",
-      "version": "1.0.0-r5"
+      "sha256": "4b10d6fc6a62f130c977f768d0e26045bad02d099c2d6c1e3013b3f6fda5385b",
+      "version": "1.0.0-r7"
     }
   ],
   "schema": 1,
   "verification": [
     "two byte-identical network-isolated builds",
-    "apk verify",
+    "apk verify for both APKs",
     "Fossil unversioned archive readback",
-    "38 native GTK workspace emphasis checks",
-    "six native Waybar workspace states across Spaceghost and Gruvbox",
-    "four existing contextual hover callbacks in isolated headless Sway",
-    "installed binary hash comparison",
-    "running Waybar maps installed library"
+    "regression demonstrated with r6 helper before fix",
+    "49 native GTK checks against the extracted signed APK library",
+    "installed library hash and preserved host package identities",
+    "1119-package lock matches all installed name/version/arch/APK identities"
   ]
 }
