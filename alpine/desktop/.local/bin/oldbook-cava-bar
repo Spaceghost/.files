@@ -115,12 +115,20 @@ class Bar:
         self.cava.stdout.close()
         self.cava = None
 
+    def orphaned(self):
+        """True once Waybar has closed the pipe, even while nothing is emitted."""
+        poller = select.poll()
+        poller.register(sys.stdout.fileno(), select.POLLERR | select.POLLHUP)
+        return bool(poller.poll(0))
+
     def run(self):
         self.emit('', 'silent')
         checked, active = 0.0, False
         while True:
             now = time.monotonic()
             if now - checked >= 1:
+                if self.orphaned():
+                    raise BrokenPipeError('Waybar closed the module pipe')
                 active, checked = playing(), now
             if not active:
                 self.stop()

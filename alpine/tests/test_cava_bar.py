@@ -95,6 +95,26 @@ class PlayerGateTests(unittest.TestCase):
                 process.stdout.close()
                 process.stderr.close()
 
+    def test_feeder_exits_when_the_pipe_closes_while_silent(self):
+        with tempfile.TemporaryDirectory(prefix='oldbook-cava-') as directory:
+            fake_bin = Path(directory) / 'bin'
+            fake_bin.mkdir()
+            (fake_bin / 'playerctl').write_text('#!/bin/sh\necho Paused\n')
+            (fake_bin / 'playerctl').chmod(0o755)
+            env = dict(os.environ, PATH=str(fake_bin) + os.pathsep + os.environ['PATH'],
+                       XDG_RUNTIME_DIR=directory)
+            process = subprocess.Popen([str(SCRIPT)], env=env, stdout=subprocess.PIPE,
+                                       stderr=subprocess.DEVNULL, text=True, start_new_session=True)
+            try:
+                self.assertEqual(json.loads(process.stdout.readline())['class'], 'silent')
+                process.stdout.close()
+                # Nothing is emitted while silent, so only the pipe poll can notice.
+                self.assertEqual(process.wait(timeout=6), 0)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+
 
 if __name__ == '__main__':
     unittest.main()
