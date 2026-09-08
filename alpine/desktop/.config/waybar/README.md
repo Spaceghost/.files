@@ -19,6 +19,12 @@ Glib dispatcher warning during in-process reload).
 | Notifications | Left: compact notification history. Right: Do Not Disturb. |
 | Clock | Los Angeles time. Click to show the full date; scroll to browse the calendar. |
 
+The active workspace number and name are bold and bright. Inactive workspace
+numbers remain bold, while their names use regular weight. The process text
+after ` · ` stays regular and subdued in either state. Both desktop themes
+provide the emphasis colors; the native helper styles text ranges without
+putting markup into workspace names or changing their click commands.
+
 `oldbook-panel-status` reads local kernel counters and addresses. Neither the
 panel nor its tooltips initiate wireless scans. Radio status reports rfkill;
 firewall status reports the daemon process, without asserting that a ruleset

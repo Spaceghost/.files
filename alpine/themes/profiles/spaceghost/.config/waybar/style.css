@@ -1,5 +1,7 @@
 /* Space Ghost control deck. GTK CSS, intentionally built for stock Waybar. */
 @import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
+@define-color oldbook_workspace_active #ffe9ff;
+@define-color oldbook_workspace_secondary #a08aaf;
 * {
     border: none;
     border-radius: 0;
@@ -35,10 +37,10 @@ window#waybar { background: transparent; color: #ede1ff; }
 #workspaces button.empty { color: #8d799d; }
 #workspaces button:hover { background: #372049; color: #ffe9ff; box-shadow: none; }
 #workspaces button.focused {
-    background: linear-gradient(110deg, #e5bcff, #bfa2f2);
-    color: #241331;
-    font-weight: 800;
-    box-shadow: inset 0 -2px #f594d1;
+    background: linear-gradient(110deg, alpha(#dca7ff, .22), alpha(#dca7ff, .10));
+    color: @oldbook_workspace_active;
+    font-weight: 400;
+    box-shadow: none;
 }
 #workspaces button.urgent { background: #bf447b; color: #fff3fa; }
 #custom-ai { color: #dca7ff; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 8px; }

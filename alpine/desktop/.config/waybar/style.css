@@ -1,5 +1,7 @@
 /* Space Ghost × Gruvbox Dark control deck. GTK CSS, intentionally built for stock Waybar. */
 @import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
+@define-color oldbook_workspace_active #fbf1c7;
+@define-color oldbook_workspace_secondary #a89984;
 * {
     border: none;
     border-radius: 0;
@@ -40,9 +42,9 @@ window#waybar.top .modules-right { background: transparent; padding: 0; }
 #workspaces button.empty { color: #7c6f64; }
 #workspaces button:hover { background: #504945; color: #fbf1c7; box-shadow: none; }
 #workspaces button.focused {
-    background: linear-gradient(110deg, #fabd2f, #d79921);
-    color: #1d2021;
-    font-weight: 800;
+    background: linear-gradient(110deg, alpha(#fabd2f, .22), alpha(#fabd2f, .10));
+    color: @oldbook_workspace_active;
+    font-weight: 400;
     box-shadow: none;
 }
 #workspaces button.urgent { background: #cc241d; color: #fbf1c7; }

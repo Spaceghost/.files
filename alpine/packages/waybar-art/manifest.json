@@ -3,15 +3,15 @@
   "arch": "x86_64",
   "packages": [
     {
-      "apk_identity": "Q1gCeBM/2nhE9wIhqv60RV4T9TJNQ=",
+      "apk_identity": "Q1ryQq8LpDRRNqzvyHie3lj7MwHPw=",
       "arch": "x86_64",
-      "artifact": "sha256/04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509/oldbook-waybar-art-1.0.0-r4.apk",
+      "artifact": "sha256/077ca2e6838cae9b169c9bd2e110b8eb3c8fc9701ea4aea30aca31eb1a16f176/oldbook-waybar-art-1.0.0-r5.apk",
       "artifact_arch": "x86_64",
-      "binary_sha256": "86c0d9dbc4f17079132da3d2edd74be0ed736a3b636149696975172843c8752c",
-      "filename": "oldbook-waybar-art-1.0.0-r4.apk",
+      "binary_sha256": "62c099bb1f44f4b58e85fb575d6705f25c645a07f340730f3ff1db5c0ddc0a7a",
+      "filename": "oldbook-waybar-art-1.0.0-r5.apk",
       "name": "oldbook-waybar-art",
-      "sha256": "04546e62ffbf991a0d6ae6c24c06aa07791f9c2e4dfd8ba67e349dbac0bdf509",
-      "version": "1.0.0-r4"
+      "sha256": "077ca2e6838cae9b169c9bd2e110b8eb3c8fc9701ea4aea30aca31eb1a16f176",
+      "version": "1.0.0-r5"
     }
   ],
   "schema": 1,
@@ -19,8 +19,10 @@
     "two byte-identical network-isolated builds",
     "apk verify",
     "Fossil unversioned archive readback",
+    "38 native GTK workspace emphasis checks",
+    "six native Waybar workspace states across Spaceghost and Gruvbox",
+    "four existing contextual hover callbacks in isolated headless Sway",
     "installed binary hash comparison",
-    "23 isolated headless Sway interaction checks",
-    "production tooltip screenshots in rotating, paused and generating states"
+    "running Waybar maps installed library"
   ]
 }
