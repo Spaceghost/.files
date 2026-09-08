@@ -1,0 +1,609 @@
+--- a/include/sway/animation_manager.h
++++ b/include/sway/animation_manager.h
+@@ -14,6 +14,11 @@
+ 	void *data;
+ 	float multiplier;
+ 	bool initialized;
++	// Duration this animation was started with, in milliseconds, and the
++	// per-tick progress step derived from it. Keeping them per animation lets
++	// window and workspace motion run at different speeds simultaneously.
++	float duration_ms;
++	float progress_delta;
+ 	void (*update)(void *);
+ 	void (*complete)(void *);
+ };
+@@ -26,6 +31,16 @@
+ 
+ void add_animation(struct animation *animation, void (*update_callback)(void *),
+ 	void (*complete_callback)(void *));
++
++// Start an animation with an explicit duration in milliseconds. A duration of
++// zero completes immediately, exactly like a disabled animation.
++void add_animation_duration(struct animation *animation, float duration_ms,
++	void (*update_callback)(void *), void (*complete_callback)(void *));
++
++// Effective duration for one animation kind: the kind's own value when it is
++// set, otherwise the shared animation_duration_ms. Zero when animations are
++// switched off, which makes every caller fall through to the instant path.
++float animation_kind_duration(float kind_duration_ms);
+ 
+ void finish_animation(struct animation *animation);
+ 
+--- a/include/sway/commands.h
++++ b/include/sway/commands.h
+@@ -109,7 +109,13 @@
+ sway_cmd cmd_exec_process;
+ 
+ sway_cmd cmd_allow_tearing;
++sway_cmd cmd_animation_close_ms;
+ sway_cmd cmd_animation_duration_ms;
++sway_cmd cmd_animation_move_ms;
++sway_cmd cmd_animation_open_ms;
++sway_cmd cmd_animation_workspace_ms;
++sway_cmd cmd_animation_workspace_style;
++sway_cmd cmd_animations;
+ sway_cmd cmd_assign;
+ sway_cmd cmd_bar;
+ sway_cmd cmd_bindcode;
+--- a/include/sway/config.h
++++ b/include/sway/config.h
+@@ -489,8 +489,20 @@
+ /**
+  * The configuration struct. The result of loading a config file.
+  */
++enum sway_animation_workspace_style {
++	ANIMATION_WORKSPACE_SLIDE,
++	ANIMATION_WORKSPACE_FADE,
++	ANIMATION_WORKSPACE_BOTH,
++};
++
+ struct sway_config {
++	bool animations_enabled;
+ 	float animation_duration_ms;
++	float animation_open_ms;
++	float animation_close_ms;
++	float animation_move_ms;
++	float animation_workspace_ms;
++	enum sway_animation_workspace_style animation_workspace_style;
+ 	int corner_radius;
+ 	bool smart_corner_radius;
+ 
+--- a/include/sway/tree/container.h
++++ b/include/sway/tree/container.h
+@@ -173,6 +173,12 @@
+ 
+ 		bool seat_is_resizing;
+ 		bool seat_is_moving_float;
++
++		// Base scene position captured when a workspace slide starts, so the
++		// floating container can be offset without losing its real place.
++		// slide_owner identifies which workspace captured it.
++		int slide_base_x;
++		void *slide_owner;
+ 	} animation_state;
+ 
+ 	list_t *marks; // char *
+--- a/include/sway/tree/workspace.h
++++ b/include/sway/tree/workspace.h
+@@ -59,6 +59,11 @@
+ 		struct animation animation;
+ 		float from_alpha;
+ 		float to_alpha;
++		// Horizontal slide offsets in layout pixels. The scene trees of this
++		// workspace are drawn at this offset while a switch is in flight.
++		int from_x;
++		int to_x;
++		bool sliding;
+ 	} animation_state;
+ };
+ 
+--- a/sway/animation_manager.c
++++ b/sway/animation_manager.c
+@@ -21,11 +21,30 @@
+ 		.progress = 0.0f,
+ 		.multiplier = 0.0f,
+ 		.initialized = false,
++		.duration_ms = 0.0f,
++		.progress_delta = 0.0f,
+ 		.update = NULL,
+ 		.complete = NULL,
+ 	};
+ }
+ 
++float animation_kind_duration(float kind_duration_ms) {
++	if (!config || !config->animations_enabled) {
++		return 0.0f;
++	}
++	if (kind_duration_ms > 0.0f) {
++		return kind_duration_ms;
++	}
++	return config->animation_duration_ms;
++}
++
++static float progress_delta_for(float duration_ms) {
++	if (duration_ms <= 0.0f) {
++		return 1.0f;
++	}
++	return animation_manager.tick_time / duration_ms;
++}
++
+ static float ease_out_cubic(float p) {
+ 	return pow(p - 1, 3) + 1;
+ }
+@@ -33,7 +52,7 @@
+ static int animation_timer() {
+ 	struct animation *animation, *tmp;
+ 	wl_list_for_each_reverse_safe(animation, tmp, &animation_manager.animations, link) {
+-		animation->progress = MIN(animation->progress + animation_manager.progress_delta, 1.0f);
++		animation->progress = MIN(animation->progress + animation->progress_delta, 1.0f);
+ 		animation->multiplier = ease_out_cubic(animation->progress);
+ 
+ 		if (animation->update) {
+@@ -55,9 +74,12 @@
+ 	return 0;
+ }
+ 
+-void add_animation(struct animation *animation, void (*update_callback)(void *),
+-		void (*complete_callback)(void *)) {
+-	if (!config->animation_duration_ms) {
++void add_animation_duration(struct animation *animation, float duration_ms,
++		void (*update_callback)(void *), void (*complete_callback)(void *)) {
++	if (duration_ms <= 0.0f) {
++		// Leave any in-flight animation alone before reporting completion, so
++		// a disabled kind never strands an entry on the tick list.
++		finish_animation(animation);
+ 		if (complete_callback) {
+ 			complete_callback(animation->data);
+ 		}
+@@ -71,11 +93,19 @@
+ 	animation->progress = 0.0f;
+ 	animation->multiplier = 0.0f;
+ 	animation->initialized = true;
++	animation->duration_ms = duration_ms;
++	animation->progress_delta = progress_delta_for(duration_ms);
+ 	animation->update = update_callback;
+ 	animation->complete = complete_callback;
+ 	wl_list_insert(&animation_manager.animations, &animation->link);
+ }
+ 
++void add_animation(struct animation *animation, void (*update_callback)(void *),
++		void (*complete_callback)(void *)) {
++	add_animation_duration(animation, animation_kind_duration(0.0f),
++		update_callback, complete_callback);
++}
++
+ void finish_animation(struct animation *animation) {
+ 	if (animation->initialized) {
+ 		wl_list_remove(&animation->link);
+@@ -86,7 +116,7 @@
+ }
+ 
+ void start_animations() {
+-	if (!config->animation_duration_ms) {
++	if (wl_list_empty(&animation_manager.animations)) {
+ 		return;
+ 	}
+ 	assert(animation_manager.tick);
+@@ -111,7 +141,13 @@
+ 		return;
+ 	}
+ 	animation_manager.tick_time = get_fastest_output_refresh_ms();
+-	animation_manager.progress_delta = animation_manager.tick_time / config->animation_duration_ms;
++	animation_manager.progress_delta = progress_delta_for(config->animation_duration_ms);
++	// Re-derive the step of everything already in flight so a duration change
++	// or an output refresh change does not stall or jump a running animation.
++	struct animation *animation;
++	wl_list_for_each(animation, &animation_manager.animations, link) {
++		animation->progress_delta = progress_delta_for(animation->duration_ms);
++	}
+ }
+ 
+ void animation_manager_init(struct sway_server *server) {
+@@ -126,7 +162,7 @@
+ }
+ 
+ float get_animated_value(float from, float to, const struct animation *animation) {
+-	if (!config->animation_duration_ms || !animation->initialized) {
++	if (!animation->initialized) {
+ 		return to;
+ 	}
+ 	return lerp(from, to, animation->multiplier);
+--- a/sway/commands.c
++++ b/sway/commands.c
+@@ -42,7 +42,13 @@
+ 
+ /* Keep alphabetized */
+ static const struct cmd_handler handlers[] = {
++	{ "animation_close_ms", cmd_animation_close_ms },
+ 	{ "animation_duration_ms", cmd_animation_duration_ms },
++	{ "animation_move_ms", cmd_animation_move_ms },
++	{ "animation_open_ms", cmd_animation_open_ms },
++	{ "animation_workspace_ms", cmd_animation_workspace_ms },
++	{ "animation_workspace_style", cmd_animation_workspace_style },
++	{ "animations", cmd_animations },
+ 	{ "assign", cmd_assign },
+ 	{ "bar", cmd_bar },
+ 	{ "bindcode", cmd_bindcode },
+--- /dev/null
++++ b/sway/commands/animations.c
+@@ -0,0 +1,89 @@
++#include <stdlib.h>
++#include <strings.h>
++#include "sway/animation_manager.h"
++#include "sway/commands.h"
++#include "sway/config.h"
++#include "util.h"
++
++// Shared bounds check: no one wants a window to take longer than five seconds
++// to open, and a negative duration has no meaning.
++static struct cmd_results *parse_duration(int argc, char **argv,
++		const char *name, float *out) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, name, EXPECTED_AT_LEAST, 1))) {
++		return error;
++	}
++
++	char *err;
++	float val = strtof(argc == 1 ? argv[0] : argv[1], &err);
++	if (*err) {
++		return cmd_results_new(CMD_INVALID, "%s float invalid", name);
++	}
++	if (val < 0 || val > 5000) {
++		return cmd_results_new(CMD_FAILURE, "%s value out of bounds", name);
++	}
++
++	*out = val;
++	refresh_animation_manager_timing();
++	return NULL;
++}
++
++struct cmd_results *cmd_animations(int argc, char **argv) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, "animations", EXPECTED_AT_LEAST, 1))) {
++		return error;
++	}
++
++	// parse_boolean already accepts enable/yes/on/true/1 and toggle; every
++	// other word is false, which matches i3 and makes "disable" work.
++	const char *value = argc == 1 ? argv[0] : argv[1];
++	config->animations_enabled = parse_boolean(value, config->animations_enabled);
++
++	refresh_animation_manager_timing();
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_open_ms(int argc, char **argv) {
++	struct cmd_results *error =
++		parse_duration(argc, argv, "animation_open_ms", &config->animation_open_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_close_ms(int argc, char **argv) {
++	struct cmd_results *error =
++		parse_duration(argc, argv, "animation_close_ms", &config->animation_close_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_move_ms(int argc, char **argv) {
++	struct cmd_results *error =
++		parse_duration(argc, argv, "animation_move_ms", &config->animation_move_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_workspace_ms(int argc, char **argv) {
++	struct cmd_results *error =
++		parse_duration(argc, argv, "animation_workspace_ms", &config->animation_workspace_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_workspace_style(int argc, char **argv) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, "animation_workspace_style", EXPECTED_AT_LEAST, 1))) {
++		return error;
++	}
++
++	const char *value = argc == 1 ? argv[0] : argv[1];
++	if (strcasecmp(value, "slide") == 0) {
++		config->animation_workspace_style = ANIMATION_WORKSPACE_SLIDE;
++	} else if (strcasecmp(value, "fade") == 0) {
++		config->animation_workspace_style = ANIMATION_WORKSPACE_FADE;
++	} else if (strcasecmp(value, "both") == 0) {
++		config->animation_workspace_style = ANIMATION_WORKSPACE_BOTH;
++	} else {
++		return cmd_results_new(CMD_INVALID,
++			"Expected 'animation_workspace_style slide|fade|both'");
++	}
++
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
+--- a/sway/config.c
++++ b/sway/config.c
+@@ -351,7 +351,13 @@
+ 	color_to_rgba(config->border_colors.background, 0xFFFFFFFF);
+ 
+ 	// SwayFX defaults
++	config->animations_enabled = true;
+ 	config->animation_duration_ms = 0.0f;
++	config->animation_open_ms = 0.0f;
++	config->animation_close_ms = 0.0f;
++	config->animation_move_ms = 0.0f;
++	config->animation_workspace_ms = 0.0f;
++	config->animation_workspace_style = ANIMATION_WORKSPACE_SLIDE;
+ 
+ 	config->corner_radius = 0;
+ 	config->smart_corner_radius = false;
+--- a/sway/desktop/transaction.c
++++ b/sway/desktop/transaction.c
+@@ -1,5 +1,6 @@
+ #include <assert.h>
+ #include <stdbool.h>
++#include <limits.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <time.h>
+@@ -132,6 +133,90 @@
+ 	}
+ }
+ 
++// Leading digits of a workspace name give its place in the strip. Names without
++// a number sit at the end, which keeps the slide direction stable for them.
++static int workspace_slide_index(struct sway_workspace *ws) {
++	if (!ws || !ws->name) {
++		return INT_MAX;
++	}
++	char *end;
++	long value = strtol(ws->name, &end, 10);
++	if (end == ws->name || value < 0 || value > INT_MAX) {
++		return INT_MAX;
++	}
++	return (int)value;
++}
++
++// +1 when the new workspace lives to the right of the old one, -1 otherwise.
++static int workspace_slide_direction(struct sway_workspace *old_ws,
++		struct sway_workspace *new_ws) {
++	int old_index = workspace_slide_index(old_ws);
++	int new_index = workspace_slide_index(new_ws);
++	if (old_index == new_index) {
++		return 1;
++	}
++	return new_index > old_index ? 1 : -1;
++}
++
++// Offset every scene node that belongs to this workspace by the current slide
++// position. Tiling and fullscreen layers are per workspace; floating containers
++// are parented to the root floating layer, so they carry their own base.
++static void workspace_apply_slide(struct sway_workspace *ws, int offset) {
++	wlr_scene_node_set_position(&ws->layers.tiling->node, offset, 0);
++	wlr_scene_node_set_position(&ws->layers.fullscreen->node, offset, 0);
++
++	for (int i = 0; i < ws->current.floating->length; i++) {
++		struct sway_container *floater = ws->current.floating->items[i];
++		if (floater->animation_state.slide_owner != ws) {
++			// First tick for this container: remember where it really sits.
++			floater->animation_state.slide_base_x = floater->scene_tree->node.x;
++			floater->animation_state.slide_owner = ws;
++		}
++		wlr_scene_node_set_position(&floater->scene_tree->node,
++			floater->animation_state.slide_base_x + offset,
++			floater->scene_tree->node.y);
++	}
++}
++
++static void workspace_slide_update_callback(void *data) {
++	struct sway_workspace *ws = data;
++	if (!ws || !ws->output) {
++		return;
++	}
++
++	int offset = get_animated_value(ws->animation_state.from_x,
++		ws->animation_state.to_x, &ws->animation_state.animation);
++	workspace_apply_slide(ws, offset);
++
++	if (config->animation_workspace_style != ANIMATION_WORKSPACE_SLIDE) {
++		workspace_fade_update_callback(ws);
++	}
++}
++
++// Settle the scene graph back to its real coordinates. Leaving a stale offset
++// behind would misplace every window on the workspace for good.
++static void workspace_slide_finish(struct sway_workspace *ws) {
++	if (!ws || !ws->animation_state.sliding) {
++		return;
++	}
++	workspace_apply_slide(ws, 0);
++	for (int i = 0; i < ws->current.floating->length; i++) {
++		struct sway_container *floater = ws->current.floating->items[i];
++		if (floater->animation_state.slide_owner == ws) {
++			floater->animation_state.slide_owner = NULL;
++		}
++	}
++	ws->animation_state.sliding = false;
++	ws->animation_state.from_x = 0;
++	ws->animation_state.to_x = 0;
++}
++
++static void workspace_slide_complete_callback(void *data) {
++	struct sway_workspace *ws = data;
++	workspace_slide_finish(ws);
++	workspace_fade_complete_callback(data);
++}
++
+ /* Compensate for scene-graph reparenting by computing the drift between
+  * the last tracked global coordinates and the actual current global position,
+  * then applying that delta to the local scene node position
+@@ -184,7 +269,9 @@
+ 						(con->animation_state.from_height * (1.0f - POPIN_FACTOR)) / 2.0f;
+ 					con->animation_state.to_width = con->animation_state.from_width * POPIN_FACTOR;
+ 					con->animation_state.to_height = con->animation_state.from_height * POPIN_FACTOR;
+-					add_animation(&con->animation_state.animation, anim_update_callback, close_anim_complete_callback);
++					add_animation_duration(&con->animation_state.animation,
++						animation_kind_duration(config->animation_close_ms),
++						anim_update_callback, close_anim_complete_callback);
+ 				} else {
+ 					container_destroy(node->sway_container);
+ 				}
+@@ -729,7 +816,10 @@
+ 
+ static void arrange_container(struct sway_container *con,
+ 		int width, int height, int x, int y, bool title_bar, int gaps) {
+-	if (!config->animation_duration_ms || !con->view
++	bool opening = con->animation_state.from_x == -1;
++	float geometry_duration = animation_kind_duration(opening
++		? config->animation_open_ms : config->animation_move_ms);
++	if (!geometry_duration || !con->view
+ 			|| con->animation_state.seat_is_resizing
+ 			|| con->animation_state.seat_is_moving_float) {
+ 		finish_animation(&con->animation_state.animation);
+@@ -756,13 +846,15 @@
+ 	con->animation_state.to_alpha = 1.0f;
+ 
+ 	// open animation — pop-in: grow from center while fading in
+-	if (con->animation_state.from_x == -1) {
++	if (opening) {
+ 		con->animation_state.from_x = x + width * (1.0f - POPIN_FACTOR) / 2.0f;
+ 		con->animation_state.from_y = y + height * (1.0f - POPIN_FACTOR) / 2.0f;
+ 		con->animation_state.from_width = width * POPIN_FACTOR;
+ 		con->animation_state.from_height = height * POPIN_FACTOR;
+ 		con->animation_state.from_alpha = 0.0f;
+-		add_animation(&con->animation_state.animation, anim_update_callback, NULL);
++		add_animation_duration(&con->animation_state.animation,
++			animation_kind_duration(config->animation_open_ms),
++			anim_update_callback, NULL);
+ 	} else {
+ 		// move animation
+ 		snap_animation_position(con);
+@@ -770,7 +862,9 @@
+ 		con->animation_state.from_height = con->animation_state.current_height;
+ 		con->animation_state.from_alpha = get_animated_value(con->animation_state.from_alpha,
+ 			con->animation_state.to_alpha, &con->animation_state.animation);
+-		add_animation(&con->animation_state.animation, anim_update_callback, NULL);
++		add_animation_duration(&con->animation_state.animation,
++			animation_kind_duration(config->animation_move_ms),
++			anim_update_callback, NULL);
+ 	}
+ 
+ 	// arrange at starting state to "win" position race between animation start and the reparent
+@@ -887,33 +981,61 @@
+ 	struct sway_workspace *new_active = output->current.active_workspace;
+ 	struct sway_workspace *old_active = output->prev_active_workspace;
+ 
++	float ws_duration = animation_kind_duration(config->animation_workspace_ms);
+ 	bool is_ws_switch = old_active && old_active != new_active
+-		&& output->wlr_output->enabled && config->animation_duration_ms > 0 &&
++		&& output->wlr_output->enabled && ws_duration > 0 &&
+ 		!(old_active->current.fullscreen || new_active->current.fullscreen);
+ 
+ 	if (is_ws_switch) {
+-		new_active->animation_state.from_alpha = 0.0f;
++		// An interrupted slide never runs its completion callback, so settle
++		// both workspaces before starting the next one. Otherwise a stale
++		// offset would leave their windows permanently displaced.
++		workspace_slide_finish(old_active);
++		workspace_slide_finish(new_active);
+ 
+-		if (old_active->current.tiling->length == 0
++		bool slide = config->animation_workspace_style != ANIMATION_WORKSPACE_FADE;
++		bool fade = config->animation_workspace_style != ANIMATION_WORKSPACE_SLIDE;
++		// Higher numbers live to the right: the arriving workspace enters from
++		// that side and the departing one leaves the opposite way.
++		int direction = workspace_slide_direction(old_active, new_active);
++
++		new_active->animation_state.from_alpha = fade ? 0.0f : 1.0f;
++
++		if (slide) {
++			old_active->animation_state.from_x = 0;
++			old_active->animation_state.to_x = -direction * width;
++			old_active->animation_state.sliding = true;
++			new_active->animation_state.from_x = direction * width;
++			new_active->animation_state.to_x = 0;
++			new_active->animation_state.sliding = true;
++		}
++
++		if (!slide && old_active->current.tiling->length == 0
+ 				&& old_active->current.floating->length == 0) {
++			// Nothing to fade out from: only bring the new workspace in.
+ 			new_active->animation_state.to_alpha = 1.0f;
+-			add_animation(&new_active->animation_state.animation,
++			add_animation_duration(&new_active->animation_state.animation, ws_duration,
+ 				workspace_fade_update_callback, NULL);
+ 		} else {
+ 			new_active->animation_state.to_alpha = 0.0f;
+ 			float current_alpha = get_animated_value(old_active->animation_state.from_alpha,
+ 				old_active->animation_state.to_alpha, &old_active->animation_state.animation);
+-			old_active->animation_state.from_alpha = current_alpha;
+-			old_active->animation_state.to_alpha = 0.0f;
++			old_active->animation_state.from_alpha = fade ? current_alpha : 1.0f;
++			old_active->animation_state.to_alpha = fade ? 0.0f : 1.0f;
+ 
+ 			finish_animation(&new_active->animation_state.animation);
+-			new_active->animation_state.from_alpha = 0.0f;
++			new_active->animation_state.from_alpha = fade ? 0.0f : 1.0f;
+ 			new_active->animation_state.to_alpha = 1.0f;
+ 
+-			add_animation(&old_active->animation_state.animation,
+-				workspace_fade_update_callback, workspace_fade_complete_callback);
+-			add_animation(&new_active->animation_state.animation,
+-				workspace_fade_update_callback, workspace_fade_complete_callback);
++			void (*update)(void *) = slide
++				? workspace_slide_update_callback : workspace_fade_update_callback;
++			void (*complete)(void *) = slide
++				? workspace_slide_complete_callback : workspace_fade_complete_callback;
++
++			add_animation_duration(&old_active->animation_state.animation, ws_duration,
++				update, complete);
++			add_animation_duration(&new_active->animation_state.animation, ws_duration,
++				update, complete);
+ 		}
+ 	}
+ 
+--- a/sway/meson.build
++++ b/sway/meson.build
+@@ -45,6 +45,7 @@
+ 	'config/input.c',
+ 
+ 	'commands/animation_duration_ms.c',
++	'commands/animations.c',
+ 	'commands/allow_tearing.c',
+ 	'commands/assign.c',
+ 	'commands/bar.c',
+--- a/sway/sway.5.scd
++++ b/sway/sway.5.scd
+@@ -420,7 +420,36 @@
+ 
+ animation_duration_ms <value>
+ 	Determines the duration of the animation applied to opening and closing
+-	windows, between 0 (no animation) and 5000 (5 seconds).
++	windows, between 0 (no animation) and 5000 (5 seconds). This is the shared
++	default; each kind below may override it.
++
++*animations* enable|disable|toggle
++	Switches every window and workspace animation on or off without losing the
++	configured durations. Disabled animations do no work at all: nothing is
++	scheduled and no frame is requested on their account.
++
++animation_open_ms <value>
++	Duration of the animation that grows and fades a window in as it opens.
++	0 (the default) uses *animation_duration_ms*.
++
++animation_close_ms <value>
++	Duration of the animation that shrinks and fades a window out as it closes.
++	0 (the default) uses *animation_duration_ms*.
++
++animation_move_ms <value>
++	Duration of the animation that glides a window to a new position or size
++	when the layout changes. 0 (the default) uses *animation_duration_ms*.
++
++animation_workspace_ms <value>
++	Duration of the workspace switch animation. 0 (the default) uses
++	*animation_duration_ms*.
++
++*animation_workspace_style* slide|fade|both
++	How a workspace switch is drawn. *slide* (the default) translates the
++	outgoing and incoming workspaces horizontally, entering from the side the
++	new workspace's number lies on. *fade* crossfades them in place. *both*
++	slides and crossfades together. Workspaces whose names do not begin with a
++	number are treated as lying to the right of numbered ones.
+ 
+ *assign* <criteria> [→] [workspace] [number] <workspace>
+ 	Assigns windows matching _criteria_ (see *CRITERIA* for details) to

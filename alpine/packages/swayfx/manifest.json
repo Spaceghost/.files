@@ -12,11 +12,11 @@
   "upstream_release": "https://github.com/wlrfx/swayfx/releases/tag/0.6",
   "source_date_epoch": 1785905137,
   "package": {
-    "filename": "swayfx-0.6-r3.apk",
-    "sha256": "30025561ef1e7cef8d95c51e75e2b08c94cc3411d857071005ae427977b4fa8f",
-    "artifact": "sha256/30025561ef1e7cef8d95c51e75e2b08c94cc3411d857071005ae427977b4fa8f/swayfx-0.6-r3.apk"
+    "filename": "swayfx-0.6-r4.apk",
+    "sha256": "750a7e28df64d9b26a025f6244aaed6485937c2f8910e694925a820a7e61f378",
+    "artifact": "sha256/750a7e28df64d9b26a025f6244aaed6485937c2f8910e694925a820a7e61f378/swayfx-0.6-r4.apk"
   },
-  "binary_sha256": "9476e4f292dc092cd42c2a984cdf9857f4ad248c28311708704049c0fce3be64",
+  "binary_sha256": "b8cef3c864cc92cd4e37f1868cff36a95e5c0a03478aff87fe0d454ba729eed4",
   "shared_dependencies": {
     "scenefx": "0.5-r0",
     "wlroots0.20": "0.20.2-r1",
@@ -37,14 +37,20 @@
       "filename": "screen-corners.patch",
       "sha256": "0de96c50f0a0d634214ef4a9ea427f1bb99e304ae34775c4ca4b4b4e1bdec5f1",
       "purpose": "Final output masks above the complete scene and software cursor; opt-in startup radius, direct-scanout prevention and explicit-sync final fence."
+    },
+    {
+      "filename": "window-animations.patch",
+      "sha256": "c96badde882f793e548c721ed3282f7304a38344136c3f5fc3b767117bae2c52",
+      "purpose": "Horizontal workspace slide, a duration per animation kind and a global animations toggle; fullscreen transitions are deliberately not animated."
     }
   ],
   "previous_package": {
-    "filename": "swayfx-0.6-r2.apk",
-    "sha256": "471a36a1e34bc0c645b02dffe2b427575c336cecd8855573d7d3257f4e299327",
-    "artifact": "sha256/471a36a1e34bc0c645b02dffe2b427575c336cecd8855573d7d3257f4e299327/swayfx-0.6-r2.apk"
+    "filename": "swayfx-0.6-r3.apk",
+    "sha256": "30025561ef1e7cef8d95c51e75e2b08c94cc3411d857071005ae427977b4fa8f",
+    "artifact": "sha256/30025561ef1e7cef8d95c51e75e2b08c94cc3411d857071005ae427977b4fa8f/swayfx-0.6-r3.apk"
   },
-  "previous_binary_sha256": "47737f93b5a6123eefc910e7acfbc575de0193e14e72e468ec77393d3bcc35b9",
+  "previous_binary_sha256": "9476e4f292dc092cd42c2a984cdf9857f4ad248c28311708704049c0fce3be64",
   "hover_raise_verification": "alpine/verification/hover-raise/native-packaged/evidence.json",
-  "screen_corners_verification": "alpine/verification/screen-corners/native-packaged/evidence.json"
+  "screen_corners_verification": "alpine/verification/screen-corners/native-packaged/evidence.json",
+  "window_animations_verification": "alpine/verification/swayfx-animations/evidence.json"
 }

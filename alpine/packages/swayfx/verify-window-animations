@@ -1,0 +1,385 @@
+#!/usr/bin/env python3
+"""Prove the window and workspace animations in a private headless SwayFX session.
+
+The check is colour based and deliberately unambiguous. Workspace 1 holds a
+solid red terminal and workspace 2 a solid green one. While a switch is in
+flight a slide must show both colours at once, separated horizontally: red
+retreating to one edge while green arrives from the other. A crossfade would
+mix the two colours across the same pixels instead, and an instant switch shows
+only one colour in every frame. Those three signatures tell the styles apart
+without a human looking at the screenshots.
+
+Nothing here touches the live session: the compositor runs on the headless
+backend inside a private runtime directory, and only processes started by this
+script are signalled.
+"""
+import argparse
+import json
+import os
+from pathlib import Path
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+
+RED = (0xcc, 0x24, 0x1d)
+GREEN = (0x98, 0x97, 0x1a)
+WIDTH, HEIGHT = 1280, 720
+# A long duration makes intermediate frames easy to catch on a software
+# renderer; the shipped desktop uses a fraction of this.
+SLOW_MS = 2000
+# Opening is slowed further: a terminal takes a moment to map and paint.
+OPEN_MS = 4000
+
+
+def near(pixel, target, tolerance=26):
+    return all(abs(int(a) - int(b)) <= tolerance for a, b in zip(pixel, target))
+
+
+def frame_profile(path):
+    """Fraction of red and green pixels, and their mean horizontal positions."""
+    import gi
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import GdkPixbuf
+
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(path))
+    channels = pixbuf.get_n_channels()
+    rowstride = pixbuf.get_rowstride()
+    pixels = pixbuf.get_pixels()
+    width, height = pixbuf.get_width(), pixbuf.get_height()
+
+    counts = {'red': 0, 'green': 0}
+    sums = {'red': 0, 'green': 0}
+    sampled = 0
+    # Sample every fourth pixel on every fourth row: plenty of signal, far less
+    # work than reading a 1280x720 buffer pixel by pixel in Python.
+    for y in range(0, height, 4):
+        base = y * rowstride
+        for x in range(0, width, 4):
+            offset = base + x * channels
+            pixel = pixels[offset:offset + 3]
+            sampled += 1
+            if near(pixel, RED):
+                counts['red'] += 1
+                sums['red'] += x
+            elif near(pixel, GREEN):
+                counts['green'] += 1
+                sums['green'] += x
+    return {
+        'red_fraction': counts['red'] / sampled,
+        'green_fraction': counts['green'] / sampled,
+        'red_mean_x': (sums['red'] / counts['red']) if counts['red'] else None,
+        'green_mean_x': (sums['green'] / counts['green']) if counts['green'] else None,
+    }
+
+
+def reddish_box(path):
+    """Width of the bounding box of anything reddish, and its coverage.
+
+    An opening window fades in as it grows, so sampling for the exact palette
+    colour misses every early frame: a half transparent red over the charcoal
+    background is not that red. Accepting anything red dominant instead follows
+    the window from its first frame, and the width of its bounding box measures
+    the pop-in scale directly.
+    """
+    import gi
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import GdkPixbuf
+
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(path))
+    channels = pixbuf.get_n_channels()
+    rowstride = pixbuf.get_rowstride()
+    pixels = pixbuf.get_pixels()
+    width, height = pixbuf.get_width(), pixbuf.get_height()
+
+    left, right, hits, sampled = width, -1, 0, 0
+    for y in range(0, height, 4):
+        base = y * rowstride
+        for x in range(0, width, 4):
+            offset = base + x * channels
+            red, green, blue = pixels[offset], pixels[offset + 1], pixels[offset + 2]
+            sampled += 1
+            if red > 60 and red > green + 20 and red > blue + 20:
+                hits += 1
+                left = min(left, x)
+                right = max(right, x)
+    return {
+        'reddish_fraction': hits / sampled,
+        'box_width': (right - left) if right >= 0 else 0,
+    }
+
+
+class Session:
+    def __init__(self, binary, base, config_text, log):
+        self.binary = binary
+        self.base = base
+        self.log = log
+        self.children = []
+        self.runtime = base / 'run'
+        self.runtime.mkdir(mode=0o700, exist_ok=True)
+        self.config = base / 'sway.conf'
+        self.config.write_text(config_text)
+        self.env = dict(
+            os.environ,
+            HOME=str(base / 'home'), XDG_RUNTIME_DIR=str(self.runtime),
+            XDG_CONFIG_HOME=str(base / 'home/.config'),
+            XDG_DATA_HOME=str(base / 'home/.local/share'),
+            XDG_STATE_HOME=str(base / 'home/.local/state'),
+            WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1',
+            WLR_RENDERER='pixman', WLR_RENDERER_ALLOW_SOFTWARE='1',
+            GTK_USE_PORTAL='0', NO_AT_BRIDGE='1', GDK_BACKEND='wayland',
+        )
+        (base / 'home').mkdir(exist_ok=True)
+        for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY'):
+            self.env.pop(key, None)
+
+    def spawn(self, command):
+        process = subprocess.Popen(command, env=self.env, stdout=self.log,
+                                   stderr=self.log, start_new_session=True)
+        self.children.append(process)
+        return process
+
+    def wait_for(self, predicate, ticks=200):
+        for _ in range(ticks):
+            if predicate():
+                return True
+            time.sleep(0.05)
+        raise RuntimeError('timed out waiting for the private session')
+
+    def start(self):
+        self.compositor = self.spawn([str(self.binary), '--config', str(self.config)])
+        self.wait_for(lambda: list(self.runtime.glob('sway-ipc*.sock')))
+        self.env['SWAYSOCK'] = str(next(self.runtime.glob('sway-ipc*.sock')))
+        self.env['WAYLAND_DISPLAY'] = next(
+            path.name for path in self.runtime.glob('wayland-*') if path.is_socket())
+        return self
+
+    def msg(self, *args):
+        return subprocess.run(['swaymsg', *args], env=self.env, capture_output=True,
+                              text=True, timeout=10).stdout
+
+    def terminal(self, colour):
+        # This foot names its palette sections colors-dark and colors-light;
+        # pinning the theme as well keeps the fill colour deterministic in a
+        # private HOME that carries no foot.ini.
+        self.spawn(['foot',
+                    '--override', 'main.initial-color-theme=dark',
+                    '--override', f'colors-dark.background={colour}',
+                    '--override', 'colors-dark.alpha=1.0',
+                    '--override', f'colors-light.background={colour}',
+                    '--', 'sh', '-c', 'clear; sleep 600'])
+
+    def grab(self, path):
+        subprocess.run(['grim', str(path)], env=self.env, check=True, timeout=20)
+
+    def stop(self):
+        for child in reversed(self.children):
+            if child.poll() is None:
+                try:
+                    os.killpg(child.pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+        for child in self.children:
+            try:
+                child.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait()
+
+
+def config_for(style, duration, extra=''):
+    return f'''xwayland disable
+output HEADLESS-1 mode {WIDTH}x{HEIGHT}
+output * bg #1d2021 solid_color
+seat seat0 fallback true
+focus_follows_mouse no
+default_border none
+gaps inner 0
+gaps outer 0
+animations enable
+animation_duration_ms {duration}
+animation_workspace_ms {duration}
+animation_workspace_style {style}
+{extra}
+'''
+
+
+def prepare(session):
+    """Put a red terminal on workspace 1 and a green one on workspace 2."""
+    session.msg('workspace', '1')
+    session.terminal('cc241d')
+    session.wait_for(lambda: '"app_id": "foot"' in session.msg('-t', 'get_tree'))
+    session.msg('workspace', '2')
+    session.terminal('98971a')
+    session.wait_for(lambda: session.msg('-t', 'get_tree').count('"app_id": "foot"') == 2)
+    time.sleep(1.5)  # let both terminals paint their background
+    session.msg('workspace', '1')
+    time.sleep(SLOW_MS / 1000 + 0.5)
+
+
+def capture_switch(session, frames_dir, label, target='2', count=7, gap=0.16):
+    """Switch workspace and grab a burst of frames while it animates."""
+    frames_dir.mkdir(parents=True, exist_ok=True)
+    session.msg('workspace', target)
+    captured = []
+    for index in range(count):
+        path = frames_dir / f'{label}-{index:02d}.png'
+        session.grab(path)
+        captured.append(path)
+        time.sleep(gap)
+    time.sleep(SLOW_MS / 1000)
+    return captured
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--binary', required=True, type=Path,
+                        help='Patched swayfx executable to exercise')
+    parser.add_argument('--output', required=True, type=Path,
+                        help='New evidence directory')
+    args = parser.parse_args()
+
+    binary = args.binary.resolve(strict=True)
+    output = args.output.absolute()
+    output.mkdir(parents=True, exist_ok=False)
+    for tool in ('foot', 'grim', 'swaymsg'):
+        if not shutil.which(tool):
+            parser.error(f'{tool} is required for this check')
+
+    results = {}
+    with (output / 'runtime.log').open('w') as log:
+        # ---------------------------------------------------------- slide
+        with tempfile.TemporaryDirectory(prefix='swayfx-anim-slide-') as temporary:
+            session = Session(binary, Path(temporary), config_for('slide', SLOW_MS), log).start()
+            try:
+                prepare(session)
+                frames = capture_switch(session, output / 'frames', 'slide')
+                results['slide'] = [frame_profile(path) for path in frames]
+            finally:
+                session.stop()
+
+        # ---------------------------------------------------------- fade
+        with tempfile.TemporaryDirectory(prefix='swayfx-anim-fade-') as temporary:
+            session = Session(binary, Path(temporary), config_for('fade', SLOW_MS), log).start()
+            try:
+                prepare(session)
+                frames = capture_switch(session, output / 'frames', 'fade')
+                results['fade'] = [frame_profile(path) for path in frames]
+            finally:
+                session.stop()
+
+        # ------------------------------------------------------- disabled
+        with tempfile.TemporaryDirectory(prefix='swayfx-anim-off-') as temporary:
+            session = Session(binary, Path(temporary),
+                              config_for('slide', SLOW_MS, extra='animations disable'), log).start()
+            try:
+                prepare(session)
+                frames = capture_switch(session, output / 'frames', 'disabled', count=4, gap=0.1)
+                results['disabled'] = [frame_profile(path) for path in frames]
+            finally:
+                session.stop()
+
+        # ------------------------------------ window open + idle cpu cost
+        with tempfile.TemporaryDirectory(prefix='swayfx-anim-open-') as temporary:
+            # A client needs a few hundred milliseconds to map and paint, so the
+            # open animation is stretched further still to leave frames to catch.
+            session = Session(binary, Path(temporary),
+                              config_for('slide', SLOW_MS,
+                                         extra=f'animation_open_ms {OPEN_MS}'), log).start()
+            try:
+                session.msg('workspace', '1')
+                time.sleep(0.5)
+                # Idle cost with animations enabled but nothing moving.
+                pid = session.compositor.pid
+                def cpu_ticks():
+                    fields = Path(f'/proc/{pid}/stat').read_text().rsplit(') ', 1)[1].split()
+                    return int(fields[11]) + int(fields[12])
+                before = cpu_ticks()
+                time.sleep(5)
+                after = cpu_ticks()
+                hertz = os.sysconf('SC_CLK_TCK')
+                results['idle_cpu_percent'] = round(
+                    100.0 * (after - before) / hertz / 5.0, 3)
+
+                opens = output / 'frames'
+                session.terminal('cc241d')
+                session.wait_for(lambda: '"app_id": "foot"' in session.msg('-t', 'get_tree'))
+                open_frames = []
+                for index in range(14):
+                    path = opens / f'open-{index:02d}.png'
+                    session.grab(path)
+                    open_frames.append(path)
+                    time.sleep(0.08)
+                results['open'] = [reddish_box(path) for path in open_frames]
+            finally:
+                session.stop()
+
+    # ------------------------------------------------------------- verdicts
+    checks = {}
+
+    def both_colours(profile, floor=0.02):
+        return profile['red_fraction'] > floor and profile['green_fraction'] > floor
+
+    slide_mixed = [p for p in results['slide'] if both_colours(p)]
+    checks['slide shows both workspaces mid-flight'] = len(slide_mixed) > 0
+    # The departing red and the arriving green must occupy different halves of
+    # the output. That is what makes it a slide rather than a crossfade.
+    separations = [abs(p['red_mean_x'] - p['green_mean_x']) for p in slide_mixed
+                   if p['red_mean_x'] is not None and p['green_mean_x'] is not None]
+    checks['slide separates the two workspaces horizontally'] = bool(
+        separations) and max(separations) > WIDTH * 0.25
+    checks['slide settles on the new workspace'] = (
+        results['slide'][-1]['green_fraction'] > 0.3
+        and results['slide'][-1]['red_fraction'] < 0.02)
+
+    fade_mixed = [p for p in results['fade'] if both_colours(p)]
+    # A crossfade blends toward the background, so pure source colours overlap
+    # far less; the point of this check is only that fade is not a slide.
+    fade_separations = [abs(p['red_mean_x'] - p['green_mean_x']) for p in fade_mixed
+                        if p['red_mean_x'] is not None and p['green_mean_x'] is not None]
+    checks['fade does not separate the workspaces horizontally'] = (
+        not fade_separations or max(fade_separations) < WIDTH * 0.25)
+    checks['fade settles on the new workspace'] = results['fade'][-1]['green_fraction'] > 0.3
+
+    checks['disabled switches instantly'] = not any(
+        both_colours(p) for p in results['disabled'])
+    checks['disabled settles on the new workspace'] = (
+        results['disabled'][-1]['green_fraction'] > 0.3)
+
+    # An opening window grows into place: its bounding box is measurably
+    # narrower part way through than the box it settles into.
+    open_widths = [p['box_width'] for p in results['open']]
+    settled = open_widths[-1]
+    checks['window open grows into place'] = (
+        settled > WIDTH * 0.5
+        and any(0 < w < settled * 0.95 for w in open_widths))
+    checks['idle costs no measurable cpu'] = results['idle_cpu_percent'] < 1.0
+
+    evidence = {
+        'status': 'passed' if all(checks.values()) else 'failed',
+        'binary': str(binary),
+        'binary_sha256': subprocess.run(['sha256sum', str(binary)], capture_output=True,
+                                        text=True, check=True).stdout.split()[0],
+        'renderer': 'pixman (software); blur and shadows are not exercised headlessly',
+        'output_mode': f'{WIDTH}x{HEIGHT}',
+        'animation_duration_ms': SLOW_MS,
+        'checks': checks,
+        'idle_cpu_percent': results['idle_cpu_percent'],
+        'frame_profiles': results,
+        'limits': [
+            'A headless software renderer proves ordering and geometry, not the '
+            'physical frame rate or the compositor blur.',
+            'Fullscreen enter and leave are deliberately not animated; see the '
+            'design note.',
+        ],
+    }
+    (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
+    print(json.dumps({'status': evidence['status'], 'checks': checks,
+                      'idle_cpu_percent': results['idle_cpu_percent']}, indent=2))
+    return 0 if evidence['status'] == 'passed' else 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())

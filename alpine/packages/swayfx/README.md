@@ -124,6 +124,47 @@ its own screenshot and JSON evidence.
 Upstream: [SwayFX 0.6](https://github.com/wlrfx/swayfx/releases/tag/0.6),
 [configuration and build instructions](https://github.com/wlrfx/swayfx/tree/fd71a6bdc061bd633b488ae7b83e8a6981d22f86).
 
+## Window and workspace animations
+
+Revision r4 adds `window-animations.patch`. SwayFX 0.6 already grew windows in
+as they opened, shrank them as they closed and tweened layout moves; the patch
+adds what was missing. Workspaces now **slide** horizontally instead of only
+crossfading, the arriving one entering from the side its number lies on, and
+each kind of animation gets its own duration:
+
+```
+animations enable|disable|toggle
+animation_open_ms <value>
+animation_close_ms <value>
+animation_move_ms <value>
+animation_workspace_ms <value>
+animation_workspace_style slide|fade|both
+```
+
+Every duration falls back to `animation_duration_ms` while it is zero, and
+`animations disable` stops all motion without losing the configured values. A
+disabled animation schedules nothing and requests no frame; with animations on
+and nothing moving the compositor measured 0.0% of a core.
+
+Only this patched build accepts these commands, so the desktop keeps them in
+`desktop/.config/swayfx/animations.conf`, which nothing includes by default.
+`oldbook-sway` validates the installed compositor against that file at login and
+starts from a generated session configuration only when it parses; an older
+binary starts exactly as before. Fullscreen enter and leave are deliberately not
+animated, because that path writes the output rect straight into the scene graph
+and rerouting it would disturb video and screen sharing for one transition.
+
+```sh
+alpine/packages/swayfx/verify-window-animations --binary /usr/bin/swayfx --output /tmp/swayfx-animation-test
+```
+
+The check runs the packaged binary headlessly with a red terminal on one
+workspace and a green one on the next, then reads the captured frames: a slide
+shows both colours separated across the output, a fade mixes them in place and a
+disabled switch shows only one. See
+[the evidence](../../verification/swayfx-animations/README.md) and
+[the design note](../../../docs/superpowers/specs/2026-09-08-animations.md).
+
 ## Physical screen corners
 
 Revision r3 adds `screen-corners.patch`: a final black output mask above the full

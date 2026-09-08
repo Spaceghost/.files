@@ -1,0 +1,199 @@
+{
+  "status": "passed",
+  "binary": "/home/jack/.claude/jobs/6e85b1d3/tmp/animations/extract/usr/bin/swayfx",
+  "binary_sha256": "b8cef3c864cc92cd4e37f1868cff36a95e5c0a03478aff87fe0d454ba729eed4",
+  "renderer": "pixman (software); blur and shadows are not exercised headlessly",
+  "output_mode": "1280x720",
+  "animation_duration_ms": 2000,
+  "checks": {
+    "slide shows both workspaces mid-flight": true,
+    "slide separates the two workspaces horizontally": true,
+    "slide settles on the new workspace": true,
+    "fade does not separate the workspaces horizontally": true,
+    "fade settles on the new workspace": true,
+    "disabled switches instantly": true,
+    "disabled settles on the new workspace": true,
+    "window open grows into place": true,
+    "idle costs no measurable cpu": true
+  },
+  "idle_cpu_percent": 0.0,
+  "frame_profiles": {
+    "slide": [
+      {
+        "red_fraction": 0.9747222222222223,
+        "green_fraction": 0.024722222222222222,
+        "red_mean_x": 622.1764747791393,
+        "green_mean_x": 1261.9775280898875
+      },
+      {
+        "red_fraction": 0.6340972222222222,
+        "green_fraction": 0.36541666666666667,
+        "red_mean_x": 404.1757748329865,
+        "green_mean_x": 1043.9133409350056
+      },
+      {
+        "red_fraction": 0.3809722222222222,
+        "green_fraction": 0.6184722222222222,
+        "red_mean_x": 242.17444403937296,
+        "green_mean_x": 881.9562092971031
+      },
+      {
+        "red_fraction": 0.2090972222222222,
+        "green_fraction": 0.7904166666666667,
+        "red_mean_x": 132.171703752906,
+        "green_mean_x": 771.9121419785627
+      },
+      {
+        "red_fraction": 0.09659722222222222,
+        "green_fraction": 0.9028472222222222,
+        "red_mean_x": 60.164629762760605,
+        "green_mean_x": 699.9560033843551
+      },
+      {
+        "red_fraction": 0.030972222222222224,
+        "green_fraction": 0.9684722222222222,
+        "red_mean_x": 18.13677130044843,
+        "green_mean_x": 657.9561164491611
+      },
+      {
+        "red_fraction": 0.006024305555555555,
+        "green_fraction": 0.9934548611111111,
+        "red_mean_x": 2.0288184438040346,
+        "green_mean_x": 641.9670412246824
+      }
+    ],
+    "fade": [
+      {
+        "red_fraction": 0.99953125,
+        "green_fraction": 0.0,
+        "red_mean_x": 638.0772931756205,
+        "green_mean_x": null
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.0,
+        "red_mean_x": null,
+        "green_mean_x": null
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.0,
+        "red_mean_x": null,
+        "green_mean_x": null
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.0,
+        "red_mean_x": null,
+        "green_mean_x": null
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      }
+    ],
+    "disabled": [
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      }
+    ],
+    "idle_cpu_percent": 0.0,
+    "open": [
+      {
+        "reddish_fraction": 0.0,
+        "box_width": 0
+      },
+      {
+        "reddish_fraction": 0.0,
+        "box_width": 0
+      },
+      {
+        "reddish_fraction": 0.7224479166666666,
+        "box_width": 1084
+      },
+      {
+        "reddish_fraction": 0.7529166666666667,
+        "box_width": 1108
+      },
+      {
+        "reddish_fraction": 0.7888368055555556,
+        "box_width": 1132
+      },
+      {
+        "reddish_fraction": 0.8155729166666666,
+        "box_width": 1156
+      },
+      {
+        "reddish_fraction": 0.8471875,
+        "box_width": 1172
+      },
+      {
+        "reddish_fraction": 0.86109375,
+        "box_width": 1184
+      },
+      {
+        "reddish_fraction": 0.8802083333333334,
+        "box_width": 1196
+      },
+      {
+        "reddish_fraction": 0.9024479166666667,
+        "box_width": 1212
+      },
+      {
+        "reddish_fraction": 0.9250173611111111,
+        "box_width": 1228
+      },
+      {
+        "reddish_fraction": 0.9364583333333333,
+        "box_width": 1236
+      },
+      {
+        "reddish_fraction": 0.9532291666666667,
+        "box_width": 1244
+      },
+      {
+        "reddish_fraction": 0.9593923611111111,
+        "box_width": 1252
+      }
+    ]
+  },
+  "limits": [
+    "A headless software renderer proves ordering and geometry, not the physical frame rate or the compositor blur.",
+    "Fullscreen enter and leave are deliberately not animated; see the design note."
+  ]
+}

@@ -9,8 +9,35 @@ export XCURSOR_THEME=Oldbook-Ghost
 export XCURSOR_SIZE=24
 # Final output cutouts; 0 opts out on the next compositor start.
 export SPACEGHOST_SCREEN_CORNER_RADIUS="${SPACEGHOST_SCREEN_CORNER_RADIUS:-20}"
+# Window and workspace animations need the patched SwayFX r4 or later. An older
+# binary rejects the commands and would refuse the whole configuration, so probe
+# the installed compositor once and start from a generated session file that
+# pulls the settings in only when they actually parse. The versioned
+# configuration is never changed, and a reload re-reads whatever this chose.
+animation_config() {
+    animations="$HOME/.config/swayfx/animations.conf"
+    base="$HOME/.config/swayfx/config"
+    [ -r "$animations" ] || return 1
+    [ -n "${XDG_RUNTIME_DIR:-}" ] || return 1
+    probe="$XDG_RUNTIME_DIR/oldbook-animations-probe.conf"
+    printf 'include %s\n' "$animations" > "$probe" || return 1
+    if /usr/bin/swayfx --validate --config "$probe" >/dev/null 2>&1; then
+        generated="$XDG_RUNTIME_DIR/oldbook-swayfx.conf"
+        printf 'include %s\ninclude %s\n' "$base" "$animations" > "$generated" || {
+            rm -f "$probe"
+            return 1
+        }
+        rm -f "$probe"
+        printf '%s\n' "$generated"
+        return 0
+    fi
+    rm -f "$probe"
+    return 1
+}
+
 if [ -x /usr/bin/swayfx ] && [ -r "$HOME/.config/swayfx/config" ] && [ "${OLDBOOK_STOCK_SWAY:-0}" != 1 ]; then
-    set -- /usr/bin/swayfx --config "$HOME/.config/swayfx/config" "$@"
+    swayfx_config=$(animation_config) || swayfx_config="$HOME/.config/swayfx/config"
+    set -- /usr/bin/swayfx --config "$swayfx_config" "$@"
 else
     set -- /usr/bin/sway "$@"
 fi
