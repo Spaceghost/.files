@@ -28,6 +28,9 @@ class TerminalThemeTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
+        self.session = {'HOME': str(self.root / 'home'),
+                        'SWAYSOCK': '/run/user/1000/sway-ipc.1000.123.sock'}
+        self.enterContext(mock.patch.dict(os.environ, self.session))
         self.config = self.root / 'foot.ini'
         self.config.write_text('''[colors-dark]
 alpha=0.98
@@ -65,6 +68,8 @@ bright7=ebdbb2
         (process / 'fdinfo').mkdir(parents=True)
         (process / 'fd').mkdir()
         (process / 'exe').symlink_to('/usr/bin/foot')
+        (process / 'environ').write_bytes(b'\0'.join(
+            os.fsencode(key + '=' + value) for key, value in self.session.items()) + b'\0')
         fields = ['S'] + ['0'] * 18 + ['1234567'] + ['0'] * 30
         (process / 'stat').write_text('123 (foot) ' + ' '.join(fields))
         for descriptor in ([7, 9] if duplicate_fd else [7]):
@@ -152,6 +157,24 @@ bright7=ebdbb2
         master, _, index, _ = self.terminal()
         self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc,
                                                      dry_run=True), [f'/dev/pts/{index}'])
+        self.assertFalse(select.select([master], [], [], 0)[0])
+
+    def test_other_home_or_compositor_never_receives_palette(self):
+        master, _, _, process = self.terminal()
+        for environment in (
+                {**self.session, 'HOME': str(self.root / 'private-home')},
+                {**self.session, 'SWAYSOCK': '/tmp/private-sway.sock'},
+                {'HOME': self.session['HOME']}):
+            with self.subTest(environment=environment):
+                (process / 'environ').write_bytes(b'\0'.join(
+                    os.fsencode(key + '=' + value) for key, value in environment.items()) + b'\0')
+                self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
+        self.assertFalse(select.select([master], [], [], 0)[0])
+
+    def test_missing_caller_session_never_receives_palette(self):
+        master, _, _, _ = self.terminal()
+        with mock.patch.dict(os.environ, {'HOME': self.session['HOME']}, clear=True):
+            self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
         self.assertFalse(select.select([master], [], [], 0)[0])
 
 

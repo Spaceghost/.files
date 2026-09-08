@@ -1,0 +1,9 @@
+test_btop_rereads_replaced_theme_symlinks_in_the_same_process (test_application_theme_refresh.ApplicationThemeRefresh.test_btop_rereads_replaced_theme_symlinks_in_the_same_process) ... ok
+test_desktop_refresh_reaches_the_existing_neovim_session (test_application_theme_refresh.ApplicationThemeRefresh.test_desktop_refresh_reaches_the_existing_neovim_session) ... ok
+test_nvim_refreshes_theme_without_changing_unsaved_editing_state (test_application_theme_refresh.ApplicationThemeRefresh.test_nvim_refreshes_theme_without_changing_unsaved_editing_state) ... ok
+test_nvim_rereads_changed_colors_when_the_scheme_name_stays_the_same (test_application_theme_refresh.ApplicationThemeRefresh.test_nvim_rereads_changed_colors_when_the_scheme_name_stays_the_same) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.756s
+
+OK

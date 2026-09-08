@@ -1,0 +1,119 @@
+{
+  "source_sha256": {
+    "alpine/bin/deploy-home": "b76b0e925fae92e7fa1f38971861edefa7e971bef4b7785e7a561bb5f7d80cef",
+    "alpine/desktop/.local/bin/oldbook-theme": "fe4f56449af1bbedc27af0a6f962318933bfd8207399c6be9683e99c501823df",
+    "alpine/wallpapers/theme_catalog.py": "82e57aca73bf23afa3a272e371383c9068b8ff756610cf12dcd8c6a05a93d5de",
+    "alpine/wallpapers/desktop_theme.py": "f7f2ba31eec3516e2fd412b52a2d394aaa83178c21ef34b0abb226eea2ef03da",
+    "alpine/themes/gruvbox-dark.json": "dd6bfcf1d07de09c712e5a88da0ccca98c9d7bac7900642668d2625348b0819f",
+    "alpine/themes/vespersteel-archive-968881e8a08a.json": "642590ca7e0c23072a256de2f06886740405959ad4a5251a8992be64ad5b5cbb"
+  },
+  "themes": [
+    {
+      "theme": "gruvbox-dark",
+      "waybar_pid": 17608,
+      "sway_pid": 17575,
+      "bar_reload_count": 1,
+      "bar_design": {
+        "name": "top",
+        "layer": "overlay",
+        "position": "top",
+        "height": 32,
+        "spacing": 2,
+        "margin-top": 0,
+        "margin-left": 4,
+        "margin-right": 4,
+        "exclusive": true,
+        "fixed-center": false,
+        "output": "HEADLESS-1",
+        "reload_style_on_change": false,
+        "modules-left": [
+          "custom/ghost",
+          "sway/workspaces"
+        ],
+        "modules-center": [],
+        "modules-right": [
+          "clock"
+        ],
+        "custom/ghost": {
+          "format": "\udb80\udea0"
+        },
+        "sway/workspaces": {
+          "format": "{value}",
+          "disable-markup": true
+        },
+        "clock": {
+          "format": "<span size=\"large\" weight=\"bold\">PRIVATE THEME PREVIEW</span>",
+          "tooltip": false
+        }
+      },
+      "style_sha256": "2a5d9c2f3cf5af6152b90147c8efa1ec79974942f9464fa7f7e902f8eb280957",
+      "foot_config_sha256": "1d5d145e22a42735cc0b7f8431f3c58ff47eef4b921ef1fd0a93d3bd33f1dcf3",
+      "screenshot": {
+        "sha256": "cc85b6801cc85513ff1af8ec3cb5e1768b12f41644ae8e8ca6edb0914ddaef83",
+        "bar_pixels_sha256": "282f2f3f8a334e8859fac108e8eb88456fdebf374feec8df9de4b34510e58dda",
+        "foreground": "#ebdbb2",
+        "foreground_pixel_count": 179,
+        "dimensions": [
+          1280,
+          800
+        ]
+      }
+    },
+    {
+      "theme": "vespersteel-archive-968881e8a08a",
+      "waybar_pid": 17608,
+      "sway_pid": 17575,
+      "bar_reload_count": 2,
+      "bar_design": {
+        "name": "top",
+        "layer": "overlay",
+        "position": "top",
+        "height": 32,
+        "spacing": 5,
+        "margin-top": 0,
+        "margin-left": 4,
+        "margin-right": 4,
+        "exclusive": true,
+        "fixed-center": false,
+        "output": "HEADLESS-1",
+        "reload_style_on_change": false,
+        "modules-left": [
+          "custom/ghost",
+          "sway/workspaces"
+        ],
+        "modules-center": [],
+        "modules-right": [
+          "clock"
+        ],
+        "custom/ghost": {
+          "format": "\udb80\udea0"
+        },
+        "sway/workspaces": {
+          "format": "{value}",
+          "disable-markup": true
+        },
+        "clock": {
+          "format": "<span size=\"large\" weight=\"bold\">PRIVATE THEME PREVIEW</span>",
+          "tooltip": false
+        }
+      },
+      "style_sha256": "53c313c17628e6d2522372554a19c65fda2035bda14649140faaceb8ad7359cd",
+      "foot_config_sha256": "e00c24b22a1e07a0530f6eb60b0805687e5dac0ae5de478a877c3b3fd0d723d4",
+      "screenshot": {
+        "sha256": "82bf1150b6a4d4f4d3c6a0b67f9687fbe861881a23f25df87a75b2a668b94b86",
+        "bar_pixels_sha256": "42237fb1faecc5256e07fbbc7cdd0fdf716ba1c488025b67e781d3b0048c542a",
+        "foreground": "#E8DFC9",
+        "foreground_pixel_count": 247,
+        "dimensions": [
+          1280,
+          800
+        ]
+      }
+    }
+  ],
+  "same_waybar_process": true,
+  "foreign_backup_unchanged": true,
+  "foreign_backup_sha256": "1c8844b16c42d0edcef68d7ae076c399bb9910f69a2264bdb782aa19a5f00eff",
+  "private_home_and_compositor": true,
+  "refresh_session_called": false
+}

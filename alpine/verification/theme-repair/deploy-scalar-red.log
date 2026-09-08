@@ -1,0 +1,36 @@
+test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... 
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document=None) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document=False) ... FAIL
+  test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document='damaged journal') ... FAIL
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 90, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 90, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) (document='damaged journal')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_deploy.py", line 90, in test_malformed_deployment_headers_block_before_replacing_user_files
+    with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.097s
+
+FAILED (failures=3)

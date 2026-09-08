@@ -1,0 +1,88 @@
+test_fragmented_reply_cannot_extend_the_total_deadline (test_theme_sway_reload.ThemeSwayReloadTests.test_fragmented_reply_cannot_extend_the_total_deadline) ... FAIL
+test_missing_session_never_discovers_another_compositor (test_theme_sway_reload.ThemeSwayReloadTests.test_missing_session_never_discovers_another_compositor) ... FAIL
+test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit) ... FAIL
+test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload) ... FAIL
+test_rejected_command_retains_the_compositor_error (test_theme_sway_reload.ThemeSwayReloadTests.test_rejected_command_retains_the_compositor_error) ... FAIL
+test_response_must_contain_boolean_command_success (test_theme_sway_reload.ThemeSwayReloadTests.test_response_must_contain_boolean_command_success) ... FAIL
+test_truncated_reply_reports_disconnection (test_theme_sway_reload.ThemeSwayReloadTests.test_truncated_reply_reports_disconnection) ... FAIL
+test_wrong_frame_magic_or_reply_type_is_rejected (test_theme_sway_reload.ThemeSwayReloadTests.test_wrong_frame_magic_or_reply_type_is_rejected) ... FAIL
+
+======================================================================
+FAIL: test_fragmented_reply_cannot_extend_the_total_deadline (test_theme_sway_reload.ThemeSwayReloadTests.test_fragmented_reply_cannot_extend_the_total_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 150, in test_fragmented_reply_cannot_extend_the_total_deadline
+    self.assertTrue(callable(self.module.get('sway_reload')))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_missing_session_never_discovers_another_compositor (test_theme_sway_reload.ThemeSwayReloadTests.test_missing_session_never_discovers_another_compositor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 147, in test_missing_session_never_discovers_another_compositor
+    self.reload()
+    ~~~~~~~~~~~^^
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 85, in reload
+    self.assertTrue(callable(callback), 'Theme reload needs a direct IPC response boundary')
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true : Theme reload needs a direct IPC response boundary
+
+======================================================================
+FAIL: test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 99, in test_refresh_accepts_a_reply_after_swaymsgs_three_second_limit
+    self.assertFalse(any('FAILED' in note for note in notes), notes)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : ['sway reload FAILED', 'GTK settings applied', 'waybar reloaded (0)', 'foot terminals repainted']
+
+======================================================================
+FAIL: test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload (test_theme_sway_reload.ThemeSwayReloadTests.test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 121, in test_refresh_cli_exits_unsuccessfully_when_sway_rejects_reload
+    self.assertEqual(status, 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_rejected_command_retains_the_compositor_error (test_theme_sway_reload.ThemeSwayReloadTests.test_rejected_command_retains_the_compositor_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 103, in test_rejected_command_retains_the_compositor_error
+    self.assertTrue(callable(self.module.get('sway_reload')))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_response_must_contain_boolean_command_success (test_theme_sway_reload.ThemeSwayReloadTests.test_response_must_contain_boolean_command_success)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 137, in test_response_must_contain_boolean_command_success
+    self.assertTrue(callable(self.module.get('sway_reload')))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_truncated_reply_reports_disconnection (test_theme_sway_reload.ThemeSwayReloadTests.test_truncated_reply_reports_disconnection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 132, in test_truncated_reply_reports_disconnection
+    self.assertTrue(callable(self.module.get('sway_reload')))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_wrong_frame_magic_or_reply_type_is_rejected (test_theme_sway_reload.ThemeSwayReloadTests.test_wrong_frame_magic_or_reply_type_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_sway_reload.py", line 124, in test_wrong_frame_magic_or_reply_type_is_rejected
+    self.assertTrue(callable(self.module.get('sway_reload')))
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.976s
+
+FAILED (failures=8)

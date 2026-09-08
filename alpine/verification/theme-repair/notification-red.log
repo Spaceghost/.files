@@ -1,0 +1,27 @@
+test_cli_includes_unmanaged_browser_limit_in_the_visible_result (test_theme_refresh.ThemeRefreshTests.test_cli_includes_unmanaged_browser_limit_in_the_visible_result) ... FAIL
+test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection (test_theme_refresh.ThemeRefreshTests.test_cli_notifies_when_a_real_interrupted_deployment_blocks_selection) ... ok
+test_cli_reports_failed_terminal_refresh_in_the_visible_result (test_theme_refresh.ThemeRefreshTests.test_cli_reports_failed_terminal_refresh_in_the_visible_result) ... FAIL
+test_wallpaper_failure_still_refreshes_deployed_application_theme (test_theme_refresh.ThemeRefreshTests.test_wallpaper_failure_still_refreshes_deployed_application_theme) ... ok
+
+======================================================================
+FAIL: test_cli_includes_unmanaged_browser_limit_in_the_visible_result (test_theme_refresh.ThemeRefreshTests.test_cli_includes_unmanaged_browser_limit_in_the_visible_result)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 124, in test_cli_includes_unmanaged_browser_limit_in_the_visible_result
+    self.assertIn('Firefox', delivered[0][-1])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'Firefox' not found in 'Fixture theme'
+
+======================================================================
+FAIL: test_cli_reports_failed_terminal_refresh_in_the_visible_result (test_theme_refresh.ThemeRefreshTests.test_cli_reports_failed_terminal_refresh_in_the_visible_result)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_theme_refresh.py", line 107, in test_cli_reports_failed_terminal_refresh_in_the_visible_result
+    self.assertEqual(status, 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 4 tests in 3.183s
+
+FAILED (failures=2)

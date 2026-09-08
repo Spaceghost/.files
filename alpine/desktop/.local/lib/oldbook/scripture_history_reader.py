@@ -49,16 +49,36 @@ def run(helper, database):
         window.set_default_size(1000, 760)
         window.set_name('scripture-history')
         provider = Gtk.CssProvider()
-        provider.load_from_data(gtk_css('''
+        stylesheet = '''
             #scripture-history { background: @theme_background; color: @theme_foreground; }
             #scripture-history textview, #scripture-history textview text {
                 background: @theme_background; color: @theme_foreground;
                 font-family: serif; font-size: 17px;
             }
             #scripture-history button { padding: 7px 12px; }
-        ''', read_palette()))
+        '''
+        palette = None
+
+        def refresh_theme():
+            nonlocal palette
+            selected = read_palette()
+            if selected != palette:
+                provider.load_from_data(gtk_css(stylesheet, selected))
+                palette = selected
+            return GLib.SOURCE_CONTINUE
+
+        refresh_theme()
+        # GTK caches the user's stylesheet at startup. The live reader palette
+        # must win over that older file without rebuilding widgets or drafts.
         Gtk.StyleContext.add_provider_for_screen(window.get_screen(), provider,
-                                                 Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                                                 Gtk.STYLE_PROVIDER_PRIORITY_USER + 1)
+        theme_timer = GLib.timeout_add_seconds(1, refresh_theme)
+
+        def stop_theme(*_args):
+            GLib.source_remove(theme_timer)
+            Gtk.StyleContext.remove_provider_for_screen(window.get_screen(), provider)
+
+        window.connect('destroy', stop_theme)
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8, margin=12)
         window.add(root)
         toolbar = Gtk.Box(spacing=8)

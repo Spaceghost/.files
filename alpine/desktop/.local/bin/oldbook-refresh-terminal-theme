@@ -47,8 +47,16 @@ def palette_bytes(path):
 
 
 def process_identity(process, uid):
-    """Require a current same-user Foot process and record its kernel start time."""
+    """Require a same-user/session Foot and record its kernel start time."""
     if process.stat().st_uid != uid or (process / 'exe').resolve(strict=True) != Path('/usr/bin/foot'):
+        return None
+    session = {b'HOME': os.fsencode(Path.home()),
+               b'SWAYSOCK': os.fsencode(os.environ.get('SWAYSOCK', ''))}
+    if not session[b'SWAYSOCK']:
+        return None
+    environment = dict(item.split(b'=', 1) for item in
+                       (process / 'environ').read_bytes().split(b'\0') if b'=' in item)
+    if any(environment.get(key) != value for key, value in session.items()):
         return None
     fields = (process / 'stat').read_text().rsplit(') ', 1)[1].split()
     if fields[0] == 'Z':

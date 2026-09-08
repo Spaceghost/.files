@@ -1,0 +1,91 @@
+test_dry_run_reports_targets_without_output_to_their_ptys (test_terminal_theme.TerminalThemeTests.test_dry_run_reports_targets_without_output_to_their_ptys) ... ok
+test_duplicate_foot_descriptors_refresh_one_private_pty_once (test_terminal_theme.TerminalThemeTests.test_duplicate_foot_descriptors_refresh_one_private_pty_once) ... ok
+test_invalid_palette_cannot_inject_control_sequences (test_terminal_theme.TerminalThemeTests.test_invalid_palette_cannot_inject_control_sequences) ... ok
+test_missing_caller_session_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_missing_caller_session_never_receives_palette) ... FAIL
+test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) ... 
+  test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/private-home', 'SWAYSOCK': '/run/user/1000/sway-ipc.1000.123.sock'}) ... FAIL
+  test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/home', 'SWAYSOCK': '/tmp/private-sway.sock'}) ... FAIL
+  test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/home'}) ... FAIL
+test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) ... FAIL
+test_other_users_and_non_foot_processes_never_receive_palette (test_terminal_theme.TerminalThemeTests.test_other_users_and_non_foot_processes_never_receive_palette) ... ok
+test_palette_sets_colors_without_requesting_replies_or_resetting_screen (test_terminal_theme.TerminalThemeTests.test_palette_sets_colors_without_requesting_replies_or_resetting_screen) ... ok
+test_symlink_and_regular_file_tty_paths_are_left_untouched (test_terminal_theme.TerminalThemeTests.test_symlink_and_regular_file_tty_paths_are_left_untouched) ... ok
+test_wrong_tty_owner_is_rejected_after_open (test_terminal_theme.TerminalThemeTests.test_wrong_tty_owner_is_rejected_after_open) ... ok
+
+======================================================================
+FAIL: test_missing_caller_session_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_missing_caller_session_never_receives_palette)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_terminal_theme.py", line 177, in test_missing_caller_session_never_receives_palette
+    self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['/dev/pts/26'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'/dev/pts/26'
+
+- ['/dev/pts/26']
++ []
+
+======================================================================
+FAIL: test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/private-home', 'SWAYSOCK': '/run/user/1000/sway-ipc.1000.123.sock'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_terminal_theme.py", line 171, in test_other_home_or_compositor_never_receives_palette
+    self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['/dev/pts/26'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'/dev/pts/26'
+
+- ['/dev/pts/26']
++ []
+
+======================================================================
+FAIL: test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/home', 'SWAYSOCK': '/tmp/private-sway.sock'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_terminal_theme.py", line 171, in test_other_home_or_compositor_never_receives_palette
+    self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['/dev/pts/26'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'/dev/pts/26'
+
+- ['/dev/pts/26']
++ []
+
+======================================================================
+FAIL: test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette) (environment={'HOME': '/tmp/tmp5t839aqi/home'})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_terminal_theme.py", line 171, in test_other_home_or_compositor_never_receives_palette
+    self.assertEqual(self.module.refresh_terminals(b'palette', proc_root=self.proc), [])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Lists differ: ['/dev/pts/26'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+'/dev/pts/26'
+
+- ['/dev/pts/26']
++ []
+
+======================================================================
+FAIL: test_other_home_or_compositor_never_receives_palette (test_terminal_theme.TerminalThemeTests.test_other_home_or_compositor_never_receives_palette)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_terminal_theme.py", line 172, in test_other_home_or_compositor_never_receives_palette
+    self.assertFalse(select.select([master], [], [], 0)[0])
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: [3] is not false
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.553s
+
+FAILED (failures=5)

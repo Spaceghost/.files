@@ -41,6 +41,57 @@ class DeployTest(unittest.TestCase):
         self.assertEqual(old.read_text(), 'my original')
         self.assertFalse(old.is_symlink())
 
+    def test_database_backup_manifest_does_not_block_deployment_or_rollback(self):
+        backup = self.home / '.local/state/oldbook/backups/scripture-hourly'
+        backup.mkdir(parents=True)
+        manifest = backup / 'manifest.json'
+        body = json.dumps({'databases': ['history.sqlite3'],
+                           'note': 'Scripture history backup'}) + '\n'
+        manifest.write_text(body)
+        database = backup / 'history.sqlite3'
+        database.write_bytes(b'preserved database backup')
+        original = self.home / '.config/app/config'
+        original.parent.mkdir(parents=True)
+        original.write_text('my original')
+
+        try:
+            deployed = m.deploy(self.home, self.overlay)
+        except RuntimeError as error:
+            self.fail(f'An unrelated database backup blocked deployment: {error}')
+        self.assertTrue(original.is_symlink())
+        self.assertEqual(original.read_text(), 'new')
+        m.rollback(self.home, deployed)
+        self.assertEqual(original.read_text(), 'my original')
+        self.assertEqual(manifest.read_text(), body)
+        self.assertEqual(database.read_bytes(), b'preserved database backup')
+
+    def test_malformed_deployment_headers_block_before_replacing_user_files(self):
+        backup = self.home / '.local/state/oldbook/backups/1788840000000000000'
+        backup.mkdir(parents=True)
+        manifest = backup / 'manifest.json'
+        original = self.home / '.config/app/config'
+        original.parent.mkdir(parents=True)
+        original.write_text('my original')
+        for document in (
+                None,
+                False,
+                'damaged journal',
+                {},
+                {'status': 'complete'},
+                {'version': 2},
+                {'entries': []},
+                {'version': 3, 'status': 'complete', 'entries': []},
+                {'version': 2, 'status': 'complete', 'entries': None},
+                {'version': 2, 'status': 'unexpected', 'entries': []}):
+            with self.subTest(document=document):
+                original.unlink(missing_ok=True)
+                original.write_text('my original')
+                manifest.write_text(json.dumps(document))
+                with self.assertRaisesRegex(RuntimeError, 'deployment journal'):
+                    m.deploy(self.home, self.overlay)
+                self.assertFalse(original.is_symlink())
+                self.assertEqual(original.read_text(), 'my original')
+
     def test_reject_parent_symlink_without_external_write(self):
         external = self.root / 'external'
         external.mkdir()

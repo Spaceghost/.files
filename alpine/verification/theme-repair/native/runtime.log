@@ -1,0 +1,47 @@
+ac_compute_device_uuid's output is based on invalid pci bus info.
+ac_compute_device_uuid's output is based on invalid pci bus info.
+2026-09-07 22:00:39 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+[2026-09-07 22:00:40.240] [info] Using configuration file /tmp/oldbook-theme-switch-yskf7ift/home/.config/waybar/config.jsonc
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.portal.Desktop' requested by ':1.0' (uid=1000 pid=6553 comm="waybar --config /tmp/oldbook-theme-switch-yskf7ift")
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.impl.portal.PermissionStore' requested by ':1.1' (uid=1000 pid=6609 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.PermissionStore'
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.portal.Documents' requested by ':1.1' (uid=1000 pid=6609 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Successfully activated service 'org.freedesktop.portal.Documents'
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.gtk' requested by ':1.1' (uid=1000 pid=6609 comm="/usr/libexec/xdg-desktop-portal")
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Successfully activated service 'org.freedesktop.impl.portal.desktop.gtk'
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.296: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.298: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.299: Failed to load RealtimeKit property: GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown: The name org.freedesktop.RealtimeKit1 was not provided by any .service files
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.353: Failed to connect to PipeWire: Couldn't connect to PipeWire
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=6609 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:00:41 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:00:41 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.441: Failed to create screenshot proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activating service name='org.freedesktop.impl.portal.desktop.wlr' requested by ':1.1' (uid=1000 pid=6609 comm="/usr/libexec/xdg-desktop-portal")
+2026/09/07 22:00:41 [ERROR] - pipewire: couldn't connect to context
+2026/09/07 22:00:41 [ERROR] - xdpw: failed to initialize screencast
+'impl->enter_count > 0' failed at ../spa/plugins/support/loop.c:619 loop_leave()
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Activated service 'org.freedesktop.impl.portal.desktop.wlr' failed: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+
+(/usr/libexec/xdg-desktop-portal:6609): xdg-desktop-portal-WARNING **: 22:00:41.560: Failed to create screen cast proxy: Error calling StartServiceByName for org.freedesktop.impl.portal.desktop.wlr: Process org.freedesktop.impl.portal.desktop.wlr exited with status 1
+dbus-daemon[6551]: [session uid=1000 pid=6551 pidfd=4] Successfully activated service 'org.freedesktop.portal.Desktop'
+[2026-09-07 22:00:41.611] [info] Using CSS file /tmp/oldbook-theme-switch-yskf7ift/home/.config/waybar/style.css
+[2026-09-07 22:00:41.928] [warning] Requested height: 32 is less than the minimum height: 40 required by the modules
+[2026-09-07 22:00:41.928] [info] Bar configured (width: 1272, height: 40) for output: HEADLESS-1
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)
+[2026-09-07 22:00:46.535] [info] Reloading...
+[2026-09-07 22:00:46.544] [info] Using configuration file /tmp/oldbook-theme-switch-yskf7ift/home/.config/waybar/config.jsonc
+[2026-09-07 22:00:46.544] [info] Using CSS file /tmp/oldbook-theme-switch-yskf7ift/home/.config/waybar/style.css
+2026-09-07 22:00:46 - [main.c:332] Found config * for output HEADLESS-1 ((null))
+[2026-09-07 22:00:46.734] [warning] Requested height: 32 is less than the minimum height: 35 required by the modules
+[2026-09-07 22:00:46.734] [info] Bar configured (width: 1272, height: 35) for output: HEADLESS-1
+warn: wayland.c:1888: compositor does not implement the xdg-toplevel-icon protocol
+warn: terminal.c:2034: slave exited with signal 1 (Hangup)

@@ -272,10 +272,8 @@ def switch_theme():
     chosen = gallery_menu('Switch theme ❯ ', ['← Back to the gallery', *labels])
     if chosen is None or chosen not in labels:
         return 0
-    if labels[chosen] == active:
-        return 0
     subprocess.Popen(['/usr/bin/python3', str(Path(__file__).resolve().parent / 'oldbook-theme'),
-                      'use', labels[chosen]], start_new_session=True)
+                      'use', labels[chosen], '--notify'], start_new_session=True)
     return 0
 
 

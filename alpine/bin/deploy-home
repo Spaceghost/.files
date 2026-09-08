@@ -82,7 +82,23 @@ def reject_interrupted(target):
         if (path.parent / 'restored').exists():
             continue
         document = json.loads(path.read_text())
-        if isinstance(document, dict) and document.get('status') != 'complete':
+        # The backup directory also holds database snapshots. Their manifests
+        # are not deployment journals and must never be sent through rollback.
+        if isinstance(document, list):
+            continue
+        if (not path.parent.name.isdigit()
+                and (not isinstance(document, dict)
+                     or not {'version', 'status', 'entries'} & document.keys())):
+            continue
+        # A partial journal header is still ours: do not silently skip damaged
+        # recovery information merely because its version or status is missing.
+        # Timestamp-named deployment directories also identify an empty header.
+        if (not isinstance(document, dict)
+                or document.get('version') != 2
+                or not isinstance(document.get('entries'), list)
+                or document.get('status') not in ('in_progress', 'complete')):
+            raise RuntimeError(f'Invalid deployment journal: {path}; inspect before deploying')
+        if document['status'] != 'complete':
             raise RuntimeError(f'Interrupted deployment: run deploy-home --target {target} --rollback {path.parent}')
 
 

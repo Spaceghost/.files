@@ -1,0 +1,25 @@
+test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback (alpine.tests.test_deploy.DeployTest.test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (alpine.tests.test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_database_backup_manifest_does_not_block_deployment_or_rollback (alpine.tests.test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... ok
+test_existing_legacy_overlay_symlink_does_not_create_alias (alpine.tests.test_deploy.DeployTest.test_existing_legacy_overlay_symlink_does_not_create_alias) ... ok
+test_explicit_legacy_overlay_config_is_not_replaced_by_alias (alpine.tests.test_deploy.DeployTest.test_explicit_legacy_overlay_config_is_not_replaced_by_alias) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (alpine.tests.test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (alpine.tests.test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (alpine.tests.test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (alpine.tests.test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (alpine.tests.test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_malformed_deployment_headers_block_before_replacing_user_files (alpine.tests.test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... ok
+test_only_rejects_missing_and_unsafe_selections_before_target_changes (alpine.tests.test_deploy.DeployTest.test_only_rejects_missing_and_unsafe_selections_before_target_changes) ... ok
+test_only_selects_exact_config_pair_and_excludes_unrelated_files (alpine.tests.test_deploy.DeployTest.test_only_selects_exact_config_pair_and_excludes_unrelated_files) ... ok
+test_partial_deployment_rolls_back_all_originals (alpine.tests.test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (alpine.tests.test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (alpine.tests.test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (alpine.tests.test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_superhold_config_alias_shares_edits_and_restores_legacy_file (alpine.tests.test_deploy.DeployTest.test_superhold_config_alias_shares_edits_and_restores_legacy_file) ... ok
+test_portable_profiles_precede_oldbook_with_legacy_fallback (alpine.tests.test_deploy.WrapperMigrationTest.test_portable_profiles_precede_oldbook_with_legacy_fallback) ... ok
+test_wrapper_reads_superhold_runtime_status_without_a_display (alpine.tests.test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.911s
+
+OK

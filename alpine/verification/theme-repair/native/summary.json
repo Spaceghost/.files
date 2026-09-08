@@ -1,0 +1,119 @@
+{
+  "source_sha256": {
+    "alpine/bin/deploy-home": "d870b58987b54e4aa7237ba62917f972dde84cc72a894160ece5da18996b1e49",
+    "alpine/desktop/.local/bin/oldbook-theme": "fdff545c742e5b03d86d7b3ee7d48502e517d0f7c4d07285fbb15af6ed6cbd41",
+    "alpine/wallpapers/theme_catalog.py": "82e57aca73bf23afa3a272e371383c9068b8ff756610cf12dcd8c6a05a93d5de",
+    "alpine/wallpapers/desktop_theme.py": "f7f2ba31eec3516e2fd412b52a2d394aaa83178c21ef34b0abb226eea2ef03da",
+    "alpine/themes/gruvbox-dark.json": "dd6bfcf1d07de09c712e5a88da0ccca98c9d7bac7900642668d2625348b0819f",
+    "alpine/themes/the-bellows-intercept-b503d18336b4.json": "6e868aebcd07a46fd601def73cfdfd7d8f727c5cd57fe1625ea41d399ca50bf2"
+  },
+  "themes": [
+    {
+      "theme": "gruvbox-dark",
+      "waybar_pid": 6553,
+      "sway_pid": 6504,
+      "bar_reload_count": 1,
+      "bar_design": {
+        "name": "top",
+        "layer": "overlay",
+        "position": "top",
+        "height": 32,
+        "spacing": 2,
+        "margin-top": 0,
+        "margin-left": 4,
+        "margin-right": 4,
+        "exclusive": true,
+        "fixed-center": false,
+        "output": "HEADLESS-1",
+        "reload_style_on_change": false,
+        "modules-left": [
+          "custom/ghost",
+          "sway/workspaces"
+        ],
+        "modules-center": [],
+        "modules-right": [
+          "clock"
+        ],
+        "custom/ghost": {
+          "format": "\udb80\udea0"
+        },
+        "sway/workspaces": {
+          "format": "{value}",
+          "disable-markup": true
+        },
+        "clock": {
+          "format": "PRIVATE THEME PREVIEW",
+          "tooltip": false
+        }
+      },
+      "style_sha256": "2a5d9c2f3cf5af6152b90147c8efa1ec79974942f9464fa7f7e902f8eb280957",
+      "foot_config_sha256": "1d5d145e22a42735cc0b7f8431f3c58ff47eef4b921ef1fd0a93d3bd33f1dcf3",
+      "screenshot": {
+        "sha256": "4e9ce1e33e95d814608ab637c4f372c42f3b4cdc0a9d76c7f24f041129963a0c",
+        "bar_pixels_sha256": "4c0342c7942d285c669d10cd3b0f6bfa03fed54d75c333baa6f78bd085c0567d",
+        "foreground": "#ebdbb2",
+        "foreground_pixel_count": 45,
+        "dimensions": [
+          1280,
+          800
+        ]
+      }
+    },
+    {
+      "theme": "the-bellows-intercept-b503d18336b4",
+      "waybar_pid": 6553,
+      "sway_pid": 6504,
+      "bar_reload_count": 2,
+      "bar_design": {
+        "name": "top",
+        "layer": "overlay",
+        "position": "top",
+        "height": 32,
+        "spacing": 5,
+        "margin-top": 0,
+        "margin-left": 4,
+        "margin-right": 4,
+        "exclusive": true,
+        "fixed-center": false,
+        "output": "HEADLESS-1",
+        "reload_style_on_change": false,
+        "modules-left": [
+          "custom/ghost",
+          "sway/workspaces"
+        ],
+        "modules-center": [],
+        "modules-right": [
+          "clock"
+        ],
+        "custom/ghost": {
+          "format": "\udb80\udea0"
+        },
+        "sway/workspaces": {
+          "format": "{value}",
+          "disable-markup": true
+        },
+        "clock": {
+          "format": "PRIVATE THEME PREVIEW",
+          "tooltip": false
+        }
+      },
+      "style_sha256": "f19e4eb2eb98e0395f3480810b11024b1acd5dede144517b0e486f52e1b18147",
+      "foot_config_sha256": "5e420f8fdd8b9a85e4f1c6a75e0702a6ed60e987d0151278dede9c13d71a7d93",
+      "screenshot": {
+        "sha256": "d37f01417178fc2ef933dd213f21c2acc86f11ba8266a318d435f957ede82aeb",
+        "bar_pixels_sha256": "8e1a864082a003f1d8e29408fa88f3253fb06aecd6edc34ef2b536a237b76144",
+        "foreground": "#E9E0C9",
+        "foreground_pixel_count": 12,
+        "dimensions": [
+          1280,
+          800
+        ]
+      }
+    }
+  ],
+  "same_waybar_process": true,
+  "foreign_backup_unchanged": true,
+  "foreign_backup_sha256": "1c8844b16c42d0edcef68d7ae076c399bb9910f69a2264bdb782aa19a5f00eff",
+  "private_home_and_compositor": true,
+  "refresh_session_called": false
+}

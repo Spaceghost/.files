@@ -11,13 +11,17 @@ at the theme's profile, records the selection, and reloads what is already
 running so the change is visible without logging out.
 """
 import argparse
+import json
 import os
 from pathlib import Path
 import re
 import runpy
 import signal
+import socket
+import struct
 import subprocess
 import sys
+import time
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
@@ -165,9 +169,13 @@ def record(identity):
 
 
 def owned_processes(*names):
-    """Yield this user's processes whose executable matches one of `names`."""
+    """Yield matching processes in this HOME and explicitly identified Sway session."""
     uid = os.getuid()
     wanted = {name.encode() for name in names}
+    session = {b'HOME': os.fsencode(Path.home()),
+               b'SWAYSOCK': os.fsencode(os.environ.get('SWAYSOCK', ''))}
+    if not session[b'SWAYSOCK']:
+        return
     for entry in os.listdir('/proc'):
         if not entry.isdigit():
             continue
@@ -176,9 +184,13 @@ def owned_processes(*names):
             if process.stat().st_uid != uid:
                 continue
             argv = (process / 'cmdline').read_bytes().split(b'\0')
+            if not argv or not argv[0] or argv[0].split(b'/')[-1] not in wanted:
+                continue
+            environment = dict(item.split(b'=', 1) for item in
+                               (process / 'environ').read_bytes().split(b'\0') if b'=' in item)
         except OSError:
             continue
-        if argv and argv[0] and argv[0].split(b'/')[-1] in wanted:
+        if all(environment.get(key) == value for key, value in session.items()):
             yield int(entry)
 
 
@@ -202,6 +214,63 @@ def run(command, timeout=20):
         return False
 
 
+def sway_reload(timeout=20):
+    """Send one reload and await its reply beyond swaymsg's fixed three seconds."""
+    address = os.environ.get('SWAYSOCK')
+    if not address:
+        raise RuntimeError('SWAYSOCK is not set; the desktop session is unknown')
+    path = Path(address)
+    if not path.is_socket() or path.stat().st_uid != os.getuid():
+        raise RuntimeError('SWAYSOCK is not an owned Sway session socket')
+    header = struct.Struct('=6sII')
+    deadline = time.monotonic() + timeout
+
+    def remaining():
+        value = deadline - time.monotonic()
+        if value <= 0:
+            raise TimeoutError('Sway reload deadline expired')
+        return value
+
+    try:
+        with socket.socket(socket.AF_UNIX) as connection:
+            while True:
+                connection.settimeout(remaining())
+                try:
+                    connection.connect(address)
+                    break
+                except BlockingIOError:
+                    # A full UNIX listen backlog is retryable before any command
+                    # is sent. Never resubmit after sending the reload itself.
+                    time.sleep(min(.01, remaining()))
+            connection.settimeout(remaining())
+            connection.sendall(header.pack(b'i3-ipc', 6, 0) + b'reload')
+
+            def read(size):
+                data = bytearray()
+                while len(data) < size:
+                    connection.settimeout(remaining())
+                    chunk = connection.recv(size - len(data))
+                    if not chunk:
+                        raise ConnectionError('Sway disconnected before confirming the reload')
+                    data.extend(chunk)
+                return bytes(data)
+
+            magic, length, kind = header.unpack(read(header.size))
+            if magic != b'i3-ipc' or kind != 0 or length > 32 * 1024 * 1024:
+                raise ValueError('Invalid Sway IPC reload response')
+            response = json.loads(read(length))
+    except TimeoutError as error:
+        raise RuntimeError(f'Sway reload reply not confirmed within {timeout:g} seconds') from error
+    if (not isinstance(response, list) or not response
+            or any(not isinstance(item, dict) or not isinstance(item.get('success'), bool)
+                   for item in response)):
+        raise ValueError('Invalid Sway IPC command result')
+    errors = [str(item.get('error', 'Sway rejected the reload'))
+              for item in response if not item['success']]
+    if errors:
+        raise RuntimeError('; '.join(errors))
+
+
 def tmux_reload():
     """Every live server rereads the theme's tmux configuration."""
     reloaded = 0
@@ -222,7 +291,11 @@ def refresh_session():
     notes = []
     here = Path(__file__).resolve().parent
 
-    notes.append('sway reloaded' if run(['swaymsg', 'reload']) else 'sway reload FAILED')
+    try:
+        sway_reload()
+        notes.append('sway reloaded')
+    except (OSError, ValueError, RuntimeError) as error:
+        notes.append('sway reload FAILED: ' + str(error))
     gtk_settings = here / 'oldbook-gtk-settings'
     if gtk_settings.is_file():
         notes.append('GTK settings applied' if run(['/usr/bin/python3', str(gtk_settings)])
@@ -235,7 +308,7 @@ def refresh_session():
     terminals = here / 'oldbook-refresh-terminal-theme'
     if terminals.is_file():
         notes.append('foot terminals repainted' if run(['/usr/bin/python3', str(terminals)])
-                     else 'foot terminals unchanged')
+                     else 'foot terminal theme refresh FAILED')
 
     # Ghostty rereads its configuration on SIGUSR2 and restyles open surfaces.
     count = signal_processes(('ghostty',), signal.SIGUSR2)
@@ -255,18 +328,22 @@ def refresh_session():
     if count:
         notes.append(f'tmux servers reloaded ({count})')
 
+    applications = here / 'oldbook-refresh-application-theme'
+    if applications.is_file():
+        helper = runpy.run_path(str(applications))
+        app_notes, _failed = helper['refresh_applications'](
+            list(owned_processes('btop', 'nvim')))
+        notes.extend(app_notes)
+
     # Cava has no reload channel; it is ours and cheap, so it comes back itself
     # through its supervisor rather than being left in the previous palette.
     count = signal_processes(('cava',), signal.SIGTERM)
     if count:
         notes.append(f'cava restarted ({count})')
 
-    stale = sorted({name for name, procs in (
-        ('Firefox', ('firefox',)), ('btop', ('btop',)), ('Neovim', ('nvim',)))
-        if any(True for _ in owned_processes(*procs))})
-    if stale:
-        notes.append('reads its theme only at startup, so still on the old palette: '
-                     + ', '.join(stale))
+    if any(True for _ in owned_processes('firefox')):
+        notes.append('Firefox custom styling is not managed; '
+                     'browser appearance may retain its own theme')
     return notes
 
 
@@ -281,13 +358,19 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
+    notes = []
     if reload:
-        gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))
-        entries, _interval = gallery['load_gallery']()
-        matching = [entry for entry in entries if entry.get('theme') == theme['id']]
-        if matching:
-            gallery['update']('select', matching[-1]['id'])
-    notes = refresh_session() if reload else []
+        try:
+            gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))
+            entries, _interval = gallery['load_gallery']()
+            matching = [entry for entry in entries if entry.get('theme') == theme['id']]
+            if matching:
+                gallery['update']('select', matching[-1]['id'])
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+            notes.append('wallpaper selection FAILED: ' + str(error))
+        # A wallpaper failure must not strand already-deployed application files
+        # on disk while running clients retain the previous theme.
+        notes.extend(refresh_session())
     return theme, profile, deployed, notes
 
 
@@ -297,6 +380,8 @@ def main():
     parser.add_argument('theme', nargs='?')
     parser.add_argument('--no-reload', action='store_true',
                         help='apply the files without touching the running session')
+    parser.add_argument('--notify', action='store_true',
+                        help='show the result in a desktop notification')
     args = parser.parse_args()
     active = current_identity()
     if args.action == 'current':
@@ -307,16 +392,24 @@ def main():
             print(theme['id'] + '\t' + describe(theme, active))
         return 0
     if args.action == 'refresh':
-        for note in refresh_session():
+        notes = refresh_session()
+        for note in notes:
             print(note)
-        return 0
+        return 1 if any('FAILED' in note for note in notes) else 0
     if args.action == 'sync':
         written = sync_profiles(REPO)
         print('\n'.join(written) if written else 'Every theme profile is already complete')
         return 0
     if not args.theme:
         parser.error('use requires a theme ID')
-    theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload)
+    try:
+        theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload)
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        if args.notify:
+            run(['notify-send', '--app-name=Desktop themes', '--urgency=critical',
+                 'Could not switch theme', str(error)])
+        print(f'oldbook-theme: {error}', file=sys.stderr)
+        return 1
     print(f'Switched to {theme["name"]}')
     if deployed is None:
         print('  Configuration already matched this theme.')
@@ -324,7 +417,13 @@ def main():
         print(f'  Previous configuration backed up to {deployed}')
     for note in notes:
         print('  ' + note)
-    return 0
+    failures = [note for note in notes if 'FAILED' in note]
+    if args.notify:
+        title = 'Theme needs attention' if failures else 'Theme applied'
+        details = failures + [note for note in notes if 'not managed' in note]
+        body = theme['name'] + ('\n' + '\n'.join(details) if details else '')
+        run(['notify-send', '--app-name=Desktop themes', title, body])
+    return 1 if failures else 0
 
 
 if __name__ == '__main__':
