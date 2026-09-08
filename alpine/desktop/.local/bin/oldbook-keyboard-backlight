@@ -1,0 +1,77 @@
+#!/bin/sh
+# The MacBook's keyboard light is an LED, separate from the display backlight.
+set -eu
+
+action=${1:-}
+case "$action" in
+    up|down|toggle|restore) ;;
+    *) printf '%s\n' 'usage: oldbook-keyboard-backlight {up|down|toggle|restore}' >&2; exit 64 ;;
+esac
+[ "$#" -eq 1 ] || exit 64
+
+notify() {
+    command -v notify-send >/dev/null 2>&1 || return 0
+    notify-send "$@" >/dev/null 2>&1 || :
+}
+
+fail() {
+    printf '%s\n' "$1" >&2
+    notify 'Keyboard backlight' "$1"
+    exit 1
+}
+
+device=smc::kbd_backlight
+brightness() {
+    brightnessctl --class=leds --device="$device" --min-value=0 "$@"
+}
+
+command -v brightnessctl >/dev/null 2>&1 || fail 'Install brightnessctl to control the keyboard light.'
+if ! current=$(brightness get 2>/dev/null); then
+    # This desktop overlay is also usable on machines without an Apple SMC.
+    [ "$action" != restore ] || exit 0
+    fail 'The kernel did not expose the Apple SMC keyboard backlight.'
+fi
+
+state_dir=${XDG_STATE_HOME:-$HOME/.local/state}/oldbook
+state_file=$state_dir/keyboard-backlight
+umask 077
+mkdir -p "$state_dir"
+# Key repeat may launch overlapping helpers; serialize hardware and saved state.
+exec 9> "$state_file.lock"
+flock -x 9
+current=$(brightness get)
+
+case "$action" in
+    up) value=10%+ ;;
+    down) value=10%- ;;
+    toggle)
+        if [ "$current" -gt 0 ]; then value=0; else value=25%; fi
+        ;;
+    restore)
+        value=$(cat "$state_file" 2>/dev/null || :)
+        case "$value" in
+            ''|*[!0-9]*)
+                # First use preserves an existing level or gently enables it.
+                if [ "$current" -gt 0 ]; then value=$current; else value=25%; fi
+                ;;
+        esac
+        ;;
+esac
+
+if ! brightness --quiet set "$value"; then
+    fail 'Cannot write the keyboard light. Check brightnessctl udev rules and input-group membership.'
+fi
+current=$(brightness get)
+maximum=$(brightness max)
+temporary=$(mktemp "$state_file.XXXXXX")
+trap 'rm -f "$temporary"' EXIT HUP INT TERM
+printf '%s\n' "$current" > "$temporary"
+mv -f "$temporary" "$state_file"
+
+# Restoring on login is quiet. Reloading Sway does not run this startup command.
+if [ "$action" != restore ]; then
+    percent=$(((current * 100 + maximum / 2) / maximum))
+    notify -h int:value:"$percent" \
+        -h string:x-canonical-private-synchronous:oldbook-keyboard-backlight \
+        'Keyboard backlight' "$percent%"
+fi

@@ -62,6 +62,7 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot |
 | Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback |
 | Brightness keys | Kernel backlight steps, with a clear notification if the seat lacks write permission |
+| Keyboard illumination keys (`F5` / `F6` on the MacBook) | Dim / brighten the keyboard by 10%, including fully off; also available while locked |
 | Click the panel audio icon | Open pavucontrol |
 | Click the notification glyph | Toggle the compact notification history card |
 | Command/Super + left click the artwork icon | Generate a new Space Ghost image and switch to it |
@@ -73,6 +74,15 @@ while the session is locked or inactive. It combines Sway bindings with relevant
 application profiles; profiles are useful baselines, not exhaustive shortcut lists.
 `oldbook-shortcuts status` reports its state. The default trigger remains Super,
 so Caps Lock retains its Escape behavior and notification indicator.
+
+The MacBook keyboard light uses the kernel's `applesmc` LED device
+`smc::kbd_backlight`; the existing `brightnessctl` udev rule and `input` group
+allow control without root. `oldbook-keyboard-backlight` accepts `up`, `down`,
+`toggle` and `restore`. It saves the chosen brightness (including off) under
+`~/.local/state/oldbook/keyboard-backlight` and restores it at Sway login; first
+use preserves an existing level or enables 25% brightness. Sway reloads do not
+reset it. With this MacBook's unchanged `hid_apple` setting `fnmode=3` (auto),
+`F5`/`F6` adjust the light and `Fn+F5`/`Fn+F6` remain application function keys.
 
 The artwork icon opens the gallery with left click, advances with right click,
 pauses with middle click, and scrolls previous/next. Its small

@@ -608,6 +608,9 @@ class ShortcutProvider:
                     ('oldbook-audio', 'mic-mute'): 'Toggle microphone mute',
                     ('oldbook-brightness', 'up'): 'Increase brightness',
                     ('oldbook-brightness', 'down'): 'Decrease brightness',
+                    ('oldbook-keyboard-backlight', 'up'): 'Increase keyboard backlight',
+                    ('oldbook-keyboard-backlight', 'down'): 'Decrease keyboard backlight',
+                    ('oldbook-keyboard-backlight', 'toggle'): 'Toggle keyboard backlight',
                 }
                 label = known_exec.get((executable, *action))
                 if label:

@@ -747,3 +747,13 @@ Concurrent changes subsequently mapped Strata to workspace 10 using the 0 key.
 The user clarification (actual workspace 0 versus workspace 10) and validation
 of those later edits are pending; the retained zero evidence does not validate
 those edits. No real logout/login cycle was performed.
+
+
+## MacBook keyboard backlight — 2026-09-07
+
+- Enabled at 64/255 (25%). Actual LED writes, saved-state restoration including
+  off, concurrent adjustments, and live Sway illumination-down/up dispatch
+  passed. Evidence: `verification/keyboard-backlight/`.
+- Physical F5/F6 presses, operation during an actual locked session, and
+  restoration after a new graphical login remain unverified. The existing
+  `hid_apple` Fn policy remains unchanged.
