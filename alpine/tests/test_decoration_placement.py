@@ -43,6 +43,77 @@ class DecorationPlacementTests(unittest.TestCase):
             'mode': 'window', 'edge': 'bottom', 'rect': floating['rect'],
             'square': False, 'window_id': 7})
 
+    def test_dropdown_focus_keeps_last_ordinary_window_context_and_geometry(self):
+        import decoration_actions
+        for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+            with self.subTest(app_id=app_id):
+                ordinary, console = view(7), view(8)
+                console['app_id'] = app_id
+                visible = workspace(2, floating=[ordinary, console], focus=[7, 8])
+                tree = {'nodes': [output('eDP-1', [visible])]}
+                before = self.model.output_placements(tree)['eDP-1']
+                visible['focus'] = [8, 7]
+                self.assertEqual(self.model.output_placements(tree)['eDP-1'], before)
+                self.assertEqual(decoration_actions.output_contexts(tree)['eDP-1']['id'], 7)
+                ordinary['rect']['x'] = 260
+                self.assertEqual(self.model.output_placements(tree)['eDP-1']['rect']['x'], 260)
+
+    def test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving(self):
+        import decoration_actions
+        console = dict(view(8), app_id='com.oldbook.dropdown')
+        wrapper = {'id': 18, 'type': 'floating_con', 'nodes': [console], 'focus': [8]}
+        visible = workspace(2, tiled=[view(4)], floating=[view(7), wrapper], focus=[18, 7, 4])
+        tree = {'nodes': [output('eDP-1', [visible])]}
+        self.assertEqual(self.model.output_placements(tree)['eDP-1']['window_id'], 7)
+        visible['focus'] = [4, 18, 7]
+        self.assertEqual(self.model.output_placements(tree)['eDP-1']['window_id'], 4)
+        self.assertEqual(self.model.output_placements(tree)['eDP-1']['mode'], 'workspace')
+        self.assertEqual(decoration_actions.output_contexts(tree)['eDP-1']['id'], 4)
+
+    def test_closed_last_ordinary_window_does_not_leave_stale_caption_target(self):
+        import decoration_actions
+        console = dict(view(8), app_id='com.oldbook.dropdown')
+        visible = workspace(2, floating=[console], focus=[8, 7])
+        tree = {'nodes': [output('eDP-1', [visible])]}
+        placement = self.model.output_placements(tree)['eDP-1']
+        self.assertEqual(placement['mode'], 'workspace')
+        self.assertIsNone(placement['window_id'])
+        self.assertIsNone(decoration_actions.output_contexts(tree)['eDP-1']['id'])
+
+    def test_similarly_named_terminals_remain_caption_targets(self):
+        import decoration_actions
+        for app_id in ('com.oldbook.monitor-notes', 'com.oldbook.dropdown-notes', 'ghostty'):
+            with self.subTest(app_id=app_id):
+                target = dict(view(8), app_id=app_id)
+                tree = {'nodes': [output('eDP-1', [workspace(2, floating=[target])])]}
+                self.assertEqual(self.model.output_placements(tree)['eDP-1']['window_id'], 8)
+                self.assertEqual(decoration_actions.output_contexts(tree)['eDP-1']['id'], 8)
+
+    def test_fullscreen_console_does_not_override_retained_floating_caption(self):
+        for mode in (1, 2):
+            for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+                with self.subTest(mode=mode, app_id=app_id):
+                    console = dict(view(8, fullscreen=mode), app_id=app_id)
+                    tree = {'nodes': [output('eDP-1', [workspace(
+                        2, floating=[view(7), console], focus=[8, 7])])]}
+                    placement = self.model.output_placements(tree, 'right')['eDP-1']
+                    self.assertEqual((placement['mode'], placement['edge'], placement['window_id']),
+                                     ('window', 'right', 7))
+
+    def test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings(self):
+        console = dict(view(8), app_id='com.oldbook.dropdown')
+        wrapper = {'id': 18, 'type': 'floating_con', 'fullscreen_mode': 2,
+                   'nodes': [console], 'focus': [8]}
+        ordinary = view(4)
+        visible = workspace(2, tiled=[ordinary], floating=[view(7), wrapper], focus=[18, 7, 4])
+        tree = {'nodes': [output('eDP-1', [visible])]}
+        placement = self.model.output_placements(tree, 'right')['eDP-1']
+        self.assertEqual((placement['mode'], placement['edge']), ('window', 'right'))
+        ordinary['fullscreen_mode'] = 1
+        placement = self.model.output_placements(tree, 'right')['eDP-1']
+        self.assertEqual((placement['mode'], placement['edge'], placement['square']),
+                         ('workspace', 'bottom', True))
+
     def test_attached_caption_tracks_move_and_resize_without_mutating_tree(self):
         floating = view(7)
         tree = {'nodes': [output('eDP-1', [workspace(2, floating=[floating])])]}

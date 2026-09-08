@@ -1,5 +1,5 @@
 """Choose attached or workspace captions from one immutable Sway tree snapshot."""
-from decoration import focused_child
+from decoration import IGNORED_CAPTION_APPS, caption_child, focused_child
 
 
 def descendants(node, floating=False):
@@ -19,7 +19,7 @@ def focused_window(workspace):
         floating = floating or node.get('type') == 'floating_con'
         if node.get('app_id') or node.get('window'):
             return node, floating
-        child = focused_child(node)
+        child = caption_child(node)
         floating = floating or any(child is candidate
                                    for candidate in node.get('floating_nodes', []))
         node = child
@@ -31,6 +31,9 @@ def fullscreen_containers(nodes, mode=None):
     return [(node, floating) for node, floating in nodes
             if node.get('type') not in ('root', 'output', 'workspace')
             and node.get('fullscreen_mode')
+            # A console or a wrapper containing only consoles has no caption.
+            and node.get('app_id') not in IGNORED_CAPTION_APPS
+            and (node.get('app_id') or node.get('window') or caption_child(node) is not None)
             and (mode is None or node['fullscreen_mode'] == mode)]
 
 

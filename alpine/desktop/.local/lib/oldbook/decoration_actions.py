@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 
-from decoration import focused_child
+from decoration import caption_child, focused_child
 
 BIN = Path.home() / '.local/bin'
 TERMINALS = ('foot', 'ghostty', 'kitty', 'alacritty', 'wezterm', 'xterm')
@@ -61,7 +61,7 @@ def output_contexts(tree):
                 context.update(id=node['id'], node=node, title=clean(node.get('name') or app_name(node)),
                                app=app_name(node), sticky=bool(node.get('sticky')))
                 break
-            child = focused_child(node)
+            child = caption_child(node)
             if child in node.get('floating_nodes', []):
                 context['floating'] = True
             if node.get('layout') in ('splith', 'splitv', 'tabbed', 'stacked'):

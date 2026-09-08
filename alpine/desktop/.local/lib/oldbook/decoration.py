@@ -7,6 +7,9 @@ import unicodedata
 
 
 SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7}
+IGNORED_CAPTION_APPS = frozenset((
+    'com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
+))
 
 
 def validate_settings(values):
@@ -85,6 +88,27 @@ def focused_child(node):
     by_id = {child.get('id'): child for child in children}
     return next((by_id[identifier] for identifier in node.get('focus', [])
                  if identifier in by_id), children[0] if children else None)
+
+
+def caption_child(node):
+    """Follow focus history past desktop drop-downs to an ordinary window.
+
+    Sway retains the previous child after a scratchpad takes focus. Filtering
+    each branch keeps caption geometry and actions on that live window without
+    retaining stale containers across closes or workspace changes.
+    """
+    children = node.get('nodes', []) + node.get('floating_nodes', [])
+    by_id = {child.get('id'): child for child in children}
+    ordered = [by_id[identifier] for identifier in node.get('focus', [])
+               if identifier in by_id]
+    ordered.extend(child for child in children if child not in ordered)
+    for child in ordered:
+        if child.get('app_id') or child.get('window'):
+            if child.get('app_id') not in IGNORED_CAPTION_APPS:
+                return child
+        elif caption_child(child) is not None:
+            return child
+    return None
 
 
 def focused_title(node):
