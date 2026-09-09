@@ -80,6 +80,46 @@ class DecorationMotionTests(unittest.TestCase):
                          motion.advance(0, 5, 100, 0.05))
         self.assertEqual(motion.advance(0, 5, 100, 0), (0, 5))
 
+    def test_a_settling_spring_overshoots_once_and_comes_to_rest_exactly(self):
+        """The landing a released strip makes, and the only place it is wanted.
+
+        A critically damped spring stops dead, which reads as the strip being
+        placed rather than arriving. Below one it passes the target and comes
+        back, and the rebound is a fraction of the distance travelled, so the
+        same number holds whatever the flight length.
+        """
+        for distance in (120.0, 400.0):
+            value = velocity = 0.0
+            peak = 0.0
+            for _ in range(600):
+                value, velocity = motion.advance(value, velocity, distance,
+                                                 1 / 120, response=0.28,
+                                                 damping=0.82)
+                peak = max(peak, value)
+            self.assertGreater(peak, distance, 'the landing did not overshoot')
+            self.assertLess(peak - distance, distance * 0.02)
+            self.assertEqual((value, velocity), (distance, 0.0))
+
+    def test_settling_and_critical_springs_agree_across_frame_rates(self):
+        def run(frequency, damping):
+            value = velocity = 0.0
+            samples = []
+            for frame in range(frequency // 2):
+                value, velocity = motion.advance(value, velocity, 300, 1 / frequency,
+                                                 damping=damping)
+                if (frame + 1) % (frequency // 60) == 0:
+                    samples.append(value)
+            return samples
+
+        for damping in (1.0, 0.82):
+            for first, second in zip(run(60, damping), run(120, damping)):
+                self.assertAlmostEqual(first, second, places=9)
+
+    def test_damping_outside_its_range_is_refused(self):
+        for damping in (0, -0.5, 1.5):
+            with self.subTest(damping=damping), self.assertRaises(ValueError):
+                motion.advance(0, 0, 10, 1 / 60, damping=damping)
+
     def test_opacity_uses_a_small_tolerance_and_settles_at_exact_target(self):
         value = velocity = 0.0
         for _ in range(120):
