@@ -53,8 +53,9 @@ built anywhere else is brought into the archive.
 
 Reaching a build host is the only part that needs a person. The desktop keeps no
 ssh key: remote agents use Tailscale SSH, so the far side must run
-`sudo tailscale up --ssh` and the tailnet policy must permit `oldbook` to reach
-it. As of 2026-09-08 neither host accepts a connection from `oldbook` —
+`sudo tailscale up --ssh` and the tailnet policy must permit `catbed` to reach
+it. As of 2026-09-08 neither host accepted a connection from this laptop, which
+was then named `oldbook` —
 `alienware` answers "tailnet policy does not permit you to SSH to this node" and
 `bak` refuses publickey authentication — so `remote-build build` reports both
 refusals and stops. It does not fall back to building here.
