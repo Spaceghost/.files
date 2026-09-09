@@ -45,40 +45,84 @@
 .control-center .notification-group,
 .control-center .notification-row,
 .control-center .notification-background { background: transparent; box-shadow: none; }
-
 /* ── The card ─────────────────────────────────────────────────────────────
-   Ground, corner, urgency rail and shadow. The rail is the only chrome that
-   changes with urgency, so a critical message reads at a glance without
-   shouting in a second colour. */
+   Restraint is the whole design. A dark, almost flat ground; one crisp accent
+   rail; and light that only ever kisses the rail rather than washing the card.
+   An earlier attempt bloomed the accent 26px inward and turned every card
+   olive -- glow spread must stay small or it stops being light and becomes a
+   stain. Every colour is a palette role, so this re-derives in any theme. */
 .notification {
-  background: rgba(40, 40, 40, 0.97);
+  background-color: alpha(#282828, 0.97);
+  background-image: linear-gradient(to bottom,
+                    alpha(#3c3836, 0.22) 0%, alpha(#1d2021, 0.14) 46%,
+                    alpha(#1d2021, 0.34) 100%);
   color: #ebdbb2;
-  margin: 8px;
-  padding: 12px 14px;
+  margin: 8px 10px;
+  padding: 13px 14px 13px 18px;
   border: none;
   border-left: 3px solid #fabd2f;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(29, 32, 33, 0.55);
-  transition: background 120ms ease-out, box-shadow 120ms ease-out;
+  border-radius: 13px;
+  box-shadow:
+    inset 5px 0 6px -7px alpha(#fabd2f, 0.75),    /* a kiss of light at the rail */
+    inset 0 1px 0 0 alpha(#fbf1c7, 0.08),         /* top hairline */
+    0 1px 0 0 alpha(#1d2021, 0.55),               /* a crisp base edge */
+    0 10px 26px -10px alpha(#1d2021, 0.85);
+  transition: background-color 150ms ease-out, box-shadow 150ms ease-out,
+              border-color 150ms ease-out;
 }
-.notification-row:hover .notification,
-.notification-row:focus .notification { background: #32302f; box-shadow: 0 12px 30px rgba(29, 32, 33, 0.72); }
-.notification-row:focus .notification { border-color: #fbf1c7; }
 
-/* Urgency. Low recedes, critical sits on a faintly warmed ground. */
+/* Hover lifts: the rail brightens, the shadow deepens, the ground warms one
+   step. The card must still read as the same card. */
+.notification-row:hover .notification {
+  background-color: alpha(#32302f, 0.98);
+  border-left-color: mix(#fabd2f, #fbf1c7, 0.45);
+  box-shadow:
+    inset 6px 0 8px -7px alpha(#fabd2f, 0.95),
+    inset 0 1px 0 0 alpha(#fbf1c7, 0.14),
+    0 1px 0 0 alpha(#1d2021, 0.55),
+    0 16px 34px -12px alpha(#1d2021, 0.92),
+    0 0 18px -8px alpha(#fabd2f, 0.30);
+}
+.notification-row:focus .notification { border-left-color: #fbf1c7; }
+
+/* ── Urgency: the rail, and only the rail ────────────────────────────────── */
 .notification.low { border-left-color: #504945; }
 .notification.low .summary { color: #ebdbb2; font-weight: normal; }
 .notification.normal { border-left-color: #fabd2f; }
-.notification.critical { border-left-color: #fb4934; background: rgba(50, 48, 47, 0.97); }
-.notification.critical .summary { color: #fb4934; }
-.notification-row:hover .notification.critical { background: #32302f; }
+.notification.critical {
+  border-left-color: #fb4934;
+  box-shadow:
+    inset 5px 0 6px -7px alpha(#fb4934, 0.8),
+    inset 0 1px 0 0 alpha(#fb4934, 0.14),
+    0 1px 0 0 alpha(#1d2021, 0.55),
+    0 10px 26px -10px alpha(#1d2021, 0.85);
+}
+.notification.critical .summary { color: mix(#fb4934, #fbf1c7, 0.35); }
+.notification-row:hover .notification.critical {
+  border-left-color: mix(#fb4934, #fbf1c7, 0.4);
+  box-shadow:
+    inset 6px 0 8px -7px alpha(#fb4934, 0.95),
+    inset 0 1px 0 0 alpha(#fb4934, 0.2),
+    0 1px 0 0 alpha(#1d2021, 0.55),
+    0 16px 34px -12px alpha(#1d2021, 0.92),
+    0 0 20px -8px alpha(#fb4934, 0.35);
+}
 
 /* Inside the card: the message, then who sent it and when. */
-.notification .summary { color: #fbf1c7; font-weight: bold; font-size: 13px; }
-.notification .body { color: #ebdbb2; font-size: 12px; }
+.notification .summary {
+  color: #fbf1c7; font-weight: bold; font-size: 13.5px;
+  margin-bottom: 1px;
+}
+.notification .body { color: alpha(#ebdbb2, 0.72); font-size: 12px; }
 .notification .time { color: #928374; font-size: 11px; }
-.notification .app-name { color: #928374; font-size: 10px; letter-spacing: 0.6px; }
-.notification .app-icon { color: #fabd2f; margin-right: 6px; }
+.notification .app-name {
+  color: alpha(#928374, 0.9); font-size: 9.5px;
+  letter-spacing: 1.2px; font-weight: bold;
+}
+.notification .app-icon {
+  color: #fabd2f; margin-right: 6px;
+  -gtk-icon-shadow: 0 1px 3px alpha(#1d2021, 0.8);
+}
 .notification .image, .notification .body-image { border-radius: 9px; margin-right: 10px; }
 .notification progressbar { margin-top: 8px; }
 .notification progressbar trough { background: #504945; border: none; border-radius: 8px; min-height: 6px; }
@@ -86,16 +130,24 @@
 
 /* Close: invisible until the pointer is on the card, red only on itself. */
 .notification .close-button {
-  background: transparent;
-  color: #282828;
+  background: alpha(#1d2021, 0.0);
+  color: alpha(#928374, 0.0);
   border: none;
-  border-radius: 8px;
-  margin: 2px;
-  padding: 2px 6px;
-  transition: background 120ms ease-out, color 120ms ease-out;
+  border-radius: 50%;
+  min-width: 24px; min-height: 24px;
+  margin: 1px 0 0 8px;
+  padding: 0;
+  transition: background 140ms ease-out, color 140ms ease-out;
 }
-.notification-row:hover .close-button { color: #928374; }
-.notification .close-button:hover { background: #fb4934; color: #1d2021; }
+.notification-row:hover .close-button {
+  background: alpha(#1d2021, 0.55);
+  color: alpha(#ebdbb2, 0.85);
+  box-shadow: inset 0 0 0 1px alpha(#fbf1c7, 0.10);
+}
+.notification .close-button:hover {
+  background: #fb4934; color: #1d2021;
+  box-shadow: 0 0 12px -3px alpha(#fb4934, 0.8);
+}
 
 /* Actions and inline reply. */
 .notification-action {
