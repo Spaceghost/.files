@@ -311,12 +311,23 @@ def notify_failure(phase, error, record, log=None):
     # The log wins over the exception. An exception has usually been through
     # several frames by the time it arrives and may have been flattened on the
     # way; the runner's own last words have not.
-    message = html.escape(log_reason(log) or str(error).strip() or 'No reason was recorded.')
+    # Escape only what would be read as markup. The full escape turns every
+    # apostrophe into &#x27;, and a usage-limit message that says "You&#x27;ve"
+    # is a worse thing to read than the one it replaced.
+    message = html.escape(log_reason(log) or str(error).strip() or 'No reason was recorded.',
+                          quote=False)
     links = remember_failure(record, log)
-    if links:
-        message += '\n\nThe whole run: ' + html.escape(
-            str(links.get('.jsonl') or links.get('.json')))
-    notify(titles.get(phase, 'Generation stopped'), message, urgency='critical')
+    stable = links.get('.jsonl') or links.get('.json')
+    if stable:
+        message += '\n\nThe whole run: ' + html.escape(str(stable), quote=False)
+    # The notification carries a button, which means whoever sends it has to
+    # wait for the click; that waiting is handed to a detached child so this
+    # process can get on with failing. If it cannot be spawned at all, the
+    # plain notification still goes out -- the reason matters more than the
+    # button.
+    from failure_notice import announce
+    if not announce(titles.get(phase, 'Generation stopped'), message, stable):
+        notify(titles.get(phase, 'Generation stopped'), message, urgency='critical')
 
 
 def notify_theme_complete(entry, metadata):
