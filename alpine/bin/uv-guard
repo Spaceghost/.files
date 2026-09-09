@@ -30,10 +30,14 @@ MANIFEST = REPO / 'packages' / 'uv-protected.json'
 # followed by a digit is deliberate: the digit form silently classified
 # scenefx-dev, waybar-openrc, opensnitch-ui and swaylock-zsh-completion as
 # disposable cache, which is exactly the mistake this file exists to prevent.
-LOCAL_STEMS = ('conky', 'oldbook-desktop', 'oldbook-radio-runtime',
+# Only packages this repository actually builds: each is either Jack's own or
+# carries local patches. Stock Alpine packages are cache even when they were
+# built here, because `apk` can fetch them again -- conky, swaylock, swaylockd
+# and swaybar were all confirmed present in the configured repositories at the
+# exact versions held, and were dropped on that evidence.
+LOCAL_STEMS = ('oldbook-desktop', 'oldbook-radio-runtime',
                'oldbook-swaylock-effects', 'oldbook-waybar-art', 'openresolv',
-               'opensnitch', 'scenefx', 'superhold', 'swayfx', 'swaylock',
-               'swaylockd', 'swaybar', 'waybar')
+               'opensnitch', 'scenefx', 'superhold', 'swayfx', 'waybar')
 
 KEEP_SUFFIXES = ('.tar.gz', '.tar.xz', '.tar.bz2', '.zip', '.patch',
                  '.pub', '.xpi', '.whl', '.py', '.json', '.md', '.log')
