@@ -40,6 +40,7 @@ LADDER = {
     'letterpress': 'battery-low',
     'terminal-progress': 'mains',
     'window-context-detail': 'battery-low',
+    'desktop-edges': 'battery-low',
     'reading-cards': 'battery-low',
     'rice-tour': 'battery-low',
     'screen-corners': 'battery-low',

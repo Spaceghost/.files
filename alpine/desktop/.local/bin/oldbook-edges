@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+"""Draw one static effect in the space no window and no reading card is using.
+
+The backdrop, at its smallest honest size. A Qt Quick surface on the BOTTOM
+layer, one per output, painting the signal margin -- dial graduations in the
+free cells of the region `oldbook-space` publishes. It never animates, it takes
+no input and it reserves nothing, so killing it leaves the desktop exactly as it
+was.
+
+Off unless asked for. `oldbook-edges on` writes the preference and starts it;
+`oldbook-edges off` stops it and puts the preference back. The session starts it
+only when the preference is already there, so installing this changes nothing.
+"""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import desktop_space
+import edges_surface
+import power_source
+
+
+def lock_path():
+    return desktop_space.runtime_directory() / f'edges-{desktop_space.session_key()}.lock'
+
+
+def running():
+    """The owner's pid, or None when no surface is mapped for this session."""
+    path = lock_path()
+    try:
+        with path.open('r+') as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                try:
+                    return int(lock.read().strip())
+                except ValueError:
+                    return -1
+        return None
+    except OSError:
+        return None
+
+
+def write_preference(**changes):
+    path = edges_surface.preferences_path()
+    path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    try:
+        record = json.loads(path.read_text())
+        record = record if isinstance(record, dict) else {}
+    except (OSError, ValueError):
+        record = {}
+    record.update(changes)
+    temporary = path.with_name(f'{path.name}.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(record, indent=2) + '\n')
+    temporary.replace(path)
+    return record
+
+
+def run():
+    """Hold the session's single ownership and stay until signalled."""
+    path = lock_path()
+    lock = path.open('a+')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        # SESSION-OWNERSHIP: a reload must not stack a second surface.
+        return 0
+    lock.seek(0)
+    lock.truncate()
+    lock.write(f'{os.getpid()}\n')
+    lock.flush()
+    try:
+        return edges_surface.run()
+    finally:
+        lock.close()
+        path.unlink(missing_ok=True)
+
+
+def start(force=False):
+    settings = edges_surface.preferences()
+    if not force and not settings['enabled']:
+        return 0
+    if running() is not None:
+        return 0
+    subprocess.Popen([sys.executable, os.path.abspath(__file__), 'run'],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    return 0
+
+
+def stop():
+    owner = running()
+    if owner is None:
+        return 0
+    if owner > 0:
+        try:
+            os.kill(owner, signal.SIGTERM)
+        except OSError as error:
+            print(f'oldbook-edges: could not stop {owner} ({error})', file=sys.stderr)
+            return 1
+    return 0
+
+
+def status():
+    settings = edges_surface.preferences()
+    owner = running()
+    print(f"preference  {'on' if settings['enabled'] else 'off'} "
+          f"({edges_surface.preferences_path()})")
+    print(f"effect      signal-margin {'on' if settings['signal-margin'] else 'off'}")
+    print(f"surface     {'running, pid ' + str(owner) if owner else 'not running'}")
+    print(f"ladder      {edges_surface.LADDER_EFFECT} — "
+          f"{'allowed' if power_source.allows(edges_surface.LADDER_EFFECT) else 'shed'} at "
+          f"{power_source.posture()}"
+          + ('' if edges_surface.LADDER_EFFECT in power_source.LADDER
+             else ' (unregistered, so allowed everywhere)'))
+    print(f"region      {len(desktop_space.published().get('regions', []))} output(s); "
+          f"{', '.join(desktop_space.subscribers()) or 'no subscriber'}")
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('on', help='turn the backdrop on and start it')
+    commands.add_parser('off', help='stop the backdrop and turn the preference off')
+    started = commands.add_parser('start', help='start it if the preference says so')
+    started.add_argument('--force', action='store_true', help='start regardless')
+    commands.add_parser('stop', help='stop the running surface')
+    commands.add_parser('run', help='run the surface in the foreground')
+    commands.add_parser('status', help='report the preference, the surface and the ladder')
+    arguments = parser.parse_args(argv)
+    if arguments.command == 'on':
+        write_preference(enabled=True)
+        return start()
+    if arguments.command == 'off':
+        write_preference(enabled=False)
+        return stop()
+    if arguments.command == 'start':
+        return start(arguments.force)
+    if arguments.command == 'stop':
+        return stop()
+    if arguments.command == 'run':
+        return run()
+    return status()
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-edges: {error}', file=sys.stderr)
+        sys.exit(1)
