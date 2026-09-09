@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify caption mode changes without entry fades or duplicate surfaces.
+"""Verify caption mode changes fly one surface instead of replacing it.
 
 Uses passive GTK callbacks and persistent Sway IPC in a private headless session.
 Timing reflects the test host and headless compositor, not physical scanout.
@@ -56,12 +56,19 @@ if len(sys.argv) > 1 and sys.argv[1] == 'observe':
         def tick(window, clock, *data):
             result = callback(window, clock, *data)
             owner = getattr(callback, '__self__', None)
+            if not hasattr(owner, 'alpha'):
+                # The strip is no longer the only thing asking for frames: a
+                # landing puts a ripple on its own surface, and that is not a
+                # caption and has none of these to report.
+                return result
+            rect = getattr(owner, 'motion_rect', None)
+            target = getattr(owner, 'motion_target', None)
             record(
                 'frame', window,
                 alpha=owner.alpha,
                 retiring=owner.retiring,
-                rect=owner.motion_rect.copy() if owner.motion_rect else None,
-                target=owner.motion_target.copy() if owner.motion_target else None,
+                rect=rect.copy() if rect else None,
+                target=target.copy() if target else None,
             )
             return result
 
@@ -270,7 +277,12 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
                         rect=sample['window'],
                     ))
                     prev = sample['window']
-            events = [f for f in frames if start <= f['t'] <= start + 1.3]
+            # Captions only. The strip is no longer the sole surface this
+            # daemon owns: its band holds the reservation and a landing puts a
+            # ripple on the screen, and neither is the thing being measured.
+            events = [f for f in frames if start <= f['t'] <= start + 1.3
+                      and f['name'].startswith('workspace-decoration-')
+                      and f['name'] != 'workspace-decoration-band']
             first_top = next(
                 (s for s in samples
                  if any(c['layer'] == 'top' for c in s['captions'])),
@@ -325,6 +337,11 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
                     None,
                 ),
                 motion_targets=[],
+                # How many distinct rectangles the strip was seen wearing. A
+                # replacement shows two -- where it was and where it went. A
+                # flight shows the whole crossing.
+                travelled=len({tuple(sorted(caption['rect'].items()))
+                               for sample in samples for caption in sample['captions']}),
             )
             for f in alpha_events:
                 if f['target'] and (
@@ -342,11 +359,17 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
         ), indent=2) + '\n')
         print(json.dumps(summaries, indent=2))
         for summary in summaries:
-            assert summary['maps'] and all(
-                item['alpha'] == 1 for item in summary['maps']
-            ), summary
+            # A mode change is flown by the strip already on screen. There is
+            # no second surface to map, so the old assertion -- that the
+            # replacement arrived opaque rather than fading in -- is now made
+            # by there being no replacement to arrive. Nothing maps, nothing
+            # unmaps, and one caption exists throughout.
+            assert not summary['maps'], summary
             assert summary['overlap_samples'] == 0, summary
             assert summary['stable_attachment_ms'] is not None, summary
+            # And it crossed rather than jumped. A cut would show the two
+            # endpoints and nothing between them.
+            assert summary['travelled'] >= 8, summary
     finally:
         if connection:
             connection.close()

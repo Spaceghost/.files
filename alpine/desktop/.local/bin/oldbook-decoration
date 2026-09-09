@@ -24,6 +24,7 @@ from decoration_actions import (application_items, execute, launchers, menu_item
                                 output_contexts, terminal_source, window_item, window_items)
 import decoration_reserve
 import power_source
+import ripple
 import window_context
 from overlay_theme import THEMES, read_palette
 from decoration_placement import band_corrections, output_placements
@@ -35,6 +36,20 @@ from decoration_watch import TreeWatch
 # and no faster than the repeat interval if something keeps reasserting it.
 BAND_SETTLE = 0.5
 BAND_REPEAT = 1.5
+
+# A strip released from a window, or grabbing one, crosses the screen rather
+# than tracking it. The move is slower than window-following on purpose -- far
+# enough to be read as travel -- and damped below one so it passes the band and
+# settles back into it, which is what makes the arrival read as a landing
+# instead of a stop. 0.82 rebounds about one part in ninety of the distance:
+# four pixels on a four hundred pixel flight.
+FLIGHT_RESPONSE = 0.18
+FLIGHT_DAMPING = 0.82
+# Half a pixel is under the rounding the surface is placed with, so a flight is
+# over once it is inside one. The default fiftieth is right for a strip tracking
+# a dragged window, where settling exactly matters more than settling soon; a
+# rebound chased to that precision spends a third of a second inaudibly small.
+FLIGHT_TOLERANCE = 0.5
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -217,6 +232,12 @@ def daemon():
             self.frame_time = None
             self.tick_id = 0
             self.retiring = False
+            # A mode change flies rather than cuts: one surface, positioned
+            # freely from the top-left corner for the length of the move, then
+            # handed back to the anchors that own it wherever it lands.
+            self.flying = False
+            self.band_request = None
+            self.output_rect = None
             self.animations = Gtk.Settings.get_default().get_property('gtk-enable-animations')
             self.alpha = 0.0 if self.animations and animate_entry else 1.0
             self.alpha_velocity = 0.0
@@ -349,6 +370,11 @@ def daemon():
             """
             if self.attachment_mode == 'window':
                 return
+            self.band_request = (thickness, matching, output_rect, usable_rect)
+            if self.flying:
+                # In flight the strip owns its own coordinates; the band is
+                # applied again the moment it lands.
+                return
             zone, margin = decoration_reserve.caption_offset(thickness, matching)
             insets = None
             if margin < 0:
@@ -441,7 +467,7 @@ def daemon():
             window for us; GTK4's reads the window's default size instead, so
             the measurement belongs here.
             """
-            if self.attachment_mode == 'window':
+            if self.attachment_mode == 'window' or self.flying:
                 return
             # Both numbers are given outright. gtk4-layer-shell requests the
             # window's default size verbatim, and a -1 there is not a size the
@@ -466,6 +492,111 @@ def daemon():
             self.window.set_size_request(-1 if self.edge == 'bottom' else size[0],
                                          size[1] if self.edge == 'bottom' else -1)
             self.window.set_default_size(*size)
+
+        def band_insets(self):
+            """The margins the anchored placement is currently using."""
+            request = self.band_request
+            insets = None
+            if request is not None:
+                thickness, matching, output_rect, usable_rect = request
+                _, margin = decoration_reserve.caption_offset(thickness, matching)
+                if margin < 0 and output_rect and usable_rect:
+                    insets = decoration_reserve.caption_insets(
+                        output_rect, usable_rect, self.edge, thickness, matching)
+            if insets is None:
+                insets = {side: decoration_reserve.EDGE_MARGIN
+                          for side in ('TOP', 'BOTTOM', 'LEFT', 'RIGHT')}
+            return insets
+
+        def workspace_extent(self, output_rect):
+            """Where an anchored strip sits, in the free coordinates a flight uses.
+
+            Anchored placement is the compositor's answer to this question and
+            a strip in flight is positioned by margin from the top-left corner,
+            so for the length of the move the answer has to be worked out here
+            instead of asked for.
+            """
+            insets = self.band_insets()
+            width = max(1, output_rect.get('width', 0))
+            height = max(1, output_rect.get('height', 0))
+            if self.edge == 'bottom':
+                thickness = max(1, self.shell.measure(Gtk.Orientation.VERTICAL, -1)[1])
+                span = max(1, width - insets['LEFT'] - insets['RIGHT'])
+                return dict(x=insets['LEFT'], y=height - insets['BOTTOM'] - thickness,
+                            width=span, height=thickness)
+            thickness = max(1, self.shell.measure(Gtk.Orientation.HORIZONTAL, -1)[1])
+            span = max(1, height - insets['TOP'] - insets['BOTTOM'])
+            return dict(x=width - insets['RIGHT'] - thickness, y=insets['TOP'],
+                        width=thickness, height=span)
+
+        def anchor_free(self):
+            """Hold the surface by one corner so a rectangle can be sprung."""
+            for name in ('TOP', 'LEFT', 'BOTTOM', 'RIGHT'):
+                side = getattr(Gtk4LayerShell.Edge, name)
+                Gtk4LayerShell.set_anchor(self.window, side, name in ('TOP', 'LEFT'))
+                Gtk4LayerShell.set_margin(self.window, side, 0)
+            Gtk4LayerShell.set_exclusive_zone(self.window, -1)
+
+        def anchor_band(self):
+            """Give the edge back to the compositor once the strip has landed."""
+            for name in ('TOP', 'LEFT', 'BOTTOM', 'RIGHT'):
+                side = getattr(Gtk4LayerShell.Edge, name)
+                Gtk4LayerShell.set_anchor(
+                    self.window, side, name in decoration_reserve.band_anchors(self.edge))
+                Gtk4LayerShell.set_margin(self.window, side, decoration_reserve.EDGE_MARGIN)
+            self.band = None
+            request = self.band_request
+            if request is not None:
+                self.set_band(*request)
+
+        def begin_flight(self, placement, output_rect):
+            """Carry one strip from where it is to where its new mode puts it.
+
+            Attaching and detaching used to be a cut: the old caption was
+            destroyed and a new one built at the destination, because
+            crossfading two surfaces leaves the old one behind while the new
+            one catches up. One surface has neither problem. It is held by its
+            top-left corner for the length of the move -- the coordinates an
+            attached strip already lives in -- and handed back to the anchors
+            at the far end.
+            """
+            departure = self.motion_rect
+            if departure is None or self.attachment_mode != 'window':
+                departure = self.workspace_extent(output_rect)
+            attached = placement['mode'] == 'window'
+            self.attachment_mode = placement['mode']
+            self.flying = True
+            self.previous_geometry = None
+            self.previous_display = None
+            # The seam belongs to the mode, not to the strip: attached along
+            # the bottom the caption climbs over the arc the compositor clipped
+            # from its window's corners, and docked it has no seam at all.
+            # Clearing the remembered style makes restyle() work that out again
+            # for the mode being flown to, instead of carrying the old one
+            # across and landing the wrong height.
+            self.previous_style = None
+            Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.TOP if attached
+                                     else Gtk4LayerShell.Layer.OVERLAY)
+            self.anchor_free()
+            self.motion_rect = dict(departure)
+            self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
+            if not attached:
+                self.motion_target = self.workspace_extent(output_rect)
+            self.frame_time = None
+            self.render_geometry()
+            self.animate()
+
+        def land(self):
+            """Hand the edge back, now the strip has arrived and settled."""
+            self.flying = False
+            if self.attachment_mode == 'window':
+                # Taking hold of a window is a grab, not an impact. Nothing
+                # struck anything, so nothing rings.
+                return
+            self.anchor_band()
+            self.content_size = None
+            self.size_to_content()
+            strike(self)
 
         def attached_extent(self, rect):
             """The size an attached strip takes for the window it decorates.
@@ -602,8 +733,13 @@ def daemon():
             if self.motion_target is not None and not self.retiring:
                 self.motion_rect, self.motion_velocity, settled = advance_rect(
                     self.motion_rect, self.motion_velocity, self.motion_target,
-                    elapsed, response=0.045)
+                    elapsed,
+                    response=FLIGHT_RESPONSE if self.flying else 0.045,
+                    tolerance=FLIGHT_TOLERANCE if self.flying else 0.05,
+                    damping=FLIGHT_DAMPING if self.flying else 1.0)
                 self.render_geometry()
+                if settled and self.flying:
+                    self.land()
             if not self.breathe(elapsed):
                 settled = False
             if settled and self.alpha == target_alpha:
@@ -868,6 +1004,7 @@ def daemon():
             square = placement['square']
             self.context = dict(context, edge=self.edge)
             self.tree = tree
+            self.output_rect = dict(output_rect)
             node = context.get('node') or {}
             terminal = terminal_source(node)
             # The strip belongs to the window it decorates, so it is as
@@ -951,6 +1088,12 @@ def daemon():
             else:
                 self.show_caption(parts)
             self.size_to_content()
+            if self.flying and self.attachment_mode != 'window':
+                # Re-aimed now the seam and the controls are those of the mode
+                # being flown to. begin_flight has to pick a target before any
+                # of that is known, and a strip aiming at last mode's thickness
+                # would arrive and then jump.
+                self.motion_target = self.workspace_extent(output_rect)
             self.place(placement, output_rect)
             self.window.present()
             self.animate()
@@ -1131,24 +1274,27 @@ def daemon():
                         if node.get('type') == 'output' and 'rect' in node}
         monitors = {monitor.get_connector(): monitor
                     for monitor in display.get_monitors() if monitor.get_connector()}
-        immediate = set()
         for name in list(captions):
             placement = placements.get(name)
-            if (name not in monitors or placement is None or captions[name].edge != placement['edge']
-                    or captions[name].attachment_mode != placement['mode']
-                    or captions[name].monitor != monitors[name]):
+            caption = captions[name]
+            if (name in monitors and placement is not None
+                    and caption.monitor == monitors[name]
+                    and caption.edge == placement['edge']
+                    and caption.attachment_mode != placement['mode']):
+                # Attaching and detaching are the same strip in two places, so
+                # it travels between them rather than being replaced. Only a
+                # mode change on the same edge and output can be flown; an edge
+                # or output change is a different strip in a different place.
+                caption.begin_flight(placement, output_rects.get(name, {}))
+                continue
+            if (name not in monitors or placement is None or caption.edge != placement['edge']
+                    or caption.attachment_mode != placement['mode']
+                    or caption.monitor != monitors[name]):
                 previous = captions.pop(name)
                 for old in tuple(retired):
                     if old.monitor == previous.monitor:
                         old.destroy()
-                if placement is not None and previous.attachment_mode != placement['mode']:
-                    # Tile/float and fullscreen changes are discrete compositor
-                    # moves. Crossfading leaves the old strip behind while the
-                    # new caption catches up. Hand off like a focus change.
-                    previous.destroy()
-                    immediate.add(name)
-                else:
-                    previous.retire()
+                previous.retire()
         for name, monitor in monitors.items():
             placement = placements.get(name)
             if placement is None:
@@ -1162,7 +1308,10 @@ def daemon():
                 # surface while keeping its prepared controls and stylesheet.
                 captions[name] = caption.handoff(placement)
             if name not in captions:
-                captions[name] = Caption(monitor, placement, animate_entry=name not in immediate)
+                # Every caption built here is genuinely new -- a fresh output,
+                # or an edge change -- and fades in. A mode change no longer
+                # reaches this point: that strip already exists and is flying.
+                captions[name] = Caption(monitor, placement)
         # The band is settled before the captions draw, so a new caption's first
         # frame already sits inside it, and again afterwards in case an
         # appearance change made the caption a different size.
@@ -1225,6 +1374,64 @@ def daemon():
             intruders.pop(identity, None)
         if commands and power_source.allows('decoration-band-guard'):
             launch(['swaymsg', '-q', '; '.join(commands)])
+
+    # One wave per output at a time. A second strike while the first is still
+    # crossing would photograph the first and refract a refraction.
+    ripples = {}
+
+    def strike(caption):
+        """Answer a landing in the band with one ring across the lower screen.
+
+        The photograph is taken on a worker thread. `grim` costs tens of
+        milliseconds, the strip has only just come to rest, and paying for it
+        on the main loop would stall the very frame the landing finished on.
+        """
+        output_rect = caption.output_rect
+        name = caption.monitor.get_connector() if caption.monitor is not None else None
+        rect = caption.motion_target or caption.motion_rect
+        if (not output_rect or not name or rect is None or name in ripples
+                or not ripple.allowed(animations=caption.animations)):
+            return
+        # Layer-shell margins are measured from the output, so everything here
+        # is in the output's own coordinates rather than the compositor's.
+        local = {'x': 0, 'y': 0, 'width': output_rect.get('width', 0),
+                 'height': output_rect.get('height', 0)}
+        area = ripple.region(local, caption.edge)
+        point = ripple.origin({key: rect[key] for key in ('x', 'y', 'width', 'height')},
+                              area)
+        monitor = caption.monitor
+        ripples[name] = True
+        photograph = STATE / ('ripple-' + re.sub(r'[^A-Za-z0-9_-]', '_', name) + '.ppm')
+
+        def release():
+            ripples.pop(name, None)
+            return False
+
+        def taken(pixels, size):
+            if stop.is_set():
+                return release()
+            try:
+                ripple.Ripple(monitor, area, point, pixels, size, on_done=release).start()
+            except Exception as error:
+                print('ripple: ' + type(error).__name__ + ': ' + str(error), file=sys.stderr)
+                release()
+            return False
+
+        def photograph_output():
+            try:
+                ripple.capture(name, photograph)
+                data = photograph.read_bytes()
+                width, height, offset = ripple.parse_ppm(data)
+                pixels, span, thickness = ripple.crop(data, offset, width, height, area)
+            except Exception as error:
+                print('ripple capture: ' + type(error).__name__, file=sys.stderr)
+                GLib.idle_add(release)
+                return
+            finally:
+                photograph.unlink(missing_ok=True)
+            GLib.idle_add(taken, pixels, (span, thickness))
+
+        threading.Thread(target=photograph_output, daemon=True).start()
 
     def usable_areas(tree):
         """What each output has left after every exclusive zone on it.
@@ -1328,6 +1535,25 @@ def daemon():
         graphics_primer = warm_graphics()
     except Exception as error:
         print('decoration graphics warmup:', error, file=sys.stderr)
+    # The wave has its own first-use cost -- the GL context an area needs and
+    # the program it runs -- and its whole job is to answer a landing on the
+    # next frame. It is paid offscreen rather than by the first strip to dock,
+    # but not during start-up. An idle at login is not idle: the pointer is
+    # already moving, the first captions are being placed, and half a second
+    # spent building a graphics context there is half a second in which the
+    # strip does not answer. It is paid once the session has settled instead,
+    # which is long before anything is dragged out of a window, and a landing
+    # inside the first few seconds simply pays for itself.
+    ripple_primer = {}
+
+    def warm_ripple():
+        try:
+            ripple_primer['keeper'] = ripple.warm()
+        except Exception as error:
+            print('decoration ripple warmup:', error, file=sys.stderr)
+        return False
+
+    GLib.timeout_add_seconds(6, warm_ripple)
     # Realization and the first draw create driver worker pools that did not
     # exist at Gtk.init(). Promote those threads after warming too.
     request_priority()
@@ -1344,6 +1570,8 @@ def daemon():
             band.destroy()
         if graphics_primer is not None:
             graphics_primer.close()
+        if ripple_primer.get('keeper') is not None:
+            ripple_primer['keeper'].close()
         guard.close()
     return 0
 

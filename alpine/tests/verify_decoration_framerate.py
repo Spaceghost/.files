@@ -81,6 +81,9 @@ def observe_helper(helper, destination):
             clock = widget.get_frame_clock()
             draw_started = None
             owner = getattr(callback, '__self__', None)
+            if owner is not None and not hasattr(owner, 'motion_rect'):
+                # A ripple asks for frames too, and is not a caption.
+                owner = None
             if owner is not None and hasattr(owner, 'update'):
                 original_update = owner.update
 
