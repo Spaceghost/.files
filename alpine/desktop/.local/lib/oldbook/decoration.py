@@ -12,6 +12,25 @@ OPACITY_FLOOR = 0.2
 IGNORED_CAPTION_APPS = frozenset((
     'com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
 ))
+# A picture-in-picture window is a video parked on the desktop to keep watching
+# while doing something else. It is deliberately small, its title says nothing
+# worth reading, and a caption across it covers the one thing it exists to show.
+PICTURE_IN_PICTURE_APPS = frozenset(('mpv', 'io.mpv.Mpv', 'oldbook-youtube'))
+# Firefox names its picture-in-picture window exactly this, and its main window
+# always carries the site and the browser too, so an exact match cannot catch a
+# page that merely happens to be about the feature.
+PICTURE_IN_PICTURE_TITLES = frozenset(('picture-in-picture', 'picture in picture'))
+
+
+def picture_in_picture(node):
+    if node.get('app_id') in PICTURE_IN_PICTURE_APPS:
+        return True
+    return str(node.get('name') or '').strip().casefold() in PICTURE_IN_PICTURE_TITLES
+
+
+def ignored_caption(node):
+    """Windows the strip must not attach itself to."""
+    return node.get('app_id') in IGNORED_CAPTION_APPS or picture_in_picture(node)
 
 
 def validate_settings(values):
@@ -108,15 +127,25 @@ def seam_overlap(mode, edge, radius):
     return window_radius(radius) if mode == 'window' and edge == 'bottom' else 0
 
 
-def corner_radii(corner_radius, square, merged):
+def corner_radii(corner_radius, square, merged, window_radius=None):
     """(top, bottom) corner radius for the strip itself.
 
-    A fullscreen tiled caption is square all round, as it has always been. A
-    caption merged into the window above it is square where the two meet and
-    keeps the saved rounding where the pair ends.
+    A fullscreen tiled caption is square all round, as it has always been.
+
+    Merged into the window above it, the strip is no longer its own object: the
+    two are one shape, square where they meet and rounded only where the pair
+    ends. So the bottom takes the *window's* radius rather than the strip's own
+    saved one. Keeping the saved value there rounded the top of the assembly at
+    the compositor's radius and the bottom at the strip's -- 22 against 7 on
+    this desktop -- which reads as a card that has been cut off square rather
+    than one shape. Unmerged, the strip is its own object again and keeps its
+    own rounding.
     """
     radius = 0 if square else max(0, int(corner_radius))
-    return (0 if merged else radius), radius
+    if square or not merged:
+        return (0 if merged else radius), radius
+    outer = radius if window_radius is None else max(0, int(window_radius))
+    return 0, outer
 
 
 def save_settings(path, values, legacy_position=None):
@@ -188,7 +217,7 @@ def caption_child(node):
     ordered.extend(child for child in children if child not in ordered)
     for child in ordered:
         if child.get('app_id') or child.get('window'):
-            if child.get('app_id') not in IGNORED_CAPTION_APPS:
+            if not ignored_caption(child):
                 return child
         elif caption_child(child) is not None:
             return child

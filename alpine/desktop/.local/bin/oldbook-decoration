@@ -623,7 +623,8 @@ def daemon():
             # window's clipped corners filled with the caption's own first-row
             # colour so the join has no seam, no gap and no second edge.
             seam = seam_overlap(self.attachment_mode, self.edge, window_corner)
-            top, radius = corner_radii(settings['corner_radius'], square, bool(seam))
+            top, radius = corner_radii(settings['corner_radius'], square,
+                                      bool(seam), window_corner)
             self.fill = components(colors['surface'], min(1, opacity + .16))
             if seam != self.seam:
                 self.seam = seam

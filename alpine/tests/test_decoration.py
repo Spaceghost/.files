@@ -173,6 +173,9 @@ class DecorationTests(unittest.TestCase):
         self.assertEqual(self.model.window_radius(400), self.model.CORNER_LIMIT)
 
     def test_merged_corners_are_square_only_where_the_two_surfaces_meet(self):
+        # Merged, the pair is one shape: the bottom takes the window's radius
+        # so the assembly is not rounded 22 at the top and 6 at the bottom.
+        self.assertEqual(self.model.corner_radii(6, False, True, 22), (0, 22))
         self.assertEqual(self.model.corner_radii(6, False, True), (0, 6))
         self.assertEqual(self.model.corner_radii(6, False, False), (6, 6))
         # Fullscreen tiled chrome stays square all round, as it always was.
