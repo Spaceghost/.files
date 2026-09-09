@@ -58,6 +58,14 @@ def terminal(stream=None, **keywords):
     return m.Terminal(Screen() if stream is None else stream, **keywords)
 
 
+def ascii_terminal(**keywords):
+    """A terminal that cannot show the drawing glyphs, so the understudies run."""
+    stream = Screen()
+    stream.encoding = 'ANSI_X3.4-1968'
+    keywords.setdefault('environ', {'TERM': 'foot', 'LANG': 'C'})
+    return probe(stream, **keywords)
+
+
 def clock():
     """A hand-wound clock, so frame budgets are decided rather than raced."""
     now = [0.0]
@@ -441,6 +449,208 @@ class Steps(unittest.TestCase):
             for _ in range(50):
                 tick.advance(1.0)
         self.assertEqual(frames(stream.getvalue()), ['  ▖ waiting', '  + waiting'])
+
+
+class Scaling(unittest.TestCase):
+    """Where a reading lands on a small scale, and what a flat run means."""
+
+    def test_readings_spread_across_the_whole_scale(self):
+        self.assertEqual(m.scale([0, 25, 50, 75, 100], low=0, high=100, steps=8),
+                         [0, 2, 4, 6, 7])
+
+    def test_a_series_with_no_spread_reads_as_steady_not_as_empty(self):
+        # Sending it to the bottom would claim nothing happened and to the top
+        # that it was at maximum; the data says neither.
+        self.assertEqual(m.scale([50] * 4, steps=8), [4, 4, 4, 4])
+
+    def test_readings_outside_the_declared_bounds_are_clamped(self):
+        self.assertEqual(m.scale([-40, 250], low=0, high=100, steps=8), [0, 7])
+
+    def test_bounds_default_to_the_extremes_of_what_was_measured(self):
+        self.assertEqual(m.scale([10, 20], steps=8), [0, 7])
+
+    def test_nothing_measured_draws_nothing(self):
+        self.assertEqual(m.scale([], steps=8), [])
+
+
+class LevelRendering(unittest.TestCase):
+    """The shared ramp: one cell a sample, eight heights."""
+
+    def test_one_cell_carries_one_sample(self):
+        self.assertEqual(m.render_levels([0, 50, 100], low=0, high=100), '▁▅█')
+
+    def test_the_ramp_is_the_one_the_audio_meter_already_speaks(self):
+        # oldbook-cava-bar owned this ramp first; the point of naming it in the
+        # library is that the visualiser and the meters cannot drift apart.
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-cava-bar').read_text()
+        self.assertIn("GLYPHS = '" + m.LEVELS + "'", source)
+
+    def test_a_terminal_without_the_glyphs_still_gets_a_ramp(self):
+        self.assertEqual(m.render_levels([0, 100], low=0, high=100, ramp=m.ASCII_LEVELS), '.@')
+
+
+class SparklineRendering(unittest.TestCase):
+    """Braille: two samples a cell, four dot rows each."""
+
+    def test_two_samples_share_one_cell(self):
+        self.assertEqual(len(m.render_sparkline(range(20), low=0, high=19)), 10)
+
+    def test_an_odd_sample_leaves_a_half_filled_cell_rather_than_inventing_one(self):
+        self.assertEqual(len(m.render_sparkline([1, 2, 3], low=0, high=3)), 2)
+
+    def test_every_sample_lights_at_least_the_bottom_dot(self):
+        # A trace with gaps in it reads as broken instrumentation rather than
+        # as a low reading, so the floor of the range still draws a mark.
+        self.assertEqual(m.render_sparkline([0, 0], low=0, high=100), '⣀')
+
+    def test_the_top_of_the_range_fills_the_cell(self):
+        self.assertEqual(m.render_sparkline([100, 100], low=0, high=100), '⣿')
+
+    def test_nothing_measured_draws_nothing(self):
+        self.assertEqual(m.render_sparkline([]), '')
+
+
+class MeterRendering(unittest.TestCase):
+    """The compact bar the panel wears, filled to the eighth of a cell."""
+
+    def test_a_reading_fills_whole_cells_then_part_of_one(self):
+        self.assertEqual(m.render_meter(0.5, width=4), '██░░')
+        self.assertEqual(m.render_meter(0.625, width=4), '██▌░')
+
+    def test_four_cells_carry_finer_steps_than_the_twenty_four_segment_bar(self):
+        readings = {m.render_meter(value / 100, width=4) for value in range(101)}
+        self.assertGreater(len(readings), m.BAR_WIDTH)
+
+    def test_the_track_is_visible_with_every_escape_code_stripped_out(self):
+        # The meter must not depend on colour to say where it ends: a pipe, a
+        # dumb terminal or NO_COLOR would otherwise reduce it to a solid bar.
+        self.assertEqual(m.render_meter(0.0, width=4), '░░░░')
+        self.assertNotEqual(m.render_meter(0.0, width=4), m.render_meter(1.0, width=4))
+
+    def test_a_full_reading_leaves_no_track_behind_it(self):
+        self.assertEqual(m.render_meter(1.0, width=4), '████')
+
+    def test_readings_outside_the_range_are_clamped_rather_than_believed(self):
+        self.assertEqual(m.render_meter(-1.0, width=3), '░░░')
+        self.assertEqual(m.render_meter(9.0, width=3), '███')
+
+    def test_a_meter_needs_somewhere_to_draw(self):
+        with self.assertRaises(ValueError):
+            m.render_meter(0.5, width=0)
+
+    def test_a_terminal_without_the_glyphs_still_gets_a_meter(self):
+        self.assertEqual(m.render_meter(0.5, width=4, glyphs=m.ASCII_EIGHTHS,
+                                        track=m.ASCII_TRACK), '@@..')
+
+
+class FrameRendering(unittest.TestCase):
+    """The closing box, and what it does when there is no room for one."""
+
+    def test_the_title_sits_in_the_top_rule(self):
+        lines = m.render_frame(['one'], title='Rebuild', width=40, indent='')
+        self.assertTrue(lines[0].startswith('╭─ Rebuild '))
+        self.assertTrue(lines[0].endswith('╮'))
+
+    def test_every_line_of_the_box_is_the_same_width(self):
+        lines = m.render_frame(['short', 'a much longer line'], title='T', width=60, indent='')
+        self.assertEqual(len({len(line) for line in lines}), 1)
+
+    def test_a_terminal_too_narrow_for_a_box_still_gets_the_summary(self):
+        # The summary is the information; the frame is the courtesy.
+        self.assertEqual(m.render_frame(['2 built'], title='x', width=10, indent=''), ['2 built'])
+
+
+class SubSteps(unittest.TestCase):
+    """Sub-steps tied to the phase that produced them."""
+
+    def scrollback(self, terminal, stream):
+        steps = m.StepList(terminal=terminal, total=2)
+        steps.start('Rebuild packages')
+        steps.detail('swayfx', 'done', '4m12s')
+        steps.detail('waybar', 'failed')
+        steps.finish('failed')
+        steps.mark('done', 'Publish')
+        return steps, visible(stream.getvalue())
+
+    def test_the_gutter_closes_on_the_last_sub_step(self):
+        stream = Screen()
+        _, lines = self.scrollback(terminal(stream), stream)
+        self.assertEqual(lines, ['  x [1/2] Rebuild packages',
+                                 '    ├─ + swayfx  4m12s',
+                                 '    └─ x waybar',
+                                 '  + [2/2] Publish'])
+
+    def test_sub_steps_are_held_until_the_phase_they_belong_to_closes(self):
+        # Printed as they arrive they would land above the live line of the
+        # phase that owns them, and then be overwritten by it.
+        stream = Screen()
+        steps = m.StepList(terminal=terminal(stream), total=1)
+        steps.start('Rebuild packages')
+        steps.detail('swayfx', 'done')
+        self.assertNotIn('swayfx', stream.getvalue())
+        steps.finish()
+        self.assertIn('swayfx', stream.getvalue())
+
+    def test_a_phase_that_did_nothing_worth_saying_gets_no_gutter(self):
+        stream = Screen()
+        steps = m.StepList(terminal=terminal(stream), total=1)
+        steps.mark('done', 'Publish')
+        self.assertEqual(visible(stream.getvalue()), ['  + [1/1] Publish'])
+
+
+class Summary(unittest.TestCase):
+    """The closing box a run leaves behind."""
+
+    def test_a_clean_run_is_counted_in_the_alphabet_the_marks_use(self):
+        stream = Screen()
+        steps = m.StepList(terminal=terminal(stream), total=2)
+        steps.mark('done', 'one')
+        steps.mark('skipped', 'two')
+        steps.summary(title='rebuild')
+        self.assertIn('+ 1 done  = 1 skipped', stream.getvalue())
+
+    def test_a_run_that_failed_is_framed_heavily_so_it_reads_without_colour(self):
+        stream = Screen()
+        steps = m.StepList(terminal=terminal(stream), total=1)
+        steps.mark('failed', 'one')
+        self.assertEqual(steps.summary(title='rebuild'), 1)
+        self.assertIn('┏━ rebuild', stream.getvalue())
+
+    def test_a_clean_run_is_framed_lightly(self):
+        stream = Screen()
+        steps = m.StepList(terminal=terminal(stream), total=1)
+        steps.mark('done', 'one')
+        self.assertEqual(steps.summary(title='rebuild'), 0)
+        self.assertIn('╭─ rebuild', stream.getvalue())
+
+
+class SpinnerAlphabets(unittest.TestCase):
+    """More than one spinner, all of them stepped rather than timed."""
+
+    def test_a_caller_can_name_the_alphabet_its_surface_suits(self):
+        self.assertEqual(probe(spinner='braille').spinner, m.SPINNERS['braille'])
+
+    def test_an_unknown_name_falls_back_rather_than_failing_a_build(self):
+        self.assertEqual(probe(spinner='no-such-spinner').spinner, m.SPINNER)
+
+    def test_a_terminal_without_the_glyphs_gets_the_plain_frames_whatever_was_asked(self):
+        self.assertEqual(ascii_terminal(spinner='braille').spinner, m.ASCII_SPINNER)
+
+    def test_the_whole_alphabet_degrades_together_or_not_at_all(self):
+        # Half a vocabulary is worse than none of it: a line carrying an ASCII
+        # meter beside a Braille sparkline would be drawn from two faces.
+        plain = ascii_terminal()
+        self.assertEqual(
+            (plain.segments, plain.spinner, plain.ellipsis, plain.levels,
+             plain.eighths, plain.track, plain.frame, plain.gutter),
+            (m.ASCII_SEGMENTS, m.ASCII_SPINNER, m.ASCII_ELLIPSIS, m.ASCII_LEVELS,
+             m.ASCII_EIGHTHS, m.ASCII_TRACK, m.ASCII_FRAME, m.ASCII_GUTTER))
+
+    def test_every_alphabet_steps_on_reported_work_and_never_on_a_clock(self):
+        for name, frames_ in m.SPINNERS.items():
+            with self.subTest(name):
+                self.assertEqual(m.spinner_frame(0, frames_), frames_[0])
+                self.assertEqual(m.spinner_frame(len(frames_), frames_), frames_[0])
 
 
 if __name__ == '__main__':

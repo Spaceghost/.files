@@ -61,6 +61,63 @@ ASCII_SEGMENTS = ('#', '-')
 ASCII_SPINNER = ('|', '/', '-', '\\')
 ASCII_ELLIPSIS = '...'
 
+# The rest of the alphabet. Every word below is drawn from characters this
+# desktop can render at one set of metrics -- .config/fontconfig/conf.d/
+# 50-oldbook-glyphs.conf names Adwaita Mono as the fallback for the ranges
+# JetBrains Mono lacks -- and every one has a plain understudy for a terminal
+# that cannot show it. None of them move on their own; they are redrawn when a
+# caller reports a reading, exactly like the bar.
+
+# Eight heights in one cell. `oldbook-cava-bar` has always spoken this ramp for
+# audio; naming it here makes the visualiser and every other meter one
+# alphabet, which is the whole reason it is not private to that script.
+LEVELS = '\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588'
+ASCII_LEVELS = '._-=+*#@'
+# Eight widths in one cell, filling left to right. This is the compact meter:
+# where the 24-segment bar needs a line to itself, four of these carry the same
+# reading in the room a percentage occupies, which is all the panel has. Alone
+# among the drawing glyphs these live in JetBrains Mono itself, so the panel
+# never changes face to draw one.
+EIGHTHS = '\u258f\u258e\u258d\u258c\u258b\u258a\u2589\u2588'
+ASCII_EIGHTHS = '.:-=+*#@'
+# The track a meter is drawn on. Light shade rather than a full block painted
+# muted, because a meter must still read when there is no colour at all: a pipe
+# or NO_COLOR would otherwise reduce it to a solid bar that means nothing.
+TRACK = '\u2591'
+ASCII_TRACK = '.'
+# Braille packs two columns of four dots into a cell, so a sparkline drawn from
+# it carries two samples per character: twice the history of the level ramp in
+# the same room. The tuples are the dot bits bottom-up, which is the order a
+# column fills in; the Braille block's own numbering is not in visual order.
+BRAILLE = 0x2800
+BRAILLE_LEFT = (0x40, 0x04, 0x02, 0x01)
+BRAILLE_RIGHT = (0x80, 0x20, 0x10, 0x08)
+
+# Spinner alphabets, so a caller can pick the one that suits its surface. All
+# of them step on reported work and none of them on a clock; the quadrant set
+# stays the default because it is the one the terminal already knows.
+SPINNERS = {
+    'quadrant': ('\u2596', '\u2598', '\u259d', '\u2597'),
+    'braille': ('\u28fe', '\u28fd', '\u28fb', '\u28bf',
+                '\u287f', '\u28df', '\u28ef', '\u28f7'),
+    'arc': ('\u25dc', '\u25dd', '\u25de', '\u25df'),
+    'moon': ('\u25d0', '\u25d3', '\u25d1', '\u25d2'),
+    'dot': ('\u00b7', '\u2219', '\u2022', '\u25cf'),
+}
+
+# Box drawing for a run's closing summary: corners, then the horizontal and
+# vertical rules. Rounded to match the 14-pixel radius the overlays use, with a
+# heavy set held back for a run that failed, so a bad result reads from across
+# the room without depending on colour.
+FRAMES = {'round': '\u256d\u256e\u2570\u256f\u2500\u2502',
+          'heavy': '\u250f\u2513\u2517\u251b\u2501\u2503'}
+ASCII_FRAME = '++++-|'
+# Gutters for sub-steps, so a phase can show what happened inside it without
+# the reader having to guess which lines belong to which phase.
+GUTTER = {'branch': '\u251c\u2500 ', 'last': '\u2514\u2500 ',
+          'trunk': '\u2502  ', 'clear': '   '}
+ASCII_GUTTER = {'branch': '|- ', 'last': '`- ', 'trunk': '|  ', 'clear': '   '}
+
 # The marks `oldbook-rebuild` has always used, so the desktop keeps one
 # alphabet for "did it work" whichever helper is doing the talking.
 MARKS = {'done': '+', 'failed': 'x', 'skipped': '=', 'blocked': '!'}
@@ -154,6 +211,102 @@ def spinner_frame(step, frames=SPINNER):
     return frames[int(step) % len(frames)]
 
 
+def scale(values, low=None, high=None, steps=8, floor=0):
+    """Put each reading on a small integer scale, honestly about flat series.
+
+    A series with no spread has no shape to draw. Sending it to the bottom of
+    the scale would read as "nothing happened" and to the top as "at maximum",
+    both of which are claims the data does not make, so it goes to the middle
+    and says "steady". Callers that know their own bounds -- a percentage is
+    always 0 to 100 -- should pass them, because a sparkline auto-scaled to its
+    own extremes turns a quiet minute into a dramatic one.
+    """
+    values = [float(value) for value in values]
+    if not values:
+        return []
+    bottom = min(values) if low is None else float(low)
+    top = max(values) if high is None else float(high)
+    span = top - bottom
+    if span <= 0:
+        return [floor + (steps - floor) // 2] * len(values)
+    return [min(steps - 1, max(floor, floor + int(
+        (min(max(value, bottom), top) - bottom) * (steps - floor) / span)))
+        for value in values]
+
+
+def render_levels(values, low=None, high=None, ramp=LEVELS, style=PLAIN, role='filled'):
+    """One cell a sample, eight heights: a history you read as a shape."""
+    return style(role, ''.join(ramp[index] for index in
+                               scale(values, low, high, steps=len(ramp))))
+
+
+def render_sparkline(values, low=None, high=None, style=PLAIN, role='filled'):
+    """Two samples a cell, four dot rows each -- the densest history text holds.
+
+    Every sample lights at least the bottom dot, so the line stays continuous
+    and a reader sees a trace rather than a row of gaps. The cost is that a
+    reading at the floor of the range looks like a low one rather than like
+    nothing, which is the right trade for a shape but the wrong one for a
+    count; use the level ramp when the difference between none and few matters.
+    """
+    heights = scale(values, low, high, steps=5, floor=1)
+    cells = []
+    for index in range(0, len(heights), 2):
+        pair = heights[index:index + 2]
+        bits = sum(BRAILLE_LEFT[row] for row in range(pair[0]))
+        if len(pair) > 1:
+            bits += sum(BRAILLE_RIGHT[row] for row in range(pair[1]))
+        cells.append(chr(BRAILLE + bits))
+    return style(role, ''.join(cells))
+
+
+def render_meter(fraction, width=4, glyphs=EIGHTHS, track=None, style=PLAIN):
+    """A bar in a handful of cells, filled to the eighth of one.
+
+    The panel has room for a reading and not for a line, so this is the bar the
+    desktop wears where the terminal wears the segmented one: four cells carry
+    thirty-two steps, which is finer than the twenty-four segments and takes a
+    sixth of the room. The track behind it is a light shade rather than blank,
+    so the meter has a visible extent at nought and still reads as a meter with
+    every escape code stripped out of it.
+    """
+    if width < 1:
+        raise ValueError('a meter needs at least one cell')
+    track = TRACK if track is None else track
+    total = max(0, min(int(round(float(fraction) * width * len(glyphs))), width * len(glyphs)))
+    full, part = divmod(total, len(glyphs))
+    filled = glyphs[-1] * full + (glyphs[part - 1] if part else '')
+    return style('filled', filled) + style('empty', track * (width - full - (1 if part else 0)))
+
+
+def render_frame(lines, title=None, width=None, frame=FRAMES['round'], style=PLAIN,
+                 role='empty', indent=INDENT, ellipsis=ELLIPSIS):
+    """A run's closing box: the title sits in the top rule, the body inside it.
+
+    Returned as a list of lines rather than written, so the caller decides
+    where it goes and the tests can read it. Nothing here is load-bearing --
+    a terminal too narrow for a box gets the body lines with no box at all,
+    because the summary is the information and the frame is the courtesy.
+    """
+    left, right, foot_left, foot_right, rule, post = frame
+    body = [str(line) for line in lines]
+    room = (width or 80) - len(indent) - 4
+    if room < 8:
+        return [indent + line for line in body]
+    inner = max([len(line) for line in body] + [len(title or '') + 3])
+    inner = min(inner, room)
+    head = rule * 2
+    if title:
+        head = rule + ' ' + fit(str(title), inner - 3, ellipsis) + ' '
+    out = [indent + style(role, left + head + rule * (inner + 2 - len(head)) + right)]
+    for line in body:
+        text = fit(line, inner, ellipsis)
+        out.append(indent + style(role, post) + ' ' + text + ' ' * (inner - len(text))
+                   + ' ' + style(role, post))
+    out.append(indent + style(role, foot_left + rule * (inner + 2) + foot_right))
+    return out
+
+
 def fit(text, room, ellipsis=ELLIPSIS):
     """Trim a caller's text to the room left on the line."""
     if room <= 0:
@@ -213,7 +366,7 @@ class Terminal:
     """
 
     def __init__(self, stream=None, live=None, colour=None, width=None, palette=None,
-                 environ=None, allows=None):
+                 environ=None, allows=None, spinner='quadrant'):
         self.stream = sys.stderr if stream is None else stream
         environ = os.environ if environ is None else environ
         mode = environ.get('OLDBOOK_LOADING', 'auto')
@@ -238,8 +391,13 @@ class Terminal:
         encoding = (getattr(self.stream, 'encoding', '') or '').lower()
         wide = 'utf' in encoding or 'utf' in environ.get('LANG', '').lower()
         self.segments = SEGMENTS if wide else ASCII_SEGMENTS
-        self.spinner = SPINNER if wide else ASCII_SPINNER
+        self.spinner = SPINNERS.get(spinner, SPINNER) if wide else ASCII_SPINNER
         self.ellipsis = ELLIPSIS if wide else ASCII_ELLIPSIS
+        self.levels = LEVELS if wide else ASCII_LEVELS
+        self.eighths = EIGHTHS if wide else ASCII_EIGHTHS
+        self.track = TRACK if wide else ASCII_TRACK
+        self.frame = FRAMES['round'] if wide else ASCII_FRAME
+        self.gutter = GUTTER if wide else ASCII_GUTTER
 
     def measure(self):
         """Columns of the stream we actually draw on, not of stdout.
@@ -455,6 +613,7 @@ class StepList:
         self.count = 0
         self.quiet = True
         self.results = []
+        self.details = []
         self.line = _Line(self.terminal, clock=clock)
 
     def render(self, state='working', label=None, note=None):
@@ -481,11 +640,61 @@ class StepList:
             self.line.paint(self.render())
         return self.count
 
+    def detail(self, text, state=None, note=None):
+        """Record one thing that happened inside the phase in hand.
+
+        Held until the phase closes rather than printed as it arrives, because
+        the phase owns a live line and a sub-step printed now would be drawn
+        above the thing it belongs to and then overwritten. They are emitted
+        under the phase's result line, tied to it by a gutter, which is how the
+        terminal already ties a tool's output to the tool that produced it.
+        """
+        self.details.append((state, str(text), note))
+        return self
+
+    def _emit_details(self):
+        """The held sub-steps, under the gutter, last one closing the branch."""
+        gutter = self.terminal.gutter
+        held, self.details = self.details, []
+        for position, (state, text, note) in enumerate(held):
+            edge = gutter['last'] if position == len(held) - 1 else gutter['branch']
+            mark = MARKS.get(state, '')
+            prefix = self.indent + '  ' + self.terminal.style('note', edge)
+            plain = self.indent + '  ' + edge
+            if mark:
+                prefix += self.terminal.style(state, mark) + ' '
+                plain += mark + ' '
+            self.line.commit(_compose(prefix, plain, text, note, self.terminal.width,
+                                      self.terminal.style, self.terminal.ellipsis))
+
     def finish(self, state='done', label=None, note=None):
         self.results.append(state)
         self.line.commit(self.render(state, label, note))
+        if self.details:
+            self._emit_details()
         self.label = self.note = None
         return state
+
+    def summary(self, title=None, lines=None):
+        """Close the run with a box, drawn heavy when anything in it failed.
+
+        Written straight to the stream rather than through the live line: by
+        the time this is called there is no work in hand and nothing to erase.
+        """
+        failed = self.failures()
+        frame = self.terminal.frame
+        if failed and self.terminal.frame is not ASCII_FRAME:
+            frame = FRAMES['heavy']
+        if lines is None:
+            counted = {state: self.results.count(state) for state in MARKS
+                       if self.results.count(state)}
+            lines = ['  '.join(f'{MARKS[state]} {count} {state}'
+                               for state, count in counted.items())] or ['nothing to do']
+        for line in render_frame(lines, title=title, width=self.terminal.width,
+                                 frame=frame, style=self.terminal.style,
+                                 indent=self.indent, ellipsis=self.terminal.ellipsis):
+            self.terminal.write(line + '\n')
+        return failed
 
     def mark(self, state, label, note=None):
         """A phase that is already over: one completed line, no live line at all."""
