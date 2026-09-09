@@ -22,7 +22,9 @@
         "alpine/desktop/.config/swaynag/*",
         "alpine/bin/build-icon-theme",
         "alpine/bin/build-wlogout-icons",
-        "alpine/themes/README.md"
+        "alpine/themes/README.md",
+        "alpine/themes/monochrome-test.json",
+        "alpine/tests/test_monochrome_leaks.py"
       ],
       "tests": [
         "test_application_theme_refresh.py",
@@ -35,7 +37,8 @@
         "test_theme_sway_reload.py",
         "test_theme_switch.py",
         "test_cursor_theme.py",
-        "test_theme_boundary.py"
+        "test_theme_boundary.py",
+        "test_monochrome_leaks.py"
       ],
       "evidence": [
         "verification/complete-themes/",

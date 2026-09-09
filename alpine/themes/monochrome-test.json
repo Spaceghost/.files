@@ -1,0 +1,43 @@
+{
+  "id": "monochrome-test",
+  "name": "Monochrome Test",
+  "palette": {
+    "background": "#000000",
+    "background_hard": "#000000",
+    "surface": "#000000",
+    "surface_bright": "#ffffff",
+    "border": "#ffffff",
+    "foreground": "#ffffff",
+    "foreground_dim": "#ffffff",
+    "subtle": "#ffffff",
+    "muted": "#ffffff",
+    "red": "#ffffff",
+    "green": "#ffffff",
+    "yellow": "#ffffff",
+    "blue": "#ffffff",
+    "purple": "#ffffff",
+    "aqua": "#ffffff",
+    "orange": "#ffffff",
+    "red_dim": "#ffffff",
+    "green_dim": "#ffffff",
+    "yellow_dim": "#ffffff",
+    "blue_dim": "#ffffff",
+    "purple_dim": "#ffffff",
+    "aqua_dim": "#ffffff",
+    "orange_dim": "#ffffff",
+    "accent": "#ffffff"
+  },
+  "reactive_accent": false,
+  "image_style": "Pure monochrome: black and white only, no colour of any kind and no midtone that reads as a hue. High-contrast ink-on-paper drawing, heavy blacks and open whites. This theme exists to make un-themed surfaces obvious, so the artwork must not introduce colour either.",
+  "design": {
+    "font": "Inter",
+    "radius": 22,
+    "spacing": 6,
+    "opacity": 0.78,
+    "bar_position": "top",
+    "widget_edge": "right",
+    "launcher_width": 48,
+    "cursors": "simp1e-cursors-gruvbox-dark",
+    "icons": "Oldbook-Gruvbox"
+  }
+}
