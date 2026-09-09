@@ -2,6 +2,7 @@
 import configparser
 import importlib.machinery
 import importlib.util
+import json
 from pathlib import Path
 import struct
 import tempfile
@@ -147,6 +148,60 @@ class ThemeTreeTests(unittest.TestCase):
         # deploy-home skips symlinks, so aliases must be real files to reach HOME.
         for path in (self.output / 'cursors').iterdir():
             self.assertFalse(path.is_symlink(), path.name)
+
+
+class ThemeSelectionTests(unittest.TestCase):
+    """Which pointer set the drawn shapes inherit, and in whose colours.
+
+    Only the waiting shapes are drawn here; everything else -- the arrow, the
+    text bar, the resize handles -- comes from an installed Simp1e set. That
+    set was a constant, so switching themes left every shape but the ring in
+    Gruvbox's colours. It is now the theme's own `design.cursors`.
+    """
+
+    def test_each_theme_inherits_the_set_its_descriptor_names(self):
+        for source in sorted((REPO / 'alpine/themes').glob('*.json')):
+            descriptor = json.loads(source.read_text())
+            with self.subTest(theme=descriptor['id']):
+                self.assertEqual(builder.theme_inherits(source),
+                                 descriptor['design']['cursors'])
+
+    def test_a_descriptor_naming_no_set_keeps_a_usable_pointer(self):
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'theme.json'
+            source.write_text(json.dumps({'design': {'radius': 22}}))
+            self.assertEqual(builder.theme_inherits(source), builder.INHERITS)
+            source.write_text(json.dumps({'id': 'bare'}))
+            self.assertEqual(builder.theme_inherits(source), builder.INHERITS)
+
+    def test_the_index_carries_the_named_set_and_keeps_the_theme_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'Oldbook-Ghost'
+            builder.build(output, builder.load_palette(THEME), sizes=(24,), frames=2,
+                          inherits='simp1e-cursors-catppuccin-mocha', name='Catppuccin Mocha')
+            parser = configparser.ConfigParser()
+            parser.read(output / 'index.theme')
+            # The deployed sway seat names Oldbook-Ghost; only the inheritance moves.
+            self.assertEqual(parser['Icon Theme']['Name'], 'Oldbook-Ghost')
+            self.assertEqual(parser['Icon Theme']['Inherits'],
+                             'simp1e-cursors-catppuccin-mocha')
+            self.assertIn('Catppuccin Mocha', parser['Icon Theme']['Comment'])
+
+    def test_the_ring_is_drawn_in_the_theme_accent(self):
+        descriptor = json.loads(THEME.read_text())
+        other = dict(descriptor['palette'], yellow='#59c2ff', accent='#59c2ff')
+        first = builder.watch_frames(builder.cursor_palette(descriptor['palette']), 24, 2)
+        second = builder.watch_frames(builder.cursor_palette(other), 24, 2)
+        self.assertNotEqual([frame[5] for frame in first], [frame[5] for frame in second])
+
+    def test_the_committed_gruvbox_shapes_are_reproduced_exactly(self):
+        """Drawing Gruvbox's own palette must return the bytes already shipped,
+        or making the shapes theme-aware would have restyled the pointer."""
+        drawn = builder.shapes(builder.load_palette(THEME))
+        self.assertEqual(len(drawn), 11)
+        for name, data in sorted(drawn.items()):
+            with self.subTest(shape=name):
+                self.assertEqual((INSTALLED / 'cursors' / name).read_bytes(), data)
 
 
 class InstalledThemeTests(unittest.TestCase):

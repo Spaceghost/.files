@@ -99,6 +99,89 @@ class GhosttyPalette(unittest.TestCase):
         self.assertNotIn('cursor-color', body)
 
 
+class ReactiveRefresh(unittest.TestCase):
+    """What a switch tells the running session, and what it admits it cannot.
+
+    A theme switch that only rewrites files is half a switch. Everything that
+    can be told to reread is told; the three things that cannot are reported
+    rather than left for the user to notice.
+    """
+
+    def seat(self, text):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / '.config/sway').mkdir(parents=True)
+            (home / '.config/sway/theme.conf').write_text(text)
+            with mock.patch.object(Path, 'home', return_value=home):
+                return THEME['cursor_settings']()
+
+    def test_the_pointer_set_and_size_come_from_the_deployed_seat_line(self):
+        self.assertEqual(self.seat('seat * xcursor_theme Oldbook-Ghost 24\n'),
+                         ('Oldbook-Ghost', '24'))
+        self.assertEqual(self.seat('seat seat0 xcursor_theme Other\n'), ('Other', '24'))
+        self.assertIsNone(self.seat('font pango:Inter 11\n'))
+
+    def test_the_deployed_theme_actually_carries_a_seat_line(self):
+        source = (REPO / 'alpine/desktop/.config/sway/theme.conf').read_text()
+        self.assertRegex(source, r'(?m)^seat \* xcursor_theme \S+ \d+$')
+
+    def test_the_pointer_is_reloaded_and_its_limits_are_stated(self):
+        sent = []
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / '.config/sway').mkdir(parents=True)
+            (home / '.config/sway/theme.conf').write_text(
+                'seat * xcursor_theme Oldbook-Ghost 24\n')
+            (home / '.local/share/icons/Oldbook-Ghost').mkdir(parents=True)
+            (home / '.local/share/icons/Oldbook-Ghost/index.theme').write_text(
+                '[Icon Theme]\nName=Oldbook-Ghost\nInherits=simp1e-cursors-nowhere\n')
+            globals_ = THEME['refresh_cursor'].__globals__
+            with mock.patch.object(Path, 'home', return_value=home):
+                with mock.patch.dict(globals_, {'sway_command': sent.append}, clear=False):
+                    notes = THEME['refresh_cursor']()
+        self.assertEqual(sent, ['seat * xcursor_theme Oldbook-Ghost 24'])
+        self.assertTrue(any('cursor theme reloaded' in note for note in notes), notes)
+        # An uninstalled inherited set is named, not silently half-applied.
+        self.assertTrue(any('simp1e-cursors-nowhere' in note for note in notes), notes)
+        self.assertTrue(any('until they restart' in note for note in notes), notes)
+
+    def test_a_missing_seat_line_is_reported_rather_than_ignored(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            with mock.patch.object(Path, 'home', return_value=home):
+                notes = THEME['refresh_cursor']()
+        self.assertTrue(any('FAILED' in note for note in notes), notes)
+
+    def test_the_accent_is_re_elected_before_the_bar_is_signalled(self):
+        """The accent stylesheet the bar imports is a runtime file that was only
+        rewritten when the gallery held a painting in the new theme, so a theme
+        with no artwork kept the previous theme's accent on the clock."""
+        calls = []
+        def run(command, timeout=20):
+            calls.append(command[2:])
+            return command[-1] == 'clear'
+        with mock.patch.dict(THEME['refresh_accent'].__globals__, {'run': run}, clear=False):
+            notes = THEME['refresh_accent']()
+        self.assertEqual(calls, [['apply', '--force', '--quiet'], ['clear']])
+        self.assertTrue(any('accent' in note for note in notes), notes)
+
+    def test_a_refusing_accent_helper_is_reported(self):
+        with mock.patch.dict(THEME['refresh_accent'].__globals__,
+                             {'run': lambda *a, **k: False}, clear=False):
+            notes = THEME['refresh_accent']()
+        self.assertTrue(any('FAILED' in note for note in notes), notes)
+
+    def test_switching_reelects_the_accent_even_with_no_matching_painting(self):
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-theme').read_text()
+        # The call sits after the gallery selection and before refresh_session,
+        # so the bar's SIGUSR2 cannot race the stylesheet being rewritten.
+        self.assertLess(source.index('refresh_accent()'), source.index('refresh_session())'))
+
+    def test_qt_windows_that_cannot_reload_are_named(self):
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-theme').read_text()
+        self.assertIn('keep the previous theme until restarted', source)
+
+
 class ShippedProfiles(unittest.TestCase):
     def test_selecting_a_theme_refreshes_ghostty_before_deploying_it(self):
         # An existing profile may have a newer Foot font than its derived

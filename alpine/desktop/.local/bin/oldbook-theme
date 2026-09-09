@@ -244,8 +244,8 @@ def run(command, timeout=20):
         return False
 
 
-def sway_reload(timeout=20):
-    """Send one reload and await its reply beyond swaymsg's fixed three seconds."""
+def sway_command(payload, timeout=20):
+    """Send one command and await its reply beyond swaymsg's fixed three seconds."""
     address = os.environ.get('SWAYSOCK')
     if not address:
         raise RuntimeError('SWAYSOCK is not set; the desktop session is unknown')
@@ -273,7 +273,8 @@ def sway_reload(timeout=20):
                     # is sent. Never resubmit after sending the reload itself.
                     time.sleep(min(.01, remaining()))
             connection.settimeout(remaining())
-            connection.sendall(header.pack(b'i3-ipc', 6, 0) + b'reload')
+            body = payload.encode()
+            connection.sendall(header.pack(b'i3-ipc', len(body), 0) + body)
 
             def read(size):
                 data = bytearray()
@@ -290,15 +291,69 @@ def sway_reload(timeout=20):
                 raise ValueError('Invalid Sway IPC reload response')
             response = json.loads(read(length))
     except TimeoutError as error:
-        raise RuntimeError(f'Sway reload reply not confirmed within {timeout:g} seconds') from error
+        raise RuntimeError(f'Sway reply to {payload!r} not confirmed '
+                           f'within {timeout:g} seconds') from error
     if (not isinstance(response, list) or not response
             or any(not isinstance(item, dict) or not isinstance(item.get('success'), bool)
                    for item in response)):
         raise ValueError('Invalid Sway IPC command result')
-    errors = [str(item.get('error', 'Sway rejected the reload'))
+    errors = [str(item.get('error', 'Sway rejected ' + payload))
               for item in response if not item['success']]
     if errors:
         raise RuntimeError('; '.join(errors))
+
+
+def sway_reload(timeout=20):
+    sway_command('reload', timeout)
+
+
+def cursor_settings():
+    """The pointer set and size the deployed Sway theme asks the seat for."""
+    try:
+        theme = (Path.home() / '.config/sway/theme.conf').read_text()
+    except OSError:
+        return None
+    found = re.search(r'(?m)^seat\s+\S+\s+xcursor_theme\s+(\S+)(?:\s+(\d+))?', theme)
+    return (found.group(1), found.group(2) or '24') if found else None
+
+
+def refresh_cursor():
+    """Reload the pointer set, and say plainly what a reload cannot reach.
+
+    Sway rebuilds its own xcursor manager when the seat command is applied, so
+    the compositor's pointer -- the one over the desktop, the bar and every
+    server-side surface -- follows immediately. A Wayland client that loads the
+    theme itself, which is every GTK and Qt application, keeps the shapes it
+    loaded at startup until it is restarted; XCURSOR_THEME in the session
+    environment is likewise fixed until the next login. Neither is worth
+    killing a user's windows over, so both are reported.
+    """
+    chosen = cursor_settings()
+    if chosen is None:
+        return ['cursor theme refresh FAILED: no seat xcursor_theme is deployed']
+    name, size = chosen
+    notes = []
+    try:
+        sway_command(f'seat * xcursor_theme {name} {size}')
+        notes.append(f'cursor theme reloaded ({name} {size})')
+    except (OSError, ValueError, RuntimeError) as error:
+        return ['cursor theme refresh FAILED: ' + str(error)]
+    inherited = None
+    index = Path.home() / '.local/share/icons' / name / 'index.theme'
+    try:
+        found = re.search(r'(?m)^Inherits=(\S+)', index.read_text())
+        inherited = found.group(1) if found else None
+    except OSError:
+        pass
+    if inherited:
+        roots = [Path.home() / '.local/share/icons', Path.home() / '.icons',
+                 Path('/usr/local/share/icons'), Path('/usr/share/icons')]
+        if not any((root / inherited / 'cursors').is_dir() for root in roots):
+            notes.append(f'cursor set {inherited} is not installed; every shape this '
+                         f'theme does not draw falls back to the default pointer '
+                         f'(doas apk add {inherited})')
+    notes.append('running GTK and Qt windows keep the pointer they loaded until they restart')
+    return notes
 
 
 def tmux_reload():
@@ -311,6 +366,27 @@ def tmux_reload():
     return reloaded
 
 
+def refresh_accent():
+    """Re-elect the bar accent for the theme now selected, before the bar reloads.
+
+    The accent stylesheet Waybar imports is a runtime file, not part of any
+    profile, and it was only ever rewritten when the gallery happened to hold a
+    painting in the new theme. A theme with no artwork yet therefore kept the
+    previous theme's accent on the clock, the focused workspace and the AI
+    indicator. The overlays are protected from a stale record by
+    `overlay_theme.accent_override`, which refuses one that names another
+    theme; the stylesheet had no such guard. Running this here, and waiting for
+    it, also removes the race against the SIGUSR2 that follows.
+    """
+    palette = Path(__file__).resolve().parent / 'oldbook-palette'
+    if not palette.is_file():
+        return []
+    for action in (['apply', '--force', '--quiet'], ['clear']):
+        if run(['/usr/bin/python3', str(palette), *action], 30):
+            return ['bar accent re-elected for this theme']
+    return ['bar accent refresh FAILED; the bar may keep the previous accent']
+
+
 def refresh_session():
     """Push the active theme into everything already running that can take it.
 
@@ -321,13 +397,22 @@ def refresh_session():
     notes = []
     here = Path(__file__).resolve().parent
 
+    reloaded = True
     try:
         sway_reload()
         notes.append('sway reloaded')
     except (OSError, ValueError, RuntimeError) as error:
+        reloaded = False
         notes.append('sway reload FAILED: ' + str(error))
+    if reloaded:
+        # A compositor that would not take the reload will not take this either,
+        # and waiting out a second deadline only delays the rest of the refresh.
+        notes.extend(refresh_cursor())
     gtk_settings = here / 'oldbook-gtk-settings'
     if gtk_settings.is_file():
+        # This carries the theme, icon-theme, font, cursor theme and cursor size
+        # the profile declares into org.gnome.desktop.interface, which is what a
+        # running GTK application watches. Its own gtk.css has no reload channel.
         notes.append('GTK settings applied' if run(['/usr/bin/python3', str(gtk_settings)])
                      else 'GTK settings refresh FAILED')
 
@@ -371,6 +456,14 @@ def refresh_session():
     if count:
         notes.append(f'cava restarted ({count})')
 
+    # Qt has no reload channel of its own: qt6ct and the LXQt plugin are read at
+    # startup. Oldbook's own Qt surfaces follow the palette on a one-second
+    # timer through overlay_theme.follow_qt_theme, so this is only about
+    # third-party windows, and restarting them is the user's call.
+    if any(True for _ in owned_processes('qt6ct', 'lximage-qt', 'pcmanfm-qt')):
+        notes.append('Qt applications read their colours at startup; '
+                     'open Qt windows keep the previous theme until restarted')
+
     if any(True for _ in owned_processes('firefox')):
         notes.append('Firefox custom styling is not managed; '
                      'browser appearance may retain its own theme')
@@ -379,7 +472,11 @@ def refresh_session():
 
 def use(identity, *, reload=True):
     theme = load_theme(REPO, identity)
-    profile = ensure_profile(REPO, theme)
+    # Binary surfaces -- the pointer shapes and the power deck's glyph tiles --
+    # are written beside the text ones, and a failure to draw them is reported
+    # rather than leaving the previous theme's cursors quietly in place.
+    asset_notes = []
+    profile = ensure_profile(REPO, theme, notes=asset_notes)
     deployed = None
     if profile is not None:
         sync_ghostty_profile(REPO, profile, theme)
@@ -388,7 +485,7 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
-    notes = refresh_boot_palette(theme)
+    notes = asset_notes + refresh_boot_palette(theme)
     if reload:
         try:
             gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))
@@ -398,6 +495,7 @@ def use(identity, *, reload=True):
                 gallery['update']('select', matching[-1]['id'])
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
             notes.append('wallpaper selection FAILED: ' + str(error))
+        notes.extend(refresh_accent())
         # A wallpaper failure must not strand already-deployed application files
         # on disk while running clients retain the previous theme.
         notes.extend(refresh_session())

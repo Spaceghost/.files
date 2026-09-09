@@ -31,7 +31,7 @@ class ThemeSwayReloadTests(unittest.TestCase):
 
     @contextmanager
     def server(self, reply=None, delay=0, magic=b'i3-ipc', kind=0,
-               truncate=False, byte_delay=0):
+               truncate=False, byte_delay=0, connections=1):
         payload = json.dumps([{'success': True}] if reply is None else reply).encode()
         frame = HEADER.pack(magic, len(payload), kind) + payload
         if truncate:
@@ -42,30 +42,34 @@ class ThemeSwayReloadTests(unittest.TestCase):
             listener.settimeout(5)
 
             def respond():
+                # A refresh sends the reload and then the seat's cursor theme,
+                # each on its own connection, so the fixture serves as many as
+                # the test under way expects.
                 try:
-                    connection, _ = listener.accept()
-                    with connection:
-                        connection.settimeout(5)
+                    for index in range(connections):
+                        connection, _ = listener.accept()
+                        with connection:
+                            connection.settimeout(5)
 
-                        def read(size):
-                            result = b''
-                            while len(result) < size:
-                                part = connection.recv(size - len(result))
-                                if not part:
-                                    raise AssertionError('Client truncated its reload command')
-                                result += part
-                            return result
+                            def read(size):
+                                result = b''
+                                while len(result) < size:
+                                    part = connection.recv(size - len(result))
+                                    if not part:
+                                        raise AssertionError('Client truncated its command')
+                                    result += part
+                                return result
 
-                        received_magic, size, received_kind = HEADER.unpack(read(HEADER.size))
-                        self.requests.append((received_magic, received_kind, read(size)))
-                        if delay:
-                            time.sleep(delay)
-                        if byte_delay:
-                            for byte in frame:
-                                time.sleep(byte_delay)
-                                connection.sendall(bytes([byte]))
-                        else:
-                            connection.sendall(frame)
+                            received_magic, size, received_kind = HEADER.unpack(read(HEADER.size))
+                            self.requests.append((received_magic, received_kind, read(size)))
+                            if delay and not index:
+                                time.sleep(delay)
+                            if byte_delay:
+                                for byte in frame:
+                                    time.sleep(byte_delay)
+                                    connection.sendall(bytes([byte]))
+                            else:
+                                connection.sendall(frame)
                 except BrokenPipeError:
                     pass  # Expected when exercising client timeout or rejection.
                 except Exception as error:
@@ -92,12 +96,16 @@ class ThemeSwayReloadTests(unittest.TestCase):
         def only_sway(command, timeout=20):
             return original_run(command, timeout) if command[0] == 'swaymsg' else True
 
-        with self.server(delay=3.15), mock.patch.dict(refresh.__globals__, {
+        with self.server(delay=3.15, connections=2), mock.patch.dict(refresh.__globals__, {
                 'run': only_sway, 'owned_processes': lambda *args: iter([]),
                 'signal_processes': lambda *args: 0, 'tmux_reload': lambda: 0}):
             notes = refresh()
         self.assertFalse(any('FAILED' in note for note in notes), notes)
-        self.assertEqual(self.requests, [(b'i3-ipc', 0, b'reload')])
+        # The reload is still one command, sent once; the pointer follows it.
+        self.assertEqual(self.requests[0], (b'i3-ipc', 0, b'reload'))
+        self.assertEqual(len(self.requests), 2)
+        self.assertTrue(self.requests[1][2].startswith(b'seat * xcursor_theme '),
+                        self.requests[1])
 
     def test_rejected_command_retains_the_compositor_error(self):
         self.assertTrue(callable(self.module.get('sway_reload')))

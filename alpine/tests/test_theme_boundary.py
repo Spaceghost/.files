@@ -63,7 +63,8 @@ ALTERNATE = {
                 'purple': '#b48ead', 'aqua': '#78d0c8', 'orange': '#e89a4a'},
     'reactive_accent': False,
     'image_style': 'A probe theme used only by the tests.',
-    'design': dict(GRUVBOX['design']),
+    'design': dict(GRUVBOX['design'], cursors='simp1e-cursors-nord-dark',
+                    icons='Oldbook-Boundary-Probe'),
 }
 
 
@@ -285,6 +286,110 @@ class ConfirmationBars(unittest.TestCase):
                     'details-background'):
             with self.subTest(key=key):
                 self.assertRegex(rendered, rf'(?m)^{key}=[0-9a-f]{{6}}$')
+
+
+class BinaryAssets(unittest.TestCase):
+    """The pointer shapes and the power deck's glyph tiles.
+
+    `render_profile` is text, and for a long time that was the whole theme file
+    set, so these two drawn surfaces stayed in Gruvbox's amber and cream under
+    every theme. They are drawn with cairo rather than compiled, so each profile
+    can carry its own; the load-bearing assertion here is that drawing Gruvbox's
+    reproduces the committed bytes exactly.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        try:
+            cls.assets = desktop_theme.render_assets(REPO, GRUVBOX)
+        except ImportError as error:  # pragma: no cover - depends on the host
+            raise unittest.SkipTest('theme assets need cairo/Pango: %s' % error)
+
+    def test_gruvbox_assets_are_drawn_exactly_as_they_were_committed(self):
+        shared = REPO / 'alpine/desktop'
+        for name, data in sorted(self.assets.items()):
+            with self.subTest(asset=name):
+                self.assertEqual((shared / name).read_bytes(), data)
+
+    def test_every_profile_carries_its_own_pointer_and_deck_tiles(self):
+        for profile in sorted((REPO / 'alpine/themes/profiles').glob('*')):
+            if not profile.is_dir():
+                continue
+            with self.subTest(theme=profile.name):
+                for name in self.assets:
+                    self.assertTrue((profile / name).is_file(), name)
+
+    def test_another_theme_draws_its_own_ring_and_tiles(self):
+        other = desktop_theme.render_assets(REPO, ALTERNATE)
+        self.assertEqual(set(other), set(self.assets))
+        for name in sorted(self.assets):
+            with self.subTest(asset=name):
+                self.assertNotEqual(other[name], self.assets[name])
+
+    def test_the_text_pass_never_tries_to_decode_a_drawn_asset(self):
+        rendered = desktop_theme.render_profile(REPO, ALTERNATE)
+        for name in self.assets:
+            self.assertNotIn(name, rendered)
+
+    def test_the_pointer_index_follows_the_theme_and_keeps_its_name(self):
+        for theme, expected in ((GRUVBOX, 'simp1e-cursors-gruvbox-dark'),
+                                (ALTERNATE, ALTERNATE['design']['cursors'])):
+            with self.subTest(theme=theme['id']):
+                index = desktop_theme.render_profile(REPO, theme)[desktop_theme.CURSOR_INDEX]
+                # The deployed sway seat names Oldbook-Ghost, so only what it
+                # inherits may move between themes.
+                self.assertIn('Name=Oldbook-Ghost\n', index)
+                self.assertIn('Inherits=' + expected + '\n', index)
+        seat = (REPO / 'alpine/desktop/.config/sway/theme.conf').read_text()
+        self.assertRegex(seat, r'(?m)^seat \* xcursor_theme Oldbook-Ghost \d+$')
+
+
+class SurfacesOutsideTheOldFileSet(unittest.TestCase):
+    """Colour-bearing files a theme switch used to leave behind entirely.
+
+    LXQt's own Qt settings retint a running application within two seconds, and
+    the screenshot annotator is spawned fresh for every capture, so both were
+    ready to follow a theme and simply were not in the file set.
+    """
+
+    PATHS = ('.config/lxqt/lxqt.conf', '.config/satty/config.toml')
+
+    def test_they_are_rendered_into_every_theme_profile(self):
+        rendered = desktop_theme.render_profile(REPO, GRUVBOX)
+        for path in self.PATHS:
+            with self.subTest(path=path):
+                self.assertIn(path, rendered)
+                for profile in sorted((REPO / 'alpine/themes/profiles').glob('*')):
+                    if profile.is_dir():
+                        self.assertTrue((profile / path).is_file(), profile.name)
+
+    def test_no_gruvbox_shade_survives_into_another_theme(self):
+        rendered = desktop_theme.render_profile(REPO, ALTERNATE)
+        owned = {value.lower() for value in ALTERNATE['palette'].values()}
+        for path in self.PATHS:
+            with self.subTest(path=path):
+                found = literals(rendered[path])
+                self.assertTrue(found)
+                self.assertFalse(found & {value.lower()
+                                          for value in GRUVBOX['palette'].values()})
+                self.assertTrue(found & owned)
+
+    def test_the_palette_preset_takes_the_theme_s_own_name(self):
+        rendered = desktop_theme.render_profile(REPO, ALTERNATE)
+        self.assertIn('.local/share/lxqt/palettes/Boundary-Probe', rendered)
+        self.assertNotIn(desktop_theme.LXQT_PRESET, rendered)
+        self.assertIn(desktop_theme.LXQT_PRESET,
+                      desktop_theme.render_profile(REPO, GRUVBOX))
+
+    def test_the_icon_and_pointer_names_reach_every_toolkit(self):
+        rendered = desktop_theme.render_profile(REPO, ALTERNATE)
+        icons = ALTERNATE['design']['icons']
+        self.assertIn('icon_theme=' + icons, rendered['.config/lxqt/lxqt.conf'])
+        self.assertIn('icon_theme=' + icons, rendered['.config/qt6ct/qt6ct.conf'])
+        for version in ('3.0', '4.0'):
+            settings = rendered[f'.config/gtk-{version}/settings.ini']
+            self.assertIn('gtk-icon-theme-name=' + icons, settings)
+            self.assertIn('gtk-cursor-theme-name=Oldbook-Ghost', settings)
 
 
 class SwitchingReachesTheBootChain(unittest.TestCase):

@@ -32,6 +32,44 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## Catppuccin, and what a second theme exposed — 2026-09-09
+
+The user asked that dropping in a theme restyle "literally every single part of
+the computer", and for Catppuccin as a theme to switch to. The second request is
+what proved the first: until now gruvbox-dark was the only theme that existed,
+so every claim about theme independence rested on synthesised test descriptors
+rather than on a theme anyone would use.
+
+Two faults had been invisible for exactly that reason. The recolour snapped an
+off-palette shade to whichever single role sat nearest, which looks correct when
+the shades were that theme's to begin with and is not: the bar's amber
+keep-awake ground collapsed to a flat surface, battery-critical red to the
+border colour, and inactive window titles to *purple*. Shades are now rebuilt as
+a blend of two roles, so a tint keeps both its ground and its tint. And the
+terminal palettes were half-dead — the ANSI dims had no roles at all, so every
+generated theme reached Foot, Ghostty, btop, Neovim, the console and the
+passphrase prompt with eight distinct colours instead of sixteen, dark yellow
+landing on green and dark magenta and dark cyan both on muted. Ten optional
+roles now exist, derived when a descriptor omits them, so a theme is still a
+thirteen-colour job to write.
+
+Binary assets ride the switch now rather than stopping at text: cursor shapes
+and the power deck's glyph tiles are drawn per theme, `design.cursors` names the
+inherited pointer set and `design.icons` the icon folder. The check that matters
+is that redrawing Gruvbox reproduces its committed cursor and PNG bytes exactly,
+which is what separates generation from something that merely looks generated.
+
+One limit was found and deliberately not papered over. `accent` and terminal
+`yellow` are the same role by construction, so declaring mauve as Catppuccin's
+accent would turn ANSI 3 and 11 mauve everywhere. Mocha ships with yellow as
+accent, which is an official Catppuccin variant, and a painting may still elect
+mauve or teal through the reactive accent.
+
+Gruvbox is unchanged: profile, console palette, kernel parameters, cursor bytes,
+deck tiles and icon set all reproduce byte for byte. Forty-five check suites
+pass. Nothing was applied — the live theme was never switched, no boot happened,
+and no pointer was looked at.
+
 ## Bed mode — 2026-09-09
 
 The user asked for the locked desktop to notice his cat on the keyboard and

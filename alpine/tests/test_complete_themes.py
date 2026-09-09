@@ -59,6 +59,91 @@ class CompleteThemes(unittest.TestCase):
                      '.config/gtk-3.0/settings.ini', '.config/fuzzel/fuzzel.ini'):
             self.assertNotEqual(first[path], second[path], path)
 
+    def test_every_declared_theme_carries_a_full_sixteen_colour_terminal(self):
+        """A second theme is what proves the palette is complete rather than
+        approximately complete. Before the dim roles existed every dark ANSI
+        slot was snapped onto whichever single role sat nearest, so a generated
+        theme reached Foot, Ghostty, btop, Neovim, the Linux console and the
+        LUKS prompt with eight distinct colours instead of sixteen -- and with
+        dark yellow landing on green, dark magenta and dark cyan both on
+        muted."""
+        renderer = importlib.import_module('desktop_theme')
+        sys.path.insert(0, str(REPO / 'alpine/system/boot'))
+        import console_palette
+        for source in sorted((REPO / 'alpine/themes').glob('*.json')):
+            theme = json.loads(source.read_text())
+            with self.subTest(theme=theme['id']):
+                foot = renderer.render_profile(REPO, theme)['.config/foot/foot.ini']
+                colors = console_palette.terminal_colors(foot)
+                self.assertEqual(len(set(colors)), 16, colors)
+                self.assertEqual(colors[0], theme['palette']['background'])
+                self.assertEqual(colors[15], theme['palette']['foreground'])
+
+    def test_optional_roles_are_derived_when_a_descriptor_leaves_them_out(self):
+        renderer = importlib.import_module('desktop_theme')
+        theme = json.loads((REPO / 'alpine/themes/gruvbox-dark.json').read_text())
+        thirteen = {name: value for name, value in theme['palette'].items()
+                    if not name.endswith('_dim') and name not in
+                    ('surface_bright', 'subtle', 'foreground_dim')}
+        self.assertEqual(len(thirteen), 13)
+        derived = renderer.colors(dict(theme, palette=thirteen))
+        for role in renderer.OPTIONAL_ROLES:
+            with self.subTest(role=role):
+                self.assertRegex(derived[role], r'^#[0-9a-f]{6}$')
+        # A declared role always wins over its derivation.
+        declared = renderer.colors(theme)
+        self.assertEqual(declared['red_dim'], theme['palette']['red_dim'])
+        self.assertNotEqual(derived['red_dim'], declared['red_dim'])
+
+    def test_a_tinted_ground_keeps_its_ground_and_its_tint(self):
+        """Snapping to one role turned every tinted status ground into the same
+        flat surface. Each of these is a role blended over a role, and the
+        reconstruction has to name the same two roles the template meant."""
+        renderer = importlib.import_module('desktop_theme')
+        theme = json.loads((REPO / 'alpine/themes/gruvbox-dark.json').read_text())
+        sources = tuple(sorted({value.lower() for value in theme['palette'].values()}
+                               | {'#fbf1c7', '#32302f'}))
+        role = {value.lower(): name for name, value in theme['palette'].items()}
+        for shade, tint in (('#504018', 'yellow_dim'),   # keep-awake ground
+                            ('#9d2420', 'red_dim'),      # battery critical ground
+                            ('#442722', 'red_dim'),      # temperature critical
+                            ('#32361a', 'green_dim'),    # AI complete
+                            ('#3c1f1e', 'red_dim')):     # Neovim diff removed
+            with self.subTest(shade=shade):
+                base, chosen, amount = renderer.decompose(shade, sources)
+                self.assertEqual(role[chosen], tint)
+                self.assertIn(role[base], ('background', 'background_hard'))
+                self.assertGreater(amount, 0)
+
+    def test_the_design_names_a_pointer_and_folder_set_for_every_theme(self):
+        renderer = importlib.import_module('desktop_theme')
+        for source in sorted((REPO / 'alpine/themes').glob('*.json')):
+            theme = json.loads(source.read_text())
+            with self.subTest(theme=theme['id']):
+                design = renderer.validate_design(theme['design'])
+                index = renderer.render_profile(REPO, theme)[renderer.CURSOR_INDEX]
+                self.assertIn('Name=Oldbook-Ghost\n', index)
+                self.assertIn('Inherits=' + design['cursors'] + '\n', index)
+                self.assertIn('gtk-icon-theme-name=' + design['icons'],
+                              renderer.render_profile(REPO, theme)['.config/gtk-3.0/settings.ini'])
+
+    def test_a_descriptor_without_asset_names_still_renders(self):
+        """An older descriptor must not lose its pointer to a stricter schema."""
+        renderer = importlib.import_module('desktop_theme')
+        theme = json.loads((REPO / 'alpine/themes/gruvbox-dark.json').read_text())
+        theme['design'] = {name: value for name, value in theme['design'].items()
+                           if name not in ('cursors', 'icons')}
+        design = renderer.validate_design(theme['design'])
+        self.assertEqual(design['cursors'], renderer.DESIGN_DEFAULTS['cursors'])
+        self.assertIn('Inherits=' + renderer.DESIGN_DEFAULTS['cursors'],
+                      renderer.render_profile(REPO, theme)[renderer.CURSOR_INDEX])
+        for bad in ({**theme['design'], 'cursors': '../elsewhere'},
+                    {**theme['design'], 'icons': ''},
+                    {**theme['design'], 'cursors': 7}):
+            with self.subTest(design=bad):
+                with self.assertRaises(ValueError):
+                    renderer.validate_design(bad)
+
     def test_rendered_profile_deploys_and_can_be_restored(self):
         renderer = importlib.import_module('desktop_theme')
         theme = json.loads((REPO / 'alpine/themes/gruvbox-dark.json').read_text())

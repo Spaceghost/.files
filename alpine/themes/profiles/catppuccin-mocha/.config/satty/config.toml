@@ -1,0 +1,24 @@
+# Screenshot annotation in the Catppuccin Mocha palette. oldbook-screenshot opens each
+# capture here after the flash and shutter; Enter copies and closes, Escape
+# closes, Ctrl+S overwrites the capture with the annotated version.
+[general]
+fullscreen = false
+early-exit = true
+corner-roundness = 12
+initial-tool = "arrow"
+copy-command = "wl-copy"
+annotation-size-factor = 1.0
+save-after-copy = false
+default-hide-toolbars = false
+disable-notifications = true
+actions-on-enter = ["save-to-clipboard", "exit"]
+actions-on-escape = ["exit"]
+actions-on-right-click = ["save-to-clipboard"]
+
+[font]
+family = "Inter"
+style = "Bold"
+
+[color-palette]
+palette = ["#f9e2af", "#f38ba8", "#a6e3a1", "#89b4fa", "#cba6f7", "#fab387"]
+custom = ["#cdd6f4", "#1e1e2e", "#94e2d5", "#b3a386", "#af6881", "#6784b9"]

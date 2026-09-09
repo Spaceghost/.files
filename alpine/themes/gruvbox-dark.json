@@ -5,8 +5,11 @@
     "background": "#282828",
     "background_hard": "#1d2021",
     "surface": "#3c3836",
+    "surface_bright": "#665c54",
     "border": "#504945",
     "foreground": "#ebdbb2",
+    "foreground_dim": "#bdae93",
+    "subtle": "#a89984",
     "muted": "#928374",
     "red": "#fb4934",
     "green": "#b8bb26",
@@ -14,7 +17,14 @@
     "blue": "#83a598",
     "purple": "#d3869b",
     "aqua": "#8ec07c",
-    "orange": "#fe8019"
+    "orange": "#fe8019",
+    "red_dim": "#cc241d",
+    "green_dim": "#98971a",
+    "yellow_dim": "#d79921",
+    "blue_dim": "#458588",
+    "purple_dim": "#b16286",
+    "aqua_dim": "#689d6a",
+    "orange_dim": "#d65d0e"
   },
   "reactive_accent": true,
   "image_style": "Gruvbox Dark color direction: warm charcoal and soot-black shadows (#282828, #1d2021), aged cream and parchment (#ebdbb2), glowing amber (#fabd2f), burnt orange (#fe8019), muted olive (#b8bb26), and restrained blue-grey (#83a598). Rich painterly canvas texture, cinematic chiaroscuro, luminous focal detail against calm dark negative space. Match a sophisticated warm dark desktop. Let Space Ghost's white suit read as aged ivory. Keep the scene funny, beautifully composed and legible at desktop scale. Avoid dominant purple or neon pink.",
@@ -25,6 +35,8 @@
     "opacity": 0.78,
     "bar_position": "top",
     "widget_edge": "right",
-    "launcher_width": 48
+    "launcher_width": 48,
+    "cursors": "simp1e-cursors-gruvbox-dark",
+    "icons": "Oldbook-Gruvbox"
   }
 }

@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """Draw the Oldbook Ghost cursor theme and write it in the Xcursor binary format.
 
-Only the waiting shapes are redrawn: an amber ring that turns and breathes while
-the desktop thinks. Everything else inherits the installed Simp1e Gruvbox set, so
-the pointer, text bar and resize arrows keep the theme the user already has.
+Only the waiting shapes are redrawn: a ring in the theme's own accent that turns
+and breathes while the desktop thinks. Everything else -- the pointer, the text
+bar, the resize arrows -- is inherited from an installed Simp1e set, named by the
+theme's `design.cursors`, so a theme switch moves the whole pointer family
+instead of leaving every shape but the ring in the previous theme's colours.
+Alpine packages the Simp1e family, so this needs no generation: Gruvbox Dark
+inherits `simp1e-cursors-gruvbox-dark` and Catppuccin Mocha inherits
+`simp1e-cursors-catppuccin-mocha` (`apk add simp1e-cursors-catppuccin-mocha`).
+An uninstalled set is not fatal -- Xcursor falls back to the default theme for
+the shapes it cannot find and the drawn ring still answers -- but it is reported
+rather than left to be discovered by eye.
 
 xcursorgen is not installed on this machine and the format is small, so the
 encoder lives here. An Xcursor file is a magic word, a table of contents, and one
@@ -45,9 +53,35 @@ ARROW = ((0.0, 0.0), (0.0, 15.2), (4.1, 11.6), (6.6, 17.4),
          (9.1, 16.3), (6.5, 10.7), (11.5, 10.2))
 
 
+def cursor_palette(roles):
+    """The four shades the drawn shapes use, as cairo channel triples.
+
+    `accent` is the same colour as `yellow` for a theme that declares no
+    separate accent, so Gruvbox's amber ring is unchanged; naming the accent is
+    what lets another theme's ring match its own bar and launcher.
+    """
+    chosen = dict(roles)
+    chosen['yellow'] = roles.get('accent', roles.get('yellow'))
+    return {name: rgb(value) for name, value in chosen.items() if isinstance(value, str)}
+
+
 def load_palette(path):
     palette = json.loads(Path(path).read_text())['palette']
-    return {name: rgb(value) for name, value in palette.items()}
+    return cursor_palette(palette)
+
+
+def theme_inherits(path):
+    """The Simp1e set a descriptor asks the drawn shapes to inherit from."""
+    design = json.loads(Path(path).read_text()).get('design') or {}
+    inherits = design.get('cursors')
+    return inherits if isinstance(inherits, str) and inherits else INHERITS
+
+
+def cursor_set_installed(name):
+    """Whether the inherited Xcursor theme is present for the session to find."""
+    roots = [Path.home() / '.local/share/icons', Path.home() / '.icons',
+             Path('/usr/local/share/icons'), Path('/usr/share/icons')]
+    return any((root / name / 'cursors').is_dir() for root in roots)
 
 
 def rgb(value):
@@ -217,9 +251,13 @@ SHAPES = {
 BUILDERS = {'watch': watch_frames, 'progress': progress_frames}
 
 
-def build(output, palette, sizes=SIZES, frames=FRAMES):
-    cursors = output / 'cursors'
-    cursors.mkdir(parents=True, exist_ok=True)
+def shapes(palette, sizes=SIZES, frames=FRAMES):
+    """Every cursor file this theme draws, keyed by the name it is written as.
+
+    The aliases are byte-identical copies rather than links: deploy-home links
+    regular files only, so a symlinked alias would never reach HOME, and Fossil
+    stores one blob for all of them regardless.
+    """
     written = {}
     for name, (kind, aliases) in SHAPES.items():
         images = []
@@ -227,14 +265,25 @@ def build(output, palette, sizes=SIZES, frames=FRAMES):
             images.extend(BUILDERS[kind](palette, size, frames))
         data = encode(images)
         for target in (name,) + tuple(aliases):
-            path = cursors / target
-            path.write_bytes(data)
-            written[target] = len(data)
+            written[target] = data
+    return written
+
+
+def build(output, palette, sizes=SIZES, frames=FRAMES, inherits=INHERITS, name=None):
+    cursors = output / 'cursors'
+    cursors.mkdir(parents=True, exist_ok=True)
+    written = {}
+    for target, data in shapes(palette, sizes, frames).items():
+        (cursors / target).write_bytes(data)
+        written[target] = len(data)
+    comment = (f'{name} cursors: a turning ring in the theme accent, inheriting {inherits}'
+               if name else
+               'Gruvbox Dark cursors: an amber ring that turns while the desktop thinks')
     index = output / 'index.theme'
     index.write_text('[Icon Theme]\n'
                      'Name=Oldbook-Ghost\n'
-                     'Comment=Gruvbox Dark cursors: an amber ring that turns while the desktop thinks\n'
-                     f'Inherits={INHERITS}\n')
+                     f'Comment={comment}\n'
+                     f'Inherits={inherits}\n')
     return written
 
 
@@ -269,7 +318,11 @@ def main():
     parser.add_argument('--strip', type=Path, help='also write a contact sheet here')
     arguments = parser.parse_args()
     palette = load_palette(arguments.theme)
-    written = build(arguments.output, palette, frames=arguments.frames)
+    inherits = theme_inherits(arguments.theme)
+    written = build(arguments.output, palette, frames=arguments.frames, inherits=inherits)
+    if not cursor_set_installed(inherits):
+        print(f'note: {inherits} is not installed; every shape this theme does not '
+              f'draw falls back to the default pointer set (apk add {inherits})')
     for name in sorted(written):
         print(f'{name}: {written[name]} bytes')
     if arguments.strip:

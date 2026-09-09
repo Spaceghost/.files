@@ -36,6 +36,29 @@ other: they were Gruvbox rather than stock, but hardcoded outside the theme file
 set, so the last screen of a session kept one theme's colours whatever was
 selected. Their values carry no leading `#`, which the renderer maps regardless.
 
+A descriptor stays a small job — thirteen roles and a design block — but every
+role a consumer needs must be derivable from it. Ten optional roles exist for
+that reason: the ANSI 1–6 dims, `surface_bright`, `subtle` and `foreground_dim`,
+each derived when a descriptor omits them. Without them a generated theme
+reached the terminals, btop, Neovim, the console and the passphrase prompt with
+eight distinct colours where sixteen were expected. An off-palette shade is
+rebuilt as a blend of two roles rather than snapped to whichever single role sits
+nearest, because that snap silently mis-mapped real surfaces — an amber
+keep-awake ground collapsed to a flat surface, and inactive window titles landed
+on purple.
+
+Binary assets follow the theme too, not only text: the cursor shapes and the
+power deck's glyph tiles are drawn per theme into its profile, `design.cursors`
+names the inherited pointer set and `design.icons` the icon folder. Redrawing
+Gruvbox's must reproduce its committed bytes exactly, which is what proves these
+are generated rather than merely regenerated-looking.
+
+Switching is reactive, and what cannot be made reactive is reported at switch
+time rather than hidden: third-party Qt windows read their palette at startup,
+already-running GTK and Qt clients keep the cursor they loaded, and `gtk.css`
+has no reload channel. The bar's accent must be re-elected before Waybar is
+signalled, not after, or the previous theme's accent survives the switch.
+
 Every built-in and generated theme is a complete desktop design: palette,
 typography, geometry, spacing, window treatment, launcher, widgets, application
 styling and matching artwork. Switching must apply it across the desktop.

@@ -21,6 +21,97 @@ Window borders, launcher outlines and panel outlines are disabled. Focus is
 shown through surface and text color. Existing shortcuts, controls, tooltips,
 notification behavior and gallery features remain available.
 
+## What a descriptor declares
+
+A theme is one JSON file beside this README. Thirteen palette roles and eight
+design values are the whole of what has to be authored; everything else is
+derived, so dropping in a new theme stays a small job.
+
+```
+palette   background  background_hard  surface  border  foreground  muted
+          red  green  yellow  blue  purple  aqua  orange
+design    font  radius  spacing  opacity  bar_position  widget_edge
+          launcher_width  cursors  icons
+```
+
+Ten further palette roles may be declared and are otherwise derived from the
+thirteen. They exist because real consumers needed values the thirteen could
+not express:
+
+| Role | Consumer | Derived as |
+| --- | --- | --- |
+| `red_dim` … `orange_dim` | ANSI 1–6 in Foot, Ghostty, btop, Neovim, the Linux console and the LUKS prompt | the bright role 32% toward `background` |
+| `surface_bright` | selection grounds, divider rules, btop's followed rows | `background` 32% toward `foreground` |
+| `subtle` | ANSI 7, and the bar's own dim labels | `background` 66% toward `foreground` |
+| `foreground_dim` | inactive titles, sidebars, footers | `background` 78% toward `foreground` |
+
+Before the dim roles existed, a generated theme's terminal had eight distinct
+colours rather than sixteen: every dark ANSI slot was snapped onto whichever
+single role sat nearest, which put Gruvbox's dark yellow on `green`, its dark
+magenta and dark cyan both on `muted`, and `#bdae93` — an inactive window title
+— on `purple`. Gruvbox Dark declares its own canonical sixteen; a theme that
+declares none gets a readable derived set.
+
+`design.cursors` names the installed Simp1e pointer set the drawn Oldbook-Ghost
+waiting shapes inherit every other shape from, and `design.icons` names the
+folder set built by `alpine/bin/build-icon-theme`. Both are asset *names*: a
+descriptor that omits them inherits the shipped Gruvbox sets rather than being
+refused, and `oldbook-theme use` says so when a named pointer set is not
+installed instead of leaving it to be noticed by eye.
+
+Off-palette shades in the authored templates are rebuilt as
+`blend(base_role, tint_role, amount)` rather than snapped to one role, so a
+tinted status ground keeps both the ground it sits on and the colour it is
+tinted with: the bar's keep-awake amber is `background_hard` a quarter of the
+way toward `yellow_dim` in every theme, not a flat surface grey.
+
+## Adding a theme
+
+```sh
+cd ~/.files
+$EDITOR alpine/themes/<id>.json          # thirteen colours and eight design values
+alpine/bin/build-icon-theme --theme <id> # optional: its own folder icons
+oldbook-theme sync                       # render its profile, cursors and deck tiles
+oldbook-theme use <id>
+```
+
+`oldbook-theme sync` renders every profile's text files, draws that theme's
+pointer shapes and power-deck glyph tiles, and derives its Ghostty palette from
+its Foot one. Nothing here compiles: the image builders are cairo and Pango.
+
+## What reacts to a theme switch, and what does not
+
+| Surface | How it follows |
+| --- | --- |
+| Sway, SwayFX | one IPC `reload`, awaited |
+| Pointer | `seat * xcursor_theme` after the reload |
+| Waybar | `SIGUSR2`, after the accent stylesheet is re-elected |
+| SwayNC | `swaync-client --reload-config` and `--reload-css` |
+| Conky | restarted by `oldbook-conky restart` |
+| Foot | OSC 4/10/11/12/17/19 written into each terminal's pty |
+| Ghostty | `SIGUSR2` |
+| tmux | `source-file` on every live server socket |
+| btop | `SIGUSR2`, guarded by an installed-handler check |
+| Neovim | `--remote-expr` re-running only the colour lines of `init.lua` |
+| GTK 3/4 | theme, icon theme, font, cursor theme and size pushed to `org.gnome.desktop.interface` |
+| Oldbook overlays | the decoration strip, Scripture bar, carousel and Super-hold poll the palette each second; the OSD and lock read it per render |
+| LXQt Qt apps | the plugin rereads `lxqt.conf`, which is now part of the profile |
+| fuzzel, wlogout, swaynag, satty | spawned per invocation, so they read the new files |
+| cava | `SIGTERM`; its supervisor brings it back |
+| The boot chain | the console palette is regenerated; `build-grub-theme` and `install-boot-console` publish it |
+
+Three things a running session cannot be made to follow, and are reported
+rather than hidden:
+
+- **Third-party Qt windows** read qt6ct at startup. Oldbook's own Qt surfaces
+  follow the palette on a one-second timer; other Qt windows keep the previous
+  theme until they are restarted.
+- **Already-running GTK and Qt clients** load the cursor theme themselves, and
+  `XCURSOR_THEME` in the session environment is fixed until the next login.
+  Sway's own pointer changes immediately.
+- **`gtk.css`** has no reload channel; the keys that travel are the ones
+  `settings.ini` publishes through gsettings.
+
 ## Edit and apply
 
 The deployed files are symlinks into `alpine/desktop/`; edit either path.

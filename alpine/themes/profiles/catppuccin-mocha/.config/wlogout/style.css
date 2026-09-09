@@ -1,0 +1,60 @@
+/* Space Ghost power deck: themed tiles over the blurred desktop.
+ *
+ * SwayFX blurs the desktop behind the logout_dialog layer; the window itself
+ * only tints it. Glyph tiles are rendered by alpine/bin/build-wlogout-icons
+ * and referenced relative to this stylesheet: GTK resolves the URL against the
+ * path it was handed, so ~/.config/wlogout/icons/ still answers once the theme
+ * deployer replaces the stylesheet beside it with a symlink into a profile.
+ *
+ * Every colour here is a role in the active theme's palette, never a shade
+ * picked by eye: the theme renderer maps each declared value to that theme's
+ * own colour, and anything off-palette gets snapped to whichever role happens
+ * to sit nearest. Staying on the thirteen roles is what makes a generated
+ * theme land exactly rather than approximately.
+ *
+ * Roles used, in Catppuccin Mocha terms:
+ *   #11111b hard ground   #313244 surface   #cdd6f4 foreground
+ *   #f9e2af accent        #fab387 orange
+ */
+* {
+    background-image: none;
+    box-shadow: none;
+    font-family: "Inter", "JetBrainsMono Nerd Font", sans-serif;
+}
+window {
+    background-color: rgba(17, 17, 27, 0.55);
+}
+button {
+    color: #cdd6f4;
+    background-color: rgba(49, 50, 68, 0.94);
+    border: none;
+    border-radius: 22px;
+    outline: none;
+    font-size: 15px;
+    font-weight: 500;
+    padding-top: 152px;
+    background-repeat: no-repeat;
+    background-position: center 32%;
+    background-size: 92px 92px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+button:hover, button:focus {
+    background-color: #f9e2af;
+    color: #11111b;
+}
+/* Pressed is the accent's warmer sibling, so the tile still reads as chosen in
+   a theme whose accent and orange are far apart. */
+button:active {
+    background-color: #fab387;
+    color: #11111b;
+}
+#lock { background-image: url("icons/lock.png"); }
+#lock:hover, #lock:focus { background-image: url("icons/lock-active.png"); }
+#suspend { background-image: url("icons/suspend.png"); }
+#suspend:hover, #suspend:focus { background-image: url("icons/suspend-active.png"); }
+#logout { background-image: url("icons/logout.png"); }
+#logout:hover, #logout:focus { background-image: url("icons/logout-active.png"); }
+#reboot { background-image: url("icons/reboot.png"); }
+#reboot:hover, #reboot:focus { background-image: url("icons/reboot-active.png"); }
+#shutdown { background-image: url("icons/shutdown.png"); }
+#shutdown:hover, #shutdown:focus { background-image: url("icons/shutdown-active.png"); }

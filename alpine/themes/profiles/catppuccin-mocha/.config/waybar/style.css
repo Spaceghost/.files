@@ -1,0 +1,174 @@
+/* Space Ghost × Catppuccin Mocha control deck. GTK CSS, intentionally built for stock Waybar. */
+@import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
+@define-color oldbook_workspace_active #d7def6;
+@define-color oldbook_workspace_secondary #a6adc8;
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "Symbols Nerd Font", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    min-height: 0;
+}
+window#waybar { background: transparent; color: #cdd6f4; }
+.modules-left, .modules-right {
+    background: linear-gradient(180deg, rgba(49, 50, 68, 0.98), rgba(17, 17, 27, 0.98));
+    border: none;
+    border-radius: 18px;
+    box-shadow: 0 4px 12px rgba(17, 17, 27, 0.55);
+    margin-bottom: 5px;
+}
+.modules-center { background: transparent; margin: 0 8px; padding: 0; }
+.modules-right { padding: 0 5px; }
+#custom-ghost {
+    font-family: "Symbols Nerd Font", "JetBrainsMono Nerd Font", sans-serif;
+    font-size: 21px;
+    min-width: 36px;
+    color: #fff6ff;
+    background: linear-gradient(135deg, #b765eb, #77369e 60%, #ce579e);
+    text-shadow: 0 0 5px #e3baff;
+    border-radius: 12px;
+    margin: 3px 5px 3px 3px;
+    padding: 0;
+}
+#custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
+#workspaces { margin: 3px 5px 3px 0; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a6adc8; transition: all 180ms ease-in-out; }
+#workspaces button.empty { color: #5d6076; }
+#workspaces button:hover { background: #45475a; color: #d7def6; box-shadow: none; }
+#workspaces button.focused {
+    background: linear-gradient(110deg, alpha(#f9e2af, .22), alpha(#f9e2af, .10));
+    color: @oldbook_workspace_active;
+    font-weight: 400;
+    box-shadow: none;
+}
+#workspaces button.urgent { background: #af6881; color: #d7def6; }
+#custom-ai { color: #f9e2af; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 11px; }
+#custom-ai:hover { background: #45475a; color: #d7def6; }
+#custom-ai.idle { color: #6c7086; }
+#custom-ai.complete { color: #a6e3a1; background: #262e2e; }
+#custom-ai.attention { color: #d7def6; background: #845268; }
+#mode { color: #fab387; padding: 0 9px; }
+#mpris { color: #94e2d5; padding: 0 7px; font-size: 10px; }
+#mpris.paused { color: #a6adc8; }
+#mpris.previous, #mpris.next { font-size: 15px; padding: 0 8px; }
+#mpris:hover { background: rgba(148, 226, 213, 0.16); }
+/* Optional transmission meter beside the music controls; silent frames collapse it. */
+#custom-cava { color: #94e2d5; padding: 0 6px; margin: 0 2px; font-size: 10px; }
+#custom-cava.silent { padding: 0; margin: 0; }
+#cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
+#pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
+    padding: 0 8px;
+    margin: 4px 0;
+    border-radius: 11px;
+}
+#cpu { color: #cba6f7; }
+#memory, #disk { color: #a6adc8; }
+#temperature { color: #fab387; }
+#temperature.critical { color: #f38ba8; background: #34293a; }
+#custom-link { color: #89b4fa; }
+#custom-link.offline, #custom-radio.blocked { color: #6c7086; }
+#custom-radio { color: #94e2d5; }
+#custom-firewall.staged { color: #f9e2af; }
+#custom-firewall.running { color: #a6e3a1; }
+#pulseaudio { color: #cdd6f4; }
+#pulseaudio.muted { color: #5d6076; }
+#battery { color: #cdd6f4; }
+#battery.charging, #battery.plugged { color: #a6e3a1; }
+#battery.warning { color: #f9e2af; }
+#battery.critical { color: #d7def6; background: #845268; animation: distress 1s ease-in-out infinite alternate; }
+#backlight { color: #f9e2af; }
+#idle_inhibitor { color: #6c7086; }
+#idle_inhibitor.activated { color: #f9e2af; background: #3a3636; }
+#custom-notifications { color: #cba6f7; padding: 0 9px; }
+#clock { background: rgba(69, 71, 90, 0.72); color: #cdd6f4; padding: 0 11px; margin-left: 3px; }
+#tray { margin-right: 2px; padding: 0 5px; }
+#cpu:hover, #memory:hover, #custom-link:hover, #custom-radio:hover, #custom-firewall:hover,
+#pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
+    background: rgba(108, 112, 134, 0.22);
+}
+tooltip { background: rgba(17, 17, 27, 0.99); border: none; border-radius: 16px; box-shadow: 0 6px 18px rgba(17, 17, 27, 0.46); }
+tooltip label { color: #cdd6f4; padding: 13px 15px; font-size: 11px; font-weight: 500; }
+@keyframes distress { to { background: #af6881; } }
+#custom-art { color: #a6adc8; font-size: 15px; padding: 0 7px 0 4px; }
+#custom-art:hover { color: #d7def6; }
+#custom-art.paused { color: #5d6076; }
+#custom-art.generating { color: #f9e2af; text-shadow: 0 0 7px #b3a386; }
+/* The badge is a thumbnail of the painting on screen; paused dims it and
+   generating shows the hourglass glyph in its place. */
+#custom-art image.thumbnail { margin: 0 2px; }
+#custom-art.paused image.thumbnail { opacity: 0.55; }
+#custom-art:hover image.thumbnail { opacity: 0.85; }
+
+/* Workspace peek: rest on a workspace and its windows appear beneath the bar. */
+popover#oldbook-peek { background: rgba(17, 17, 27, 0.98); border-radius: 16px; }
+popover#oldbook-peek contents { background: transparent; }
+popover#oldbook-peek .oldbook-peek-card { padding: 2px; }
+popover#oldbook-peek .oldbook-peek-still { background: #313244; border-radius: 6px; }
+popover#oldbook-peek .oldbook-peek-title { color: #a6adc8; font-size: 10px; padding-top: 2px; }
+
+/* Click-through system monitor: bottom layer, visible through transparent terminals. */
+window#waybar.monitor { background: transparent; color: #b5bcd8; }
+window#waybar.monitor .modules-left {
+    background: linear-gradient(145deg, rgba(17, 17, 27, 0.68), rgba(49, 50, 68, 0.48));
+    border: 1px solid rgba(166, 173, 200, 0.25);
+    border-radius: 11px;
+    padding: 7px 7px 8px;
+}
+window#waybar.monitor #custom-conky-title,
+window#waybar.monitor #custom-conky-footer,
+window#waybar.monitor #cpu,
+window#waybar.monitor #memory,
+window#waybar.monitor #temperature,
+window#waybar.monitor #network,
+window#waybar.monitor #disk,
+window#waybar.monitor #custom-uptime {
+    background: transparent;
+    border-radius: 0;
+    margin: 0;
+    padding: 3px 5px;
+    font-size: 10px;
+}
+window#waybar.monitor #custom-conky-title,
+window#waybar.monitor #custom-conky-footer { color: #a6adc8; }
+window#waybar.monitor #custom-conky-title {
+    color: #f9e2af;
+    font-weight: 800;
+    padding-bottom: 5px;
+}
+window#waybar.monitor #custom-conky-footer { padding-top: 5px; }
+window#waybar.monitor #cpu { color: #cba6f7; }
+window#waybar.monitor #memory { color: #94e2d5; }
+window#waybar.monitor #temperature { color: #fab387; }
+window#waybar.monitor #network { color: #89b4fa; }
+window#waybar.monitor #network.disconnected { color: #6c7086; }
+window#waybar.monitor #disk { color: #bac2de; }
+window#waybar.monitor #custom-uptime { color: #b5bcd8; }
+
+/* While a window is fullscreen the bar fades back so it stops competing with
+   the content; oldbook-waybar-dim writes the opacity into waybar-state.css.
+   GTK only sets the hover state on the module boxes, never on the window or
+   the row that holds them, so each chrome block answers the pointer itself. */
+window#waybar.top .modules-left,
+window#waybar.top .modules-center,
+window#waybar #status {
+    transition: opacity 130ms ease-out;
+}
+window#waybar.top .modules-left:hover,
+window#waybar.top .modules-center:hover,
+window#waybar #status:hover {
+    opacity: 1;
+    transition: opacity 90ms ease-out;
+}
+
+/* Music controls occupy the center naturally, without a surrounding island. */
+window#waybar.top .modules-center { margin: 0 8px; padding: 0; }
+
+/* The accent follows the painting on screen. Written by oldbook-palette;
+   imported last so its rules win over the declared accent above. */
+@import url("waybar-accent.css");
+
+/* catppuccin-mocha: typography and panel shape */
+* { font-family: "Inter", "Symbols Nerd Font", sans-serif; }
+window#waybar.top .modules-left, window#waybar.top .modules-right { border-radius: 22px; }
+#workspaces button { padding: 0 6px; }
