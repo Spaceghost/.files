@@ -23,9 +23,15 @@ from verify_decoration_attachment import SwayIPC, theme_radius, walk
 
 
 if len(sys.argv) > 1 and sys.argv[1] == 'observe':
+    import ctypes
+    import ctypes.util
     import gi
 
-    gi.require_version('Gtk', '3.0')
+    # gtk4-layer-shell only interposes when it precedes libwayland-client, so
+    # it has to be loaded before importing Gtk -- the daemon does the same.
+    ctypes.CDLL(ctypes.util.find_library('gtk4-layer-shell')
+                or 'libgtk4-layer-shell.so.0', mode=ctypes.RTLD_GLOBAL)
+    gi.require_version('Gtk', '4.0')
     from gi.repository import Gtk
 
     trace = []

@@ -139,11 +139,20 @@ def queue_geometry_update(callback):
 
 
 def daemon():
+    # gtk4-layer-shell only takes effect when it precedes libwayland-client in
+    # the global scope, which is the in-process equivalent of LD_PRELOAD and
+    # what every other GTK4 surface here does. Loaded directly rather than
+    # through showdesktop's helper: three lines of ctypes are not worth
+    # importing the show-desktop animation and its workspace model for.
+    import ctypes
+    import ctypes.util
+    ctypes.CDLL(ctypes.util.find_library('gtk4-layer-shell')
+                or 'libgtk4-layer-shell.so.0', mode=ctypes.RTLD_GLOBAL)
     import gi
-    gi.require_version('Gtk', '3.0')
-    gi.require_version('Gdk', '3.0')
-    gi.require_version('GtkLayerShell', '0.1')
-    from gi.repository import Gdk, Gio, GLib, Gtk, GtkLayerShell, Pango
+    gi.require_version('Gtk', '4.0')
+    gi.require_version('Gdk', '4.0')
+    gi.require_version('Gtk4LayerShell', '1.0')
+    from gi.repository import Gdk, Gio, GLib, Gtk, Gtk4LayerShell, Pango
 
     STATE.mkdir(parents=True, exist_ok=True)
     guard = (STATE / 'daemon.lock').open('a+')
@@ -152,10 +161,40 @@ def daemon():
     except BlockingIOError:
         return 0
 
+    Gtk.init()
     display = Gdk.Display.get_default()
-    if display is None or not GtkLayerShell.is_supported():
+    if display is None or not Gtk4LayerShell.is_supported():
         print('Workspace decoration needs the Wayland desktop.', file=sys.stderr)
         return 1
+    loop = GLib.MainLoop()
+
+    def load_css(provider, text):
+        """GTK 4.12 replaced the byte-oriented loader with a string one."""
+        if hasattr(provider, 'load_from_string'):
+            provider.load_from_string(text)
+        else:
+            provider.load_from_data(text.encode(), -1)
+
+    def add_click(widget, callback):
+        """GTK4 delivers pointer buttons through a gesture, not an event signal.
+
+        Button 0 means every button: the handler decides which ones it wants
+        and claims only those, so an unclaimed press still reaches the widget's
+        own click machinery exactly as returning False did under GTK3.
+        """
+        gesture = Gtk.GestureClick()
+        gesture.set_button(0)
+        gesture.connect('pressed', callback)
+        widget.add_controller(gesture)
+        return gesture
+
+    def children_of(box):
+        child = box.get_first_child()
+        while child is not None:
+            # Read the sibling first: a handler may unparent this child.
+            following = child.get_next_sibling()
+            yield child
+            child = following
 
     class Caption:
         def __init__(self, monitor, placement, animate_entry=True):
@@ -179,38 +218,37 @@ def daemon():
             self.disposed = False
             self.icon_key = None
             self.window = Gtk.Window()
+            self.window.set_decorated(False)
             self.window.set_opacity(self.alpha)
             self.css_name = 'workspace-decoration-' + str(id(self))
             self.window.set_name(self.css_name)
             self.window.set_can_focus(False)
-            visual = self.window.get_screen().get_rgba_visual()
-            if visual is not None:
-                self.window.set_visual(visual)
-            GtkLayerShell.init_for_window(self.window)
-            GtkLayerShell.set_namespace(self.window, 'oldbook-decoration')
-            GtkLayerShell.set_monitor(self.window, monitor)
+            Gtk4LayerShell.init_for_window(self.window)
+            Gtk4LayerShell.set_namespace(self.window, 'oldbook-decoration')
+            Gtk4LayerShell.set_monitor(self.window, monitor)
             attached = self.attachment_mode == 'window'
-            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP if attached
-                                    else GtkLayerShell.Layer.OVERLAY)
-            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.TOP if attached
+                                     else Gtk4LayerShell.Layer.OVERLAY)
+            Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.NONE)
             anchors = (('TOP', 'LEFT') if attached
                        else decoration_reserve.band_anchors(edge))
             for name in anchors:
-                side = getattr(GtkLayerShell.Edge, name)
-                GtkLayerShell.set_anchor(self.window, side, True)
-                GtkLayerShell.set_margin(self.window, side,
-                                         0 if attached else decoration_reserve.EDGE_MARGIN)
+                side = getattr(Gtk4LayerShell.Edge, name)
+                Gtk4LayerShell.set_anchor(self.window, side, True)
+                Gtk4LayerShell.set_margin(self.window, side,
+                                          0 if attached else decoration_reserve.EDGE_MARGIN)
             # The caption itself never reserves anything: the band does that
             # once and keeps doing it, so no focus change can resize a window.
             # An attached caption follows a window that may be anywhere in the
             # output and needs the whole coordinate space; a workspace caption
             # keeps a zero zone so it still sits below the bar's reservation,
             # and steps back over its own band with a negative margin.
-            GtkLayerShell.set_exclusive_zone(self.window, -1 if attached else 0)
+            Gtk4LayerShell.set_exclusive_zone(self.window, -1 if attached else 0)
             self.band = (0, True)
             orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
             self.box = Gtk.Box(orientation=orientation, spacing=4)
-            self.box.get_style_context().add_class('caption')
+            self.box.add_css_class('caption')
+            self.box.set_vexpand(True)
             # The strip and the window it decorates are one shape along the
             # bottom, so the surface starts above the caption: the seam area
             # covers the window's last rows and fills the two corners the
@@ -219,22 +257,21 @@ def daemon():
             self.seam = 0
             self.fill = None
             self.input_shape = None
+            self.content_size = None
             self.shell = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
             self.fillets = Gtk.DrawingArea()
-            self.fillets.connect('draw', self.draw_seam)
-            self.shell.pack_start(self.fillets, False, False, 0)
-            self.shell.pack_start(self.box, True, True, 0)
-            self.window.add(self.shell)
-            self.shell.show()
+            self.fillets.set_draw_func(self.draw_seam)
+            self.shell.append(self.fillets)
+            self.shell.append(self.box)
+            self.window.set_child(self.shell)
             self.brand = self.button('', 'Window actions', lambda button: self.popup(button))
-            self.brand.get_style_context().add_class('brand')
-            self.image = Gtk.Image.new_from_icon_name('application-x-executable-symbolic', Gtk.IconSize.MENU)
-            self.brand.set_image(self.image)
-            self.brand.set_always_show_image(True)
-            self.box.pack_start(self.brand, False, False, 0)
+            self.brand.add_css_class('brand')
+            self.image = Gtk.Image.new_from_icon_name('application-x-executable-symbolic')
+            self.brand.set_child(self.image)
+            self.box.append(self.brand)
             self.title_button = Gtk.Button()
             self.title_button.set_can_focus(False)
-            self.title_button.get_style_context().add_class('title-button')
+            self.title_button.add_css_class('title-button')
             self.label = Gtk.Label()
             self.label.set_use_markup(False)
             if edge == 'bottom':
@@ -243,34 +280,39 @@ def daemon():
                 self.label.set_hexpand(True)
                 # Observatory captions read from the left, like an exhibit label.
                 self.label.set_xalign(0.0)
-            self.title_button.add(self.label)
-            self.title_button.connect('button-press-event', self.title_click)
-            self.box.pack_start(self.title_button, True, True, 0)
+            self.title_button.set_child(self.label)
+            if edge == 'bottom':
+                self.title_button.set_hexpand(True)
+            else:
+                self.title_button.set_vexpand(True)
+            add_click(self.title_button, self.title_click)
+            self.box.append(self.title_button)
             self.state_label = Gtk.Label()
-            self.state_label.get_style_context().add_class('window-state')
-            self.box.pack_start(self.state_label, False, False, 4)
+            self.state_label.add_css_class('window-state')
+            self.state_label.set_margin_start(4)
+            self.state_label.set_margin_end(4)
+            self.box.append(self.state_label)
             self.empty_controls = Gtk.Box(orientation=orientation, spacing=3)
             for action in launchers({}):
                 control = self.button(action['label'], 'Open ' + action['label'],
                                       lambda button, action=action: self.run(dict(
                                           action, workspace=self.context.get('workspace'))))
-                self.empty_controls.pack_start(control, False, False, 0)
-            self.box.pack_start(self.empty_controls, False, False, 0)
+                self.empty_controls.append(control)
+            self.box.append(self.empty_controls)
             self.tile_button = self.button('▱', 'Float this window', lambda button: self.toggle_float())
             self.full_button = self.button('⛶', 'Fullscreen', lambda button: self.toggle_fullscreen())
             self.windows_button = self.button('▤', 'Choose a window', lambda button: self.popup(button, windows=True))
             self.more_button = self.button('⋯', 'Window actions and strip appearance', lambda button: self.popup(button))
             for button in (self.tile_button, self.full_button, self.windows_button, self.more_button):
-                self.box.pack_start(button, False, False, 0)
+                self.box.append(button)
             self.provider = Gtk.CssProvider()
-            Gtk.StyleContext.add_provider_for_screen(self.window.get_screen(), self.provider,
-                                                    Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            Gtk.StyleContext.add_provider_for_display(display, self.provider,
+                                                      Gtk.STYLE_PROVIDER_PRIORITY_USER)
             # The accent wash behind the brand button follows the keyboard's
             # breath while you type. It rides its own provider above the styled
             # one so a pulse never reparses the whole caption stylesheet.
             self.breath_provider = Gtk.CssProvider()
-            Gtk.StyleContext.add_provider_for_screen(self.window.get_screen(),
-                                                    self.breath_provider, 900)
+            Gtk.StyleContext.add_provider_for_display(display, self.breath_provider, 900)
             self.breath = air.Smoother(air.CAPTION_LOW, response=0.09, tolerance=1e-4)
             self.breath_painted = None
             self.accent = None
@@ -294,10 +336,20 @@ def daemon():
                 return
             self.band = (thickness, matching)
             zone, margin = decoration_reserve.caption_offset(thickness, matching)
-            side = getattr(GtkLayerShell.Edge,
+            if margin < 0:
+                # gtk4-layer-shell cannot carry a negative margin: the size it
+                # asks the compositor for collapses to zero and sway answers
+                # with a default slab two hundred pixels tall. Taking the whole
+                # output and stepping in from the raw edge puts the strip in
+                # exactly the same row, because the band it is stepping back
+                # over is the only thing reserving that edge. It still reserves
+                # nothing itself -- a zone of -1 declines other reservations,
+                # it does not make one.
+                zone, margin = -1, decoration_reserve.EDGE_MARGIN
+            side = getattr(Gtk4LayerShell.Edge,
                            'BOTTOM' if self.edge == 'bottom' else 'RIGHT')
-            GtkLayerShell.set_exclusive_zone(self.window, zone)
-            GtkLayerShell.set_margin(self.window, side, margin)
+            Gtk4LayerShell.set_exclusive_zone(self.window, zone)
+            Gtk4LayerShell.set_margin(self.window, side, margin)
 
         def remeasure(self, style):
             """Size the band from a reference line rather than the live caption.
@@ -312,10 +364,10 @@ def daemon():
             self.label.set_use_markup(False)
             if self.edge == 'bottom':
                 self.label.set_text(reference)
-                natural = self.box.get_preferred_height()[1]
+                natural = self.box.measure(Gtk.Orientation.VERTICAL, -1)[1]
             else:
                 self.label.set_text(vertical_title(reference, len(reference)))
-                natural = self.box.get_preferred_width()[1]
+                natural = self.box.measure(Gtk.Orientation.HORIZONTAL, -1)[1]
             self.measured = decoration_reserve.band_thickness(natural)
             sample = self.label.create_pango_layout(decoration_reserve.SAMPLE)
             sample.set_font_description(Pango.FontDescription(f'{style[0]} {style[1]}'))
@@ -341,10 +393,61 @@ def daemon():
             if self.edge != 'bottom' or not self.character_width:
                 return None
             span = (placement['rect']['width'] if self.attachment_mode == 'window'
-                    else self.monitor.get_workarea().width)
-            controls = sum(child.get_preferred_width()[1] for child in self.box.get_children()
+                    else self.monitor.get_geometry().width)
+            controls = sum(child.measure(Gtk.Orientation.HORIZONTAL, -1)[1]
+                           for child in children_of(self.box)
                            if child is not self.title_button and child.get_visible())
             return decoration_reserve.character_budget(span, self.character_width, controls + 48)
+
+        def size_to_content(self):
+            """Give the compositor the one dimension its anchors cannot supply.
+
+            A workspace strip is anchored along the whole of its edge, so the
+            span is the compositor's to choose, but the thickness is anchored
+            at neither end. A layer surface that asks for zero there is asking
+            to be told, and what it is told is an arbitrary default rather than
+            the caption's own height. GTK3's layer-shell binding measured the
+            window for us; GTK4's reads the window's default size instead, so
+            the measurement belongs here.
+            """
+            if self.attachment_mode == 'window':
+                return
+            # Both numbers are given outright. gtk4-layer-shell requests the
+            # window's default size verbatim, and a -1 there is not a size the
+            # protocol can carry; the anchored span is the compositor's to
+            # overrule anyway, so naming the output's own extent costs nothing.
+            area = self.monitor.get_geometry()
+            if self.edge == 'bottom':
+                size = (max(1, area.width),
+                        max(1, self.shell.measure(Gtk.Orientation.VERTICAL, -1)[1]))
+            else:
+                size = (max(1, self.shell.measure(Gtk.Orientation.HORIZONTAL, -1)[1]),
+                        max(1, area.height))
+            if size == self.content_size:
+                return
+            self.content_size = size
+            # The thickness is stated as a request as well as a default. A
+            # layer surface that leaves a dimension to the compositor is told
+            # an arbitrary number for it, and any later change to the zone or
+            # the margins recomputes the surface and forgets a default size --
+            # a request is a floor the recomputation keeps. This is what an
+            # attached caption already does through render_geometry().
+            self.window.set_size_request(-1 if self.edge == 'bottom' else size[0],
+                                         size[1] if self.edge == 'bottom' else -1)
+            self.window.set_default_size(*size)
+
+        def attached_extent(self, rect):
+            """The size an attached strip takes for the window it decorates.
+
+            The span comes from the window; the thickness is measured from the
+            strip's own contents. Kept apart from place() because a handoff
+            has to state the size before it has anywhere to put it.
+            """
+            if self.edge == 'bottom':
+                width = max(1, rect['width'])
+                return width, max(1, self.shell.measure(Gtk.Orientation.VERTICAL, width)[1])
+            height = max(1, rect['height'])
+            return max(1, self.shell.measure(Gtk.Orientation.HORIZONTAL, height)[1]), height
 
         def place(self, placement, output_rect):
             if self.attachment_mode != 'window':
@@ -357,17 +460,14 @@ def daemon():
                 return
             x = rect['x'] - output_rect['x']
             y = rect['y'] - output_rect['y']
+            width, height = self.attached_extent(rect)
             if self.edge == 'bottom':
                 # The caption's own rows stay exactly where they have always
                 # been; only the seam above them is new, so the surface starts
                 # that much higher and is that much taller.
                 y += rect['height'] - self.seam
-                width = max(1, rect['width'])
-                height = max(1, self.shell.get_preferred_height_for_width(width)[1])
             else:
                 x += rect['width']
-                height = max(1, rect['height'])
-                width = max(1, self.shell.get_preferred_width_for_height(height)[1])
             self.motion_target = dict(x=x, y=y, width=width, height=height)
             if self.motion_rect is None or not self.animations:
                 self.motion_rect = dict(self.motion_target)
@@ -377,19 +477,26 @@ def daemon():
 
         def render_geometry(self):
             rect = {key: round(value) for key, value in self.motion_rect.items()}
-            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rect['x'])
-            GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.TOP, rect['y'])
+            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.LEFT, rect['x'])
+            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.TOP, rect['y'])
             size = (max(1, rect['width']), max(1, rect['height']))
             if size != self.rendered_size:
-                # GTK queues layout even when resize() repeats the same size.
+                # GTK queues layout even when the size request repeats itself.
                 # Moving a caption only needs new margins and a repaint.
-                self.window.set_size_request(size[0] if self.edge == 'bottom' else -1,
-                                             size[1] if self.edge == 'right' else -1)
-                self.window.resize(*size)
+                #
+                # Both dimensions are requested, not just the anchored span.
+                # A hover handoff renews the native surface, and whatever the
+                # window cannot state at that moment the compositor decides
+                # for it -- which is a two-hundred pixel square, shown for a
+                # frame at the new position before the real size arrives. The
+                # thickness here is the same measurement place() just took, so
+                # stating it costs nothing and leaves nothing to guess.
+                self.window.set_size_request(*size)
+                self.window.set_default_size(*size)
                 self.rendered_size = size
                 self.refresh_input()
 
-        def draw_seam(self, widget, context):
+        def draw_seam(self, widget, context, width, height):
             """Fill the two corners the compositor clipped out of the window.
 
             The rounding removes a quarter disc from each bottom corner and the
@@ -398,7 +505,6 @@ def daemon():
             the colour the caption's own first row already has -- squares the
             pair's outline without hiding a single row the window was drawing.
             """
-            width = widget.get_allocated_width()
             radius = min(self.seam, width // 2)
             if radius <= 0 or self.fill is None:
                 return False
@@ -428,13 +534,16 @@ def daemon():
             size = self.rendered_size
             if size is None or (self.seam, size) == self.input_shape:
                 return
+            surface = self.window.get_surface()
+            if surface is None:
+                return
             try:
                 import cairo
                 region = None
                 if self.seam > 0:
                     region = cairo.Region(cairo.RectangleInt(
                         0, self.seam, max(1, size[0]), max(1, size[1] - self.seam)))
-                self.window.input_shape_combine_region(region)
+                surface.set_input_region(region)
             except (ImportError, AttributeError, TypeError, ValueError):
                 return
             self.input_shape = (self.seam, size)
@@ -473,9 +582,9 @@ def daemon():
                 painted = air.quantise(value)
                 if painted != self.breath_painted:
                     self.breath_painted = painted
-                    self.breath_provider.load_from_data(
-                        f'#{self.css_name} .brand {{ background: alpha({self.accent}, '
-                        f'{painted:.3f}); }}'.encode())
+                    load_css(self.breath_provider,
+                             f'#{self.css_name} .brand {{ background: alpha({self.accent}, '
+                             f'{painted:.3f}); }}')
             return settled and breath_state['target'] == air.CAPTION_LOW
 
         def retire(self):
@@ -495,30 +604,32 @@ def daemon():
             button = Gtk.Button.new_with_label(label)
             button.set_can_focus(False)
             button.set_tooltip_text(hint)
-            button.get_accessible().set_name(hint)
+            button.update_property([Gtk.AccessibleProperty.LABEL], [hint])
             button.connect('clicked', callback)
-            button.connect('button-press-event', self.secondary_click)
+            add_click(button, self.secondary_click)
             return button
 
-        def secondary_click(self, widget, event):
-            if event.button != 3:
-                return False
-            if event.state & Gdk.ModifierType.SHIFT_MASK:
+        def secondary_click(self, gesture, presses, x, y):
+            if gesture.get_current_button() != 3:
+                return
+            gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+            if gesture.get_current_event_state() & Gdk.ModifierType.SHIFT_MASK:
                 launch(action_command(3, shifted=True))
             else:
-                self.popup(widget, event=event)
-            return True
+                self.popup(gesture.get_widget())
 
-        def title_click(self, widget, event):
-            if event.button == 3:
-                return self.secondary_click(widget, event)
-            if event.button == 2:
+        def title_click(self, gesture, presses, x, y):
+            button = gesture.get_current_button()
+            if button == 3:
+                self.secondary_click(gesture, presses, x, y)
+                return
+            if button == 2:
+                gesture.set_state(Gtk.EventSequenceState.CLAIMED)
                 self.toggle_float()
-                return True
-            if event.button == 1:
-                self.popup(widget, windows=bool(self.context.get('id')), event=event)
-                return True
-            return False
+                return
+            if button == 1:
+                gesture.set_state(Gtk.EventSequenceState.CLAIMED)
+                self.popup(gesture.get_widget(), windows=bool(self.context.get('id')))
 
         def run(self, action):
             threading.Thread(target=execute, args=(action,), daemon=True).start()
@@ -531,82 +642,112 @@ def daemon():
             context = dict(self.context)
             self.run(window_item(context, '', 'fullscreen disable' if context.get('fullscreen') else 'fullscreen enable'))
 
-        def fill_menu(self, menu, actions):
+        def menu_entry(self, group, counter, command=None):
+            """One uniquely named action per entry, disabled when it does nothing.
+
+            GTK4 menus are models rather than widgets, so an item's sensitivity
+            belongs to the action behind it: a disabled action is exactly the
+            insensitive row `set_sensitive(False)` used to produce.
+            """
+            counter[0] += 1
+            name = 'item%d' % counter[0]
+            entry = Gio.SimpleAction.new(name, None)
+            if command is None:
+                entry.set_enabled(False)
+            else:
+                entry.connect('activate', lambda widget, parameter: self.run(command))
+            group.add_action(entry)
+            return 'menu.' + name
+
+        def fill_menu(self, model, actions, group, counter):
+            """Translate one action list into a model, separators and all.
+
+            A `None` closes the current section: GTK4 draws the rule between
+            sections itself, which is what the separator items used to be.
+            """
+            section = Gio.Menu()
             for action in actions:
                 if action is None:
-                    menu.append(Gtk.SeparatorMenuItem())
+                    if section.get_n_items():
+                        model.append_section(None, section)
+                        section = Gio.Menu()
                     continue
-                entry = Gtk.MenuItem.new_with_label(action['label'])
                 children = action.get('children')
-                if children is not None:
-                    submenu = self.new_menu()
-                    self.fill_menu(submenu, children)
-                    entry.set_submenu(submenu)
-                    entry.set_sensitive(bool(children))
-                elif action.get('command'):
-                    entry.connect('activate', lambda widget, action=action: self.run(action))
+                if children:
+                    submenu = Gio.Menu()
+                    self.fill_menu(submenu, children, group, counter)
+                    section.append_submenu(action['label'], submenu)
+                elif children is not None or not action.get('command'):
+                    section.append(action['label'], self.menu_entry(group, counter))
                 else:
-                    entry.set_sensitive(False)
-                menu.append(entry)
+                    section.append(action['label'], self.menu_entry(group, counter, action))
+            if section.get_n_items():
+                model.append_section(None, section)
 
-        def new_menu(self):
-            menu = Gtk.Menu()
-            menu.get_style_context().add_class('decoration-menu')
-            menu.set_reserve_toggle_size(False)
-            return menu
-
-        def popup(self, widget, windows=False, event=None):
-            if self.menu:
-                self.menu.destroy()
+        def popup(self, widget, windows=False):
+            self.dismiss_menu()
             context = dict(self.context)
-            menu = self.new_menu()
-            self.menu = menu
-            heading = Gtk.MenuItem.new_with_label('Choose a window' if windows else
-                       (context.get('title') or 'Workspace ' + context.get('workspace', ''))[:65])
-            heading.set_sensitive(False)
-            menu.append(heading)
-            menu.append(Gtk.SeparatorMenuItem())
-            self.fill_menu(menu, window_items(self.tree) if windows else menu_items(context, self.tree))
-            menu.connect('selection-done', self.menu_closed)
+            group = Gio.SimpleActionGroup()
+            counter = [0]
+            model = Gio.Menu()
+            heading = Gio.Menu()
+            heading.append('Choose a window' if windows else
+                           (context.get('title') or 'Workspace ' + context.get('workspace', ''))[:65],
+                           self.menu_entry(group, counter))
+            model.append_section(None, heading)
+            # Kept as its own section so the asynchronous answer can replace it
+            # in place, where GTK3 held an index into a list of widgets.
+            applications = Gio.Menu()
             if not windows and context.get('id'):
-                app_entry = Gtk.MenuItem.new_with_label('Application actions…')
-                app_entry.set_sensitive(False)
-                menu.insert(app_entry, 2)
-
+                applications.append('Application actions…', self.menu_entry(group, counter))
+                model.append_section(None, applications)
+            self.fill_menu(model, window_items(self.tree) if windows
+                           else menu_items(context, self.tree), group, counter)
+            menu = Gtk.PopoverMenu.new_from_model(model)
+            menu.add_css_class('decoration-menu')
+            menu.set_has_arrow(False)
+            menu.set_position(Gtk.PositionType.TOP if self.edge == 'bottom'
+                              else Gtk.PositionType.LEFT)
+            menu.insert_action_group('menu', group)
+            menu.set_parent(widget)
+            menu.connect('closed', self.menu_closed)
+            self.menu = menu
+            if not windows and context.get('id'):
                 def discover():
                     try:
                         actions = application_items(context)
                     except Exception as error:
                         print('Application actions unavailable: ' + type(error).__name__, file=sys.stderr)
                         actions = []
-                    GLib.idle_add(self.app_menu_ready, menu, app_entry, actions)
+                    GLib.idle_add(self.app_menu_ready, menu, applications, group, counter, actions)
                 threading.Thread(target=discover, daemon=True).start()
-            menu.show_all()
-            if self.edge == 'bottom':
-                anchors = (Gdk.Gravity.NORTH_EAST, Gdk.Gravity.SOUTH_EAST)
-            else:
-                anchors = (Gdk.Gravity.NORTH_WEST, Gdk.Gravity.NORTH_EAST)
-            menu.popup_at_widget(widget, *anchors, event or Gtk.get_current_event())
+            menu.popup()
 
-        def app_menu_ready(self, menu, entry, actions):
+        def app_menu_ready(self, menu, section, group, counter, actions):
             if self.disposed or self.menu is not menu:
                 return False
+            # An empty section draws nothing at all, which is the model's way
+            # of hiding the placeholder when an application offers no actions.
+            section.remove_all()
             if actions:
-                submenu = self.new_menu()
-                self.fill_menu(submenu, actions)
-                entry.set_submenu(submenu)
-                entry.set_label('Application actions')
-                entry.set_sensitive(True)
-                submenu.show_all()
-            else:
-                entry.hide()
+                submenu = Gio.Menu()
+                self.fill_menu(submenu, actions, group, counter)
+                section.append_submenu('Application actions', submenu)
             return False
 
         def menu_closed(self, menu):
             if self.menu is menu:
                 self.menu = None
             # Defer disposal until GTK has finished delivering the activation.
-            GLib.idle_add(lambda: (menu.destroy(), False)[1])
+            GLib.idle_add(lambda: (menu.unparent(), False)[1])
+
+        def dismiss_menu(self):
+            """Take down an open menu now, without waiting for its idle unparent."""
+            menu, self.menu = self.menu, None
+            if menu is None:
+                return
+            menu.popdown()
+            menu.unparent()
 
         def restyle(self, style, square, opacity):
             if (style, square, opacity) == self.previous_style:
@@ -638,7 +779,7 @@ def daemon():
             shade = ('0 4px 12px -2px' if seam else '0 3px 12px')
             # Ghost Observatory captions: roomier padding, medium-weight title.
             padding = '3px 9px' if self.edge == 'bottom' else '9px 3px'
-            self.provider.load_from_data(f'''
+            load_css(self.provider, f'''
                 #workspace-decoration {{ background: transparent; }}
                 #workspace-decoration .caption {{
                     background-image: linear-gradient(to bottom,
@@ -671,16 +812,20 @@ def daemon():
                 #workspace-decoration button:hover label, #workspace-decoration button:hover image {{
                     color: {colors['accent']};
                 }}
-                .decoration-menu {{
+                .decoration-menu {{ background: transparent; }}
+                .decoration-menu > contents {{
                     background: {colors['background']}; color: {colors['foreground']};
                     border: 1px solid alpha({colors['accent']}, .3); border-radius: 12px;
                     padding: 6px; font-family: "{family}"; font-size: {size}pt;
+                    box-shadow: 0 4px 16px alpha({colors['background_hard']}, .55);
                 }}
-                .decoration-menu menuitem {{ padding: 5px 12px; border-radius: 4px; }}
-                .decoration-menu menuitem:hover {{ background: alpha({colors['accent']}, .17); }}
-                .decoration-menu menuitem:disabled {{ color: alpha({colors['foreground']}, .55); }}
+                .decoration-menu modelbutton {{
+                    padding: 5px 12px; border-radius: 4px; min-height: 0;
+                }}
+                .decoration-menu modelbutton:hover {{ background: alpha({colors['accent']}, .17); }}
+                .decoration-menu modelbutton:disabled {{ color: alpha({colors['foreground']}, .55); }}
                 .decoration-menu separator {{ background: alpha({colors['foreground']}, .12); margin: 5px 8px; }}
-            '''.replace('#workspace-decoration', '#' + self.css_name).encode())
+            '''.replace('#workspace-decoration', '#' + self.css_name))
             self.previous_style = (style, square, opacity)
 
         def update(self, context, tree, style, placement, output_rect):
@@ -715,10 +860,10 @@ def daemon():
                 except (GLib.Error, AttributeError, TypeError):
                     pass
                 if icon:
-                    self.image.set_from_gicon(icon, Gtk.IconSize.MENU)
+                    self.image.set_from_gicon(icon)
                 else:
                     self.image.set_from_icon_name('utilities-terminal-symbolic' if terminal else
-                        ('application-x-executable-symbolic' if occupied else 'view-app-grid-symbolic'), Gtk.IconSize.MENU)
+                        ('application-x-executable-symbolic' if occupied else 'view-app-grid-symbolic'))
             title = context.get('title') or 'Empty workspace · ' + context.get('workspace', '')
             state = 'FULLSCREEN' if context.get('fullscreen') else ('FLOATING' if context.get('floating') else 'TILED')
             self.state_label.set_text(state if occupied and self.edge == 'bottom' else '')
@@ -727,13 +872,15 @@ def daemon():
             self.brand.set_tooltip_text((context.get('app') or 'Workspace') + ' · actions')
             self.tile_button.set_label('▦' if context.get('floating') else '▱')
             self.tile_button.set_tooltip_text('Tile this window' if context.get('floating') else 'Float this window')
-            self.tile_button.get_accessible().set_name(self.tile_button.get_tooltip_text())
+            self.tile_button.update_property([Gtk.AccessibleProperty.LABEL],
+                                             [self.tile_button.get_tooltip_text()])
             self.full_button.set_label('⤡' if context.get('fullscreen') else '⛶')
             self.full_button.set_tooltip_text('Leave fullscreen' if context.get('fullscreen') else 'Fullscreen')
-            self.full_button.get_accessible().set_name(self.full_button.get_tooltip_text())
-            # Measure the final visible controls and set attachment geometry
-            # before mapping the window's first buffer.
-            self.box.show_all()
+            self.full_button.update_property([Gtk.AccessibleProperty.LABEL],
+                                             [self.full_button.get_tooltip_text()])
+            # Set the visible controls and the attachment geometry before the
+            # window maps its first buffer. GTK4 widgets are visible as soon as
+            # they are added, so only what must be hidden is named here.
             self.empty_controls.set_visible(not occupied and self.edge == 'bottom')
             attached = self.attachment_mode == 'window'
             span = placement['rect']['width' if self.edge == 'bottom' else 'height']
@@ -758,7 +905,7 @@ def daemon():
                 layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
                 height = max(1, layout.get_pixel_size()[1])
                 span = (placement['rect']['height'] if self.attachment_mode == 'window'
-                        else self.monitor.get_workarea().height)
+                        else self.monitor.get_geometry().height)
                 available = max(1, span - (110 if span < 240 else 260))
                 self.shown_parts = list(parts)
                 self.label.set_use_markup(False)
@@ -767,8 +914,9 @@ def daemon():
                     available // height))
             else:
                 self.show_caption(parts)
+            self.size_to_content()
             self.place(placement, output_rect)
-            self.window.show()
+            self.window.present()
             self.animate()
             self.previous_display = display_state
 
@@ -780,31 +928,44 @@ def daemon():
             if self.tick_id:
                 self.window.remove_tick_callback(self.tick_id)
                 self.tick_id = 0
-            if self.menu:
-                self.menu.destroy()
-                self.menu = None
-            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
-            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(),
-                                                        self.breath_provider)
+            self.dismiss_menu()
+            Gtk.StyleContext.remove_provider_for_display(display, self.provider)
+            Gtk.StyleContext.remove_provider_for_display(display, self.breath_provider)
             self.window.destroy()
 
         def handoff(self, placement):
-            # Reuse the expensive GTK controls and CSS, but never reuse the
-            # old native buffer at a new position with its previous width.
-            # Unmapping and unrealizing make the next show allocate a fresh
-            # native surface after update() prepares the complete new size.
+            # Reuse the expensive GTK controls, the CSS and the native surface.
+            #
+            # GTK3 unmapped and unrealized here so the next present allocated a
+            # fresh surface rather than showing the old width at the new
+            # margins for a frame. Under GTK4 that trade is the wrong way
+            # round: gtk4-layer-shell has no resize(), so a size only lands on
+            # the next frame while a margin commits at once, and a surface
+            # created without a stated extent is given the compositor's guess
+            # -- a two hundred pixel square -- until its first frame arrives.
+            # Renewing the surface therefore replaces one frame of a slightly
+            # wrong width with one frame of a large opaque square. Keeping it
+            # is the smaller artefact.
             if self.tick_id:
                 self.window.remove_tick_callback(self.tick_id)
                 self.tick_id = 0
-            if self.menu:
-                self.menu.destroy()
-                self.menu = None
-            self.window.hide()
-            self.window.unrealize()
+            self.dismiss_menu()
+            # State the new size while the window is still realized and
+            # allocated. A layer surface that is created without one is given
+            # the compositor's guess -- a two hundred pixel square, shown at
+            # the new position for a frame before the real extent lands -- and
+            # by the time place() runs the surface already exists. Sizing here
+            # commits nothing on its own: the window is hidden in the same
+            # turn, so no frame is drawn between the two.
+            if self.attachment_mode == 'window':
+                extent = self.attached_extent(placement['rect'])
+                self.window.set_size_request(*extent)
+                self.window.set_default_size(*extent)
             self.previous_display = None
             self.previous_geometry = None
             self.rendered_size = None
             self.input_shape = None
+            self.content_size = None
             self.motion_rect = None
             self.motion_target = None
             self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
@@ -827,39 +988,58 @@ def daemon():
         def __init__(self, monitor, edge, thickness):
             self.monitor, self.edge, self.thickness = monitor, edge, 0
             self.window = Gtk.Window()
+            self.window.set_decorated(False)
             self.window.set_name('workspace-decoration-band')
             self.window.set_can_focus(False)
-            self.window.set_accept_focus(False)
-            visual = self.window.get_screen().get_rgba_visual()
-            if visual is not None:
-                self.window.set_visual(visual)
-            GtkLayerShell.init_for_window(self.window)
-            GtkLayerShell.set_namespace(self.window, 'oldbook-decoration-band')
-            GtkLayerShell.set_monitor(self.window, monitor)
+            Gtk4LayerShell.init_for_window(self.window)
+            Gtk4LayerShell.set_namespace(self.window, 'oldbook-decoration-band')
+            Gtk4LayerShell.set_monitor(self.window, monitor)
             # Behind everything: it must never cover a window, only keep one out.
-            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BACKGROUND)
-            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            Gtk4LayerShell.set_layer(self.window, Gtk4LayerShell.Layer.BACKGROUND)
+            Gtk4LayerShell.set_keyboard_mode(self.window, Gtk4LayerShell.KeyboardMode.NONE)
             for name in decoration_reserve.band_anchors(edge):
-                GtkLayerShell.set_anchor(self.window, getattr(GtkLayerShell.Edge, name), True)
-            self.window.set_size_request(*((-1, 1) if edge == 'bottom' else (1, -1)))
+                Gtk4LayerShell.set_anchor(self.window, getattr(Gtk4LayerShell.Edge, name), True)
+            # GTK4 refuses to map a toplevel whose natural size is zero, and a
+            # window holding no widgets at all has exactly that. One pixel in
+            # each direction is enough to exist; the anchors stretch it along
+            # the edge and the exclusive zone, not the surface, does the
+            # reserving.
+            # The reservation has to draw, even though it draws nothing. Its
+            # background is transparent and it holds no widgets, so GTK4 finds
+            # no content, never commits a sized buffer, and the layer surface
+            # keeps whatever the compositor guessed for it -- with the
+            # exclusive zone below never applied, which is the surface's whole
+            # job. A drawing area with an empty draw function produces the
+            # frame without putting a pixel on the screen. GTK3 painted the
+            # toolkit's own background here and never had to be asked.
+            area = Gtk.DrawingArea()
+            area.set_draw_func(lambda widget, context, width, height: None)
+            self.window.set_child(area)
+            # An empty toplevel measures zero, and a layer surface that asks
+            # for nothing is given an arbitrary default two hundred tall.
+            self.window.set_size_request(1, 1)
+            self.window.set_default_size(1, 1)
             # A window with no widgets still paints the toolkit's own background,
             # which on the screen's last row is a bright line across the desktop.
             # The band is a reservation, and a reservation is not a thing to see.
             self.provider = Gtk.CssProvider()
-            self.provider.load_from_data(
-                b'#workspace-decoration-band { background: transparent; border: none; }')
-            Gtk.StyleContext.add_provider_for_screen(
-                self.window.get_screen(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            load_css(self.provider,
+                     '#workspace-decoration-band { background: transparent; border: none; }')
+            Gtk.StyleContext.add_provider_for_display(
+                display, self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
             self.window.connect('realize', self.untouchable)
             self.set_thickness(thickness)
-            self.window.show_all()
+            self.window.present()
 
         def untouchable(self, _widget):
             """A one-pixel line at the screen edge is exactly where a person
             aims; an empty input region keeps their click on the window."""
+            surface = self.window.get_surface()
+            if surface is None:
+                return
             try:
                 import cairo
-                self.window.input_shape_combine_region(cairo.Region())
+                surface.set_input_region(cairo.Region())
             except (ImportError, AttributeError, TypeError):
                 pass
 
@@ -867,11 +1047,11 @@ def daemon():
             if thickness == self.thickness:
                 return False
             self.thickness = thickness
-            GtkLayerShell.set_exclusive_zone(self.window, thickness)
+            Gtk4LayerShell.set_exclusive_zone(self.window, thickness)
             return True
 
         def destroy(self):
-            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+            Gtk.StyleContext.remove_provider_for_display(display, self.provider)
             self.window.destroy()
 
     captions = {}
@@ -924,8 +1104,8 @@ def daemon():
         watcher.set_attached(any(item['mode'] == 'window' for item in placements.values()))
         output_rects = {node['name']: node['rect'] for node in last_tree.get('nodes', [])
                         if node.get('type') == 'output' and 'rect' in node}
-        monitors = {Gdk.Screen.get_default().get_monitor_plug_name(i): display.get_monitor(i)
-                    for i in range(display.get_n_monitors())}
+        monitors = {monitor.get_connector(): monitor
+                    for monitor in display.get_monitors() if monitor.get_connector()}
         immediate = set()
         for name in list(captions):
             placement = placements.get(name)
@@ -1080,7 +1260,7 @@ def daemon():
 
     def quit_daemon():
         stop.set()
-        Gtk.main_quit()
+        loop.quit()
         return False
 
     watcher = TreeWatch(os.environ.get('SWAYSOCK', ''), deliver_tree)
@@ -1092,8 +1272,22 @@ def daemon():
     watcher.start()
     from ui_priority import request_priority
     request_priority()
+    # GTK4 compiles its renderer's shaders the first time anything is actually
+    # drawn. Left alone that lands on the first caption the pointer asks for,
+    # and the strip sits still through the move that requested it. Rendering
+    # synthetic pixels offscreen pays for the pipeline up front, exactly as the
+    # carousel does; the keeper holds the device open for the session.
+    graphics_primer = None
     try:
-        Gtk.main()
+        from graphics_warmup import warm_graphics
+        graphics_primer = warm_graphics()
+    except Exception as error:
+        print('decoration graphics warmup:', error, file=sys.stderr)
+    # Realization and the first draw create driver worker pools that did not
+    # exist at Gtk.init(). Promote those threads after warming too.
+    request_priority()
+    try:
+        loop.run()
     finally:
         stop.set()
         watcher.close()
@@ -1103,6 +1297,8 @@ def daemon():
             caption.destroy()
         for band in bands.values():
             band.destroy()
+        if graphics_primer is not None:
+            graphics_primer.close()
         guard.close()
     return 0
 

@@ -51,15 +51,22 @@ def require(value, message):
 
 def observe_helper(helper, destination):
     """Passively observe only callbacks requested by the real daemon."""
+    import ctypes
+    import ctypes.util
     import gi
 
-    gi.require_version('Gtk', '3.0')
+    # gtk4-layer-shell only interposes when it precedes libwayland-client, so
+    # it has to be loaded before importing Gtk -- the daemon does the same.
+    ctypes.CDLL(ctypes.util.find_library('gtk4-layer-shell')
+                or 'libgtk4-layer-shell.so.0', mode=ctypes.RTLD_GLOBAL)
+    gi.require_version('Gtk', '4.0')
     from gi.repository import Gtk
 
     original = Gtk.Widget.add_tick_callback
     frames, paints, draws, timing_objects, resize_calls, updates = [], [], [], [], [], []
     observed = set()
-    original_resize = Gtk.Window.resize
+    # GTK4 sizes a layer surface through its default size; there is no resize().
+    original_resize = Gtk.Window.set_default_size
 
     def resize(window, width, height):
         resize_calls.append({'window': window.get_name(),
@@ -86,28 +93,27 @@ def observe_helper(helper, destination):
 
                 owner.update = update
 
+            # GTK4 renders through snapshots and has no ::draw signal to time.
+            # The frame clock brackets the same work: before-paint opens the
+            # interval and after-paint closes it, so this still measures how
+            # long the caption spends painting one frame.
+            def before_paint(frame_clock):
+                nonlocal draw_started
+                draw_started = time.monotonic_ns()
+                draws.append({'window': identity, 'duration_us': None,
+                              'counter': frame_clock.get_frame_counter(),
+                              'monotonic_us': draw_started // 1000})
+
             def after_paint(frame_clock):
                 paints.append({'window': identity,
                                'counter': frame_clock.get_frame_counter(),
                                'clock_us': frame_clock.get_frame_time(),
                                'monotonic_us': time.monotonic_ns() // 1000})
-
-            def draw(window, _context):
-                nonlocal draw_started
-                draw_started = time.monotonic_ns()
-                draws.append({'window': identity, 'duration_us': None,
-                              'counter': window.get_frame_clock().get_frame_counter(),
-                              'monotonic_us': draw_started // 1000})
-                return False
-
-            def draw_complete(_window, _context):
-                if draw_started is not None:
+                if draw_started is not None and draws and draws[-1]['duration_us'] is None:
                     draws[-1]['duration_us'] = (time.monotonic_ns() - draw_started) / 1000
-                return False
 
+            clock.connect('before-paint', before_paint)
             clock.connect('after-paint', after_paint)
-            widget.connect('draw', draw)
-            widget.connect_after('draw', draw_complete)
 
         def observed_callback(window, frame_clock, *data):
             owner = getattr(callback, '__self__', None)
@@ -148,7 +154,7 @@ def observe_helper(helper, destination):
         }, indent=2) + '\n')
 
     Gtk.Widget.add_tick_callback = register
-    Gtk.Window.resize = resize
+    Gtk.Window.set_default_size = resize
     atexit.register(save)
     sys.argv = [str(helper), 'daemon']
     runpy.run_path(str(helper), run_name='__main__')
@@ -277,7 +283,7 @@ def analyze(raw, start_us, end_us, refresh):
                                           for value in raw['resize_calls']),
         'gdk_refresh_intervals_us': sorted(set(value['refresh_interval_us'] for value in timings)),
         'callback_duration_us': duration_stats([frame['callback_us'] for frame in frames]),
-        'draw_signal_duration_us': duration_stats([value['duration_us'] for value in draws
+        'paint_duration_us': duration_stats([value['duration_us'] for value in draws
                                                   if value['duration_us'] is not None]),
         'caption_update_duration_us': duration_stats([value['duration_us'] for value in raw['updates']
             if start_us <= value['monotonic_us'] <= end_us]),
@@ -498,6 +504,13 @@ def main():
         data = origin.read_bytes()
         destination.write_bytes(data)
         hashes[str(relative)] = hashlib.sha256(data).hexdigest()
+    # The daemon imports more of the library than SOURCES names -- the air
+    # curve, the reservation, the power ladder, the window context -- and a
+    # snapshot missing any of them cannot start at all. Copy the library whole
+    # and let SOURCES stay the list whose hashes are recorded as evidence.
+    shutil.copytree(args.source / 'alpine/desktop/.local/lib/oldbook',
+                    source / 'alpine/desktop/.local/lib/oldbook',
+                    ignore=shutil.ignore_patterns('__pycache__'), dirs_exist_ok=True)
     shutil.copytree(args.source / 'alpine/themes', source / 'alpine/themes',
                     ignore=shutil.ignore_patterns('profiles', 'assets', '__pycache__'))
     summary = {'source_sha256': hashes,
