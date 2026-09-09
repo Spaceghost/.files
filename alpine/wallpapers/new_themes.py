@@ -79,6 +79,50 @@ def save_theme(repo, definition, phrase):
     return theme
 
 
+def log_reason(log, limit=400):
+    """Return what the generator itself said went wrong, from its own log.
+
+    The log is JSONL from the model runner, and when a run fails the reason is
+    almost always in it in plain words -- an expired login, a usage limit with
+    the date it resets, a refusal. Every one of those used to be replaced by
+    "see private generation log", which is a sentence that tells the reader
+    only that reading is required and not where or what for. The last error the
+    runner recorded is what the user actually needs, so it is carried out to
+    them instead of being left behind in a file named after a timestamp.
+    """
+    if log is None:
+        return None
+    try:
+        lines = Path(log).read_text(errors='replace').splitlines()
+    except (OSError, ValueError):
+        return None
+    for line in reversed(lines):
+        line = line.strip()
+        if not line.startswith('{'):
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(event, dict):
+            continue
+        found = event.get('message')
+        error = event.get('error')
+        if not found and isinstance(error, dict):
+            found = error.get('message')
+        elif not found and isinstance(error, str):
+            found = error
+        if isinstance(found, str) and found.strip():
+            return ' '.join(found.split())[:limit]
+    return None
+
+
+def failed(log, fallback):
+    """The reason the log gives, or the caller's own words when it gives none."""
+    reason = log_reason(log)
+    return RuntimeError(reason or fallback)
+
+
 def request_design(config, env, log, prompt, schema, command_builder):
     """Use the existing login for a bounded text-only proposal before painting."""
     with tempfile.TemporaryDirectory(prefix='oldbook-theme-') as directory:
@@ -102,7 +146,8 @@ def request_design(config, env, log, prompt, schema, command_builder):
                     process.wait()
                 raise RuntimeError('Artwork design exceeded its three-minute deadline') from None
         if process.returncode:
-            raise RuntimeError('Artwork design failed; see private generation log')
+            raise failed(log, f'Artwork design exited with status {process.returncode} '
+                              'and recorded no reason')
         return json.loads((work / 'result.json').read_text())
 
 

@@ -237,12 +237,16 @@ def checkpoint_record(record, metadata, repository=REPO):
     return 0
 
 
-def notify(title, message, *, image=None):
+def notify(title, message, *, image=None, urgency=None):
     env = os.environ.copy()
     runtime = Path('/run/user') / str(os.getuid())
     if 'DBUS_SESSION_BUS_ADDRESS' not in env and (runtime / 'bus').exists():
         env['DBUS_SESSION_BUS_ADDRESS'] = 'unix:path=' + str(runtime / 'bus')
     command = ['notify-send', '--app-name=Ghost Gallery', '--icon=image-x-generic']
+    if urgency:
+        # A failure the user did not see is a failure they cannot act on, and
+        # these arrive while nobody is watching. Critical stays until dismissed.
+        command.append('--urgency=' + urgency)
     if image is not None:
         image = Path(image).resolve()
         command.append('--hint=string:image-path:' + str(image))
@@ -251,6 +255,68 @@ def notify(title, message, *, image=None):
         subprocess.run([*command, '--', title, message], env=env, capture_output=True, timeout=5)
     except (OSError, subprocess.TimeoutExpired):
         pass
+
+
+LAST_FAILURE = STATE / 'last-failure'
+
+
+def remember_failure(record, log):
+    """Leave a fixed pair of paths at the last failure, whatever it was called.
+
+    Records are named after a timestamp and a pid, so the log holding the
+    answer is never at a path anyone can remember or type. These two links
+    always point at the most recent one.
+    """
+    found = {}
+    for suffix, target in (('.json', record), ('.jsonl', log)):
+        link = LAST_FAILURE.with_suffix(suffix)
+        try:
+            if target is None or not Path(target).exists():
+                continue
+            link.unlink(missing_ok=True)
+            link.symlink_to(Path(target).resolve())
+            found[suffix] = link
+        except OSError:
+            continue
+    return found
+
+
+def newest_attempt_log(record, phase):
+    """The log of the attempt that actually failed, not the first one.
+
+    Each retry writes its own file beside the record, so the first attempt's
+    log is the one least likely to hold the reason the run gave up.
+    """
+    first = record.with_suffix(f'.{phase}.jsonl')
+    candidates = [path for path in (first, *sorted(
+        first.parent.glob(first.stem + '.attempt-*' + first.suffix))) if path.exists()]
+    return candidates[-1] if candidates else None
+
+
+def notify_failure(phase, error, record, log=None):
+    """Say what stopped it, in the generator's own words, and where to look.
+
+    The old message was the phase name and "hit a snag", over an error that had
+    already been flattened to "see private generation log" several frames
+    below. Between them they managed to say that something had gone wrong
+    without saying what, which is the one thing a notification about a failure
+    exists to do. The reason now comes from the runner's own log -- an expired
+    login, a usage limit and the date it lifts -- and the paths are the fixed
+    ones rather than a timestamp nobody kept.
+    """
+    titles = {'theme': 'Theme design stopped', 'scene': 'Scene design stopped',
+              'image': 'Painting stopped'}
+    from new_themes import log_reason
+    log = log or newest_attempt_log(record, phase)
+    # The log wins over the exception. An exception has usually been through
+    # several frames by the time it arrives and may have been flattened on the
+    # way; the runner's own last words have not.
+    message = html.escape(log_reason(log) or str(error).strip() or 'No reason was recorded.')
+    links = remember_failure(record, log)
+    if links:
+        message += '\n\nThe whole run: ' + html.escape(
+            str(links.get('.jsonl') or links.get('.json')))
+    notify(titles.get(phase, 'Generation stopped'), message, urgency='critical')
 
 
 def notify_theme_complete(entry, metadata):
@@ -328,7 +394,9 @@ def generate_native(config, prompt, env, log):
                     process.wait()
                 raise RuntimeError('Generation exceeded its 15-minute deadline') from None
         if process.returncode:
-            raise RuntimeError(f'Codex exited with status {process.returncode}; see private generation log')
+            from new_themes import failed
+            raise failed(log, f'The painter exited with status {process.returncode} '
+                              'and recorded no reason')
         answer = json.loads((work / 'result.json').read_text())
         if (not isinstance(answer, dict) or not isinstance(answer.get('image_path'), str)
                 or not answer['image_path'].strip()):
@@ -423,7 +491,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
                 metadata.update(status='failed', phase='theme', error=str(error))
                 atomic_json(record, metadata)
-                notify('Theme design hit a snag', str(error)[:300])
+                notify_failure('theme', error, record)
                 raise
         else:
             selected_theme = load_theme(REPO, theme)
@@ -466,7 +534,7 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as error:
                     metadata.update(status='failed', phase='scene', error=str(error))
                     atomic_json(record, metadata)
-                    notify('Scene design hit a snag', str(error)[:300])
+                    notify_failure('scene', error, record)
                     raise
         seed = prompt_catalog.variation_seed()
         started = time.time()
