@@ -733,6 +733,17 @@
       ]
     },
     {
+      "id": "BAZZITE-REPLAY",
+      "paths": [
+        "bazzite/*",
+        "alpine/tests/test_bazzite_profile.py"
+      ],
+      "tests": [
+        "test_bazzite_profile.py"
+      ],
+      "evidence": []
+    },
+    {
       "id": "PACKAGE-CLOSURE",
       "paths": [
         "alpine/packages/*",

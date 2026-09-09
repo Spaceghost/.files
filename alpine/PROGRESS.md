@@ -30,6 +30,19 @@ and the net was never reached. Holding the key for ten seconds showed that
 elogind counts every autorepeat as a fresh press — forty-one of them — and
 refused all forty-one, which is what makes a sat-on key safe rather than a race.
 
+It travels to the other machines. `oldbook-lock` takes the first of
+`elogind-inhibit` and `systemd-inhibit` that the host provides — elogind's is a
+fork of systemd's and takes identical options — so the Bazzite replay gets the
+same guarantee from logind that Alpine gets from elogind. The replay transform
+swaps in stock swaylock, and it leaves the inhibitor intact: applied to a
+scratch HOME with a Bazzite-shaped PATH carrying `systemd-inhibit` and no
+elogind at all, the replayed helper took the block inhibitor, held it while
+swaylock ran and released it the moment the locker died. Bazzite's idle and
+before-sleep units call the same helper, so every lock route there is covered
+too. `oldbook-bazzite-profile check` now requires `systemd-inhibit`, and the
+replay has a BAZZITE-REPLAY contract for the first time: its paths were
+unmapped, so nothing recorded what a future change there had to preserve.
+
 Two limits recorded rather than papered over. The several-second hold that the
 SMC turns into a hardware power cut happens below Linux, and no inhibitor
 reaches it. And the key is inert only while the lock is up; an unlocked session

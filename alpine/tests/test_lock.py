@@ -5,6 +5,7 @@ import runpy
 import signal
 import socket
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import time
@@ -154,9 +155,15 @@ class LockRegressionTests(unittest.TestCase):
                 os.kill(int((root / 'started').read_text()), 0)
 
     def test_the_locker_holds_a_power_key_inhibitor_for_its_whole_life(self):
-        """elogind powers the machine off on a short press of the MacBook's
-        power key, which sits beside Backspace: brushing it while typing a
-        password must not end the session instead of unlocking it."""
+        """A short press of the MacBook's power key, which sits beside
+        Backspace, powers the machine off: brushing it while typing a password
+        must not end the session instead of unlocking it. Alpine supplies the
+        inhibitor as elogind's and the Bazzite replay as systemd's."""
+        for inhibitor in ('elogind-inhibit', 'systemd-inhibit'):
+            with self.subTest(inhibitor=inhibitor):
+                self.assert_the_locker_holds(inhibitor)
+
+    def assert_the_locker_holds(self, inhibitor):
         with tempfile.TemporaryDirectory(prefix='oldbook-lock-power-') as directory:
             root = Path(directory)
             wayland = socket.socket(socket.AF_UNIX)
@@ -164,7 +171,7 @@ class LockRegressionTests(unittest.TestCase):
             self.addCleanup(wayland.close)
             fake_bin = root / 'bin'
             fake_bin.mkdir()
-            inhibit = fake_bin / 'elogind-inhibit'
+            inhibit = fake_bin / inhibitor
             inhibit.write_text('#!/bin/sh\n'
                                f'printf "%s\\n" "$@" > {root / "inhibit-arguments"}\n'
                                'while [ "$1" != "--" ]; do shift; done\n'
@@ -178,9 +185,11 @@ class LockRegressionTests(unittest.TestCase):
                               'os.write(int(sys.argv[sys.argv.index("-R") + 1]), b"\\n")\n'
                               'time.sleep(20)\n')
             helper.chmod(0o755)
+            for command in ('python3', 'cat'):
+                (fake_bin / command).symlink_to(shutil.which(command))
             env = dict(os.environ, HOME=directory, XDG_RUNTIME_DIR=directory,
                        WAYLAND_DISPLAY='wayland-test', OLDBOOK_LOCK_BACKEND='stock',
-                       PATH=str(fake_bin) + ':/usr/bin:/bin')
+                       PATH=str(fake_bin))
             result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=5)
             self.assertEqual(result.returncode, 0, result.stderr)
             arguments = (root / 'inhibit-arguments').read_text().splitlines()
@@ -215,7 +224,7 @@ class LockRegressionTests(unittest.TestCase):
                               'os.write(int(sys.argv[sys.argv.index("-R") + 1]), b"\\n")\n'
                               'time.sleep(20)\n')
             helper.chmod(0o755)
-            (fake_bin / 'python3').symlink_to('/usr/bin/python3')
+            (fake_bin / 'python3').symlink_to(shutil.which('python3'))
             env = dict(os.environ, HOME=directory, XDG_RUNTIME_DIR=directory,
                        WAYLAND_DISPLAY='wayland-test', OLDBOOK_LOCK_BACKEND='stock',
                        PATH=str(fake_bin))

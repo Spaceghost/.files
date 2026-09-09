@@ -225,6 +225,23 @@ class BazziteProfileTest(unittest.TestCase):
         for flag in flags:
             self.assertIn(flag.split('=', 1)[0], help_text)
 
+    def test_bazzite_lock_keeps_the_power_key_inert_with_the_systemd_inhibitor(self):
+        """Bazzite carries no elogind. The replayed locker must still hold a
+        handle-power-key block inhibitor so a brushed power key cannot power the
+        machine off behind the lock, and check must require the program that
+        supplies it there."""
+        applied = self.run_profile('apply')
+        self.assertEqual(applied.returncode, 0, applied.stderr)
+        path = self.home / '.local/bin/oldbook-lock'
+        loader = importlib.machinery.SourceFileLoader('bazzite_lock_power', str(path))
+        spec = importlib.util.spec_from_loader(loader.name, loader)
+        lock = importlib.util.module_from_spec(spec)
+        loader.exec_module(lock)
+        self.assertIn('systemd-inhibit', lock.POWER_KEY_INHIBITORS)
+        self.assertIn('--what=handle-power-key', lock.POWER_KEY_HOLDER)
+        self.assertIn('--mode=block', lock.POWER_KEY_HOLDER)
+        self.assertIn('systemd-inhibit', load_helper().RUNTIME_COMMANDS)
+
     def test_deployed_overlay_theme_reads_the_checkout_palette(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)

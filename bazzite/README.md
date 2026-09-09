@@ -52,6 +52,15 @@ image and scaling option match the guarded Alpine invocation. Validate both
 manual locking and swayidle on the real host before treating the replay profile
 as usable.
 
+A locked session ignores the power key here exactly as it does on Alpine. The
+locker is launched under `systemd-inhibit --what=handle-power-key --mode=block`,
+which logind honours while `PowerKeyIgnoreInhibited` keeps its default `no`, and
+the inhibitor is released when the locker exits. `check` requires
+`systemd-inhibit` for that reason. logind counts each autorepeat of a held key
+as another press and refuses every one, so a key that is sat on stays inert; the
+sustained hold that firmware turns into a hardware power cut is below Linux on
+any machine and is not covered.
+
 Bazzite's systemd session owns D-Bus, PipeWire, WirePlumber and policy-kit. The
 profile never starts duplicate media/session daemons. The checked-in user units
 start the Oldbook panel, notification center, idle lock, workspace labels,

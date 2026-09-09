@@ -79,10 +79,11 @@ identities; a matching process name is insufficient.
 
 A locked session ignores the power key. The MacBook's power key sits beside
 Backspace and elogind powers the machine off on a short press, counting each
-autorepeat of a held key as another press, so the locker is launched holding an
-elogind `handle-power-key` block inhibitor and holds it for exactly as long as
-it lives, however it ends. elogind's `PowerKeyIgnoreInhibited` must stay `no`
-for that to hold. A missing or refused inhibitor must never prevent locking: a
+autorepeat of a held key as another press, so the locker is launched holding a
+`handle-power-key` block inhibitor and holds it for exactly as long as it lives,
+however it ends. The inhibitor comes from whichever login manager the host runs
+— `elogind-inhibit` here, `systemd-inhibit` on the Bazzite replay — and its
+`PowerKeyIgnoreInhibited` must stay `no` for that to hold. A missing or refused inhibitor must never prevent locking: a
 power key that still works is not a reason to leave the session open. The
 several-second hold the SMC turns into a hardware power cut sits below Linux
 and stays out of reach.
@@ -700,6 +701,29 @@ backup restored just to bypass the guard.
 - Checks: [deployment/recovery tests](tests/test_deploy.py).
   Disposable-HOME proof is separate from live application refresh; preserve real
   backup contents and compare exact owned paths before activation.
+
+### BAZZITE-REPLAY
+
+The desktop reaches other machines through the Bazzite replay profile, which
+copies the portable pieces of `alpine/desktop` onto a Fedora/systemd HOME from
+an explicit allowlist and rewrites what cannot travel: repository anchors, the
+Waybar art module, and the lock, which names the image's stock swaylock because
+Bazzite carries neither swaylockd nor swaylock-effects. Alpine APKs, OpenRC
+services, native musl binaries and the Apple SMC helpers stay behind. Preserve
+`preview`, `check`, `apply` and `rollback`, the immutable per-revision overlay
+and the shared deployment journal.
+
+Behavior the replay is meant to keep must be pinned in its own right rather than
+assumed from the Alpine side. A locked session ignores the power key on both:
+the transform must leave the inhibitor intact and `check` must require
+`systemd-inhibit`, which is what supplies it where there is no elogind.
+
+- Implementation: [replay profile](../bazzite/bin/oldbook-bazzite-profile),
+  [Bazzite notes](../bazzite/README.md),
+  [session units](../bazzite/desktop/.config/systemd/user).
+- Checks: [replay profile tests](tests/test_bazzite_profile.py).
+  A replay applied on this machine is not a Bazzite host; manual locking,
+  swayidle and the session units remain the user's check on the real machine.
 
 ### PACKAGE-CLOSURE
 

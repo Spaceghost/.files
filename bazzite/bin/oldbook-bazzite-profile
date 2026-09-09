@@ -82,7 +82,8 @@ RUNTIME_COMMANDS = (
     'eza', 'firefox', 'foot', 'fossil', 'fuzzel', 'ghostty', 'grim', 'gsettings', 'ip', 'jq',
     'less', 'loginctl', 'mpv', 'mpvpaper', 'nmcli', 'notify-send', 'nvim', 'pavucontrol',
     'playerctl', 'python3', 'slurp', 'ssh', 'starship', 'superhold', 'sway', 'swayidle',
-    'swaylock', 'swaymsg', 'swaync', 'swaync-client', 'systemctl', 'thunar', 'tmux', 'waybar',
+    'swaylock', 'swaymsg', 'swaync', 'swaync-client', 'systemctl', 'systemd-inhibit',
+    'thunar', 'tmux', 'waybar',
     'wl-copy', 'wl-paste', 'wpctl', 'xdg-open', 'yt-dlp', 'zoxide', 'zsh',
 )
 OPTIONAL_COMMANDS = ('cava', 'pithos', 'swappy', 'wl-clip-persist', 'wtype')

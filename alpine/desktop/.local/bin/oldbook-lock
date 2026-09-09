@@ -26,10 +26,11 @@ STOCK_SUPERVISOR = 'swaylockd'
 EFFECTS_LOCKER = 'swaylock-effects'
 FIRST_RUN_OPTIONS = {'-R': 1, '--ready-fd': 1, '--fade-in': 1, '--screenshots': 0, '-S': 0}
 MAX_RESTARTS = 5
-POWER_KEY_INHIBITOR = 'elogind-inhibit'
-POWER_KEY_HOLDER = [POWER_KEY_INHIBITOR, '--what=handle-power-key', '--mode=block',
-                    '--who=oldbook-lock', '--why=A locked session ignores the power key',
-                    '--', 'cat']
+# elogind here, systemd on the Bazzite replay: one is a fork of the other and
+# takes the same options, so the first of these the host provides is the one.
+POWER_KEY_INHIBITORS = ('elogind-inhibit', 'systemd-inhibit')
+POWER_KEY_HOLDER = ['--what=handle-power-key', '--mode=block', '--who=oldbook-lock',
+                    '--why=A locked session ignores the power key', '--', 'cat']
 
 
 def private_directory(path):
@@ -138,24 +139,27 @@ def launchers(runtime, command=None):
 
 
 def inhibit_power_key():
-    """Keep elogind off the power key for exactly as long as the locker lives.
+    """Keep the login manager off the power key while the locker lives.
 
-    The MacBook's power key is a keyboard key beside Backspace, and elogind
-    powers the machine off on a short press: brushing it while typing a
-    password ends the session instead of unlocking it. elogind honours a block
-    inhibitor on handle-power-key, so the locker is launched holding one. The
-    holder waits on this pipe rather than tracking a process, which releases
-    the inhibitor the moment the locker's tree ends however it ends; the caller
-    passes the returned descriptor to the locker and closes its own copy. A
-    missing or refused inhibitor returns None, because a power key that still
-    works is never a reason to leave the session unlocked.
+    The MacBook's power key is a keyboard key beside Backspace, and a short
+    press powers the machine off: brushing it while typing a password ends the
+    session instead of unlocking it. elogind and systemd both honour a block
+    inhibitor on handle-power-key, so the locker is launched holding whichever
+    of the two the host provides. The holder waits on this pipe rather than
+    tracking a process, which releases the inhibitor the moment the locker's
+    tree ends however it ends; the caller passes the returned descriptor to
+    the locker and closes its own copy. A missing or refused inhibitor returns
+    None, because a power key that still works is never a reason to leave the
+    session unlocked.
     """
-    if shutil.which(POWER_KEY_INHIBITOR) is None:
+    inhibitor = next(filter(None, map(shutil.which, POWER_KEY_INHIBITORS)), None)
+    if inhibitor is None:
         return None
     read_fd, write_fd = os.pipe()
     try:
-        subprocess.Popen(POWER_KEY_HOLDER, stdin=read_fd, stdout=subprocess.DEVNULL,
-                         stderr=subprocess.DEVNULL, start_new_session=True)
+        subprocess.Popen([inhibitor] + POWER_KEY_HOLDER, stdin=read_fd,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
         return write_fd
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         os.close(write_fd)
