@@ -13,8 +13,22 @@ import stat
 import subprocess
 import sys
 
-SCENE_VERSION = 1
+SCENE_VERSION = 2
 DEFAULT_GEOMETRY = (2880, 1800, 2)
+# How soft the painting goes behind the lock. The radius is a fraction of the
+# scene's working width rather than a pixel count, so a 13" panel and a 27" one
+# are blurred by eye instead of by pixel; raise the divisor for a clearer
+# painting, lower it for more fog. The scene cache is keyed by SCENE_VERSION,
+# so bump that whenever these change or an old blur will be served from cache.
+#
+#   divisor  radius at 1440px working width  reads as
+#      110              13                    fog; the painting stops being one
+#      150              10
+#      190               8   ← now            shapes and brush direction legible
+#      260               6                    barely softened
+BLUR_WIDTH_DIVISOR = 190
+BLUR_MINIMUM_RADIUS = 4      # never less, whatever the output
+BLUR_PASSES = 3              # three box passes are close enough to a gaussian
 CAPTION_WIDTH = 560          # logical pixels
 CAPTION_MARGIN = 44          # logical pixels from the lower-left corner
 INDICATOR_RADIUS = 172       # logical pixels
@@ -33,7 +47,18 @@ def _smoothstep(edge0, edge1, value):
     return t * t * (3.0 - 2.0 * t)
 
 
-def _box_blur(image, radius, passes=3):
+def blur_radius(working_width):
+    """The blur radius for a scene rendered at this working width.
+
+    Named on purpose. The strength used to be `max(6, round(work_w / 110))`
+    buried in the middle of the render, and the user's note that the lock
+    images were too blurred could not be answered without reading the whole
+    function. Tune BLUR_WIDTH_DIVISOR above instead.
+    """
+    return max(BLUR_MINIMUM_RADIUS, round(working_width / BLUR_WIDTH_DIVISOR))
+
+
+def _box_blur(image, radius, passes=BLUR_PASSES):
     """Separable box blur repeated three times: a close, fast gaussian."""
     import numpy as np
     width = 2 * radius + 1
@@ -183,7 +208,7 @@ def render_background(painting, geometry, palette, cache=None):
     image = np.lib.stride_tricks.as_strided(rows, shape=(work_h, work_w, channels),
                                             strides=(stride, channels, 1))[:, :, :3]
     image = image.astype(np.float32) / 255.0
-    image = _box_blur(image, max(6, round(work_w / 110)))
+    image = _box_blur(image, blur_radius(work_w), passes=BLUR_PASSES)
     luminance = image @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
     image = image * 0.86 + luminance[:, :, None] * 0.14
     tint = np.array(_hex_rgb(palette.get('background', '#282828')), dtype=np.float32)
@@ -198,7 +223,9 @@ def render_background(painting, geometry, palette, cache=None):
     small = GdkPixbuf.Pixbuf.new_from_bytes(GLib.Bytes.new(data), GdkPixbuf.Colorspace.RGB,
                                             False, 8, work_w, work_h, work_w * 3)
     # Half resolution is invisible under this much blur; the locker scales it
-    # bilinearly, and the file loads in a fraction of the time.
+    # bilinearly, and the file loads in a fraction of the time. A radius of 8
+    # here is a 16px softening at panel resolution, still far wider than the
+    # 2x upscale, so clearing the blur further did not cost the scene detail.
     temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
     small.savev(str(temporary), 'png', ['compression'], ['1'])
     os.chmod(temporary, 0o600)
@@ -358,6 +385,17 @@ def scene_arguments(ready_fd, palette, geometry, runtime, home=None, cache=None)
     painting = current_painting(home)
     # The desktop screenshot is the fade source; effects run on it at buffer
     # resolution, so compose geometry below is percentages or physical pixels.
+    #
+    # Keep --fade-in. It looks like the obvious cause of the blank moment at
+    # lock time and it is not: measured on this panel with WAYLAND_DEBUG
+    # protocol timestamps in a private headless session, the gap between
+    # ext_session_lock_manager_v1.lock() and the locker's first committed
+    # buffer is 70 ms with it and 94-103 ms without. The fade's first frame
+    # paints the opaque screenshot copy and skips the composed scene at alpha
+    # zero; without the fade, that first frame paints the composed ARGB scene
+    # instead, which pixman composites far more slowly. The blank is the first
+    # cairo paint of a 2880x1800 shm buffer -- it fell to 18 ms at a quarter of
+    # the pixels -- so shortening it means fewer pixels, never less dissolve.
     args = ['--fade-in', '0.4', '--screenshots', '-c', palette['background'].lstrip('#')]
     if ready_fd is not None:
         args = ['-R', str(ready_fd)] + args

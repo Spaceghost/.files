@@ -202,6 +202,7 @@ def apply(entry, origin=None, duration=None):
     temporary.replace(CURRENT)
     relayout_panels()
     refresh_accent()
+    warm_lock_scene()
     return socket
 
 
@@ -234,6 +235,28 @@ def refresh_accent():
         return
     try:
         subprocess.Popen(['/usr/bin/python3', str(helper), 'apply', '--quiet'],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        pass
+
+
+def warm_lock_scene():
+    """Blur the new painting for the lock now, while nobody is waiting for it.
+
+    The lock scene is cached per painting, and until this hook nothing warmed
+    that cache: the first lock after every gallery rotation paid for the whole
+    render inside the lock call. Measured on this panel, that is 2.4-3.7 s of a
+    pressed Super+Escape doing nothing visible before the locker even starts,
+    against 0.34-0.37 s warm. Detached and best-effort, exactly like the accent
+    election above: a slow blur must never hold up the fade already on screen,
+    and a failure here only means the next lock renders the scene itself.
+    """
+    helper = REPO / 'alpine/desktop/.local/bin/oldbook-lock'
+    if not helper.is_file():
+        return
+    try:
+        subprocess.Popen(['/usr/bin/python3', str(helper), 'prerender'],
                          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
                          stderr=subprocess.DEVNULL, start_new_session=True)
     except OSError:

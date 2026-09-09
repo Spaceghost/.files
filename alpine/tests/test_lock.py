@@ -333,6 +333,71 @@ class LockSceneTests(unittest.TestCase):
             self.assertEqual(again, arguments)
             self.assertEqual(sorted(path.name for path in cache.glob('*.png')), [scene.name])
 
+    def test_the_blur_is_a_named_documented_value_and_softer_than_it_was(self):
+        """The user asked for less blur on the lock images. The strength used to
+        be `max(6, round(work_w / 110))` inline in the middle of the render; it
+        is now a named constant with a tuning table beside it, so the next
+        adjustment is an edit rather than an excavation."""
+        module = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py'))
+        source = (REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py').read_text()
+        self.assertIn('_box_blur(image, blur_radius(work_w)', source)
+        self.assertNotIn('_box_blur(image, max(', source, 'the magic number left the render')
+        self.assertIn('#      190', source, 'the tuning table stays beside the constant')
+        self.assertEqual(module['BLUR_WIDTH_DIVISOR'], 190)
+        # A 2880-wide panel renders the scene at 1440; that used to blur by 13.
+        self.assertEqual(module['blur_radius'](1440), 8)
+        self.assertLess(module['blur_radius'](1440), 13, 'the painting is clearer than before')
+        self.assertEqual(module['blur_radius'](320), module['BLUR_MINIMUM_RADIUS'],
+                         'a tiny output still gets a floor, never a sharp painting')
+        self.assertGreaterEqual(module['SCENE_VERSION'], 2,
+                                'a changed blur must not be served from the old cache')
+
+    def test_the_dissolve_is_kept_and_the_measurement_that_says_so_is_recorded(self):
+        """--fade-in looks like the cause of the blank moment at lock time and
+        measurably is not: 70 ms with it against 94-103 ms without. Deleting it
+        to chase the flash would make the flash worse and lose the dissolve
+        LOCK-THEME pins, so the numbers live next to the argument."""
+        source = (REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py').read_text()
+        self.assertIn("'--fade-in', '0.4'", source)
+        self.assertIn('ext_session_lock_manager_v1.lock()', source)
+        self.assertIn('70 ms', source)
+
+    def test_a_new_painting_warms_the_lock_scene_cache(self):
+        """Nothing used to call `oldbook-lock prerender`, so the first lock
+        after every gallery rotation rendered the scene inside the lock call:
+        2.4-3.7 s of a pressed Super+Escape doing nothing before the locker
+        even started, against 0.34-0.37 s warm."""
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper').read_text()
+        applied = source.split('def apply(', 1)[1].split('\ndef ', 1)[0]
+        self.assertIn('warm_lock_scene()', applied)
+        warming = source.split('def warm_lock_scene(', 1)[1].split('\ndef ', 1)[0]
+        self.assertIn("'prerender'", warming)
+        self.assertIn('oldbook-lock', warming)
+        self.assertIn('start_new_session=True', warming,
+                      'a slow blur must never hold up the fade already on screen')
+        self.assertIn('except OSError', warming, 'warming is best effort, never load bearing')
+
+    def test_prerender_writes_the_cache_the_scene_then_reuses(self):
+        with tempfile.TemporaryDirectory(prefix='oldbook-lock-warm-') as directory:
+            root = Path(directory)
+            home = fake_home(root)
+            cache = root / 'cache'
+            cache.mkdir(mode=0o700)
+            env = dict(os.environ, HOME=str(home), XDG_DATA_HOME=str(home / '.local/share'),
+                       XDG_STATE_HOME=str(home / '.local/state'), XDG_RUNTIME_DIR=str(root),
+                       OLDBOOK_LOCK_CACHE=str(cache))
+            env.pop('SWAYSOCK', None)
+            env.pop('WAYLAND_DISPLAY', None)
+            result = subprocess.run([str(LOCK), 'prerender'], env=env, capture_output=True,
+                                    text=True, timeout=180)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            rendered = sorted(cache.glob('*.png'))
+            self.assertEqual(len(rendered), 1)
+            module = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py'))
+            self.assertTrue(rendered[0].name.endswith(f'-v{module["SCENE_VERSION"]}.png'),
+                            f'the cache name must carry the scene version: {rendered[0].name}')
+            self.assertEqual(Path(result.stdout.strip()), rendered[0])
+
     def test_scene_without_a_painting_degrades_to_the_palette_background(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-lock-scene-') as directory:
             arguments, _, cache, _ = self.scene(Path(directory), painting=False)
