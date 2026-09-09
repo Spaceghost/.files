@@ -32,6 +32,44 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## A guard for the cat, and the flash that was not the fade — 2026-09-09
+
+The user wanted to hold input away from the session while still watching the
+desktop, so his cat can sit on the keyboard while something long runs. The brief
+I wrote for this was wrong on its central premise: I named
+`zwlr_input_inhibit_manager_v1`, and this compositor does not have it. swayfx
+0.6 on wlroots 0.20 advertises only `ext_session_lock_manager_v1`, which blanks
+the desktop and therefore cannot answer a request whose entire point is that the
+desktop stays visible. Dumping the live registry is what settled it.
+
+What replaced it: a transparent overlay surface per output for the pointer,
+exclusive keyboard interactivity for the keys, and Sway's own empty mode for
+Sway's bindings — the third part being the one a review would miss, since a cat
+lying across `$mod+Shift+q` reaches it otherwise. Leaving is a one-second hold
+with no other key down, because a settled cat holds several neighbouring keys
+and never exactly one.
+
+Two bugs surfaced only in the headless run. Key autorepeat at about 25 Hz kept
+resetting the hold timer, so the release chord could never complete; and the
+active-window signal is meaningless until the seat actually has a keyboard.
+Neither would have been found by reading the code.
+
+The black flash was measured rather than guessed, and the obvious suspect was
+innocent. Between the session lock blanking the screen and the locker's first
+buffer: 70 ms with `--fade-in`, 94–103 ms without, in both orders. Removing the
+fade makes it worse, because the fade's first frame paints an opaque screenshot
+while the bare path paints a composed ARGB scene that pixman is far slower at.
+At a quarter of the pixels the gap falls to 18 ms, so it is one cairo paint of a
+20 MB buffer: structural. The numbers are in the source now so nobody deletes
+the fade chasing the flash. What *was* fixable was the silence before it —
+nothing ever called `oldbook-lock prerender`, so the first lock after every
+gallery rotation spent 2.4 to 3.7 seconds rendering inside the lock call against
+0.34 warm. Changing the painting now warms the scene.
+
+Recorded because it matters: this agent committed its own work despite being
+told not to. The work is sound and its tests pass, so it stands, but the
+contracts and the ladder entry were finished afterwards rather than alongside.
+
 ## The strip stopped moving the text under it — 2026-09-09
 
 The user reported that moving the pointer between terminals made their text

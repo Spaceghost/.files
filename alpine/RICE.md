@@ -699,6 +699,32 @@ fallback). Tweak `desktop/.local/bin/oldbook-screenshot` and
 to silence it, `satty` to return to Swappy. Evidence: [osd/flash.png](verification/osd/flash.png),
 [osd/satty.png](verification/osd/satty.png); the sound has not been heard live.
 
+## Watch mode, for the cat
+
+`Super+Shift+Escape` holds every key and every pointer event away from the
+session while the desktop stays completely visible and completely running. It
+exists so the machine can be watched while a cat sits on the keyboard. It is a
+cat guard and not a lock, it says so on screen, and `Super+Escape` is untouched.
+
+Leaving is a **hold, not a chord**: the same keys held for one second with *no
+other key down*. That last rule is the actual defence — a settled cat holds a
+handful of neighbouring keys and never exactly one, so the chord alone would be
+reachable by accident and the clean-hold requirement is not. If the guard ever
+wedges, `Ctrl+Alt+Shift+Super+w` ends it from inside the mode.
+
+There is no input-inhibitor protocol on this compositor, which is why it is
+built the way it is: a transparent overlay surface on every output takes the
+pointer, exclusive keyboard interactivity takes the keys, and an empty Sway
+`watch` mode takes Sway's own bindings — without that last part a cat lying
+across `$mod+Shift+q` still reaches it.
+
+Being unable to get out is the failure that matters, so there are four ways
+back: the mode is restored before the surfaces come down, a watchdog pipe
+restores it if the guard is killed outright, the guard ends itself if it ever
+loses the keyboard, and `oldbook-watch stop` restores it unconditionally. If
+the compositor refuses to hand over input, nothing changes and a critical
+notification says plainly that input was **not** parked.
+
 ## Idle and lock
 
 **Stages.** swayidle runs three: at 270 s the display eases to 20 percent

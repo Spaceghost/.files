@@ -42,6 +42,7 @@ LADDER = {
     'rice-tour': 'battery-low',
     'screen-corners': 'battery-low',
     'sound-cues': 'battery-low',
+    'watch-indicator': 'battery-low',
 }
 
 

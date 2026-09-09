@@ -539,6 +539,39 @@ Caps Lock, and clearing one target must not clear the others.
   [LED](tests/test_notification_led.py), [video](tests/test_video_background.py).
   A reload test is not a fresh-login, suspend/resume or hardware-hotplug test.
 
+### WATCH-MODE
+
+`Super+Shift+Escape` parks every key and pointer event away from the session
+while the desktop stays fully visible and fully running, so the machine can be
+watched while a cat sits on it. It is a cat guard and never a security feature,
+and it must say so; `Super+Escape` remains the real lock and is untouched.
+
+This compositor advertises no input-inhibitor protocol — swayfx 0.6 on wlroots
+0.20 offers only `ext_session_lock_manager_v1`, which blanks the desktop and so
+cannot be used here. Input is held instead by a transparent layer-shell OVERLAY
+surface on every output for the pointer, exclusive keyboard interactivity for
+keys, and Sway's own empty `watch` mode for compositor bindings, which a cat
+lying across `$mod+Shift+q` would otherwise reach.
+
+Leaving is a hold rather than a chord — the entry chord held for one second
+with no other key down — because a settled cat holds several neighbouring keys
+and never exactly one. Getting stuck is the failure that matters: the mode is
+entered only after the compositor proves it sent `wl_keyboard.enter`, restored
+before the surfaces come down, restored by a watchdog pipe on SIGKILL, and
+dropped by the guard itself if it ever stops holding the keyboard. A refusal
+must change nothing and say plainly that input was NOT parked, because claiming
+input is held when it is not is the worst possible outcome for a feature whose
+purpose is walking away from the machine.
+
+- Implementation: [guard](desktop/.local/bin/oldbook-watch),
+  [model](desktop/.local/lib/oldbook/watch_mode.py),
+  [binding and mode](desktop/.config/sway/local.d/watch.conf).
+- Checks: [watch mode tests](tests/test_watch_mode.py),
+  [headless evidence](verification/watch-mode/README.md).
+  Headless pixman with a virtual keyboard is neither the Apple panel nor the
+  internal keyboard, and no cat was available; the first live guard is the
+  user's check.
+
 ### FEEDBACK-OSD
 
 Volume, mute, microphone, display brightness and keyboard-light changes show

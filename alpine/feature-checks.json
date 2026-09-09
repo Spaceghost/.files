@@ -509,6 +509,22 @@
       "evidence": []
     },
     {
+      "id": "WATCH-MODE",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-watch",
+        "alpine/desktop/.local/lib/oldbook/watch_mode.py",
+        "alpine/desktop/.config/sway/local.d/watch.conf",
+        "alpine/tests/test_watch_mode.py",
+        "alpine/verification/watch-mode/*"
+      ],
+      "tests": [
+        "test_watch_mode.py"
+      ],
+      "evidence": [
+        "verification/watch-mode/"
+      ]
+    },
+    {
       "id": "FEEDBACK-OSD",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-osd",
