@@ -119,63 +119,57 @@ window#waybar { background: transparent; color: @ctp_text; }
    MPRIS widgets hide themselves when no player is running and the meter hides
    on silence, so a ground on the row would be left behind as an empty pill in
    the middle of an otherwise quiet bar. */
+/* ── Music ────────────────────────────────────────────────────────────────
+   These are glyphs on the bar, not buttons in a case. An earlier pass gave
+   them grounds, rings and shadows and turned three light controls into a piece
+   of hi-fi; the shape was right to begin with and only the finish was thin.
+   So: no ground at rest, and the work goes into how they read against a
+   painting and how they answer the pointer. */
 #mpris {
-    background: linear-gradient(180deg, alpha(@ctp_crust, 0.90), alpha(@ctp_mantle, 0.90));
     color: @ctp_text;
     font-size: 10px;
-    min-width: 128px;
-    padding: 0 12px;
-    margin: 4px 0 9px;
-    border-radius: 13px;
-    box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.9),
-                inset 0 2px 4px alpha(@ctp_crust, 0.5),
-                0 2px 8px alpha(@ctp_crust, 0.45);
-    transition: background 150ms ease-out, box-shadow 150ms ease-out, color 150ms ease-out;
+    padding: 0 8px;
+    margin: 0 1px;
+    border-radius: 11px;
+    /* A painting can be bright anywhere, so the glyphs carry their own edge
+       rather than relying on a ground to sit on. */
+    text-shadow: 0 1px 3px alpha(@ctp_crust, 0.85);
+    transition: background 160ms cubic-bezier(0.2, 0.9, 0.25, 1),
+                color 160ms ease-out, text-shadow 160ms ease-out;
 }
-#mpris:hover {
-    background: linear-gradient(180deg, alpha(@ctp_mantle, 0.94), alpha(@ctp_surface0, 0.94));
-    box-shadow: inset 0 0 0 1px alpha(@ctp_teal, 0.35),
-                inset 0 2px 4px alpha(@ctp_crust, 0.4),
-                0 2px 12px alpha(@ctp_crust, 0.55);
-}
-/* Playback state is the one place the screen spends colour: teal while it is
+/* Playback state is the one place these spend colour: teal while something is
    actually transmitting, the neutral ladder while it is not. */
-#mpris.playing {
-    color: @ctp_teal;
-    box-shadow: inset 0 0 0 1px alpha(@ctp_teal, 0.26),
-                inset 0 2px 4px alpha(@ctp_crust, 0.5),
-                0 2px 8px alpha(@ctp_crust, 0.45);
-}
+#mpris.playing { color: @ctp_teal; }
 #mpris.paused { color: @ctp_subtext0; }
 #mpris.stopped { color: @ctp_overlay0; }
-/* The transport keys. Listed after the state rules on purpose: the arrows
-   carry the playback class too, and at equal specificity the later rule is
-   what keeps them neutral while the screen beside them is lit. */
+/* The arrows carry the playback class too, so these come after the state rules
+   to keep them quieter than the title they sit beside. */
 #mpris.previous,
 #mpris.next {
-    background: linear-gradient(180deg, alpha(@ctp_surface0, 0.94), alpha(@ctp_mantle, 0.96));
     color: @ctp_subtext0;
-    font-size: 14px;
-    min-width: 20px;
-    padding: 0 9px;
-    margin: 4px 0 9px;
-    border-radius: 13px;
-    box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.5),
-                0 2px 8px alpha(@ctp_crust, 0.45);
-    transition: background 150ms ease-out, box-shadow 150ms ease-out, color 150ms ease-out;
+    font-size: 15px;
+    padding: 0 8px;
 }
 #mpris.paused.previous,
 #mpris.paused.next,
 #mpris.stopped.previous,
 #mpris.stopped.next { color: @ctp_overlay1; }
+/* Hover is a soft wash that follows the glyph, and a lift in its own colour --
+   no box appears that was not there before. */
+#mpris:hover {
+    background: alpha(@ctp_surface0, 0.55);
+    color: @ctp_text;
+    text-shadow: 0 1px 4px alpha(@ctp_crust, 0.95);
+}
+#mpris.playing:hover {
+    background: alpha(@ctp_teal, 0.16);
+    color: @ctp_teal;
+}
 #mpris.previous:hover,
 #mpris.next:hover {
-    background: linear-gradient(180deg, alpha(@ctp_surface1, 0.96), alpha(@ctp_surface0, 0.96));
+    background: alpha(@ctp_surface0, 0.6);
     color: @ctp_text;
-    box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.7),
-                0 2px 12px alpha(@ctp_crust, 0.55);
 }
-/* Optional transmission meter beside the music controls; silent frames collapse it. */
 #custom-cava {
     background: alpha(@ctp_crust, 0.75);
     color: alpha(@ctp_teal, 0.72);
