@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Protect the irreplaceable half of Fossil's unversioned storage.
+
+`~/.files` keeps two very different things in Fossil's unversioned area. The
+`.apk` files fetched from an Alpine mirror are a cache: deleting one costs a
+download. The source tarballs, the locally built packages, the signing key and
+the recorded evidence are not replaceable at all -- `remote-build` resolves
+build inputs from them by checksum and `alpine/packages/RESTORE.md` restores
+from them. Fossil's own help warns that unversioned changes "cannot be undone".
+
+So this tool exists to make the two halves behave differently. `verify` proves
+every protected entry is still present and still matches its digest, and
+`prune-cache` is the only supported way to delete anything -- it removes
+mirror-fetchable APKs and refuses, with no override flag, to touch anything in
+the protected manifest. There is deliberately no command here that deletes a
+source tarball. Removing one means editing this file first, which is the point.
+"""
+import argparse
+import hashlib
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+MANIFEST = REPO / 'packages' / 'uv-protected.json'
+
+# A package built here keeps every subpackage it produces (-dev, -doc, -openrc,
+# -ui, -zsh-completion). Matching on the stem plus '-' rather than on the stem
+# followed by a digit is deliberate: the digit form silently classified
+# scenefx-dev, waybar-openrc, opensnitch-ui and swaylock-zsh-completion as
+# disposable cache, which is exactly the mistake this file exists to prevent.
+LOCAL_STEMS = ('conky', 'oldbook-desktop', 'oldbook-radio-runtime',
+               'oldbook-swaylock-effects', 'oldbook-waybar-art', 'openresolv',
+               'opensnitch', 'scenefx', 'superhold', 'swayfx', 'swaylock',
+               'swaylockd', 'swaybar', 'waybar')
+
+KEEP_SUFFIXES = ('.tar.gz', '.tar.xz', '.tar.bz2', '.zip', '.patch',
+                 '.pub', '.xpi', '.whl', '.py', '.json', '.md', '.log')
+
+
+def basename(uv_name):
+    return uv_name.rsplit('/', 1)[-1]
+
+
+def is_local_build(name):
+    base = basename(name)
+    return any(base == stem or base.startswith(stem + '-') for stem in LOCAL_STEMS)
+
+
+def protected(name):
+    """True when this entry must never be removed by tooling."""
+    base = basename(name)
+    if not base.endswith('.apk'):
+        return True
+    return is_local_build(name)
+
+
+def unversioned():
+    # sz = 0 rows are Fossil's delete tombstones, kept so a removal propagates on
+    # sync. They hold no content, so they are not candidates for anything.
+    result = subprocess.run(
+        ['fossil', 'sql', "SELECT name || '|' || sz FROM unversioned WHERE sz > 0;"],
+        cwd=REPO.parent, capture_output=True, text=True, timeout=300)
+    if result.returncode != 0:
+        raise SystemExit(f'cannot read unversioned storage: {result.stderr.strip()}')
+    entries = []
+    for line in result.stdout.splitlines():
+        if line.strip():
+            name, size = line.rsplit('|', 1)
+            entries.append((name, int(size)))
+    return entries
+
+
+def load_manifest():
+    if not MANIFEST.exists():
+        raise SystemExit(f'no protected manifest at {MANIFEST}; run "uv-guard record" first')
+    return json.loads(MANIFEST.read_text())
+
+
+def record(args):
+    entries = [{'uv_name': n, 'basename': basename(n), 'size': s}
+               for n, s in sorted(unversioned()) if protected(n)]
+    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    MANIFEST.write_text(json.dumps({'entries': entries}, indent=2) + '\n')
+    tarballs = sum(1 for e in entries if e['basename'].endswith(('.tar.gz', '.tar.xz')))
+    print(f'recorded {len(entries)} protected entries ({tarballs} source tarballs)')
+    return 0
+
+
+def verify(args):
+    manifest = load_manifest()
+    present = {name: size for name, size in unversioned()}
+    missing = [e for e in manifest['entries'] if e['uv_name'] not in present]
+    resized = [e for e in manifest['entries']
+               if e['uv_name'] in present and present[e['uv_name']] != e['size']]
+    for entry in missing:
+        print(f'MISSING  {entry["basename"]}')
+    for entry in resized:
+        print(f'CHANGED  {entry["basename"]}  {entry["size"]} -> {present[entry["uv_name"]]}')
+    if missing or resized:
+        print(f'\n{len(missing)} missing, {len(resized)} changed of '
+              f'{len(manifest["entries"])} protected entries')
+        return 1
+    print(f'all {len(manifest["entries"])} protected entries present and unchanged')
+    return 0
+
+
+def prune_cache(args):
+    manifest = load_manifest()
+    guarded = {e['uv_name'] for e in manifest['entries']}
+    candidates = [n for n, _ in unversioned() if not protected(n)]
+    overlap = guarded.intersection(candidates)
+    if overlap:
+        raise SystemExit(f'refusing: {len(overlap)} protected entries were classified as cache')
+    wrong = [n for n in candidates if not basename(n).endswith('.apk')]
+    if wrong:
+        raise SystemExit(f'refusing: {len(wrong)} non-APK entries were classified as cache')
+    if not candidates:
+        print('nothing to prune')
+        return 0
+    if args.dry_run:
+        print(f'would remove {len(candidates)} cached APKs')
+        return 0
+    for start in range(0, len(candidates), 60):
+        chunk = candidates[start:start + 60]
+        result = subprocess.run(['fossil', 'unversioned', 'remove'] + chunk,
+                                cwd=REPO.parent, capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            raise SystemExit(f'removal failed: {result.stderr.strip()[:200]}')
+    print(f'removed {len(candidates)} cached APKs')
+    return verify(args)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    sub = parser.add_subparsers(dest='command', required=True)
+    sub.add_parser('record', help='record the current protected set as the manifest')
+    sub.add_parser('verify', help='prove every protected entry is still present')
+    prune = sub.add_parser('prune-cache', help='remove mirror-fetchable APKs only')
+    prune.add_argument('-n', '--dry-run', action='store_true')
+    args = parser.parse_args()
+    return {'record': record, 'verify': verify, 'prune-cache': prune_cache}[args.command](args)
+
+
+if __name__ == '__main__':
+    sys.exit(main())
