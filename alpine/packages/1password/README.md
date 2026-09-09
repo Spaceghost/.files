@@ -25,6 +25,37 @@ community package can lag the vendor's native release. Startup also reports
 unavailable system D-Bus monitoring and global shortcuts in this environment;
 the app itself renders successfully.
 
+## Rendering workaround
+
+1Password's window rendered incorrectly on this machine: red and blue swapped,
+interlaced text, horizontally sheared bands, and patches of stale video memory
+from other windows. It was diagnosed by running the app inside a throwaway
+headless SwayFX at this display's 2880x1800 scale-2 geometry, so the live
+session was never used as the test bed.
+
+The graphics stack is healthy and is not the cause. An EGL probe on both render
+nodes reports hardware drivers on the host and inside the Flatpak sandbox
+alike: radeonsi (verde) on the Radeon R9 M370X and Iris Pro P5200 on the Intel.
+Foot and Firefox render correctly in the same compositor, Firefox while holding
+the same AMD render node, so neither the driver nor SceneFX is at fault. The
+fault is specific to the GPU-shared (dmabuf) buffers Chromium allocates and
+presents. The Radeon here is driven by the legacy `radeon` kernel driver rather
+than `amdgpu`, which is the unusual part of this configuration.
+
+`--disable-gpu-compositing` makes Chromium composite in software and hand the
+compositor an ordinary shared-memory buffer, avoiding that path. Over three
+cold starts each, measured against a reference frame, the stock entry differed
+every time and the flag was pixel-identical every time. Two lighter changes
+were tried and rejected: suppressing the dmabuf modifier extension fixed the
+colours but left stale-memory patches, and forcing software GL changed nothing,
+because both keep Chromium presenting through dmabuf.
+
+`com.onepassword.OnePassword.desktop` carries the flag and is symlinked into
+`~/.local/share/applications`, which XDG searches before the Flatpak export, so
+it survives app updates. Launching with a bare `flatpak run` bypasses it; pass
+the flag by hand, or use the launcher. Delete the symlink to fall back to the
+stock entry and retest after a 1Password, Electron, Mesa or wlroots update.
+
 ## Sources and artifacts
 
 - [1Password Linux installation](https://support.1password.com/install-linux/)
