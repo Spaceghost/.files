@@ -1,6 +1,8 @@
 """Lock acquisition regression tests; never connect to the live compositor."""
+import hashlib
 import json
 import os
+import re
 import runpy
 import signal
 import socket
@@ -407,6 +409,139 @@ class LockSceneTests(unittest.TestCase):
             self.assertEqual(list(cache.glob('*.png')), [])
 
 
+class IndicatorPanelTests(unittest.TestCase):
+    """The third swaylock-effects patch, and what it is allowed to be.
+
+    Under ext-session-lock-v1 a locker that dies without unlock_and_destroy
+    does not fail open: the compositor stays locked and shows no password
+    prompt at all until a replacement takes the lock. Failing stuck is safe and
+    unusable, so the bar for adding anything to this binary is that it cannot
+    crash it. These tests hold the patch to that.
+    """
+
+    PACKAGE = REPO / 'alpine/packages/swaylock-effects'
+    PATCH = PACKAGE / '0003-indicator-panel.patch'
+    # The lock's trusted path. The drawing hook has no business anywhere near
+    # the password, the PAM conversation, the seat or the readiness pipe.
+    UNTOUCHABLE = ('pam.c', 'password.c', 'password-buffer.c', 'comm.c',
+                   'shadow.c', 'seat.c', 'pam/swaylock')
+
+    def touched(self):
+        return sorted({line[6:].strip() for line in self.PATCH.read_text().splitlines()
+                       if line.startswith('+++ b/')})
+
+    def test_the_patch_is_pinned_in_the_recipe_by_both_checksums(self):
+        raw = self.PATCH.read_bytes()
+        recipe = (self.PACKAGE / 'APKBUILD').read_text()
+        self.assertIn('\t0003-indicator-panel.patch\n', recipe)
+        self.assertIn(f'{hashlib.sha512(raw).hexdigest()}  0003-indicator-panel.patch',
+                      recipe)
+        manifest = json.loads((self.PACKAGE / 'manifest.json').read_text())
+        self.assertIn('0003-indicator-panel.patch', manifest['patches'])
+        self.assertEqual(manifest['patches_sha256']['0003-indicator-panel.patch'],
+                         hashlib.sha256(raw).hexdigest())
+        self.assertGreater(int(re.search(r'^pkgrel=(\d+)$', recipe, re.M).group(1)), 0,
+                           'a changed package needs a new release number')
+
+    def test_the_patch_stays_out_of_the_password_and_pam_path(self):
+        for name in self.touched():
+            self.assertNotIn(Path(name).name, self.UNTOUCHABLE, name)
+        self.assertEqual(self.touched(),
+                         ['include/panel.h', 'include/swaylock.h', 'main.c',
+                          'meson.build', 'panel.c', 'render.c', 'swaylock.1.scd'])
+
+    def test_the_drawing_hook_takes_data_and_never_code(self):
+        """A dlopen'd renderer is one segfault from a session with no prompt,
+        and a segfault cannot be caught. So the hook is a PNG and a short list
+        of clamped numbers: however wrong they are, the worst outcome is that
+        nothing is drawn and the locker shows its own indicator."""
+        patch = self.PATCH.read_text()
+        for forbidden in ('dlopen(', 'dlsym(', 'system(', 'popen(', 'execv', 'fork('):
+            self.assertNotIn(forbidden, patch, forbidden)
+        # Every refusal that keeps a bad panel out of cairo.
+        for guard in ('O_NOFOLLOW', 'S_ISREG', 'st_uid != getuid()',
+                      'S_IWGRP | S_IWOTH', 'PANEL_FILE_MAX', 'PANEL_IMAGE_BYTES_MAX',
+                      'PANEL_IMAGE_PIXELS_MAX', 'panel_clamp', 'panel_name_is_safe'):
+            self.assertIn(guard, patch, guard)
+        # cairo's own PNG reader rather than the format-sniffing pixbuf stack.
+        self.assertIn('cairo_image_surface_create_from_png', patch)
+        self.assertNotIn('gdk_pixbuf_new_from_file', patch)
+
+    def test_a_panel_that_stops_being_written_takes_itself_off_the_screen(self):
+        patch = self.PATCH.read_text()
+        self.assertIn('panel_is_fresh', patch)
+        self.assertIn('CLOCK_REALTIME', patch)
+        self.assertIn('panel_deactivate', patch)
+
+    def test_repaints_are_driven_by_the_frame_callback_and_stop_on_their_own(self):
+        """The spec's stage one: frames from wl_surface.frame rather than a
+        timer, and a chain that ends when the animation does, so the lock
+        settles to a still frame instead of holding the pipeline awake."""
+        patch = self.PATCH.read_text()
+        self.assertIn('swaylock_panel_animating(&surface->state->panel)', patch)
+        self.assertIn('surface->dirty = true;', patch)
+        self.assertIn('wl_surface_damage_buffer(surface->child, panel->rect_x', patch)
+        self.assertIn('swaylock_indicator_signature', patch)
+
+    def test_the_ring_and_its_countable_highlights_go_away_under_a_panel(self):
+        """swaylock highlights one arc per keypress and uses a different colour
+        for backspace, so an observer can count both. A panel drawing the
+        indicator area takes the whole ring with it rather than sitting beside
+        a leak."""
+        patch = self.PATCH.read_text()
+        self.assertIn('if (!panel->hide_ring)', patch)
+        self.assertIn('countable per-keystroke highlight', patch)
+        panel = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/cat_panel.py'))
+        self.assertIn("'ring 0'", (REPO / 'alpine/desktop/.local/lib/oldbook/cat_panel.py').read_text())
+        self.assertEqual(panel['STATE_NAME'], 'cat-panel')
+
+    def test_the_panel_fits_where_the_caption_card_is_not(self):
+        """The lock has two things on it already: a clock at 40% of the height
+        and a caption card in the lower-left corner whose height changes with
+        the painting and the hour. A wide panel below the clock lands on the
+        card, so the hearth goes above it, and it has to actually fit there."""
+        scene = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py'))
+        panel = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/cat_panel.py'))
+        source = (REPO / 'alpine/desktop/.local/lib/oldbook/cat_panel.py').read_text()
+        self.assertIn("'place above'", source)
+        width, height, scale = scene['DEFAULT_GEOMETRY']
+        logical_h = height // scale
+        indicator_top = (int(logical_h * 0.40) - scene['INDICATOR_RADIUS']
+                         - scene['INDICATOR_THICKNESS'])
+        self.assertGreaterEqual(indicator_top,
+                                panel['PANEL_HEIGHT'] + panel['PANEL_GAP'],
+                                'the hearth must fit between the screen top and the clock')
+        self.assertLessEqual(panel['PANEL_WIDTH'], width // scale - 2 * 44)
+
+    def test_the_scene_points_the_locker_at_the_panel_in_the_private_runtime(self):
+        with tempfile.TemporaryDirectory(prefix='oldbook-lock-panel-') as directory:
+            root = Path(directory)
+            module = runpy.run_path(str(REPO / 'alpine/desktop/.local/lib/oldbook/lock_scene.py'))
+            palette = runpy.run_path(
+                str(REPO / 'alpine/desktop/.local/lib/oldbook/overlay_theme.py'))['read_palette'](root)
+            # The flag is only emitted to a locker that has it. An unpatched
+            # swaylock-effects exits on an unrecognised option, which the
+            # launcher reads as a locker that died before readiness, so it falls
+            # back to stock swaylock -- which draws none of this scene. Emitting
+            # it blind replaced the whole composed lock with a bare ring.
+            module['_OPTION_SUPPORT']['--indicator-panel'] = True
+            arguments = module['scene_arguments'](None, palette, (1440, 900, 1), root)
+            self.assertIn('--indicator-panel', arguments)
+            named = Path(arguments[arguments.index('--indicator-panel') + 1])
+            self.assertEqual(named, root / 'oldbook/cat-panel')
+            # Nothing is created by naming it, and the plain lock is the one
+            # that happens on every lock where no cat is on the keyboard.
+            self.assertFalse(named.exists())
+
+            module['_OPTION_SUPPORT']['--indicator-panel'] = False
+            without = module['scene_arguments'](None, palette, (1440, 900, 1), root)
+            self.assertNotIn('--indicator-panel', without)
+            # Losing the panel must never cost the scene: the composed painting
+            # and the caption card are still there without it.
+            self.assertEqual(without.count('--effect-compose'), 2)
+            self.assertNotIn('--grace', arguments)
+
+
 class LockBackendTests(unittest.TestCase):
     def test_failed_effects_locker_falls_back_to_the_stock_locker(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-lock-fallback-') as directory:
@@ -417,7 +552,13 @@ class LockBackendTests(unittest.TestCase):
             self.addCleanup(wayland.close)
             fake_bin = root / 'bin'
             fake_bin.mkdir()
-            (fake_bin / 'swaylock-effects').write_text('#!/bin/sh\necho effects >> ' + str(root / 'launches') + '\nexit 1\n')
+            # A --help probe is a capability question, not a lock attempt, so the
+            # fake answers it without counting a launch -- exactly as the real
+            # binary would, and exactly as the gate in lock_scene needs.
+            (fake_bin / 'swaylock-effects').write_text(
+                '#!/bin/sh\n'
+                'case "$1" in --help) echo "usage: swaylock"; exit 0;; esac\n'
+                'echo effects >> ' + str(root / 'launches') + '\nexit 1\n')
             (fake_bin / 'swaylockd').write_text("#!/usr/bin/python3\nimport os,sys,time\n"
                                                 f"open({str(root / 'launches')!r}, 'a').write('stock\\n')\n"
                                                 "os.write(int(sys.argv[sys.argv.index('-R')+1]), b'\\n')\n"

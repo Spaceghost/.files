@@ -14,6 +14,7 @@ import subprocess
 import sys
 
 SCENE_VERSION = 2
+_OPTION_SUPPORT = {}
 DEFAULT_GEOMETRY = (2880, 1800, 2)
 # How soft the painting goes behind the lock. The radius is a fraction of the
 # scene's working width rather than a pixel count, so a 13" panel and a 27" one
@@ -408,4 +409,47 @@ def scene_arguments(ready_fd, palette, geometry, runtime, home=None, cache=None)
     caption, caption_w, _ = render_caption(story, scripture, palette, scale, caption_dir / 'caption.png')
     margin = CAPTION_MARGIN * scale
     args += ['--effect-compose', f'{margin},-{margin};{caption_w * scale}x-1;southwest;{caption}']
+    # Point the locker at the cat panel, but only if this locker has the flag.
+    # Nothing is created here and nothing is waited for: while no panel file
+    # exists -- which is every lock in which no cat is lying on the keyboard --
+    # the locker draws exactly what it drew before the flag existed, and a panel
+    # that is malformed, stale, oversized or owned by anyone else is refused by
+    # the locker rather than trusted.
+    #
+    # The probe is not optional caution. An unpatched swaylock-effects exits on
+    # an unrecognised option, which the launcher reads as a locker that died
+    # before readiness, so it falls back to stock swaylock -- and stock swaylock
+    # draws none of this scene. Emitting the flag against a binary that predates
+    # it silently replaced the whole composed lock with a bare ring, caption and
+    # all, and the fallback chain made that look like working software.
+    if supports_option('--indicator-panel'):
+        args += ['--indicator-panel', str(Path(runtime) / 'oldbook' / cat_panel_name())]
     return args + indicator_arguments(palette, geometry)
+
+
+def supports_option(option, locker='swaylock-effects'):
+    """Does the installed locker accept this option?
+
+    Cached for the process. A locker that cannot be asked is assumed not to
+    support it, because emitting an unknown option costs the entire scene while
+    omitting a known one costs only the feature it belongs to.
+    """
+    cached = _OPTION_SUPPORT.get(option)
+    if cached is None:
+        try:
+            help_text = subprocess.run([locker, '--help'], capture_output=True, text=True,
+                                       timeout=5).stdout
+            cached = option.lstrip('-') in help_text
+        except (OSError, subprocess.SubprocessError):
+            cached = False
+        _OPTION_SUPPORT[option] = cached
+    return cached
+
+
+def cat_panel_name():
+    """The panel state file the cat daemon writes, named in exactly one place."""
+    try:
+        import cat_panel
+        return cat_panel.STATE_NAME
+    except ImportError:
+        return 'cat-panel'
