@@ -6,7 +6,7 @@ import re
 import shutil
 import subprocess
 
-from decoration import caption_child, focused_child
+from decoration import caption_child, focused_child, focused_title
 import window_context
 
 BIN = Path.home() / '.local/bin'
@@ -40,6 +40,36 @@ def quote(value):
     return json.dumps(str(value), ensure_ascii=False)
 
 
+def sibling_name(node):
+    """What one tab in a tabbed container should be called in one glance.
+
+    A leaf says whatever it calls itself; a split holding several windows has no
+    name of its own, so it borrows the one its focused window uses.
+    """
+    if node.get('app_id') or node.get('window'):
+        return clean(node.get('name') or app_name(node))
+    return clean(focused_title(node) or node.get('layout') or 'split')
+
+
+def container_tabs(node, child):
+    """Sway's own tabbed and stacked containers, which are a real tab set.
+
+    This is the only tab set another program can honestly be asked for: Wayland
+    gives nobody the titles inside somebody else's window, so a browser's or a
+    file manager's tabs are unreachable and are not invented here. What is
+    reachable is how the compositor stacked these windows, which is often the
+    more useful answer anyway.
+    """
+    if node.get('layout') not in ('tabbed', 'stacked'):
+        return None
+    children = node.get('nodes') or []
+    if len(children) < 2 or child not in children:
+        return None
+    return {'source': 'sway', 'layout': node['layout'],
+            'index': children.index(child) + 1, 'count': len(children),
+            'names': [sibling_name(entry) for entry in children]}
+
+
 def output_contexts(tree):
     result = {}
     for output in tree.get('nodes', []):
@@ -51,7 +81,7 @@ def output_contexts(tree):
             continue
         context = {'output': name, 'workspace': workspace.get('name', ''),
                    'layout': workspace.get('layout', ''), 'floating': False,
-                   'fullscreen': False,
+                   'fullscreen': False, 'tabs': None,
                    'id': None, 'node': {}}
         node = workspace
         while node:
@@ -69,6 +99,9 @@ def output_contexts(tree):
                 context['floating'] = True
             if node.get('layout') in ('splith', 'splitv', 'tabbed', 'stacked'):
                 context['layout'] = node['layout']
+            # The innermost tabbed container wins: it is the set the focused
+            # window is actually one of.
+            context['tabs'] = container_tabs(node, child) or context['tabs']
             node = child
         result[name] = context
     return result

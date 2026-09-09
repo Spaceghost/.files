@@ -123,12 +123,17 @@ class DecorationTests(unittest.TestCase):
                 'muted': '#816b91', 'border': '#261631',
                 'background_hard': '#13091f'}
             script['appearance'].__globals__['design_font'] = lambda: None
+            script['appearance'].__globals__['design_opacity'] = lambda: 0.78
 
-            family, size, colors, settings = script['appearance']()
+            family, size, colors, settings, theme_opacity = script['appearance']()
 
             self.assertEqual((family, size), ('Fixture Mono', 9.5))
             self.assertEqual(settings, {'position': 'bottom', 'opacity': 0.78,
-                                        'corner_radius': 7})
+                                        'corner_radius': 7, 'reserve_band': True,
+                                        'powerline': False})
+            # The strip matches the window it decorates, so the theme's terminal
+            # transparency travels with the appearance.
+            self.assertEqual(theme_opacity, 0.78)
             self.assertEqual(colors['surface'], '#261631')
             self.assertEqual(colors['accent'], '#dca7ff')
             self.assertEqual(colors['muted'], '#816b91')
@@ -156,20 +161,66 @@ class DecorationTests(unittest.TestCase):
 
     def test_decoration_settings_validate_ranges_and_types(self):
         self.assertTrue(hasattr(self.model, 'validate_settings'))
-        defaults = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7}
+        defaults = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
+                    'reserve_band': True, 'powerline': False}
         self.assertEqual(self.model.validate_settings({}), defaults)
         self.assertEqual(self.model.validate_settings(
             {'position': 'right', 'opacity': 0.2, 'corner_radius': 24}),
-            {'position': 'right', 'opacity': 0.2, 'corner_radius': 24})
+            dict(defaults, position='right', opacity=0.2, corner_radius=24))
+        # The band is on unless the user says otherwise; powerline is off until
+        # they ask for it.
+        self.assertEqual(self.model.validate_settings(
+            {'powerline': True, 'reserve_band': False}),
+            dict(defaults, powerline=True, reserve_band=False))
         invalid = [
             {'unknown': 1}, {'position': 'top'}, {'opacity': True},
             {'opacity': math.nan}, {'opacity': 0.19}, {'opacity': 1.01},
             {'corner_radius': True}, {'corner_radius': 1.5},
             {'corner_radius': -1}, {'corner_radius': 25},
+            {'powerline': 'yes'}, {'reserve_band': 1},
         ]
         for values in invalid:
             with self.subTest(values=values), self.assertRaises(ValueError):
                 self.model.validate_settings(values)
+
+    def test_the_strip_is_as_transparent_as_the_window_it_decorates(self):
+        """A translucent terminal gets a translucent strip; a solid application
+        gets a solid one, so the caption reads as part of that window."""
+        terminal = {'app_id': 'com.mitchellh.ghostty', 'name': '~'}
+        browser = {'app_id': 'firefox', 'name': 'Rice Board'}
+        self.assertEqual(self.model.window_opacity(terminal, True, 0.78, 0.67), 0.78)
+        self.assertEqual(self.model.window_opacity(browser, False, 0.78, 0.67), 1.0)
+        # Nothing to decorate: the saved preference decorates the desktop.
+        self.assertEqual(self.model.window_opacity({}, False, 0.78, 0.67), 0.67)
+        # A theme without a terminal opacity falls back the same way.
+        self.assertEqual(self.model.window_opacity(terminal, True, None, 0.67), 0.67)
+
+    def test_an_explicitly_transparent_window_is_believed_over_the_theme(self):
+        """Sway only reports an opacity where something set one, and a window it
+        calls fully opaque has told us nothing its application had not."""
+        asked = {'app_id': 'firefox', 'name': 'Rice Board', 'opacity': 0.5}
+        self.assertEqual(self.model.window_opacity(asked, False, 0.78, 0.67), 0.5)
+        solid = {'app_id': 'com.mitchellh.ghostty', 'name': '~', 'opacity': 1.0}
+        self.assertEqual(self.model.window_opacity(solid, True, 0.78, 0.67), 0.78)
+        # Never so faint that the caption stops being readable.
+        faint = {'app_id': 'firefox', 'opacity': 0.01}
+        self.assertEqual(self.model.window_opacity(faint, False, 0.78, 0.67),
+                         self.model.OPACITY_FLOOR)
+
+    def test_design_opacity_reads_the_active_theme_descriptor(self):
+        script = runpy.run_path(str(SCRIPT))
+        with tempfile.TemporaryDirectory(prefix='oldbook-decoration-opacity-') as directory:
+            themes = Path(directory)
+            (themes / 'current').write_text('fixture\n')
+            (themes / 'fixture.json').write_text(json.dumps(
+                {'palette': {}, 'design': {'opacity': 0.78}}))
+            self.assertEqual(script['design_opacity'](themes), 0.78)
+            (themes / 'fixture.json').write_text(json.dumps({'palette': {}, 'design': {}}))
+            self.assertIsNone(script['design_opacity'](themes))
+            (themes / 'fixture.json').write_text(json.dumps(
+                {'palette': {}, 'design': {'opacity': 'clear'}}))
+            self.assertIsNone(script['design_opacity'](themes))
+            self.assertIsNone(script['design_opacity'](themes / 'missing'))
 
     def test_settings_migrate_legacy_position_and_save_through_symlink(self):
         self.assertTrue(hasattr(self.model, 'load_settings'))
@@ -194,7 +245,8 @@ class DecorationTests(unittest.TestCase):
                                              legacy)
             self.assertTrue(config.is_symlink())
             self.assertEqual(saved, {'position': 'bottom', 'opacity': 0.55,
-                                     'corner_radius': 7})
+                                     'corner_radius': 7, 'reserve_band': True,
+                                     'powerline': False})
             self.assertEqual(json.loads(target.read_text()), saved)
             self.assertEqual(legacy.read_text(), 'bottom\n')
 

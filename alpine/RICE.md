@@ -441,6 +441,50 @@ photographed.
 Lock LED through `oldbook-notification-led` until the window is visited;
 ordinary notices never light it. Off: remove its launch from `oldbook-session`.
 
+### The strip no longer moves your text
+
+The strip used to reserve its own space, and the reservation travelled with
+focus: a floating window took the caption with it and released the workspace
+band, a tiled window took the band back. With the pointer choosing focus that
+happened on every border crossing, and a headless run of the real daemon
+measured the cost — the tiled terminal resized by 39 pixels, two or three rows
+of its grid, twice per pass of the mouse.
+
+The two jobs are separate now. An invisible one-pixel surface holds a fixed
+exclusive zone on the saved edge and never changes for focus, mode, content or
+fullscreen. The caption reserves nothing and draws at exactly the pixel it
+always did. Set `"reserve_band": false` in `~/.config/oldbook/decoration.json`
+and the band disappears entirely, leaving the strip overlaying windows — also
+jump-free, just covering content instead of sitting beside it.
+
+### Repository, tabs and powerline
+
+The place segment names the repository and how the checkout stands, for Fossil
+as readily as git: a branch glyph, a dot for uncommitted work, a check when
+there is nothing to report, arrows for what has not moved. Fossil is read
+straight out of its own SQLite rather than forked, which is also where "behind"
+comes from — and "ahead" appears only where a sync URL exists, so a repository
+that has never synced is not accused of being behind hand.
+
+Tabs come only from sources that are real: tmux's window list, and sway's own
+tabbed and stacked containers. No Wayland protocol exposes another
+application's tabs, so a browser's are not invented, and the sway container
+answer is usually the more useful one anyway.
+
+As the strip narrows it gives up whole ideas in a fixed order rather than
+letting the text be cut: other tabs' names, then the tab count, then the
+repository's standing, then the branch, then the directory. Where you are and
+what you are in never go.
+
+Powerline separators are a setting, default off — `"powerline": true`, or the
+checkbox in the settings editor at Shift+right-click. They are only markup, so
+they cost one layout parse and nothing else, but they read well only while a
+theme keeps its surfaces apart, which is why they are opt-in.
+
+Everything that costs a process runs on a worker thread while the caption keeps
+the last answer, and all of it sheds on the `window-context-detail` rung, asked
+four times less often off mains. One caption update costs 0.29 ms warm.
+
 ## Notification cards
 
 A notification is a card and nothing around it paints. That is the whole design,
@@ -700,6 +744,9 @@ look.
 ![Power deck rendered headlessly](verification/power-deck/power-deck.png)
 
 ## What the strip says
+
+    10 Strata · ghostty › nvim · ~/.files   alpine-oldbook  ·  2/3 edit, logs
+
 
 The caption used to repeat the window title, which for a terminal is usually
 the directory or nothing at all. It now answers three questions at a glance:

@@ -38,6 +38,8 @@ class CaptionHandoffTests(unittest.TestCase):
                          GtkLayerShell=GtkLayerShell, Pango=Pango, retired=set())
         exec(compile(ast.Module(body=[caption], type_ignores=[]), str(SCRIPT), 'exec'), namespace)
         cls.Caption = namespace['Caption']
+        cls.shell = GtkLayerShell
+        cls.reserve = namespace['decoration_reserve']
         cls.monitor = Gdk.Display.get_default().get_monitor(0)
 
     def test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry(self):
@@ -86,6 +88,40 @@ class CaptionHandoffTests(unittest.TestCase):
             self.assertIsNone(getattr(replacement, name), name)
         self.assertEqual(set(replacement.motion_velocity.values()), {0})
         self.assertEqual(replacement.alpha_velocity, 0)
+
+
+    def test_the_caption_reserves_nothing_and_steps_back_over_its_band(self):
+        """Reserving from the caption is exactly what made hovering resize
+        windows: the zone travelled with focus, so crossing between a tiled and
+        a floating terminal took the band away and gave it back. The caption
+        now reserves nothing in either mode and only steps back over the band
+        the reservation surface holds for it."""
+        if os.environ.get(ISOLATION_MARKER) != '1':
+            # The isolated child above runs this file whole; running the GTK
+            # fixture twice in one session buys nothing.
+            self.skipTest('covered by the isolated child run')
+        shell = self.shell
+        workspace = {'mode': 'workspace', 'edge': 'bottom', 'window_id': None,
+                     'rect': {'x': 0, 'y': 0, 'width': 1440, 'height': 900}}
+        caption = self.Caption(self.monitor, workspace, animate_entry=False)
+        self.addCleanup(caption.destroy)
+        self.assertEqual(shell.get_exclusive_zone(caption.window), 0)
+        self.assertEqual(shell.get_margin(caption.window, shell.Edge.BOTTOM),
+                         self.reserve.EDGE_MARGIN)
+        caption.set_band(39)
+        self.assertEqual(shell.get_margin(caption.window, shell.Edge.BOTTOM),
+                         self.reserve.caption_margin(39))
+        self.assertEqual(shell.get_exclusive_zone(caption.window), 0)
+
+        attached = self.Caption(self.monitor, {
+            'mode': 'window', 'edge': 'bottom', 'window_id': 3,
+            'rect': {'x': 200, 'y': 160, 'width': 620, 'height': 360}}, animate_entry=False)
+        self.addCleanup(attached.destroy)
+        # An attached caption follows a window anywhere in the output, so it
+        # needs the whole coordinate space and still reserves nothing.
+        self.assertEqual(shell.get_exclusive_zone(attached.window), -1)
+        attached.set_band(39)
+        self.assertEqual(shell.get_margin(attached.window, shell.Edge.TOP), 0)
 
 
 if __name__ == '__main__':

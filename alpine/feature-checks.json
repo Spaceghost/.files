@@ -368,7 +368,8 @@
         "alpine/desktop/.local/bin/oldbook-decoration-settings",
         "alpine/desktop/.local/lib/oldbook/air.py",
         "alpine/desktop/.local/lib/oldbook/window_context.py",
-        "alpine/tests/test_window_context.py"
+        "alpine/tests/test_window_context.py",
+        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py"
       ],
       "tests": [
         "test_decoration.py",
@@ -391,7 +392,8 @@
         "alpine/desktop/.local/lib/oldbook/decoration*",
         "alpine/desktop/.local/lib/oldbook/decoration.py",
         "alpine/desktop/.local/lib/oldbook/decoration_placement.py",
-        "alpine/themes/profiles/*/.config/swayfx/effects.conf"
+        "alpine/themes/profiles/*/.config/swayfx/effects.conf",
+        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py"
       ],
       "tests": [
         "test_decoration_placement.py",

@@ -32,6 +32,42 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## The strip stopped moving the text under it — 2026-09-09
+
+The user reported that moving the pointer between terminals made their text
+jump, and asked to keep the strip but stop the jumping, suggesting the bottom
+simply stop being window space. Diagnosis in a private headless SwayFX, driving
+the real daemon, found the reservation travelling with focus: the caption used
+an automatic exclusive zone in workspace mode and none in window mode, and
+window mode is exactly what a focused *floating* window selects. With one tiled
+and one floating terminal, every crossing flipped it. Measured: the tiled
+client resized by 39 pixels, twice per pass.
+
+Splitting the two jobs fixed it. An invisible one-pixel band holds a fixed zone
+on the saved edge; the caption reserves nothing and a negative margin puts it
+back on the pixel it always drew at. Re-measured: zero.
+
+Running the attachment verifier is what made this trustworthy, and it needed
+compiling a two-file pointer helper to run at all. It failed three times, and
+only the first was a stale expectation. The second was a real bug: band
+thickness was taken from the tallest caption anywhere, so when fullscreen forced
+the caption to the bottom, the *right* band was re-measured from a bottom
+caption and the reservation moved 16 pixels on entering fullscreen — the same
+defect wearing a different hat. Thickness is per edge now. The third was
+visible: an empty toolkit window paints the toolkit's own background, so the
+band drew a bright line across the bottom row of the screen. It would have been
+on his desktop the moment this shipped.
+
+Two smaller things surfaced. A Nerd Font glyph run is 20 pixels tall against 18
+for plain Latin, so a band measured from live caption content would have
+resized windows whenever the caption gained a branch glyph; thickness comes
+from a reference line holding every glyph class instead. And the verifier's
+corner sampling was reading the *output's* rounded corner rather than the
+caption's, which it had been doing before this work.
+
+Thirty-seven verifier checks, 17 check files, and the unit suites at 95 tests.
+Nothing has been seen on the live desktop: the daemon was never restarted.
+
 ## The remote builder actually builds now — 2026-09-09
 
 `remote-build` had never once run to completion. The earlier session that wrote

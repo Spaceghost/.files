@@ -160,7 +160,14 @@ def bottom_corner_pixels(image_path, rect):
         start = y * stride + x * channels
         return tuple(pixels[start:start + 3])
 
-    x, y = rect["x"], rect["y"] + rect["height"] - 1
+    # Three rows up, not the last one. This compositor rounds the output itself,
+    # and that arc reaches into the caption's bottom corners -- at the last row
+    # it eats the corner pixel whatever the caption's own radius is, so the last
+    # row measures the shape of the screen rather than the shape of the caption.
+    # Three rows up the output's arc no longer reaches, the row is still inside
+    # the caption's own padding so nothing else paints across it, and a seven
+    # pixel corner would still clip two pixels past the edge there.
+    x, y = rect["x"], rect["y"] + rect["height"] - 3
     width = rect["width"]
     return {"left_corner": pixel(x, y), "left_inset": pixel(x + 9, y),
             "right_corner": pixel(x + width - 1, y),
@@ -337,11 +344,47 @@ def run_verifier(output, prioritize_ui=False):
                     absolute = dict(caption["extent"])
                     absolute["x"] += active["rect"]["x"]
                     absolute["y"] += active["rect"]["y"]
+                bands = [item for item in active.get("layer_shell_surfaces", [])
+                         if item["namespace"] == "oldbook-decoration-band"]
+                visible = next((item for item in workspaces
+                                if item.get("output") == "HEADLESS-1" and item.get("visible")),
+                               None)
                 return {
                     "output": active["rect"], "captions": captions,
                     "caption_global_rect": absolute, "clients": clients,
-                    "workspaces": workspaces,
+                    "workspaces": workspaces, "bands": bands,
+                    "usable": visible["rect"] if visible else None,
                 }
+
+            band_size = {}
+
+            def reserved(state):
+                """How much of the output the band holds back, from the usable area.
+
+                Read from the compositor's geometry rather than from the surface
+                list, because sway stops reporting background-layer surfaces once
+                a fullscreen window covers the output: during fullscreen the band
+                is still reserving -- the usable area proves it -- while
+                `layer_shell_surfaces` no longer mentions it. What must hold is
+                the reservation, not whether this particular report names it.
+                """
+                if state["usable"] is None:
+                    return None
+                width = state["output"]["width"] - state["usable"]["width"]
+                height = state["output"]["height"] - TOP_ZONE - state["usable"]["height"]
+                return height if height else width
+
+            def band_holds(state):
+                """The reservation is the one that settled, and has not moved.
+
+                Every scenario after the band settles asserts this: the whole
+                point of the fixed band is that no focus change, no attachment,
+                no fullscreen and no caption content may alter it.
+                """
+                found = reserved(state)
+                if found is None or not 0 < found < 80:
+                    return False
+                return found == band_size.get("px", found)
 
             def attached(state, edge, app_id="attachment-floating"):
                 if len(state["captions"]) != 1 or app_id not in state["clients"]:
@@ -349,13 +392,14 @@ def run_verifier(output, prioritize_ui=False):
                 caption = state["captions"][0]
                 actual = state["caption_global_rect"]
                 client = state["clients"][app_id]["rect"]
-                output_rect = state["output"]
-                expected_tiled = {
-                    "x": output_rect["x"],
-                    "y": output_rect["y"] + TOP_ZONE,
-                    "width": output_rect["width"],
-                    "height": output_rect["height"] - TOP_ZONE,
-                }
+                # The caption reserves nothing in either mode; one invisible
+                # band holds a fixed edge so that moving the pointer between a
+                # tiled and a floating window can never resize either of them.
+                # The tiled client therefore fills the usable area, which is the
+                # output less the top panel and that band.
+                if not band_holds(state) or len(state["bands"]) != 1:
+                    return False
+                expected_tiled = dict(state["usable"])
                 geometry = (
                     actual["x"] == client["x"]
                     and actual["y"] == client["y"] + client["height"]
@@ -385,8 +429,19 @@ def run_verifier(output, prioritize_ui=False):
                     and actual["y"] == TOP_ZONE + 5
                     and actual["height"] == HEIGHT - TOP_ZONE - 10
                 )
-                return (geometry and caption.get("exclusive_zone", 1) > 0
-                        and caption["layer"] == "overlay")
+                # The workspace caption used to carry the reservation itself,
+                # which is exactly what made a hover resize windows. It now
+                # reserves nothing and draws inside the band instead. Fullscreen
+                # borrows the bottom for the caption while the band stays on the
+                # saved edge, and sway stops listing background surfaces while a
+                # fullscreen window covers the output, so the band is asserted
+                # through the usable area and only counted when it is reportable.
+                fullscreen = any(client.get("fullscreen_mode")
+                                 for client in state["clients"].values())
+                return (geometry and caption.get("exclusive_zone", 0) <= 0
+                        and caption["layer"] == "overlay"
+                        and band_holds(state)
+                        and len(state["bands"]) == (0 if fullscreen else 1))
 
             def capture(name, predicate, message):
                 latest = {}
@@ -455,9 +510,27 @@ def run_verifier(output, prioritize_ui=False):
                 floating = wait_for(lambda: node("attachment-floating"), "floating client missing")
                 floating_id, tiled_id = floating["id"], tiled["id"]
                 decoration = spawn("decoration", [str(HELPER), "daemon"])
-                initial = capture("attached-bottom", lambda state: attached(state, "bottom")
-                        and state["clients"]["attachment-tiled"]["rect"] == baseline,
-                        "bottom caption did not attach flush without reserving workspace space")
+                initial = capture("attached-bottom", lambda state: attached(state, "bottom"),
+                        "bottom caption did not attach flush to the bottom edge")
+                # The desktop now reserves a fixed strip on the saved edge on
+                # purpose: a reservation that came and went with focus was the
+                # text-jumping bug. So the tiled client is expected to settle
+                # once, smaller, and the property under test becomes that it
+                # never moves again -- which every later comparison against this
+                # baseline is now asserting.
+                settled = wait_for(lambda: node("attachment-tiled"),
+                                   "tiled client missing after the band appeared")["rect"]
+                require(settled["x"] == baseline["x"]
+                        and settled["width"] == baseline["width"]
+                        and settled["y"] == baseline["y"]
+                        and 0 < baseline["height"] - settled["height"] <= 80,
+                        "the band is not a fixed strip on the bottom edge: "
+                        f"{baseline} became {settled}")
+                evidence["band_reserved_px"] = baseline["height"] - settled["height"]
+                band_size["px"] = reserved(snapshot())
+                require(band_size["px"] == evidence["band_reserved_px"],
+                        "the band's reservation and the client's loss disagree")
+                baseline = settled
                 prioritize(decoration)
 
                 ipc(command='mode "window-switcher"')
@@ -611,11 +684,26 @@ def run_verifier(output, prioritize_ui=False):
                         {"x": 340, "y": 230, "width": 740, "height": 420}
                         and state["clients"]["attachment-tiled"]["rect"] == baseline,
                         "attachment did not track moving and resizing the float")
+                # Changing the saved edge is the one action allowed to move the
+                # reservation, so stop holding it to the bottom figure until it
+                # has settled on the other side.
+                band_size.pop("px", None)
                 subprocess.run([str(HELPER), "right"], env=env, stdout=log,
                                stderr=log, check=True, timeout=5)
-                capture("attached-right", lambda state: attached(state, "right")
-                        and state["clients"]["attachment-tiled"]["rect"] == baseline,
+                capture("attached-right", lambda state: attached(state, "right"),
                         "saved right placement did not follow the floating edge")
+                # The band follows the saved edge, so changing that edge is the
+                # one thing that is allowed to move the reservation. It settles
+                # once more, on the other side, and everything after this must
+                # hold against the new resting rect.
+                turned = wait_for(lambda: node("attachment-tiled"),
+                                  "tiled client missing after the band changed edge")["rect"]
+                require(turned != baseline,
+                        "changing the saved edge did not move the reservation")
+                evidence["band_right_rect"] = turned
+                band_size["px"] = reserved(snapshot())
+                evidence["band_right_px"] = band_size["px"]
+                baseline = turned
                 ipc(command=f"[con_id={floating_id}] resize set 220 180")
                 capture("small-right", lambda state: attached(state, "right")
                         and state["clients"]["attachment-floating"]["rect"]["height"] == 180,

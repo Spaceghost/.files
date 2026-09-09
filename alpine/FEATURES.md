@@ -122,7 +122,14 @@ Retain app icon, readable title, window state, helpful hover text and interactiv
 window/workspace controls. Bottom is the saved default; right-edge placement
 remains available. The preference editor exposes placement, opacity and corners
 beside editable JSON, validates changes and refuses stale overwrites. Preserve
-the user's saved values, currently bottom / 0.67 opacity / radius 7. Caption
+the user's saved values, currently bottom / 0.67 opacity / radius 7, which is
+the fallback rather than the rule: the strip takes the opacity of the window it
+decorates. An explicitly transparent container wins; otherwise a terminal takes
+the active theme's design opacity, the same value the terminal configuration is
+generated from, so the two move together on a theme switch, and an ordinary
+application gets an opaque strip so its caption reads as part of that window
+rather than a translucent slab over it. An empty workspace has no window to
+belong to and keeps the saved value. Caption
 typography follows the active theme's design typeface (Inter Medium for Gruvbox
 Dark) one point above the terminal size, left-aligned with Ghost Observatory
 padding; a theme without a design font keeps the terminal font.
@@ -153,8 +160,25 @@ for the pane and Fossil for the branch is on the power ladder as
 
 ### DECORATION-PLACEMENT
 
-Attach the caption to the focused ordinary floating window without reserving
-workspace space. Actual fullscreen on its visible workspace forces the workspace
+Attach the caption to the focused ordinary floating window. The caption itself
+reserves nothing in either mode; a separate invisible one-pixel band holds a
+fixed exclusive zone on the saved edge. This supersedes the earlier pin that no
+workspace space is reserved at all, because a reservation that came and went
+with focus was the defect: floating windows took the caption and released the
+band, tiled windows took it back, and with `focus_follows_mouse` a measured 39
+pixels — two or three terminal rows — moved on every pointer crossing.
+
+The band never changes for focus, mode, content or fullscreen, and it follows
+the saved edge rather than the fullscreen override, since a fullscreen window
+ignores exclusive zones and following it would resize ordinary windows for
+nothing. Its thickness is measured from a reference line containing every glyph
+class the strip can draw, never from the live caption, because a Nerd Font run
+is two pixels taller than plain Latin. Thickness is remembered per edge: a
+bottom caption's height is no measurement of a vertical strip's width, and
+borrowing one for the other moved the reservation 16 pixels on entering
+fullscreen. The band paints nothing — an empty toolkit window still fills
+itself with the toolkit's background unless told otherwise. Actual fullscreen on
+its visible workspace forces the workspace
 bottom caption; global fullscreen applies on every output. Hidden-workspace
 fullscreen does not interfere. Restore the saved edge afterward. Fullscreen tiled
 captions have square corners; ordinary/floating captions retain chosen rounding.

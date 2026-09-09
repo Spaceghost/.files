@@ -65,7 +65,15 @@ def create_window(config_path):
             self.radius.set_numeric(True)
             self.radius.set_tooltip_text('A softer landing for ordinary and floating windows. Fullscreen tiled windows always use square corners.')
             controls.pack_start(self.field('_Corner radius · pixels', self.radius), False, False, 0)
-            note = self.label('Your floating window brings its caption along.\nFullscreen parks it at the workspace bottom.\nBlended colors; square corners for fullscreen tiles.')
+
+            self.reserve = Gtk.CheckButton.new_with_mnemonic('_Keep the caption’s edge clear of windows')
+            self.reserve.set_tooltip_text('Hold a fixed band along the caption’s edge so windows never resize as the caption moves between them. Without it the caption simply draws over whatever is there.')
+            controls.pack_start(self.reserve, False, False, 0)
+
+            self.powerline = Gtk.CheckButton.new_with_mnemonic('Po_werline separators')
+            self.powerline.set_tooltip_text('Draw the caption as coloured powerline segments instead of dotted text. Needs a Nerd Font, and reads best where the theme keeps its surfaces apart.')
+            controls.pack_start(self.powerline, False, False, 0)
+            note = self.label('Your floating window brings its caption along.\nFullscreen parks it at the workspace bottom.\nThe caption is as transparent as the window it decorates.')
             note.get_style_context().add_class('muted')
             controls.pack_start(note, False, False, 0)
             controls.pack_start(Gtk.Box(), True, True, 0)
@@ -148,6 +156,8 @@ def create_window(config_path):
             self.position.set_active_id(settings['position'])
             self.opacity.set_value(settings['opacity'] * 100)
             self.radius.set_value(settings['corner_radius'])
+            self.reserve.set_active(settings['reserve_band'])
+            self.powerline.set_active(settings['powerline'])
 
         def message(self, text, error=False):
             self.status.set_text(text)
@@ -198,7 +208,9 @@ def create_window(config_path):
         def apply_controls(self, _button):
             self.save({'position': self.position.get_active_id(),
                        'opacity': round(self.opacity.get_value() / 100, 2),
-                       'corner_radius': self.radius.get_value_as_int()})
+                       'corner_radius': self.radius.get_value_as_int(),
+                       'reserve_band': self.reserve.get_active(),
+                       'powerline': self.powerline.get_active()})
 
         def apply_json(self, _button):
             try:
@@ -231,6 +243,9 @@ def create_window(config_path):
                     button.suggested-action { background: @theme_accent; color: @theme_background_hard; }
                     button.suggested-action label { color: @theme_background_hard; }
                     scale highlight { background: @theme_accent; border-color: @theme_accent; }
+                    checkbutton check { background: @theme_background_hard; color: @theme_accent;
+                                        border: 1px solid alpha(@theme_accent, 0.4); box-shadow: none; }
+                    checkbutton check:checked { background: @theme_accent; color: @theme_background_hard; }
                     .error { color: @theme_accent; font-weight: bold; }
                 ''', palette))
                 self.palette = palette

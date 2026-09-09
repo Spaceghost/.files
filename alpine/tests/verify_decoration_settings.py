@@ -37,6 +37,11 @@ def run_client(source, config_home, state_home, output):
     config = config_home / "oldbook/decoration.json"
     legacy = state_home / "oldbook/decoration/position"
     save_settings = module["save_settings"]
+    defaults = module["SETTINGS_DEFAULTS"]
+
+    def settled(**values):
+        """A saved file carries every setting, not only the ones just touched."""
+        return dict(defaults, **values)
 
     window = create_window(config)
     window.show_all()
@@ -63,7 +68,7 @@ def run_client(source, config_home, state_home, output):
         window.position.set_active_id("bottom")
         window.opacity.set_value(55)
         window.radius.set_value(12)
-        external = {"position": "right", "opacity": 0.78, "corner_radius": 7}
+        external = settled(position="right", opacity=0.78, corner_radius=7)
         save_settings(config, external, legacy)
         window.apply_controls(None)
         require(read_config() == external, "stale controls overwrote an external update")
@@ -93,11 +98,7 @@ def run_client(source, config_home, state_home, output):
         window.opacity.set_value(55)
         window.radius.set_value(12)
         window.apply_controls(None)
-        controls_saved = {
-            "position": "right",
-            "opacity": 0.55,
-            "corner_radius": 12,
-        }
+        controls_saved = settled(position="right", opacity=0.55, corner_radius=12)
         require(read_config() == controls_saved, "controls did not save")
         require(
             json.loads(window.buffer.get_text(*window.buffer.get_bounds(), True))
@@ -118,7 +119,7 @@ def run_client(source, config_home, state_home, output):
         )
         checks.append("invalid-json-preserves-saved-file")
 
-        json_saved = {"position": "bottom", "opacity": 0.78, "corner_radius": 7}
+        json_saved = settled(position="bottom", opacity=0.78, corner_radius=7)
         window.buffer.set_text(json.dumps(json_saved))
         window.apply_json(None)
         require(read_config() == json_saved, "valid JSON did not save")
@@ -138,7 +139,7 @@ def run_client(source, config_home, state_home, output):
         window.buffer.set_text(
             json.dumps({"position": "bottom", "opacity": 0.66, "corner_radius": 10})
         )
-        external = {"position": "right", "opacity": 0.78, "corner_radius": 7}
+        external = settled(position="right", opacity=0.78, corner_radius=7)
         save_settings(config, external, legacy)
         window.apply_json(None)
         require(read_config() == external, "stale JSON overwrote an external update")

@@ -275,5 +275,106 @@ class DecorationActionContextTests(unittest.TestCase):
         self.assertFalse(self.actions.output_contexts(tree)['eDP-1']['fullscreen'])
 
 
+class ReservedBandTests(unittest.TestCase):
+    """The band that stops a hover from resizing anything."""
+
+    @classmethod
+    def setUpClass(cls):
+        path = LIBRARY / 'decoration_reserve.py'
+        spec = importlib.util.spec_from_file_location('decoration_reserve', path)
+        cls.band = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.band)
+        placement = LIBRARY / 'decoration_placement.py'
+        spec = importlib.util.spec_from_file_location('decoration_placement', placement)
+        cls.model = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.model)
+
+    def test_the_band_is_the_same_on_every_output_whatever_has_focus(self):
+        """A floating window takes its caption with it; the band stays put.
+
+        This is the whole fix: the reservation used to travel with the caption,
+        so crossing from a tiled terminal to a floating one released it and
+        every tiled window on the output was resized by its thickness.
+        """
+        floating = view(7)
+        attached = {'nodes': [output('eDP-1', [workspace(2, [view(4)], [floating], [7, 4])])]}
+        tiled = {'nodes': [output('eDP-1', [workspace(2, [view(4)], [floating], [4, 7])])]}
+        placements = [self.model.output_placements(tree) for tree in (attached, tiled)]
+        self.assertEqual([found['eDP-1']['mode'] for found in placements],
+                         ['window', 'workspace'])
+        plans = [self.band.band_plan(found, 'bottom', 39) for found in placements]
+        self.assertEqual(plans[0], plans[1])
+        self.assertEqual(plans[0], {'eDP-1': {'edge': 'bottom', 'thickness': 39}})
+
+    def test_fullscreen_moves_the_caption_and_leaves_the_band_alone(self):
+        """Fullscreen ignores exclusive zones, so moving the band would only
+        resize the ordinary windows on the way in and again on the way out."""
+        tree = {'nodes': [output('eDP-1', [workspace(2, [view(4, fullscreen=1)])])]}
+        placement = self.model.output_placements(tree, 'right')['eDP-1']
+        self.assertEqual(placement['edge'], 'bottom')
+        self.assertEqual(self.band.band_plan({'eDP-1': placement}, 'right', 44),
+                         {'eDP-1': {'edge': 'right', 'thickness': 44}})
+
+    def test_a_caption_steps_back_over_the_band_it_may_not_reserve(self):
+        """Zero zone keeps the strip inside the usable area; the negative margin
+        puts it back over its own band, exactly where it has always been."""
+        self.assertEqual(self.band.caption_margin(39), self.band.EDGE_MARGIN - 39)
+        self.assertEqual(self.band.caption_margin(0), self.band.EDGE_MARGIN)
+        self.assertEqual(self.band.caption_offset(39), (0, self.band.EDGE_MARGIN - 39))
+        # No band: reserve nothing, and keep respecting whoever else reserved.
+        self.assertEqual(self.band.caption_offset(0), (0, self.band.EDGE_MARGIN))
+        # Fullscreen borrows the bottom while the band holds the right edge;
+        # that band is not this caption's, so it takes the whole output.
+        self.assertEqual(self.band.caption_offset(39, matching=False),
+                         (-1, self.band.EDGE_MARGIN))
+
+    def test_the_band_is_measured_from_a_reference_line_not_the_live_caption(self):
+        reference = self.band.REFERENCE
+        for glyph in ('\ue725', '\ue0b0', '›', '·'):
+            self.assertIn(glyph, reference)
+        self.assertEqual(self.band.band_thickness(34), 34 + self.band.EDGE_MARGIN)
+        # A failed measurement must not hand the compositor a nonsense band.
+        for broken in (0, -20, None, 'tall'):
+            self.assertEqual(self.band.band_thickness(broken), self.band.MINIMUM)
+        self.assertEqual(self.band.band_thickness(10_000), self.band.MAXIMUM)
+
+    def test_the_band_is_measured_by_a_caption_on_its_own_edge(self):
+        """Fullscreen borrows the bottom while the band stays on the saved edge.
+
+        Sizing the reservation from whichever caption happened to exist made
+        entering fullscreen re-measure the right band from a bottom caption and
+        resize the windows beside it — the same bug wearing a different hat.
+        """
+        measured = {'bottom': 39, 'right': 55}
+        self.assertEqual(self.band.band_measurement(measured, 'right'), 55)
+        self.assertEqual(self.band.band_measurement(measured, 'bottom'), 39)
+        # No caption has been drawn along that edge yet, so it keeps the floor
+        # rather than the other edge's number.
+        self.assertEqual(self.band.band_measurement({'bottom': 39}, 'right'),
+                         self.band.band_thickness(0))
+        self.assertEqual(self.band.band_measurement({}, 'bottom'),
+                         self.band.band_thickness(0))
+
+    def test_turning_the_band_off_reserves_nothing_at_all(self):
+        placements = {'eDP-1': {'mode': 'workspace'}}
+        self.assertEqual(self.band.band_plan(placements, 'bottom', 39, enabled=False), {})
+        self.assertEqual(self.band.band_plan(placements, 'bottom', 0), {})
+
+    def test_the_band_only_ever_uses_an_edge_the_strip_uses(self):
+        with self.assertRaises(ValueError):
+            self.band.band_plan({'eDP-1': {}}, 'top', 39)
+        self.assertEqual(self.band.band_anchors('bottom'), ('BOTTOM', 'LEFT', 'RIGHT'))
+        self.assertEqual(self.band.band_anchors('right'), ('RIGHT', 'TOP', 'BOTTOM'))
+
+    def test_the_caption_budget_leaves_room_for_the_controls(self):
+        wide = self.band.character_budget(1440, 7.5, 200)
+        narrow = self.band.character_budget(400, 7.5, 200)
+        self.assertGreater(wide, narrow)
+        self.assertEqual(wide, int((1440 - 200) / 7.5))
+        self.assertEqual(self.band.character_budget(40, 7.5, 200), self.band.MINIMUM_BUDGET)
+        self.assertIsNone(self.band.character_budget(1440, 0))
+        self.assertIsNone(self.band.character_budget(1440, None))
+
+
 if __name__ == '__main__':
     unittest.main()

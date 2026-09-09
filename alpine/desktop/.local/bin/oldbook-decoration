@@ -15,9 +15,11 @@ import threading
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import air
-from decoration import action_command, load_settings, save_settings, vertical_title
+from decoration import (action_command, load_settings, save_settings, vertical_title,
+                        window_opacity)
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
+import decoration_reserve
 import window_context
 from overlay_theme import THEMES, read_palette
 from decoration_placement import output_placements
@@ -48,16 +50,33 @@ def launch(command):
         return False
 
 
-def design_font(directory=THEMES):
-    """The active theme's caption typeface, or None to keep the terminal font."""
+def design_descriptor(directory=THEMES):
+    """The active theme's design block, or nothing at all if it will not read."""
     try:
         identity = (directory / 'current').read_text().strip()
         if not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,63}', identity):
-            return None
-        font = json.loads((directory / (identity + '.json')).read_text()).get('design', {}).get('font')
+            return {}
+        found = json.loads((directory / (identity + '.json')).read_text()).get('design', {})
     except (OSError, ValueError, AttributeError, TypeError):
-        return None
+        return {}
+    return found if isinstance(found, dict) else {}
+
+
+def design_font(directory=THEMES):
+    """The active theme's caption typeface, or None to keep the terminal font."""
+    font = design_descriptor(directory).get('font')
     return font.strip() if isinstance(font, str) and font.strip() else None
+
+
+def design_opacity(directory=THEMES):
+    """How transparent this theme makes its terminals, which is what a strip
+    decorating a terminal should match. The theme generates the terminal
+    configuration from this same number, so the two never drift apart."""
+    value = design_descriptor(directory).get('opacity')
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return None
+    value = float(value)
+    return value if 0 < value <= 1 else None
 
 
 def appearance():
@@ -74,7 +93,7 @@ def appearance():
     if design and design != family:
         family, size = design, size + 1
     return (family, min(40, max(5, size)), read_palette(),
-            load_settings(SETTINGS, STATE / 'position'))
+            load_settings(SETTINGS, STATE / 'position'), design_opacity())
 
 
 def queue_geometry_update(callback):
@@ -140,18 +159,21 @@ def daemon():
             GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.TOP if attached
                                     else GtkLayerShell.Layer.OVERLAY)
             GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
-            anchors = (('TOP', 'LEFT') if attached else
-                       ('BOTTOM', 'LEFT', 'RIGHT') if edge == 'bottom' else ('RIGHT', 'TOP', 'BOTTOM'))
+            anchors = (('TOP', 'LEFT') if attached
+                       else decoration_reserve.band_anchors(edge))
             for name in anchors:
                 side = getattr(GtkLayerShell.Edge, name)
                 GtkLayerShell.set_anchor(self.window, side, True)
-                GtkLayerShell.set_margin(self.window, side, 0 if attached else 5)
-            if attached:
-                # Use the entire output coordinate space, independent of other
-                # reserved edges. Negative zone reserves no workspace space.
-                GtkLayerShell.set_exclusive_zone(self.window, -1)
-            else:
-                GtkLayerShell.auto_exclusive_zone_enable(self.window)
+                GtkLayerShell.set_margin(self.window, side,
+                                         0 if attached else decoration_reserve.EDGE_MARGIN)
+            # The caption itself never reserves anything: the band does that
+            # once and keeps doing it, so no focus change can resize a window.
+            # An attached caption follows a window that may be anywhere in the
+            # output and needs the whole coordinate space; a workspace caption
+            # keeps a zero zone so it still sits below the bar's reservation,
+            # and steps back over its own band with a negative margin.
+            GtkLayerShell.set_exclusive_zone(self.window, -1 if attached else 0)
+            self.band = (0, True)
             orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
             self.box = Gtk.Box(orientation=orientation, spacing=4)
             self.box.get_style_context().add_class('caption')
@@ -206,6 +228,75 @@ def daemon():
             self.accent = None
             self.previous_style = None
             self.previous_display = None
+            self.measured = decoration_reserve.band_thickness(0)
+            self.measured_key = None
+            self.character_width = None
+            self.powerline = False
+            self.palette = {}
+            self.shown_parts = []
+
+        def set_band(self, thickness, matching=True):
+            """Step back over the reserved band so the strip stays where it was.
+
+            The band is a reservation, not a shelf to sit on top of: the caption
+            crosses it and draws inside it, which leaves the strip exactly where
+            it has always been while the windows above it stop moving.
+            """
+            if self.attachment_mode == 'window' or (thickness, matching) == self.band:
+                return
+            self.band = (thickness, matching)
+            zone, margin = decoration_reserve.caption_offset(thickness, matching)
+            side = getattr(GtkLayerShell.Edge,
+                           'BOTTOM' if self.edge == 'bottom' else 'RIGHT')
+            GtkLayerShell.set_exclusive_zone(self.window, zone)
+            GtkLayerShell.set_margin(self.window, side, margin)
+
+        def remeasure(self, style):
+            """Size the band from a reference line rather than the live caption.
+
+            A Nerd Font branch glyph is taller than plain Latin in the same face,
+            so a band that followed what the caption happens to say would resize
+            every window whenever the pointer crossed from a repository to a
+            plain window. The reference holds every glyph class the strip can
+            draw, so one measurement per appearance covers all of them.
+            """
+            reference = decoration_reserve.REFERENCE
+            self.label.set_use_markup(False)
+            if self.edge == 'bottom':
+                self.label.set_text(reference)
+                natural = self.box.get_preferred_height()[1]
+            else:
+                self.label.set_text(vertical_title(reference, len(reference)))
+                natural = self.box.get_preferred_width()[1]
+            self.measured = decoration_reserve.band_thickness(natural)
+            sample = self.label.create_pango_layout(decoration_reserve.SAMPLE)
+            sample.set_font_description(Pango.FontDescription(f'{style[0]} {style[1]}'))
+            self.character_width = sample.get_pixel_size()[0] / len(decoration_reserve.SAMPLE)
+
+        def show_caption(self, parts):
+            """Set the line once, in whichever form this strip is wearing."""
+            self.shown_parts = list(parts)
+            if self.powerline and parts:
+                self.label.set_markup(window_context.markup(parts, self.palette))
+                return
+            self.label.set_use_markup(False)
+            self.label.set_text(window_context.SEPARATOR.join(text for _, text in parts))
+
+        def budget(self, placement):
+            """How much line there is room for, in characters.
+
+            Pango's ellipsis cuts whatever happens to be last, which is no way
+            to choose what a person loses. Measuring the room first lets the
+            caption drop whole ideas in a deliberate order instead, and leaves
+            the ellipsis as the last resort it should be.
+            """
+            if self.edge != 'bottom' or not self.character_width:
+                return None
+            span = (placement['rect']['width'] if self.attachment_mode == 'window'
+                    else self.monitor.get_workarea().width)
+            controls = sum(child.get_preferred_width()[1] for child in self.box.get_children()
+                           if child is not self.title_button and child.get_visible())
+            return decoration_reserve.character_budget(span, self.character_width, controls + 48)
 
         def place(self, placement, output_rect):
             if self.attachment_mode != 'window':
@@ -291,7 +382,8 @@ def daemon():
                 return
             self.retiring = True
             self.window.set_sensitive(False)
-            GtkLayerShell.set_exclusive_zone(self.window, -1)
+            # Its zone is already nothing, and changing one now would move a
+            # fading strip off the edge it is anchored inside.
             retired.add(self)
             self.animate()
             # Also dispose when an output disappears and stops frame callbacks.
@@ -414,15 +506,16 @@ def daemon():
             # Defer disposal until GTK has finished delivering the activation.
             GLib.idle_add(lambda: (menu.destroy(), False)[1])
 
-        def restyle(self, style, square):
-            if (style, square) == self.previous_style:
+        def restyle(self, style, square, opacity):
+            if (style, square, opacity) == self.previous_style:
                 return
-            family, size, colors, settings = style
+            family, size, colors, settings, _theme = style
             family = family.replace('\\', '\\\\').replace('"', '\\"')
             if colors['accent'] != self.accent:
                 self.accent = colors['accent']
                 self.breath_painted = None
-            opacity = settings['opacity']
+            self.palette = colors
+            self.powerline = bool(settings['powerline'])
             radius = 0 if square else settings['corner_radius']
             # Ghost Observatory captions: roomier padding, medium-weight title.
             padding = '3px 9px' if self.edge == 'bottom' else '9px 3px'
@@ -468,21 +561,29 @@ def daemon():
                 .decoration-menu menuitem:disabled {{ color: alpha({colors['foreground']}, .55); }}
                 .decoration-menu separator {{ background: alpha({colors['foreground']}, .12); margin: 5px 8px; }}
             '''.replace('#workspace-decoration', '#' + self.css_name).encode())
-            self.previous_style = (style, square)
+            self.previous_style = (style, square, opacity)
 
         def update(self, context, tree, style, placement, output_rect):
             square = placement['square']
             self.context = dict(context, edge=self.edge)
             self.tree = tree
-            caption_text = window_context.strip_caption(context)
+            node = context.get('node') or {}
+            terminal = terminal_source(node)
+            # The strip belongs to the window it decorates, so it is as
+            # transparent as that window is: the theme's terminal value for a
+            # terminal, opaque for an application that is, and the saved
+            # preference when there is no window to belong to.
+            opacity = window_opacity(node, terminal is not None,
+                                     style[4], style[3]['opacity'])
+            parts = window_context.strip_segments(context, self.budget(placement))
             display_state = (tuple(context.get(key) for key in
                              ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')),
-                             caption_text, style, square,
+                             tuple(parts), style, square, opacity,
                              placement['rect']['width'], placement['rect']['height'])
             if display_state == self.previous_display:
                 self.place(placement, output_rect)
                 return
-            self.restyle(style, square)
+            self.restyle(style, square, opacity)
             occupied = bool(context.get('id'))
             app = context.get('app', '')
             if app != self.icon_key:
@@ -496,23 +597,9 @@ def daemon():
                 if icon:
                     self.image.set_from_gicon(icon, Gtk.IconSize.MENU)
                 else:
-                    terminal = terminal_source(context.get('node', {}))
                     self.image.set_from_icon_name('utilities-terminal-symbolic' if terminal else
                         ('application-x-executable-symbolic' if occupied else 'view-app-grid-symbolic'), Gtk.IconSize.MENU)
             title = context.get('title') or 'Empty workspace · ' + context.get('workspace', '')
-            shown_title = caption_text
-            if self.edge == 'right':
-                layout = self.label.create_pango_layout('M')
-                family, size = style[:2]
-                layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
-                height = max(1, layout.get_pixel_size()[1])
-                span = (placement['rect']['height'] if self.attachment_mode == 'window'
-                        else self.monitor.get_workarea().height)
-                available = max(1, span - (110 if span < 240 else 260))
-                shown = vertical_title(shown_title, available // height)
-            else:
-                shown = shown_title
-            self.label.set_text(shown)
             state = 'FULLSCREEN' if context.get('fullscreen') else ('FLOATING' if context.get('floating') else 'TILED')
             self.state_label.set_text(state if occupied and self.edge == 'bottom' else '')
             self.title_button.set_tooltip_text(title + '\n' + (context.get('app', '') + ' · ' + state if occupied else 'Choose an app to open')
@@ -537,6 +624,29 @@ def daemon():
             self.more_button.set_visible(not attached or span >= 120)
             self.title_button.set_visible(not attached or span >= 80)
             self.state_label.set_visible(occupied and self.edge == 'bottom' and (not attached or span >= 520))
+            # Size the band now the controls are in their final state, from the
+            # reference line rather than whatever the caption happens to say.
+            measured = (style[0], style[1], self.edge)
+            if measured != self.measured_key:
+                self.measured_key = measured
+                self.remeasure(style)
+            if self.edge == 'right':
+                # A column of single characters has no room for segments; it
+                # keeps the plain line and its own vertical budget.
+                layout = self.label.create_pango_layout('M')
+                family, size = style[:2]
+                layout.set_font_description(Pango.FontDescription(f'{family} {size}'))
+                height = max(1, layout.get_pixel_size()[1])
+                span = (placement['rect']['height'] if self.attachment_mode == 'window'
+                        else self.monitor.get_workarea().height)
+                available = max(1, span - (110 if span < 240 else 260))
+                self.shown_parts = list(parts)
+                self.label.set_use_markup(False)
+                self.label.set_text(vertical_title(
+                    window_context.SEPARATOR.join(text for _, text in parts),
+                    available // height))
+            else:
+                self.show_caption(parts)
             self.place(placement, output_rect)
             self.window.show()
             self.animate()
@@ -582,7 +692,74 @@ def daemon():
             self.window.set_opacity(1.0)
             return self
 
+    class Reservation:
+        """The band itself: an invisible surface whose only job is to hold space.
+
+        It draws nothing, takes no input and never moves. Everything about the
+        caption changes as the pointer travels — which window it belongs to,
+        which edge it uses, how tall its text is — and none of that may reach
+        the compositor's idea of the usable area, or the windows above resize
+        and terminals re-flow their text under the pointer. So the reservation
+        lives here instead, where nothing can disturb it.
+        """
+
+        def __init__(self, monitor, edge, thickness):
+            self.monitor, self.edge, self.thickness = monitor, edge, 0
+            self.window = Gtk.Window()
+            self.window.set_name('workspace-decoration-band')
+            self.window.set_can_focus(False)
+            self.window.set_accept_focus(False)
+            visual = self.window.get_screen().get_rgba_visual()
+            if visual is not None:
+                self.window.set_visual(visual)
+            GtkLayerShell.init_for_window(self.window)
+            GtkLayerShell.set_namespace(self.window, 'oldbook-decoration-band')
+            GtkLayerShell.set_monitor(self.window, monitor)
+            # Behind everything: it must never cover a window, only keep one out.
+            GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BACKGROUND)
+            GtkLayerShell.set_keyboard_mode(self.window, GtkLayerShell.KeyboardMode.NONE)
+            for name in decoration_reserve.band_anchors(edge):
+                GtkLayerShell.set_anchor(self.window, getattr(GtkLayerShell.Edge, name), True)
+            self.window.set_size_request(*((-1, 1) if edge == 'bottom' else (1, -1)))
+            # A window with no widgets still paints the toolkit's own background,
+            # which on the screen's last row is a bright line across the desktop.
+            # The band is a reservation, and a reservation is not a thing to see.
+            self.provider = Gtk.CssProvider()
+            self.provider.load_from_data(
+                b'#workspace-decoration-band { background: transparent; border: none; }')
+            Gtk.StyleContext.add_provider_for_screen(
+                self.window.get_screen(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_USER)
+            self.window.connect('realize', self.untouchable)
+            self.set_thickness(thickness)
+            self.window.show_all()
+
+        def untouchable(self, _widget):
+            """A one-pixel line at the screen edge is exactly where a person
+            aims; an empty input region keeps their click on the window."""
+            try:
+                import cairo
+                self.window.input_shape_combine_region(cairo.Region())
+            except (ImportError, AttributeError, TypeError):
+                pass
+
+        def set_thickness(self, thickness):
+            if thickness == self.thickness:
+                return False
+            self.thickness = thickness
+            GtkLayerShell.set_exclusive_zone(self.window, thickness)
+            return True
+
+        def destroy(self):
+            Gtk.StyleContext.remove_provider_for_screen(self.window.get_screen(), self.provider)
+            self.window.destroy()
+
     captions = {}
+    bands = {}
+    # The thickness each edge needs, remembered per edge rather than taken from
+    # whatever caption exists now: fullscreen borrows the bottom while the band
+    # stays on the saved edge, and a bottom caption's height is no measurement
+    # of a vertical strip's width.
+    measures = {}
     retired = set()
     # One breath for every caption on every output, polled in one place.
     air_watch = air.AirWatcher()
@@ -657,9 +834,50 @@ def daemon():
                 captions[name] = caption.handoff(placement)
             if name not in captions:
                 captions[name] = Caption(monitor, placement, animate_entry=name not in immediate)
+        # The band is settled before the captions draw, so a new caption's first
+        # frame already sits inside it, and again afterwards in case an
+        # appearance change made the caption a different size.
+        settle_bands(placements, monitors)
+        for name, monitor in monitors.items():
+            placement = placements.get(name)
+            if placement is None or name not in captions:
+                continue
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
                                   last_tree, style, placement, output_rects[name])
+        settle_bands(placements, monitors)
         return False
+
+    def settle_bands(placements, monitors):
+        """One reservation per output, held whatever the captions are doing.
+
+        A caption is the authority on the edge it is drawn along and on no
+        other. Sizing the band from whichever caption happens to exist made
+        entering fullscreen with a right-edge strip re-measure the right band
+        from a bottom caption and quietly resize the windows beside it, which
+        is the same bug in a different disguise.
+        """
+        for caption in captions.values():
+            measures[caption.edge] = caption.measured
+        edge = style[3]['position']
+        thickness = decoration_reserve.band_measurement(measures, edge)
+        plan = decoration_reserve.band_plan(placements, edge, thickness,
+                                            style[3]['reserve_band'])
+        for name in list(bands):
+            wanted = plan.get(name)
+            if (name not in monitors or wanted is None or bands[name].edge != wanted['edge']
+                    or bands[name].monitor != monitors[name]):
+                bands.pop(name).destroy()
+        for name, wanted in plan.items():
+            if name not in monitors:
+                continue
+            if name in bands:
+                bands[name].set_thickness(wanted['thickness'])
+            else:
+                bands[name] = Reservation(monitors[name], wanted['edge'], wanted['thickness'])
+        for name, caption in captions.items():
+            band = bands.get(name)
+            caption.set_band(band.thickness if band else 0,
+                             bool(band and band.edge == caption.edge))
 
     def refresh_appearance():
         nonlocal style
@@ -709,6 +927,8 @@ def daemon():
             caption.destroy()
         for caption in tuple(retired):
             caption.destroy()
+        for band in bands.values():
+            band.destroy()
         guard.close()
     return 0
 

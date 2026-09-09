@@ -6,7 +6,9 @@ from pathlib import Path
 import unicodedata
 
 
-SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7}
+SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
+                     'reserve_band': True, 'powerline': False}
+OPACITY_FLOOR = 0.2
 IGNORED_CAPTION_APPS = frozenset((
     'com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
 ))
@@ -26,13 +28,45 @@ def validate_settings(values):
     if isinstance(opacity, bool) or not isinstance(opacity, (int, float)):
         raise ValueError('Decoration opacity must be a number')
     opacity = float(opacity)
-    if not math.isfinite(opacity) or not 0.2 <= opacity <= 1:
+    if not math.isfinite(opacity) or not OPACITY_FLOOR <= opacity <= 1:
         raise ValueError('Decoration opacity must be between 0.2 and 1')
     radius = result['corner_radius']
     if isinstance(radius, bool) or not isinstance(radius, int) or not 0 <= radius <= 24:
         raise ValueError('Decoration corner radius must be an integer from 0 to 24')
+    for name in ('reserve_band', 'powerline'):
+        if not isinstance(result[name], bool):
+            raise ValueError('Decoration ' + name.replace('_', ' ') + ' must be true or false')
     result['opacity'] = opacity
     return result
+
+
+def window_opacity(node, terminal=False, theme=None, saved=SETTINGS_DEFAULTS['opacity']):
+    """Match the window the strip is decorating, so it reads as part of it.
+
+    Sway only reports a container opacity where something explicitly set one, so
+    that answer wins wherever it exists and is actually transparent; a window
+    sway calls fully opaque tells us nothing the application has not already.
+    Otherwise a terminal is as transparent as the active theme says terminals
+    are -- the same value the terminal's own configuration is generated from, so
+    the two move together when the theme changes -- and an ordinary application
+    is opaque, which makes its caption opaque with it rather than a translucent
+    slab floating over a solid window. An empty workspace decorates the desktop
+    itself and keeps the saved preference.
+    """
+    fallback = saved if isinstance(saved, (int, float)) and not isinstance(saved, bool) else \
+        SETTINGS_DEFAULTS['opacity']
+    if not node or not (node.get('app_id') or node.get('window')):
+        return float(fallback)
+    explicit = node.get('opacity')
+    if isinstance(explicit, (int, float)) and not isinstance(explicit, bool):
+        explicit = float(explicit)
+        if math.isfinite(explicit) and 0 < explicit < 1:
+            return max(OPACITY_FLOOR, explicit)
+    if terminal and isinstance(theme, (int, float)) and not isinstance(theme, bool):
+        theme = float(theme)
+        if math.isfinite(theme) and 0 < theme <= 1:
+            return max(OPACITY_FLOOR, theme)
+    return 1.0 if not terminal else float(fallback)
 
 
 def save_settings(path, values, legacy_position=None):
