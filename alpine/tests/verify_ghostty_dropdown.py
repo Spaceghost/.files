@@ -136,6 +136,7 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         cold = toggle()
         node, workspace = wait(find)
         assert node['app_id'] == 'com.oldbook.dropdown' and node['visible']
+        assert node['sticky'], 'a shown console must be stuck to the output'
         first_id, first_pid = (node['id'], node['pid'])
         rect = node['rect']
         assert rect == dict(x=43, y=39, width=1354, height=468), rect
@@ -161,47 +162,65 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         assert dropdown_count(ipc('get_tree')) == 1
         command('grim', str(OUT / 'headless.png'))
 
-        # A dropdown shown on another workspace must arrive on the first toggle.
-        # Retain the real Foot and btop processes through moves and hiding.
+        # A shown drop-down comes along to every workspace with no keypress,
+        # and keeps the same Foot and btop through the moves and through hiding.
         home_workspace = next(item['name'] for item in ipc('get_workspaces')
                               if item.get('focused'))
         toggle('monitor')
         monitor, where = find('monitor')
-        assert monitor['visible'] and where == home_workspace
+        assert monitor['visible'] and monitor['sticky'] and where == home_workspace
         monitor_id, monitor_pid = monitor['id'], monitor['pid']
         assert pathlib.Path(f'/proc/{monitor_pid}/exe').resolve().name == 'foot'
         btop_pid = wait(lambda: monitor_child(monitor_pid))
         workspace_moves = []
         for number in (2, 10):
             ipc('command', f'workspace number {number}')
-            toggle('monitor')
             moved, where = find('monitor')
-            assert moved['visible'] and moved['focused'] and where == str(number), (
-                'one monitor toggle must recall it to the focused workspace', where)
+            assert moved['visible'] and where == str(number), (
+                'a shown monitor must follow the workspace switch', where)
             assert (moved['id'], moved['pid']) == (monitor_id, monitor_pid)
             assert monitor_child(monitor_pid) == btop_pid
+            assert find()[1] == str(number), 'the console follows the switch too'
             workspace_moves.append({'workspace': where, 'container': moved['id'],
                                     'foot_pid': moved['pid'], 'btop_pid': btop_pid})
             toggle('monitor')
             hidden_monitor, where = find('monitor')
             assert where == '__i3_scratch' and not hidden_monitor['visible']
+            assert not hidden_monitor['sticky'], 'a hidden monitor holds no workspace'
+            ipc('command', 'workspace number 7')
+            assert find('monitor')[1] == '__i3_scratch', 'a hidden monitor follows nothing'
+            ipc('command', f'workspace number {number}')
             toggle('monitor')
             reshown_monitor, where = find('monitor')
-            assert reshown_monitor['visible'] and where == str(number)
+            assert reshown_monitor['visible'] and reshown_monitor['focused']
+            assert where == str(number)
             assert (reshown_monitor['id'], reshown_monitor['pid']) == (monitor_id, monitor_pid)
             assert monitor_child(monitor_pid) == btop_pid
         command('grim', str(OUT / 'monitor-workspace-ten.png'))
+        # A window parked on another workspace by hand still returns on one press.
+        ipc('command', f'[con_id={monitor_id}] sticky disable, '
+                       'move container to workspace number 3')
+        ipc('command', 'workspace number 10')
+        assert find('monitor')[1] == '3'
         toggle('monitor')
-        # Console recall is independent; the hidden monitor stays alive.
+        recalled, where = find('monitor')
+        assert recalled['visible'] and recalled['sticky'] and where == '10', (
+            'one monitor toggle must recall it to the focused workspace', where)
+        assert (recalled['id'], recalled['pid']) == (monitor_id, monitor_pid)
+        toggle('monitor')
+        assert find('monitor')[1] == '__i3_scratch'
+        # Console lifecycle is independent; the hidden monitor stays alive.
+        toggle()
+        assert find()[1] == '__i3_scratch'
         toggle()
         recalled_console, where = find()
         assert recalled_console['visible'] and where == '10'
         assert (recalled_console['id'], recalled_console['pid']) == (first_id, first_pid)
         assert find('monitor')[1] == '__i3_scratch'
         ipc('command', 'workspace ' + json.dumps(home_workspace))
-        toggle()
         recalled_console, where = find()
-        assert recalled_console['visible'] and where == home_workspace
+        assert recalled_console['visible'] and where == home_workspace, (
+            'the console follows back without a keypress', where)
         assert (recalled_console['id'], recalled_console['pid']) == (first_id, first_pid)
         assert monitor_child(monitor_pid) == btop_pid
 
@@ -224,7 +243,11 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
                        'hide_show_preserves_shell': True, 'focused_when_shown': True,
                        'undecorated': True, 'exit_then_reopen': True, 'offset_output': True,
                        'keyboard_input': True, 'new_window_shortcut_unbound': True},
-            'workspace_checks': {'monitor_first_toggle_recalls_other_workspace': True,
+            'workspace_checks': {'shown_monitor_follows_workspace_switch': True,
+                                 'shown_console_follows_workspace_switch': True,
+                                 'hidden_dropdown_follows_nothing': True,
+                                 'hidden_dropdown_clears_sticky': True,
+                                 'monitor_first_toggle_recalls_other_workspace': True,
                                  'monitor_local_toggle_hides': True,
                                  'monitor_retains_foot_and_btop': True,
                                  'console_recall_independent': True},

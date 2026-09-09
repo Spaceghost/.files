@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Toggle persistent console and monitor windows on the focused workspace."""
+"""Toggle persistent console and monitor windows on the focused workspace.
+
+A shown window is sticky, so it follows every workspace switch on its output
+rather than being left behind on the workspace that summoned it.
+"""
 import argparse
 import fcntl
 import hashlib
@@ -91,14 +95,20 @@ def toggle(profile='terminal'):
         focused_workspace = next(item for item in ipc('get_workspaces')
                                  if item.get('focused'))
         if workspace != '__i3_scratch':
-            ipc('command', criteria + ' move scratchpad')
+            # Release the workspace before hiding, so a hidden window never
+            # carries a stale flag back out of the scratchpad.
+            ipc('command', criteria + ' sticky disable, move scratchpad')
             # Hide locally; recall a window left on another workspace immediately.
             if workspace == focused_workspace['name']:
                 return
         output = next(output for output in ipc('get_outputs') if output.get('focused'))
         x, y, width, height = geometry(output, focused_workspace)
         # One transaction avoids displaying the old centered geometry for a frame.
-        ipc('command', criteria + f' scratchpad show, resize set {width} px {height} px, '
+        # Sticky keeps a shown window on the workspace being looked at: switching
+        # workspaces carries it along instead of stranding it behind, so it stays
+        # summonable everywhere and pins no workspace open by sitting on it.
+        ipc('command', criteria + f' scratchpad show, sticky enable, '
+            f'resize set {width} px {height} px, '
             f'move absolute position {x} px {y} px, focus')
 
 
