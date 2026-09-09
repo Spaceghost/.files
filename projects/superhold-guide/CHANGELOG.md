@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased — section order and arrangement
+
+- Order sections from the most local context outward: the focused application,
+  tmux, its terminal, the desktop, then system-wide controls. The desktop was
+  previously second, above the terminal and tmux it contains.
+- Add a `sections` setting that reorders sections, hides them, renames them,
+  and defines custom sections that behave like the built-in ones. The daemon's
+  existing once-a-second settings check applies changes without a restart.
+
 ## 0.2.0.dev1 — desktop theme integration
 
 - Use the desktop GTK palette and font in the guide and search controls.

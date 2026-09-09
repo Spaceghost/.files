@@ -793,21 +793,23 @@ def _wayland_socket(runtime):
     return path if path.is_absolute() else runtime / path
 
 
-def _provider(socket_path, profiles_path=None, decorate=False):
+def _provider(socket_path, profiles_path=None, decorate=False, sections=None):
     from superhold.shortcut_sources import ShortcutProvider
-    provider = ShortcutProvider(str(socket_path), profiles_path=profiles_path)
+    provider = ShortcutProvider(str(socket_path), profiles_path=profiles_path,
+                                sections=sections)
     return ContextProvider(provider, socket_path) if decorate else provider
 
 
-def dump_snapshot(socket_path, profiles_path=None):
-    print(json.dumps(_provider(socket_path, profiles_path).snapshot(),
+def dump_snapshot(socket_path, profiles_path=None, sections=None):
+    print(json.dumps(_provider(socket_path, profiles_path, sections=sections).snapshot(),
                      ensure_ascii=False, indent=2))
 
 
-def preview(socket_path, profiles_path=None, seconds=5.0):
+def preview(socket_path, profiles_path=None, seconds=5.0, sections=None):
     overlay = GtkShortcutOverlay(preview_seconds=seconds)
     from gi.repository import GLib, Gtk
-    snapshot = _provider(socket_path, profiles_path, decorate=True).snapshot()
+    snapshot = _provider(socket_path, profiles_path, decorate=True,
+                         sections=sections).snapshot()
     overlay.show(snapshot)
     GLib.timeout_add(max(1, int(seconds * 1000)), Gtk.main_quit)
     try:
@@ -873,7 +875,8 @@ def _run_app(runtime, socket_path, config, config_file=None, profiles_path=None,
             return guide
 
         overlay = make_overlay(once or config.dismiss_mode == 'focus_loss')
-        provider = _provider(socket_path, profiles_path or config.profiles_path or None, decorate=True)
+        provider = _provider(socket_path, profiles_path or config.profiles_path or None,
+                             decorate=True, sections=config.sections)
         controller = InteractiveController(monitor, provider, overlay, watch, guard,
                                            config=config, sender=sender)
         sender.guard = lambda: (sender._default_guard()
@@ -911,7 +914,8 @@ def _run_app(runtime, socket_path, config, config_file=None, profiles_path=None,
                             config = updated
                             controller.configure(config)
                             controller.provider = _provider(socket_path,
-                                profiles_path or config.profiles_path or None, decorate=True)
+                                profiles_path or config.profiles_path or None,
+                                decorate=True, sections=config.sections)
                         last_config_error = None
                     except ConfigError as error:
                         if str(error) != last_config_error:
@@ -1011,10 +1015,11 @@ def main(arguments=None):
     runtime = Path(runtime_name)
     _owned_private_directory(runtime)
     socket_path = find_sway_socket(runtime, args.socket)
+    sections = config.sections if config else None
     if args.command == 'dump':
-        dump_snapshot(socket_path, profiles_path)
+        dump_snapshot(socket_path, profiles_path, sections)
     elif args.command == 'preview':
-        preview(socket_path, profiles_path, args.seconds)
+        preview(socket_path, profiles_path, args.seconds, sections)
     elif args.command == 'status':
         print_status(runtime, socket_path)
     else:

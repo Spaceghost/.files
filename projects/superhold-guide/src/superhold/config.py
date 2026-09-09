@@ -10,9 +10,138 @@ import tempfile
 MAX_CONFIG_BYTES = 65536
 CONFIG_VERSION = 1
 
+# The guide reads outward from the most local context: the focused application
+# sits inside tmux, inside its terminal, inside the desktop, inside the system.
+# ``diagnostics`` only appears when a profile file failed to load.
+SECTION_IDS = ('application', 'tmux', 'terminal', 'desktop', 'system', 'diagnostics')
+
 
 class ConfigError(ValueError):
     """A configuration file could not be read, validated, or saved safely."""
+
+
+def _display_text(value, limit, what):
+    """Accept only a single, already-tidy display line."""
+    if (not isinstance(value, str) or not value.strip() or value.strip() != value
+            or len(value) > limit or any(character < ' ' or character == '\x7f'
+                                         for character in value)):
+        raise ConfigError(f'{what} must be one tidy line of at most {limit} characters')
+    return value
+
+
+def _section_names(values, what):
+    if isinstance(values, str) or not isinstance(values, (list, tuple)):
+        raise ConfigError(f'sections.{what} must be a list of section names')
+    if len(values) > 32:
+        raise ConfigError(f'sections.{what} lists more than 32 sections')
+    names = tuple(_display_text(value, 64, f'a sections.{what} name') for value in values)
+    if len(set(names)) != len(names):
+        raise ConfigError(f'sections.{what} repeats a section')
+    return names
+
+
+def _custom_section(name, raw):
+    if not isinstance(raw, dict) or set(raw) - {'title', 'coverage', 'rows'}:
+        raise ConfigError(f'sections.custom.{name} accepts only title, coverage and rows')
+    coverage = _display_text(raw.get('coverage', 'Partial local section'), 80,
+                             f'sections.custom.{name}.coverage')
+    # A local section describes some of your keys; it cannot claim to be complete.
+    if not coverage.startswith('Partial'):
+        raise ConfigError(f'sections.custom.{name}.coverage must begin with "Partial"')
+    rows = raw.get('rows', ())
+    if isinstance(rows, str) or not isinstance(rows, (list, tuple)) or len(rows) > 100:
+        raise ConfigError(f'sections.custom.{name}.rows must be a list of at most 100 rows')
+    pairs = []
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {'key', 'description'}:
+            raise ConfigError(f'each sections.custom.{name} row needs key and description')
+        pairs.append((_display_text(row['key'], 80, 'a row key'),
+                      _display_text(row['description'], 180, 'a row description')))
+    return (name, _display_text(raw.get('title', name), 80, f'sections.custom.{name}.title'),
+            coverage, tuple(pairs))
+
+
+@dataclass(frozen=True)
+class SectionLayout:
+    """Which guide sections appear, in what order, and under what titles.
+
+    Every field is a tuple so the whole settings value stays immutable and
+    comparable. ``order`` lists sections first to last and anything omitted
+    keeps its default place after them, so a partial order stays valid.
+    ``hidden`` drops sections, ``titles`` renames them, and ``custom`` defines
+    sections of your own that are ordered, renamed and hidden like built-ins.
+    """
+
+    order: tuple = SECTION_IDS
+    hidden: tuple = ()
+    titles: tuple = ()
+    custom: tuple = ()
+
+    @classmethod
+    def from_document(cls, raw):
+        if not isinstance(raw, dict) or set(raw) - {'order', 'hidden', 'titles', 'custom'}:
+            raise ConfigError('sections accepts only order, hidden, titles and custom')
+        custom_raw = raw.get('custom', {})
+        if not isinstance(custom_raw, dict) or len(custom_raw) > 16:
+            raise ConfigError('sections.custom must be an object of at most 16 sections')
+        custom = []
+        for name, entry in custom_raw.items():
+            name = _display_text(name, 64, 'a sections.custom name')
+            if name in SECTION_IDS:
+                raise ConfigError(f'sections.custom.{name} shadows a built-in section')
+            custom.append(_custom_section(name, entry))
+        titles_raw = raw.get('titles', {})
+        if not isinstance(titles_raw, dict):
+            raise ConfigError('sections.titles must be an object of section names')
+        titles = tuple((_display_text(name, 64, 'a sections.titles name'),
+                        _display_text(value, 80, 'a section title'))
+                       for name, value in titles_raw.items())
+        layout = cls(order=_section_names(raw.get('order', SECTION_IDS), 'order'),
+                     hidden=_section_names(raw.get('hidden', ()), 'hidden'),
+                     titles=titles, custom=tuple(custom))
+        known = set(SECTION_IDS) | {entry[0] for entry in layout.custom}
+        unknown = sorted((set(layout.order) | set(layout.hidden)
+                          | {name for name, _ in layout.titles}) - known)
+        if unknown:
+            raise ConfigError('unknown section: ' + ', '.join(unknown))
+        return layout
+
+    def as_document(self):
+        return {
+            'order': list(self.order),
+            'hidden': list(self.hidden),
+            'titles': {name: title for name, title in self.titles},
+            'custom': {name: {'title': title, 'coverage': coverage,
+                              'rows': [{'key': key, 'description': description}
+                                       for key, description in rows]}
+                       for name, title, coverage, rows in self.custom},
+        }
+
+    def arrange(self, built):
+        """Return the built sections as a display list, ordered and renamed.
+
+        ``built`` maps section name to section. Custom sections fill in names
+        the desktop did not build, unlisted sections follow in default order,
+        and hiding is applied last so renaming a hidden section stays harmless.
+        """
+        sections = dict(built)
+        for name, title, coverage, rows in self.custom:
+            sections.setdefault(name, {
+                'title': title, 'coverage': coverage,
+                'rows': [{'key': key, 'description': description}
+                         for key, description in rows]})
+        titles = dict(self.titles)
+        hidden = set(self.hidden)
+        arranged = []
+        for name in dict.fromkeys((*self.order, *SECTION_IDS, *sections)):
+            section = sections.get(name)
+            if section is None or name in hidden:
+                continue
+            title = titles.get(name)
+            # Replacing an existing key keeps its position, so a section stays
+            # shaped {title, coverage, rows} in that order.
+            arranged.append({**section, 'title': title} if title else section)
+        return arranged
 
 
 @dataclass(frozen=True)
@@ -22,6 +151,7 @@ class AppConfig:
     key_delay_ms: int = 12
     release_timeout_ms: int = 5000
     profiles_path: str = ''
+    sections: SectionLayout = SectionLayout()
     # JSON text keeps the frozen value immutable while retaining future fields.
     _extra_json: str = field(default='{}', repr=False, compare=False)
 
@@ -107,6 +237,9 @@ def _validated(document):
     if profiles_path and not (Path(profiles_path).is_absolute() or profiles_path.startswith('~/')):
         raise ConfigError('profiles_path must be empty, absolute, or start with ~/')
     values['profiles_path'] = profiles_path
+    sections = document.get('sections', defaults.sections)
+    values['sections'] = (sections if isinstance(sections, SectionLayout)
+                          else SectionLayout.from_document(sections))
     names = set(values) | {'version'}
     values['_extra_json'] = json.dumps({key: value for key, value in document.items()
                                        if key not in names}, ensure_ascii=False)
@@ -125,6 +258,7 @@ def save_config(config, path=None):
     path = _path(path)
     values = {item.name: getattr(config, item.name) for item in fields(AppConfig)
               if not item.name.startswith('_')}
+    values['sections'] = values['sections'].as_document()
     _validated(values)
     existing = _read_document(path)
     _validated(existing)  # Never replace an existing malformed or future-version file.

@@ -11,7 +11,8 @@ from unittest import mock
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
 
-from superhold.config import AppConfig, ConfigError, config_path, load_config, save_config
+from superhold.config import (SECTION_IDS, AppConfig, ConfigError, SectionLayout,
+                              config_path, load_config, save_config)
 
 
 class ConfigTests(unittest.TestCase):
@@ -54,6 +55,53 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(saved['hold_delay_ms'], 900)
         save_config(AppConfig(), self.path)
         self.assertEqual(json.loads(self.path.read_text())['future'], {'enabled': True})
+
+    def test_default_section_order_reads_from_the_most_local_context_outward(self):
+        self.assertEqual(AppConfig().sections.order, SECTION_IDS)
+        self.assertEqual(SECTION_IDS, ('application', 'tmux', 'terminal', 'desktop',
+                                       'system', 'diagnostics'))
+
+    def test_sections_order_hidden_titles_and_custom_rows_round_trip(self):
+        document = {
+            'order': ['system', 'desktop', 'mine'],
+            'hidden': ['diagnostics'],
+            'titles': {'desktop': 'Window manager'},
+            'custom': {'mine': {'title': 'My keys', 'coverage': 'Partial local section',
+                                'rows': [{'key': 'Super+G',
+                                          'description': 'Grid overlay'}]}},
+        }
+        self.write({'version': 1, 'sections': document})
+        loaded = load_config(self.path)
+
+        self.assertEqual(loaded.sections.order, ('system', 'desktop', 'mine'))
+        self.assertEqual(loaded.sections.hidden, ('diagnostics',))
+        self.assertEqual(loaded.sections.as_document(), document)
+        save_config(loaded, self.path)
+        self.assertEqual(load_config(self.path), loaded)
+        self.assertEqual(json.loads(self.path.read_text())['sections'], document)
+
+    def test_sections_reject_unknown_names_shadowing_and_untidy_text(self):
+        for document in ({'order': ['nope']},
+                         {'hidden': 'system'},
+                         {'order': ['system', 'system']},
+                         {'titles': {'nope': 'Anything'}},
+                         {'titles': {'desktop': 'two\nlines'}},
+                         {'custom': {'system': {'title': 'Shadow'}}},
+                         {'custom': {'mine': {'title': ' padded '}}},
+                         {'custom': {'mine': {'coverage': 'Complete coverage'}}},
+                         {'custom': {'mine': {'rows': [{'key': 'a'}]}}},
+                         {'unknown': []}):
+            self.write({'version': 1, 'sections': document})
+            with self.subTest(document=document), self.assertRaises(ConfigError):
+                load_config(self.path)
+
+    def test_hidden_section_still_accepts_a_title_and_a_place_in_the_order(self):
+        layout = SectionLayout.from_document(
+            {'order': ['system'], 'hidden': ['system'], 'titles': {'system': 'Machine'}})
+        built = {'system': {'title': 'System controls', 'coverage': 'c', 'rows': []},
+                 'desktop': {'title': 'Sway', 'coverage': 'c', 'rows': []}}
+
+        self.assertEqual([section['title'] for section in layout.arrange(built)], ['Sway'])
 
     def test_invalid_types_ranges_versions_and_duplicate_fields_are_rejected(self):
         for document in (

@@ -23,14 +23,30 @@ control characters, bounded counts, custom coverage that must begin with
 fails at load with a named error, the same way an invalid `trigger` already
 does, rather than being silently ignored.
 
-Superhold is the running implementation. The legacy overlay under
-`alpine/desktop/.local/lib/oldbook/` — reachable only with
-`OLDBOOK_SHORTCUTS_LEGACY=1` — takes the same default order and gains no
-settings, which keeps one arrangement across both paths without duplicating a
-second configuration format.
+Three implementations exist and all three now share the default order.
+`projects/superhold-guide` (0.2.0.dev1) is the one that actually runs: Sway
+starts `~/.local/bin/superhold daemon`, which resolves to an installed venv
+under `~/.local/share/superhold/versions/`. It gets the same feature through a
+`sections` object in `~/.config/superhold/config.json`, and because the daemon
+already re-reads its settings once a second while idle, an edit takes effect
+without a restart. `projects/superhold` (0.1.0) is the portable Qt project
+behind the `oldbook-shortcuts` wrapper and reads `config.toml`. The legacy
+overlay under `alpine/desktop/.local/lib/oldbook/`, reachable only with
+`OLDBOOK_SHORTCUTS_LEGACY=1`, takes the default order and gains no settings,
+because inventing a third configuration format for a path behind an escape
+hatch would cost more than it returns.
 
-Reversal: remove the `[sections]` table handling and `Sections` from
-`superhold/config.py` and restore the ordered `sections.append` calls in both
-implementations. Checks: `projects/superhold/tests/test_config.py`,
-`projects/superhold/tests/test_sources.py` and
-`alpine/tests/test_shortcut_sources.py`.
+The running guide's `AppConfig` is a frozen dataclass whose fields are all
+hashable, so `SectionLayout` stores tuples rather than dicts and converts to
+and from plain JSON at the file boundary. That keeps `save_config`'s existing
+guarantees — atomic writes, unknown fields preserved, malformed files never
+replaced — working unchanged.
+
+The GTK settings window is untouched; sections are edited in the file. An
+editor for them is a larger piece of UI and a separate decision.
+
+Reversal: remove `SectionLayout` and the `sections` field from each config
+module and restore the ordered `sections.append` calls in all three
+implementations. Checks: `projects/superhold-guide/tests/test_config.py` and
+`tests/test_shortcut_sources.py`, `projects/superhold/tests/test_config.py` and
+`tests/test_sources.py`, and `alpine/tests/test_shortcut_sources.py`.

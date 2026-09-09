@@ -11,6 +11,7 @@ from unittest import mock
 LIB = Path(__file__).resolve().parents[1] / 'src'
 sys.path.insert(0, str(LIB))
 
+from superhold.config import SectionLayout
 from superhold.shortcut_sources import ShortcutProvider
 
 
@@ -45,8 +46,10 @@ def focused_tree(app_id='firefox', pid=200, output='eDP-1'):
 
 
 class FixtureProvider(ShortcutProvider):
-    def __init__(self, replies, commands=None, processes=None, profiles_path=None):
-        super().__init__('/tmp/fake-sway.sock', profiles_path=profiles_path)
+    def __init__(self, replies, commands=None, processes=None, profiles_path=None,
+                 sections=None):
+        super().__init__('/tmp/fake-sway.sock', profiles_path=profiles_path,
+                         sections=sections)
         self.replies = replies
         self.commands = commands or {}
         self.processes = processes or {}
@@ -329,7 +332,7 @@ bindsym --locked Group2+Mod4+x exec grouped-action
         })
         self.assertEqual(snapshot['sections'][1]['title'], 'Sway — default')
 
-    def test_terminal_uses_active_tmux_pane_and_orders_context_sections(self):
+    def test_terminal_uses_active_tmux_pane_and_orders_sections_local_context_first(self):
         processes = {
             100: {'pid': 100, 'ppid': 1, 'comm': 'foot', 'tty': 0, 'pgrp': 100, 'tpgid': -1},
             110: {'pid': 110, 'ppid': 100, 'comm': 'tmux: client',
@@ -355,14 +358,45 @@ bindsym --locked Group2+Mod4+x exec grouped-action
         ).snapshot()
 
         self.assertEqual(snapshot['app'], 'btop')
+        # Innermost outward: the app runs in tmux, in Foot, on Sway, on the box.
         self.assertEqual([section['title'] for section in snapshot['sections']], [
-            'btop shortcuts', 'Sway — default', 'Foot terminal', 'tmux (Ctrl+A)',
+            'btop shortcuts', 'tmux (Ctrl+A)', 'Foot terminal', 'Sway — default',
             'System controls',
         ])
-        self.assertEqual(snapshot['sections'][3]['rows'], [
-            {'key': 'Ctrl+A, c', 'description': 'New window'},
-            {'key': 'Ctrl+A, %', 'description': 'Split pane horizontally'},
-        ])
+        self.assertEqual([row['key'] for row in snapshot['sections'][1]['rows']],
+                         ['Ctrl+A, c', 'Ctrl+A, %'])
+
+    def test_configured_order_hidden_and_titles_rearrange_the_guide(self):
+        layout = SectionLayout.from_document({
+            'order': ['system', 'desktop'], 'hidden': ['application'],
+            'titles': {'desktop': 'Window manager'}})
+        snapshot = FixtureProvider(self.replies(), sections=layout).snapshot()
+
+        self.assertEqual([section['title'] for section in snapshot['sections']],
+                         ['System controls', 'Window manager'])
+
+    def test_custom_section_is_ordered_and_renamed_like_a_built_in(self):
+        layout = SectionLayout.from_document({
+            'order': ['mine', 'desktop'], 'titles': {'mine': 'Muscle memory'},
+            'custom': {'mine': {'title': 'My keys', 'coverage': 'Partial local section',
+                                'rows': [{'key': 'Super+G',
+                                          'description': 'Grid overlay'}]}}})
+        snapshot = FixtureProvider(self.replies(), sections=layout).snapshot()
+
+        self.assertEqual(snapshot['sections'][0]['title'], 'Muscle memory')
+        self.assertEqual(snapshot['sections'][0]['coverage'], 'Partial local section')
+        self.assertEqual(snapshot['sections'][0]['rows'][0]['key'], 'Super+G')
+        # Unlisted sections keep their default place after the listed ones.
+        self.assertEqual([section['title'] for section in snapshot['sections']],
+                         ['Muscle memory', 'Sway — default', 'Firefox shortcuts',
+                          'System controls'])
+
+    def test_unlisted_sections_keep_the_default_local_first_order(self):
+        layout = SectionLayout.from_document({'order': ['system']})
+        snapshot = FixtureProvider(self.replies(), sections=layout).snapshot()
+
+        self.assertEqual([section['title'] for section in snapshot['sections']],
+                         ['System controls', 'Firefox shortcuts', 'Sway — default'])
 
     def test_tmux_copy_mode_table_is_added_only_when_pane_reports_it(self):
         processes = {

@@ -93,10 +93,11 @@ so Caps Lock retains its Escape behavior and notification indicator.
 
 Its sections read outward from wherever you are: the focused application first,
 then tmux, then the terminal holding it, then Sway, then system-wide controls.
-The `[sections]` table in `~/.config/superhold/config.toml` reorders them, hides
+The `sections` object in `~/.config/superhold/config.json` reorders them, hides
 any of them, renames them, and defines sections of your own that sit among the
-built-in ones — see the [portable guide](../../projects/superhold/README.md) and
-its `examples/config.toml`.
+built-in ones; the daemon picks up an edit within a second. See the
+[guide's settings](../../projects/superhold-guide/README.md). The portable Qt
+project takes the same settings from `config.toml`.
 
 ## The command deck
 

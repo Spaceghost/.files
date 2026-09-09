@@ -36,6 +36,7 @@ import stat
 import struct
 import subprocess
 
+from .config import SectionLayout
 from .shortcut_profiles import PROFILES, SYSTEM_ROWS, TERMINAL_ROWS
 from .shortcut_actions import capture_target, prepare_actions, sway_actions, sway_keysym
 
@@ -95,8 +96,9 @@ class ShortcutProvider:
     _MAX_COMMAND = 512 * 1024
     _TIMEOUT = 0.75
 
-    def __init__(self, socket_path, profiles_path=None):
+    def __init__(self, socket_path, profiles_path=None, sections=None):
         self.socket_path = os.fspath(socket_path)
+        self.sections = SectionLayout() if sections is None else sections
         self._profiles_explicit = profiles_path is not None
         if profiles_path is None:
             configured = os.environ.get('XDG_CONFIG_HOME', '')
@@ -129,45 +131,49 @@ class ShortcutProvider:
             identity_source, tmux_context = self._terminal_identity(window, source)
 
         profile = index.get(_source_key(identity_source))
+        # Sections are collected by name and arranged afterwards, so the
+        # configured order decides what the guide reads like, not this code.
+        collected = {}
         if profile:
             app = profile['name']
-            sections = [_profile_section(profile)]
+            collected['application'] = _profile_section(profile)
         else:
             app = _clean(identity_source, 80) or 'Application'
-            sections = [{
+            collected['application'] = {
                 'title': f'{app} shortcuts',
                 'coverage': 'Unavailable: no shortcut profile',
                 'rows': [],
-            }]
+            }
 
-        sections.append(self._sway_section())
+        collected['desktop'] = self._sway_section()
         if terminal_source and _source_key(identity_source) not in _TERMINALS:
             terminal_profile = index.get(_source_key(terminal_source))
             terminal_name = terminal_profile['name'] if terminal_profile else 'Terminal'
-            sections.append({
+            collected['terminal'] = {
                 'title': f'{terminal_name} terminal',
                 'coverage': 'Partial documented baseline',
                 'rows': [
                     {'key': key, 'description': description}
                     for key, description in TERMINAL_ROWS
                 ],
-            })
+            }
         if tmux_context:
-            sections.append(self._tmux_section(tmux_context))
-        sections.append({
+            collected['tmux'] = self._tmux_section(tmux_context)
+        collected['system'] = {
             'title': 'System controls',
             'coverage': 'Partial configured controls',
             'rows': [
                 {'key': key, 'description': description}
                 for key, description in SYSTEM_ROWS
             ],
-        })
+        }
         if profile_error:
-            sections.append({
+            collected['diagnostics'] = {
                 'title': 'Local shortcut profiles',
                 'coverage': f'Unavailable: {profile_error}',
                 'rows': [],
-            })
+            }
+        sections = self.sections.arrange(collected)
         for section in sections:
             for row in section['rows']:
                 if 'actions' not in row:

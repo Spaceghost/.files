@@ -524,18 +524,25 @@ Sections read outward from the most local context: the focused application,
 then tmux, then its terminal, then the desktop, then system-wide controls, with
 profile diagnostics last. That order, each section's visibility and each
 section's title are configurable, and local sections of your own can be defined
-and placed among the built-in ones. Superhold owns the configuration; the
-legacy overlay keeps the same default order and offers no settings.
+and placed among the built-in ones. The running guide reads that from
+`~/.config/superhold/config.json` and applies edits within a second without a
+restart; the portable Qt project takes the same settings from its own
+`config.toml`; the legacy overlay keeps the same default order and offers no
+settings. All three keep the same default order.
 
 - Implementation: [guide launch](desktop/.config/sway/local.d/shortcuts.conf),
   [shortcut helper](desktop/.local/bin/oldbook-shortcuts),
-  [section configuration](../projects/superhold/superhold/config.py),
-  [section assembly](../projects/superhold/superhold/sources.py),
+  [running guide settings](../projects/superhold-guide/src/superhold/config.py),
+  [running guide sections](../projects/superhold-guide/src/superhold/shortcut_sources.py),
+  [portable settings](../projects/superhold/superhold/config.py),
+  [portable sections](../projects/superhold/superhold/sources.py),
   [legacy shortcut sources](desktop/.local/lib/oldbook/shortcut_sources.py),
   [local guide package](packages/superhold-guide/manifest.json).
 - Checks: [hold](tests/test_shortcut_hold.py), [service](tests/test_shortcut_service.py),
   [sources](tests/test_shortcut_sources.py),
-  [superhold sections](../projects/superhold/tests/test_config.py).
+  [running guide settings](../projects/superhold-guide/tests/test_config.py),
+  [running guide sections](../projects/superhold-guide/tests/test_shortcut_sources.py),
+  [portable settings](../projects/superhold/tests/test_config.py).
   Verify the actual service launch path; the portable wrapper and installed
   full guide are distinct implementations in this checkout.
 

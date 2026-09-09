@@ -47,8 +47,11 @@ The Super-hold shortcut guide lists sections from the most local context
 outward: the focused application, then tmux, then its terminal, then the
 desktop, then system-wide controls. Keep the desktop section immediately before
 the system one. The order, visibility and titles are the user's to change in
-`~/.config/superhold/config.toml`; prefer adding configuration to hardcoding a
-new arrangement.
+`~/.config/superhold/config.json`; prefer adding configuration to hardcoding a
+new arrangement. Three implementations must stay in step on the default order:
+`projects/superhold-guide` is the one that actually runs, `projects/superhold`
+is the portable Qt project behind `oldbook-shortcuts`, and the legacy overlay
+under `desktop/.local/lib/oldbook/` sits behind `OLDBOOK_SHORTCUTS_LEGACY=1`.
 
 Every desktop theme must be complete. The user explicitly rejects palette-only
 themes; do not introduce that category or treat recoloring a few overlays as a

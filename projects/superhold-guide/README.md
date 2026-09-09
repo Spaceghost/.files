@@ -97,7 +97,13 @@ Settings live in `$XDG_CONFIG_HOME/superhold/config.json`, defaulting to
   "dismiss_mode": "focus_loss",
   "key_delay_ms": 12,
   "release_timeout_ms": 5000,
-  "profiles_path": ""
+  "profiles_path": "",
+  "sections": {
+    "order": ["application", "tmux", "terminal", "desktop", "system", "diagnostics"],
+    "hidden": [],
+    "titles": {},
+    "custom": {}
+  }
 }
 ```
 
@@ -108,6 +114,37 @@ Settings live in `$XDG_CONFIG_HOME/superhold/config.json`, defaulting to
 | `key_delay_ms` | Integer, 0–250 | Delay between native key events. |
 | `release_timeout_ms` | Integer, 250–30000 | Cancel a chosen shortcut if held keys do not become verifiably released in time. |
 | `profiles_path` | Empty, absolute path, or `~/` path | Use the default shortcut profile file or select another one. |
+| `sections` | Object; see below | Choose which sections appear, in what order, and under what titles. |
+
+The guide reads outward from the most local context: the focused application,
+then tmux, then the terminal holding it, then the desktop, then system-wide
+controls, with profile diagnostics last. `sections` changes that. `order` lists
+sections first to last and anything omitted keeps its default place after them,
+so a partial list stays valid; `hidden` drops sections outright; `titles` maps a
+section name to a replacement heading; and `custom` defines sections of your own
+that are ordered, renamed and hidden exactly like the built-ins. Section names
+are `application`, `tmux`, `terminal`, `desktop`, `system` and `diagnostics`.
+
+```json
+{
+  "sections": {
+    "order": ["mine", "application", "tmux", "terminal", "desktop", "system"],
+    "hidden": ["diagnostics"],
+    "titles": {"desktop": "Window manager"},
+    "custom": {
+      "mine": {
+        "title": "Muscle memory",
+        "coverage": "Partial local section",
+        "rows": [{"key": "Super+G", "description": "Grid overlay"}]
+      }
+    }
+  }
+}
+```
+
+A custom section's `coverage` must begin with `Partial`, its name may not
+shadow a built-in one, and every title, key and description must be a single
+tidy line. The settings window does not edit sections; the file does.
 
 Menu-launched `show` always opens the persistent guide, including when the hold
 gesture is configured for release mode. A daemon checks settings once a second
