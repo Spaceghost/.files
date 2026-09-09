@@ -1,0 +1,407 @@
+#!/usr/bin/env python3
+"""Make a dying battery obvious: quicker keys, closing edges, a labouring screen.
+
+Everything else power-aware on this desktop subtracts as the charge falls. The
+ladder in `power_source` sheds blur, then animations, then the edges, so the
+machine grows quieter exactly as it gets nearer to stopping, and nothing says
+so. This is the one effect that runs the other way.
+
+Three channels, one number, from `lastlight.urgency`:
+
+  keys        the breath period published for oldbook-keyboard-backlight, which
+              accumulates phase continuously and so changes tempo without a jump
+  edges       a layer-shell vignette whose alpha and reach grow inward
+  backlight   a shallow downward wave on the panel, riding slower than the keys
+
+Charging is not a special case. The charge rises, the urgency falls and the same
+glide runs backwards, which is what makes recovery read as the inverse of dying
+rather than as the effect being switched off.
+
+Two things are load-bearing rather than tidy. The fast timer only runs below the
+warning band: a 30 Hz loop to tell you the battery is low would be its own joke,
+so on mains and above 25 percent this costs one file read every twenty seconds.
+And the panel brightness is restored on every exit path, including signals,
+because leaving somebody's screen dimmed because a helper died is a worse bug
+than the one this fixes.
+"""
+import argparse
+import atexit
+import json
+import math
+import os
+from pathlib import Path
+import signal
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import lastlight
+import power_source
+
+LIB = Path(__file__).resolve().parents[1] / 'lib/oldbook'
+QML = Path(__file__).resolve().parents[1] / 'share/oldbook/qml/LastLight.qml'
+
+NAMESPACE = 'oldbook-lastlight'
+# wlr-layer-shell: BACKGROUND 0, BOTTOM 1, TOP 2, OVERLAY 3. A warning that a
+# fullscreen video can hide is not a warning, so this sits above everything.
+LAYER_OVERLAY = 3
+ANCHOR_ALL = 15
+KEYBOARD_NONE = 0
+# The bridge refuses any exclusive zone but zero on purpose, so a surface can
+# never quietly become a tiling claim. Zero is also what this wants: the vignette
+# sits over the desktop and takes nothing away from it.
+EXCLUSIVE_ZONE = 0
+
+ACTIVE_TICK = 1.0 / 30.0
+IDLE_TICK = 20.0
+POWER_REREAD = 2.0
+
+# Never take the panel below this fraction of where we found it, whatever the
+# arithmetic says.
+BRIGHTNESS_FLOOR = 0.55
+BACKLIGHT_ROOT = Path(os.environ.get('OLDBOOK_BACKLIGHT_ROOT', '/sys/class/backlight'))
+
+
+def state_path():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        raise RuntimeError('XDG_RUNTIME_DIR is required')
+    directory = Path(runtime) / 'oldbook'
+    directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+    return directory / 'lastlight.json'
+
+
+def publish(record):
+    path = state_path()
+    temporary = path.with_name(f'{path.name}.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(record, indent=2) + '\n')
+    temporary.replace(path)
+
+
+def clear_published():
+    try:
+        state_path().unlink(missing_ok=True)
+    except (OSError, RuntimeError):
+        pass
+
+
+class Panel:
+    """The laptop's backlight, waved gently and always put back.
+
+    The base level is re-read whenever it drifts from what we last wrote, so
+    reaching for the brightness keys during a wave re-bases the effect on the new
+    level instead of fighting it back.
+    """
+
+    def __init__(self, root=BACKLIGHT_ROOT):
+        self.device = None
+        self.maximum = 0
+        self.base = None
+        self.written = None
+        if not root.is_dir():
+            return
+        for entry in sorted(root.iterdir()):
+            try:
+                maximum = int((entry / 'max_brightness').read_text().strip())
+                current = int((entry / 'brightness').read_text().strip())
+            except (OSError, ValueError):
+                continue
+            if maximum > 0:
+                self.device = entry
+                self.maximum = maximum
+                self.base = current
+                break
+
+    @property
+    def available(self):
+        return self.device is not None and self.base is not None
+
+    def _read(self):
+        try:
+            return int((self.device / 'brightness').read_text().strip())
+        except (OSError, ValueError):
+            return None
+
+    def _write(self, value):
+        try:
+            (self.device / 'brightness').write_text(f'{int(value)}\n')
+            self.written = int(value)
+            return True
+        except OSError:
+            return False
+
+    def rebase_if_touched(self):
+        """If somebody moved the brightness, take their level as the new base."""
+        if not self.available:
+            return
+        current = self._read()
+        if current is None or self.written is None:
+            return
+        if abs(current - self.written) > max(2, self.maximum // 200):
+            self.base = current
+            self.written = current
+
+    def apply(self, amplitude, phase):
+        """Ride a downward-only sine. Upward would exceed the level he chose."""
+        if not self.available:
+            return
+        if amplitude <= 0:
+            self.restore()
+            return
+        dip = (1 - math.cos(phase * 2 * math.pi)) / 2  # 0..1, starts at rest
+        factor = 1.0 - amplitude * dip
+        floor = self.base * BRIGHTNESS_FLOOR
+        value = max(floor, min(self.base, self.base * factor))
+        if self.written is None or abs(value - self.written) >= 1:
+            self._write(round(value))
+
+    def restore(self):
+        if self.available and self.written is not None and self.written != self.base:
+            self._write(self.base)
+        self.written = None
+
+
+class Vignette:
+    """The layer-shell surfaces, created lazily and torn down when it clears.
+
+    Nothing Qt is imported until the effect actually has something to draw, so a
+    machine on mains never loads a GUI toolkit to decide it has nothing to say.
+    """
+
+    def __init__(self, source=QML):
+        self.source = source
+        self.application = None
+        self.bridge = None
+        self.surfaces = {}
+        self.failed = None
+        self._sip = None
+        self._qt = None
+
+    def _load(self):
+        if self.application is not None or self.failed:
+            return not self.failed
+        try:
+            sys.path.insert(0, str(LIB))
+            import edges_surface
+            from PyQt6 import sip
+            from PyQt6.QtCore import QUrl, Qt
+            from PyQt6.QtGui import QColor, QRegion
+            from PyQt6.QtQuick import QQuickView
+            self._sip = sip
+            self._qt = {'QUrl': QUrl, 'Qt': Qt, 'QColor': QColor,
+                        'QRegion': QRegion, 'QQuickView': QQuickView}
+            self.bridge = edges_surface.load_bridge()
+            self.application = edges_surface.create_application([NAMESPACE])
+            self.application.setApplicationName(NAMESPACE)
+        except Exception as error:                       # noqa: BLE001 - report and carry on
+            self.failed = str(error)
+            print(f'oldbook-lastlight: no vignette ({error})', file=sys.stderr)
+            return False
+        return True
+
+    def _make(self, screen):
+        qt = self._qt
+        view = qt['QQuickView']()
+        view.setColor(qt['QColor'](0, 0, 0, 0))
+        view.setFlags(qt['Qt'].WindowType.Window
+                      | qt['Qt'].WindowType.FramelessWindowHint
+                      | qt['Qt'].WindowType.WindowDoesNotAcceptFocus
+                      | qt['Qt'].WindowType.WindowTransparentForInput)
+        view.setResizeMode(qt['QQuickView'].ResizeMode.SizeRootObjectToView)
+        view.setScreen(screen)
+        geometry = screen.geometry()
+        view.resize(geometry.size())
+        view.setSource(qt['QUrl'].fromLocalFile(os.fspath(self.source)))
+        if view.status() != qt['QQuickView'].Status.Ready:
+            raise RuntimeError('; '.join(str(e.toString()) for e in view.errors())
+                               or 'QML did not load')
+        result = self.bridge.oldbook_layer_shell_configure(
+            int(self._sip.unwrapinstance(view)), int(self._sip.unwrapinstance(screen)),
+            NAMESPACE.encode(), LAYER_OVERLAY, ANCHOR_ALL, EXCLUSIVE_ZONE,
+            KEYBOARD_NONE, geometry.width(), geometry.height())
+        if result != 0:
+            raise RuntimeError(f'could not configure the layer surface: {result}')
+        view.show()
+        # Qt reads an empty QRegion as "no restriction" and would swallow every
+        # click on the desktop; a one-pixel region outside the surface is a real
+        # region the compositor clips to nothing.
+        view.setMask(self._qt['QRegion'](-1, -1, 1, 1))
+        return view
+
+    def apply(self, record):
+        depth = record['vignette']['alpha']
+        if depth <= 0.0005:
+            self.clear()
+            return
+        if not self._load():
+            return
+        try:
+            for screen in self.application.screens():
+                name = screen.name()
+                if name not in self.surfaces:
+                    self.surfaces[name] = self._make(screen)
+                root = self.surfaces[name].rootObject()
+                root.setProperty('depth', depth)
+                root.setProperty('reach', record['vignette']['reach'])
+                root.setProperty('pulsePeriod', record['breath_period'])
+            self.application.processEvents()
+        except Exception as error:                       # noqa: BLE001
+            self.failed = str(error)
+            print(f'oldbook-lastlight: vignette stopped ({error})', file=sys.stderr)
+            self.clear()
+
+    def pump(self):
+        if self.application is not None:
+            self.application.processEvents()
+
+    def clear(self):
+        for view in self.surfaces.values():
+            try:
+                view.hide()
+                view.setSource(self._qt['QUrl']())
+            except Exception:                            # noqa: BLE001
+                pass
+        self.surfaces = {}
+
+
+def reading(root=None):
+    """Charge and mains, preferring the power daemon's record when it is fresh."""
+    if root is None and not os.environ.get('OLDBOOK_POWER_ROOT'):
+        record = power_source.published()
+        if isinstance(record, dict) and 'capacity' in record:
+            return record.get('capacity'), bool(record.get('mains'))
+    supplies = power_source.read_supplies(root)
+    return supplies['capacity'], bool(supplies['mains'])
+
+
+def run(once=False, surface=True, root=None):
+    settings = lastlight.preferences()
+    if not settings['enabled']:
+        clear_published()
+        return 0
+    panel = Panel() if settings['backlight'] else Panel(Path('/nonexistent'))
+    vignette = Vignette() if surface and settings['edges'] else None
+    stopping = []
+
+    def stop(*_):
+        stopping.append(True)
+
+    def cleanup():
+        panel.restore()
+        clear_published()
+        if vignette is not None:
+            vignette.clear()
+
+    atexit.register(cleanup)
+    for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(number, stop)
+
+    level = 0.0
+    phase = 0.0
+    last = time.monotonic()
+    checked = 0.0
+    capacity, mains = reading(root)
+
+    while not stopping:
+        now = time.monotonic()
+        elapsed = now - last
+        last = now
+
+        if now - checked >= POWER_REREAD:
+            capacity, mains = reading(root)
+            checked = now
+            panel.rebase_if_touched()
+
+        target = lastlight.urgency(capacity, mains)
+        level = lastlight.glide(level, target, elapsed)
+        record = lastlight.describe(capacity, mains, level)
+
+        if level > 0.0005:
+            phase = (phase + elapsed / record['wave']['period']) % 1.0
+            panel.apply(record['wave']['amplitude'], phase)
+        else:
+            phase = 0.0
+            panel.restore()
+
+        record['phase'] = round(phase, 4)
+        if not settings['keys']:
+            # The keyboard reads this file; withholding the period is how the
+            # keys opt out without the daemon reaching into their daemon.
+            record['breath_period'] = None
+        publish(record)
+        if vignette is not None:
+            vignette.apply(record)
+
+        if once:
+            break
+        if level > 0.0005 or target > 0.0005:
+            deadline = now + ACTIVE_TICK
+            while time.monotonic() < deadline and not stopping:
+                if vignette is not None:
+                    vignette.pump()
+                time.sleep(0.004)
+        else:
+            slept = 0.0
+            while slept < IDLE_TICK and not stopping:
+                time.sleep(0.25)
+                slept += 0.25
+
+    cleanup()
+    atexit.unregister(cleanup)
+    return 0
+
+
+def show(root=None):
+    capacity, mains = reading(root)
+    target = lastlight.urgency(capacity, mains)
+    record = lastlight.describe(capacity, mains, target)
+    charge = 'unknown' if capacity is None else f'{capacity}%'
+    print(f"charge      {charge}, {'mains' if mains else 'battery'}")
+    print(f"stage       {record['stage']}")
+    print(f"urgency     {record['target']:.3f} at rest")
+    print(f"keys        breath every {record['breath_period']:.2f}s")
+    print(f"edges       alpha {record['vignette']['alpha']:.3f}, "
+          f"reach {record['vignette']['reach']:.3f}")
+    print(f"backlight   {record['wave']['amplitude'] * 100:.1f}% swing "
+          f"every {record['wave']['period']:.2f}s")
+    settings = lastlight.preferences()
+    panel = Panel()
+    print(f"panel       {'found ' + panel.device.name if panel.available else 'not writable'}")
+    off = [name for name in ('keys', 'edges', 'backlight') if not settings[name]]
+    state = 'on' if settings['enabled'] else 'off by preference'
+    print(f"enabled     {state}" + (f", channels off: {', '.join(off)}" if off else ''))
+    print(f"bands       warning {lastlight.WARNING}%, critical {lastlight.CRITICAL}%, "
+          f"terminal {lastlight.TERMINAL}%")
+    return 0
+
+
+def table(root=None):
+    """What each charge asks for, so the curve can be read without a flat battery."""
+    print(f"{'charge':>7}  {'stage':<9} {'urgency':>7}  {'breath':>7}  {'alpha':>6}  {'wave':>6}")
+    for charge in (100, 40, 25, 20, 15, 10, 7, 4, 2, 0):
+        record = lastlight.describe(charge, False, lastlight.urgency(charge, False))
+        print(f"{charge:>6}%  {record['stage']:<9} {record['target']:>7.3f}  "
+              f"{record['breath_period']:>6.2f}s  {record['vignette']['alpha']:>6.3f}  "
+              f"{record['wave']['amplitude'] * 100:>5.2f}%")
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest='command')
+    watch = commands.add_parser('run', help='watch the charge and drive the three channels')
+    watch.add_argument('--once', action='store_true', help='one pass, then exit')
+    watch.add_argument('--no-surface', action='store_true',
+                       help='keys and backlight only; do not create a layer surface')
+    commands.add_parser('status', help='what the current charge asks for')
+    commands.add_parser('table', help='the whole curve, charge by charge')
+    arguments = parser.parse_args(argv)
+    if arguments.command == 'run':
+        return run(once=arguments.once, surface=not arguments.no_surface)
+    if arguments.command == 'table':
+        return table()
+    return show()
+
+
+if __name__ == '__main__':
+    sys.exit(main())

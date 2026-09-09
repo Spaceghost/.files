@@ -27,6 +27,14 @@ import time
 DEVICE = 'smc::kbd_backlight'
 PERIOD = 6.0
 INTERVAL = 1.0 / 60.0
+# oldbook-lastlight shortens the breath as the battery empties, so the keys are
+# the first thing that says the machine is dying. It publishes the period it
+# wants; this reads it at a lazy interval and falls back to PERIOD whenever the
+# file is missing, stale-free or unreadable, so nothing here depends on that
+# service running.
+LASTLIGHT_FILENAME = 'lastlight.json'
+LASTLIGHT_REREAD = 0.5
+LASTLIGHT_MIN_PERIOD = 0.4
 INPUT_EVENT = struct.Struct('@llHHI')
 INPUT_EVENT_SIZE = INPUT_EVENT.size
 INPUT_KEY = 1
@@ -181,6 +189,30 @@ def _last_breath_value(overlay, peak, now):
         wave = (1 + math.cos(math.pi * elapsed / LAST_BREATH_FALL)) / 2
         return int(round(peak * wave)), False
     return 0, True
+
+
+def _breath_period(cache, runtime_dir, now):
+    """The resting 6 seconds, or whatever oldbook-lastlight is asking for.
+
+    Read at `LASTLIGHT_REREAD` rather than every frame: the file changes 30 times
+    a second while the battery is dying, but a breath that retimes twice a second
+    is already smooth, and the phase accumulates so a change of tempo never jumps.
+    Any failure means the resting period, because a keyboard that stops breathing
+    when a helper is absent would be a worse bug than one that never quickens.
+    """
+    if now < cache.get('next', 0.0):
+        return cache.get('period', PERIOD)
+    cache['next'] = now + LASTLIGHT_REREAD
+    period = PERIOD
+    try:
+        record = json.loads((Path(runtime_dir) / LASTLIGHT_FILENAME).read_text())
+        asked = float(record.get('breath_period', PERIOD))
+        if math.isfinite(asked):
+            period = max(LASTLIGHT_MIN_PERIOD, min(PERIOD, asked))
+    except (OSError, ValueError, TypeError, AttributeError):
+        period = PERIOD
+    cache['period'] = period
+    return period
 
 
 class KeyboardBacklight:
@@ -594,6 +626,8 @@ class KeyboardBacklight:
             wpm_samples = deque()
             ambient = None
             lung = None
+            breath = None
+            lastlight = {}
             next_air = 0.0
             air_live = False
             try:
@@ -645,6 +679,7 @@ class KeyboardBacklight:
                             wpm_samples.clear()
                             ambient = None
                             lung = None
+                            breath = None
                         elif observed_level != level:
                             anchor_level = float(level)
                             anchor_time = now
@@ -662,11 +697,20 @@ class KeyboardBacklight:
                             air = ('last-breath', value / peak, 0.0, value / peak,
                                    LAST_BREATH_RISE + LAST_BREATH_FALL)
                         elif mode == 'breathing':
-                            cycle = (now - started) / PERIOD
+                            # Phase accumulates instead of being derived from the
+                            # start time, so oldbook-lastlight can shorten the
+                            # period as the battery empties without the light
+                            # jumping to a new point in the cycle.
+                            if breath is None:
+                                breath = dict(phase=(now - started) / PERIOD, last=now)
+                            period = _breath_period(lastlight, self.runtime_dir, now)
+                            breath['phase'] += max(0.0, now - breath['last']) / period
+                            breath['last'] = now
+                            cycle = breath['phase']
                             wave = (1 + math.cos(2 * math.pi * cycle)) / 2
                             curve = 0.12 + 0.88 * wave
                             value = max(1, min(maximum, round(level * curve)))
-                            air = ('breathing', 1.0, cycle, curve, PERIOD)
+                            air = ('breathing', 1.0, cycle, curve, period)
                         elif mode == 'ambient':
                             if ambient is None:
                                 origin = previous if previous is not None else self.read('brightness')

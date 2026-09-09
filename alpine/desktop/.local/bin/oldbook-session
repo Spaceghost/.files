@@ -164,6 +164,13 @@ fi
 if command -v oldbook-battery-cue >/dev/null 2>&1; then
     start_service battery-cue oldbook-battery-cue
 fi
+# The one effect that appears as the battery empties rather than being shed with
+# everything else: quicker keys, a vignette closing in, a labouring backlight.
+# It draws nothing above 25 percent, so starting it always costs one file read
+# every twenty seconds until it is needed.
+if command -v oldbook-lastlight >/dev/null 2>&1; then
+    start_service lastlight oldbook-lastlight run
+fi
 if command -v oldbook-notification-led >/dev/null 2>&1; then
     oldbook-notification-led 9>&- >>"$art_state/notification-led.log" 2>&1 &
 fi
