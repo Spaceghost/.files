@@ -1,0 +1,80 @@
+00:00:00.000 [INFO] [sway/main.c:310] scenefx version 0.5.0
+00:00:00.006 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE
+00:00:00.102 [INFO] [wlr] [render/egl.c:374] EGL vendor: Mesa Project
+00:00:00.124 [DEBUG] [wlr] [render/egl.c:439] Created EGL context using OpenGL ES 2.0
+00:00:00.125 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:473] Creating scenefx FX renderer
+00:00:00.125 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:474] Using OpenGL ES 3.2 Mesa 26.1.6
+00:00:00.125 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:475] GL vendor: Intel
+00:00:00.125 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:476] GL renderer: Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)
+00:00:00.243 [INFO] [wlr] [render/fx_renderer/fx_renderer.c:585] FX RENDERER: Shaders Initialized Successfully
+00:00:00.294 [INFO] [sway/config.c:466] Loading config from /tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-A/A-top-r1/sway.conf
+00:00:00.294 [INFO] [sway/commands.c:413] Config command: xwayland disable
+00:00:00.295 [DEBUG] [sway/config.c:825] Read line 2: output HEADLESS-1 mode 2880x1800@1000Hz
+00:00:00.295 [INFO] [sway/commands.c:413] Config command: output HEADLESS-1 mode 2880x1800@1000Hz
+00:00:00.295 [INFO] [sway/commands.c:436] After replacement: output HEADLESS-1 mode 2880x1800@1000Hz
+00:00:00.295 [DEBUG] [sway/commands.c:468] Subcommand: mode 2880x1800@1000Hz
+00:00:00.295 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (2880x1800@1000.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.295 [DEBUG] [sway/config.c:825] Read line 3: output HEADLESS-1 scale 2
+00:00:00.295 [INFO] [sway/commands.c:413] Config command: output HEADLESS-1 scale 2
+00:00:00.295 [INFO] [sway/commands.c:436] After replacement: output HEADLESS-1 scale 2
+00:00:00.295 [DEBUG] [sway/commands.c:468] Subcommand: scale 2
+00:00:00.295 [DEBUG] [sway/config/output.c:279] Config stored for output HEADLESS-1 (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale 2.000000 subpixel unknown transform -1) (bg (null) (null)) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.295 [INFO] [sway/commands.c:413] Config command: output * bg "/home/jack/.files/alpine/assets/spaceghost.png" fill
+00:00:00.302 [DEBUG] [sway/config/output.c:279] Config stored for output * (enabled: -1) (-1x-1@-1.000000Hz position 2147483647,2147483647 scale -1.000000 subpixel unknown transform -1) (bg /home/jack/.files/alpine/assets/spaceghost.png fill) (power -1) (max render time: -1) (allow tearing: -1) (hdr: -1)
+00:00:00.302 [INFO] [sway/commands.c:413] Config command: default_border none
+00:00:00.303 [INFO] [sway/commands.c:413] Config command: gaps inner 13
+00:00:00.303 [INFO] [sway/commands.c:413] Config command: font pango:monospace 10
+00:00:00.352 [DEBUG] [sway/config.c:825] Read line 8: include "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-A/A-top-r1/effects.conf"
+00:00:00.352 [INFO] [sway/commands.c:413] Config command: include "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-A/A-top-r1/effects.conf"
+00:00:00.352 [INFO] [sway/commands.c:436] After replacement: include "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-A/A-top-r1/effects.conf"
+00:00:00.359 [INFO] [sway/config.c:466] Loading config from /tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-A/A-top-r1/effects.conf
+00:00:00.359 [INFO] [sway/commands.c:413] Config command: corner_radius 22
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: smart_corner_radius disable
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 3: blur enable
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur enable
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur enable
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 4: blur_xray disable
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_xray disable
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_xray disable
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 5: blur_passes 1
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_passes 1
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_passes 1
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 6: blur_radius 4
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_radius 4
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_radius 4
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 7: blur_noise 0.012
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_noise 0.012
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_noise 0.012
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 8: blur_brightness 0.94
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_brightness 0.94
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_brightness 0.94
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 9: blur_contrast 1.03
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_contrast 1.03
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_contrast 1.03
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 10: blur_saturation 1.0
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: blur_saturation 1.0
+00:00:00.360 [INFO] [sway/commands.c:436] After replacement: blur_saturation 1.0
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: shadows enable
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: shadows_on_csd enable
+00:00:00.360 [DEBUG] [sway/config.c:825] Read line 13: shadow_blur_radius 34
+00:00:00.360 [INFO] [sway/commands.c:413] Config command: shadow_blur_radius 34
+00:00:00.361 [INFO] [sway/commands.c:436] After replacement: shadow_blur_radius 34
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: shadow_color #1d2021b8
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: shadow_inactive_color #1d202190
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: shadow_offset 0 10
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: default_dim_inactive 0.02
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: dim_inactive_colors.unfocused #282828ff
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: titlebar_separator disable
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: animation_duration_ms 140
+00:00:00.361 [DEBUG] [sway/config.c:825] Read line 21: layer_effects "measure-anim" {
+00:00:00.361 [DEBUG] [sway/config.c:879] Entering block 'layer_effects "measure-anim"'
+00:00:00.361 [DEBUG] [sway/config.c:825] Read line 22:     blur disable
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: layer_effects "measure-anim" blur disable
+00:00:00.361 [INFO] [sway/commands.c:436] After replacement: layer_effects "measure-anim" blur disable
+00:00:00.361 [INFO] [sway/layer_criteria.c:58] Handling layer effect 'blur disable'
+00:00:00.361 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'measure-anim' 'blur disable' added
+00:00:00.361 [INFO] [sway/commands.c:413] Config command: layer_effects "measure-anim" shadows disable
+00:00:00.361 [INFO] [sway/commands.c:436] After replacement: layer_effects "measure-anim" shadows disable
+00:00:00.361 [DEBUG] [sway/layer_criteria.c:111] layer_effect 'measure-anim' already exists: 'blur disable'. Replacing with: 'shadows disable'
+00:00:00.361 [DEBUG] [sway/commands/layer_effects.c:18] layer_effect: 'measure-anim' 'shadows disable' added
+00:00:00.362 [INFO] [sway/commands.c:413] Config command: layer_effects "measure-anim" corner_radius 0

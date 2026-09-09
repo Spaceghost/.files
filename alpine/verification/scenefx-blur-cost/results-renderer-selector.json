@@ -1,0 +1,108 @@
+[
+  {
+    "case": {
+      "label": "C-pixman-selector",
+      "layer": "bottom",
+      "anim_mode": "callback",
+      "rate": 1,
+      "damage": "200x200",
+      "duration": 6,
+      "mode": "2880x1800@1000Hz",
+      "wlr_renderer": "pixman",
+      "screenshot": true
+    },
+    "wall_s": 6.005,
+    "compositor_cpu_frac": 0.0966,
+    "gpu_busy_frac": 1.0,
+    "gpu_freq_mean_mhz": 150.0,
+    "gpu_freq_max_mhz": 150,
+    "rc6_delta_ms": 0,
+    "screenshot": "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-C/C-pixman-selector/screenshot.png",
+    "animator": {
+      "commits": 234,
+      "frame_callbacks": 233,
+      "elapsed": 9.003,
+      "commit_hz": 25.99,
+      "buffer": "2880x1800",
+      "damage": "400x400",
+      "layer": "bottom",
+      "mode": "callback"
+    },
+    "composite_fps": 25.99,
+    "frame_ms": 38.476,
+    "cpu_ms_per_frame": 3.717,
+    "renderer": "00:00:00.004 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE",
+    "gl_renderer": "Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)",
+    "gl_vendor": "Mesa Project",
+    "scenefx": "scenefx version"
+  },
+  {
+    "case": {
+      "label": "C-gles-shot",
+      "layer": "bottom",
+      "anim_mode": "callback",
+      "rate": 1,
+      "damage": "200x200",
+      "duration": 6,
+      "mode": "2880x1800@1000Hz",
+      "screenshot": true
+    },
+    "wall_s": 6.041,
+    "compositor_cpu_frac": 0.1092,
+    "gpu_busy_frac": 1.0,
+    "gpu_freq_mean_mhz": 150.0,
+    "gpu_freq_max_mhz": 150,
+    "rc6_delta_ms": 0,
+    "screenshot": "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-C/C-gles-shot/screenshot.png",
+    "animator": {
+      "commits": 236,
+      "frame_callbacks": 235,
+      "elapsed": 9.017,
+      "commit_hz": 26.17,
+      "buffer": "2880x1800",
+      "damage": "400x400",
+      "layer": "bottom",
+      "mode": "callback"
+    },
+    "composite_fps": 26.17,
+    "frame_ms": 38.212,
+    "cpu_ms_per_frame": 4.173,
+    "renderer": "00:00:00.016 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE",
+    "gl_renderer": "Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)",
+    "gl_vendor": "Mesa Project",
+    "scenefx": "scenefx version"
+  },
+  {
+    "case": {
+      "label": "C-static-shot",
+      "layer": "bottom",
+      "anim_mode": "timer",
+      "rate": 0,
+      "damage": "200x200",
+      "duration": 6,
+      "mode": "2880x1800@60Hz",
+      "screenshot": true
+    },
+    "wall_s": 6.001,
+    "compositor_cpu_frac": 0.0,
+    "gpu_busy_frac": 0.004,
+    "gpu_freq_mean_mhz": 0.0,
+    "gpu_freq_max_mhz": 0,
+    "rc6_delta_ms": 5977,
+    "screenshot": "/tmp/claude-1000/-home-jack/5b842415-00e2-41a0-8a2e-144abd349e0b/scratchpad/blurcost/out-C/C-static-shot/screenshot.png",
+    "animator": {
+      "commits": 0,
+      "frame_callbacks": 1,
+      "elapsed": 9.067,
+      "commit_hz": 0.0,
+      "buffer": "2880x1800",
+      "damage": "400x400",
+      "layer": "bottom",
+      "mode": "timer"
+    },
+    "renderer": "00:00:00.005 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE",
+    "gl_renderer": "Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)",
+    "gl_vendor": "Mesa Project",
+    "scenefx": "scenefx version"
+  }
+]

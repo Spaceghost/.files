@@ -1,0 +1,70 @@
+[
+  {
+    "case": {
+      "label": "ship-bottom",
+      "layer": "bottom",
+      "anim_mode": "callback",
+      "rate": 1,
+      "damage": "200x200",
+      "duration": 5,
+      "mode": "2880x1800@1000Hz"
+    },
+    "wall_s": 5.039,
+    "compositor_cpu_frac": 0.0893,
+    "gpu_busy_frac": 1.0,
+    "gpu_freq_mean_mhz": 150.0,
+    "gpu_freq_max_mhz": 150,
+    "rc6_delta_ms": 0,
+    "animator": {
+      "commits": 218,
+      "frame_callbacks": 217,
+      "elapsed": 8.079,
+      "commit_hz": 26.98,
+      "buffer": "2880x1800",
+      "damage": "400x400",
+      "layer": "bottom",
+      "mode": "callback"
+    },
+    "composite_fps": 26.98,
+    "frame_ms": 37.064,
+    "cpu_ms_per_frame": 3.31,
+    "renderer": "00:00:00.005 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE",
+    "gl_renderer": "Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)",
+    "gl_vendor": "Mesa Project",
+    "scenefx": "scenefx version"
+  },
+  {
+    "case": {
+      "label": "ship-top",
+      "layer": "top",
+      "anim_mode": "callback",
+      "rate": 1,
+      "damage": "200x200",
+      "duration": 5,
+      "mode": "2880x1800@1000Hz"
+    },
+    "wall_s": 5.047,
+    "compositor_cpu_frac": 0.9272,
+    "gpu_busy_frac": 0.3541,
+    "gpu_freq_mean_mhz": 150.0,
+    "gpu_freq_max_mhz": 150,
+    "rc6_delta_ms": 3260,
+    "animator": {
+      "commits": 1240,
+      "frame_callbacks": 1239,
+      "elapsed": 8.001,
+      "commit_hz": 154.98,
+      "buffer": "2880x1800",
+      "damage": "400x400",
+      "layer": "top",
+      "mode": "callback"
+    },
+    "composite_fps": 154.98,
+    "frame_ms": 6.452,
+    "cpu_ms_per_frame": 5.983,
+    "renderer": "00:00:00.004 [INFO] [wlr] [render/fx_renderer/util.c:71] Opening DRM render node '/dev/dri/renderD128' from WLR_RENDER_DRM_DEVICE",
+    "gl_renderer": "Mesa Intel(R) Iris(R) Pro Graphics P5200 (HSW GT3)",
+    "gl_vendor": "Mesa Project",
+    "scenefx": "scenefx version"
+  }
+]
