@@ -1,5 +1,9 @@
 # Superhold
 
+> This is the portable Qt project, and it is **not** the guide running on this
+> machine — that one is `../superhold-guide/`, a separate GTK codebase. See
+> [`../README.md`](../README.md) before changing either.
+
 Hold Super alone for half a second to see a contextual shortcut guide. Release
 it or press another key to dismiss it. Scroll with the pointer wheel while the
 focused application keeps keyboard focus.

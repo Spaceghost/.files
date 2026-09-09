@@ -99,6 +99,7 @@ class ShortcutProvider:
         if profiles_path is None:
             profiles_path = Path.home() / '.config/oldbook/shortcuts.json'
         self.profiles_path = Path(profiles_path).expanduser()
+        self._retained_target = None
 
     def snapshot(self):
         custom_profiles, profile_error = self._load_custom_profiles()
@@ -113,7 +114,7 @@ class ShortcutProvider:
                 tree = reply
         except (OSError, ValueError, TimeoutError, json.JSONDecodeError):
             tree = None
-        window, output = self._focused_view(tree)
+        window, output = self._retained(*self._focused_view(tree))
 
         source = self._window_source(window)
         identity_source = source
@@ -167,6 +168,32 @@ class ShortcutProvider:
                 'rows': [],
             })
         return {'app': app, 'output': output, 'sections': sections}
+
+    # The guide's own windows are never a context to describe. GTK and Qt both
+    # take the Wayland app_id from the program name.
+    OWN_WINDOW_IDS = frozenset({'superhold', 'org.superhold.settings'})
+
+    @classmethod
+    def _own_window(cls, window):
+        if not isinstance(window, dict):
+            return False
+        properties = window.get('window_properties')
+        properties = properties if isinstance(properties, dict) else {}
+        identity = {_source_key(value) for value in
+                    (window.get('app_id'), properties.get('class'),
+                     properties.get('instance')) if value}
+        return bool(identity & cls.OWN_WINDOW_IDS)
+
+    def _retained(self, window, output):
+        """Hold the window the guide was opened over while the guide has focus.
+
+        Focusing the guide would otherwise make it describe itself. The hold is
+        released as soon as focus lands on anything that is not the guide.
+        """
+        if not self._own_window(window):
+            self._retained_target = (window, output)
+            return window, output
+        return self._retained_target or (window, output)
 
     def _sway_request(self, message_type):
         request = self._IPC_MAGIC + struct.pack('<II', 0, message_type)

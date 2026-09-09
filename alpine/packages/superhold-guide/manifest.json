@@ -93,6 +93,48 @@
     "rollback_and_reactivate": "passed",
     "graphics": "alpine/verification/superhold-guide-dev1/graphics-evidence.json",
     "live_pid": 23237,
-    "live_keyboard_devices": 2
+    "live_keyboard_devices": 2,
+    "source_install_hashes_match_note": "True when packaged; see local_patch for the changes installed since."
+  },
+  "local_patch": {
+    "note": "The installed prefix carries changes made after packaging: the guide reads sections from the most local context outward, those sections are configurable, and the guide no longer treats its own window as the context to describe. The wheel, sdist and their hashes above still describe the archives as built; validation.source_install_hashes_match was true when packaged and is not true now.",
+    "fossil_commits": [
+      "11c776f1ff"
+    ],
+    "previous_installed_modules": "/home/jack/.local/state/oldbook/superhold-section-order",
+    "rollback_digests_re_recorded": "/home/jack/.local/share/superhold/backups/0.2.0.dev1-2c5a0afe5578/manifest.json",
+    "files": {
+      "CHANGELOG.md": {
+        "packaged": "dbb3f22c168cf6511808fe1274eb0d4fe3aa2fe19fff765a7c7ef5ef9ab47144",
+        "source_now": "dabe0ebb34b0b3f54b50a9e038310cc23921d1314cbe89510fbeceb356d7879a"
+      },
+      "README.md": {
+        "packaged": "e4cb489df21ed94c9bb07dcebece520d33aa59ab76844d1c3436d26025dfb275",
+        "source_now": "a97bb920a57272bdfdcdd1f0cff5d091747978853064b4a96765ac8776cb3a81"
+      },
+      "src/superhold/config.py": {
+        "packaged": "77f6a7265ab698a5a2a5122ec58239e9be7e3541fc7e645e6ca16ef8c10170e4",
+        "source_now": "405b9186b596f45c878cc2c22ede67b411d735b674da5c61f614119b27eb68d8",
+        "installed_now": "405b9186b596f45c878cc2c22ede67b411d735b674da5c61f614119b27eb68d8"
+      },
+      "src/superhold/shortcut_overlay.py": {
+        "packaged": "844caf4d892a3bb43b706527de0661270d5fc4d087c6661e96d3907b3465bd61",
+        "source_now": "7e3c9a13d16495fee5e12a0e1f0613dbbab733b5f7fea2f0e16a420b03e6b7f5",
+        "installed_now": "7e3c9a13d16495fee5e12a0e1f0613dbbab733b5f7fea2f0e16a420b03e6b7f5"
+      },
+      "src/superhold/shortcut_sources.py": {
+        "packaged": "60c314b892236210975881308d4d8b739733d7cd2a55f9c4191cc0806862a95a",
+        "source_now": "31e94ad3ac5341687ad32858fe17cd57fe59a71fbfc0ea8285aa0d46c86ec911",
+        "installed_now": "31e94ad3ac5341687ad32858fe17cd57fe59a71fbfc0ea8285aa0d46c86ec911"
+      },
+      "tests/test_config.py": {
+        "packaged": "1778b13f8ceef23d8ea4f40630cfa9e77984b9c890a54e7cf715b436a17a1cfa",
+        "source_now": "8fd1bab5065f9e80d0218efaa1b2e4fb1c354a06481af9f059773d7e80f93a5b"
+      },
+      "tests/test_shortcut_sources.py": {
+        "packaged": "cb7b69c77469177bff2af234e11025da67c2cedc2aaeff41c00670ca43170367",
+        "source_now": "d58a6e617a89b3d5e17171db6a483f64632143876b8e94b09e39180f2593ea18"
+      }
+    }
   }
 }

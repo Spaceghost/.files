@@ -48,10 +48,21 @@ outward: the focused application, then tmux, then its terminal, then the
 desktop, then system-wide controls. Keep the desktop section immediately before
 the system one. The order, visibility and titles are the user's to change in
 `~/.config/superhold/config.json`; prefer adding configuration to hardcoding a
-new arrangement. Three implementations must stay in step on the default order:
-`projects/superhold-guide` is the one that actually runs, `projects/superhold`
-is the portable Qt project behind `oldbook-shortcuts`, and the legacy overlay
-under `desktop/.local/lib/oldbook/` sits behind `OLDBOOK_SHORTCUTS_LEGACY=1`.
+new arrangement. The guide's own window is never the context it describes:
+focusing it holds the window it was opened over until focus lands elsewhere,
+and the caption strip does not attach to it.
+
+Read `../projects/README.md` before editing any shortcut guide. Three
+directories contain a program called Superhold and only `projects/superhold-guide`
+runs here; `projects/superhold` is the portable Qt project behind
+`oldbook-shortcuts`, `projects/hold-to-help` is the old name, and the legacy
+overlay under `desktop/.local/lib/oldbook/` sits behind
+`OLDBOOK_SHORTCUTS_LEGACY=1`. They share the default section order and the
+self-focus rule. `~/.local/bin/superhold` is not a symlink into the checkout
+but an installed, hash-verified virtualenv copy, so a source edit reaches the
+keyboard only after the modules are copied in, the daemon restarted, and the
+digests re-recorded in the backup manifest — miss that last step and
+`superhold-rollback` refuses to run.
 
 Every desktop theme must be complete. The user explicitly rejects palette-only
 themes; do not introduce that category or treat recoloring a few overlays as a

@@ -45,6 +45,33 @@ def focused_tree(app_id='firefox', pid=200, output='eDP-1'):
     }
 
 
+def guide_over(app_id='firefox', pid=200, output='eDP-1', focus='superhold',
+               keep=True):
+    """A tree with the guide floating over one ordinary window.
+
+    ``focus`` names which of the two Sway reports as focused; ``keep`` decides
+    whether the ordinary window is still open at all.
+    """
+    tree = focused_tree(app_id, pid, output)
+    workspace = tree['nodes'][0]['nodes'][0]
+    if keep:
+        workspace['nodes'][0]['focused'] = focus == app_id
+    else:
+        workspace['nodes'] = []
+    workspace['floating_nodes'] = [{
+        'id': 9,
+        'type': 'floating_con',
+        'focused': focus == 'superhold',
+        'app_id': 'superhold',
+        'pid': 900,
+        'name': 'Keyboard shortcuts',
+        'window_properties': {},
+        'nodes': [],
+        'floating_nodes': [],
+    }]
+    return tree
+
+
 class FixtureProvider(ShortcutProvider):
     def __init__(self, replies, commands=None, processes=None, profiles_path=None,
                  sections=None):
@@ -365,6 +392,48 @@ bindsym --locked Group2+Mod4+x exec grouped-action
         ])
         self.assertEqual([row['key'] for row in snapshot['sections'][1]['rows']],
                          ['Ctrl+A, c', 'Ctrl+A, %'])
+
+    def test_focusing_the_guide_keeps_showing_the_window_it_was_opened_over(self):
+        provider = FixtureProvider(self.replies(tree=focused_tree('firefox')))
+        opened = provider.snapshot()
+        self.assertEqual(opened['app'], 'Firefox')
+
+        provider.replies = self.replies(tree=guide_over('firefox'))
+        held = provider.snapshot()
+
+        self.assertEqual(held['app'], 'Firefox')
+        self.assertEqual(held['target']['con_id'], 4)
+        # An unchanged snapshot is what stops the open guide from redrawing.
+        self.assertEqual(held['sections'], opened['sections'])
+
+    def test_focus_landing_on_another_window_releases_the_held_context(self):
+        provider = FixtureProvider(self.replies(tree=focused_tree('firefox')))
+        provider.snapshot()
+        provider.replies = self.replies(tree=guide_over('firefox'))
+        self.assertEqual(provider.snapshot()['app'], 'Firefox')
+
+        provider.replies = self.replies(tree=focused_tree('foot', pid=100))
+        self.assertEqual(provider.snapshot()['app'], 'Foot')
+        provider.replies = self.replies(tree=guide_over('foot', pid=100))
+        self.assertEqual(provider.snapshot()['app'], 'Foot')
+
+    def test_a_held_window_that_closes_stops_being_held(self):
+        provider = FixtureProvider(self.replies(tree=focused_tree('firefox')))
+        provider.snapshot()
+
+        provider.replies = self.replies(tree=guide_over('firefox', keep=False))
+        stranded = provider.snapshot()
+
+        self.assertEqual(stranded['app'], 'superhold')
+        self.assertEqual(stranded['sections'][0]['coverage'],
+                         'Unavailable: no shortcut profile')
+
+    def test_the_guide_is_never_the_context_even_on_a_first_snapshot(self):
+        provider = FixtureProvider(self.replies(tree=focused_tree('firefox')))
+        provider.snapshot()
+        provider.replies = self.replies(tree=guide_over('firefox', focus='firefox'))
+
+        self.assertEqual(provider.snapshot()['app'], 'Firefox')
 
     def test_configured_order_hidden_and_titles_rearrange_the_guide(self):
         layout = SectionLayout.from_document({

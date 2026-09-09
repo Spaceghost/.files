@@ -1,8 +1,14 @@
 # Superhold
 
-Open a contextual shortcut guide, choose an action with the mouse, and send
-its native shortcut to the original application. The list starts with the
-focused app, followed by Sway and applicable terminal or tmux controls.
+> This is the guide that runs on this machine. Two other directories in
+> `projects/` also contain a program called Superhold and neither of them is
+> what the keyboard reaches; see [`../README.md`](../README.md), which also
+> explains why editing this checkout is not enough on its own.
+
+Open a contextual shortcut guide, choose an action with the mouse, and send its
+native shortcut to the original application. The list reads outward from where
+you are: the focused application first, then tmux, then the terminal holding
+it, then Sway, then system-wide controls.
 
 Run **Superhold Shortcut Guide** from the application menu, or hold either
 **Super** key alone for half a second while the daemon is running. By default,

@@ -92,6 +92,9 @@ class ShortcutProvider:
         '#{q:pane_current_command}\t#{pane_in_mode}\t#{q:pane_mode}'
     )
     _IPC_MAGIC = b'i3-ipc'
+    # GTK takes the Wayland app_id from the program name; the settings window
+    # carries its own application id. Neither is somewhere the reader lives.
+    OWN_WINDOW_IDS = frozenset({'superhold', 'org.superhold.settings'})
     _MAX_IPC = 2 * 1024 * 1024
     _MAX_COMMAND = 512 * 1024
     _TIMEOUT = 0.75
@@ -99,6 +102,7 @@ class ShortcutProvider:
     def __init__(self, socket_path, profiles_path=None, sections=None):
         self.socket_path = os.fspath(socket_path)
         self.sections = SectionLayout() if sections is None else sections
+        self._retained_target = None
         self._profiles_explicit = profiles_path is not None
         if profiles_path is None:
             configured = os.environ.get('XDG_CONFIG_HOME', '')
@@ -121,7 +125,7 @@ class ShortcutProvider:
                 tree = reply
         except (OSError, ValueError, TimeoutError, json.JSONDecodeError):
             tree = None
-        window, output = self._focused_view(tree)
+        window, output = self._retained_view(tree)
 
         source = self._window_source(window)
         identity_source = source
@@ -227,8 +231,42 @@ class ShortcutProvider:
             return ''
         return completed.stdout[:self._MAX_COMMAND]
 
+    @classmethod
+    def _own_window(cls, window):
+        """True for the guide's own windows, which are never a context."""
+        if not isinstance(window, dict):
+            return False
+        properties = window.get('window_properties')
+        properties = properties if isinstance(properties, dict) else {}
+        identity = {_source_key(value) for value in
+                    (window.get('app_id'), properties.get('class'),
+                     properties.get('instance')) if value}
+        return bool(identity & cls.OWN_WINDOW_IDS)
+
+    def _retained_view(self, tree):
+        """Return the window being read about, holding it while the guide has focus.
+
+        Clicking into the guide, or its own window taking focus when it opens,
+        would otherwise make the guide describe itself a second later and
+        redraw with its own shortcuts. Instead the window it was opened over is
+        remembered and looked up again in the current tree, so its identity
+        stays current, the rendered snapshot is unchanged and nothing redraws.
+        The hold is released the moment focus lands anywhere that is not the
+        guide, including a window that has since replaced the remembered one.
+        """
+        window, output = self._focused_view(tree)
+        if not self._own_window(window):
+            con_id = window.get('id') if isinstance(window, dict) else None
+            self._retained_target = con_id if isinstance(con_id, int) else None
+            return window, output
+        if self._retained_target is None:
+            return window, output
+        retained = self._find_view(tree, lambda node: node.get('id') == self._retained_target)
+        # A remembered window that has closed leaves nothing to hold on to.
+        return retained if retained[0] is not None else (window, output)
+
     @staticmethod
-    def _focused_view(tree):
+    def _find_view(tree, matches):
         best = None
 
         def visit(node, output, depth):
@@ -244,7 +282,7 @@ class ShortcutProvider:
                 or (isinstance(properties, dict)
                     and (properties.get('class') or properties.get('instance')))
             )
-            if node.get('focused') is True and is_view:
+            if is_view and matches(node):
                 candidate = (depth, node, output)
                 if best is None or depth > best[0]:
                     best = candidate
@@ -257,6 +295,10 @@ class ShortcutProvider:
         if isinstance(tree, dict):
             visit(tree, None, 0)
         return (best[1], best[2]) if best else (None, None)
+
+    @classmethod
+    def _focused_view(cls, tree):
+        return cls._find_view(tree, lambda node: node.get('focused') is True)
 
     @staticmethod
     def _window_source(window):

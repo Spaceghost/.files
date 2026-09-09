@@ -17,6 +17,11 @@ IGNORED_CAPTION_APPS = frozenset((
     # recognisable by its class -- which is why identity is matched across all
     # three fields rather than app_id alone.
     'opensnitch-ui', 'opensnitch_ui',
+    # The shortcut guide is something you read across whatever you were already
+    # doing, not a window you are working in. Letting the strip follow it names
+    # the guide instead of the thing the guide is describing, and pulls the
+    # caption off that window for as long as the guide is up.
+    'superhold', 'org.superhold.Settings',
 ))
 # A picture-in-picture window is a video parked on the desktop to keep watching
 # while doing something else. It is deliberately small, its title says nothing

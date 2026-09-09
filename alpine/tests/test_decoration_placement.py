@@ -43,9 +43,10 @@ class DecorationPlacementTests(unittest.TestCase):
             'mode': 'window', 'edge': 'bottom', 'rect': floating['rect'],
             'square': False, 'window_id': 7})
 
-    def test_dropdown_focus_keeps_last_ordinary_window_context_and_geometry(self):
+    def test_ignored_window_focus_keeps_last_ordinary_context_and_geometry(self):
         import decoration_actions
-        for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+        for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
+                       'superhold', 'org.superhold.Settings'):
             with self.subTest(app_id=app_id):
                 ordinary, console = view(7), view(8)
                 console['app_id'] = app_id
@@ -82,7 +83,8 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_similarly_named_terminals_remain_caption_targets(self):
         import decoration_actions
-        for app_id in ('com.oldbook.monitor-notes', 'com.oldbook.dropdown-notes', 'ghostty'):
+        for app_id in ('com.oldbook.monitor-notes', 'com.oldbook.dropdown-notes',
+                       'ghostty', 'superholder', 'superhold-notes'):
             with self.subTest(app_id=app_id):
                 target = dict(view(8), app_id=app_id)
                 tree = {'nodes': [output('eDP-1', [workspace(2, floating=[target])])]}
@@ -91,7 +93,8 @@ class DecorationPlacementTests(unittest.TestCase):
 
     def test_fullscreen_console_does_not_override_retained_floating_caption(self):
         for mode in (1, 2):
-            for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'):
+            for app_id in ('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
+                           'superhold', 'org.superhold.Settings'):
                 with self.subTest(mode=mode, app_id=app_id):
                     console = dict(view(8, fullscreen=mode), app_id=app_id)
                     tree = {'nodes': [output('eDP-1', [workspace(
