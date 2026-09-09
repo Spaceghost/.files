@@ -31,6 +31,11 @@
     "ghost-urgent": {
       "exec": "~/.local/bin/oldbook-sound urgent-notification",
       "urgency": "Critical"
+    },
+    "focus-sender": {
+      "exec": "~/.local/bin/oldbook-notify-focus",
+      "app-name": ".*",
+      "run-on": "action"
     }
   },
   "widget-config": {
@@ -48,19 +53,19 @@
       "loop-carousel": false
     },
     "volume": {
-      "label": "󰕾",
+      "label": "\udb81\udd7e",
       "show-per-app": true,
       "show-per-app-icon": true,
       "show-per-app-label": false,
       "expand-per-app": false,
       "empty-list-label": "Nothing on the air",
-      "expand-button-label": "󰅀",
-      "collapse-button-label": "󰅃",
+      "expand-button-label": "\udb80\udd40",
+      "collapse-button-label": "\udb80\udd43",
       "animation-type": "slide_down",
       "animation-duration": 180
     },
     "backlight": {
-      "label": "󰃟",
+      "label": "\udb80\udcdf",
       "device": "gmux_backlight",
       "subsystem": "backlight",
       "min": 40
@@ -69,31 +74,31 @@
       "buttons-per-row": 3,
       "actions": [
         {
-          "label": "󰌾  Lock",
+          "label": "\udb80\udf3e  Lock",
           "command": "~/.local/bin/oldbook-lock"
         },
         {
-          "label": "󰊠  Deck",
+          "label": "\udb80\udea0  Deck",
           "command": "~/.local/bin/oldbook-control"
         },
         {
-          "label": "󰸉  Next art",
+          "label": "\udb83\ude09  Next art",
           "command": "~/.local/bin/oldbook-wallpaper next"
         },
         {
-          "label": "󰏤  Hold art",
+          "label": "\udb80\udfe4  Hold art",
           "type": "toggle",
           "command": "~/.local/bin/oldbook-wallpaper pause",
           "update-command": "~/.local/bin/oldbook-wallpaper status 2>/dev/null | grep -q 'class.: .paused' && echo true || echo false"
         },
         {
-          "label": "󰍭  Mic off",
+          "label": "\udb80\udf6d  Mic off",
           "type": "toggle",
           "command": "~/.local/bin/oldbook-audio mic-mute",
           "update-command": "wpctl get-volume @DEFAULT_AUDIO_SOURCE@ 2>/dev/null | grep -q MUTED && echo true || echo false"
         },
         {
-          "label": "󱂬  Cards",
+          "label": "\udb84\udcac  Cards",
           "type": "toggle",
           "command": "~/.local/bin/oldbook-conky toggle",
           "update-command": "~/.local/bin/oldbook-conky status 2>/dev/null | grep -q ^on && echo true || echo false"

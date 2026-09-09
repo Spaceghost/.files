@@ -302,7 +302,16 @@ their collapse and close-all controls, progress, the app icon and image, and the
 empty history placeholder. Every colour declared must be a role in the active
 theme's palette, never a shade chosen by eye, because the theme renderer snaps
 an off-palette value to whichever role is nearest and a generated theme then
-lands approximately instead of exactly. The control center
+lands approximately instead of exactly. A notification you cannot follow back to its window is a dead end, so clicking
+one focuses the window that sent it, which carries the workspace with it.
+Matching is layered and refuses rather than guesses: the desktop entry first,
+because it is the only identifier an application promises; the display name
+next; the window title last and only above a length floor, since a window whose
+title merely mentions the sender is usually not the sender. No confident match
+means the click does nothing, which beats focusing the wrong window. Windows the
+desktop already parks for itself are never a destination. Buttons on a
+notification come from the sender and cannot be added from outside; Oldbook's
+own notifications may carry them. The control center
 carries the playing MPRIS track with album art, sound and brightness sliders and
 a quick-action grid above the history; those widgets are additive and never
 change popup placement or the bar's notification clicks.

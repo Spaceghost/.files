@@ -171,9 +171,13 @@
         "alpine/themes/profiles/*/.config/swayfx/effects.conf",
         "alpine/themes/profiles/*/.config/swaync/*",
         "alpine/wallpapers/desktop_theme.py",
-        "alpine/tests/verify_swaync_widgets.py"
+        "alpine/tests/verify_swaync_widgets.py",
+        "alpine/desktop/.local/bin/oldbook-notify-focus",
+        "alpine/tests/test_notify_focus.py"
       ],
-      "tests": [],
+      "tests": [
+        "test_notify_focus.py"
+      ],
       "evidence": [
         "verification/notifications/",
         "verification/notification-overlay/",

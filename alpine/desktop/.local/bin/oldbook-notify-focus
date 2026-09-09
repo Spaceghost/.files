@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""Click a notification, land on the window that sent it.
+
+swaync runs this with `run-on: action`, which fires when a notification is
+activated, and hands the sender's identity over the environment. A notification
+that names a window nobody can reach is a dead end, so this finds that window in
+the Sway tree and focuses it -- which carries the workspace with it, because
+focusing a window on another workspace switches to that workspace.
+
+Matching is deliberately layered rather than clever. The desktop entry is the
+only identifier an application actually promises, so it is tried first against
+`app_id`; the notification's display name is tried next, because most senders
+set it to something recognisable; and the title is the last resort, since a
+title match alone can be a coincidence. Nothing is guessed: when no window is a
+confident match the click does nothing rather than focusing the wrong thing,
+which is worse than doing nothing at all.
+"""
+import json
+import os
+import subprocess
+import sys
+
+# Windows whose caption the desktop already suppresses are equally poor targets:
+# a drop-down parks itself and the monitor is summoned, so neither is a place to
+# be sent by a click.
+UNREACHABLE = frozenset(('com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor'))
+
+
+def tree():
+    try:
+        found = subprocess.run(['swaymsg', '-t', 'get_tree'], capture_output=True,
+                               text=True, timeout=5)
+        return json.loads(found.stdout)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return {}
+
+
+def windows(node, found=None):
+    found = [] if found is None else found
+    if node.get('app_id') or node.get('window'):
+        found.append(node)
+    for key in ('nodes', 'floating_nodes'):
+        for child in node.get(key, []):
+            windows(child, found)
+    return found
+
+
+def identifiers(window):
+    properties = window.get('window_properties') or {}
+    return [value for value in (window.get('app_id'), properties.get('class'),
+                                properties.get('instance')) if value]
+
+
+def score(window, entry, name):
+    """How confidently does this window belong to that notification?
+
+    Higher is better; zero means no. An exact identifier match beats a
+    containment match, and a title match scores lowest because a window whose
+    title merely mentions the sender is usually not the sender.
+    """
+    if window.get('app_id') in UNREACHABLE:
+        return 0
+    marks = [value.casefold() for value in identifiers(window)]
+    for candidate, exact, loose in ((entry, 6, 4), (name, 5, 3)):
+        if not candidate:
+            continue
+        wanted = candidate.casefold()
+        # A desktop entry may be reversed DNS; its last segment is the app id.
+        tail = wanted.rsplit('.', 1)[-1]
+        if wanted in marks or tail in marks:
+            return exact
+        if any(wanted in mark or mark in wanted for mark in marks):
+            return loose
+    title = str(window.get('name') or '').casefold()
+    if name and len(name) > 3 and name.casefold() in title:
+        return 1
+    return 0
+
+
+def target(entry, name):
+    candidates = [(score(window, entry, name), window) for window in windows(tree())]
+    candidates = [(rank, window) for rank, window in candidates if rank]
+    if not candidates:
+        return None
+    best = max(rank for rank, _ in candidates)
+    # Two windows equally likely means the click cannot know which was meant;
+    # prefer the one already focused, else the most recently focused.
+    tied = [window for rank, window in candidates if rank == best]
+    return next((w for w in tied if w.get('focused')), tied[0])
+
+
+def main():
+    entry = os.environ.get('SWAYNC_DESKTOP_ENTRY', '')
+    name = os.environ.get('SWAYNC_APP_NAME', '')
+    if len(sys.argv) > 1:
+        name = sys.argv[1]
+    window = target(entry, name)
+    if window is None:
+        return 1
+    subprocess.run(['swaymsg', f'[con_id={window["id"]}]', 'focus'],
+                   capture_output=True, timeout=5)
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
