@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "enabled": false,
+  "selected": "bed",
+  "interactions": [
+    {
+      "id": "bed",
+      "title": "Bed mode",
+      "date": "2026-09-09",
+      "handler": "bed",
+      "summary": "The laptop runs warm on purpose for as long as she is lying on it.",
+      "trigger": "oldbook-cat on, then let her sit on the locked keyboard",
+      "detail": "Mains only, under a hard ceiling, fans held quiet only while cool, and the lid may close without the machine sleeping. Stop it any time with: oldbook-cat stop"
+    }
+  ],
+  "work": []
+}

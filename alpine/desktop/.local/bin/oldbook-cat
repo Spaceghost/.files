@@ -1,0 +1,630 @@
+#!/usr/bin/env python3
+"""Notice when the cat is on the keyboard, and be nice to her about it.
+
+She sits on the machine while it is locked. This watches the internal keyboard
+and trackpad through evdev, decides from the shape of the input whether that is
+a cat or a person, publishes the answer for the rest of the desktop, and runs
+whichever interaction is selected. Today exactly one is: bed mode, which warms
+the laptop on purpose for as long as she is lying on it.
+
+Three separate things are kept apart on purpose, because they fail differently:
+
+    cat_presence     the judgement, and the record under $XDG_RUNTIME_DIR
+    cat_interactions the list of things the desktop can do about it
+    cat_bed          the one implemented interaction, and every thermal ceiling
+
+and this file is the service that joins them: it owns the file descriptors, the
+elogind inhibitor and the exit paths, and it is the only place that decides
+when bed mode may begin.
+
+It is deliberately independent of the lock's own UI. Nothing here draws
+anything, and nothing here is called by the locker; it reads the same readiness
+record the ambient display daemon already reads, so a change to how the session
+locks cannot take the cat with it.
+
+    oldbook-cat run                  the service, started by oldbook-session
+    oldbook-cat status [--json]      what it thinks right now
+    oldbook-cat stop                 stop everything, now, and stay stopped
+    oldbook-cat on | off             the whole feature
+    oldbook-cat interactions         the list, with the selected one marked
+    oldbook-cat select ID | next     choose one, or cycle
+    oldbook-cat add FILE | remove ID manage the list
+    oldbook-cat fans [restore]       what the fans are doing; put them back
+"""
+import argparse
+import contextlib
+import errno
+import fcntl
+import json
+import os
+from pathlib import Path
+import select
+import shutil
+import signal
+import struct
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import cat_bed             # noqa: E402
+import cat_interactions    # noqa: E402
+import cat_presence        # noqa: E402
+import power_source        # noqa: E402
+import thermal             # noqa: E402
+
+TICK = 2.0
+# The ladder effect this asks about. It is not registered in power_source yet,
+# and an unregistered effect is allowed everywhere on purpose, so the explicit
+# mains test below is the thing actually enforcing "never on battery" until the
+# entry lands. Both are checked; neither is trusted alone.
+LADDER_EFFECT = 'cat-bed'
+INHIBITORS = ('elogind-inhibit', 'systemd-inhibit')
+LID_HOLDER = ['--what=handle-lid-switch', '--mode=block', '--who=oldbook-cat',
+              '--why=A cat is asleep on the keyboard', '--', 'cat']
+KEYBOARD_HINTS = ('Apple Internal Keyboard', 'Internal Keyboard', 'AT Translated Set 2')
+TRACKPAD_HINTS = ('bcm5974', 'Trackpad', 'Touchpad', 'TouchPad')
+PROC_DEVICES = '/proc/bus/input/devices'
+# A sitting stopped by a ceiling waits this long before another may begin, and
+# the session gives up on bed mode after this many of them.
+SAFETY_COOLDOWN = 600.0
+SAFETY_STOP_LIMIT = 2
+
+
+# ---- devices ---------------------------------------------------------------
+
+
+def input_devices(text=None):
+    """Parse /proc/bus/input/devices into (name, handlers) pairs."""
+    if text is None:
+        try:
+            text = Path(os.environ.get('OLDBOOK_INPUT_PROC', PROC_DEVICES)).read_text()
+        except OSError:
+            return []
+    found, name, handlers = [], None, []
+    for line in text.splitlines() + ['']:
+        if line.startswith('N: Name='):
+            name = line.split('=', 1)[1].strip().strip('"')
+        elif line.startswith('H: Handlers='):
+            handlers = line.split('=', 1)[1].split()
+        elif not line.strip():
+            if name is not None:
+                found.append((name, handlers))
+            name, handlers = None, []
+    return found
+
+
+def event_nodes(hints, text=None, want_keys=False):
+    """The /dev/input/event* nodes whose device name matches one of these hints."""
+    nodes = []
+    for name, handlers in input_devices(text):
+        if not any(hint.lower() in name.lower() for hint in hints):
+            continue
+        if want_keys and 'kbd' not in handlers:
+            continue
+        nodes += [f'/dev/input/{handler}' for handler in handlers
+                  if handler.startswith('event')]
+    return nodes
+
+
+def chosen_devices():
+    """Which nodes to watch: the environment wins, so tests need no hardware."""
+    override = os.environ.get('OLDBOOK_INPUT_DEVICES')
+    if override:
+        return [item for item in override.split(':') if item]
+    keyboard = event_nodes(KEYBOARD_HINTS, want_keys=True)
+    trackpad = event_nodes(TRACKPAD_HINTS)
+    return keyboard + [node for node in trackpad if node not in keyboard]
+
+
+def contact_maximum(descriptor):
+    """The trackpad's own full-scale contact size, via EVIOCGABS.
+
+    Asked of the device rather than assumed, because "far too large for a
+    finger" is only meaningful against the scale the driver reports. A device
+    that will not answer simply contributes no contact evidence.
+    """
+    layout = struct.Struct('6i')
+    request = ((2 << 30) | (layout.size << 16) | (ord('E') << 8)
+               | (0x40 + cat_presence.ABS_MT_TOUCH_MAJOR))
+    try:
+        answer = fcntl.ioctl(descriptor, request, bytes(layout.size))
+    except (OSError, ValueError):
+        return None
+    maximum = layout.unpack(answer)[2]
+    return maximum if maximum > 0 else None
+
+
+# ---- session facts ---------------------------------------------------------
+
+
+def lock_record_path():
+    runtime = os.environ.get('XDG_RUNTIME_DIR') or str(Path.home() / '.local/state')
+    return Path(os.environ.get('OLDBOOK_LOCK_RECORD',
+                               str(Path(runtime) / 'oldbook-screen-lock/ready.json')))
+
+
+def session_locked():
+    """Is the screen locked? Read from the locker's own readiness record.
+
+    The same record `oldbook-ambient-display` reads, and read the same way: a
+    live pid belonging to us. This is the single largest guard against a false
+    positive, because an unlocked session is a person at the machine and a
+    person at the machine never gets warmed.
+    """
+    try:
+        record = json.loads(lock_record_path().read_text())
+        pid = int(record['process']['pid'])
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
+
+def on_mains():
+    """Mains, by the desktop's own posture, and by the ladder if it knows us."""
+    return power_source.posture() == 'mains' and power_source.allows(LADDER_EFFECT)
+
+
+def hold_lid():
+    """Keep elogind off the lid switch for as long as this pipe stays open.
+
+    Exactly the shape `oldbook-lock` uses for the power key: the inhibitor is
+    held by a process waiting on a pipe, so it is released the moment this
+    daemon's tree ends, however it ends. Returns the write descriptor, or None
+    when no inhibitor is available -- in which case the lid still suspends, and
+    that is a fine outcome: the machine going to sleep is the safe direction.
+    """
+    inhibitor = next(filter(None, map(shutil.which, INHIBITORS)), None)
+    if inhibitor is None:
+        return None
+    read_fd, write_fd = os.pipe()
+    try:
+        subprocess.Popen([inhibitor] + LID_HOLDER, stdin=read_fd,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        return write_fd
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        os.close(write_fd)
+        print(f'oldbook-cat: the lid still suspends ({error})', file=sys.stderr)
+        return None
+    finally:
+        os.close(read_fd)
+
+
+# ---- the service -----------------------------------------------------------
+
+
+def runtime_dir():
+    base = os.environ.get('XDG_RUNTIME_DIR') or str(Path.home() / '.local/state')
+    return Path(base) / 'oldbook/cat'
+
+
+def owner_pid():
+    try:
+        pid = int((runtime_dir() / 'pid').read_text().strip())
+        os.kill(pid, 0)
+    except (OSError, ValueError):
+        return None
+    return pid
+
+
+class Service:
+    def __init__(self, config=None, clock=time.monotonic):
+        self.config_path = Path(config) if config else None
+        self.clock = clock
+        self.presence = cat_presence.Presence()
+        self.bed = None
+        self.lid_fd = None
+        self.lid_since = None
+        self.devices = {}
+        self.stopping = False
+        self.last_seen_wall = None
+        self.safety_stops = 0
+        self.cooldown_until = 0.0
+        self.cooldown_reason = None
+        self.latched = False
+        self.last_record = {}
+
+    # ---- input -------------------------------------------------------------
+
+    def open_devices(self):
+        """Open every watched node read-only and non-blocking; skip what we cannot.
+
+        Membership of the `input` group is what makes this possible without
+        privilege. A node that will not open is reported once and left alone;
+        the keyboard alone is enough to judge, the trackpad only corroborates.
+        """
+        largest = None
+        for node in chosen_devices():
+            try:
+                descriptor = os.open(node, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
+            except OSError as error:
+                print(f'oldbook-cat: cannot watch {node} ({error})', file=sys.stderr)
+                continue
+            self.devices[descriptor] = node
+            largest = largest or contact_maximum(descriptor)
+        self.presence.contact_maximum = largest
+        return len(self.devices)
+
+    def close_devices(self):
+        for descriptor in list(self.devices):
+            with contextlib.suppress(OSError):
+                os.close(descriptor)
+        self.devices = {}
+
+    def drain(self, descriptor, now):
+        while True:
+            try:
+                data = os.read(descriptor, 4096)
+            except OSError as error:
+                if error.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
+                    return True
+                return False
+            if not data:
+                return False
+            self.presence.feed(now, data)
+
+    # ---- the lid -----------------------------------------------------------
+
+    def lid(self, wanted):
+        """Hold or release the lid inhibitor, and never hold one silently."""
+        if wanted and self.lid_fd is None:
+            self.lid_fd = hold_lid()
+            self.lid_since = time.time() if self.lid_fd is not None else None
+        elif not wanted and self.lid_fd is not None:
+            with contextlib.suppress(OSError):
+                os.close(self.lid_fd)
+            self.lid_fd, self.lid_since = None, None
+        return self.lid_fd is not None
+
+    # ---- one tick ----------------------------------------------------------
+
+    def tick(self, now):
+        document = cat_interactions.load(self.config_path)
+        enabled = cat_interactions.enabled(document)
+        chosen = cat_interactions.selected(document)
+        judgement = self.presence.judge(now)
+        locked = session_locked()
+        present = bool(judgement['present'] and locked and enabled)
+        if present:
+            self.last_seen_wall = time.time()
+
+        # The lid answers the user's question directly: a cat within the last
+        # thirty seconds, and the machine stays up. The moment that lapses the
+        # inhibitor goes, and elogind does whatever it would normally do.
+        recent = (self.last_seen_wall is not None
+                  and time.time() - self.last_seen_wall <= cat_presence.RECENT)
+        held = self.lid(bool(recent and enabled))
+
+        lid_shut = thermal.lid_closed()
+        bed = self.bed_tick(document, chosen, present, enabled, lid_shut)
+        record = {
+            'running': True, 'enabled': enabled, 'locked': locked,
+            'present': present, 'detected': judgement['deciding'],
+            'vetoed': judgement['vetoed'], 'confidence': judgement['confidence'],
+            'keys_down': judgement['keys_down'], 'patch': judgement['patch'],
+            'signals': judgement['signals'], 'corroboration': judgement['corroboration'],
+            'last_seen': self.last_seen_wall, 'recent_window': cat_presence.RECENT,
+            'recent': bool(recent),
+            'interaction': chosen['id'] if chosen else None,
+            'implemented': cat_interactions.implemented(chosen),
+            'lid': 'unknown' if lid_shut is None else ('closed' if lid_shut else 'open'),
+            'lid_inhibited': held, 'lid_inhibited_since': self.lid_since,
+            'devices': sorted(self.devices.values()),
+            'mains': on_mains(), 'bed': bed, 'updated_at': time.time(),
+        }
+        self.last_record = record
+        with contextlib.suppress(OSError, RuntimeError):
+            cat_presence.publish(record)
+        return record
+
+    def bed_tick(self, document, chosen, present, enabled, lid_shut):
+        """Start, feed or stop bed mode. Every refusal is named in the record.
+
+        Note which way the unknown lid falls. `lid_shut is not False` is what
+        picks the regime, so a lid that cannot be read gets the closed-lid
+        ceilings: not knowing whether the machine can breathe is a reason to
+        assume it cannot, never a reason to use the loose numbers.
+        """
+        refusal = None
+        if not enabled:
+            refusal = 'the feature is off'
+        elif chosen is None or chosen.get('handler') != 'bed':
+            refusal = 'the selected interaction is not bed mode'
+        elif not present:
+            refusal = 'no cat is present'
+        elif not on_mains():
+            refusal = 'not on mains'
+        elif self.cooldown_until and self.clock() < self.cooldown_until:
+            refusal = f'resting: {self.cooldown_reason}'
+        elif self.latched:
+            refusal = 'latched off after repeated ceiling stops; oldbook-cat on to clear'
+        if refusal is not None:
+            if self.bed is not None:
+                if self.bed.running:
+                    self.bed.stop(refusal)
+                self.bed = None
+            return {'running': False, 'refusal': refusal}
+        if self.bed is None:
+            self.bed = cat_bed.BedMode(cat_bed.load_jobs(document), clock=self.clock)
+            self.bed.start()
+        if not self.bed.running:
+            return self.retire(self.bed.report(thermal.readings(),
+                                               thermal.regime(lid_shut is not False),
+                                               'closed' if lid_shut is not False else 'open'))
+        return self.retire(self.bed.update(thermal.readings(), lid_shut is not False))
+
+    def retire(self, report):
+        """A sitting that ended on its own always rests before another begins.
+
+        Any ending -- a ceiling, three hours elapsed, a load that would not
+        start -- earns the same quiet period, because the alternative is that
+        the next tick simply starts the whole thing again while the cat is
+        still sitting there, which would turn every limit into no limit at all.
+
+        A thermal stop earns more than the rest, because it is not a transient:
+        something about this room, this load or this lid makes the machine hot.
+        The first one is counted, the second latches bed mode off for the rest
+        of the session rather than letting it oscillate against the ceiling.
+        """
+        if self.bed is not None and not self.bed.running:
+            self.cooldown_until = self.clock() + SAFETY_COOLDOWN
+            self.cooldown_reason = self.bed.stopped_reason or 'the sitting ended'
+            if self.bed.safety_stop:
+                self.safety_stops += 1
+                self.latched = self.safety_stops >= SAFETY_STOP_LIMIT
+            self.bed = None
+        return report
+
+    # ---- the loop ----------------------------------------------------------
+
+    @contextlib.contextmanager
+    def owned(self):
+        directory = runtime_dir()
+        directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+        with (directory / 'lock').open('a') as guard:
+            try:
+                fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                raise RuntimeError('another cat watcher already owns this session')
+            (directory / 'pid').write_text(f'{os.getpid()}\n')
+            try:
+                yield
+            finally:
+                with contextlib.suppress(FileNotFoundError):
+                    (directory / 'pid').unlink()
+
+    def run(self, once=False):
+        for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            signal.signal(number, lambda *_: setattr(self, 'stopping', True))
+        with self.owned():
+            # Anything left holding a fan from a previous life is put back
+            # before this one starts. It is a no-op on a healthy machine.
+            cat_bed.restore_fans()
+            if not self.open_devices():
+                print('oldbook-cat: no watchable input device; nothing to do',
+                      file=sys.stderr)
+                return 1
+            try:
+                while not self.stopping:
+                    readable, _, _ = select.select(list(self.devices), [], [], TICK)
+                    for descriptor in readable:
+                        if not self.drain(descriptor, self.clock()):
+                            with contextlib.suppress(OSError):
+                                os.close(descriptor)
+                            self.devices.pop(descriptor, None)
+                    self.tick(self.clock())
+                    if once:
+                        break
+                    if not self.devices:
+                        print('oldbook-cat: every input device went away',
+                              file=sys.stderr)
+                        break
+            finally:
+                # The order here is the safety argument in three lines: heat
+                # off and fans back first, then the lid may do what it likes,
+                # then say so. Nothing below can be skipped by an exception.
+                if self.bed is not None:
+                    self.bed.stop('the watcher is stopping')
+                self.lid(False)
+                self.close_devices()
+                # The parting record keeps everything a subscriber was reading
+                # and only changes what stopping actually changed, so a reader
+                # after the watcher exits still gets a whole answer.
+                with contextlib.suppress(OSError, RuntimeError):
+                    cat_presence.publish(dict(self.last_record, running=False,
+                                              present=False, lid_inhibited=False,
+                                              last_seen=self.last_seen_wall,
+                                              recent_window=cat_presence.RECENT,
+                                              bed={'running': False,
+                                                   'refusal': 'the watcher stopped'},
+                                              updated_at=time.time()))
+        return 0
+
+
+# ---- commands --------------------------------------------------------------
+
+
+def spawn():
+    if owner_pid() is not None:
+        return False
+    subprocess.Popen([sys.executable, str(Path(__file__).resolve()), 'run'],
+                     stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True, close_fds=True)
+    return True
+
+
+def status(as_json):
+    document = cat_interactions.load()
+    chosen = cat_interactions.selected(document)
+    record = cat_presence.published()
+    thermalish = cat_bed.describe()
+    if as_json:
+        print(json.dumps({'record': record, 'thermal': thermalish,
+                          'enabled': cat_interactions.enabled(document),
+                          'selected': chosen['id'] if chosen else None,
+                          'watcher': owner_pid()}, indent=2, sort_keys=True))
+        return 0
+    seen = cat_presence.seen_within(record=record)
+    print(f"feature    {'on' if cat_interactions.enabled(document) else 'off'}"
+          f"{'' if owner_pid() else ', no watcher running'}")
+    print(f"cat        {'on the keyboard' if record.get('present') else 'not on the keyboard'}"
+          f"{', seen in the last 30s' if seen else ''}")
+    print(f"selected   {chosen['id'] if chosen else 'nothing'}"
+          f"{'' if cat_interactions.implemented(chosen) else ' (declared, not implemented)'}")
+    print(f"session    {'locked' if record.get('locked') else 'unlocked'}, "
+          f"lid {thermalish['lid']}, {'mains' if on_mains() else 'battery'}")
+    temperatures = ', '.join(f'{name} {value}C' if value is not None else f'{name} unreadable'
+                             for name, value in sorted(thermalish['temperatures'].items()))
+    print(f"thermal    {temperatures}")
+    ceilings = thermalish['ceilings']
+    print(f"ceilings   {thermalish['regime']}: target {ceilings['cpu_target']:.0f}C, "
+          f"load stops {ceilings['cpu_ceiling']:.0f}C, fans free {ceilings['fan_release']:.0f}C, "
+          f"battery {ceilings['battery_ceiling']:.0f}C, skin {ceilings['skin_ceiling']:.0f}C")
+    bed = record.get('bed') or {}
+    if bed.get('running'):
+        print(f"bed mode   running at duty {bed.get('duty')}, "
+              f"{'fans held' if bed.get('fans_held') else 'fans automatic'}")
+    elif bed.get('refusal') or bed.get('stopped_reason'):
+        print(f"bed mode   idle: {bed.get('refusal') or bed.get('stopped_reason')}")
+    print('stop it    oldbook-cat stop')
+    return 0
+
+
+def stop():
+    """The one obvious command. It works whether or not the watcher answers."""
+    cat_interactions.set_enabled(False)
+    pid = owner_pid()
+    if pid is not None:
+        with contextlib.suppress(OSError):
+            os.kill(pid, signal.SIGTERM)
+        for _ in range(50):
+            if owner_pid() is None:
+                break
+            time.sleep(0.1)
+    # Unconditional, and last: even a watcher that never answered leaves the
+    # fans on automatic after this, because this asks the hardware directly.
+    restored = cat_bed.restore_fans()
+    print('bed mode is off and the feature is disabled; re-enable with: oldbook-cat on')
+    print(f'watcher    {"stopped" if pid else "was not running"}')
+    print(f'fans       {restored or "left to the firmware"}')
+    return 0
+
+
+def interactions():
+    document = cat_interactions.load()
+    chosen = document.get('selected')
+    for entry in cat_interactions.entries(document):
+        mark = '*' if entry['id'] == chosen else ' '
+        note = '' if cat_interactions.implemented(entry) else '  [declared, not implemented]'
+        print(f"{mark} {entry['id']:<16} {entry['date']}  {entry['title']}{note}")
+        print(f"    {entry['summary']}")
+        if entry.get('detail'):
+            print(f"    {entry['detail']}")
+    return 0
+
+
+def fans(action):
+    if action == 'restore':
+        print(cat_bed.restore_fans() or 'no fan helper is installed')
+        return 0
+    root = thermal.smc_root()
+
+    def value(index, field):
+        try:
+            return (root / f'fan{index}_{field}').read_text().strip()
+        except OSError:
+            return 'unreadable'
+
+    names = sorted({path.name.split('_', 1)[0] for path in root.glob('fan*_manual')})
+    if not names:
+        print('this machine exposes no controllable fans')
+    for name in names:
+        index = name[len('fan'):]
+        print(f'{name}      {value(index, "input")} rpm, '
+              f'{"MANUAL" if value(index, "manual") == "1" else "automatic"}, '
+              f'min {value(index, "min")}, output {value(index, "output")}')
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0],
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    commands = parser.add_subparsers(dest='command')
+    watched = commands.add_parser('run', help='watch the keyboard for a cat')
+    watched.add_argument('--once', action='store_true', help=argparse.SUPPRESS)
+    reported = commands.add_parser('status', help='what the watcher thinks now')
+    reported.add_argument('--json', action='store_true')
+    commands.add_parser('stop', help='stop everything now and stay stopped')
+    commands.add_parser('on', help='enable the feature and start the watcher')
+    commands.add_parser('off', help='disable the feature')
+    commands.add_parser('interactions', help='list the interactions')
+    commands.add_parser('next', help='select the next interaction')
+    picked = commands.add_parser('select', help='select an interaction by id')
+    picked.add_argument('id')
+    added = commands.add_parser('add', help='register an interaction from a JSON file')
+    added.add_argument('file')
+    added.add_argument('--select', action='store_true')
+    dropped = commands.add_parser('remove', help='unregister an interaction')
+    dropped.add_argument('id')
+    fanned = commands.add_parser('fans', help='what the fans are doing')
+    fanned.add_argument('action', nargs='?', choices=('show', 'restore'), default='show')
+    arguments = parser.parse_args(argv)
+    os.umask(0o077)
+    command = arguments.command or 'status'
+    if command == 'run':
+        try:
+            return Service().run(getattr(arguments, 'once', False))
+        except RuntimeError:
+            return 0
+    if command == 'status':
+        return status(arguments.json)
+    if command == 'stop':
+        return stop()
+    if command == 'on':
+        # A fresh watcher, so a session latched off by earlier ceiling stops
+        # starts clean; the latch lives in the process, not on disk.
+        pid = owner_pid()
+        if pid is not None:
+            with contextlib.suppress(OSError):
+                os.kill(pid, signal.SIGTERM)
+            for _ in range(50):
+                if owner_pid() is None:
+                    break
+                time.sleep(0.1)
+        cat_interactions.set_enabled(True)
+        spawn()
+        return status(False)
+    if command == 'off':
+        cat_interactions.set_enabled(False)
+        return stop()
+    if command == 'interactions':
+        return interactions()
+    if command == 'next':
+        cat_interactions.cycle(1)
+        return interactions()
+    if command == 'select':
+        cat_interactions.select(arguments.id)
+        return interactions()
+    if command == 'add':
+        cat_interactions.add(json.loads(Path(arguments.file).read_text()),
+                             select_it=arguments.select)
+        return interactions()
+    if command == 'remove':
+        cat_interactions.remove(arguments.id)
+        return interactions()
+    return fans(arguments.action)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(0)
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-cat: {error}', file=sys.stderr)
+        sys.exit(1)

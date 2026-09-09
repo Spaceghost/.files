@@ -129,6 +129,12 @@ fi
 if command -v oldbook-ambient-display >/dev/null 2>&1; then
     start_service ambient-display oldbook-ambient-display run
 fi
+# Watches the internal keyboard for a cat sitting on it while the session is
+# locked. It is opt-in, and it puts any fan left on manual by a previous life
+# back on automatic as its very first act, so starting it is also the recovery.
+if command -v oldbook-cat >/dev/null 2>&1; then
+    start_service cat oldbook-cat run
+fi
 
 # The wallpaper service uses a flock; starting it after reload is safe.
 art_state="${XDG_STATE_HOME:-$HOME/.local/state}/oldbook"

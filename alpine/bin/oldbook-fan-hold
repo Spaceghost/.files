@@ -1,0 +1,405 @@
+#!/usr/bin/python3 -I
+"""Hold the Apple SMC fans down for exactly as long as someone is alive to say so.
+
+Installed as a root-owned file by install-desktop-system and invoked through
+doas by `oldbook-cat`. It exists because `fan1_manual=1` is a latch: the kernel
+writes it and nothing ever unwrites it, so a process that sets it and then dies
+leaves a laptop with no automatic cooling and no one watching. That is the one
+failure this whole feature must not have, so the guarantee is built out of file
+descriptors and process lifetimes rather than out of good intentions:
+
+  the pipe        Commands arrive on stdin, which is a pipe from the caller.
+                  When the caller dies -- cleanly, by crash, by kill -9, by the
+                  session ending, by the machine losing the user -- the pipe
+                  closes, `read` returns nothing, and the fans go back to
+                  automatic. This is the shape `oldbook-lock` uses to release
+                  its elogind inhibitor, for the same reason.
+
+  the heartbeat   A caller that is alive but wedged is as bad as a dead one, so
+                  the hold also expires. `renew` restarts a deadline; silence
+                  past it restores the fans. CLOCK_BOOTTIME is used on purpose,
+                  so a suspend counts against the deadline and a machine that
+                  wakes up hours later wakes up on automatic.
+
+  the restorer    Forked before anything is written, in its own session, doing
+                  nothing but holding the other end of a second pipe. If this
+                  process is killed with a signal it cannot catch, the restorer
+                  sees the pipe close and puts the fans back. If the restorer is
+                  the one that dies, this process notices and stops holding,
+                  because a hold without its guard is not a hold worth having.
+
+  its own eyes    The temperature is read here as well as in the caller, from
+                  the kernel, every tick. Past the release line, or with a
+                  sensor that will not answer, the hold ends immediately and
+                  this process exits. It never re-takes a hold it has released.
+
+Nothing is imported from the user's home: a root process must not execute code
+out of a directory the user can write. The two temperatures below are therefore
+a deliberate copy of the ones in `thermal.py`, and `test_cat_fans.py` fails if
+the copy ever drifts from the original.
+
+    oldbook-fan-hold hold [--regime open|closed] [--deadline SECONDS]
+    oldbook-fan-hold restore
+"""
+import argparse
+import errno
+import os
+from pathlib import Path
+import re
+import select
+import signal
+import sys
+import time
+
+# Copy of thermal.REGIMES[*]['fan_release']; the test asserts they still agree.
+FAN_RELEASE = {'open': 66.0, 'closed': 58.0}
+DEFAULT_ROOT = '/sys/devices/platform/applesmc.768'
+DEFAULT_HWMON = '/sys/class/hwmon'
+DEFAULT_DEADLINE = 10.0
+TICK = 1.0
+FAN_FILE = re.compile(r'fan([0-9]+)_(manual|output|min)')
+IMPLAUSIBLE_ABOVE = 125.0
+
+
+def now():
+    """Boot time, so that a suspend counts against every deadline here."""
+    try:
+        return time.clock_gettime(time.CLOCK_BOOTTIME)
+    except (AttributeError, OSError):
+        return time.monotonic()
+
+
+def fan_path(root, index, field):
+    name = f'fan{index}_{field}'
+    if not FAN_FILE.fullmatch(name):
+        raise ValueError('Refusing a fan path that is not a fan control: ' + name)
+    path = root / name
+    if path.is_symlink():
+        raise ValueError('Refusing a symlinked fan control: ' + str(path))
+    return path
+
+
+def fans(root):
+    """Every fan index the SMC exposes a manual switch for."""
+    found = set()
+    try:
+        entries = sorted(root.iterdir())
+    except OSError:
+        return []
+    for entry in entries:
+        match = FAN_FILE.fullmatch(entry.name)
+        if match and match.group(2) == 'manual':
+            found.add(int(match.group(1)))
+    return sorted(found)
+
+
+def read_int(path):
+    try:
+        return int(path.read_text().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def write_int(path, value):
+    try:
+        path.write_text(f'{int(value)}\n')
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def snapshot(root):
+    """What the fans were doing before we touched them."""
+    saved = {}
+    for index in fans(root):
+        saved[index] = {field: read_int(fan_path(root, index, field))
+                        for field in ('manual', 'output', 'min')}
+    return saved
+
+
+def restore(root, saved):
+    """Give the fans back. Automatic first, then the numbers; never raises.
+
+    Order matters: clearing `manual` hands control to the SMC firmware
+    immediately, so it happens before anything else and even if everything
+    after it fails. Called from several places on purpose -- doing it twice is
+    writing the same values twice, and doing it once too often is the whole
+    design goal.
+    """
+    for index, fields in sorted(saved.items()):
+        try:
+            write_int(fan_path(root, index, 'manual'), fields.get('manual') or 0)
+        except ValueError:
+            continue
+        for field in ('output', 'min'):
+            value = fields.get(field)
+            if value is not None:
+                try:
+                    write_int(fan_path(root, index, field), value)
+                except ValueError:
+                    pass
+
+
+def release_all(root):
+    """Hand every fan back to the firmware, with no snapshot to consult.
+
+    This is the recovery command: run at session start and by `oldbook-cat
+    fans restore`, so a machine that somehow kept a manual setting through a
+    double kill is put right by the next login rather than by a reboot.
+    """
+    restored = []
+    for index in fans(root):
+        try:
+            path = fan_path(root, index, 'manual')
+        except ValueError:
+            continue
+        if read_int(path) == 0:
+            continue
+        if write_int(path, 0):
+            restored.append(index)
+    return restored
+
+
+def hottest_core(hwmon):
+    """The hottest coretemp reading in Celsius, or None if none can be read."""
+    values = []
+    try:
+        chips = sorted(Path(hwmon).iterdir())
+    except OSError:
+        return None
+    for chip in chips:
+        try:
+            if (chip / 'name').read_text().strip() != 'coretemp':
+                continue
+            inputs = sorted(chip.glob('temp*_input'))
+        except OSError:
+            continue
+        for entry in inputs:
+            reading = read_int(entry)
+            if reading is not None and 0 < reading / 1000.0 < IMPLAUSIBLE_ABOVE:
+                values.append(reading / 1000.0)
+    return max(values) if values else None
+
+
+def guard(read_fd, root, saved, deadline):
+    """The restorer. It writes the fans back and nothing else, ever.
+
+    Runs in its own session so that killing the holder's process group does not
+    take the guard with it, and exits the moment it has done its one job.
+    """
+    try:
+        os.setsid()
+    except OSError:
+        pass
+    for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(number, signal.SIG_DFL)
+    try:
+        os.close(0)
+    except OSError:
+        pass
+    while True:
+        readable, _, _ = select.select([read_fd], [], [], deadline)
+        if not readable:
+            break               # the holder stopped saying it was alive
+        try:
+            if not os.read(read_fd, 4096):
+                break           # the holder is gone
+        except OSError as error:
+            if error.errno not in (errno.EINTR, errno.EAGAIN):
+                break
+    restore(root, saved)
+    os._exit(0)
+
+
+class Holder:
+    def __init__(self, root, hwmon, regime, deadline, stream=None, output=None):
+        self.root = Path(root)
+        self.hwmon = Path(hwmon)
+        self.regime = regime if regime in FAN_RELEASE else 'closed'
+        self.deadline = float(deadline)
+        self.stream = sys.stdin if stream is None else stream
+        self.output = sys.stdout if output is None else output
+        self.saved = {}
+        self.guard_pid = None
+        self.guard_fd = None
+        self.holding = False
+        self.last_renew = now()
+        self.reason = None
+        self.done = False
+
+    # ---- the hold ----------------------------------------------------------
+
+    def apply(self):
+        """Take manual control at each fan's own minimum, or give up entirely."""
+        for index, fields in sorted(self.saved.items()):
+            floor = fields.get('min')
+            if floor is None:
+                return self.finish('a fan has no readable minimum')
+            if not write_int(fan_path(self.root, index, 'output'), floor):
+                return self.finish('a fan output could not be written')
+            if not write_int(fan_path(self.root, index, 'manual'), 1):
+                return self.finish('a fan could not be switched to manual')
+        self.holding = True
+        return True
+
+    def finish(self, reason):
+        """End the hold. Idempotent, and the only way the fans come back.
+
+        Every exit path funnels through here -- a command, a lapsed deadline, a
+        signal, an exception, the loop's own `finally` -- so there is exactly
+        one piece of code that decides what "released" means, and calling it
+        twice writes the same automatic setting twice.
+        """
+        if self.done:
+            return False
+        self.done = True
+        self.reason = reason
+        restore(self.root, self.saved)
+        self.holding = False
+        if self.guard_fd is not None:
+            try:
+                os.close(self.guard_fd)
+            except OSError:
+                pass
+            self.guard_fd = None
+        self.say(f'released: {reason}')
+        return False
+
+    def say(self, message):
+        try:
+            print(message, file=self.output, flush=True)
+        except (OSError, ValueError):
+            pass
+
+    # ---- the loop ----------------------------------------------------------
+
+    def heartbeat(self):
+        """Tell the guard we are alive; a broken guard ends the hold."""
+        if self.guard_fd is None:
+            return False
+        try:
+            os.write(self.guard_fd, b'.')
+        except OSError:
+            return False
+        if self.guard_pid is not None:
+            try:
+                done, _ = os.waitpid(self.guard_pid, os.WNOHANG)
+            except OSError:
+                return False
+            if done:
+                return False
+        return True
+
+    def command(self, line):
+        parts = line.split()
+        if not parts:
+            return True
+        if parts[0] == 'renew':
+            self.last_renew = now()
+            if len(parts) > 1 and parts[1] in FAN_RELEASE:
+                self.regime = parts[1]
+            return True
+        if parts[0] == 'release':
+            return self.finish('the caller asked')
+        return True
+
+    def tick(self):
+        if now() - self.last_renew > self.deadline:
+            return self.finish('the caller stopped renewing the hold')
+        if not self.heartbeat():
+            return self.finish('the restorer is gone')
+        temperature = hottest_core(self.hwmon)
+        if temperature is None:
+            return self.finish('no readable core temperature')
+        if temperature >= FAN_RELEASE[self.regime]:
+            return self.finish(f'{temperature:.1f}C reached the {self.regime} '
+                               f'release line {FAN_RELEASE[self.regime]:.0f}C')
+        return True
+
+    def run(self):
+        try:
+            self.saved = snapshot(self.root)
+        except ValueError as error:
+            # Refused before a single write: a fan control that is a symlink is
+            # someone pointing this root process somewhere else.
+            self.say(f'released: {error}')
+            return 1
+        if not self.saved:
+            self.say('released: this machine exposes no controllable fans')
+            return 1
+        read_fd, write_fd = os.pipe()
+        self.guard_pid = os.fork()
+        if self.guard_pid == 0:
+            os.close(write_fd)
+            guard(read_fd, self.root, self.saved, self.deadline)
+        os.close(read_fd)
+        self.guard_fd = write_fd
+
+        def signalled(number, _frame):
+            self.finish(f'signal {number}')
+            raise SystemExit(0)
+
+        for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP, signal.SIGQUIT):
+            signal.signal(number, signalled)
+        try:
+            if not self.apply():
+                return 0
+            self.say('holding')
+            descriptor = self.stream.fileno()
+            while True:
+                readable, _, _ = select.select([descriptor], [], [], TICK)
+                if readable:
+                    try:
+                        data = os.read(descriptor, 4096)
+                    except OSError:
+                        data = b''
+                    if not data:
+                        self.finish('the caller closed the pipe')
+                        return 0
+                    for line in data.decode('utf-8', 'replace').splitlines():
+                        if not self.command(line):
+                            return 0
+                if not self.tick():
+                    return 0
+        finally:
+            # Whatever brought us here -- return, exception, SystemExit from a
+            # signal, an unhandled error -- the fans are on automatic before
+            # this frame is gone.
+            self.finish('the holder exited')
+
+
+def privileged_enough(root, default):
+    """A helper aimed at the real SMC must be root; a synthetic tree need not be."""
+    return os.geteuid() == 0 or str(root) != default
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('action', choices=('hold', 'restore'))
+    parser.add_argument('--root', default=DEFAULT_ROOT)
+    parser.add_argument('--hwmon', default=DEFAULT_HWMON)
+    parser.add_argument('--regime', default='closed', choices=sorted(FAN_RELEASE))
+    parser.add_argument('--deadline', type=float, default=DEFAULT_DEADLINE)
+    arguments = parser.parse_args(argv)
+    root = Path(arguments.root)
+    if not privileged_enough(root, DEFAULT_ROOT):
+        print('oldbook-fan-hold: the SMC fan controls need root', file=sys.stderr)
+        return 1
+    if not root.is_dir() or root.is_symlink():
+        print(f'oldbook-fan-hold: {root} is not a fan control directory', file=sys.stderr)
+        return 1
+    if arguments.action == 'restore':
+        restored = release_all(root)
+        print('restored: ' + (', '.join(f'fan{index}' for index in restored) or 'nothing to do'))
+        return 0
+    if arguments.deadline <= 0:
+        print('oldbook-fan-hold: the hold deadline must be positive', file=sys.stderr)
+        return 1
+    return Holder(root, arguments.hwmon, arguments.regime, arguments.deadline).run()
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(0)
