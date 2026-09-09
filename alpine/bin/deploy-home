@@ -8,9 +8,12 @@ import json
 import os
 from pathlib import Path
 import stat
+import sys
 import time
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
 
 
 def sync_directory(path):
@@ -102,7 +105,7 @@ def reject_interrupted(target):
             raise RuntimeError(f'Interrupted deployment: run deploy-home --target {target} --rollback {path.parent}')
 
 
-def deploy(target, overlay, wallpaper=None, *, only=None):
+def deploy(target, overlay, wallpaper=None, *, only=None, report=None):
     pairs = [(p, p.relative_to(overlay)) for p in sorted(overlay.rglob('*'))
              if p.is_file() and not p.is_symlink()
              and p.relative_to(overlay).parts[0] != 'README.md'
@@ -157,7 +160,12 @@ def deploy(target, overlay, wallpaper=None, *, only=None):
         # examines actual source/backup files, so no per-operation progress write
         # is needed in the vulnerable interval between rename and link creation.
         write_journal(backup / 'manifest.json', document)
-        for entry in entries:
+        # Reported per file rather than per byte: the work here is one rename
+        # and one symlink each, so the count is the honest unit and the caller
+        # gets a total it can settle a bar on.
+        for position, entry in enumerate(entries):
+            if report is not None:
+                report(position, len(entries), entry['path'])
             dest = target / entry['path']
             saved = backup / 'home' / entry['path']
             if file_identity(dest) != entry['original']:
@@ -170,6 +178,8 @@ def deploy(target, overlay, wallpaper=None, *, only=None):
                 sync_directory(saved.parent)
             dest.symlink_to(entry['source'])
             sync_directory(dest.parent)
+        if report is not None:
+            report(len(entries), len(entries), None)
         document['status'] = 'complete'
         write_journal(backup / 'manifest.json', document)
         return backup
@@ -263,8 +273,19 @@ def main():
         wallpaper = REPO / 'alpine/assets/spaceghost.png'
         if not wallpaper.is_file():
             wallpaper = REPO / 'alpine/assets/violet-eclipse.png'
+        bar = []
+
+        def report(done, total, note):
+            """Open the bar on the first file, because the total is not known
+            until the preflight has decided what actually needs linking."""
+            if not bar:
+                bar.append(loading.Progress('linking into HOME', total,
+                                            loading.Terminal(sys.stderr)))
+            bar[0].update(done, note) if done < total else bar[0].finish()
+
         result = deploy(args.target, REPO / 'alpine/desktop',
-                        wallpaper if wallpaper.is_file() else None, only=args.only)
+                        wallpaper if wallpaper.is_file() else None, only=args.only,
+                        report=report)
         print('Already current' if result is None else f'Backup: {result}')
 
 

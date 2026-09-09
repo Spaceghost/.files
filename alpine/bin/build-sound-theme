@@ -10,12 +10,15 @@ import argparse
 import json
 import math
 from pathlib import Path
+import sys
 import wave
 
 import cairo
 import numpy as np
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
 DEFAULT_OUTPUT = REPO / 'alpine/desktop/.local/share/sounds/oldbook'
 RATE = 48000
 PEAK = 0.25  # about -12 dBFS: audible in a quiet room, never startling.
@@ -177,10 +180,16 @@ def write_wave(path, frames):
 
 def build(output, cues=None):
     written = {}
-    for name in sorted(cues or CUES):
-        frames = stereo(CUES[name]())
-        size = write_wave(output / f'{name}.wav', frames)
-        written[name] = {'bytes': size, 'seconds': round(len(frames) / RATE, 3)}
+    names = sorted(cues or CUES)
+    # To stderr, because this script's stdout is the JSON record of what it
+    # wrote and a progress line in the middle of that would be a syntax error.
+    with loading.Progress('synthesizing cues', len(names)) as bar:
+        for name in names:
+            bar.update(bar.done, name)
+            frames = stereo(CUES[name]())
+            size = write_wave(output / f'{name}.wav', frames)
+            written[name] = {'bytes': size, 'seconds': round(len(frames) / RATE, 3)}
+            bar.advance()
     return written
 
 

@@ -23,6 +23,9 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO / 'desktop/.local/lib/oldbook'))
+import loading
+
 MANIFEST = REPO / 'packages' / 'uv-protected.json'
 
 # A package built here keeps every subpackage it produces (-dev, -doc, -openrc,
@@ -98,16 +101,29 @@ def verify(args):
     missing = [e for e in manifest['entries'] if e['uv_name'] not in present]
     resized = [e for e in manifest['entries']
                if e['uv_name'] in present and present[e['uv_name']] != e['size']]
-    for entry in missing:
-        print(f'MISSING  {entry["basename"]}')
-    for entry in resized:
-        print(f'CHANGED  {entry["basename"]}  {entry["size"]} -> {present[entry["uv_name"]]}')
+    # The verdict is a claim about data that cannot be fetched again, so it is
+    # framed rather than printed as one more line: a run that scrolled past a
+    # build log should not be able to hide the one sentence that matters.
+    terminal = loading.Terminal(sys.stdout)
+    total = len(manifest['entries'])
     if missing or resized:
-        print(f'\n{len(missing)} missing, {len(resized)} changed of '
-              f'{len(manifest["entries"])} protected entries')
-        return 1
-    print(f'all {len(manifest["entries"])} protected entries present and unchanged')
-    return 0
+        lines = [f'{loading.MARKS["failed"]} {entry["basename"]}  missing'
+                 for entry in missing]
+        lines += [f'{loading.MARKS["failed"]} {entry["basename"]}  '
+                  f'{entry["size"]} -> {present[entry["uv_name"]]} bytes'
+                  for entry in resized]
+        lines.append(f'{len(missing)} missing, {len(resized)} changed of {total}')
+        frame = loading.FRAMES['heavy'] if terminal.frame is not loading.ASCII_FRAME \
+            else terminal.frame
+    else:
+        lines = [f'{loading.MARKS["done"]} all {total} protected entries '
+                 'present and unchanged']
+        frame = terminal.frame
+    for line in loading.render_frame(lines, title='uv-guard verify', frame=frame,
+                                     width=terminal.width, style=terminal.style,
+                                     ellipsis=terminal.ellipsis):
+        print(line)
+    return 1 if missing or resized else 0
 
 
 def prune_cache(args):
@@ -126,12 +142,17 @@ def prune_cache(args):
     if args.dry_run:
         print(f'would remove {len(candidates)} cached APKs')
         return 0
-    for start in range(0, len(candidates), 60):
-        chunk = candidates[start:start + 60]
-        result = subprocess.run(['fossil', 'unversioned', 'remove'] + chunk,
-                                cwd=REPO.parent, capture_output=True, text=True, timeout=600)
-        if result.returncode != 0:
-            raise SystemExit(f'removal failed: {result.stderr.strip()[:200]}')
+    # Sixty names a call, so the bar advances sixty at a time: honest about
+    # what actually completed rather than interpolating between the two.
+    with loading.Progress('removing cached APKs', len(candidates),
+                          loading.Terminal(sys.stderr)) as bar:
+        for start in range(0, len(candidates), 60):
+            chunk = candidates[start:start + 60]
+            result = subprocess.run(['fossil', 'unversioned', 'remove'] + chunk,
+                                    cwd=REPO.parent, capture_output=True, text=True, timeout=600)
+            if result.returncode != 0:
+                raise SystemExit(f'removal failed: {result.stderr.strip()[:200]}')
+            bar.advance(len(chunk), basename(chunk[-1]))
     print(f'removed {len(candidates)} cached APKs')
     return verify(args)
 

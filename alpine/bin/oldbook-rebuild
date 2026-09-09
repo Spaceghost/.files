@@ -13,35 +13,68 @@ import subprocess
 import sys
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
+
 HOME = Path.home()
 GREETD_CONFIG = REPO / 'alpine/system/greetd/config.toml'
 SERVICES = (('crond', 'default'), ('tailscale', 'default'), ('greetd', 'default'))
 GREETD_VT = 'tty1'
 
 
+# This script has always marked its findings `+ = ! x`; the shared loading
+# language took that alphabet from here. Naming the mapping once means the two
+# cannot drift, and lets a finding be drawn under the step that produced it
+# rather than as a free-floating line the reader has to attribute by eye.
+STATES = {'changed': 'done', 'already': 'skipped', 'manual': 'blocked',
+          'failed': 'failed'}
+# Which outcome a step as a whole takes from the findings inside it. A step
+# that only confirmed what was already true is skipped rather than done: this
+# script is run repeatedly and the useful reading is what moved.
+PRECEDENCE = ('failed', 'manual', 'changed', 'already')
+
+
 class Step:
     """One named unit of work that reports rather than assumes."""
 
-    def __init__(self, plan):
+    def __init__(self, plan, steps=None):
         self.plan = plan
+        self.steps = steps
         self.changed = []
         self.already = []
         self.manual = []
         self.failed = []
+        self.current = []
 
     def run(self, command, root=False, check=True, capture=True, timeout=1800):
         if root and os.geteuid() != 0:
             command = ['doas', *command]
         if self.plan:
-            print('    would run: ' + ' '.join(command))
+            self.report(None, 'would run: ' + ' '.join(command))
             return subprocess.CompletedProcess(command, 0, '', '')
         return subprocess.run(command, capture_output=capture, text=True,
                               check=check, timeout=timeout)
 
     def note(self, bucket, message):
         getattr(self, bucket).append(message)
-        marks = {'changed': '  +', 'already': '  =', 'manual': '  !', 'failed': '  x'}
-        print(f'{marks[bucket]} {message}')
+        self.current.append(bucket)
+        self.report(STATES[bucket], message)
+
+    def report(self, state, message):
+        """One finding, under the step in hand when there is a step list."""
+        if self.steps is not None:
+            self.steps.detail(message, state)
+            return
+        marks = {'done': '  +', 'skipped': '  =', 'blocked': '  !', 'failed': '  x'}
+        print(f'{marks.get(state, "   ")} {message}')
+
+    def outcome(self):
+        """The mark the step in hand earns, and a fresh slate for the next."""
+        seen, self.current = self.current, []
+        for bucket in PRECEDENCE:
+            if bucket in seen:
+                return STATES[bucket]
+        return 'skipped'
 
 
 def have(command):
@@ -231,23 +264,25 @@ def main():
     if os.geteuid() == 0:
         raise SystemExit('Run as the normal user; root steps escalate with doas.')
 
-    step = Step(arguments.plan)
-    for name, function in STEPS:
-        if arguments.only and name not in arguments.only:
-            continue
-        print(f'\n{name}:')
+    chosen = [pair for pair in STEPS
+              if not arguments.only or pair[0] in arguments.only]
+    steps = loading.StepList(loading.Terminal(sys.stdout), total=len(chosen))
+    step = Step(arguments.plan, steps)
+    for name, function in chosen:
+        steps.start(name)
         try:
             function(step)
         except (OSError, subprocess.SubprocessError) as error:
             step.note('failed', f'{name}: {error}')
+        steps.finish(step.outcome())
 
-    print('\n' + '-' * 60)
-    print(f'changed {len(step.changed)}   already correct {len(step.already)}   '
-          f'needs you {len(step.manual)}   failed {len(step.failed)}')
-    for message in step.manual:
-        print('  ! ' + message)
-    for message in step.failed:
-        print('  x ' + message)
+    # The counts, then the two lists a person has to act on. Everything else is
+    # already on the screen under the step that found it.
+    steps.summary(title='oldbook-rebuild', lines=[
+        f'+ {len(step.changed)} changed   = {len(step.already)} already correct   '
+        f'! {len(step.manual)} needs you   x {len(step.failed)} failed',
+        *(f'! {message}' for message in step.manual),
+        *(f'x {message}' for message in step.failed)])
     return 1 if step.failed else 0
 
 

@@ -29,6 +29,8 @@ gi.require_version('PangoCairo', '1.0')
 from gi.repository import Pango, PangoCairo  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
 ICONS = REPO / 'alpine/desktop/.config/wlogout/icons'
 DEFAULT_THEME = REPO / 'alpine/themes/gruvbox-dark.json'
 FONT = 'JetBrainsMono Nerd Font 112'
@@ -84,12 +86,19 @@ def main():
         sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
         from desktop_theme import colors
         variants = tile_colors(colors(json.loads(args.theme.read_text())))
-    for name, data in tiles(variants).items():
-        path = args.output / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data)
-        digest = hashlib.sha256(data).hexdigest()
-        print(f'{digest[:12]}  {path.relative_to(REPO) if path.is_relative_to(REPO) else path}')
+    drawn = tiles(variants)
+    # The digests on stdout are this script's real output and are checked
+    # against elsewhere, so the bar goes to stderr and leaves them byte for byte.
+    with loading.Progress('drawing tiles', len(drawn)) as bar:
+        for name, data in drawn.items():
+            bar.update(bar.done, name)
+            path = args.output / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+            digest = hashlib.sha256(data).hexdigest()
+            print(f'{digest[:12]}  '
+                  f'{path.relative_to(REPO) if path.is_relative_to(REPO) else path}')
+            bar.advance()
     return 0
 
 

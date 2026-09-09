@@ -7,9 +7,12 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import tempfile
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
 
 
 def checksum(path):
@@ -52,7 +55,12 @@ def prepare_cache(path):
 
 def export(entries, cache, repository=REPO):
     cache = prepare_cache(cache)
+    # Each entry is a multi-megabyte export followed by a full checksum, so the
+    # wait is real and the total is known before the first one starts.
+    bar = loading.Progress('verifying source archives', len(entries),
+                           loading.Terminal(sys.stderr))
     for entry in entries:
+        bar.update(bar.done, entry['name'])
         destination = cache / entry['name']
         if destination.is_symlink():
             raise RuntimeError(f'Refusing cache symlink: {destination}')
@@ -70,6 +78,8 @@ def export(entries, cache, repository=REPO):
                     pass
         if checksum(destination) != entry['sha256']:
             raise RuntimeError(f'Checksum mismatch; preserving evidence: {destination}')
+        bar.advance()
+    bar.finish()
     print(f'Verified {len(entries)} source/binary archives in {cache}')
 
 
