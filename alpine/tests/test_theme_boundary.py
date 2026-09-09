@@ -250,6 +250,43 @@ class PowerDeck(unittest.TestCase):
             self.assertTrue((icons / name).is_file(), name)
 
 
+class ConfirmationBars(unittest.TestCase):
+    """The swaynag bars that ask before logging out, rebooting or shutting down.
+
+    They were already Gruvbox rather than stock, but hardcoded: the file sat
+    outside the theme file set, so the one screen that appears at the moment a
+    session ends kept one theme's colours whatever was selected.
+    """
+
+    NAG = '.config/swaynag/config'
+
+    def setUp(self):
+        self.source = (REPO / 'alpine/desktop' / self.NAG).read_text()
+
+    def test_only_declared_palette_roles_are_used(self):
+        allowed = {value.lower() for value in GRUVBOX['palette'].values()}
+        allowed |= {'#fbf1c7', '#32302f'}
+        for value in literals(self.source):
+            self.assertIn(value, allowed, value)
+
+    def test_the_bars_are_rendered_into_every_theme_profile(self):
+        rendered = desktop_theme.render_profile(REPO, GRUVBOX)
+        self.assertIn(self.NAG, rendered)
+        self.assertEqual(rendered[self.NAG], self.source)
+        self.assertEqual((REPO / 'alpine/themes/profiles/gruvbox-dark' / self.NAG).read_text(),
+                         self.source)
+
+    def test_no_gruvbox_shade_survives_into_another_theme(self):
+        """The values carry no leading #, so prove the renderer still maps them."""
+        rendered = desktop_theme.render_profile(REPO, ALTERNATE)[self.NAG]
+        for shade in ('282828', 'ebdbb2', 'fabd2f', '3c3836', '1d2021', 'fb4934'):
+            self.assertNotIn(shade, rendered, shade)
+        for key in ('background', 'text', 'border-bottom', 'button-background',
+                    'details-background'):
+            with self.subTest(key=key):
+                self.assertRegex(rendered, rf'(?m)^{key}=[0-9a-f]{{6}}$')
+
+
 class SwitchingReachesTheBootChain(unittest.TestCase):
     """Selecting a theme leaves the checkout ready for one root command."""
 

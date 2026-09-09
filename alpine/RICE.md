@@ -983,6 +983,13 @@ alpine/bin/build-grub-theme                    # repaint the menu, ~6s, no compi
 doas alpine/bin/install-boot-console           # publish to /etc and /boot
 ```
 
+The confirmation bars follow too. `oldbook-power` raises a swaynag bar before
+logging out, rebooting or shutting down — the last screen of a session, and the
+one most likely to be left stock. It was already Gruvbox, but hardcoded outside
+the theme file set, so it alone kept those colours whatever theme was chosen.
+Adding it to the reference profile was the whole fix; its values carry no
+leading `#` and the renderer maps them anyway.
+
 Gruvbox Dark is byte-for-byte what it always was — the generated document
 equals the committed one exactly — which is the proof this generalised the
 boot chain rather than restyling it.

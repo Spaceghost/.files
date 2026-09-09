@@ -18,7 +18,8 @@
         "projects/superhold/*",
         "alpine/bin/build-cursor-theme",
         "alpine/desktop/.local/share/icons/*",
-        "alpine/desktop/.config/wlogout/*"
+        "alpine/desktop/.config/wlogout/*",
+        "alpine/desktop/.config/swaynag/*"
       ],
       "tests": [
         "test_application_theme_refresh.py",

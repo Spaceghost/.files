@@ -30,6 +30,12 @@ removing a pin.
 
 ### THEME-COMPLETE
 
+Theming reaches every screen, not only the desktop. The swaynag bars that ask
+before logging out, rebooting or shutting down are a themed surface like any
+other: they were Gruvbox rather than stock, but hardcoded outside the theme file
+set, so the last screen of a session kept one theme's colours whatever was
+selected. Their values carry no leading `#`, which the renderer maps regardless.
+
 Every built-in and generated theme is a complete desktop design: palette,
 typography, geometry, spacing, window treatment, launcher, widgets, application
 styling and matching artwork. Switching must apply it across the desktop.
@@ -60,7 +66,8 @@ hover uses `#d997ff`, `#a355d7`, `#f284bd`. This is an explicit branding excepti
 to theme recoloring, not permission to stop theming other controls.
 
 - Implementation: [Waybar CSS](desktop/.config/waybar/style.css),
-  [profile rendering](wallpapers/desktop_theme.py), [power deck](desktop/.config/wlogout/).
+  [profile rendering](wallpapers/desktop_theme.py), [power deck](desktop/.config/wlogout/),
+  [confirmation bars](desktop/.config/swaynag/config).
 - Checks: [branding regression](tests/test_ghost_branding.py),
   [native restoration evidence](verification/ghost-branding/README.md).
   Restoring source/profile branding alone does not prove the live bar reloaded it.
