@@ -17,7 +17,8 @@
         "projects/superhold-guide/*",
         "projects/superhold/*",
         "alpine/bin/build-cursor-theme",
-        "alpine/desktop/.local/share/icons/*"
+        "alpine/desktop/.local/share/icons/*",
+        "alpine/desktop/.config/wlogout/*"
       ],
       "tests": [
         "test_application_theme_refresh.py",
@@ -29,7 +30,8 @@
         "test_theme_session.py",
         "test_theme_sway_reload.py",
         "test_theme_switch.py",
-        "test_cursor_theme.py"
+        "test_cursor_theme.py",
+        "test_theme_boundary.py"
       ],
       "evidence": [
         "verification/complete-themes/",
@@ -830,10 +832,15 @@
       "paths": [
         "alpine/system/boot/*",
         "alpine/system/mkinitfs/*",
-        "alpine/bin/install-boot-console"
+        "alpine/bin/install-boot-console",
+        "alpine/bin/build-console-palette",
+        "alpine/bin/build-grub-theme",
+        "alpine/system/grub/*",
+        "alpine/tests/test_theme_boundary.py"
       ],
       "tests": [
-        "test_boot_console.py"
+        "test_boot_console.py",
+        "test_theme_boundary.py"
       ],
       "evidence": []
     }

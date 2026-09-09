@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Render alpine/system/boot/console-palette.json from the selected theme.
+
+Run as the user, from the checkout.  It writes one versioned file and nothing
+else: the boot chain only changes when `doas alpine/bin/install-boot-console`
+copies the result to /etc and /boot.
+
+    alpine/bin/build-console-palette            # rewrite it for the active theme
+    alpine/bin/build-console-palette --check    # report whether it is current
+    alpine/bin/build-console-palette --theme x  # render another theme's palette
+
+The sixteen colours come from that theme's own Foot palette, which is where
+Ghostty's palette already comes from, so the terminals, the console, the
+initramfs LUKS prompt, the rescue gettys and the GRUB menu cannot drift apart.
+`oldbook-theme use` calls this on every switch; the explicit command exists for
+review after editing a theme by hand, and for `--check` in a test or a hook.
+"""
+import argparse
+from pathlib import Path
+import sys
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/system/boot'))
+import console_palette  # noqa: E402
+
+
+def build(repo=REPO, selection='active', output=None):
+    """Write the palette for one theme; return (path, changed, document)."""
+    palette = console_palette.for_selection(repo, selection)
+    text = console_palette.render(palette)
+    path = Path(output) if output else Path(repo) / console_palette.RELATIVE
+    changed = not path.is_file() or path.read_text() != text
+    if changed:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text)
+    return path, changed, palette
+
+
+def name(path):
+    """Checkout-relative when it belongs to the checkout, so messages are copyable."""
+    return path.relative_to(REPO) if path.is_relative_to(REPO) else path
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('--check', action='store_true',
+                        help='report whether the committed palette matches the theme; write nothing')
+    parser.add_argument('--theme', default='active', metavar='ID',
+                        help='render this theme instead of the selected one')
+    parser.add_argument('--output', type=Path, help='write somewhere other than the versioned file')
+    arguments = parser.parse_args(argv)
+    if arguments.check:
+        palette = console_palette.for_selection(REPO, arguments.theme)
+        expected = console_palette.render(palette)
+        path = arguments.output or (REPO / console_palette.RELATIVE)
+        current = path.read_text() if path.is_file() else ''
+        if current == expected:
+            print('%s is current for %s.' % (name(path), palette['theme']))
+            return 0
+        print('%s does not match %s; run alpine/bin/build-console-palette'
+              % (name(path), palette['theme']), file=sys.stderr)
+        return 1
+    path, changed, palette = build(REPO, arguments.theme, arguments.output)
+    print('%s %s for %s' % ('Wrote' if changed else 'Already current:', name(path), palette['theme']))
+    if changed:
+        print('Next: alpine/bin/build-grub-theme, then doas alpine/bin/install-boot-console.')
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, RuntimeError) as error:
+        print('build-console-palette: %s' % error, file=sys.stderr)
+        sys.exit(1)

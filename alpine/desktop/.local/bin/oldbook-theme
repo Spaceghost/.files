@@ -9,6 +9,11 @@ the gallery only ever offered to *generate* artwork in its style and nothing
 actually changed.  This applies a theme: it repoints the deployed HOME symlinks
 at the theme's profile, records the selection, and reloads what is already
 running so the change is visible without logging out.
+
+The selection reaches past the session too.  The power deck is part of the
+profile like any other surface, and the console palette every text-mode screen
+reads is regenerated here so GRUB, the kernel console, the initramfs passphrase
+prompt and the rescue gettys can be brought up to date by one root command.
 """
 import argparse
 import json
@@ -136,6 +141,31 @@ def sync_profiles(repo):
         if changed is not None:
             written.append(changed)
     return written
+
+
+def refresh_boot_palette(theme):
+    """Regenerate the versioned console palette so the boot chain follows the choice.
+
+    The lock reads the active palette already, and there is no login screen --
+    greetd autologins into Sway, because the LUKS passphrase is the real gate --
+    so the surfaces a theme switch used to miss are the ones on either side of
+    the session: the GRUB menu, the kernel console, the initramfs passphrase
+    prompt and the rescue gettys.  All four read one generated file, and writing
+    it here is the same kind of checkout write the Ghostty sync above does.  The
+    root install that publishes it to /etc and /boot stays a separate, deliberate
+    step, so this only ever leaves the checkout ready for it.
+    """
+    builder = REPO / 'alpine/bin/build-console-palette'
+    if not builder.is_file():
+        return []
+    try:
+        _path, changed, _palette = runpy.run_path(str(builder))['build'](REPO, theme['id'])
+    except (OSError, ValueError, RuntimeError, ImportError) as error:
+        return ['boot console palette FAILED: ' + str(error)]
+    if not changed:
+        return []
+    return ['boot console palette updated; run alpine/bin/build-grub-theme, then '
+            'doas alpine/bin/install-boot-console, to carry it into the next boot']
 
 
 def profile_directory(identity):
@@ -358,7 +388,7 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
-    notes = []
+    notes = refresh_boot_palette(theme)
     if reload:
         try:
             gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))

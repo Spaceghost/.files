@@ -7,7 +7,9 @@ execution around these helpers.
 Sources of truth versioned beside this module:
 
 - console-palette.json: the sixteen VT colours, the kernel font and the default
-  attribute the console starts with.
+  attribute the console starts with. It is generated from the selected desktop
+  theme by console_palette.py, so every text-mode screen follows the same
+  choice the session does; it names the theme it was rendered for.
 - issue.template: the /etc/issue banner printed by the rescue gettys. It uses
   colour tokens so the versioned text stays readable; the rendered file carries
   raw ESC bytes.
@@ -57,6 +59,12 @@ def load_palette(text):
         index = document.get(key)
         if not isinstance(index, int) or not 0 <= index <= 15:
             raise ValueError(key + ' must be a palette index from 0 to 15')
+    identity = document.get('theme')
+    # The theme name is a path component for anything that resolves the rest of
+    # that theme's roles, so it is checked here rather than at each reader.
+    if identity is not None and (not isinstance(identity, str)
+                                 or not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,63}', identity)):
+        raise ValueError('console palette theme must be a theme identity')
     return document
 
 

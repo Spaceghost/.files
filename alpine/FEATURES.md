@@ -60,7 +60,7 @@ hover uses `#d997ff`, `#a355d7`, `#f284bd`. This is an explicit branding excepti
 to theme recoloring, not permission to stop theming other controls.
 
 - Implementation: [Waybar CSS](desktop/.config/waybar/style.css),
-  [profile rendering](wallpapers/desktop_theme.py).
+  [profile rendering](wallpapers/desktop_theme.py), [power deck](desktop/.config/wlogout/).
 - Checks: [branding regression](tests/test_ghost_branding.py),
   [native restoration evidence](verification/ghost-branding/README.md).
   Restoring source/profile branding alone does not prove the live bar reloaded it.
@@ -897,8 +897,18 @@ never close the current desktop merely to load a new executable.
 
 ### BOOT-CONSOLE
 
-Every text-mode screen is Gruvbox from the first frame: the initramfs LUKS
-passphrase prompt, kernel messages and the rescue gettys on tty2–tty6. The
+Every text-mode screen wears the selected theme from the first frame: the
+initramfs LUKS passphrase prompt, kernel messages and the rescue gettys on
+tty2–tty6. This supersedes the earlier pin of Gruvbox specifically; the user
+asked for the lock, login and shutdown screens to follow theme selection, and
+the boot chain is what "login screen" means on a machine that autologins. The
+sixteen console colours are generated from the active theme's own terminal
+palette by `bin/build-console-palette`, so the terminals, the console, the LUKS
+prompt, the gettys and the GRUB menu cannot drift apart; the menu takes the
+three shades the ANSI sixteen lack from the theme the palette document names.
+Selecting a theme regenerates the versioned palette and says which two commands
+publish it, and the installer refuses a palette the selection has moved past
+rather than writing a stale one. The
 palette, the cream-on-charcoal default attribute and the kernel's Terminus 16x32
 are kernel parameters appended to GRUB_CMDLINE_LINUX_DEFAULT; the rescue banner
 is a rendered /etc/issue. Installation is idempotent, backs up every replaced
@@ -910,9 +920,12 @@ patched init; /boot/initramfs-lts and mkinitfs.conf stay untouched. Nothing
 here reboots, switches VTs or loads a font into a live console.
 
 - Implementation: [installer](bin/install-boot-console),
-  [console logic](system/boot/boot_console.py), [palette](system/boot/console-palette.json),
+  [console logic](system/boot/boot_console.py),
+  [palette generation](system/boot/console_palette.py), [generator CLI](bin/build-console-palette),
+  [generated palette](system/boot/console-palette.json), [boot menu](bin/build-grub-theme),
   [rescue banner](system/boot/issue.template), [banner initramfs](system/mkinitfs/).
 - Checks: [boot console tests](tests/test_boot_console.py),
+  [session boundary tests](tests/test_theme_boundary.py),
   [boot console record](../docs/superpowers/specs/2026-09-08-boot-console.md),
   [LUKS prompt record](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
   A generated grub.cfg and a listed initramfs are not a boot: the visual result

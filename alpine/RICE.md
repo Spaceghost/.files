@@ -878,6 +878,42 @@ to try it; `--remove-ghost` withdraws it; rerun the installer after a kernel
 upgrade. **Next boot:** never booted. Design and adoption steps:
 [luks-prompt spec](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
 
+## The theme reaches past the session
+
+Picking a theme used to stop at the edge of the running session. The lock
+already followed the palette and there is no login screen to follow it — greetd
+autologins straight into Sway, deliberately, because the LUKS passphrase is the
+real gate — so what a theme switch actually missed were the power deck and
+everything that happens before the compositor exists.
+
+The power deck joins the file set: wlogout's stylesheet now lives in the
+reference profile, so it is recoloured like any other surface, for generated
+themes as much as authored ones. One shade had to move. Its pressed-button
+`#d79921` belongs to no palette role, and the renderer snaps an off-palette
+value to whichever role sits nearest — which for that shade is *green*. It now
+takes the orange role deliberately rather than landing on green by accident.
+
+`console-palette.json` is generated rather than authored. Its sixteen VT
+colours come from the selected theme's own Foot palette, the same file
+Ghostty's colours derive from, so the terminals, the console, the initramfs
+LUKS prompt, the rescue gettys and the GRUB menu cannot drift apart.
+`build-grub-theme` takes the three extra shades the ANSI sixteen do not carry
+from whichever theme the palette document names, and `install-boot-console`
+refuses outright to publish a palette the selection has already moved past.
+
+Because those files live under `/etc` and `/boot`, switching theme cannot
+finish the job on its own. `oldbook-theme use` regenerates the versioned
+palette and then tells you the two commands that publish it:
+
+```sh
+alpine/bin/build-grub-theme                    # repaint the menu, ~6s, no compiler
+doas alpine/bin/install-boot-console           # publish to /etc and /boot
+```
+
+Gruvbox Dark is byte-for-byte what it always was — the generated document
+equals the committed one exactly — which is the proof this generalised the
+boot chain rather than restyling it.
+
 ## Theming system
 
 **Descriptor and profiles.** `themes/gruvbox-dark.json` is the source of the

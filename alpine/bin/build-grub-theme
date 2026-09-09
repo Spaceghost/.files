@@ -53,14 +53,17 @@ BACKGROUND_SIZE = (1280, 800)
 SELECTION_CORNER = 12
 SELECTION_TILE = 4
 
-# Gruvbox roles, read from the console palette so the boot menu, the console and
+# Palette roles, read from the console palette so the boot menu, the console and
 # the desktop cannot drift apart. Indices follow the ANSI order.
 ROLE_INDEX = {'background': 0, 'background_hard': 0, 'red': 1, 'green': 2, 'amber': 11,
               'blue': 4, 'purple': 5, 'aqua': 6, 'muted': 7, 'grey': 8,
               'orange': 3, 'foreground': 15}
-HARD_BACKGROUND = '#1d2021'
-SURFACE = '#3c3836'
-BORDER = '#504945'
+# The hard ground, the raised surface and the border are chrome the ANSI sixteen
+# do not carry, so they come from the desktop theme the palette document names
+# and the menu paints the same shades the desktop does. These Gruvbox values are
+# the fallback for a document that names no theme, or names one this checkout no
+# longer has.
+FALLBACK_ROLES = {'background_hard': '#1d2021', 'surface': '#3c3836', 'border': '#504945'}
 
 # ASCII, Latin-1 and the punctuation GRUB's own strings use, plus the Material
 # Design ghost the desktop brands itself with (U+F02A0 in the Nerd Font).
@@ -76,11 +79,31 @@ def codepoints():
     return sorted(set(points) | set(EXTRA_CODEPOINTS))
 
 
+def chrome_roles(identity):
+    """The three UI shades the sixteen console colours do not carry.
+
+    A missing or unknown theme is not a reason to refuse to build a menu, so the
+    Gruvbox shades stand in and the caller still gets a usable theme.
+    """
+    if not identity:
+        return dict(FALLBACK_ROLES)
+    location = str(REPO / 'alpine/wallpapers')
+    if location not in sys.path:
+        sys.path.insert(0, location)
+    try:
+        from theme_catalog import load_theme
+        from desktop_theme import colors as theme_colors
+        roles = theme_colors(load_theme(REPO, identity))
+        return {name: roles[name] for name in FALLBACK_ROLES}
+    except (OSError, ValueError, RuntimeError, ImportError, KeyError):
+        return dict(FALLBACK_ROLES)
+
+
 def palette():
     document = boot_console.load_palette(PALETTE_FILE.read_text())
     colors = document['colors']
     roles = {name: colors[index] for name, index in ROLE_INDEX.items()}
-    roles.update(background_hard=HARD_BACKGROUND, surface=SURFACE, border=BORDER)
+    roles.update(chrome_roles(document.get('theme')))
     return roles
 
 

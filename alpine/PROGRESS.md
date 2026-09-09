@@ -32,6 +32,43 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## The theme reaches past the session — 2026-09-08
+
+The user asked with emphasis for "my lock screen, login screen, shutdown
+screens all tied into my theme selection system". Reading the machine changed
+what that meant. The lock already follows the palette, and there is no login
+screen at all: greetd autologins straight into Sway on purpose, since the LUKS
+passphrase is the real gate. So the surfaces a theme switch was missing were
+the power deck and the whole boot chain, and `console-palette.json` pinned
+`"theme": "gruvbox-dark"` with literal hex that `build-grub-theme` then read
+for the menu.
+
+wlogout's stylesheet joins the reference profile, which is all it takes for
+every theme to recolour it. Its pressed-button shade had to move: `#d79921`
+belongs to no role, and the renderer snaps an off-palette value to the nearest
+one, which for that shade is green. It takes the orange role now, deliberately
+rather than by accident, and that is the single intentional Gruvbox delta.
+
+The console palette is generated from the selected theme's own Foot colours,
+and the menu takes its three extra shades from the theme the document names.
+`oldbook-theme use` regenerates the versioned file and names the two commands
+that publish it, because /etc and /boot need root and a theme switch must not
+quietly reach outside HOME. The installer refuses a palette the selection has
+moved past instead of writing a stale one.
+
+The regression that mattered is the one that holds: for gruvbox-dark the
+generated document equals the committed one byte for byte, the kernel command
+line is the same string, and `build-grub-theme --check` still matches a fresh
+render, fonts and nine pixmaps included. Twenty-one boundary tests and
+twenty-four check files pass.
+
+Four limits recorded. The boot chain stays unproven until a physical reboot.
+wlogout was never launched, so its CSS has not been through GTK. Only one real
+theme exists, so every alternate-theme assertion uses a synthesised descriptor.
+And the deck's glyph tiles are still shared PNGs rendered once, because the
+profile renderer is text-only; they read on any dark theme but they are not
+that theme's colours.
+
 ## The desktop lists its own new rice — 2026-09-08
 
 The user asked for "a conky list of the things I need to try that you worked on
