@@ -119,21 +119,32 @@
     },
     "cpu": {
       "interval": 3,
-      "format": "\udb80\udf5b {usage}%",
+      // Eight cells for eight cores. The module publishes {icon0}..{icon7} and
+      // picks each from format-icons by that core's own load, so the panel
+      // shows which cores are busy rather than an average that hides it. The
+      // exact figure is in the tooltip, where a number belongs. The block
+      // elements are native to JetBrains Mono, so no face changes to draw them.
+      "format": "\udb80\udf5b {icon0}{icon1}{icon2}{icon3}{icon4}{icon5}{icon6}{icon7}",
+      "format-icons": ["\u2581", "\u2582", "\u2583", "\u2584",
+                       "\u2585", "\u2586", "\u2587", "\u2588"],
       "on-click": "foot --title=\"Ghost Reactor\" -e btop",
       "tooltip-format": "<b>GHOST REACTOR \u00b7 PROCESSOR</b>\nLoad: {usage}%\nRunning average: {avg_frequency} GHz\n\nClick: open btop\nHover to reveal memory, thermal core and archive.",
       "on-click-right": "foot --title=\"Ghost Reactor\" -e btop"
     },
     "memory": {
       "interval": 5,
-      "format": "\udb81\ude1a {percentage}%",
+      "format": "\udb81\ude1a {icon} {percentage}%",
+      "format-icons": ["\u2581", "\u2582", "\u2583", "\u2584",
+                       "\u2585", "\u2586", "\u2587", "\u2588"],
       "tooltip-format": "GHOST REACTOR \u00b7 MEMORY\n{used:0.1f} / {total:0.1f} GiB\nAvailable: {avail:0.1f} GiB\n\nClick: open btop",
       "on-click": "foot --title=\"Ghost Reactor\" -e btop"
     },
     "temperature": {
       "interval": 5,
       "critical-threshold": 82,
-      "format": "\udb81\udd04 {temperatureC}\u00b0",
+      "format": "\udb81\udd04 {icon} {temperatureC}\u00b0",
+      "format-icons": ["\u2581", "\u2582", "\u2583", "\u2584",
+                       "\u2585", "\u2586", "\u2587", "\u2588"],
       "format-critical": "\udb83\ude01 {temperatureC}\u00b0",
       "tooltip-format": "<b>GHOST REACTOR \u00b7 THERMAL CORE</b>\n{temperatureC}\u00b0C / {temperatureF}\u00b0F\nDistress signal begins at 82\u00b0C.\n\nClick: open btop",
       "on-click": "foot --title=\"Ghost Reactor\" -e btop"
@@ -254,7 +265,9 @@
       "on-click": "~/.local/bin/oldbook-power"
     },
     "backlight": {
-      "format": "\udb80\udcdf {percent}%",
+      "format": "\udb80\udcdf {icon} {percent}%",
+      "format-icons": ["\u2581", "\u2582", "\u2583", "\u2584",
+                       "\u2585", "\u2586", "\u2587", "\u2588"],
       "tooltip-format": "MOONLIGHT CONTROL\nDisplay brightness: {percent}%\n\nScroll: brighten/dim the display",
       "on-scroll-up": "~/.local/bin/oldbook-brightness up",
       "on-scroll-down": "~/.local/bin/oldbook-brightness down",

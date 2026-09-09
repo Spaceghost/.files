@@ -9,6 +9,7 @@ they exit quietly and never start one, so a key press can never block on GTK.
 """
 import argparse
 import fcntl
+import math
 import os
 from pathlib import Path
 import signal
@@ -31,6 +32,13 @@ PADDING = 18
 RADIUS = 14
 GLYPH_COLUMN = 36
 BAR_HEIGHT = 6
+# The pill's meter is stepped, not swept, like every other meter this desktop
+# draws. Twenty is not an arbitrary count: oldbook-audio moves the sink in 5%
+# steps, so one key press lights exactly one segment and the reading is never
+# caught half way between two. It is also wide enough here that each segment
+# reads as a capsule; at the terminal bar's twenty-four they would be dots.
+BAR_SEGMENTS = 20
+BAR_GAP = 3.0
 BOTTOM_MARGIN = 36
 FONT = 'JetBrainsMono Nerd Font'
 # Aged cream rather than pure white, so the wash belongs to the palette.
@@ -174,13 +182,17 @@ def render_pill(cr, width, height, content, palette):
     draw_text(cr, str(content['value']) + '%', left, 0, 13, accent, weight='bold',
               align='right', box_width=span, middle=row_middle)
     bar_top = height - PADDING - BAR_HEIGHT + 2
-    rounded_rectangle(cr, left, bar_top, span, BAR_HEIGHT, BAR_HEIGHT / 2.0)
-    cr.set_source_rgba(*rgb(palette['border']), 0.95)
-    cr.fill()
-    filled = span * content['fill']
-    if filled > 0:
-        rounded_rectangle(cr, left, bar_top, max(BAR_HEIGHT, filled), BAR_HEIGHT, BAR_HEIGHT / 2.0)
-        cr.set_source_rgb(*rgb(accent))
+    # Rounded up, so any reading above nought lights its first segment: a
+    # volume that is on must never draw the same meter as one that is off.
+    lit = math.ceil(content['fill'] * BAR_SEGMENTS - 1e-9)
+    pitch = (span + BAR_GAP) / BAR_SEGMENTS
+    for index in range(BAR_SEGMENTS):
+        rounded_rectangle(cr, left + index * pitch, bar_top, pitch - BAR_GAP,
+                          BAR_HEIGHT, BAR_HEIGHT / 2.0)
+        if index < lit:
+            cr.set_source_rgb(*rgb(accent))
+        else:
+            cr.set_source_rgba(*rgb(palette['border']), 0.95)
         cr.fill()
     cr.restore()
 
