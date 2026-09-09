@@ -724,10 +724,22 @@ change hook must not silence the hooks after it.
 
 ### CAT-BED
 
-While the session is locked, the desktop may notice that a cat is lying on the
-keyboard and be kind to her: bed mode runs the machine deliberately warm and
-holds the fans down. Interactions are a named set with one selected, so adding
-another is adding an entry; bed mode is the only one implemented.
+The desktop may notice that a cat is lying on the keyboard and be kind to her:
+bed mode runs the machine deliberately warm and holds the fans down.
+Interactions are a named set with one selected, so adding another is adding an
+entry; bed mode is the only one implemented.
+
+The machine is warmed only while its input is parked, and the cat may park it
+herself. A decided judgement on an unlocked session engages the same guard
+Super+Shift+Escape does, which takes the keyboard and pointer while leaving the
+desktop visible, and releases it the moment she leaves; the linger holds it
+through her shifting her weight. This supersedes the earlier requirement that
+the session be locked *before* she settled, which was the same rule stated as a
+precondition the user had to satisfy rather than one the desktop could meet.
+The reasoning it replaces is preserved exactly: nothing is warmed while anyone
+could be typing. A guard that refuses to start is therefore a refusal to warm,
+a guard this daemon did not engage is never released, and the keyboard is
+handed back before anything else when the daemon stops.
 
 Detection must be lopsided in favour of refusing. Five keys held together for
 two seconds is necessary but never sufficient, and one corroborating signal is
@@ -735,8 +747,9 @@ required: a connected patch of keys, no clean keystroke in five seconds, a
 trackpad contact area above 45 percent of the device's own maximum, or three
 keys in autorepeat. Three clean press-and-release events within ten seconds veto
 the judgement outright, whatever else is true. Above all the daemon must not
-publish a cat unless the locker's own readiness record names a live process: an
-unlocked session is a person, and a person is never warmed.
+publish a cat while input is live: the locker's own readiness record naming a
+live process, or the daemon's own guard holding the keyboard. A session where
+someone could be typing is a person, and a person is never warmed.
 
 Warming a laptop deliberately, with the fans held down and the lid possibly
 shut, makes safety the feature rather than a caveat. Three sensor families are
@@ -755,7 +768,7 @@ stop latches it off for the session.
   [thermal policy](desktop/.local/lib/oldbook/thermal.py),
   [privileged fan hold](bin/oldbook-fan-hold).
 - Checks: [detector](tests/test_cat_presence.py), [bed mode](tests/test_cat_bed.py),
-  [fan restoration](tests/test_cat_fans.py).
+  [input guard](tests/test_cat_guard.py), [fan restoration](tests/test_cat_fans.py).
   Every thermal and fan path is tested against synthetic sysfs trees; no bed
   mode has ever run on this machine, no real fan has been held, and no cat has
   been observed. A physical run is the user's check.

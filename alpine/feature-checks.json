@@ -580,9 +580,10 @@
         "alpine/tests/test_cat_fans.py"
       ],
       "tests": [
-        "test_cat_presence.py",
         "test_cat_bed.py",
-        "test_cat_fans.py"
+        "test_cat_fans.py",
+        "test_cat_guard.py",
+        "test_cat_presence.py"
       ],
       "evidence": []
     },
