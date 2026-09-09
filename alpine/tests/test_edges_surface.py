@@ -1,5 +1,7 @@
 """The backdrop is off until asked for, never animates and reserves nothing."""
 import json
+import importlib.machinery
+import importlib.util
 import os
 from pathlib import Path
 import re
@@ -7,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
@@ -152,6 +155,32 @@ class ServiceTests(unittest.TestCase):
         self.assertEqual(sorted(path.name for path in BRIDGE.parent.iterdir()),
                          ['layer_shell_bridge.cpp'])
         self.assertNotIn('abuild', BUILDER.read_text())
+
+    def test_starting_the_surfaces_never_compiles_anything(self):
+        loader = importlib.machinery.SourceFileLoader('bridge_builder', str(BUILDER))
+        specification = importlib.util.spec_from_loader(loader.name, loader)
+        builder = importlib.util.module_from_spec(specification)
+        loader.exec_module(builder)
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / 'unbuilt.cpp'
+            source.write_text('int oldbook_layer_shell_configure(void) { return 0; }\n')
+            with mock.patch.dict(os.environ, {'XDG_CACHE_HOME': directory}, clear=False):
+                os.environ.pop('OLDBOOK_ALLOW_LOCAL_BUILD', None)
+                # The session start asks for the cache and accepts being told no.
+                with self.assertRaises(RuntimeError) as refused:
+                    builder.build(source=source, allow_local=False)
+                self.assertIn('build-layer-shell-bridge', str(refused.exception))
+                # A cache entry that already matches is handed over, not rebuilt.
+                target = builder.library_path(source)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(b'')
+                self.assertEqual(builder.build(source=source, allow_local=False), target)
+
+    def test_the_surfaces_ask_for_the_cache_rather_than_a_build(self):
+        text = (REPO / 'alpine/desktop/.local/lib/oldbook/edges_surface.py').read_text()
+        self.assertIn('module.build(allow_local=allow_local)', text)
+        self.assertIn('def library_path(allow_local=False)', text)
 
 
 if __name__ == '__main__':

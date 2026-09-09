@@ -6,6 +6,13 @@ package: nothing is signed, nothing enters the apk closure, and the result is a
 cache entry named after the hash of its own source, so an unchanged source is a
 no-op and a changed one never loads a stale library. `alpine/bin/remote-build`
 stays the route for anything that is genuinely a package.
+
+Compiling is never something that simply happens to this laptop. Running this
+script is the deliberate act and builds; everything that merely *wants* the
+library asks with ``allow_local=False`` and gets the cache or an error naming
+this command. That is what keeps a login -- which starts the edge surfaces --
+from turning into a compile because a source file changed since yesterday, and
+it reuses the OLDBOOK_ALLOW_LOCAL_BUILD gate the package build already honours.
 """
 import argparse
 import hashlib
@@ -38,11 +45,25 @@ def compiler_flags():
     return shlex.split(result.stdout)
 
 
-def build(source=SOURCE, force=False):
-    """Return the library path, compiling only when that exact source has none."""
+def local_builds_allowed():
+    return os.environ.get('OLDBOOK_ALLOW_LOCAL_BUILD') == '1'
+
+
+def build(source=SOURCE, force=False, allow_local=True):
+    """Return the library path, compiling only when that exact source has none.
+
+    A caller that is not itself a deliberate build passes ``allow_local=False``
+    and is refused rather than quietly compiling; ``OLDBOOK_ALLOW_LOCAL_BUILD=1``
+    lifts that for a caller that has asked the user.
+    """
     target = library_path(source)
     if target.is_file() and not force:
         return target
+    if not allow_local and not local_builds_allowed():
+        raise RuntimeError(
+            f'the layer-shell bridge is not built for this source ({target.name}); '
+            'run alpine/bin/build-layer-shell-bridge, or set '
+            'OLDBOOK_ALLOW_LOCAL_BUILD=1 to compile it here')
     temporary = target.with_name(f'{target.name}.{os.getpid()}.tmp')
     command = ['c++', '-std=c++17', '-O2', '-fPIC', '-shared', '-Wall', '-Wextra',
                '-fvisibility=hidden', str(source), '-o', str(temporary),
@@ -70,6 +91,6 @@ def main(argv=None):
 if __name__ == '__main__':
     try:
         sys.exit(main())
-    except (OSError, ValueError, subprocess.CalledProcessError) as error:
+    except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
         print(f'build-layer-shell-bridge: {error}', file=sys.stderr)
         sys.exit(1)

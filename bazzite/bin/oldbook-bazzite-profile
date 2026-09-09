@@ -72,6 +72,15 @@ BIN_ANCHOR_BAZZITE = "REPO = (Path(__file__).resolve().parents[3] / 'repo').reso
 LIB_ANCHOR = "THEMES = Path(__file__).resolve().parents[5] / 'alpine/themes'"
 LIB_ANCHOR_BAZZITE = ("THEMES = (Path(__file__).resolve().parents[4] / 'repo/alpine/themes')"
                       ".resolve(strict=True)")
+# A library may need the checkout itself rather than the themes inside it --
+# the edge surfaces reach it for the bridge source they compile against. Only
+# the themes shape was known here, so such a file could not be replayed at all
+# and took the whole profile down with it rather than only its own feature.
+LIB_REPO_ANCHOR = 'REPO = Path(__file__).resolve().parents[5]'
+LIB_REPO_ANCHOR_BAZZITE = ("REPO = (Path(__file__).resolve().parents[4] / 'repo')"
+                           ".resolve(strict=True)")
+LIB_ANCHORS = ((LIB_ANCHOR, LIB_ANCHOR_BAZZITE),
+               (LIB_REPO_ANCHOR, LIB_REPO_ANCHOR_BAZZITE))
 
 # The image builds the glibc Waybar module; a per-user copy remains supported.
 SYSTEM_ARTWORK_MODULES = (Path('/usr/lib64/oldbook/oldbook-art.so'),
@@ -210,9 +219,11 @@ def transform(relative, content, target):
     if relative.parts[:3] == ('.local', 'lib', 'oldbook') and relative.suffix == '.py':
         text = content.decode()
         if 'parents[5]' in text:
-            if LIB_ANCHOR not in text:
+            anchored = [pair for pair in LIB_ANCHORS if pair[0] in text]
+            if not anchored:
                 raise RuntimeError(f'Cannot anchor repository path in {relative}')
-            text = text.replace(LIB_ANCHOR, LIB_ANCHOR_BAZZITE, 1)
+            for original, replacement in anchored:
+                text = text.replace(original, replacement, 1)
         return text.encode()
     return content
 

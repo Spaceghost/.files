@@ -87,12 +87,15 @@ def preferences(path=None):
     return settings
 
 
-def library_path():
-    """The bridge, compiled on demand into the cache and never into the repo.
+def library_path(allow_local=False):
+    """The bridge, taken from the cache under the hash of its own source.
 
-    Two seconds of one translation unit against installed headers, cached under
-    the hash of its own source. `alpine/bin/remote-build` remains the route for
-    anything that is actually a package.
+    The edge surfaces start with the session, and a session start is the last
+    place a C++ compile should appear: it is unasked for, it happens while the
+    desktop is coming up, and on this laptop it is heard. So this asks for the
+    cache and nothing more. When the source has changed and no cache entry
+    matches, the surfaces stay down and say why rather than building, and
+    `alpine/bin/build-layer-shell-bridge` is the deliberate act that fixes it.
     """
     override = os.environ.get('OLDBOOK_LAYER_SHELL_LIBRARY')
     if override:
@@ -103,7 +106,7 @@ def library_path():
     specification = importlib.util.spec_from_loader(name, loader)
     module = importlib.util.module_from_spec(specification)
     loader.exec_module(module)
-    return module.build()
+    return module.build(allow_local=allow_local)
 
 
 def load_bridge(path=None):
@@ -113,7 +116,8 @@ def load_bridge(path=None):
             ctypes.c_void_p, ctypes.c_void_p, ctypes.c_char_p, ctypes.c_int,
             ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
         bridge.oldbook_layer_shell_configure.restype = ctypes.c_int
-    except (OSError, AttributeError, ValueError, subprocess.CalledProcessError) as error:
+    except (OSError, AttributeError, ValueError, RuntimeError,
+            subprocess.CalledProcessError) as error:
         raise RuntimeError(f'the Wayland layer-shell bridge is unavailable: {error}') from error
     return bridge
 

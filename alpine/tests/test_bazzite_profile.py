@@ -175,6 +175,22 @@ class BazziteProfileTest(unittest.TestCase):
         self.assertNotIn("REPO / 'alpine/desktop/.local/bin/oldbook-control'", wallpaper)
         self.assertIn("Path(__file__).resolve().parent / 'oldbook-control'", wallpaper)
 
+    def test_a_library_may_anchor_the_checkout_itself_not_only_its_themes(self):
+        module = load_helper()
+        themes = module.transform(
+            Path('.local/lib/oldbook/overlay_theme.py'),
+            (module.LIB_ANCHOR + '\n').encode(), 'bazzite').decode()
+        repository = module.transform(
+            Path('.local/lib/oldbook/edges_surface.py'),
+            (module.LIB_REPO_ANCHOR + '\n').encode(), 'bazzite').decode()
+
+        self.assertEqual(themes.strip(), module.LIB_ANCHOR_BAZZITE)
+        self.assertEqual(repository.strip(), module.LIB_REPO_ANCHOR_BAZZITE)
+        # A shape nobody taught it is still refused rather than replayed broken.
+        with self.assertRaises(RuntimeError):
+            module.transform(Path('.local/lib/oldbook/invented.py'),
+                             b'HERE = Path(__file__).resolve().parents[5]\n', 'bazzite')
+
     def test_every_retained_oldbook_sway_binding_has_a_deployed_helper(self):
         applied = self.run_profile('apply')
         self.assertEqual(applied.returncode, 0, applied.stderr)
