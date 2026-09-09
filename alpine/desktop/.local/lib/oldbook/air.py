@@ -32,7 +32,13 @@ CAPTION_HIGH = 0.22
 # Quantising the caption keeps the stylesheet reload rate to a few per second.
 CAPTION_STEPS = 24
 PREFERENCES = 'breath.json'
-DEFAULT_PREFERENCES = {'wallpaper': True, 'caption': True}
+# The painting does not move unless it is asked to. A breathing image is
+# physically unpleasant for this user and he has met it twice on a machine he
+# had already asked to hold still, so the wallpaper opts in rather than out.
+# Pointer-driven motion is welcome; motion the machine generates on its own is
+# not. The caption's accent wash is a colour on a small strip rather than a
+# moving image and stays on.
+DEFAULT_PREFERENCES = {'wallpaper': False, 'caption': True}
 
 
 def runtime_directory():

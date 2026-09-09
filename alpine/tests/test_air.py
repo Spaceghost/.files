@@ -192,12 +192,12 @@ class PreferenceTests(unittest.TestCase):
             path.unlink() if path.is_file() else path.rmdir()
         self.base.rmdir()
 
-    def test_both_halves_breathe_by_default(self):
-        self.assertEqual(air.read_preferences(self.path), {'wallpaper': True, 'caption': True})
+    def test_the_wallpaper_does_not_breathe_unless_it_is_asked_to(self):
+        self.assertEqual(air.read_preferences(self.path), {'wallpaper': False, 'caption': True})
 
-    def test_an_unreadable_file_keeps_breathing(self):
+    def test_an_unreadable_file_falls_back_to_the_still_painting(self):
         self.path.write_text('{ not json')
-        self.assertEqual(air.read_preferences(self.path), {'wallpaper': True, 'caption': True})
+        self.assertEqual(air.read_preferences(self.path), {'wallpaper': False, 'caption': True})
 
     def test_switches_round_trip(self):
         air.write_preferences({'wallpaper': False, 'caption': True}, self.path)
