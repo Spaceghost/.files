@@ -1,19 +1,25 @@
+# Catppuccin Mocha: generated from this theme's Foot palette by oldbook-theme sync.
+# Edit the Foot colours, then rerun sync; this file is derived.
 copy-on-select = clipboard
-# Catppuccin Mocha, matching Foot and the shared desktop painting.
 font-family = JetBrainsMono Nerd Font
 font-size = 9.5
 command = /bin/zsh
-background = 1e1e2e
-foreground = cdd6f4
-background-opacity = 0.92
-selection-background = 45475a
-selection-foreground = d7def6
-cursor-color = f9e2af
-cursor-text = 1e1e2e
 window-padding-x = 6
 window-padding-y = 6
 window-decoration = server
 window-theme = dark
+custom-shader = ~/.config/ghostty/shaders/warm-bloom.glsl
+custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
+custom-shader-animation = true
+
+background = 1e1e2e
+foreground = cdd6f4
+selection-background = 45475a
+selection-foreground = d7def6
+background-opacity = 0.92
+cursor-text = 1e1e2e
+cursor-color = f9e2af
+
 palette = 0=#1e1e2e
 palette = 1=#af6881
 palette = 2=#7aa47c
@@ -30,9 +36,3 @@ palette = 12=#89b4fa
 palette = 13=#cba6f7
 palette = 14=#94e2d5
 palette = 15=#cdd6f4
-
-# Shaders: a short cursor smear and a faint warm bloom, both cheap. Ghostty
-# animates them only while the surface is focused. Paths may start with ~/.
-custom-shader = ~/.config/ghostty/shaders/warm-bloom.glsl
-custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
-custom-shader-animation = true

@@ -1,7 +1,41 @@
 /* Space Ghost × Catppuccin Mocha control deck. GTK CSS, intentionally built for stock Waybar. */
 @import url("waybar-state.css");  /* fullscreen dimming, written by oldbook-waybar-dim */
-@define-color oldbook_workspace_active #d7def6;
-@define-color oldbook_workspace_secondary #a6adc8;
+
+/* ── The palette, named once ──────────────────────────────────────────────
+   This profile is authored rather than recoloured, so every shade below is
+   written once here and referenced everywhere else. The eight hex values are
+   the theme descriptor's own declared roles, in Catppuccin's own names; the
+   three derived shades are GTK colour functions over them, so a future
+   renderer that maps these eleven literals repaints the whole bar.
+
+     crust/base/surface0-2/overlay0-1/subtext0-1/text  the layering ladder
+     mantle    the half-step between base and crust Catppuccin uses for chrome
+     overlay1  the half-step between overlay0 and subtext0, for resting glyphs
+
+   Catppuccin gets its depth from stacked surfaces rather than from strong
+   colour, which is the whole difference between it and the Gruvbox design
+   this profile used to be a recolour of. Depth is spent on grounds; the
+   pastels are spent sparingly, on the one thing in a module that is live. */
+@define-color ctp_crust     #11111b;   /* background_hard */
+@define-color ctp_base      #1e1e2e;   /* background      */
+@define-color ctp_surface0  #313244;   /* surface         */
+@define-color ctp_surface1  #45475a;   /* border          */
+@define-color ctp_surface2  #585b70;   /* surface_bright  */
+@define-color ctp_overlay0  #6c7086;   /* muted           */
+@define-color ctp_subtext0  #a6adc8;   /* subtle          */
+@define-color ctp_subtext1  #bac2de;   /* foreground_dim  */
+@define-color ctp_text      #cdd6f4;   /* foreground      */
+@define-color ctp_mantle    mix(@ctp_base, @ctp_crust, 0.5);
+@define-color ctp_overlay1  mix(@ctp_overlay0, @ctp_subtext0, 0.35);
+@define-color ctp_red       #f38ba8;
+@define-color ctp_green     #a6e3a1;
+@define-color ctp_yellow    #f9e2af;   /* accent */
+@define-color ctp_blue      #89b4fa;
+@define-color ctp_mauve     #cba6f7;   /* purple */
+@define-color ctp_teal      #94e2d5;   /* aqua   */
+@define-color ctp_peach     #fab387;   /* orange */
+@define-color oldbook_workspace_active @ctp_text;
+@define-color oldbook_workspace_secondary @ctp_subtext0;
 * {
     border: none;
     border-radius: 0;
@@ -10,12 +44,20 @@
     font-weight: 500;
     min-height: 0;
 }
-window#waybar { background: transparent; color: #cdd6f4; }
+window#waybar { background: transparent; color: @ctp_text; }
+
+/* ── The two chrome islands ───────────────────────────────────────────────
+   Lit along the top edge and settling into mantle, with a surface1 hairline
+   drawn as an inset ring rather than a border so it costs no layout. Under
+   Gruvbox the same island fell all the way to the hard ground, which that
+   palette can carry; in Mocha a surface0-to-crust drop across 29 pixels is a
+   three-step fall that makes the bar look like a hole. */
 .modules-left, .modules-right {
-    background: linear-gradient(180deg, rgba(49, 50, 68, 0.98), rgba(17, 17, 27, 0.98));
+    background: linear-gradient(180deg, alpha(@ctp_surface0, 0.94), alpha(@ctp_mantle, 0.97));
     border: none;
     border-radius: 18px;
-    box-shadow: 0 4px 12px rgba(17, 17, 27, 0.55);
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.55),
+                0 4px 14px alpha(@ctp_crust, 0.55);
     margin-bottom: 5px;
 }
 .modules-center { background: transparent; margin: 0 8px; padding: 0; }
@@ -33,67 +75,171 @@ window#waybar { background: transparent; color: #cdd6f4; }
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
 #workspaces { margin: 3px 5px 3px 0; }
-#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a6adc8; transition: all 180ms ease-in-out; }
-#workspaces button.empty { color: #5d6076; }
-#workspaces button:hover { background: #45475a; color: #d7def6; box-shadow: none; }
+#workspaces button {
+    padding: 0 7px;
+    margin: 1px 1px;
+    border-radius: 13px;
+    color: @ctp_subtext0;
+    transition: background 180ms ease-in-out, color 180ms ease-in-out, box-shadow 180ms ease-in-out;
+}
+#workspaces button.empty { color: @ctp_overlay0; }
+#workspaces button:hover {
+    background: alpha(@ctp_surface1, 0.85);
+    color: @ctp_text;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.55);
+}
 #workspaces button.focused {
     background: linear-gradient(110deg, alpha(#f9e2af, .22), alpha(#f9e2af, .10));
     color: @oldbook_workspace_active;
     font-weight: 400;
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.45);
 }
-#workspaces button.urgent { background: #af6881; color: #d7def6; }
-#custom-ai { color: #f9e2af; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 11px; }
-#custom-ai:hover { background: #45475a; color: #d7def6; }
-#custom-ai.idle { color: #6c7086; }
-#custom-ai.complete { color: #a6e3a1; background: #262e2e; }
-#custom-ai.attention { color: #d7def6; background: #845268; }
-#mode { color: #fab387; padding: 0 9px; }
-#mpris { color: #94e2d5; padding: 0 7px; font-size: 10px; }
-#mpris.paused { color: #a6adc8; }
-#mpris.previous, #mpris.next { font-size: 15px; padding: 0 8px; }
-#mpris:hover { background: rgba(148, 226, 213, 0.16); }
+#workspaces button.urgent {
+    background: alpha(@ctp_red, 0.24);
+    color: @ctp_red;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_red, 0.45);
+}
+#custom-ai { color: @ctp_yellow; padding: 0 10px; margin: 4px 4px 4px 0; border-radius: 13px; }
+#custom-ai:hover { background: alpha(@ctp_surface1, 0.85); color: @ctp_text; }
+#custom-ai.idle { color: @ctp_overlay0; }
+#custom-ai.complete { color: @ctp_green; background: alpha(@ctp_green, 0.16); }
+#custom-ai.attention { color: @ctp_red; background: alpha(@ctp_red, 0.22); }
+#mode { color: @ctp_peach; padding: 0 9px; }
+
+/* ── Now transmitting ─────────────────────────────────────────────────────
+   The four media modules are the only ones that sit in the middle of the bar
+   with nothing behind them, and in a palette this low-contrast that reads as
+   loose glyphs floating on the painting -- which is the complaint. They become
+   a segmented instrument instead: two raised surface0 keys either side of a
+   recessed crust screen, each on its own chip, each lifted off the wallpaper
+   by the same shadow. Their vertical margins put them on exactly the line the
+   chips inside the two islands sit on, so the three groups read as one row.
+
+   The ground belongs to the modules and never to `.modules-center`: all three
+   MPRIS widgets hide themselves when no player is running and the meter hides
+   on silence, so a ground on the row would be left behind as an empty pill in
+   the middle of an otherwise quiet bar. */
+#mpris {
+    background: linear-gradient(180deg, alpha(@ctp_crust, 0.90), alpha(@ctp_mantle, 0.90));
+    color: @ctp_text;
+    font-size: 10px;
+    min-width: 128px;
+    padding: 0 12px;
+    margin: 4px 0 9px;
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.9),
+                inset 0 2px 4px alpha(@ctp_crust, 0.5),
+                0 2px 8px alpha(@ctp_crust, 0.45);
+    transition: background 150ms ease-out, box-shadow 150ms ease-out, color 150ms ease-out;
+}
+#mpris:hover {
+    background: linear-gradient(180deg, alpha(@ctp_mantle, 0.94), alpha(@ctp_surface0, 0.94));
+    box-shadow: inset 0 0 0 1px alpha(@ctp_teal, 0.35),
+                inset 0 2px 4px alpha(@ctp_crust, 0.4),
+                0 2px 12px alpha(@ctp_crust, 0.55);
+}
+/* Playback state is the one place the screen spends colour: teal while it is
+   actually transmitting, the neutral ladder while it is not. */
+#mpris.playing {
+    color: @ctp_teal;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_teal, 0.26),
+                inset 0 2px 4px alpha(@ctp_crust, 0.5),
+                0 2px 8px alpha(@ctp_crust, 0.45);
+}
+#mpris.paused { color: @ctp_subtext0; }
+#mpris.stopped { color: @ctp_overlay0; }
+/* The transport keys. Listed after the state rules on purpose: the arrows
+   carry the playback class too, and at equal specificity the later rule is
+   what keeps them neutral while the screen beside them is lit. */
+#mpris.previous,
+#mpris.next {
+    background: linear-gradient(180deg, alpha(@ctp_surface0, 0.94), alpha(@ctp_mantle, 0.96));
+    color: @ctp_subtext0;
+    font-size: 14px;
+    min-width: 20px;
+    padding: 0 9px;
+    margin: 4px 0 9px;
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.5),
+                0 2px 8px alpha(@ctp_crust, 0.45);
+    transition: background 150ms ease-out, box-shadow 150ms ease-out, color 150ms ease-out;
+}
+#mpris.paused.previous,
+#mpris.paused.next,
+#mpris.stopped.previous,
+#mpris.stopped.next { color: @ctp_overlay1; }
+#mpris.previous:hover,
+#mpris.next:hover {
+    background: linear-gradient(180deg, alpha(@ctp_surface1, 0.96), alpha(@ctp_surface0, 0.96));
+    color: @ctp_text;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.7),
+                0 2px 12px alpha(@ctp_crust, 0.55);
+}
 /* Optional transmission meter beside the music controls; silent frames collapse it. */
-#custom-cava { color: #94e2d5; padding: 0 6px; margin: 0 2px; font-size: 10px; }
-#custom-cava.silent { padding: 0; margin: 0; }
+#custom-cava {
+    background: alpha(@ctp_crust, 0.75);
+    color: alpha(@ctp_teal, 0.72);
+    font-size: 10px;
+    padding: 0 8px;
+    margin: 4px 0 9px;
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.75);
+}
+#custom-cava.silent { background: transparent; box-shadow: none; padding: 0; margin: 0; }
+
+/* ── Status chips ─────────────────────────────────────────────────────── */
 #cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
 #pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
     padding: 0 8px;
     margin: 4px 0;
-    border-radius: 11px;
+    border-radius: 13px;
+    transition: background 150ms ease-out, color 150ms ease-out;
 }
-#cpu { color: #cba6f7; }
-#memory, #disk { color: #a6adc8; }
-#temperature { color: #fab387; }
-#temperature.critical { color: #f38ba8; background: #34293a; }
-#custom-link { color: #89b4fa; }
-#custom-link.offline, #custom-radio.blocked { color: #6c7086; }
-#custom-radio { color: #94e2d5; }
-#custom-firewall.staged { color: #f9e2af; }
-#custom-firewall.running { color: #a6e3a1; }
-#pulseaudio { color: #cdd6f4; }
-#pulseaudio.muted { color: #5d6076; }
-#battery { color: #cdd6f4; }
-#battery.charging, #battery.plugged { color: #a6e3a1; }
-#battery.warning { color: #f9e2af; }
-#battery.critical { color: #d7def6; background: #845268; animation: distress 1s ease-in-out infinite alternate; }
-#backlight { color: #f9e2af; }
-#idle_inhibitor { color: #6c7086; }
-#idle_inhibitor.activated { color: #f9e2af; background: #3a3636; }
-#custom-notifications { color: #cba6f7; padding: 0 9px; }
-#clock { background: rgba(69, 71, 90, 0.72); color: #cdd6f4; padding: 0 11px; margin-left: 3px; }
+#cpu { color: @ctp_mauve; }
+#memory, #disk { color: @ctp_subtext0; }
+#temperature { color: @ctp_peach; }
+#temperature.critical { color: @ctp_red; background: alpha(@ctp_red, 0.20); }
+#custom-link { color: @ctp_blue; }
+#custom-link.offline, #custom-radio.blocked { color: @ctp_overlay0; }
+#custom-radio { color: @ctp_teal; }
+#custom-firewall.staged { color: @ctp_yellow; }
+#custom-firewall.running { color: @ctp_green; }
+#pulseaudio { color: @ctp_text; }
+#pulseaudio.muted { color: @ctp_overlay0; }
+#battery { color: @ctp_subtext1; }
+#battery.charging, #battery.plugged { color: @ctp_green; }
+#battery.warning { color: @ctp_yellow; background: alpha(@ctp_yellow, 0.16); }
+/* Critical is a solid chip rather than a blink: nothing on this desktop is
+   allowed to move on its own, and a saturated red plate with crust lettering
+   is louder in a pastel bar than a pulse was anyway. */
+#battery.critical {
+    color: @ctp_crust;
+    background: @ctp_red;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_red, 0.9), 0 0 10px alpha(@ctp_red, 0.45);
+}
+#backlight { color: @ctp_yellow; }
+#idle_inhibitor { color: @ctp_overlay0; }
+#idle_inhibitor.activated { color: @ctp_yellow; background: alpha(@ctp_yellow, 0.18); }
+#custom-notifications { color: @ctp_mauve; padding: 0 9px; }
+#clock { background: alpha(@ctp_surface1, 0.72); color: @ctp_text; padding: 0 11px; margin-left: 3px; }
 #tray { margin-right: 2px; padding: 0 5px; }
 #cpu:hover, #memory:hover, #custom-link:hover, #custom-radio:hover, #custom-firewall:hover,
 #pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
-    background: rgba(108, 112, 134, 0.22);
+    background: alpha(@ctp_surface1, 0.75);
+    color: @ctp_text;
 }
-tooltip { background: rgba(17, 17, 27, 0.99); border: none; border-radius: 16px; box-shadow: 0 6px 18px rgba(17, 17, 27, 0.46); }
-tooltip label { color: #cdd6f4; padding: 13px 15px; font-size: 11px; font-weight: 500; }
-@keyframes distress { to { background: #af6881; } }
-#custom-art { color: #a6adc8; font-size: 15px; padding: 0 7px 0 4px; }
-#custom-art:hover { color: #d7def6; }
-#custom-art.paused { color: #5d6076; }
-#custom-art.generating { color: #f9e2af; text-shadow: 0 0 7px #b3a386; }
+tooltip {
+    background: alpha(@ctp_crust, 0.98);
+    border: none;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.9),
+                0 8px 24px alpha(@ctp_crust, 0.55);
+}
+tooltip label { color: @ctp_text; padding: 13px 15px; font-size: 11px; font-weight: 500; }
+#custom-art { color: @ctp_subtext0; font-size: 15px; padding: 0 7px 0 4px; }
+#custom-art:hover { color: @ctp_text; }
+#custom-art.paused { color: @ctp_overlay0; }
+#custom-art.generating { color: @ctp_yellow; text-shadow: 0 0 7px alpha(@ctp_yellow, 0.55); }
 /* The badge is a thumbnail of the painting on screen; paused dims it and
    generating shows the hourglass glyph in its place. */
 #custom-art image.thumbnail { margin: 0 2px; }
@@ -101,18 +247,27 @@ tooltip label { color: #cdd6f4; padding: 13px 15px; font-size: 11px; font-weight
 #custom-art:hover image.thumbnail { opacity: 0.85; }
 
 /* Workspace peek: rest on a workspace and its windows appear beneath the bar. */
-popover#oldbook-peek { background: rgba(17, 17, 27, 0.98); border-radius: 16px; }
+popover#oldbook-peek {
+    background: alpha(@ctp_crust, 0.98);
+    border-radius: 16px;
+    box-shadow: 0 10px 28px alpha(@ctp_crust, 0.6);
+}
 popover#oldbook-peek contents { background: transparent; }
 popover#oldbook-peek .oldbook-peek-card { padding: 2px; }
-popover#oldbook-peek .oldbook-peek-still { background: #313244; border-radius: 6px; }
-popover#oldbook-peek .oldbook-peek-title { color: #a6adc8; font-size: 10px; padding-top: 2px; }
+popover#oldbook-peek .oldbook-peek-still {
+    background: @ctp_surface0;
+    border-radius: 8px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.7);
+}
+popover#oldbook-peek .oldbook-peek-title { color: @ctp_subtext0; font-size: 10px; padding-top: 2px; }
 
 /* Click-through system monitor: bottom layer, visible through transparent terminals. */
-window#waybar.monitor { background: transparent; color: #b5bcd8; }
+window#waybar.monitor { background: transparent; color: @ctp_subtext1; }
 window#waybar.monitor .modules-left {
-    background: linear-gradient(145deg, rgba(17, 17, 27, 0.68), rgba(49, 50, 68, 0.48));
-    border: 1px solid rgba(166, 173, 200, 0.25);
-    border-radius: 11px;
+    background: linear-gradient(145deg, alpha(@ctp_mantle, 0.66), alpha(@ctp_surface0, 0.46));
+    border: none;
+    border-radius: 13px;
+    box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.45);
     padding: 7px 7px 8px;
 }
 window#waybar.monitor #custom-conky-title,
@@ -130,20 +285,20 @@ window#waybar.monitor #custom-uptime {
     font-size: 10px;
 }
 window#waybar.monitor #custom-conky-title,
-window#waybar.monitor #custom-conky-footer { color: #a6adc8; }
+window#waybar.monitor #custom-conky-footer { color: @ctp_subtext0; }
 window#waybar.monitor #custom-conky-title {
-    color: #f9e2af;
+    color: @ctp_yellow;
     font-weight: 800;
     padding-bottom: 5px;
 }
 window#waybar.monitor #custom-conky-footer { padding-top: 5px; }
-window#waybar.monitor #cpu { color: #cba6f7; }
-window#waybar.monitor #memory { color: #94e2d5; }
-window#waybar.monitor #temperature { color: #fab387; }
-window#waybar.monitor #network { color: #89b4fa; }
-window#waybar.monitor #network.disconnected { color: #6c7086; }
-window#waybar.monitor #disk { color: #bac2de; }
-window#waybar.monitor #custom-uptime { color: #b5bcd8; }
+window#waybar.monitor #cpu { color: @ctp_mauve; }
+window#waybar.monitor #memory { color: @ctp_teal; }
+window#waybar.monitor #temperature { color: @ctp_peach; }
+window#waybar.monitor #network { color: @ctp_blue; }
+window#waybar.monitor #network.disconnected { color: @ctp_overlay0; }
+window#waybar.monitor #disk { color: @ctp_subtext1; }
+window#waybar.monitor #custom-uptime { color: @ctp_subtext1; }
 
 /* While a window is fullscreen the bar fades back so it stops competing with
    the content; oldbook-waybar-dim writes the opacity into waybar-state.css.

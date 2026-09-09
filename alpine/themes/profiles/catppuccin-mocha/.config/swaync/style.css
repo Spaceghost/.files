@@ -3,14 +3,34 @@
  * Every colour here is a role in the active theme's palette, never a shade
  * picked by eye: the theme renderer maps each declared value to that theme's
  * own colour, and anything off-palette gets snapped to whichever role happens
- * to sit nearest. Staying on the thirteen roles is what makes a generated
+ * to sit nearest. Staying on the declared roles is what makes a generated
  * theme land exactly rather than approximately.
  *
- * Roles used, in Catppuccin Mocha terms:
- *   #11111b hard ground   #1e1e2e ground     #313244 surface   #45475a border
- *   #6c7086 muted         #cdd6f4 foreground #d7def6 bright    #282839 raised
- *   #f9e2af accent        #f38ba8 red        #a6e3a1 green     #89b4fa blue
+ * This profile is authored rather than recoloured, so the roles are named once
+ * below and referenced everywhere else, and the two derived shades are GTK
+ * colour functions over declared roles. Where the Gruvbox design this file
+ * grew from could paint every panel on one ground and let its high contrast
+ * separate them, Mocha cannot: crust, mantle, base and surface0 are what
+ * separate the panel from its widgets and the widgets from their keys.
  */
+@define-color ctp_crust     #11111b;   /* background_hard */
+@define-color ctp_base      #1e1e2e;   /* background      */
+@define-color ctp_surface0  #313244;   /* surface         */
+@define-color ctp_surface1  #45475a;   /* border          */
+@define-color ctp_surface2  #585b70;   /* surface_bright  */
+@define-color ctp_overlay0  #6c7086;   /* muted           */
+@define-color ctp_subtext0  #a6adc8;   /* subtle          */
+@define-color ctp_subtext1  #bac2de;   /* foreground_dim  */
+@define-color ctp_text      #cdd6f4;   /* foreground      */
+@define-color ctp_mantle    mix(@ctp_base, @ctp_crust, 0.5);
+@define-color ctp_overlay1  mix(@ctp_overlay0, @ctp_subtext0, 0.35);
+@define-color ctp_red       #f38ba8;
+@define-color ctp_green     #a6e3a1;
+@define-color ctp_yellow    #f9e2af;   /* accent */
+@define-color ctp_blue      #89b4fa;
+@define-color ctp_mauve     #cba6f7;   /* purple */
+@define-color ctp_teal      #94e2d5;   /* aqua   */
+@define-color ctp_peach     #fab387;   /* orange */
 
 * { font-family: "JetBrainsMono Nerd Font", sans-serif; font-size: 12px; }
 
@@ -18,14 +38,27 @@
 .blank-window { background: transparent; }
 .floating-notifications, .floating-notifications.background { background: transparent; }
 
-.control-center, .widget-title, .widget-dnd, .widget-mpris, .widget-volume,
+/* ── The panel ────────────────────────────────────────────────────────────
+   Deepest surface in the stack. Its widgets sit a step above it and their
+   keys a step above that, which is how Catppuccin reads as layered rather
+   than as one flat sheet of indigo. */
+.control-center {
+  background: alpha(@ctp_crust, 0.97);
+  color: @ctp_text;
+  border: none;
+  border-radius: 18px;
+  padding: 12px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.85),
+              0 12px 36px alpha(@ctp_crust, 0.7);
+}
+.widget-title, .widget-dnd, .widget-mpris, .widget-volume,
 .widget-backlight, .widget-buttons-grid, .widget-inhibitors, .widget-menubar {
-  background: rgba(30, 30, 46, 0.97);
-  color: #cdd6f4;
+  background: alpha(@ctp_base, 0.96);
+  color: @ctp_text;
   border: none;
   border-radius: 14px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.8);
 }
-.control-center { padding: 12px; box-shadow: 0 10px 32px rgba(17, 17, 27, 0.65); }
 
 /* ── The row is a container, never a surface ──────────────────────────────
    swaync gives the row the full width of the layer. Any background on it
@@ -49,153 +82,227 @@
 /* ── The card ─────────────────────────────────────────────────────────────
    Ground, corner, urgency rail and shadow. The rail is the only chrome that
    changes with urgency, so a critical message reads at a glance without
-   shouting in a second colour. */
+   shouting in a second colour. The hairline ring is what keeps a base-on-base
+   card legible where Gruvbox could rely on contrast alone. */
 .notification {
-  background: rgba(30, 30, 46, 0.97);
-  color: #cdd6f4;
+  background: alpha(@ctp_base, 0.97);
+  color: @ctp_text;
   margin: 8px;
   padding: 12px 14px;
   border: none;
-  border-left: 3px solid #f9e2af;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(17, 17, 27, 0.55);
-  transition: background 120ms ease-out, box-shadow 120ms ease-out;
+  border-left: 3px solid @ctp_yellow;
+  border-radius: 16px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.85),
+              0 10px 26px alpha(@ctp_crust, 0.6);
+  transition: background 140ms ease-out, box-shadow 140ms ease-out;
 }
 .notification-row:hover .notification,
-.notification-row:focus .notification { background: #282839; box-shadow: 0 12px 30px rgba(17, 17, 27, 0.72); }
-.notification-row:focus .notification { border-color: #d7def6; }
+.notification-row:focus .notification {
+  background: alpha(@ctp_surface0, 0.97);
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.9),
+              0 14px 32px alpha(@ctp_crust, 0.75);
+}
+.notification-row:focus .notification { border-color: @ctp_text; }
 
 /* Urgency. Low recedes, critical sits on a faintly warmed ground. */
-.notification.low { border-left-color: #45475a; }
-.notification.low .summary { color: #cdd6f4; font-weight: normal; }
-.notification.normal { border-left-color: #f9e2af; }
-.notification.critical { border-left-color: #f38ba8; background: rgba(40, 40, 57, 0.97); }
-.notification.critical .summary { color: #f38ba8; }
-.notification-row:hover .notification.critical { background: #282839; }
+.notification.low { border-left-color: @ctp_surface2; }
+.notification.low .summary { color: @ctp_subtext1; font-weight: normal; }
+.notification.normal { border-left-color: @ctp_yellow; }
+.notification.critical {
+  border-left-color: @ctp_red;
+  background: alpha(@ctp_base, 0.97);
+  box-shadow: inset 0 0 0 1px alpha(@ctp_red, 0.35),
+              0 10px 26px alpha(@ctp_crust, 0.6);
+}
+.notification.critical .summary { color: @ctp_red; }
+.notification-row:hover .notification.critical { background: alpha(@ctp_surface0, 0.97); }
 
 /* Inside the card: the message, then who sent it and when. */
-.notification .summary { color: #d7def6; font-weight: bold; font-size: 13px; }
-.notification .body { color: #cdd6f4; font-size: 12px; }
-.notification .time { color: #6c7086; font-size: 11px; }
-.notification .app-name { color: #6c7086; font-size: 10px; letter-spacing: 0.6px; }
-.notification .app-icon { color: #f9e2af; margin-right: 6px; }
-.notification .image, .notification .body-image { border-radius: 9px; margin-right: 10px; }
+.notification .summary { color: @ctp_text; font-weight: bold; font-size: 13px; }
+.notification .body { color: @ctp_subtext1; font-size: 12px; }
+.notification .time { color: @ctp_overlay1; font-size: 11px; }
+.notification .app-name { color: @ctp_overlay0; font-size: 10px; letter-spacing: 0.6px; }
+.notification .app-icon { color: @ctp_yellow; margin-right: 6px; }
+.notification .image, .notification .body-image { border-radius: 10px; margin-right: 10px; }
 .notification progressbar { margin-top: 8px; }
-.notification progressbar trough { background: #45475a; border: none; border-radius: 8px; min-height: 6px; }
-.notification progressbar progress { background: #f9e2af; border-radius: 8px; }
+.notification progressbar trough { background: @ctp_surface0; border: none; border-radius: 8px; min-height: 6px; }
+.notification progressbar progress { background: @ctp_yellow; border-radius: 8px; }
 
 /* Close: invisible until the pointer is on the card, red only on itself. */
 .notification .close-button {
   background: transparent;
-  color: #1e1e2e;
+  color: @ctp_base;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   margin: 2px;
   padding: 2px 6px;
-  transition: background 120ms ease-out, color 120ms ease-out;
+  transition: background 140ms ease-out, color 140ms ease-out;
 }
-.notification-row:hover .close-button { color: #6c7086; }
-.notification .close-button:hover { background: #f38ba8; color: #11111b; }
+.notification-row:hover .close-button { color: @ctp_overlay1; }
+.notification .close-button:hover { background: @ctp_red; color: @ctp_crust; }
 
 /* Actions and inline reply. */
 .notification-action {
-  background: #313244;
-  color: #cdd6f4;
+  background: @ctp_surface0;
+  color: @ctp_text;
   border: none;
-  border-radius: 9px;
+  border-radius: 10px;
   margin: 8px 4px 0 0;
   padding: 5px 12px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.7);
+  transition: background 140ms ease-out, box-shadow 140ms ease-out;
 }
-.notification-action:hover { background: #45475a; color: #d7def6; }
-.notification-action:active { background: #f9e2af; color: #11111b; }
-.notification-default-action { border-radius: 14px; }
+.notification-action:hover {
+  background: @ctp_surface1;
+  color: @ctp_text;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.8);
+}
+.notification-action:active { background: @ctp_yellow; color: @ctp_crust; }
+.notification-default-action { border-radius: 16px; }
 .inline-reply { margin-top: 8px; }
 .inline-reply-entry {
-  background: #11111b;
-  color: #cdd6f4;
-  caret-color: #f9e2af;
-  border: 1px solid #45475a;
-  border-radius: 9px;
+  background: alpha(@ctp_crust, 0.9);
+  color: @ctp_text;
+  caret-color: @ctp_yellow;
+  border: none;
+  border-radius: 10px;
   padding: 4px 8px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.8);
 }
-.inline-reply-entry:focus { border-color: #f9e2af; }
-.inline-reply-button { background: #313244; color: #cdd6f4; border: none; border-radius: 9px; margin-left: 6px; padding: 4px 10px; }
-.inline-reply-button:hover { background: #45475a; color: #d7def6; }
-.inline-reply-button:disabled { background: transparent; color: #45475a; }
+.inline-reply-entry:focus { box-shadow: inset 0 0 0 1px alpha(@ctp_yellow, 0.8); }
+.inline-reply-button {
+  background: @ctp_surface0;
+  color: @ctp_text;
+  border: none;
+  border-radius: 10px;
+  margin-left: 6px;
+  padding: 4px 10px;
+}
+.inline-reply-button:hover { background: @ctp_surface1; color: @ctp_text; }
+.inline-reply-button:disabled { background: transparent; color: @ctp_surface2; }
 
 /* ── Groups ───────────────────────────────────────────────────────────────
    Several messages from one app collapse under a quiet header. */
-.notification-group-headers { color: #6c7086; font-size: 11px; letter-spacing: 0.6px; margin: 0 10px; }
-.notification-group-icon { color: #f9e2af; }
+.notification-group-headers { color: @ctp_overlay1; font-size: 11px; letter-spacing: 0.6px; margin: 0 10px; }
+.notification-group-icon { color: @ctp_yellow; }
 .notification-group-collapse-button,
 .notification-group-close-all-button {
   background: transparent;
-  color: #6c7086;
+  color: @ctp_overlay1;
   border: none;
-  border-radius: 8px;
+  border-radius: 9px;
   padding: 2px 8px;
   margin: 0 2px;
+  transition: background 140ms ease-out, color 140ms ease-out;
 }
-.notification-group-collapse-button:hover { background: #313244; color: #cdd6f4; }
-.notification-group-close-all-button:hover { background: #f38ba8; color: #11111b; }
-.notification-group:hover .notification-group-headers { color: #cdd6f4; }
+.notification-group-collapse-button:hover { background: @ctp_surface0; color: @ctp_text; }
+.notification-group-close-all-button:hover { background: @ctp_red; color: @ctp_crust; }
+.notification-group:hover .notification-group-headers { color: @ctp_subtext0; }
 
 /* Nothing waiting is a state worth designing, not an empty box. */
-.control-center-list-placeholder { color: #45475a; font-size: 13px; padding: 28px 0; }
+.control-center-list-placeholder { color: @ctp_overlay0; font-size: 13px; padding: 28px 0; }
 
 /* ── Panel furniture ──────────────────────────────────────────────────── */
 .widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight,
 .widget-buttons-grid, .widget-inhibitors { margin: 6px 0; padding: 10px; }
-.widget-title > label { color: #f9e2af; font-weight: bold; }
+.widget-title > label { color: @ctp_text; font-weight: bold; }
 .widget-title > button, .widget-dnd > switch slider,
-.widget-buttons-grid > flowbox > flowboxchild > button { background: #313244; color: #cdd6f4; border: none; border-radius: 10px; }
+.widget-buttons-grid > flowbox > flowboxchild > button {
+  background: @ctp_surface0;
+  color: @ctp_text;
+  border: none;
+  border-radius: 11px;
+}
 .widget-title > button:hover,
-.widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #45475a; }
-.widget-label > label { color: #6c7086; font-size: 11px; }
-.widget-dnd > switch { background: #45475a; border: none; border-radius: 12px; }
-.widget-dnd > switch:checked { background: #f9e2af; }
-.widget-dnd > switch slider { background: #cdd6f4; border-radius: 50%; }
-.widget-inhibitors > button { background: #313244; color: #cdd6f4; border: none; border-radius: 10px; }
-.widget-inhibitors > button:hover { background: #45475a; }
+.widget-buttons-grid > flowbox > flowboxchild > button:hover { background: @ctp_surface1; }
+.widget-label > label { color: @ctp_overlay1; font-size: 11px; }
+.widget-dnd > switch { background: @ctp_surface0; border: none; border-radius: 12px; box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.8); }
+.widget-dnd > switch:checked { background: @ctp_yellow; box-shadow: none; }
+.widget-dnd > switch slider { background: @ctp_text; border-radius: 50%; }
+.widget-inhibitors > button { background: @ctp_surface0; color: @ctp_text; border: none; border-radius: 11px; }
+.widget-inhibitors > button:hover { background: @ctp_surface1; }
 
-progressbar, scale highlight { background: #f9e2af; border-radius: 8px; }
-scale trough { background: #45475a; border-radius: 8px; min-height: 9px; }
-scale slider { background: #f9e2af; border: none; border-radius: 50%; min-width: 14px; min-height: 14px; margin: -3px; box-shadow: 0 1px 4px rgba(17, 17, 27, 0.6); }
-scale slider:hover { background: #d7def6; }
+progressbar, scale highlight { background: @ctp_yellow; border-radius: 8px; }
+scale trough { background: @ctp_surface0; border-radius: 8px; min-height: 9px; box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.7); }
+scale slider { background: @ctp_text; border: none; border-radius: 50%; min-width: 14px; min-height: 14px; margin: -3px; box-shadow: 0 1px 4px alpha(@ctp_crust, 0.7); }
+scale slider:hover { background: @ctp_yellow; }
 
-/* Now transmitting: the MPRIS player card. Album art is the blurred backdrop
-   of its own card; the overlay keeps titles legible over any cover. */
+/* ── Now transmitting ─────────────────────────────────────────────────────
+   The player card, and the same instrument the bar's transport is: the album
+   art is the blurred backdrop of its own card, a crust overlay keeps the
+   titles legible over any cover, and teal marks the one control that is live.
+   Cover art is arbitrary colour, so the overlay has to carry the contrast the
+   palette would otherwise supply. */
 :root {
   --mpris-album-art-icon-size: 84px;
   --widget-volume-row-icon-size: 22px;
 }
 .widget-mpris { padding: 0; }
-.widget-mpris .widget-mpris-player { margin: 0; border-radius: 14px; box-shadow: none; background: #11111b; }
+.widget-mpris .widget-mpris-player {
+  margin: 0;
+  border-radius: 14px;
+  background: @ctp_crust;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.85);
+}
 .widget-mpris .widget-mpris-player .mpris-background { filter: blur(14px); }
-.widget-mpris .widget-mpris-player .mpris-overlay { padding: 12px 14px; background: rgba(17, 17, 27, 0.72); }
-.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-album-art { border-radius: 9px; box-shadow: 0 6px 18px rgba(17, 17, 27, 0.6); }
-.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title { color: #d7def6; font-weight: bold; font-size: 13px; }
-.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: #6c7086; font-size: 11px; }
-.widget-mpris .widget-mpris-player .mpris-overlay > box > button { background: transparent; color: #cdd6f4; border-radius: 8px; padding: 2px 6px; }
-.widget-mpris .widget-mpris-player .mpris-overlay > box > button:hover { background: rgba(69, 71, 90, 0.85); color: #f9e2af; }
-.widget-mpris > box > button { background: transparent; color: #6c7086; border-radius: 8px; }
-.widget-mpris > box > button:hover { color: #d7def6; }
-.widget-mpris > box > button:disabled { color: #45475a; }
+.widget-mpris .widget-mpris-player .mpris-overlay {
+  padding: 12px 14px;
+  background: linear-gradient(180deg, alpha(@ctp_crust, 0.66), alpha(@ctp_crust, 0.88));
+}
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-album-art {
+  border-radius: 10px;
+  box-shadow: 0 8px 20px alpha(@ctp_crust, 0.75);
+}
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title { color: @ctp_text; font-weight: bold; font-size: 13px; }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: @ctp_subtext0; font-size: 11px; }
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button {
+  background: alpha(@ctp_surface0, 0.55);
+  color: @ctp_subtext0;
+  border-radius: 10px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  transition: background 140ms ease-out, color 140ms ease-out;
+}
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button:hover {
+  background: alpha(@ctp_surface1, 0.9);
+  color: @ctp_teal;
+}
+.widget-mpris > box > button { background: transparent; color: @ctp_overlay1; border-radius: 10px; }
+.widget-mpris > box > button:hover { color: @ctp_text; background: alpha(@ctp_surface0, 0.8); }
+.widget-mpris > box > button:disabled { color: @ctp_surface1; background: transparent; }
 
-/* Sound system and moonlight control: amber sliders on charcoal troughs. */
+/* Sound system and moonlight control: accent sliders on layered troughs. */
 .widget-volume, .widget-backlight { padding: 8px 12px; }
-.widget-volume label, .widget-backlight label { color: #f9e2af; font-size: 15px; margin-right: 8px; }
-.widget-volume button { background: #313244; color: #6c7086; border-radius: 8px; padding: 2px 8px; margin-left: 6px; }
-.widget-volume button:hover { background: #45475a; color: #d7def6; }
-.per-app-volume { background: rgba(49, 50, 68, 0.75); border-radius: 10px; margin: 8px 0 0; padding: 4px 6px; }
-.widget-volume row { background: transparent; border-radius: 8px; padding: 4px 6px; }
-.widget-volume row:hover { background: rgba(69, 71, 90, 0.55); }
-.widget-volume row label { color: #cdd6f4; font-size: 11px; margin: 0; }
+.widget-volume label, .widget-backlight label { color: @ctp_yellow; font-size: 15px; margin-right: 8px; }
+.widget-volume button { background: @ctp_surface0; color: @ctp_subtext0; border-radius: 9px; padding: 2px 8px; margin-left: 6px; }
+.widget-volume button:hover { background: @ctp_surface1; color: @ctp_text; }
+.per-app-volume { background: alpha(@ctp_crust, 0.75); border-radius: 12px; margin: 8px 0 0; padding: 4px 6px; box-shadow: inset 0 0 0 1px alpha(@ctp_surface0, 0.8); }
+.widget-volume row { background: transparent; border-radius: 9px; padding: 4px 6px; }
+.widget-volume row:hover { background: alpha(@ctp_surface0, 0.85); }
+.widget-volume row label { color: @ctp_subtext1; font-size: 11px; margin: 0; }
 
-/* Quick actions: charcoal keys, accent when a toggle is engaged. */
+/* Quick actions: layered keys, accent when a toggle is engaged. */
 .widget-buttons-grid { padding: 8px; }
 .widget-buttons-grid flowbox, .widget-buttons-grid flowboxchild { background: transparent; padding: 0; margin: 0; }
-.widget-buttons-grid flowboxchild > button { background: #313244; color: #cdd6f4; border: none; border-radius: 10px; margin: 3px; padding: 8px 4px; font-size: 12px; }
-.widget-buttons-grid flowboxchild > button:hover { background: #45475a; color: #d7def6; }
-.widget-buttons-grid flowboxchild > button.toggle:checked { background: #f9e2af; color: #11111b; }
-.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #d7def6; color: #11111b; }
+.widget-buttons-grid flowboxchild > button {
+  background: @ctp_surface0;
+  color: @ctp_text;
+  border: none;
+  border-radius: 12px;
+  margin: 3px;
+  padding: 8px 4px;
+  font-size: 12px;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface1, 0.6);
+  transition: background 140ms ease-out, box-shadow 140ms ease-out, color 140ms ease-out;
+}
+.widget-buttons-grid flowboxchild > button:hover {
+  background: @ctp_surface1;
+  color: @ctp_text;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_surface2, 0.8);
+}
+.widget-buttons-grid flowboxchild > button.toggle:checked {
+  background: @ctp_yellow;
+  color: @ctp_crust;
+  box-shadow: inset 0 0 0 1px alpha(@ctp_yellow, 0.9);
+}
+.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: @ctp_peach; color: @ctp_crust; }

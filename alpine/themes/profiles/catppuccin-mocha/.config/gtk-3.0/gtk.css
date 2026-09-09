@@ -1,48 +1,79 @@
-/* Catppuccin Mocha: shared GTK 3/4 semantic palette. */
-@define-color accent_bg_color #f9e2af;
-@define-color accent_fg_color #11111b;
-@define-color accent_color #f9e2af;
-@define-color window_bg_color #1e1e2e;
-@define-color window_fg_color #cdd6f4;
-@define-color view_bg_color #11111b;
-@define-color view_fg_color #cdd6f4;
-@define-color headerbar_bg_color #282839;
-@define-color headerbar_fg_color #cdd6f4;
-@define-color headerbar_border_color #45475a;
-@define-color headerbar_backdrop_color #1e1e2e;
-@define-color headerbar_shade_color rgba(17, 17, 27, 0.36);
-@define-color headerbar_darker_shade_color rgba(17, 17, 27, 0.9);
-@define-color card_bg_color #313244;
-@define-color card_fg_color #cdd6f4;
-@define-color card_shade_color rgba(17, 17, 27, 0.36);
-@define-color popover_bg_color #282839;
-@define-color popover_fg_color #cdd6f4;
-@define-color popover_shade_color rgba(17, 17, 27, 0.25);
-@define-color dialog_bg_color #282839;
-@define-color dialog_fg_color #cdd6f4;
-@define-color sidebar_bg_color #282839;
-@define-color sidebar_fg_color #b5bcd8;
-@define-color sidebar_backdrop_color #1e1e2e;
-@define-color sidebar_shade_color rgba(17, 17, 27, 0.25);
-@define-color sidebar_border_color #45475a;
-@define-color thumbnail_bg_color #313244;
-@define-color thumbnail_fg_color #cdd6f4;
-@define-color destructive_bg_color #f38ba8;
-@define-color destructive_fg_color #11111b;
-@define-color destructive_color #f38ba8;
-@define-color success_bg_color #a6e3a1;
-@define-color success_fg_color #11111b;
-@define-color success_color #a6e3a1;
-@define-color warning_bg_color #f9e2af;
-@define-color warning_fg_color #11111b;
-@define-color warning_color #f9e2af;
-@define-color error_bg_color #f38ba8;
-@define-color error_fg_color #11111b;
-@define-color error_color #f38ba8;
-@define-color shade_color rgba(17, 17, 27, 0.25);
-@define-color scrollbar_outline_color #11111b;
-@define-color panel_bg_color #11111b;
-@define-color panel_fg_color #cdd6f4;
+/* Catppuccin Mocha: shared GTK 3/4 semantic palette.
+ *
+ * The ladder is named first and every semantic colour GTK and libadwaita read
+ * is mapped onto it, so the file carries no shade that is not a declared role
+ * or a GTK colour function over one. That matters here more than in most
+ * places: this palette recoloured from a Gruvbox template picked up a pair of
+ * derived greys for the headerbar and the sidebar text that sit beside
+ * Catppuccin's surface ladder rather than on it, and a stack of chrome that
+ * is nearly-but-not-quite the theme's own surfaces is exactly what makes
+ * Mocha look muddy.
+ *
+ * The stack, lightest chrome to deepest content: headerbar and cards on
+ * surface0, windows on base, sidebars on mantle, text views on crust.
+ */
+@define-color ctp_crust     #11111b;   /* background_hard */
+@define-color ctp_base      #1e1e2e;   /* background      */
+@define-color ctp_surface0  #313244;   /* surface         */
+@define-color ctp_surface1  #45475a;   /* border          */
+@define-color ctp_surface2  #585b70;   /* surface_bright  */
+@define-color ctp_overlay0  #6c7086;   /* muted           */
+@define-color ctp_subtext0  #a6adc8;   /* subtle          */
+@define-color ctp_subtext1  #bac2de;   /* foreground_dim  */
+@define-color ctp_text      #cdd6f4;   /* foreground      */
+@define-color ctp_mantle    mix(@ctp_base, @ctp_crust, 0.5);
+@define-color ctp_overlay1  mix(@ctp_overlay0, @ctp_subtext0, 0.35);
+@define-color ctp_red       #f38ba8;
+@define-color ctp_green     #a6e3a1;
+@define-color ctp_yellow    #f9e2af;   /* accent */
+@define-color ctp_blue      #89b4fa;
+@define-color ctp_mauve     #cba6f7;   /* purple */
+@define-color ctp_teal      #94e2d5;   /* aqua   */
+@define-color ctp_peach     #fab387;   /* orange */
+@define-color accent_bg_color @ctp_yellow;
+@define-color accent_fg_color @ctp_crust;
+@define-color accent_color @ctp_yellow;
+@define-color window_bg_color @ctp_base;
+@define-color window_fg_color @ctp_text;
+@define-color view_bg_color @ctp_crust;
+@define-color view_fg_color @ctp_text;
+@define-color headerbar_bg_color @ctp_surface0;
+@define-color headerbar_fg_color @ctp_text;
+@define-color headerbar_border_color @ctp_surface1;
+@define-color headerbar_backdrop_color @ctp_base;
+@define-color headerbar_shade_color alpha(@ctp_crust, 0.36);
+@define-color headerbar_darker_shade_color alpha(@ctp_crust, 0.9);
+@define-color card_bg_color @ctp_surface0;
+@define-color card_fg_color @ctp_text;
+@define-color card_shade_color alpha(@ctp_crust, 0.36);
+@define-color popover_bg_color @ctp_surface0;
+@define-color popover_fg_color @ctp_text;
+@define-color popover_shade_color alpha(@ctp_crust, 0.25);
+@define-color dialog_bg_color @ctp_base;
+@define-color dialog_fg_color @ctp_text;
+@define-color sidebar_bg_color @ctp_mantle;
+@define-color sidebar_fg_color @ctp_subtext1;
+@define-color sidebar_backdrop_color @ctp_base;
+@define-color sidebar_shade_color alpha(@ctp_crust, 0.25);
+@define-color sidebar_border_color @ctp_surface1;
+@define-color thumbnail_bg_color @ctp_surface0;
+@define-color thumbnail_fg_color @ctp_text;
+@define-color destructive_bg_color @ctp_red;
+@define-color destructive_fg_color @ctp_crust;
+@define-color destructive_color @ctp_red;
+@define-color success_bg_color @ctp_green;
+@define-color success_fg_color @ctp_crust;
+@define-color success_color @ctp_green;
+@define-color warning_bg_color @ctp_yellow;
+@define-color warning_fg_color @ctp_crust;
+@define-color warning_color @ctp_yellow;
+@define-color error_bg_color @ctp_red;
+@define-color error_fg_color @ctp_crust;
+@define-color error_color @ctp_red;
+@define-color shade_color alpha(@ctp_crust, 0.25);
+@define-color scrollbar_outline_color @ctp_crust;
+@define-color panel_bg_color @ctp_crust;
+@define-color panel_fg_color @ctp_text;
 /* GTK applications that use the traditional theme color names. */
 @define-color theme_bg_color @window_bg_color;
 @define-color theme_fg_color @window_fg_color;
@@ -50,9 +81,9 @@
 @define-color theme_text_color @view_fg_color;
 @define-color theme_selected_bg_color @accent_bg_color;
 @define-color theme_selected_fg_color @accent_fg_color;
-@define-color insensitive_fg_color #6c7086;
-@define-color borders #45475a;
-selection { background-color: #585b70; color: #d7def6; }
+@define-color insensitive_fg_color @ctp_overlay1;
+@define-color borders @ctp_surface1;
+selection { background-color: @ctp_surface2; color: @ctp_text; }
 
 button, entry, popover > contents { border-radius: 22px; }
 button { padding: 3px 6px; }
