@@ -95,10 +95,14 @@ def main():
     if len(sys.argv) > 1:
         name = sys.argv[1]
     window = target(entry, name)
-    if window is None:
-        return 1
-    subprocess.run(['swaymsg', f'[con_id={window["id"]}]', 'focus'],
-                   capture_output=True, timeout=5)
+    if window is not None:
+        subprocess.run(['swaymsg', f'[con_id={window["id"]}]', 'focus'],
+                       capture_output=True, timeout=5)
+    # Always succeed. swaync reports any non-zero exit from a script as a
+    # notification of its own -- "Failed to run script" -- so a click on a
+    # sender with no window on screen would answer with an error about the
+    # click. Finding nothing to focus is a normal outcome of asking, not a
+    # failure, and the click simply does nothing.
     return 0
 
 

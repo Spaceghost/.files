@@ -58,7 +58,7 @@ class ClaudeNotifyTests(unittest.TestCase):
         self.assertEqual(result.stdout, '', 'empty stdout leaves the decision to Claude')
         self.assertEqual(self.notifications(), [[
             '--app-name=Claude', '--urgency=critical',
-            'Claude • Needs attention']])
+            'Claude • Waiting on you']])
 
     def test_supported_input_notifications_are_content_free(self):
         kinds = [
@@ -80,8 +80,11 @@ class ClaudeNotifyTests(unittest.TestCase):
                 })
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stdout, '')
+        # A nudge is not a catastrophe. Red is reserved for the permission
+        # request, which is Claude stopped and waiting; sending everything
+        # critical is how a desktop teaches you to ignore critical.
         expected = [[
-            '--app-name=Claude', '--urgency=critical',
+            '--app-name=Claude', '--urgency=normal',
             'Claude • Needs attention']] * len(kinds)
         self.assertEqual(self.notifications(), expected)
 
@@ -95,7 +98,7 @@ class ClaudeNotifyTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 0, completed.stderr)
         self.assertEqual(completed.stdout, '')
         self.assertEqual(self.notifications(), [[
-            '--app-name=Claude', '--urgency=normal', 'Claude • Done']])
+            '--app-name=Claude', '--urgency=low', 'Claude • Done']])
 
         for field in ('background_tasks', 'session_crons'):
             with self.subTest(field=field):

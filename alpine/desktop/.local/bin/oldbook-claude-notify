@@ -25,17 +25,25 @@ def load_event():
 
 
 def notification(payload):
+    """Urgency is a claim about regret, not about how much we care.
+
+    Red is spent only where missing it costs something you cannot get back, so
+    it is reserved for a permission request: that is Claude stopped, waiting,
+    doing nothing until you answer. An attention notice is a nudge and finishing
+    is news, and neither is worth the loudest colour the desktop owns. Sending
+    everything critical is how a desktop teaches you to ignore critical.
+    """
     event = payload.get('hook_event_name')
     if event == 'PermissionRequest':
-        return 'critical', 'Claude • Needs attention'
+        return 'critical', 'Claude • Waiting on you'
     if (event == 'Notification'
             and payload.get('notification_type') in ATTENTION_NOTIFICATIONS):
-        return 'critical', 'Claude • Needs attention'
+        return 'normal', 'Claude • Needs attention'
     if event == 'Stop':
         for field in ('background_tasks', 'session_crons'):
             if payload.get(field) != []:
                 return None
-        return 'normal', 'Claude • Done'
+        return 'low', 'Claude • Done'
     return None
 
 
