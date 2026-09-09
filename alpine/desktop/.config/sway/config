@@ -17,7 +17,7 @@ include ~/.config/sway/theme.conf
 smart_gaps off
 focus_follows_mouse yes
 mouse_warping output
-focus_on_window_activation smart
+focus_on_window_activation urgent
 
 # Stable, native panel settings.  Do not apply an unverified external display mode.
 output eDP-1 mode 2880x1800@60Hz scale 2 position 0 0
