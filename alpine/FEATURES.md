@@ -202,15 +202,16 @@ handoffs are immediate and must not leave overlapping caption surfaces.
 
 ### MOTION
 
-Blur must never reach past the gap into the next window. Dual-Kawase reaches
-about `blur_radius * 2^blur_passes`; where that exceeds the gap between windows
-the blur samples a live neighbour, and any repaint of that neighbour — which
-`focus_follows_mouse` causes on every crossing — leaves the blur smeared along
-the vertical edges where windows meet. Top and bottom edges never showed it
-because those neighbours are `blur_xray` layers with a static backdrop. Derived
-theme values must respect the same bound: deriving the blur radius from the
-corner radius alone generated 11 for a 22px corner, reaching 44px across a 13px
-gap, so the derivation is bounded by the theme's spacing instead.
+Blur reach is `2^(blur_passes + 1) * blur_radius` in SceneFX — one power of two
+larger than a first reading of dual-Kawase suggests. Reaching past the gap into
+a neighbouring window is what blur is for and is not a defect: the smearing once
+blamed on it was SceneFX skipping its own damage compensation, because a guard
+compared the damage region's bounding box rather than its coverage, and a
+software-cursor rectangle plus any distant repaint made that box output-sized.
+That is fixed upstream and carried in `alpine/packages/scenefx`. What still
+needs bounding is the derivation: the corner radius alone generated 11 for a
+22px corner, a 44 pixel reach that is expensive and muddy at any gap, so the
+derived radius is capped.
 
 Aim for at least 60fps, smooth continuous motion, preserved velocity and exact
 settling without overshoot. Use display frame clocks; stop animation when idle.

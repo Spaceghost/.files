@@ -126,12 +126,15 @@ def render_profile(repo, theme):
     change('.config/sway/theme.conf', r'^font .*', f'font pango:{font} 9.5')
     files['.config/sway/theme.conf'] += f'\ngaps inner {spacing}\ngaps outer {spacing + 1}\n'
     change('.config/swayfx/effects.conf', r'^corner_radius \d+', f'corner_radius {radius}')
-    # Blur reach is about blur_radius * 2^blur_passes and the template runs one
-    # pass, so the radius must stay within half the gap or the blur samples the
-    # neighbouring window and smears along the edge where they meet. The corner
-    # radius alone would have generated 11 here, reaching far past any gap.
+    # SceneFX reaches 2^(blur_passes + 1) * blur_radius, so one pass at radius 4
+    # samples 16 pixels, not 8. Reaching past the gap into a neighbouring window
+    # is what blur is *for* and is not the defect it was once blamed for: the
+    # smearing was SceneFX skipping its damage compensation, fixed upstream and
+    # carried in alpine/packages/scenefx. What still needs bounding is the
+    # derivation, because the corner radius alone generated 11 here -- a 44
+    # pixel reach, expensive and muddy at any gap.
     change('.config/swayfx/effects.conf', r'^blur_radius \d+',
-           f'blur_radius {max(1, min(radius // 2, spacing // 2))}')
+           f'blur_radius {max(2, min(radius // 2, 8))}')
     change('.config/foot/foot.ini', r'^pad=.*', f'pad={spacing}x{spacing} center')
     change('.config/foot/foot.ini', r'^alpha=.*', f'alpha={design["opacity"]}')
     change('.config/ghostty/config', r'^background-opacity\s*=.*', f'background-opacity = {design["opacity"]}')

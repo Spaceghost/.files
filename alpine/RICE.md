@@ -176,6 +176,19 @@ horizontally where a fade does not, with idle cost measured at zero.
 
 ### Why the blur is one pass
 
+**Corrected.** The reach arithmetic below was wrong by a factor of two, and the
+cause it names was wrong too. SceneFX reaches `2^(blur_passes + 1) *
+blur_radius`, so one pass at radius 4 is 16 pixels rather than 8 — it never did
+fit inside the 13 pixel gap. And reaching past the gap was not the defect: the
+smear was SceneFX skipping its own damage compensation, because a guard compared
+the damage region's *bounding box* to the output instead of its coverage, and a
+software-cursor rectangle plus any distant repaint made that box output-sized
+while almost nothing was damaged. Upstream fixed it a week after the 0.5 tag;
+`alpine/packages/scenefx` carries the fix. One pass is kept because it is
+cheaper, not because it fits.
+
+#### The original reasoning, left for the record
+
 Blur reaches roughly `blur_radius * 2^blur_passes`. At radius 4 and two passes
 that is about 16 pixels, and the gap between two tiled windows is 13, so the
 blur was sampling three pixels into the neighbouring window. With focus
