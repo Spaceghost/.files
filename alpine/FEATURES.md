@@ -983,6 +983,106 @@ is edited or removed. Other cards ignore right-clicks.
   [local model provenance and replay](verification/scripture-local-generation/README.md).
   Controlled-clock hourly tests do not substitute for a physical hour of observation.
 
+## Network and radio
+
+### WIFI-DECK
+
+Choosing a network away from home, from the same deck as everything else. The
+everyday page scans once when it is opened and lists what answered, folded by
+name so a network with four access points is one row rather than four, ordered
+loudest first, and marked with what a person actually decides on: whether it is
+saved, whether it will ask for a password, how loud it is and when this machine
+was last on it. That last mark is the one that separates his own network from a
+stranger broadcasting the same name. Open networks draw a different glyph from
+encrypted ones rather than the same bars, because the open one is the dangerous
+one and must not look identical at a glance.
+
+The supplicant is driven through its control socket, never by rewriting its
+configuration and restarting it: a restart drops the association, and on a
+machine whose only link is this radio that is the difference between changing
+networks and losing the session. The socket is created root-owned with no group,
+so commands go through the `doas` grant the wheel group already has; no new
+privilege is introduced. Alpine ships `wpa_supplicant.conf` without a
+`ctrl_interface` line, so nothing could be scanned or joined until
+`oldbook-wifi enable-control` adds it along with `update_config=1` and restarts
+the service once, which is the only moment the link is deliberately dropped.
+
+Two behaviours exist because getting them wrong is expensive. `select_network`
+does not merely prefer a network, it disables every other one; committed to disk
+in that state the first cafe joined would permanently disable the home network,
+so candidacy is handed back the moment the association completes. And a password
+that failed is removed rather than saved, so the configuration never accumulates
+guesses that fail again at every boot.
+
+Refusals carry the supplicant's own words. `wpa_cli` answers `FAIL` and nothing
+else, so the reason is recovered from the two places that know: the network's
+own `TEMP-DISABLED` flag after an authentication failure, and the daemon's
+sentence in the system log, which is `root:wheel` and readable without
+escalation. "The password was not accepted" is reported where the daemon said
+`WRONG_KEY`.
+
+Hovering the panel costs nothing and tells nobody. The association is described
+with `iw dev <iface> link`, which needs no privilege, answers in about three
+milliseconds, transmits nothing and reports more than the control socket does --
+it carries the negotiated bitrates, which are what say whether a link showing
+four bars is actually performing. The encryption name is the one thing `iw` will
+not give, so it is fetched from the supplicant once per association and cached
+against the access point's address rather than paid for every three seconds.
+Recent signal is drawn as a block ramp from readings the panel already took, and
+a span of one dBm reads as steady rather than as a full-scale staircase. The
+panel's standing invariant is intact: nothing on the bar ever causes a scan.
+
+Arrival and departure notices ride the panel's existing poll rather than a
+daemon. The comparison is one small file read against a name already in hand, and
+a process is spawned only when the answer changed -- spawning one every three
+seconds to discover that nothing happened is the idle cost this desktop refuses
+to pay. The spawned side does the slow work, because a captive-portal check is a
+real network request and the bar has three seconds to draw.
+
+Every network is held at a posture -- home ground, trusted, or public air --
+defaulting to the careful one for anything unrecognised, and the posture decides
+whether the hardware address is randomised for that network. Whether the driver
+honours that is a separate question this machine cannot answer in advance:
+brcmfmac is a FullMAC part and may refuse, in which case the refusal is reported
+rather than swallowed.
+
+A hotspot is possible but constrained by the radio, not by preference. The
+kernel permits one managed and one AP interface at `#channels <= 1`, so an access
+point raised while online must sit on the uplink's channel; a configured channel
+is overridden and the row says so, because a hotspot silently ignoring its
+setting is one he will think is broken. Offline the channel is a free choice and
+the air survey makes it. That survey exists because this chipset reports no
+channel occupancy and has no monitor mode -- the six interface modes it declares
+contain no `monitor`, and `survey dump` returns nothing -- so occupancy is
+inferred the way a phone's analyser infers it, from what answered a scan weighted
+by how loudly it arrived. `hostapd` and `dnsmasq` are not installed until a
+hotspot is actually wanted, and the masquerade rules live in their own nftables
+table so they can be removed without touching OpenSnitch's.
+
+Wi-Fi Direct is wired up but deliberately at the far end of the menus: a peer
+link needs no access point and coexists with the client association, which is
+genuinely useful for moving something between two laptops on an untrustworthy
+network, and is rarely the answer otherwise.
+
+Network names come off the air and are chosen by whoever owns the access point.
+They are never evaluated as shell -- every command is executed as an argument
+list -- and they are escaped for the supplicant's own configuration grammar,
+which would otherwise truncate a name at an unescaped quote.
+
+- Implementation: [reading the air](desktop/.local/lib/oldbook/wifi.py),
+  [joining and leaving](desktop/.local/lib/oldbook/wifi_join.py),
+  [hotspot and peers](desktop/.local/lib/oldbook/wifi_hotspot.py),
+  [the deck](desktop/.local/bin/oldbook-wifi),
+  [panel tooltip](desktop/.local/bin/oldbook-panel-status),
+  [bar wiring](desktop/.config/waybar/config.jsonc),
+  [notification centre](desktop/.config/swaync/config.json).
+- Checks: [wifi tests](tests/test_wifi.py).
+  Parsing, drawing, posture, channel choice, configuration generation and the
+  escaping are covered against synthetic scans, a synthetic `iw` and a fake
+  system log. Joining a real network, a real captive portal, hardware address
+  randomisation on this driver and the hotspot itself have not been exercised
+  here; they need a second machine and somewhere that is not home.
+
 ## Installation, recovery and packaging
 
 ### CODEX-PACKAGING

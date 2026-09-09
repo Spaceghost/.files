@@ -173,8 +173,9 @@
       "exec": "~/.local/bin/oldbook-panel-status network",
       "return-type": "json",
       "interval": 3,
-      "on-click": "~/.local/bin/oldbook-control network",
-      "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-control network-report",
+      "on-click": "~/.local/bin/oldbook-wifi menu",
+      "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-wifi report",
+      "on-click-middle": "foot --title=\"Air Survey\" -e ~/.local/bin/oldbook-wifi survey",
       "max-length": 14
     },
     "custom/radio": {

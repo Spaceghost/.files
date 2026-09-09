@@ -251,6 +251,13 @@ def menu(section="main"):
             "?  Help · desktop commands and shortcuts": lambda: launch(["foot", "--title=Ghost Planet Help", "-e", "less", HOME / ".files/alpine/desktop/README.md"]),
         },
         "network": {
+            # The Wi-Fi deck owns everything that transmits.  Choosing a network
+            # is why this section gets opened away from home, so it leads; the
+            # read-only report below it is why it gets opened at home.
+            "󰤨  Wi-Fi · choose a network": lambda: launch([BIN / "oldbook-wifi", "menu"]),
+            "󰉹  Known networks · saved, held and forgotten": lambda: launch([BIN / "oldbook-wifi", "known"]),
+            "󰄨  Air survey · what is on each channel": lambda: launch(["foot", "--title=Air Survey", "-e", BIN / "oldbook-wifi", "survey"]),
+            "󰀃  Hotspot · serve a network": lambda: launch([BIN / "oldbook-wifi", "hotspot"]),
             "󰤨  Connection report · no scanning": lambda: launch(["foot", "--title=Transmission Status", "-e", BIN / "oldbook-control", "network-report"]),
             "󰒃  Application firewall": firewall,
             "󰤭  Turn radios off": radio_off,

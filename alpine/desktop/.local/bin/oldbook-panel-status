@@ -9,6 +9,13 @@ import subprocess
 import sys
 import time
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib/oldbook"))
+try:
+    import wifi as _wifi
+except ImportError:                                       # pragma: no cover
+    # The panel must keep drawing on a machine without the wireless module.
+    _wifi = None
+
 
 def read(path, fallback=""):
     try:
@@ -52,6 +59,36 @@ def rate(value):
         value /= 1024
 
 
+def announce(record=None):
+    """Let the Wi-Fi deck notice an arrival or a departure, off this same poll.
+
+    Waybar already asks for this status every three seconds, so a link coming up
+    or going down is detectable for free.  Only the comparison happens here: it
+    is one small file read against a name we already have.  A process is spawned
+    solely when the answer actually changed, because spawning one every three
+    seconds to discover that nothing happened is exactly the kind of idle cost
+    this desktop refuses to pay.  The spawned side does the slow work -- a
+    captive-portal check is a real network request, and this function has a bar
+    to draw.
+    """
+    if _wifi is None:
+        return
+    ssid = (record or {}).get("ssid", "")
+    marker = _wifi.runtime() / "oldbook-wifi-last.json"
+    try:
+        previous = json.loads(marker.read_text()).get("ssid", "")
+    except (OSError, ValueError, AttributeError):
+        previous = ""
+    if ssid == previous:
+        return
+    try:
+        subprocess.Popen([str(Path(__file__).resolve().parent / "oldbook-wifi"), "announce"],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        pass
+
+
 def network():
     iface = ""
     for line in read("/proc/net/route").splitlines()[1:]:
@@ -63,7 +100,8 @@ def network():
         entries = [p for p in Path("/sys/class/net").iterdir() if p.name != "lo" and read(p / "operstate") == "up"]
         iface = entries[0].name if entries else ""
     if not iface:
-        emit("󰤭 offline", "<b>TRANSMISSION OFFLINE</b>\nNo connected interface.\n\nClick for network controls. Status never requests a scan.", "offline")
+        emit("󰤭 offline", "<b>TRANSMISSION OFFLINE</b>\nNo connected interface.\n\nLeft: choose a network. Status never requests a scan.", "offline")
+        announce({})
         return
     net = Path("/sys/class/net") / iface
     now = time.monotonic()
@@ -86,11 +124,6 @@ def network():
         temporary.replace(cache)
     except OSError:
         pass
-    signal = ""
-    for line in read("/proc/net/wireless").splitlines()[2:]:
-        fields = line.split()
-        if fields and fields[0] == f"{iface}:":
-            signal = f"\nSignal: {fields[3].rstrip('.')} dBm"
     glyph = "󰤨" if (net / "wireless").exists() else "󰈀"
     addresses = []
     try:
@@ -99,9 +132,27 @@ def network():
             addresses.extend(html.escape(addr["local"]) for addr in item.get("addr_info", []) if addr.get("scope") == "global")
     except (OSError, ValueError, subprocess.TimeoutExpired):
         pass
-    tooltip = f"<b>TRANSMISSION · {html.escape(iface)}</b>\n↓ {rate(down)}/s  ↑ {rate(up)}/s{signal}\n" + "\n".join(addresses)
-    tooltip += "\n\nKernel counters and address data only; no Wi-Fi scan.\nLeft: controls · Right: connection report\nHover to reveal radio and firewall status."
-    emit(f"{glyph} ↓{rate(down)}", tooltip, "connected")
+    # The wireless detail is read from `iw`, which transmits nothing: the
+    # association already exists and this only asks the driver to describe it.
+    # The invariant this panel has always kept -- that hovering never causes a
+    # scan -- is intact.
+    wireless, association = [], {}
+    if _wifi is not None and (net / "wireless").exists():
+        try:
+            association = _wifi.link(iface)
+            wireless = _wifi.hover_lines(iface)
+        except (OSError, ValueError, subprocess.SubprocessError):
+            wireless, association = [], {}
+    lines = [f"<b>TRANSMISSION · {html.escape(iface)}</b>"]
+    lines += [html.escape(line) for line in wireless]
+    lines.append(f"↓ {rate(down)}/s  ↑ {rate(up)}/s")
+    lines += addresses
+    lines.append("")
+    lines.append("No Wi-Fi scan is requested to draw this.")
+    lines.append("Left: choose a network · Right: connection report")
+    lines.append("Hover to reveal radio and firewall status.")
+    emit(f"{glyph} ↓{rate(down)}", "\n".join(lines), "connected")
+    announce(association)
 
 
 def notifications():

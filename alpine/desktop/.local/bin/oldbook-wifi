@@ -1,0 +1,802 @@
+#!/usr/bin/env python3
+"""The Wi-Fi deck: what is on the air, what to join, and what to serve.
+
+Fixed actions only.  Network names come off the air and are chosen by whoever
+owns the access point, so they are never evaluated as shell: every command here
+is executed as an argument list, and a network calling itself `; rm -rf ~` is
+just a badly named network.
+
+The deck reports before it offers, like the command deck it hangs off.  A row
+says whether the network is saved, how loud it is, whether it will ask for a
+password and when he was last on it, because those four together are what
+separates his own network from a stranger using the same name.
+"""
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import time
+
+BIN = Path(__file__).resolve().parent
+sys.path.insert(0, str(BIN.parent / "lib/oldbook"))
+sys.path.insert(0, str(Path.home() / ".local/lib/oldbook"))
+
+import wifi                                          # noqa: E402
+import wifi_join as join                             # noqa: E402
+import wifi_hotspot as hotspot                       # noqa: E402
+from wifi import WifiError                           # noqa: E402
+
+FUZZEL = BIN / "oldbook-fuzzel"
+ON, OFF = "◉", "◌"
+PICKED, UNPICKED = "●", "○"
+KEY_COLUMN = 52
+TRUST_GLYPH = {"home": "\U000f02dc", "trusted": "\U000f0565", "public": "\U000f01e7"}
+TRUST_WORD = {"home": "home ground", "trusted": "trusted", "public": "public air"}
+
+
+def run(arguments, **kwargs):
+    return subprocess.run([str(a) for a in arguments], check=False, **kwargs)
+
+
+def notify(title, body="", urgency="normal"):
+    run(["notify-send", "-u", urgency, "-a", "Wi-Fi", title, body])
+
+
+def launch(arguments):
+    subprocess.Popen([str(a) for a in arguments], start_new_session=True,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def columns(text):
+    """Roughly how wide a string is, counting the private-use glyphs as two."""
+    return sum(2 if ord(character) > 0xF0000 else 1 for character in text)
+
+
+def row(glyph, text, tail=""):
+    label = f"{glyph}  {text}"
+    if not tail:
+        return label
+    return label + " " * max(2, KEY_COLUMN - columns(label)) + tail
+
+
+def rule(name):
+    return f"──  {name}  " + "─" * max(3, KEY_COLUMN + 6 - columns(name))
+
+
+def choose(title, options, lines=18):
+    if not shutil.which(str(FUZZEL)):
+        raise WifiError("The picker is not installed.", f"{FUZZEL} is missing.")
+    answer = run([FUZZEL, "--dmenu", "--prompt", f" {title} › ", "--width", "68",
+                  "--lines", str(max(1, min(lines, len(options))))],
+                 input="\n".join(options) + "\n", text=True, capture_output=True)
+    return answer.stdout.strip() if answer.returncode == 0 else ""
+
+
+def ask(title, placeholder="", secret=False):
+    """One line of free text.  `--prompt-only` is fuzzel's own text-entry mode."""
+    arguments = [FUZZEL, "--dmenu", "--prompt-only", f" {title} › ", "--width", "48"]
+    if placeholder:
+        arguments += ["--placeholder", placeholder]
+    if secret:
+        arguments += ["--password"]
+    answer = run(arguments, input="", text=True, capture_output=True)
+    return answer.stdout.strip() if answer.returncode == 0 else ""
+
+
+def confirm(question, yes, no="Leave it alone"):
+    answer = choose(question, [f"{OFF}  {no}", f"{ON}  {yes}"], lines=2)
+    return answer.startswith(ON)
+
+
+def hold():
+    print("\nPress Enter to return to the deck.")
+    try:
+        input()
+    except EOFError:
+        pass
+
+
+def guard(action):
+    """Run one deck action, turning any refusal into a notification he can read."""
+    try:
+        return action()
+    except WifiError as error:
+        notify("Wi-Fi", error.told(), urgency="critical")
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        notify("Wi-Fi", f"The radio could not be reached.\n{error}", urgency="critical")
+    return None
+
+
+# --- what is on the air -----------------------------------------------------
+
+def describe_current(iface=""):
+    """The association as a record the menus and the panel can both read.
+
+    Built from `iw`, not from the supplicant.  The association exists whether or
+    not the control socket has ever been opened, and describing it must not
+    depend on being able to command it -- otherwise the report would announce
+    'not associated' to somebody plainly online, which is worse than saying
+    nothing.  The socket is asked only for the two things `iw` does not carry,
+    and only when it is there.
+    """
+    record = wifi.link(iface)
+    if not record:
+        return {}
+    found = {
+        "ssid": record.get("ssid", ""), "bssid": record.get("bssid", ""),
+        "signal": record.get("signal"), "step": record.get("step", 0),
+        "quality": record.get("quality", ""),
+        "frequency": record.get("frequency", 0),
+        "channel": record.get("channel", 0), "band": record.get("band", ""),
+        "rx_bitrate": record.get("rx_bitrate"), "tx_bitrate": record.get("tx_bitrate"),
+        "security": wifi.association_security(record.get("bssid", ""), iface),
+        "address": join.address_of(iface),
+        "state": "COMPLETED",
+    }
+    if wifi.socket_ready(iface):
+        supplicant = wifi.status(iface)
+        found["security"] = supplicant.get("key_mgmt") or found["security"]
+        found["address"] = supplicant.get("ip_address") or found["address"]
+    return found
+
+
+def network_row(entry, saved_names, current, preference):
+    """One network as a line: loud enough, locked or not, ours or a stranger's."""
+    security = entry["security"]
+    glyph = wifi.bars(entry["signal"], locked=not security["open"])
+    marks = []
+    if entry["ssid"] == current:
+        marks.append("connected")
+    elif entry["ssid"] in saved_names:
+        marks.append("saved")
+    if security["open"]:
+        marks.append("unsecured")
+    else:
+        marks.append(security["name"])
+    marks.append(entry["quality"])
+    if entry["access_points"] > 1:
+        marks.append(f"{entry['access_points']} APs")
+    seen = join.logbook().get(entry["ssid"]) or {}
+    if seen.get("last_seen") and entry["ssid"] != current:
+        marks.append(f"last {join.since(seen['last_seen'])}")
+    trust = wifi.trust_of(entry["ssid"], preference)
+    tail = f"{TRUST_GLYPH.get(trust, '')} {entry['band']}"
+    return row(glyph, f"{entry['ssid']} · " + " · ".join(marks), tail)
+
+
+def menu(argv=()):
+    """The everyday page: scan, then join something."""
+    preference = wifi.preferences()
+    if not wifi.socket_ready():
+        return control_missing()
+    current = describe_current()
+    notify("Wi-Fi", "Listening…") if "--quiet" not in argv else None
+    networks = wifi.scan()
+    saved = {entry["ssid"]: entry for entry in wifi.saved()}
+    options, actions = [], {}
+
+    def add(label, action):
+        options.append(label)
+        actions[label] = action
+
+    options.append(rule("ON THE AIR"))
+    for entry in networks:
+        label = network_row(entry, saved, current.get("ssid", ""), preference)
+        add(label, lambda e=entry: join_network(e, saved, preference))
+    if not networks:
+        options.append(row("\U000f092d", "Nothing answered the scan"))
+
+    options.append(rule("THE SHIP"))
+    add(row("\U000f0450", "Scan again"), lambda: menu(("--quiet",)))
+    if current:
+        add(row("\U000f092d", f"Disconnect from {current['ssid']}"), disconnect_now)
+    add(row("\U000f05f9", "Join a hidden network…"), lambda: join_hidden(preference))
+    add(row("\U000f0279", f"Known networks · {len(saved)} saved"), lambda: known_page(preference))
+    add(row("\U000f0128", "Air survey · what is on each channel"),
+        lambda: terminal("Air Survey", "survey"))
+    add(row("\U000f099d", "Shields · how this network is held"), lambda: shields_page(preference))
+    add(row("\U000f0003", "Hotspot · serve a network"), lambda: hotspot_page(preference))
+    add(row("\U000f02fc", "Connection report"), lambda: terminal("Transmission Status", "report"))
+
+    selected = choose("WI-FI", options, lines=min(20, len(options)))
+    if selected in actions:
+        guard(actions[selected])
+    elif selected.startswith("──"):
+        menu(("--quiet",))
+
+
+def control_missing():
+    """The one failure that is a configuration state rather than a fault."""
+    if confirm("WI-FI CANNOT BE COMMANDED YET",
+               "Open the supplicant's control socket (brief drop)",
+               "Leave the radio as it is"):
+        return guard(enable_control)
+    notify("Wi-Fi",
+           "wpa_supplicant has no control interface, so networks cannot be "
+           "scanned or joined. Run: oldbook-wifi enable-control")
+    return None
+
+
+def join_network(entry, saved, preference):
+    """Join one network, asking only for what it actually needs."""
+    ssid = entry["ssid"]
+    security = entry["security"]
+    existing = saved.get(ssid)
+    if existing:
+        record = join.activate(existing["id"])
+        return arrived(record, ssid)
+    kind = security["kind"]
+    secret = identity = ""
+    if kind == "eap":
+        identity = ask(f"{ssid} · identity", "username or user@domain")
+        if not identity:
+            return None
+        secret = ask(f"{ssid} · password", secret=True)
+        if not secret:
+            return None
+    elif kind != "open":
+        secret = ask(f"{ssid} · password", secret=True)
+        if not secret:
+            return None
+        if len(secret) < 8 and kind in ("psk", "sae"):
+            notify("Wi-Fi", "A WPA password is at least eight characters; nothing was changed.")
+            return None
+    trust = wifi.trust_of(ssid, preference)
+    mac = ((preference.get("shields") or {}).get(trust) or {}).get("mac", "")
+    identifier = join.create(ssid, security=kind, secret=secret, identity=identity,
+                             mac=mac)
+    try:
+        record = join.activate(identifier)
+    except WifiError:
+        # The password was a guess and the guess was wrong; do not leave it in
+        # the configuration file to fail again at every boot.
+        try:
+            wifi.wpa("remove_network", identifier)
+        except (WifiError, OSError):
+            pass
+        raise
+    join.commit()
+    return arrived(record, ssid)
+
+
+def join_hidden(preference):
+    ssid = ask("HIDDEN NETWORK · name", "exact name, case sensitive")
+    if not ssid:
+        return None
+    kinds = {row("\U000f033e", "WPA2 or WPA3 password"): "psk",
+             row("\U000f099d", "Enterprise · identity and password"): "eap",
+             row("\U000f05f9", "Open · no password"): "open"}
+    picked = choose(f"{ssid} · SECURITY", list(kinds), lines=3)
+    if picked not in kinds:
+        return None
+    kind = kinds[picked]
+    identity = ask(f"{ssid} · identity") if kind == "eap" else ""
+    if kind == "eap" and not identity:
+        return None
+    secret = ask(f"{ssid} · password", secret=True) if kind != "open" else ""
+    if kind != "open" and not secret:
+        return None
+    trust = wifi.trust_of(ssid, preference)
+    mac = ((preference.get("shields") or {}).get(trust) or {}).get("mac", "")
+    identifier = join.create(ssid, security=kind, secret=secret, identity=identity,
+                             hidden=True, mac=mac)
+    try:
+        record = join.activate(identifier)
+    except WifiError:
+        try:
+            wifi.wpa("remove_network", identifier)
+        except (WifiError, OSError):
+            pass
+        raise
+    join.commit()
+    return arrived(record, ssid)
+
+
+def disconnect_now():
+    join.disconnect()
+    notify("Wi-Fi", "Disconnected. The radio is still on; nothing will be rejoined "
+                    "until you choose a network.")
+
+
+def stamp(ssid):
+    """Record which network we are on, so `announce` knows this is not news."""
+    marker = wifi.runtime() / "oldbook-wifi-last.json"
+    try:
+        temporary = marker.with_suffix(f".{os.getpid()}.tmp")
+        temporary.write_text(json.dumps({"ssid": ssid, "at": time.time()}))
+        os.chmod(temporary, 0o600)
+        temporary.replace(marker)
+    except OSError:
+        pass
+
+
+def arrived(record, ssid):
+    """Say where we landed, and start the checks that need the network up.
+
+    The marker is stamped before the report is spawned.  Without that, the
+    panel's next poll would see the network change it had not yet been told
+    about and announce the same arrival a second time.
+    """
+    address = record.get("ip_address") or join.address_of()
+    join.record_arrival(ssid, address, record.get("bssid", ""))
+    stamp(ssid)
+    launch([BIN / "oldbook-wifi", "landed", ssid])
+    return record
+
+
+# --- the pages behind the everyday one --------------------------------------
+
+def known_page(preference=None):
+    """Every saved network, and what can be done to it without a scan."""
+    preference = preference or wifi.preferences()
+    entries = wifi.saved()
+    if not entries:
+        notify("Wi-Fi", "Nothing is saved yet.")
+        return None
+    options, actions = [], {}
+    log = join.logbook()
+    for entry in entries:
+        seen = log.get(entry["ssid"]) or {}
+        marks = []
+        if entry["current"]:
+            marks.append("connected")
+        if entry["disabled"]:
+            marks.append("disabled")
+        if seen.get("joins"):
+            marks.append(f"{seen['joins']} joins")
+        if seen.get("last_seen"):
+            marks.append(join.since(seen["last_seen"]))
+        trust = wifi.trust_of(entry["ssid"], preference)
+        label = row(TRUST_GLYPH.get(trust, "\U000f0279"),
+                    entry["ssid"] + (" · " + " · ".join(marks) if marks else ""),
+                    TRUST_WORD.get(trust, ""))
+        options.append(label)
+        actions[label] = lambda e=entry: known_actions(e, preference)
+    options.append(rule("THE LIST"))
+    export = row("\U000f0207", "Export the list to the other laptops")
+    options.append(export)
+    actions[export] = export_list
+    restore = row("\U000f01da", "Import a list from another laptop")
+    options.append(restore)
+    actions[restore] = import_list
+    selected = choose("KNOWN NETWORKS", options, lines=min(20, len(options)))
+    if selected in actions:
+        guard(actions[selected])
+
+
+def known_actions(entry, preference):
+    ssid = entry["ssid"]
+    trust = wifi.trust_of(ssid, preference)
+    options = {}
+    if not entry["current"]:
+        options[row("\U000f0928", "Connect now")] = lambda: join.activate(entry["id"])
+    options[row("\U000f099d", f"Held as · {TRUST_WORD.get(trust, trust)}")] = \
+        lambda: trust_page(ssid, preference)
+    if entry["disabled"]:
+        options[row(ON, "Enable · may be joined automatically")] = \
+            lambda: (wifi.wpa("enable_network", entry["id"]), join.commit())
+    else:
+        options[row(OFF, "Disable · keep it, but never join it automatically")] = \
+            lambda: (wifi.wpa("disable_network", entry["id"]), join.commit())
+    options[row("\U000f0143", "Prefer this one · join it before the others")] = \
+        lambda: promote_network(entry)
+    options[row("\U000f01b4", "Forget this network")] = lambda: forget_network(entry)
+    selected = choose(ssid.upper(), list(options), lines=len(options))
+    if selected in options:
+        guard(options[selected])
+
+
+def forget_network(entry):
+    if confirm(f"FORGET {entry['ssid'].upper()}?", "Forget it and its password"):
+        join.forget(entry["id"], entry["ssid"])
+        notify("Wi-Fi", f"{entry['ssid']} forgotten, with its password.")
+
+
+def trust_page(ssid, preference=None):
+    """How much of the ship to close up when we are on this network."""
+    preference = preference or wifi.preferences()
+    current = wifi.trust_of(ssid, preference)
+    options = {}
+    for trust in wifi.TRUSTS:
+        shields = (preference.get("shields") or {}).get(trust) or {}
+        detail = f"hardware address {shields.get('mac', 'permanent')}"
+        mark = PICKED if trust == current else UNPICKED
+        options[row(TRUST_GLYPH.get(trust, ""), f"{mark} {TRUST_WORD[trust]} · {detail}")] = trust
+    selected = choose(f"{ssid.upper()} · HELD AS", list(options), lines=len(options))
+    if selected in options:
+        wifi.remember(ssid, trust=options[selected])
+        notify("Wi-Fi", f"{ssid} is now held as {TRUST_WORD[options[selected]]}. "
+                        "It takes effect the next time you join it.")
+
+
+def shields_page(preference=None):
+    """What each posture does, and which one the current network is held at."""
+    preference = preference or wifi.preferences()
+    current = describe_current()
+    ssid = current.get("ssid", "")
+    options = {}
+    if ssid:
+        options[row("\U000f099d", f"{ssid} · held as {TRUST_WORD.get(wifi.trust_of(ssid, preference))}")] = \
+            lambda: trust_page(ssid, preference)
+    for key, name, on, off in (
+            ("notifications", "Arrival notices", "the deck says where you landed", "silence"),
+            ("portal_check", "Sign-in detection", "check for a captive portal", "never check"),
+            ("scan_randomization", "Scan address randomising",
+             "scan with a random address", "scan with the real one"),
+            ("sound", "Sound on arrival", "a cue when the link comes up", "silence")):
+        value = preference.get(key) is not False if key != "sound" else bool(preference.get(key))
+        options[row("\U000f099d" if value else "\U000f099c",
+                    f"{name} · {ON if value else OFF} {on if value else off}")] = \
+            (lambda k=key, v=value: toggle_preference(k, not v))
+    selected = choose("SHIELDS", list(options), lines=len(options))
+    if selected in options:
+        guard(options[selected])
+
+
+def toggle_preference(key, value):
+    preference = wifi.preferences()
+    preference[key] = value
+    wifi.save_preferences(preference)
+    notify("Wi-Fi", f"{key.replace('_', ' ').capitalize()} is now {'on' if value else 'off'}.")
+    if key == "scan_randomization":
+        guard(lambda: wifi.wpa("set", "preassoc_mac_addr", "1" if value else "0"))
+
+
+def promote_network(entry):
+    value = join.promote(entry["id"])
+    notify("Wi-Fi", f"{entry['ssid']} will be joined before the others "
+                    f"(priority {value}).")
+
+
+def import_list():
+    source = ask("IMPORT FROM", str(Path.home() / "wifi-networks.json"))
+    if not source:
+        return
+    restored, pending = join.import_saved(Path(source).expanduser())
+    notify("Wi-Fi", f"{restored} network(s) restored to their postures.\n"
+                    + (f"{pending} still need a password before they will join."
+                       if pending else "All of them are already saved here."))
+
+
+def export_list():
+    destination = Path.home() / "wifi-networks.json"
+    count = join.export_saved(destination)
+    notify("Wi-Fi", f"{count} networks written to {destination}.\n"
+                    "Passwords are not included; the supplicant will not hand them back.")
+
+
+# --- hotspot and the far end ------------------------------------------------
+
+def hotspot_page(preference=None):
+    preference = preference or wifi.preferences()
+    absent = hotspot.missing_tools()
+    options = {}
+    if hotspot.running():
+        clients = hotspot.clients()
+        options[row("\U000f0003", f"Take the hotspot down · {len(clients)} connected")] = stop_hotspot
+        options[row("\U000f02fc", "Who is connected")] = lambda: terminal("Hotspot", "hotspot-report")
+    elif absent:
+        options[row("\U000f01da",
+                    f"Install what the hotspot needs · {', '.join(absent)}")] = \
+            lambda: install_hotspot(absent)
+    else:
+        options[row("\U000f0003", "Raise the hotspot")] = lambda: start_hotspot(preference)
+    settings = preference.get("hotspot") or {}
+    options[row("\U000f02dc", f"Name · {settings.get('ssid', 'Ghost Planet')}")] = rename_hotspot
+    options[row("\U000f033e", "Show the password")] = show_hotspot_password
+    options[row("\U000f0318", "Wi-Fi Direct · talk straight to a peer")] = direct_page
+    selected = choose("HOTSPOT", list(options), lines=len(options))
+    if selected in options:
+        guard(options[selected])
+
+
+def install_hotspot(absent):
+    if not confirm("INSTALL " + " AND ".join(a.upper() for a in absent) + "?",
+                   f"Install {' and '.join(absent)} from the Alpine repository"):
+        return
+    result = run(["doas", "-n", "apk", "add", *absent], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise WifiError("The packages could not be installed.",
+                        (result.stderr or result.stdout or "").strip())
+    notify("Wi-Fi", f"{' and '.join(absent)} installed. The hotspot can be raised now.")
+
+
+def start_hotspot(preference):
+    networks = [] if wifi.status().get("wpa_state") == "COMPLETED" else wifi.scan()
+    record = hotspot.start(preference, networks)
+    notify("Hotspot up",
+           f"{record['ssid']} on {record['why']}.\nPassword: {record['passphrase']}\n"
+           + ("Sharing this machine's connection." if record["shared"]
+              else "Local only; there is no uplink to share."))
+
+
+def stop_hotspot():
+    told = hotspot.stop()
+    notify("Hotspot down", "; ".join(told) + ".")
+
+
+def rename_hotspot():
+    preference = wifi.preferences()
+    settings = dict(preference.get("hotspot") or {})
+    name = ask("HOTSPOT NAME", settings.get("ssid", "Ghost Planet"))
+    if not name:
+        return
+    settings["ssid"] = name
+    preference["hotspot"] = settings
+    wifi.save_preferences(preference)
+    notify("Hotspot", f"It will be called {name} the next time it is raised.")
+
+
+def show_hotspot_password():
+    notify("Hotspot password", hotspot.passphrase())
+
+
+def direct_page():
+    """Wi-Fi Direct, kept at the far end because it is rarely the answer."""
+    peers = hotspot.p2p_peers()
+    options = {}
+    options[row("\U000f0450", f"Look for peers · {len(peers)} known")] = direct_find
+    for peer in peers:
+        label = row("\U000f0318", f"{peer['name'] or peer['address']} · {peer['address']}")
+        options[label] = lambda p=peer: direct_connect(p)
+    if peers:
+        options[row("\U000f01b4", "Forget the peers found so far")] = hotspot.p2p_stop
+    selected = choose("WI-FI DIRECT", list(options), lines=max(2, len(options)))
+    if selected in options:
+        guard(options[selected])
+
+
+def direct_find():
+    notify("Wi-Fi Direct", "Looking for peers for eight seconds…")
+    peers = hotspot.p2p_find(8)
+    notify("Wi-Fi Direct", f"{len(peers)} peer(s) answered." if peers
+           else "No peer answered. The other device has to be discoverable too.")
+    direct_page()
+
+
+def direct_connect(peer):
+    if not confirm(f"CONNECT TO {(peer['name'] or peer['address']).upper()}?",
+                   "Push-button connect · confirm on the other device too"):
+        return
+    hotspot.p2p_connect(peer["address"], "pbc")
+    notify("Wi-Fi Direct", f"Asked {peer['name'] or peer['address']} to connect. "
+                           "Accept it on the other device.")
+
+
+# --- what runs after we land ------------------------------------------------
+
+def landed(argv):
+    """Everything worth doing once, after an association, off the panel's path.
+
+    This is spawned detached rather than run inside the status poll, because a
+    captive-portal check is a real network request and the panel has three
+    seconds to answer.
+    """
+    ssid = argv[0] if argv else describe_current().get("ssid", "")
+    preference = wifi.preferences()
+    current = describe_current()
+    if not current:
+        return
+    trust = wifi.trust_of(ssid, preference)
+    lines = [f"{current.get('address') or 'no address yet'} · {current.get('band', '')}"
+             f" · {current.get('quality', '')}"]
+    lines.append(f"Held as {TRUST_WORD.get(trust, trust)}.")
+    if preference.get("sound"):
+        run([BIN / "oldbook-sound", "tick"])
+    portal = join.portal_state(preference)
+    if portal["state"] == "portal":
+        notify(f"{ssid} wants a sign-in", portal["detail"] +
+               "\nOpen the sign-in page from the Wi-Fi deck.", urgency="critical")
+        launch([BIN / "oldbook-wifi", "portal-open"])
+        return
+    if portal["state"] == "open":
+        lines.append("The connection reaches the internet.")
+    if preference.get("notifications") is not False:
+        notify(f"On {ssid}", "\n".join(lines))
+
+
+def portal_open():
+    """Put the sign-in page in front of him rather than describing it."""
+    portal = join.portal_state()
+    url = portal.get("url") or "http://neverssl.com/"
+    for browser in ("xdg-open", "firefox", "chromium"):
+        if shutil.which(browser):
+            launch([browser, url])
+            return
+    notify("Wi-Fi", f"No browser is installed to open {url}.")
+
+
+def announce():
+    """Notice a link coming up or going down, from the panel's existing poll.
+
+    There is no daemon here on purpose.  Waybar already asks for the network
+    status every three seconds; comparing that answer with the last one is free,
+    and it means arrival notices cost nothing when nothing is happening.
+    """
+    preference = wifi.preferences()
+    marker = wifi.runtime() / "oldbook-wifi-last.json"
+    current = describe_current()
+    ssid = current.get("ssid", "")
+    try:
+        previous = json.loads(marker.read_text())
+    except (OSError, ValueError):
+        previous = {}
+    was = previous.get("ssid", "")
+    if ssid != was:
+        stamp(ssid)
+        if ssid:
+            join.record_arrival(ssid, current.get("address", ""), current.get("bssid", ""))
+            launch([BIN / "oldbook-wifi", "landed", ssid])
+        elif was and preference.get("notifications") is not False:
+            notify("Link lost", f"{was} is no longer associated.", urgency="critical")
+
+
+# --- reports ----------------------------------------------------------------
+
+def terminal(title, action):
+    launch(["foot", f"--title={title}", "-e", BIN / "oldbook-wifi", action])
+
+
+def survey():
+    """What is on each channel, drawn rather than tabulated.
+
+    This radio is FullMAC: there is no monitor mode and no channel survey to
+    read, so occupancy is inferred the way a phone's analyser infers it, from
+    what answered a scan weighted by how loudly it arrived.
+    """
+    print("\033[1;35mSPACE GHOST · AIR SURVEY\033[0m\n")
+    try:
+        networks = wifi.scan()
+    except WifiError as error:
+        print(error.told())
+        return hold()
+    if not networks:
+        print("Nothing answered the scan.")
+        return hold()
+    loads = wifi.congestion(networks)
+    peak = max((entry["weight"] for entry in loads), default=1.0) or 1.0
+    print(f"{len(networks)} networks on {len(loads)} channels.\n")
+    for entry in sorted(loads, key=lambda e: (e["band"], e["channel"])):
+        filled = int(round(entry["weight"] / peak * 18))
+        bar = wifi.SEGMENTS[0] * filled + wifi.SEGMENTS[1] * (18 - filled)
+        print(f"  {entry['band']:<8} ch {entry['channel']:>3}  {bar}  "
+              f"{entry['count']} network{'s' if entry['count'] != 1 else ''}, "
+              f"strongest {entry['strongest']} dBm")
+    print("\n  Quietest 2.4 GHz channel:", wifi.quietest_channel(networks, "2.4"))
+    print("  Quietest 5 GHz channel:  ", wifi.quietest_channel(networks, "5"))
+    print("\n\033[1mNetworks\033[0m\n")
+    for entry in networks:
+        glyph = wifi.bars(entry["signal"], locked=not entry["security"]["open"])
+        print(f"  {glyph}  {entry['ssid'][:28]:<28} {entry['signal']:>4} dBm  "
+              f"ch {entry['channel']:>3}  {entry['security']['name']}")
+    print("\nOccupancy is inferred from scan responses; this chipset reports no "
+          "channel survey and has no monitor mode.")
+    hold()
+
+
+def report():
+    print("\033[1;35mSPACE GHOST · TRANSMISSION REPORT\033[0m\n")
+    current = describe_current()
+    if not current:
+        print("Not associated with any network.\n")
+    else:
+        history = wifi.signal_history()
+        print(f"  Network    {current['ssid']}")
+        print(f"  Access pt  {current['bssid']}")
+        print(f"  Signal     {current['signal']} dBm · {current['quality']} "
+              f"{wifi.bars(current['signal'])}")
+        if len(history) > 1:
+            print(f"  Recent     {wifi.sparkline(history)}")
+        print(f"  Radio      {current['band']} · channel {current['channel']}")
+        print(f"  Security   {current['security']}")
+        print(f"  Address    {current['address'] or 'none'}")
+        print(f"  Held as    {TRUST_WORD.get(wifi.trust_of(current['ssid']))}\n")
+    print("Interfaces:")
+    run(["ip", "-brief", "address"])
+    print("\nRoutes:")
+    run(["ip", "route"])
+    if hotspot.running():
+        print("\nHotspot is up. Clients:")
+        for client in hotspot.clients():
+            print(f"  {client['address']:<15} {client['name'] or client['mac']}")
+    hold()
+
+
+def hotspot_report():
+    print("\033[1;35mSPACE GHOST · HOTSPOT\033[0m\n")
+    if not hotspot.running():
+        print("The hotspot is not up.")
+        return hold()
+    print(f"  Name       {(wifi.preferences().get('hotspot') or {}).get('ssid')}")
+    print(f"  Password   {hotspot.passphrase()}")
+    print(f"  Address    {hotspot.AP_ADDRESS}\n")
+    clients = hotspot.clients()
+    print(f"{len(clients)} client{'s' if len(clients) != 1 else ''} connected.\n")
+    for client in clients:
+        print(f"  {client['address']:<15} {client['name'] or '(unnamed)':<24} {client['mac']}")
+    hold()
+
+
+def enable_control():
+    """Open the supplicant's control socket, which is what makes any of this possible.
+
+    The socket is created at start-up from the configuration file, so this is a
+    root edit and a restart.  The restart drops the association for a few
+    seconds; on a machine whose only link is this radio that is worth saying out
+    loud before it happens rather than after.
+    """
+    body = subprocess.run(["doas", "-n", "cat", str(wifi.SUPPLICANT_CONF)],
+                          capture_output=True, text=True, check=False)
+    if body.returncode != 0:
+        raise WifiError("The supplicant's configuration could not be read.",
+                        (body.stderr or "").strip())
+    existing = body.stdout
+    wanted = []
+    if "ctrl_interface=" not in existing:
+        wanted.append("ctrl_interface=DIR=/run/wpa_supplicant")
+    if "update_config=" not in existing:
+        # Without this the daemon will not write networks back, so every network
+        # joined would be forgotten at the next boot.
+        wanted.append("update_config=1")
+    if not wanted:
+        notify("Wi-Fi", "The control interface is already configured. "
+                        "If it still is not answering, restart wpa_supplicant.")
+        return
+    merged = "\n".join(wanted) + "\n" + existing
+    result = subprocess.run(["doas", "-n", "tee", str(wifi.SUPPLICANT_CONF)],
+                            input=merged, capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        raise WifiError("The supplicant's configuration could not be written.",
+                        (result.stderr or "").strip())
+    restart = run(["doas", "-n", "rc-service", "wpa_supplicant", "restart"],
+                  capture_output=True, text=True)
+    if restart.returncode != 0:
+        raise WifiError("wpa_supplicant would not restart.",
+                        (restart.stderr or restart.stdout or "").strip())
+    for _ in range(20):
+        if wifi.socket_ready():
+            break
+        time.sleep(0.5)
+    join.renew_lease(fresh=False)
+    notify("Wi-Fi", "The control socket is open. Networks can be scanned and joined now."
+           if wifi.socket_ready() else
+           "wpa_supplicant restarted but the socket still is not there; check its log.")
+
+
+def status_json():
+    """The association as JSON, for anything that would rather not import this."""
+    current = describe_current()
+    print(json.dumps({"connected": bool(current), **current,
+                      "hotspot": hotspot.running(),
+                      "control": wifi.socket_ready()}, indent=2))
+
+
+ACTIONS = {
+    "menu": lambda argv: menu(argv), "known": lambda argv: guard(known_page),
+    "survey": lambda argv: survey(), "report": lambda argv: report(),
+    "hotspot": lambda argv: guard(hotspot_page),
+    "hotspot-report": lambda argv: hotspot_report(),
+    "direct": lambda argv: guard(direct_page),
+    "shields": lambda argv: guard(shields_page),
+    "landed": lambda argv: landed(argv), "announce": lambda argv: announce(),
+    "portal-open": lambda argv: portal_open(),
+    "enable-control": lambda argv: guard(enable_control),
+    "status": lambda argv: status_json(),
+}
+
+
+def main(argv):
+    action = argv[0] if argv else "menu"
+    if action not in ACTIONS:
+        raise SystemExit("usage: oldbook-wifi {" + "|".join(ACTIONS) + "}")
+    ACTIONS[action](argv[1:])
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main(sys.argv[1:]))
+    except KeyboardInterrupt:
+        raise SystemExit(130)

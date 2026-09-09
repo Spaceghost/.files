@@ -894,6 +894,25 @@
         "test_theme_boundary.py"
       ],
       "evidence": []
+    },
+    {
+      "id": "WIFI-DECK",
+      "paths": [
+        "alpine/desktop/.local/lib/oldbook/wifi.py",
+        "alpine/desktop/.local/lib/oldbook/wifi_join.py",
+        "alpine/desktop/.local/lib/oldbook/wifi_hotspot.py",
+        "alpine/desktop/.local/bin/oldbook-wifi",
+        "alpine/desktop/.local/bin/oldbook-panel-status",
+        "alpine/desktop/.local/bin/oldbook-network",
+        "alpine/desktop/.config/waybar/config.jsonc",
+        "alpine/desktop/.config/swaync/config.json",
+        "alpine/tests/test_wifi.py"
+      ],
+      "tests": [
+        "test_wifi.py",
+        "test_panel_status.py"
+      ],
+      "evidence": []
     }
   ]
 }
