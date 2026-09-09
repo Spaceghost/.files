@@ -116,6 +116,9 @@ def main():
     parser.add_argument('--output', type=Path, required=True, help='New evidence directory')
     parser.add_argument('--config', type=Path, default=CONFIG)
     parser.add_argument('--style', type=Path, default=STYLE)
+    parser.add_argument('--notifications', type=int, default=2,
+                        help='how many to post before opening the panel; more than '
+                             'the list can show is what proves it scrolls')
     args = parser.parse_args()
     if not os.environ.get('OLDBOOK_NOTIFICATION_PRIVATE_BUS'):
         with tempfile.TemporaryDirectory(prefix='oldbook-swaync-bus-') as bus:
@@ -188,14 +191,29 @@ def main():
                 daemon = spawn(['swaync', '--config', str(config_path), '--style', str(style_path)])
                 wait_for(lambda: 'Loading widget: widget-notifications' in log_text())
                 time.sleep(1)
-                for summary, body, extra in (
-                        ('Ghost Gallery', 'A new painting is ready: Yosemite, with commentary.',
-                         ['-i', str(ALBUM_ART)]),
-                        ('Codex', 'Approval requested in the Lab workspace.', ['-u', 'normal'])):
+                posts = [('Ghost Gallery', 'A new painting is ready: Yosemite, with commentary.',
+                          ['-i', str(ALBUM_ART)]),
+                         ('Codex', 'Approval requested in the Lab workspace.', ['-u', 'normal'])]
+                # Filling the list past what it can show is the only way to see
+                # whether it scrolls or simply grows until the panel runs out.
+                # Each from a different application on purpose: swaync groups by
+                # app, so a dozen from one sender collapse into a single stack
+                # and prove nothing about whether the list scrolls.
+                posts += [(f'Notice {number}',
+                           'A line of body text long enough to occupy a row of its own.',
+                           ['-u', 'low', '-a', f'sender-{number}'])
+                          for number in range(3, max(3, args.notifications + 1))]
+                posts = posts[:args.notifications]
+                for summary, body, extra in posts:
                     subprocess.run(['notify-send', *extra, summary, body], env=env, check=True, timeout=10)
-                wait_for(lambda: client('-c') == '2')
+                wait_for(lambda: client('-c') == str(len(posts)))
                 client('-op')
+                # Whether the panel is actually on screen is the one thing a
+                # screenshot of it must not be trusted to imply: an earlier run
+                # reported every widget loaded over a picture of bare wallpaper.
+                wait_for(lambda: client('-D') == 'true')
                 time.sleep(2)
+                panel_visible = client('-D') == 'true'
                 subprocess.run(['grim', str(output / 'control-center.png')], env=env, check=True, timeout=15)
                 client('-cp')
                 time.sleep(.5)
@@ -205,7 +223,9 @@ def main():
                 problems = [line for line in text.splitlines()
                             if any(word in line.lower() for word in ('invalid', 'error', 'critical', 'warning'))]
                 evidence = {
-                    'status': 'passed' if len(loaded) == len(EXPECTED_WIDGETS) else 'failed',
+                    'status': ('passed' if len(loaded) == len(EXPECTED_WIDGETS) and panel_visible
+                               else 'failed'),
+                    'panel_visible': panel_visible,
                     'widgets_loaded': loaded,
                     'widgets_expected': list(EXPECTED_WIDGETS),
                     'log_problems': problems,
@@ -215,7 +235,7 @@ def main():
                     'fake_player': 'org.mpris.MediaPlayer2.ghostradio with local album art',
                     'live_session_notifications': 0,
                     'owned_notification_server_pid': daemon.pid,
-                    'notification_count': 2,
+                    'notification_count': len(posts),
                 }
                 (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
                 print(json.dumps(evidence, indent=2))
