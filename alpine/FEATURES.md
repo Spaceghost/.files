@@ -477,6 +477,32 @@ compositor session. Permission and missing-device errors remain notifications.
 
 ## Gallery and durable reading content
 
+### POWER-POSTURE
+
+The desktop knows whether it is running on the cord and behaves accordingly,
+with nothing for the user to switch. `oldbook-power-mode` publishes one posture
+for the session — mains, battery, battery-low, battery-critical — read from the
+power supplies at the same 25 and 10 percent thresholds the battery cue and the
+Waybar module already use, so nothing on the desktop disagrees about what low
+means. Effects register on a ladder naming the last posture at which each still
+runs, and each rung sheds everything the rung above it sheds. An effect absent
+from the ladder runs everywhere: forgetting to register a new helper must never
+switch it off silently, only registering it may.
+
+Waking is event-driven from udev with a slow backstop poll, because a service
+that polls the battery in a tight loop to save the battery is its own
+contradiction. A hand-set override may only make the desktop quieter than the
+hardware asks, never louder, and is always reported. A subscriber reading the
+posture with no service running must still get a true answer, and one failing
+change hook must not silence the hooks after it.
+
+- Implementation: [posture service](desktop/.local/bin/oldbook-power-mode),
+  [shared reading](desktop/.local/lib/oldbook/power_source.py),
+  [session start](desktop/.local/bin/oldbook-session).
+- Checks: [posture and ladder tests](tests/test_power_mode.py).
+  A synthetic supply tree is not an unplugged machine; pulling the cord and
+  watching the ladder shed remains the user's check.
+
 ### AMBIENT-DISPLAY
 
 The panel may follow the Apple SMC light sensor: a dark room settles it at a

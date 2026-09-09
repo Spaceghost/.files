@@ -2,6 +2,37 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The desktop learned where its power comes from — 2026-09-08
+
+Opening a round of rice work, the user attached one condition: "the only thing
+I ask is that you automatically mind when we're on battery." Two helpers already
+read the power supplies, `oldbook-battery-cue` for its thresholds and
+`oldbook-conky` for its battery line, each in its own way, and nothing else on
+the desktop knew the cord was out at all. The eyecandy cost the same either way.
+
+`oldbook-power-mode` publishes one posture for the session — mains, battery,
+battery-low, battery-critical — and every effect asks the same question the same
+way, either by exit status (`oldbook-power-mode allows shaders`) or by a hook in
+`~/.config/oldbook/power.d` that fires on the change so an effect can stop
+rather than merely decline to start next time. The rungs reuse the battery cue's
+own 25 and 10 percent, so the amber Waybar battery and the desktop going quiet
+happen at the same number instead of two.
+
+Three decisions are worth keeping. An effect missing from the ladder runs
+everywhere, because a helper added tomorrow must not disappear by being
+forgotten; the ladder is a list of things that shed, not a permit list. A
+hand-set override may only make the desktop quieter than the hardware asks and
+never louder, so being plugged in cannot override a flat battery back up to
+mains. And waking is event-driven from udev with a one-minute backstop, because
+a service that polls the battery in a tight loop to save the battery would be
+its own joke.
+
+Twelve tests cover the rungs, the superset property between them, the desktop
+with no battery, the charging battery that proves a cord with no mains supply,
+the unreadable supply, the override direction and a failing hook not silencing
+the hooks after it. A synthetic supply tree is not an unplugged machine, so
+pulling the cord and watching the ladder shed is recorded as the user's check.
+
 ## The power key does nothing behind the lock — 2026-09-08
 
 The power key powered this machine off mid-session at 21:14 today, and the user

@@ -114,6 +114,11 @@ fi
 if command -v oldbook-firewall-ui >/dev/null 2>&1; then
     start_service firewall-ui oldbook-firewall-ui
 fi
+# The power posture is published before the effects that read it start, so the
+# first thing a helper asks on an unplugged boot already has a true answer.
+if command -v oldbook-power-mode >/dev/null 2>&1; then
+    start_service power-mode oldbook-power-mode run
+fi
 # Night light only for an explicit ~/.config/oldbook/location.json; nothing is inferred.
 if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/oldbook/location.json" ] \
         && command -v oldbook-sun-light >/dev/null 2>&1 && ! has_comm wlsunset; then

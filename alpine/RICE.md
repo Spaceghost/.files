@@ -621,6 +621,34 @@ look.
 
 ![Power deck rendered headlessly](verification/power-deck/power-deck.png)
 
+## Power posture
+
+The desktop asks one question about the cord and every effect gets the same
+answer. `oldbook-power-mode show` prints it: the posture (mains, battery,
+battery-low, battery-critical), the charge, any hand-set override, and exactly
+what is being shed right now. `oldbook-power-mode ladder` prints the whole
+table — what still runs at each rung — and `oldbook-power-mode allows <effect>`
+answers by exit status, so a shell helper can ask in one line.
+
+The rungs use the thresholds the battery cue already uses, 25 and 10 percent,
+so the amber Waybar battery and the desktop going quiet happen together rather
+than at two different numbers. Unplugged, the shaders, the gallery drift and
+the generator stop first; at 25 percent the blur, cava, the rotation and the
+keyboard breath follow; at 10 percent only the reading cards, the corners, the
+cues and the letterpress remain. An effect nobody registered keeps running,
+which is the deliberate default: the ladder is a list of things that shed, not
+a permit list.
+
+Waking is event-driven. udev already announces a plug or an unplug, so the
+service sleeps until the kernel speaks, with a one-minute backstop for the
+charge drifting down inside a rung. Hold a posture by hand with
+`oldbook-power-mode override battery-low` — it can only make the desktop
+quieter than the hardware asks, never louder — and release it with `override
+auto`. Hooks in `~/.config/oldbook/power.d/` run on every change with the new
+posture as their argument, which is how an effect stops rather than merely
+declining to start next time. Off: stop the service and every helper falls back
+to reading the supplies directly, so nothing breaks, it simply stops reacting.
+
 ## Terminals
 
 **Ghostty and Foot.** Both run at 78 percent opacity with the Gruvbox

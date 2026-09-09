@@ -1,0 +1,10 @@
+[Unit]
+Description=Oldbook power posture
+PartOf=oldbook-session.target
+After=sway-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/oldbook-power-mode run
+Restart=on-failure
+RestartSec=2

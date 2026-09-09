@@ -510,6 +510,19 @@
       "evidence": []
     },
     {
+      "id": "POWER-POSTURE",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-power-mode",
+        "alpine/desktop/.local/lib/oldbook/power_source.py",
+        "alpine/tests/test_power_mode.py",
+        "bazzite/desktop/.config/systemd/user/oldbook-power-mode.service"
+      ],
+      "tests": [
+        "test_power_mode.py"
+      ],
+      "evidence": []
+    },
+    {
       "id": "AMBIENT-DISPLAY",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-ambient-display",

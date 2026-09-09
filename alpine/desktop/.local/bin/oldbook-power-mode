@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Publish the desktop's power posture and tell every effect when it changes.
+
+The desktop used to cost the same whether the cord was in or not. This watches
+the power supplies, names one posture for the whole session, and runs the hooks
+in `~/.config/oldbook/power.d` when it changes, so an effect can stop rather
+than merely decline to start next time.
+
+Waking is event-driven: udev already announces a plug or an unplug, so the
+service sleeps until the kernel says something happened, with a slow backstop
+poll for the charge drifting down inside a posture. Polling a laptop's battery
+in a tight loop to save the battery would be its own joke.
+"""
+import argparse
+import os
+from pathlib import Path
+import select
+import signal
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import power_source
+
+BACKSTOP = 60
+MONITOR = ['udevadm', 'monitor', '--udev', '--subsystem-match=power_supply']
+
+
+def hooks_directory():
+    base = os.environ.get('XDG_CONFIG_HOME') or str(Path.home() / '.config')
+    return Path(base) / 'oldbook/power.d'
+
+
+def run_hooks(current, previous):
+    """Announce the change; one broken hook never silences the others."""
+    directory = hooks_directory()
+    if not directory.is_dir():
+        return
+    environment = dict(os.environ, OLDBOOK_POWER_POSTURE=current,
+                       OLDBOOK_POWER_PREVIOUS=previous or '')
+    for hook in sorted(directory.iterdir()):
+        if not (hook.is_file() and os.access(hook, os.X_OK)):
+            continue
+        try:
+            subprocess.Popen([str(hook), current], env=environment,
+                             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                             stderr=subprocess.DEVNULL, start_new_session=True)
+        except OSError as error:
+            print(f'oldbook-power-mode: {hook.name} did not run ({error})', file=sys.stderr)
+
+
+def announce(previous):
+    """Publish the current record, running hooks only on a real change."""
+    record = power_source.describe()
+    record['changed_at'] = time.time()
+    power_source.publish(record)
+    if record['posture'] != previous:
+        run_hooks(record['posture'], previous)
+    return record['posture']
+
+
+def monitor():
+    """udev's event stream, or None when udevadm cannot be watched."""
+    try:
+        return subprocess.Popen(MONITOR, stdout=subprocess.PIPE,
+                                stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL)
+    except OSError:
+        return None
+
+
+def run(once=False):
+    stopping = []
+    for number in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(number, lambda *_: stopping.append(True))
+    stream = monitor()
+    previous = announce(None)
+    try:
+        while not stopping:
+            if once:
+                return 0
+            if stream is not None and stream.poll() is None:
+                readable, _, _ = select.select([stream.stdout], [], [], BACKSTOP)
+                if readable and not os.read(stream.stdout.fileno(), 4096):
+                    stream = None
+            else:
+                # No udev to lean on: the backstop poll is the whole service.
+                stream = None
+                time.sleep(BACKSTOP)
+            previous = announce(previous)
+    finally:
+        if stream is not None and stream.poll() is None:
+            stream.terminate()
+            stream.wait(timeout=2)
+    return 0
+
+
+def show(as_json):
+    record = power_source.describe()
+    if as_json:
+        import json
+        print(json.dumps(record, indent=2))
+        return 0
+    charge = '—' if record['capacity'] is None else f"{record['capacity']}%"
+    print(f"posture   {record['posture']}")
+    print(f"power     {'mains' if record['mains'] else 'battery'}, {charge}")
+    if record['override']:
+        print(f"override  {record['override']} (set by hand; clear with: "
+              f"oldbook-power-mode override auto)")
+    print(f"shedding  {', '.join(record['shed']) or 'nothing'}")
+    return 0
+
+
+def ladder():
+    for posture in power_source.POSTURES:
+        names = sorted(name for name in power_source.LADDER
+                       if power_source.allows(name, posture))
+        print(f"{posture:<18} {', '.join(names) or 'the registered effects are all shed'}")
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest='command', required=True)
+    watched = commands.add_parser('run', help='watch the supplies and publish the posture')
+    watched.add_argument('--once', action='store_true', help=argparse.SUPPRESS)
+    reported = commands.add_parser('show', help='report the current posture')
+    reported.add_argument('--json', action='store_true')
+    commands.add_parser('ladder', help='print what runs at each posture')
+    permitted = commands.add_parser('allows', help='exit 0 if an effect may run now')
+    permitted.add_argument('effect')
+    chosen = commands.add_parser('override', help='hold a posture by hand, or auto')
+    chosen.add_argument('posture', choices=(*power_source.POSTURES, 'auto'))
+    arguments = parser.parse_args(argv)
+    if arguments.command == 'run':
+        return run(getattr(arguments, 'once', False))
+    if arguments.command == 'show':
+        return show(arguments.json)
+    if arguments.command == 'ladder':
+        return ladder()
+    if arguments.command == 'allows':
+        return 0 if power_source.allows(arguments.effect) else 1
+    power_source.write_override(None if arguments.posture == 'auto' else arguments.posture)
+    return show(False)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-power-mode: {error}', file=sys.stderr)
+        sys.exit(1)

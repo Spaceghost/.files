@@ -4,6 +4,7 @@ BindsTo=sway-session.target
 After=sway-session.target
 Wants=oldbook-desktop-settings.service
 Wants=oldbook-notification-led.service
+Wants=oldbook-power-mode.service
 Wants=oldbook-shortcuts.service
 Wants=oldbook-swayidle.service
 Wants=oldbook-swaync.service
