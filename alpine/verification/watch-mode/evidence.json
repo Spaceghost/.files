@@ -1,0 +1,51 @@
+{
+  "status": "verified",
+  "binary": "/usr/bin/swayfx",
+  "mode": "1440x900",
+  "scale": 1,
+  "steps": {
+    "seat": {
+      "virtual_keyboard_alive": true
+    },
+    "before": {
+      "binding_state": "default"
+    },
+    "engaged": {
+      "binding_state": "watch",
+      "engaged": true,
+      "record": {
+        "process": {
+          "pid": 7233,
+          "start_time": "1146665",
+          "boot_id": "daff675c-1ea9-4ca2-b423-7c9ca08806f4"
+        },
+        "engaged_at": 1788938752.5997584,
+        "mode": "watch",
+        "keyboard_proven": true,
+        "release": "hold Super+Shift+Escape for a second"
+      }
+    },
+    "dirty_hold": {
+      "binding_state": "watch",
+      "still_engaged": true
+    },
+    "clean_hold": {
+      "released": true,
+      "returncode": 0,
+      "binding_state": "default",
+      "record_removed": true,
+      "stdout": "",
+      "stderr": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-watch:122: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead\n  GLib.unix_signal_add(GLib.PRIORITY_HIGH, signum, lambda: finish('signal') or True)"
+    },
+    "killed": {
+      "reengaged": true,
+      "recovered": true,
+      "binding_state": "default"
+    }
+  },
+  "screenshots": {
+    "desktop.png": "2090aebfcf400d7a0b25715c06f74aba3f2324c94c002205f86d9e8526f90f7c",
+    "watching.png": "c324c20977efb28baf67f2bce1492cf5004c66d3f0ec9f50c4a48b0284db0dc0",
+    "released.png": "2090aebfcf400d7a0b25715c06f74aba3f2324c94c002205f86d9e8526f90f7c"
+  }
+}

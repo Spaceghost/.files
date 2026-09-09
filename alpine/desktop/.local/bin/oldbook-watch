@@ -1,0 +1,210 @@
+#!/usr/bin/env python3
+"""Watch mode: park input off the live desktop so a cat can sit on the keyboard.
+
+A cat guard, not a lock, and never to be described as one. The desktop stays
+fully visible and fully running; a transparent overlay surface takes the
+keyboard and every pointer event, and Sway's empty `watch` mode removes the
+compositor's own bindings. `Super+Escape` remains the real lock and is
+untouched by anything here.
+
+  oldbook-watch start    engage (bound to Super+Shift+Escape)
+  oldbook-watch stop     leave, and put Sway back in its default mode
+  oldbook-watch status   report honestly whether input is actually parked
+
+Leaving: hold Super+Shift+Escape for a second with no other key down. If this
+helper is ever wedged, `Ctrl+Alt+Shift+Super+w` is bound inside the mode as the
+emergency exit, and killing this process restores the mode by itself.
+
+Nothing here ever reports success it has not proven. If the compositor will not
+give the guard the keyboard, watch mode refuses to start, says so, and leaves
+the desktop exactly as it was — telling someone their input is parked when it
+is not is the one failure that matters, because they are about to walk away.
+"""
+import fcntl
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import power_source
+import watch_mode
+from overlay_theme import THEMES, read_palette
+
+# The card's translucent slab asks the compositor to blur what is behind it on
+# every frame. Registering it here means a tired battery gets a flat card
+# instead; the card itself is never shed, because a guard that cannot say how
+# to leave is worse than no guard.
+INDICATOR_EFFECT = 'watch-indicator'
+
+
+def start(runtime):
+    if watch_mode.engaged(runtime):
+        print('oldbook-watch: watch mode is already holding the desktop')
+        return 0
+    directory = watch_mode.runtime_directory(runtime)
+    guard_fd = os.open(directory / 'watch.lock',
+                       os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+    with os.fdopen(guard_fd, 'r+') as single:
+        try:
+            fcntl.flock(single, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print('oldbook-watch: another watch guard is starting', file=sys.stderr)
+            return 1
+        return run(runtime)
+
+
+def run(runtime):
+    # Prove the IPC before anything is shown: the release path needs it too.
+    watch_mode.sway(kind='get_version')
+    from gi.repository import GLib
+    loop = GLib.MainLoop()
+    session = {'engaged': False, 'reason': None, 'failure': None, 'watchdog': None,
+               'keyboard_proven': False}
+
+    def engage(proven=True):
+        """Park input, now that the compositor has shown it will be parked."""
+        if session['engaged'] or session['failure']:
+            return
+        session['keyboard_proven'] = proven
+        try:
+            # The watchdog is armed before the mode is entered, so there is no
+            # instant in which Sway has an empty mode and nothing to undo it.
+            session['watchdog'] = watch_mode.mode_watchdog()
+            watch_mode.sway(f'mode "{watch_mode.SWAY_MODE}"')
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+            session['failure'] = f'Sway would not enter the watch mode ({error})'
+            loop.quit()
+            return
+        session['engaged'] = True
+        watch_mode.publish({'process': watch_mode.process_identity(os.getpid()),
+                            'engaged_at': time.time(), 'mode': watch_mode.SWAY_MODE,
+                            'keyboard_proven': proven,
+                            'release': 'hold Super+Shift+Escape for a second'}, runtime)
+        watch_mode.cue('tick')
+
+    def finish(reason):
+        session['reason'] = session['reason'] or reason
+        loop.quit()
+
+    def mapped():
+        # The keyboard clock starts here, not at launch: a slow GTK start and a
+        # compositor that will not hand over the keyboard are different faults.
+        GLib.timeout_add(int(watch_mode.FOCUS_DEADLINE_SECONDS * 1000), keyboard_deadline)
+
+    def keyboard_deadline():
+        if not session['engaged'] and not session['failure']:
+            # The surface is up and this seat has a keyboard, so the enter
+            # should have arrived. It did not: refuse rather than pretend.
+            session['failure'] = ('the guard is on screen but the compositor never gave it '
+                                  'the keyboard, so input was NOT parked')
+            loop.quit()
+        return False
+
+    def map_deadline():
+        if not guard.mapped and not session['failure']:
+            session['failure'] = ('the guard surface never reached the screen, so input was '
+                                  'NOT parked')
+            loop.quit()
+        return False
+
+    guard = watch_mode.Guard(read_palette(THEMES),
+                             on_release=lambda: finish('released'),
+                             on_keyboard=engage,
+                             on_keyboard_lost=lambda: finish('keyboard-lost'),
+                             on_mapped=mapped,
+                             translucent=power_source.allows(INDICATOR_EFFECT))
+    GLib.timeout_add(int(watch_mode.MAP_DEADLINE_SECONDS * 1000), map_deadline)
+    # GLib moved unix_signal_add to GLibUnix; take whichever this GTK has,
+    # because a deprecation warning on stderr is noise in the one place the
+    # user is meant to read stderr for a refusal.
+    try:
+        import gi
+        gi.require_version('GLibUnix', '2.0')
+        from gi.repository import GLibUnix
+        add_signal = GLibUnix.signal_add
+    except (ImportError, ValueError, AttributeError):
+        add_signal = GLib.unix_signal_add
+    for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        add_signal(GLib.PRIORITY_HIGH, signum, lambda: finish('signal') or True)
+    guard.present()
+    try:
+        loop.run()
+    finally:
+        # The mode goes back first: if tearing the surfaces down were to hang,
+        # the desktop must already be answering its own keys again.
+        if session['engaged']:
+            try:
+                watch_mode.sway('mode "default"')
+            except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+                watch_mode.announce('Watch mode could not restore the Sway mode',
+                                    f'Run: swaymsg mode default ({error})')
+        guard.close()
+        watch_mode.state_path(runtime).unlink(missing_ok=True)
+        if session['watchdog'] is not None:
+            os.close(session['watchdog'])
+    if session['failure']:
+        watch_mode.announce('Watch mode did not start',
+                            f'{session["failure"]}. The desktop is unchanged.')
+        return 1
+    if session['reason'] == 'keyboard-lost':
+        watch_mode.announce('Watch mode ended early',
+                            'It stopped holding the keyboard, so the desktop is live again.',
+                            urgent=False)
+        return 0
+    watch_mode.cue('tick')
+    return 0
+
+
+def stop(runtime):
+    """Leave watch mode from outside, and put Sway back whatever happens."""
+    record = watch_mode.engaged(runtime)
+    if record:
+        try:
+            os.kill(record['process']['pid'], signal.SIGTERM)
+        except (OSError, KeyError, TypeError):
+            pass
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline and watch_mode.engaged(runtime):
+            time.sleep(0.05)
+    # Unconditional, and harmless when watch mode was never on: an empty mode
+    # left behind by a killed guard is exactly what this has to clear.
+    try:
+        watch_mode.sway('mode "default"')
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f'oldbook-watch: {error}', file=sys.stderr)
+        return 1
+    return 0
+
+
+def status(runtime):
+    record = watch_mode.engaged(runtime)
+    try:
+        mode = watch_mode.sway(kind='get_binding_state').get('name')
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
+        mode = None
+    print(json.dumps({'engaged': bool(record), 'sway_mode': mode,
+                      'security': 'no — watch mode is a cat guard, not a lock',
+                      'release': watch_mode.HOW_TO_LEAVE, 'record': record}, indent=2))
+    return 0
+
+
+def main(argv):
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        raise RuntimeError('XDG_RUNTIME_DIR is required for watch mode')
+    action = argv[0] if argv else 'start'
+    if len(argv) > 1 or action not in ('start', 'stop', 'status'):
+        raise RuntimeError('usage: oldbook-watch [start|stop|status]')
+    return {'start': start, 'stop': stop, 'status': status}[action](runtime)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+        watch_mode.announce('Watch mode did not start', f'{error}. The desktop is unchanged.')
+        sys.exit(1)
