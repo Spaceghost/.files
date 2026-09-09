@@ -112,5 +112,146 @@ class DesktopSpaceTests(unittest.TestCase):
         self.assertEqual(space['right'], 16)
 
 
+def region_tree(*, current='1', fullscreen=0, tiled=False):
+    """An output whose visible workspace carries one window."""
+    view = {'id': 3, 'type': 'con' if tiled else 'floating_con', 'app_id': 'foot',
+            'fullscreen_mode': fullscreen,
+            'rect': {'x': -1240, 'y': 400, 'width': 400, 'height': 200}}
+    visible = {'id': 2, 'type': 'workspace', 'name': '1', 'fullscreen_mode': 1, 'focus': [3],
+               'nodes': [view] if tiled else [], 'floating_nodes': [] if tiled else [view]}
+    hidden = {'id': 4, 'type': 'workspace', 'name': '2', 'fullscreen_mode': 1, 'nodes': [
+        {'id': 5, 'type': 'con', 'app_id': 'firefox', 'fullscreen_mode': 0,
+         'rect': {'x': -1440, 'y': 200, 'width': 1440, 'height': 900}}]}
+    node = dict(output(), type='output', focus=[2], current_workspace=current,
+                nodes=[visible, hidden])
+    return {'type': 'root', 'nodes': [node]}
+
+
+class FreeRegionTests(unittest.TestCase):
+    """What a BOTTOM-layer surface may draw on, published for plank 0."""
+
+    def cells(self, region):
+        return {(column, row) for row, line in enumerate(region['grid'])
+                for column, mark in enumerate(line) if mark == '#'}
+
+    def test_every_conky_panel_is_occupied_so_a_bottom_surface_cannot_cover_a_card(self):
+        # The single correctness detail of the whole plank: Conky is one
+        # surface per panel on BACKGROUND, one layer below BOTTOM.
+        panels = [surface('conky', 20, 520, 360, 120, 'background'),
+                  surface('conky', 1100, 300, 280, 80, 'background')]
+        region = desktop_space.free_region(output(panels), region_tree())
+        names = [item['name'] for item in region['occupied'] if item['kind'] == 'layer']
+        self.assertEqual(names.count('conky'), 2)
+        # 1440x900 on a 72x45 grid is exactly 20x20 logical pixels per cell.
+        self.assertIn((1, 26), self.cells(region))
+        self.assertIn((55, 15), self.cells(region))
+
+    def test_the_painting_and_the_invisible_band_are_not_occupiers(self):
+        # A BOTTOM surface is meant to draw over the painting, and the caption
+        # band paints nothing at all; reserving either would leave no region.
+        surfaces = [surface('wallpaper', 0, 0, 1440, 900, 'background'),
+                    surface('oldbook-background', 0, 0, 1440, 900, 'background'),
+                    surface('oldbook-decoration-band', 0, 899, 1440, 1, 'background')]
+        region = desktop_space.free_region(output(surfaces), region_tree())
+        self.assertEqual([item for item in region['occupied'] if item['kind'] == 'layer'], [])
+        self.assertEqual(region['free_cells'], 72 * 45 - 20 * 10)
+
+    def test_the_backdrop_never_moves_a_reading_card(self):
+        # CONKY-READING: the cards must not reflow for the backdrop, whatever
+        # shape it takes. Skipping it by name is what makes that true rather
+        # than merely true of a full-output surface at the origin.
+        for extent in ((0, 0, 1440, 900), (0, 840, 1440, 60), (1380, 0, 60, 900)):
+            own = surface(desktop_space.EFFECT_NAMESPACE, *extent, 'bottom')
+            space = desktop_space.screen_space(output([own]), region_tree())
+            self.assertEqual((space['bottom'], space['right'], space['origin_y']),
+                             (16, 16, 0))
+
+    def test_the_effect_never_reserves_itself(self):
+        own = surface(desktop_space.EFFECT_NAMESPACE, 0, 0, 1440, 900, 'bottom')
+        region = desktop_space.free_region(output([own]), region_tree())
+        self.assertEqual([item for item in region['occupied'] if item['kind'] == 'layer'], [])
+
+    def test_the_transparent_notification_host_is_not_a_permanent_strip(self):
+        # NOTIFICATION-PLACEMENT keeps the empty host transparent; reserving it
+        # would carve a third of the output out of the region for nothing.
+        host = surface('swaync-notification-window', 1060, 46, 380, 815, 'top')
+        region = desktop_space.free_region(output([host]), region_tree())
+        self.assertEqual([item for item in region['occupied'] if item['kind'] == 'layer'], [])
+
+    def test_the_bar_and_the_caption_are_occupied(self):
+        surfaces = [surface('top', 10, 6, 1420, 40, 'overlay'),
+                    surface('oldbook-decoration', 84, 781, 1268, 56, 'top'),
+                    surface('oldbook-scripture', 340, 843, 760, 41, 'bottom')]
+        region = desktop_space.free_region(output(surfaces), region_tree())
+        self.assertEqual(sorted(item['name'] for item in region['occupied']
+                                if item['kind'] == 'layer'),
+                         ['oldbook-decoration', 'oldbook-scripture', 'top'])
+
+    def test_window_rectangles_are_output_local_for_tiled_and_floating_alike(self):
+        for tiled in (False, True):
+            region = desktop_space.free_region(output(), region_tree(tiled=tiled))
+            windows = [item for item in region['occupied'] if item['kind'] == 'window']
+            self.assertEqual(windows, [{'x': 200, 'y': 200, 'width': 400, 'height': 200,
+                                        'kind': 'window', 'name': 'foot'}])
+
+    def test_a_hidden_workspace_contributes_nothing(self):
+        region = desktop_space.free_region(output(), region_tree())
+        self.assertEqual([item['name'] for item in region['occupied']], ['foot'])
+
+    def test_fullscreen_is_a_state_rather_than_a_rectangle(self):
+        region = desktop_space.free_region(output(), region_tree(fullscreen=1))
+        self.assertTrue(region['fullscreen'])
+        self.assertEqual(region['occupied'], [])
+        self.assertFalse(desktop_space.free_region(output(), region_tree())['fullscreen'])
+
+    def test_a_partly_covered_cell_counts_as_covered(self):
+        grid = desktop_space.occupancy_grid(1440, 900, [
+            {'x': 19, 'y': 0, 'width': 2, 'height': 1}])
+        self.assertEqual(grid[0][:3], '##.')
+        self.assertEqual(len(grid), 45)
+        self.assertTrue(all(len(row) == 72 for row in grid))
+
+    def test_rectangles_outside_the_output_clamp_instead_of_wrapping(self):
+        grid = desktop_space.occupancy_grid(1440, 900, [
+            {'x': -400, 'y': -400, 'width': 500, 'height': 500},
+            {'x': 1430, 'y': 890, 'width': 4000, 'height': 4000}])
+        self.assertEqual(grid[0][:6], '#####.')
+        self.assertEqual(grid[-1][-1], '#')
+        self.assertEqual(grid[10][40], '.')
+
+
+class SpaceServiceTests(unittest.TestCase):
+    """Publishing and the claim that keeps the service alive."""
+
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.runtime = self.directory.name
+        self.addCleanup(self.directory.cleanup)
+
+    def test_a_published_record_is_read_back_without_the_compositor(self):
+        desktop_space.publish({'version': 1, 'regions': []}, self.runtime)
+        self.assertEqual(desktop_space.published(self.runtime),
+                         {'version': 1, 'regions': []})
+        self.assertTrue(desktop_space.state_path(self.runtime).is_file())
+
+    def test_retracting_leaves_nothing_for_a_consumer_to_read(self):
+        desktop_space.publish({'version': 1, 'regions': []}, self.runtime)
+        desktop_space.retract(self.runtime)
+        self.assertFalse(desktop_space.state_path(self.runtime).exists())
+        desktop_space.retract(self.runtime)
+
+    def test_a_held_claim_is_live_and_a_released_one_is_swept(self):
+        self.assertEqual(desktop_space.subscribers(self.runtime), [])
+        with desktop_space.Subscription('oldbook-edges', self.runtime) as claim:
+            self.assertEqual(desktop_space.subscribers(self.runtime), [claim.path.name])
+        self.assertEqual(desktop_space.subscribers(self.runtime), [])
+        self.assertFalse(claim.path.exists())
+
+    def test_a_claim_name_may_not_escape_its_directory(self):
+        for name in ('../elsewhere', '.hidden', ''):
+            with self.assertRaises(ValueError):
+                desktop_space.Subscription(name, self.runtime)
+
+
 if __name__ == '__main__':
     unittest.main()

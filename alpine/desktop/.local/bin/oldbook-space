@@ -1,0 +1,165 @@
+#!/usr/bin/env python3
+"""Publish where the desktop is free, for the surfaces that draw between windows.
+
+Nothing draws here. This answers one question -- which part of each output is
+covered by neither a window nor a piece of desktop chrome -- and writes the
+answer to `$XDG_RUNTIME_DIR/oldbook/space.json` in the shape `power_source`
+publishes the power posture in, so a consumer reads a file and gets a true
+answer whether or not the service is running.
+
+The answer that matters is Conky. Each reading card is its own `conky` surface
+on the BACKGROUND layer, one layer *below* anything on BOTTOM, so a BOTTOM
+surface draws over the cards unless the region excludes them. `desktop_space`
+therefore treats every reported surface as an occupier rather than listing the
+ones it knows about, and the cards are covered by that rule rather than by a
+special case someone can forget to write.
+
+It costs nothing when nobody is looking. A consumer holds a claim under
+`space.d/`; with no live claim the service publishes nothing, removes any record
+it left, and exits. Waking is event-driven from the compositor's own
+subscription, with the slow backstop `decoration_watch` already established --
+Sway sends no event during a floating drag, and none at all for a layer surface,
+so a Conky panel moving after a painting change is only ever seen by a re-read.
+"""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import socket
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import desktop_space
+from decoration_watch import TreeWatch, _receive, _send
+
+SUBSCRIBE = 2
+EVENTS = b'["window","workspace","output","shutdown"]'
+SHUTDOWN = (1 << 31) | 6
+BACKSTOP = TreeWatch.IDLE_INTERVAL
+
+
+def connect(socket_path, timeout=1):
+    connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    connection.settimeout(timeout)
+    connection.connect(socket_path)
+    return connection
+
+
+def sway_socket():
+    path = os.environ.get('SWAYSOCK')
+    if not path:
+        raise RuntimeError('SWAYSOCK is required to read the desktop layout')
+    return path
+
+
+def subscribe(connection):
+    _send(connection, SUBSCRIBE, EVENTS)
+    kind, body = _receive(connection)
+    reply = json.loads(body)
+    if kind != SUBSCRIBE or not isinstance(reply, dict) or not reply.get('success'):
+        raise ValueError('Sway rejected the space subscription')
+
+
+def drain(connection):
+    """Collapse a burst of events into one re-read; report a compositor exit."""
+    for _ in range(64):
+        kind, _body = _receive(connection)
+        if kind == SHUTDOWN:
+            return False
+        if not select.select([connection], [], [], 0)[0]:
+            break
+    return True
+
+
+def run(once=False, runtime=None):
+    """Publish while a consumer is subscribed, and only while one is."""
+    stopping = []
+    for number in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(number, lambda *_: stopping.append(True))
+    lock = desktop_space.lock_path(runtime).open('a')
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        # One owner per compositor session; a second start is not an error.
+        return 0
+    if not desktop_space.subscribers(runtime):
+        desktop_space.retract(runtime)
+        return 0
+    path = sway_socket()
+    request = events = None
+    published = None
+    try:
+        request, events = connect(path), connect(path)
+        subscribe(events)
+        while not stopping:
+            record = desktop_space.describe(connection=request)
+            if record != published:
+                desktop_space.publish(dict(record, changed_at=time.time()), runtime)
+                published = record
+            if once:
+                return 0
+            if not desktop_space.subscribers(runtime):
+                break
+            readable, _, _ = select.select([events], [], [], BACKSTOP)
+            if readable and not drain(events):
+                break
+    except (OSError, ValueError) as error:
+        print(f'oldbook-space: {error}', file=sys.stderr)
+        return 1
+    finally:
+        for connection in (request, events):
+            if connection is not None:
+                connection.close()
+        desktop_space.retract(runtime)
+        lock.close()
+    return 0
+
+
+def show(as_json, runtime=None):
+    record = desktop_space.published(runtime)
+    if as_json:
+        print(json.dumps(record, indent=2))
+        return 0
+    for region in record.get('regions', []):
+        rect = region['rect']
+        state = 'fullscreen' if region['fullscreen'] else (
+            f"{region['free_cells']} of {region['columns'] * region['rows']} cells free")
+        print(f"{region['output']}  {rect['width']}x{rect['height']}  {state}")
+        for item in region['occupied']:
+            print(f"  {item['kind']:<7} {item['name']:<26} "
+                  f"{item['width']}x{item['height']}+{item['x']}+{item['y']}")
+        for row in region['grid']:
+            print('  ' + row)
+    if not record.get('regions'):
+        print('no active output')
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest='command', required=True)
+    watched = commands.add_parser('run', help='publish the region while a consumer is subscribed')
+    watched.add_argument('--once', action='store_true', help=argparse.SUPPRESS)
+    reported = commands.add_parser('show', help='print the region now, service or no service')
+    reported.add_argument('--json', action='store_true')
+    commands.add_parser('subscribers', help='list the consumers holding a claim')
+    arguments = parser.parse_args(argv)
+    if arguments.command == 'run':
+        return run(arguments.once)
+    if arguments.command == 'show':
+        return show(arguments.json)
+    for name in desktop_space.subscribers():
+        print(name)
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError) as error:
+        print(f'oldbook-space: {error}', file=sys.stderr)
+        sys.exit(1)
