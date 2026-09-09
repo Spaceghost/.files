@@ -174,6 +174,21 @@ login:** the patch is installed but the session predates it. Evidence:
 thirty-two frames proving by colour that a slide separates the two workspaces
 horizontally where a fade does not, with idle cost measured at zero.
 
+### Why the blur is one pass
+
+Blur reaches roughly `blur_radius * 2^blur_passes`. At radius 4 and two passes
+that is about 16 pixels, and the gap between two tiled windows is 13, so the
+blur was sampling three pixels into the neighbouring window. With focus
+following the pointer, crossing between two terminals repainted that neighbour
+and the blur re-ran against a half-updated scene, smearing along the vertical
+edges. Only the vertical ones: above and below sit Waybar and the decoration
+strip, which are layers with `blur_xray enable` and therefore a static backdrop
+that cannot go stale. One pass reaches about 8 pixels and stays inside the
+channel, so the blur only ever samples wallpaper.
+
+If you want the softer two-pass blur back, widen the channel to match rather
+than the other way round: `gaps inner 17` restores a 16-pixel reach safely.
+
 ## Control deck bar
 
 The Waybar at the top is a 34-pixel floating strip with 6-pixel margins, split

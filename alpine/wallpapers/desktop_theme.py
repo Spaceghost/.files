@@ -126,7 +126,12 @@ def render_profile(repo, theme):
     change('.config/sway/theme.conf', r'^font .*', f'font pango:{font} 9.5')
     files['.config/sway/theme.conf'] += f'\ngaps inner {spacing}\ngaps outer {spacing + 1}\n'
     change('.config/swayfx/effects.conf', r'^corner_radius \d+', f'corner_radius {radius}')
-    change('.config/swayfx/effects.conf', r'^blur_radius \d+', f'blur_radius {max(2, radius // 2)}')
+    # Blur reach is about blur_radius * 2^blur_passes and the template runs one
+    # pass, so the radius must stay within half the gap or the blur samples the
+    # neighbouring window and smears along the edge where they meet. The corner
+    # radius alone would have generated 11 here, reaching far past any gap.
+    change('.config/swayfx/effects.conf', r'^blur_radius \d+',
+           f'blur_radius {max(1, min(radius // 2, spacing // 2))}')
     change('.config/foot/foot.ini', r'^pad=.*', f'pad={spacing}x{spacing} center')
     change('.config/foot/foot.ini', r'^alpha=.*', f'alpha={design["opacity"]}')
     change('.config/ghostty/config', r'^background-opacity\s*=.*', f'background-opacity = {design["opacity"]}')

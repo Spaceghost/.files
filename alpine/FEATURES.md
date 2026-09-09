@@ -171,6 +171,16 @@ handoffs are immediate and must not leave overlapping caption surfaces.
 
 ### MOTION
 
+Blur must never reach past the gap into the next window. Dual-Kawase reaches
+about `blur_radius * 2^blur_passes`; where that exceeds the gap between windows
+the blur samples a live neighbour, and any repaint of that neighbour — which
+`focus_follows_mouse` causes on every crossing — leaves the blur smeared along
+the vertical edges where windows meet. Top and bottom edges never showed it
+because those neighbours are `blur_xray` layers with a static backdrop. Derived
+theme values must respect the same bound: deriving the blur radius from the
+corner radius alone generated 11 for a 22px corner, reaching 44px across a 13px
+gap, so the derivation is bounded by the theme's spacing instead.
+
 Aim for at least 60fps, smooth continuous motion, preserved velocity and exact
 settling without overshoot. Use display frame clocks; stop animation when idle.
 Avoid redundant resize/layout work and unbounded update queues. Honor disabled

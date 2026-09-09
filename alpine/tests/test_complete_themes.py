@@ -2,6 +2,7 @@
 import importlib
 import json
 from pathlib import Path
+import re
 import runpy
 import sys
 import tempfile
@@ -27,6 +28,25 @@ class CompleteThemes(unittest.TestCase):
                     self.assertIn(name, files)
                 bar = json.loads(files['.config/waybar/config.jsonc'])[0]
                 self.assertEqual(bar['mpris']['on-click-middle'], '~/.local/bin/oldbook-pithos middle')
+
+    def test_blur_never_reaches_past_the_gap_into_the_next_window(self):
+        """Dual-Kawase reaches about blur_radius * 2^blur_passes. Where that
+        overshoots the gap the blur samples the live neighbouring window, and a
+        focus change repainting that neighbour smears along the vertical edge
+        where the two meet. Deriving the radius from the corner radius alone
+        generated 11 for a 22px corner, which overshoots every legal gap."""
+        renderer = importlib.import_module('desktop_theme')
+        theme = json.loads((REPO / 'alpine/themes/gruvbox-dark.json').read_text())
+        for spacing in range(2, 17):
+            for radius in (0, 4, 14, 22, 24):   # the schema's whole legal range
+                with self.subTest(spacing=spacing, radius=radius):
+                    theme['design'] = dict(theme['design'], radius=radius, spacing=spacing)
+                    effects = renderer.render_profile(REPO, theme)['.config/swayfx/effects.conf']
+                    values = dict(re.findall(r'^(blur_radius|blur_passes) (\d+)$',
+                                             effects, re.MULTILINE))
+                    reach = int(values['blur_radius']) * 2 ** int(values['blur_passes'])
+                    self.assertLessEqual(reach, spacing,
+                                         f'blur reaches {reach}px across a {spacing}px gap')
 
     def test_design_changes_geometry_and_typography_with_identical_colors(self):
         renderer = importlib.import_module('desktop_theme')
