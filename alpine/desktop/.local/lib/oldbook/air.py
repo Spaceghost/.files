@@ -32,13 +32,16 @@ CAPTION_HIGH = 0.22
 # Quantising the caption keeps the stylesheet reload rate to a few per second.
 CAPTION_STEPS = 24
 PREFERENCES = 'breath.json'
-# The painting does not move unless it is asked to. A breathing image is
-# physically unpleasant for this user and he has met it twice on a machine he
-# had already asked to hold still, so the wallpaper opts in rather than out.
-# Pointer-driven motion is welcome; motion the machine generates on its own is
-# not. The caption's accent wash is a colour on a small strip rather than a
-# moving image and stays on.
+# The painting never breathes. This is not a default and not a preference: the
+# user asked three times, the last time as "ABSOLUTELY NO MORE BREATHING
+# PAINTINGS", and each earlier round left a switch that something else could
+# turn back on -- a stale default, then a toggle in the control deck. A switch
+# that must always be off is better removed than defaulted. `wallpaper` stays in
+# the mapping so old records and callers still parse, and is forced False here
+# so no file, toggle or caller can raise it. The caption's accent wash is a
+# colour on a small strip rather than a moving image and is still a real choice.
 DEFAULT_PREFERENCES = {'wallpaper': False, 'caption': True}
+IMMUTABLE_PREFERENCES = {'wallpaper': False}
 
 
 def runtime_directory():
@@ -134,7 +137,7 @@ def read_preferences(path=None):
         return dict(DEFAULT_PREFERENCES)
     if not isinstance(record, dict):
         return dict(DEFAULT_PREFERENCES)
-    return {key: bool(record.get(key, default))
+    return {key: IMMUTABLE_PREFERENCES.get(key, bool(record.get(key, default)))
             for key, default in DEFAULT_PREFERENCES.items()}
 
 
@@ -142,7 +145,7 @@ def write_preferences(values, path=None):
     """Save the switches atomically; returns the stored mapping."""
     target = Path(path or preferences_path())
     target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-    stored = {key: bool(values.get(key, default))
+    stored = {key: IMMUTABLE_PREFERENCES.get(key, bool(values.get(key, default)))
               for key, default in DEFAULT_PREFERENCES.items()}
     temporary = target.with_name(target.name + f'.{os.getpid()}.tmp')
     temporary.write_text(json.dumps(stored, sort_keys=True) + '\n')
