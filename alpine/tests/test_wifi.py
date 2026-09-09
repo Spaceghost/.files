@@ -162,12 +162,22 @@ class Drawing(unittest.TestCase):
                 self.assertNotEqual(wifi.bars(dbm), wifi.bars(dbm, locked=True))
 
     def test_a_steady_signal_reads_as_steady_not_as_noise(self):
-        """A one-dBm span must not be amplified to a full-scale staircase."""
-        drawn = wifi.sparkline([-60, -60, -60, -60])
-        self.assertEqual(len(set(drawn)), 1)
+        """A healthy link wobbles a few dBm; that must not draw a mountain range."""
+        self.assertEqual(len(set(wifi.sparkline([-60, -60, -60, -60]))), 1)
+        self.assertLessEqual(len(set(wifi.sparkline([-54, -57, -55, -56, -54]))), 2)
 
     def test_a_falling_signal_draws_a_descending_line(self):
-        drawn = wifi.sparkline([-50, -60, -70, -80])
+        drawn = wifi.sparkline([-45, -60, -75, -88])
+        heights = [wifi.BLOCKS.index(character) for character in drawn]
+        self.assertEqual(heights, sorted(heights, reverse=True))
+        self.assertGreater(heights[0], heights[-1])
+
+    def test_the_scale_is_absolute_so_two_links_can_be_compared(self):
+        """The same reading draws the same height whatever else is in the run."""
+        self.assertEqual(wifi.sparkline([-50, -50])[0], wifi.sparkline([-50, -85])[0])
+
+    def test_readings_beyond_the_scale_are_clamped_rather_than_overflowing(self):
+        drawn = wifi.sparkline([-10, -120])
         self.assertEqual(drawn[0], wifi.BLOCKS[-1])
         self.assertEqual(drawn[-1], wifi.BLOCKS[0])
 

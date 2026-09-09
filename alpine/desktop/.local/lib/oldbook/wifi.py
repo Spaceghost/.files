@@ -278,26 +278,34 @@ def bars(dbm, locked=None):
     return (LOCKED_BARS if locked else BARS)[step]
 
 
+# The scale the trace is drawn against, in dBm.  Fixed rather than fitted: see
+# `sparkline`.  Roughly seven dB to a block across the range that matters.
+SIGNAL_FLOOR, SIGNAL_CEILING = -90, -35
+
+
 def sparkline(readings):
     """Recent signal as a block ramp, so a drifting link is visible at a glance.
 
     Drawn from readings the panel already took for its own status line, never
-    from anything new: watching the link has to stay free.  A flat line is a
-    steady association; a staircase down is him walking away from the access
-    point, which is worth seeing before the link gives out rather than after.
+    from anything new: watching the link has to stay free.
+
+    The scale is absolute, not fitted to the readings.  Fitting was the obvious
+    thing and it was wrong: a rock-steady excellent link wobbles three or four
+    dBm on its own, and stretching that across the full ramp drew a mountain
+    range, which reads as an unstable connection and is a lie.  Received signal
+    already means something on its own -- -40 is next to the access point, -85
+    is about to drop -- so the trace is drawn against that, and a steady link
+    is a flat line at the height its quality deserves.  A genuine decline still
+    descends, because it is genuinely crossing the scale.
     """
     values = [v for v in readings if isinstance(v, (int, float))]
     if len(values) < 2:
         return ""
-    low, high = min(values), max(values)
-    if high - low < 1:
-        # A steady signal must read as steady rather than as noise amplified to
-        # full scale by a span of one dBm.
-        return BLOCKS[len(BLOCKS) // 2] * len(values)
-    span = high - low
-    return "".join(BLOCKS[min(len(BLOCKS) - 1,
-                              int((value - low) / span * (len(BLOCKS) - 1)))]
-                   for value in values)
+    span = SIGNAL_CEILING - SIGNAL_FLOOR
+    return "".join(
+        BLOCKS[max(0, min(len(BLOCKS) - 1,
+                          int((value - SIGNAL_FLOOR) / span * (len(BLOCKS) - 1) + 0.5)))]
+        for value in values)
 
 
 def signal_history(dbm=None):
