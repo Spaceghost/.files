@@ -17,8 +17,9 @@ import time
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import air
-from decoration import (action_command, corner_radii, load_settings, save_settings,
-                        seam_overlap, vertical_title, window_opacity, window_radius)
+from decoration import (action_command, corner_radii, focused_child, load_settings,
+                        save_settings, seam_overlap, vertical_title, window_opacity,
+                        window_radius)
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
 import decoration_reserve
@@ -184,6 +185,13 @@ def daemon():
         """
         gesture = Gtk.GestureClick()
         gesture.set_button(0)
+        # Ahead of the widget's own gesture, not behind it. A GTK4 button
+        # claims the sequence for itself, and a middle or right click that
+        # reaches it first never arrives here at all; GTK3 delivered the press
+        # to the handler before the button acted on it. Capturing restores that
+        # order, and a press this handler does not claim still travels on to
+        # the button underneath.
+        gesture.set_propagation_phase(Gtk.PropagationPhase.CAPTURE)
         gesture.connect('pressed', callback)
         widget.add_controller(gesture)
         return gesture
@@ -244,7 +252,7 @@ def daemon():
             # keeps a zero zone so it still sits below the bar's reservation,
             # and steps back over its own band with a negative margin.
             Gtk4LayerShell.set_exclusive_zone(self.window, -1 if attached else 0)
-            self.band = (0, True)
+            self.band = None
             orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
             self.box = Gtk.Box(orientation=orientation, spacing=4)
             self.box.add_css_class('caption')
@@ -325,31 +333,54 @@ def daemon():
             self.palette = {}
             self.shown_parts = []
 
-        def set_band(self, thickness, matching=True):
+        def set_band(self, thickness, matching=True, output_rect=None, usable_rect=None):
             """Step back over the reserved band so the strip stays where it was.
 
             The band is a reservation, not a shelf to sit on top of: the caption
             crosses it and draws inside it, which leaves the strip exactly where
             it has always been while the windows above it stop moving.
+
+            Stepping over it was a negative margin, and gtk4-layer-shell cannot
+            carry one -- the extent it asks the compositor for collapses to zero
+            and the surface is handed an arbitrary default instead. So the
+            caption declines every reservation and is placed from the raw output
+            edge, with whatever the other panels hold back added into its
+            margins. Declining is not reserving: a zone of -1 makes no claim.
             """
-            if self.attachment_mode == 'window' or (thickness, matching) == self.band:
+            if self.attachment_mode == 'window':
                 return
-            self.band = (thickness, matching)
             zone, margin = decoration_reserve.caption_offset(thickness, matching)
+            insets = None
             if margin < 0:
-                # gtk4-layer-shell cannot carry a negative margin: the size it
-                # asks the compositor for collapses to zero and sway answers
-                # with a default slab two hundred pixels tall. Taking the whole
-                # output and stepping in from the raw edge puts the strip in
-                # exactly the same row, because the band it is stepping back
-                # over is the only thing reserving that edge. It still reserves
-                # nothing itself -- a zone of -1 declines other reservations,
-                # it does not make one.
-                zone, margin = -1, decoration_reserve.EDGE_MARGIN
-            side = getattr(Gtk4LayerShell.Edge,
-                           'BOTTOM' if self.edge == 'bottom' else 'RIGHT')
+                # Only the step over this caption's own band is rewritten. A
+                # band on the other edge already declines every reservation on
+                # purpose -- fullscreen borrows the bottom while the band stays
+                # on the saved edge, and the borrowed strip is meant to span the
+                # whole output rather than be pushed out of a reservation it is
+                # not sitting in -- so that case keeps its plain margin.
+                zone = -1
+                if output_rect and usable_rect:
+                    insets = decoration_reserve.caption_insets(
+                        output_rect, usable_rect, self.edge, thickness, matching)
+            state = (thickness, matching, tuple(sorted(insets.items())) if insets else None)
+            if state == self.band:
+                return
+            self.band = state
             Gtk4LayerShell.set_exclusive_zone(self.window, zone)
-            Gtk4LayerShell.set_margin(self.window, side, margin)
+            if insets is None:
+                # Without the compositor's rectangles there is nothing to add
+                # back, so a step-over falls to the ordinary gap: the strip sits
+                # where it always does against the raw edge, which is right
+                # whenever this caption's band is the only thing reserving it.
+                side = getattr(Gtk4LayerShell.Edge,
+                               'BOTTOM' if self.edge == 'bottom' else 'RIGHT')
+                Gtk4LayerShell.set_margin(
+                    self.window, side,
+                    margin if margin >= 0 else decoration_reserve.EDGE_MARGIN)
+                return
+            for name in decoration_reserve.band_anchors(self.edge):
+                Gtk4LayerShell.set_margin(self.window, getattr(Gtk4LayerShell.Edge, name),
+                                          insets[name])
 
         def remeasure(self, style):
             """Size the band from a reference line rather than the live caption.
@@ -477,9 +508,12 @@ def daemon():
 
         def render_geometry(self):
             rect = {key: round(value) for key, value in self.motion_rect.items()}
-            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.LEFT, rect['x'])
-            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.TOP, rect['y'])
             size = (max(1, rect['width']), max(1, rect['height']))
+            # Extent first, then the margins that move it, with nothing in
+            # between. A margin commits the layer surface immediately while a
+            # resize waits for GTK's next frame, so anything done between the
+            # two is time the strip spends at its old width in its new place.
+            # Set together in one turn they reach the compositor as one change.
             if size != self.rendered_size:
                 # GTK queues layout even when the size request repeats itself.
                 # Moving a caption only needs new margins and a repaint.
@@ -495,6 +529,8 @@ def daemon():
                 self.window.set_default_size(*size)
                 self.rendered_size = size
                 self.refresh_input()
+            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.LEFT, rect['x'])
+            Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.TOP, rect['y'])
 
         def draw_seam(self, widget, context, width, height):
             """Fill the two corners the compositor clipped out of the window.
@@ -950,17 +986,6 @@ def daemon():
                 self.window.remove_tick_callback(self.tick_id)
                 self.tick_id = 0
             self.dismiss_menu()
-            # State the new size while the window is still realized and
-            # allocated. A layer surface that is created without one is given
-            # the compositor's guess -- a two hundred pixel square, shown at
-            # the new position for a frame before the real extent lands -- and
-            # by the time place() runs the surface already exists. Sizing here
-            # commits nothing on its own: the window is hidden in the same
-            # turn, so no frame is drawn between the two.
-            if self.attachment_mode == 'window':
-                extent = self.attached_extent(placement['rect'])
-                self.window.set_size_request(*extent)
-                self.window.set_default_size(*extent)
             self.previous_display = None
             self.previous_geometry = None
             self.rendered_size = None
@@ -1141,14 +1166,14 @@ def daemon():
         # The band is settled before the captions draw, so a new caption's first
         # frame already sits inside it, and again afterwards in case an
         # appearance change made the caption a different size.
-        settle_bands(placements, monitors)
+        settle_bands(placements, monitors, output_rects)
         for name, monitor in monitors.items():
             placement = placements.get(name)
             if placement is None or name not in captions:
                 continue
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
                                   last_tree, style, placement, output_rects[name])
-        settle_bands(placements, monitors)
+        settle_bands(placements, monitors, output_rects)
         guard_band(last_tree, output_rects)
         return False
 
@@ -1201,7 +1226,24 @@ def daemon():
         if commands and power_source.allows('decoration-band-guard'):
             launch(['swaymsg', '-q', '; '.join(commands)])
 
-    def settle_bands(placements, monitors):
+    def usable_areas(tree):
+        """What each output has left after every exclusive zone on it.
+
+        Sway's visible workspace rectangle is that answer already, which is
+        better than adding the reservations up here and disagreeing with the
+        compositor about them.
+        """
+        areas = {}
+        for output in tree.get('nodes', []):
+            name = output.get('name', '')
+            if output.get('type') != 'output' or not name or name.startswith('__'):
+                continue
+            workspace = focused_child(output)
+            if workspace and isinstance(workspace.get('rect'), dict):
+                areas[name] = workspace['rect']
+        return areas
+
+    def settle_bands(placements, monitors, output_rects=None):
         """One reservation per output, held whatever the captions are doing.
 
         A caption is the authority on the edge it is drawn along and on no
@@ -1228,10 +1270,13 @@ def daemon():
                 bands[name].set_thickness(wanted['thickness'])
             else:
                 bands[name] = Reservation(monitors[name], wanted['edge'], wanted['thickness'])
+        areas = usable_areas(last_tree)
+        output_rects = output_rects or {}
         for name, caption in captions.items():
             band = bands.get(name)
             caption.set_band(band.thickness if band else 0,
-                             bool(band and band.edge == caption.edge))
+                             bool(band and band.edge == caption.edge),
+                             output_rects.get(name), areas.get(name))
 
     def refresh_appearance():
         nonlocal style

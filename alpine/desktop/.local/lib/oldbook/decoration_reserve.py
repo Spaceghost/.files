@@ -90,6 +90,46 @@ def caption_offset(thickness, matching=True, margin=EDGE_MARGIN):
     return (-1 if thickness else 0), int(margin)
 
 
+def caption_insets(output_rect, usable_rect, edge, thickness, matching, margin=EDGE_MARGIN):
+    """Margins putting a caption that declines reservations where one that respected them sat.
+
+    A caption normally keeps a zero exclusive zone, so the compositor seats it
+    inside the usable area, and then steps back over its own band with a
+    negative margin. GTK4's layer-shell binding cannot carry a negative margin
+    at all -- the extent it asks the compositor for collapses to zero and the
+    surface is given an arbitrary default -- so the caption declines every
+    reservation instead and is measured from the raw output edge.
+
+    Declining them all means the other panels' reservations have to be added
+    back by hand, which is what this returns: for each side, whatever is held
+    back there plus the ordinary gap. The caption's own band is the one
+    exception, subtracted on the edge it sits on, because drawing inside that
+    band is the whole reason the caption cannot simply respect them all.
+
+    Rectangles are Sway's: the output's own, and the visible workspace's, which
+    is the usable area after every exclusive zone on that output.
+    """
+    if edge not in ('bottom', 'right'):
+        raise ValueError('Decoration edge must be bottom or right')
+    margin = max(0, int(margin))
+    thickness = max(0, int(thickness))
+    held = {}
+    for side, value in (
+            ('LEFT', usable_rect['x'] - output_rect['x']),
+            ('TOP', usable_rect['y'] - output_rect['y']),
+            ('RIGHT', (output_rect['x'] + output_rect['width'])
+                      - (usable_rect['x'] + usable_rect['width'])),
+            ('BOTTOM', (output_rect['y'] + output_rect['height'])
+                       - (usable_rect['y'] + usable_rect['height']))):
+        held[side] = max(0, int(value))
+    own = 'BOTTOM' if edge == 'bottom' else 'RIGHT'
+    if matching:
+        # Only this caption's band is stepped over; anything else on that side
+        # is another panel and is still respected.
+        held[own] = max(0, held[own] - thickness)
+    return {side: value + margin for side, value in held.items()}
+
+
 def character_budget(span, character_width, controls=0):
     """How much caption fits along `span`, in characters, after the buttons.
 
