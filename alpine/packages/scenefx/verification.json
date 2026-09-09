@@ -1,0 +1,37 @@
+{
+  "date": "2026-09-09",
+  "package": "scenefx 0.5-r1 (with scenefx-dev and scenefx-doc)",
+  "installed": false,
+  "installed_note": "Nothing here was installed. This package replaces a shared library under the running compositor, so `apk add` is the user's decision.",
+  "build": {
+    "command": "alpine/bin/remote-build build --host bak scenefx",
+    "host": "bak",
+    "engine": "incus, ephemeral alpine:edge instance",
+    "network": "options=!net; the pinned tarball was exported from Fossil unversioned storage by its own SHA-256 and abuild re-verified it before unpacking",
+    "signing": "Built and signed with a throwaway key on bak, re-signed here with jack-6a9e83bd.rsa; the private key never left this machine",
+    "shared_dependency": "wlroots0.20-dev 0.20.2-r1 in the container, identical to the wlroots0.20 installed here"
+  },
+  "checks": [
+    "All three APKs pass `apk verify` against the installed local public key",
+    "Two independent builds on bak, in separate ephemeral containers, produced byte-identical signed APKs for all three packages (scenefx f937e01e..., scenefx-dev b3379180..., scenefx-doc 3104ac7b...)",
+    "abuild applied all three patches with no fuzz and no offset on the build host",
+    "Exported dynamic symbols of the rebuilt libscenefx-0.5.so are byte-for-byte the same set as the installed 0.5-r0 library",
+    "DT_NEEDED list and DT_SONAME are unchanged (libscenefx-0.5.so)",
+    "Exactly one new undefined symbol appears: pixman_region32_contains_rectangle, which is the coverage fix and nothing else",
+    "All 73 SceneFX symbols /usr/bin/swayfx imports are still defined by the rebuilt library",
+    "The installed /usr/bin/swayfx resolves and runs against the rebuilt library through LD_LIBRARY_PATH: `swayfx --version` reports 0.6 (based on sway 1.12.0)",
+    "verify-headless ran the installed SwayFX against the rebuilt library on AMD renderD129: scenefx 0.5.0 loaded, the FX renderer initialised its shaders, blur/blur_passes 2/corner_radius/shadows parsed and a blurred, rounded, shadowed frame was captured"
+  ],
+  "evidence": {
+    "headless_render": "screenshot, compositor log and IPC evidence produced by alpine/packages/swayfx/verify-headless against the extracted library; not archived because it duplicates the existing SwayFX renderer proof",
+    "library_sha256": "6736cfb87a388890fa7117e1e535d664a7e8ebfb636dc8da5d8aa2dff30c83d5",
+    "replaced_library_sha256": "bf92482f3104671217e8e9049d7d0da83e50200e4246adcd22ffc8fa6d762894"
+  },
+  "limits": [
+    "The pointer smear itself is NOT verified. It needs a live session with a software cursor, a blurred transparent window and a moving pointer; the headless backend has no cursor and the running compositor still has the old library mapped.",
+    "MOTION's frame-rate target was not measured against this build. The damage compensation now runs on most frames instead of intermittently; at blur_passes 1 / blur_radius 4 the padding ring is 16 buffer pixels, but that cost is reasoned about rather than timed.",
+    "The screencast fix carried by blur-damage-output-clip.patch was not exercised; this machine has one output and no capture session was run.",
+    "alpine:edge moves. This build used the toolchain and wlroots that edge published on 2026-09-09; a later rebuild may not produce identical bytes.",
+    "Reproducibility holds for these two builds a few minutes apart on one host; it was not tested on a second host or after alpine:edge moves."
+  ]
+}

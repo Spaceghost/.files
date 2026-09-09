@@ -1,0 +1,100 @@
+{
+  "name": "scenefx",
+  "version": "0.5",
+  "revision": 1,
+  "upstream_commit": "37ccd723bef49e6891156ffafce8f549f01446cc",
+  "upstream_release": "https://github.com/wlrfx/scenefx/releases/tag/0.5",
+  "source_date_epoch": 1782624992,
+  "source": {
+    "url": "https://github.com/wlrfx/scenefx/archive/refs/tags/0.5.tar.gz",
+    "filename": "scenefx-0.5.tar.gz",
+    "sha256": "0fa8ecca0e310f813efd052624c5ed7d9153d6a0fdead5cc957d34c07f9a86c6",
+    "sha512": "055511e88ba4036e6bb4a9f1c5f3a16c4841c518a57b98ad824dd0ecd53c251541a9801be9c760ebf78936400918a51c3b04300f22a47437077d444bc7bc2f08",
+    "artifact": "sha256/0fa8ecca0e310f813efd052624c5ed7d9153d6a0fdead5cc957d34c07f9a86c6/scenefx-0.5.tar.gz"
+  },
+  "replaces": {
+    "package": "scenefx-0.5-r0",
+    "repository": "https://dl-cdn.alpinelinux.org/alpine/edge/community",
+    "note": "Alpine's official scenefx. This package keeps the same pkgver so the only difference apk sees is the revision."
+  },
+  "base_recipe": {
+    "repository": "https://gitlab.alpinelinux.org/alpine/aports/-/tree/master/community/scenefx",
+    "version": "0.5-r0",
+    "deviations": [
+      "abuild-meson instead of abuild-muon; same project, same options.",
+      "arch pinned to x86_64, the only architecture this checkout builds for.",
+      "options gains !net so the pinned tarball travels with the recipe."
+    ]
+  },
+  "patches": [
+    {
+      "filename": "add-missing-include-for__always_inline.patch",
+      "sha256": "21d4bee5ef6ea16b2f15429aa8ead5c2f7be06359d4f65a45b0dd70f2b8ecf12",
+      "origin": "alpine/aports community/scenefx",
+      "purpose": "musl build fix carried by the official package: clipped_region.h needs linux/stddef.h for __always_inline."
+    },
+    {
+      "filename": "blur-damage-output-clip.patch",
+      "sha256": "b2fb6e7a2ff897353847c42d1fdf929edb3ba385cf7972a1759f94143d6bb2ee",
+      "upstream_commit": "06fb6d8dac68485d1cac075baa60a15408a84666",
+      "url": "https://github.com/wlrfx/scenefx/commit/06fb6d8dac68485d1cac075baa60a15408a84666",
+      "purpose": "Clip the blur damage compensation to the output before publishing it, and treat an empty intersection as no compensation. Backported because the coverage fix makes this path run on nearly every frame."
+    },
+    {
+      "filename": "blur-damage-coverage.patch",
+      "sha256": "f5f4ea9f83e32e5e5cd6f5633824cd7e68af18375f4fdecf6f61094d556e0267",
+      "upstream_commit": "3606f3d3bb4bb97e13228adc5190bf57fc687c88",
+      "url": "https://github.com/wlrfx/scenefx/commit/3606f3d3bb4bb97e13228adc5190bf57fc687c88",
+      "purpose": "Decide 'the whole output is damaged' by region coverage instead of the damage bounding box, so a small cursor rectangle far from another repaint no longer disables blur damage expansion and leaves smeared squares tracking the pointer."
+    }
+  ],
+  "shared_dependencies": {
+    "wlroots0.20": "0.20.2-r1",
+    "source": "Exact official APK inputs captured by the repository package lock."
+  },
+  "consumers": [
+    "swayfx-0.6-r4 imports every blur symbol from libscenefx-0.5.so"
+  ],
+  "packages": [
+    {
+      "filename": "scenefx-0.5-r1.apk",
+      "sha256": "f937e01e5f618d977943212444e629acfcfd0b01c5b1f95cc9a8adc9169e1ecd",
+      "artifact": "sha256/f937e01e5f618d977943212444e629acfcfd0b01c5b1f95cc9a8adc9169e1ecd/scenefx-0.5-r1.apk",
+      "apk_identity": "Q1+BPSpSIT+KFG6L+tqcF5Bsvi9hw="
+    },
+    {
+      "filename": "scenefx-dev-0.5-r1.apk",
+      "sha256": "b337918054d0c2a0120cb07ef1cc7ef44a98736361069c797e6551d3743a0802",
+      "artifact": "sha256/b337918054d0c2a0120cb07ef1cc7ef44a98736361069c797e6551d3743a0802/scenefx-dev-0.5-r1.apk",
+      "apk_identity": "Q1qD6fzATkZDaIAee7oyrtyPvkPRo="
+    },
+    {
+      "filename": "scenefx-doc-0.5-r1.apk",
+      "sha256": "3104ac7bd9bffc593c86d60255acec34268f26fff0995553864899e508073a50",
+      "artifact": "sha256/3104ac7bd9bffc593c86d60255acec34268f26fff0995553864899e508073a50/scenefx-doc-0.5-r1.apk",
+      "apk_identity": "Q1oIgcDauQxd03awISFwQx3l/CDj4="
+    }
+  ],
+  "library_sha256": "6736cfb87a388890fa7117e1e535d664a7e8ebfb636dc8da5d8aa2dff30c83d5",
+  "previous_packages": [
+    {
+      "filename": "scenefx-0.5-r0.apk",
+      "sha256": "db8b04ee59bbcc498bffe127a92e4f254d852d31805c8b04e76ad35d6e51cfa9",
+      "artifact": "sha256/db8b04ee59bbcc498bffe127a92e4f254d852d31805c8b04e76ad35d6e51cfa9/scenefx-0.5-r0.apk"
+    },
+    {
+      "filename": "scenefx-dev-0.5-r0.apk",
+      "sha256": "8934ff1a10f13f64b38b28dd8026c6c4c902f7fec2d7ca2222bd5a1b684e2b62",
+      "artifact": "sha256/8934ff1a10f13f64b38b28dd8026c6c4c902f7fec2d7ca2222bd5a1b684e2b62/scenefx-dev-0.5-r0.apk"
+    }
+  ],
+  "previous_library_sha256": "bf92482f3104671217e8e9049d7d0da83e50200e4246adcd22ffc8fa6d762894",
+  "build": {
+    "host": "bak",
+    "engine": "incus",
+    "image": "alpine:edge",
+    "command": "alpine/bin/remote-build build --host bak scenefx",
+    "date": "2026-09-09",
+    "wlroots0.20_dev": "0.20.2-r1 (identical to the version installed here)"
+  }
+}

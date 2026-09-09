@@ -1,0 +1,59 @@
+# Contributor: omni <omni+alpine@hack.org>
+# Maintainer: Oldbook local package <oldbook@localhost.invalid>
+pkgname=scenefx
+pkgver=0.5
+pkgrel=1
+pkgdesc="wlroots scene API with eye-candy effects, with blur damage compensation fixed"
+url="https://github.com/wlrfx/scenefx"
+arch="x86_64"
+license="MIT"
+subpackages="$pkgname-dev $pkgname-doc"
+makedepends="glslang
+	lcms2-dev
+	libxkbcommon-dev
+	meson
+	pkgconf
+	samurai
+	wayland-protocols
+	wlroots0.20-dev
+	"
+# No tests upstream. The pinned tarball travels beside this recipe, so the
+# compile itself never reaches the network.
+options="!check !net"
+source="scenefx-$pkgver.tar.gz
+	add-missing-include-for__always_inline.patch
+	blur-damage-output-clip.patch
+	blur-damage-coverage.patch
+	"
+builddir="$srcdir/$pkgname-$pkgver"
+export SOURCE_DATE_EPOCH=1782624992
+
+depends_dev="$pkgname=$pkgver-r$pkgrel"
+
+build() {
+	# Alpine community/scenefx 0.5-r0 configures the same options through
+	# abuild-muon. This checkout uses meson instead: it is the project's own
+	# build system, abuild-meson supplies Alpine's prefix, plain buildtype and
+	# hardening flags, and nothing here depends on which of the two reads
+	# meson.build. Enabling the auto features keeps colour management on,
+	# exactly as the official package this replaces was built; it has to be the
+	# --auto-features spelling, because abuild-meson already passes that option
+	# and meson refuses to be given the same setting under both names.
+	abuild-meson \
+		--auto-features=enabled \
+		-Dexamples=false \
+		. output
+	meson compile -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+	install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/LICENSE
+}
+
+sha512sums="
+055511e88ba4036e6bb4a9f1c5f3a16c4841c518a57b98ad824dd0ecd53c251541a9801be9c760ebf78936400918a51c3b04300f22a47437077d444bc7bc2f08  scenefx-0.5.tar.gz
+d7c75ad296f9a9e88ca170161bdef3b579eaab6e5493b479bd1444533f7c02005491b90267cdfbb0370bd7b450f42d3eab03279996c5053fcc54629edee5bda4  add-missing-include-for__always_inline.patch
+eeed223d1beff54681b3bbb5c00b526f363ee93f281948649a1ff61e5487ea855b3e37e2d3de511bee95cadddafebbbdbf097daa7391f82d46be2aff8a729667  blur-damage-output-clip.patch
+413238810bc207610df81bd55279ce6805b50c91a99648a05838c9f056ef38c27be4616a4aad48f0c88a25834e04e5de59136400c25435956d5b990989046c97  blur-damage-coverage.patch
+"

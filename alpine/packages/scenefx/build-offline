@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Build the pinned SceneFX APK in abuild's disposable rootbld environment.
+
+This is the recovery path, not the normal one. Packages in this checkout are
+built on a build host with `alpine/bin/remote-build build --host bak scenefx`;
+compiling here pins both fans of a MacBookPro11,5 for minutes. The helper
+therefore refuses to run unless OLDBOOK_ALLOW_LOCAL_BUILD=1 says the heat is
+deliberate, the same escape `~/.local/bin/abuild` honours.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+ESCAPE = 'OLDBOOK_ALLOW_LOCAL_BUILD'
+
+parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+parser.add_argument('--source', required=True, type=Path,
+                    help='Pinned scenefx-0.5.tar.gz exported from the Fossil archive')
+parser.add_argument('--work', required=True, type=Path,
+                    help='New, nonexisting build directory')
+args = parser.parse_args()
+if os.geteuid() == 0:
+    parser.error('Run as the ordinary build user with a configured abuild signing key')
+if os.environ.get(ESCAPE) != '1':
+    parser.error('This machine is the desktop, not the build machine. Use\n'
+                 '    alpine/bin/remote-build build --host bak scenefx\n'
+                 f'or set {ESCAPE}=1 to compile here on purpose.')
+
+recipe = Path(__file__).resolve().parent
+manifest = json.loads((recipe / 'manifest.json').read_text())
+source = args.source.resolve(strict=True)
+if hashlib.sha256(source.read_bytes()).hexdigest() != manifest['source']['sha256']:
+    parser.error('Source SHA-256 does not match manifest.json')
+
+patches = [entry['filename'] for entry in manifest['patches']]
+work = args.work.absolute()
+work.mkdir(parents=True, exist_ok=False)
+stage = work / 'aports/community/scenefx'
+stage.mkdir(parents=True)
+for name in ['APKBUILD', *patches]:
+    shutil.copy2(recipe / name, stage / name)
+distfiles = work / 'distfiles'
+distfiles.mkdir()
+shutil.copy2(source, distfiles / manifest['source']['filename'])
+shutil.copy2(source, stage / manifest['source']['filename'])
+
+# rootbld expands this template while preparing its disposable APK root.
+(stage.parent / '.rootbld-repositories').write_text(
+    'https://dl-cdn.alpinelinux.org/alpine/$version/main\n'
+    'https://dl-cdn.alpinelinux.org/alpine/$version/community\n'
+    '@testing https://dl-cdn.alpinelinux.org/alpine/$version/testing\n')
+
+packages = work / 'packages'
+packages.mkdir()
+command = ['abuild', '-K', '-P', str(packages), '-s', str(distfiles), 'rootbld']
+with (work / 'build.log').open('w') as log:
+    result = subprocess.run(command, cwd=stage, stdout=log,
+                            stderr=subprocess.STDOUT,
+                            env=dict(os.environ, JOBS='4'))
+if result.returncode:
+    raise SystemExit(f'Build failed; see {work / "build.log"}')
+apk = next(packages.glob('community/*/scenefx-[0-9]*.apk'))
+print(apk)
+print('SHA-256', hashlib.sha256(apk.read_bytes()).hexdigest())
