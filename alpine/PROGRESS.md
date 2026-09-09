@@ -2,6 +2,36 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The strip says what you are actually looking at — 2026-09-08
+
+The user could not tell Foot from Ghostty at a glance and wanted the decoration
+to carry enough to know everything at once, giving the shape himself: "I want to
+see things like: foot tmux nvim <contextual info>". The caption had been
+repeating the window title, which for a terminal is usually the directory or
+nothing at all.
+
+It now reads `10 Strata · foot › tmux › claude · ~`: the workspace identity
+without the live window hint the strip already shows, the process chain out of
+/proc, and the directory with its branch. The tmux step matters more than it
+looks — the pane's program is a child of the tmux server, not of the client in
+our chain, so walking /proc alone stops at "tmux" and calls it done. tmux is
+asked directly instead.
+
+Testing against the live tree is what shaped it. The first version called Pithos
+"python3", followed Firefox down to `firefox › forkserver › Web Content`, and
+reported that window's directory as `/proc/18886/fdinfo` — all true, all
+useless. Only terminals are walked now, every other window keeps the title it
+chose, and a directory inside /proc or /sys is treated as no answer. The raw
+title stays in the tooltip, so nothing readable before stopped being reachable.
+
+The chain is plain file reads and never sheds. Asking tmux for the pane and
+Fossil for the branch costs a process each, so both are on the power ladder as
+`window-context-detail` and stop at battery-low, leaving the emulator and the
+directory. Fourteen tests cover the shell filtering, the tmux client name, the
+youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
+parsing including a detached head, and each caption shape. A rendered string in
+a test is not the strip on the panel; the live caption is the user's check.
+
 ## The desktop learned where its power comes from — 2026-09-08
 
 Opening a round of rice work, the user attached one condition: "the only thing

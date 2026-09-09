@@ -18,6 +18,7 @@ import air
 from decoration import action_command, load_settings, save_settings, vertical_title
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
+import window_context
 from overlay_theme import THEMES, read_palette
 from decoration_placement import output_placements
 from decoration_motion import advance, advance_rect
@@ -473,8 +474,10 @@ def daemon():
             square = placement['square']
             self.context = dict(context, edge=self.edge)
             self.tree = tree
+            caption_text = window_context.strip_caption(context)
             display_state = (tuple(context.get(key) for key in
-                             ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')), style, square,
+                             ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')),
+                             caption_text, style, square,
                              placement['rect']['width'], placement['rect']['height'])
             if display_state == self.previous_display:
                 self.place(placement, output_rect)
@@ -497,6 +500,7 @@ def daemon():
                     self.image.set_from_icon_name('utilities-terminal-symbolic' if terminal else
                         ('application-x-executable-symbolic' if occupied else 'view-app-grid-symbolic'), Gtk.IconSize.MENU)
             title = context.get('title') or 'Empty workspace · ' + context.get('workspace', '')
+            shown_title = caption_text
             if self.edge == 'right':
                 layout = self.label.create_pango_layout('M')
                 family, size = style[:2]
@@ -505,9 +509,9 @@ def daemon():
                 span = (placement['rect']['height'] if self.attachment_mode == 'window'
                         else self.monitor.get_workarea().height)
                 available = max(1, span - (110 if span < 240 else 260))
-                shown = vertical_title(title, available // height)
+                shown = vertical_title(shown_title, available // height)
             else:
-                shown = title
+                shown = shown_title
             self.label.set_text(shown)
             state = 'FULLSCREEN' if context.get('fullscreen') else ('FLOATING' if context.get('floating') else 'TILED')
             self.state_label.set_text(state if occupied and self.edge == 'bottom' else '')

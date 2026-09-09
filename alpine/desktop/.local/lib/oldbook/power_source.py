@@ -36,6 +36,7 @@ LADDER = {
     'window-animations': 'battery',
     'window-ghosts': 'battery',
     'letterpress': 'battery-low',
+    'window-context-detail': 'battery-low',
     'reading-cards': 'battery-low',
     'screen-corners': 'battery-low',
     'sound-cues': 'battery-low',

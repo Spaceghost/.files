@@ -621,6 +621,31 @@ look.
 
 ![Power deck rendered headlessly](verification/power-deck/power-deck.png)
 
+## What the strip says
+
+The caption used to repeat the window title, which for a terminal is usually
+the directory or nothing at all. It now answers three questions at a glance:
+where you are, what is running, and where it is running.
+
+    10 Strata · foot › tmux › claude · ~
+
+The workspace identity comes first, without the live window hint the strip is
+already showing you. For a terminal the process chain follows, read out of
+/proc the way you would say it aloud, so Foot and Ghostty are told apart on
+sight and tmux never hides what is inside it — the pane's real program comes
+from tmux itself, because that program is a child of the tmux server and no
+walk from the window's own process would ever reach it. Last is the directory
+and, in a checkout, the branch: `~/.files (alpine-oldbook)`, from Git's HEAD
+file or from Fossil.
+
+Only terminals are walked. Every other window keeps the title it chose, since
+descending a browser lands in a content process that is neither the program on
+screen nor anywhere you have been, and answers `cwd` with somewhere inside
+/proc. The full window title stays in the tooltip on hover, so nothing that was
+readable before stopped being reachable. On battery-low the tmux and Fossil
+questions stop being asked and the line falls back to the emulator and the
+directory; the chain itself is plain file reads and never sheds.
+
 ## Power posture
 
 The desktop asks one question about the cord and every effect gets the same

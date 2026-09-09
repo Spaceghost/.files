@@ -130,6 +130,19 @@ The accent wash behind the brand button follows the keystroke breath alone,
 between 0.06 and 0.22 alpha on its own stylesheet provider; the plain breath,
 the last breath and a stopped worker leave the strip at its resting value.
 
+The caption answers where you are and what you are looking at, not only what
+the window calls itself. It carries the workspace identity without the live
+window hint the strip already shows, and for a terminal it names the process
+chain the way it would be said aloud — ghostty › tmux › nvim — with that
+program's directory and branch. Only terminals are walked: every other window
+keeps the title it chose, because a browser's youngest descendant is a content
+process that is neither what the user is looking at nor anywhere they have
+been. A directory inside /proc or /sys is no answer and is dropped. The raw
+window title stays in the tooltip either way, so nothing readable before stops
+being reachable. The chain is plain /proc reads and always runs; asking tmux
+for the pane and Fossil for the branch is on the power ladder as
+`window-context-detail`.
+
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),
   [preferences](desktop/.config/oldbook/decoration.json).

@@ -7,6 +7,7 @@ import shutil
 import subprocess
 
 from decoration import caption_child, focused_child
+import window_context
 
 BIN = Path.home() / '.local/bin'
 TERMINALS = ('foot', 'ghostty', 'kitty', 'alacritty', 'wezterm', 'xterm')
@@ -60,6 +61,8 @@ def output_contexts(tree):
             if node.get('app_id') or node.get('window'):
                 context.update(id=node['id'], node=node, title=clean(node.get('name') or app_name(node)),
                                app=app_name(node), sticky=bool(node.get('sticky')))
+                context['provenance'] = window_context.describe(
+                    node.get('pid'), terminal_source(node) is not None)
                 break
             child = caption_child(node)
             if child in node.get('floating_nodes', []):
