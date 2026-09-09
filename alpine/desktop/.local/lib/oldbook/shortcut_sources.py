@@ -134,7 +134,12 @@ class ShortcutProvider:
                 'rows': [],
             }]
 
-        sections.append(self._sway_section())
+        # Sections read outward from the most local context: the focused
+        # application sits inside tmux, inside its terminal, inside Sway,
+        # inside the system. Superhold owns the configurable version of this
+        # order; the legacy overlay keeps the same default and no settings.
+        if tmux_context:
+            sections.append(self._tmux_section(tmux_context))
         if terminal_source and _source_key(identity_source) not in _TERMINALS:
             terminal_profile = index.get(_source_key(terminal_source))
             terminal_name = terminal_profile['name'] if terminal_profile else 'Terminal'
@@ -146,8 +151,7 @@ class ShortcutProvider:
                     for key, description in TERMINAL_ROWS
                 ],
             })
-        if tmux_context:
-            sections.append(self._tmux_section(tmux_context))
+        sections.append(self._sway_section())
         sections.append({
             'title': 'System controls',
             'coverage': 'Partial configured controls',

@@ -1,5 +1,13 @@
 # Changes
 
+## Unreleased
+
+Order guide sections from the most local context outward — the focused
+application, tmux, its terminal, the desktop, then system-wide controls —
+instead of placing the desktop second. Add an optional `[sections]`
+configuration table that reorders, hides and renames sections, and that defines
+custom sections which behave like the built-in ones.
+
 ## 0.1.0
 
 Named Superhold before public release. Preserves the earlier local command,

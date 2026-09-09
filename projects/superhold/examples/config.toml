@@ -3,3 +3,25 @@
 trigger = "super" # "super" or "capslock"
 hold_seconds = 0.5 # finite duration between 0.15 and 3 seconds
 backend = "auto" # "auto", "sway", or "x11"
+
+# Sections are listed from the most local context outward: the focused
+# application sits inside tmux, inside its terminal, inside the desktop,
+# inside the system. Everything below is optional.
+[sections]
+# Sections you name come first, in this order. Anything you leave out keeps
+# its default place after them, so a partial list stays valid.
+order = ["application", "tmux", "terminal", "desktop", "session", "system", "diagnostics"]
+# Drop sections entirely. "session" is X11-only and "diagnostics" appears only
+# when a profile file fails to load, so both are simply skipped when absent.
+hidden = []
+
+# Rename any section, built-in or your own.
+[sections.titles]
+# desktop = "Window manager"
+
+# Define your own sections. They can be ordered, renamed and hidden exactly
+# like the built-ins, and their names must not collide with a built-in.
+# [sections.custom.mine]
+# title = "Muscle memory"
+# coverage = "Partial local section" # must begin with "Partial"
+# rows = [{ key = "Super+G", description = "Grid overlay" }]

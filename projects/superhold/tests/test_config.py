@@ -9,7 +9,8 @@ import unittest
 from unittest import mock
 
 from superhold.cli import parse_args, select_backend
-from superhold.config import Config, default_profiles_path, load_config
+from superhold.config import (Config, SECTION_IDS, default_profiles_path,
+                              load_config)
 from superhold.hold import HoldState, KEY_CAPSLOCK, KEY_LEFTMETA
 
 
@@ -34,6 +35,53 @@ class ConfigurationTests(unittest.TestCase):
                 Config(**options)
         self.assertEqual(Config(hold_seconds=.15).hold_seconds, .15)
         self.assertEqual(Config(hold_seconds=3).hold_seconds, 3)
+
+    def test_sections_table_orders_hides_renames_and_defines_custom_sections(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'config.toml'
+            path.write_text(
+                "[sections]\n"
+                "order = ['system', 'desktop', 'mine']\n"
+                "hidden = ['diagnostics']\n"
+                "[sections.titles]\n"
+                "desktop = 'Window manager'\n"
+                "[sections.custom.mine]\n"
+                "title = 'My keys'\n"
+                "coverage = 'Partial local section'\n"
+                "rows = [{key = 'Super+G', description = 'Grid overlay'}]\n")
+            sections = load_config(path).sections
+
+        self.assertEqual(sections.order, ('system', 'desktop', 'mine'))
+        self.assertEqual(sections.hidden, frozenset({'diagnostics'}))
+        self.assertEqual(dict(sections.titles), {'desktop': 'Window manager'})
+        self.assertEqual(dict(sections.custom['mine']), {
+            'title': 'My keys', 'coverage': 'Partial local section',
+            'rows': [{'key': 'Super+G', 'description': 'Grid overlay'}]})
+
+    def test_default_section_order_reads_from_the_most_local_context_outward(self):
+        self.assertEqual(Config().sections.order, SECTION_IDS)
+        self.assertEqual(SECTION_IDS[:6], ('application', 'tmux', 'terminal',
+                                           'desktop', 'session', 'system'))
+
+    def test_sections_table_rejects_unknown_names_shadowing_and_untidy_text(self):
+        documents = (
+            "[sections]\nnope = []\n",
+            "[sections]\norder = ['nope']\n",
+            "[sections]\nhidden = 'system'\n",
+            "[sections]\norder = ['system', 'system']\n",
+            '[sections.titles]\ndesktop = "two\\nlines"\n',
+            "[sections.titles]\nnope = 'Anything'\n",
+            "[sections.custom.system]\ntitle = 'Shadow'\n",
+            "[sections.custom.mine]\ntitle = ' padded '\n",
+            "[sections.custom.mine]\ncoverage = 'Complete coverage'\n",
+            "[sections.custom.mine]\nrows = [{key = 'a'}]\n",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'config.toml'
+            for document in documents:
+                path.write_text(document)
+                with self.subTest(document=document), self.assertRaises(ValueError):
+                    load_config(path)
 
     def test_invalid_explicit_files_and_unknown_toml_fields_fail(self):
         with tempfile.TemporaryDirectory() as directory:

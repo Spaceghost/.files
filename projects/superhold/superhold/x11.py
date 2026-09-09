@@ -425,8 +425,8 @@ def focused_context(display):
 
 class X11ShortcutProvider(ShortcutProvider):
     def __init__(self, display=None, profiles_path=None, trigger_label='Super',
-                 openbox_path=None, lxqt_path=None):
-        super().__init__('', profiles_path, trigger_label)
+                 openbox_path=None, lxqt_path=None, sections=None):
+        super().__init__('', profiles_path, trigger_label, sections)
         self.display_name = display or os.environ.get('DISPLAY')
         display_identity(self.display_name)
         self.openbox_path = Path(openbox_path) if openbox_path else _desktop_config('openbox/rc.xml')
@@ -454,7 +454,8 @@ class X11ShortcutProvider(ShortcutProvider):
         return self._last_context['window'], self._last_context['output']
 
     def _desktop_sections(self):
-        return [openbox_section(self.openbox_path), lxqt_section(self.lxqt_path)]
+        return [('desktop', openbox_section(self.openbox_path)),
+                ('session', lxqt_section(self.lxqt_path))]
 
     def snapshot(self):
         snapshot = super().snapshot()

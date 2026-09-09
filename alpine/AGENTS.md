@@ -28,10 +28,27 @@ or restart a local Ollama server or model runner on the MacBook. Desktop
 responsiveness takes priority; an unavailable Alienware endpoint is not
 permission to fall back to the MacBook's CPU.
 
+Compile packages on the Alienware or bak, not on this MacBook Pro. A C++ build
+here pins both fans for minutes and the user notices. `alpine/bin/remote-build`
+ships a package directory to a build host, builds it in a throwaway Alpine
+container and signs the result on this machine; the signing key never leaves.
+`~/.local/bin/abuild` refuses to compile unless `OLDBOOK_ALLOW_LOCAL_BUILD=1`.
+An unreachable build host is a reason to stop and say so, exactly as an
+unavailable inference endpoint is, and never permission to build on the laptop.
+
 The 0 key selects workspace 10. Keep STRATA on numeric workspace 10, displayed
 after workspaces 1–9; do not introduce a separate workspace 0 for it.
 Only Strata–Fossil is anchored there. Summon the console and system monitor on
-the current workspace; neither dropdown is pinned to a workspace.
+the current workspace; neither dropdown is pinned to a workspace. While shown,
+both come along to whichever workspace is switched to, so neither is ever left
+behind and neither holds a workspace open by being the only window on it.
+
+The Super-hold shortcut guide lists sections from the most local context
+outward: the focused application, then tmux, then its terminal, then the
+desktop, then system-wide controls. Keep the desktop section immediately before
+the system one. The order, visibility and titles are the user's to change in
+`~/.config/superhold/config.toml`; prefer adding configuration to hardcoding a
+new arrangement.
 
 Every desktop theme must be complete. The user explicitly rejects palette-only
 themes; do not introduce that category or treat recoloring a few overlays as a

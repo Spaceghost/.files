@@ -36,7 +36,7 @@ import struct
 import subprocess
 
 from .profiles import PROFILES, SYSTEM_ROWS, TERMINAL_ROWS
-from .config import default_profiles_path
+from .config import Sections, default_profiles_path
 
 
 _CONTROL = re.compile(r'[\x00-\x1f\x7f]+')
@@ -96,9 +96,11 @@ class ShortcutProvider:
     _MAX_COMMAND = 512 * 1024
     _TIMEOUT = 0.75
 
-    def __init__(self, socket_path, profiles_path=None, trigger_label='Super'):
+    def __init__(self, socket_path, profiles_path=None, trigger_label='Super',
+                 sections=None):
         self.socket_path = os.fspath(socket_path)
         self.trigger_label = trigger_label
+        self.sections = Sections() if sections is None else sections
         self._profiles_explicit = profiles_path is not None
         if profiles_path is None:
             profiles_path = default_profiles_path()
@@ -124,7 +126,8 @@ class ShortcutProvider:
         return self._focused_view(tree)
 
     def _desktop_sections(self):
-        return [self._sway_section()]
+        """Return (name, section) pairs for whatever runs the windows here."""
+        return [('desktop', self._sway_section())]
 
     def _snapshot_for_context(self, window, output, index, profile_error):
 
@@ -136,23 +139,26 @@ class ShortcutProvider:
             identity_source, tmux_context = self._terminal_identity(window, source)
 
         profile = index.get(_source_key(identity_source))
+        # Sections are collected by name and arranged afterwards, so the
+        # configured order decides what the guide reads like, not this code.
+        sections = {}
         if profile:
             app = profile['name']
-            sections = [_profile_section(profile)]
+            sections['application'] = _profile_section(profile)
         else:
             app = _clean(identity_source, 80) or 'Application'
-            sections = [{
+            sections['application'] = {
                 'title': f'{app} shortcuts',
                 'coverage': 'Unavailable: no shortcut profile',
                 'rows': [],
-            }]
+            }
 
-        sections.extend(self._desktop_sections())
+        sections.update(self._desktop_sections())
         if terminal_source and _source_key(identity_source) not in _TERMINALS:
             terminal_profile = index.get(_source_key(terminal_source))
             terminal_name = terminal_profile['name'] if terminal_profile else 'Terminal'
             terminal_rows = TERMINAL_ROWS if _source_key(terminal_source) in {'foot', 'footclient'} else ()
-            sections.append({
+            sections['terminal'] = {
                 'title': f'{terminal_name} terminal',
                 'coverage': ('Partial documented baseline' if terminal_rows
                              else 'Unavailable: no terminal shortcut profile'),
@@ -160,24 +166,25 @@ class ShortcutProvider:
                     {'key': key, 'description': description}
                     for key, description in terminal_rows
                 ],
-            })
+            }
         if tmux_context:
-            sections.append(self._tmux_section(tmux_context))
-        sections.append({
+            sections['tmux'] = self._tmux_section(tmux_context)
+        sections['system'] = {
             'title': 'System controls',
             'coverage': 'Partial configured controls',
             'rows': [
                 {'key': f'{self.trigger_label} (hold)', 'description': description}
                 for key, description in SYSTEM_ROWS
             ],
-        })
+        }
         if profile_error:
-            sections.append({
+            sections['diagnostics'] = {
                 'title': 'Local shortcut profiles',
                 'coverage': f'Unavailable: {profile_error}',
                 'rows': [],
-            })
-        return {'app': app, 'output': output, 'sections': sections}
+            }
+        return {'app': app, 'output': output,
+                'sections': self.sections.arrange(sections)}
 
     def _sway_request(self, message_type):
         request = self._IPC_MAGIC + struct.pack('<II', 0, message_type)

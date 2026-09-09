@@ -87,6 +87,15 @@ physical: selecting Caps Lock does not disable its normal toggle or change
 your Caps-to-Escape mapping. The default remains Super. Override session
 detection with `--backend sway` or `--backend x11`.
 
+The guide reads outward from the most local context: the focused application,
+then tmux, then its terminal, then the desktop, then system-wide controls. The
+optional `[sections]` table changes that. `order` lists sections first-to-last
+and anything omitted keeps its default place after them; `hidden` drops sections
+outright; `[sections.titles]` renames them; and `[sections.custom.NAME]` defines
+your own sections of `key`/`description` rows, which can then be ordered,
+renamed and hidden exactly like the built-ins. Section names are `application`,
+`tmux`, `terminal`, `desktop`, `session` (X11 only), `system` and `diagnostics`.
+
 Copy `examples/profiles.json` to `~/.config/superhold/profiles.json` and replace
 the example with your application's identity and shortcuts. XDG_CONFIG_HOME is
 respected. `--profiles PATH` keeps an existing profile collection usable.

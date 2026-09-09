@@ -520,13 +520,22 @@ release or another key dismisses it. A fresh Super press also closes it without
 immediate reopening. Scrolling must not steal keyboard focus. Keep it hidden
 while locked/inactive; preserve personal trigger/settings and existing application
 profiles. Tooltips and help must describe the current controls, with character.
+Sections read outward from the most local context: the focused application,
+then tmux, then its terminal, then the desktop, then system-wide controls, with
+profile diagnostics last. That order, each section's visibility and each
+section's title are configurable, and local sections of your own can be defined
+and placed among the built-in ones. Superhold owns the configuration; the
+legacy overlay keeps the same default order and offers no settings.
 
 - Implementation: [guide launch](desktop/.config/sway/local.d/shortcuts.conf),
   [shortcut helper](desktop/.local/bin/oldbook-shortcuts),
-  [shortcut sources](desktop/.local/lib/oldbook/shortcut_sources.py),
+  [section configuration](../projects/superhold/superhold/config.py),
+  [section assembly](../projects/superhold/superhold/sources.py),
+  [legacy shortcut sources](desktop/.local/lib/oldbook/shortcut_sources.py),
   [local guide package](packages/superhold-guide/manifest.json).
 - Checks: [hold](tests/test_shortcut_hold.py), [service](tests/test_shortcut_service.py),
-  [sources](tests/test_shortcut_sources.py).
+  [sources](tests/test_shortcut_sources.py),
+  [superhold sections](../projects/superhold/tests/test_config.py).
   Verify the actual service launch path; the portable wrapper and installed
   full guide are distinct implementations in this checkout.
 
@@ -567,11 +576,16 @@ workspace on the first press; hide only when already there. Preserve process
 identity through hide/show and separate lifecycle. Dock below the bar at 94%
 output width and 52% height, bounded by available space.
 Neither is pinned to Strata and neither takes over the ordinary caption.
+A shown window is sticky: it comes along to every workspace switch on its
+output, with no keypress. Hiding clears that, so a hidden window follows
+nothing and holds no workspace open by sitting on it. A window parked on
+another workspace by hand still returns on one press.
 
 - Implementation: [drop-down helper](desktop/.local/bin/oldbook-dropdown),
   [bindings](desktop/.config/sway/local.d/dropdown.conf).
 - Checks: [native console/monitor](verification/console-monitor-foot/README.md),
   [cross-workspace recall](verification/dropdown-current-workspace/README.md),
+  [follows the workspace](verification/dropdown-follows-workspace/README.md),
   [caption exclusion](verification/decoration-monitor/README.md).
 
 ### TMUX-CONTROLS

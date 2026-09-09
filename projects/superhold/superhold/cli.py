@@ -70,13 +70,14 @@ def _wayland_socket(runtime):
 
 
 def _provider(socket_path, profiles_path=None, decorate=False, *, backend='sway',
-              display=None, trigger_label='Super'):
+              display=None, trigger_label='Super', sections=None):
     if backend == 'x11':
         from .x11 import X11ShortcutProvider
         # Connections are owned by each background snapshot, not by Qt.
-        return X11ShortcutProvider(display, profiles_path, trigger_label)
+        return X11ShortcutProvider(display, profiles_path, trigger_label,
+                                   sections=sections)
     from .sources import ShortcutProvider
-    provider = ShortcutProvider(str(socket_path), profiles_path, trigger_label)
+    provider = ShortcutProvider(str(socket_path), profiles_path, trigger_label, sections)
     return ContextProvider(provider, socket_path) if decorate else provider
 
 
@@ -86,14 +87,15 @@ def dump_snapshot(socket_path, profiles_path=None, **options):
 
 
 def preview(socket_path, profiles_path=None, seconds=5.0, *, backend='sway',
-            display=None, trigger_label='Super'):
+            display=None, trigger_label='Super', sections=None):
     from .qt_overlay import create_application, QtShortcutOverlay
     from PyQt6.QtCore import QTimer
     application = create_application(['superhold'])
     overlay = QtShortcutOverlay(trigger_label=trigger_label)
     try:
         provider = _provider(socket_path, profiles_path, decorate=True,
-                             backend=backend, display=display, trigger_label=trigger_label)
+                             backend=backend, display=display,
+                             trigger_label=trigger_label, sections=sections)
         overlay.show(provider.snapshot())
         QTimer.singleShot(max(1, int(seconds * 1000)), application.quit)
         application.exec()
@@ -134,7 +136,8 @@ def _run_daemon(runtime, socket_path, profiles_path=None, *, backend='sway',
             lock_probe=lock_probe)
         resources.callback(guard.close)
         provider = _provider(socket_path, profiles_path, decorate=True, backend=backend,
-                             display=display, trigger_label=settings.trigger_label)
+                             display=display, trigger_label=settings.trigger_label,
+                             sections=settings.sections)
         from .qt_overlay import create_application, QtShortcutOverlay
         from PyQt6.QtCore import QTimer
         application = create_application(['superhold'])
@@ -195,7 +198,9 @@ def main(arguments=None):
         display_identity(display)
     if args.command == 'status':
         return print_status(runtime, socket_path, display=display)
-    options = {'backend': backend, 'display': display, 'trigger_label': args.settings.trigger_label}
+    options = {'backend': backend, 'display': display,
+               'trigger_label': args.settings.trigger_label,
+               'sections': args.settings.sections}
     if args.command == 'dump':
         return dump_snapshot(socket_path, args.profiles, **options)
     os.environ['QT_QPA_PLATFORM'] = 'xcb' if backend == 'x11' else 'wayland'

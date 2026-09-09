@@ -59,8 +59,10 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Control | Action |
 | --- | --- |
 | `Super+Enter`, `Super+D` | Ghostty terminal, Spaceghost application menu |
+| `Super+Shift+D`, click the Ghost badge | The command deck (see below) |
 | Super + backtick (\`) | Toggle the persistent drop-down console |
 | `Super+~` (`Super+Shift+grave`) | Toggle a separate persistent btop system monitor in Foot |
+| Either drop-down, once shown | Comes along to whichever workspace you switch to; hide it and it follows nothing |
 | `Super+C`, `Super+Shift+C` | Center the active window and bring it forward |
 | `Super+Ctrl+Shift+C` | Reload Sway configuration |
 | `Super+Tab` or `Alt+Tab` | Browse all windows in recent-use order; add Shift to reverse, release Super/Alt to select, or Escape to cancel. |
@@ -88,6 +90,52 @@ while the session is locked or inactive. It combines Sway bindings with relevant
 application profiles; profiles are useful baselines, not exhaustive shortcut lists.
 `oldbook-shortcuts status` reports its state. The default trigger remains Super,
 so Caps Lock retains its Escape behavior and notification indicator.
+
+Its sections read outward from wherever you are: the focused application first,
+then tmux, then the terminal holding it, then Sway, then system-wide controls.
+The `[sections]` table in `~/.config/superhold/config.toml` reorders them, hides
+any of them, renames them, and defines sections of your own that sit among the
+built-in ones — see the [portable guide](../../projects/superhold/README.md) and
+its `examples/config.toml`.
+
+## The command deck
+
+`Super+Shift+D`, or the Ghost badge on the panel, opens the deck
+(`oldbook-control`). It reports before it offers: the prompt names the power
+posture and the charge, and every switch says which way it is set — `◉` on,
+`◌` off — before you throw it. A row with neither mark is a row whose state
+could not be read, never a guess. The rows are grouped by six rules; typing
+filters them away, and selecting one simply draws the deck again.
+
+| Group | Rows |
+| --- | --- |
+| The ship | Applications, Expo, switch window, Ghostty, notifications |
+| The look | Artwork gallery, **Theme**, bottom decoration, video background, YouTube, **the rice catalogue** |
+| The light | Keyboard glow, ambient screen, night light, caption breath |
+| The sound | Sound studio, sound cues, now transmitting |
+| The machine | **Power posture**, reactor, **watch mode**, **bed mode**, transmissions, firewall |
+| The planet | Fossil checkout, help, session |
+
+**Theme** lists the themes in `alpine/themes/` with the active one marked, and
+applies one through `oldbook-theme use … --notify`; the last row hands you the
+gallery's own theme workshop. **Power posture** shows what the batteries read
+and lets you hold a posture by hand or give the decision back
+(`oldbook-power-mode override`). **Watch mode** heads itself with the gesture
+that releases it. **Bed mode** says whether the cat watcher is running and
+whether she is abed, and can hand the fans back at once. **The rice
+catalogue** describes an entry and tells you how to set it off; it never runs
+one, so opening the list changes nothing. Four rows open a terminal report the
+deck writes itself — connection, power, bed mode, rice — so no menu text ever
+reaches a shell.
+
+Nothing on the deck moves. It is drawn once, when you open it, and only you
+change it: no polling, no timers, no animation. Reading the desktop's state is
+on the shared power ladder as `control-deck-state`; the posture is always read,
+because when the power is short that is the one line worth having.
+
+Every row is also a subcommand, for a keybinding of your own:
+`oldbook-control theme | posture | watch | cat | rice | keyboard | ambient |
+windows | firewall | power | network`.
 
 Window switching is shared by both Tab shortcuts. Hold the modifier to browse
 a frozen list; repeated quick taps alternate between your two most recent
@@ -199,14 +247,14 @@ kernel's default LED trigger; the helper detaches it again when it starts.
 
 Screenshots are stored in `~/Pictures/Screenshots` and offered to Satty for annotation (Swappy remains the fallback), with the Gruvbox palette from `~/.config/satty/config.toml`; Enter copies the annotated image and closes, Ctrl+S overwrites the capture. The flash and shutter sound run only after the file is written, so neither appears in the picture, and `oldbook-osd` also draws the volume, microphone, brightness and keyboard-light pill; `oldbook-osd preview --output pill.png` renders it without a display. The same daemon announces a new track on a card at the bottom right, with the album art, for four seconds: it watches MPRIS on the session bus, stays quiet while the desktop is locked or the notification centre is open, never repeats the song already playing, and is switched off from **Now transmitting** in the command deck or `{"card": false}` in `~/.config/oldbook/osd.json`. The helper quotes output paths and accepts only its three fixed capture modes. The Waybar network widget reads only `/sys/class/net` and the current route. It never starts a wireless scan and does not imply radio privacy or connectivity merely because an interface exists.
 
-The painting breathes with the keyboard. While any breathing keyboard mode runs,
+The painting never breathes. While any breathing keyboard mode runs,
 `oldbook-keyboard-backlight` publishes the breath to
-`$XDG_RUNTIME_DIR/oldbook/air.json`, and `oldbook-background` swells the picture
-with it: a hint at rest, a little more once your keystrokes have filled the lungs
-in **breathe on air** mode, always settling back to exactly the untouched
-painting. In that mode the caption strip's accent glows in time as well. Switch
-either half off in `~/.config/oldbook/breath.json` or with **Desktop breath** in
-the command deck.
+`$XDG_RUNTIME_DIR/oldbook/air.json`, and the caption strip's accent glows in time
+with it — a colour on a small strip, moving only while you type. The picture
+itself holds still: `air.py` forces the `wallpaper` half of
+`~/.config/oldbook/breath.json` off at every read and write, and no switch on
+the desktop can raise it. The caption's half is a real choice, in that file or
+with **Caption breath** in the command deck.
 
 Four minutes idle, the paintings take over: `oldbook-screensaver start` (run by
 `oldbook-idle screensaver` from swayidle) drifts slowly across the current
