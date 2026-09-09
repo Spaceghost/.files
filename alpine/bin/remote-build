@@ -1,0 +1,477 @@
+#!/usr/bin/env python3
+"""Build Alpine packages on a build host and sign the results on this machine.
+
+The MacBook is the desktop, not the build machine: a Waybar C++ compile pins
+both fans for many minutes. Every package in `alpine/packages` is therefore
+built on `alienware` or `bak` inside a throwaway Alpine container, and only the
+finished APK comes back.
+
+Both machines are x86_64, so this is a native build on faster hardware rather
+than cross-compilation. The container supplies the musl sysroot and the `-dev`
+packages `abuild` needs, which a drop-in cross compiler such as `zig cc` cannot.
+
+The signing key never leaves this machine. The build host signs with a throwaway
+key it generates for itself, and `sign` replaces that signature here. An APK v2
+signature covers the control segment alone, so re-signing costs one SHA-1 over a
+few hundred bytes and leaves the package identity apk records as `C:` untouched.
+"""
+import argparse
+import gzip
+import hashlib
+import json
+import io
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import zlib
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
+PACKAGES = REPO / 'alpine/packages'
+HOSTS = ('alienware', 'bak')
+IMAGE = 'alpine:edge'
+CACHE = Path.home() / '.cache/oldbook-apks'
+PRIVATE_KEY = Path.home() / '.config/abuild/jack-6a9e83bd.rsa'
+GUARD = Path.home() / '.local/bin/abuild'
+ESCAPE = 'OLDBOOK_ALLOW_LOCAL_BUILD'
+
+# Built on the far side. It needs no repository checkout: the package directory
+# arrives as a tarball and the finished APKs are collected from one output
+# directory. Sources are fetched inside the container, so the build host keeps
+# nothing but a cache directory it may delete at any time.
+REMOTE_SCRIPT = r'''set -eu
+work=$1
+image=$2
+
+# The build itself is identical on every engine, so it is written once and run
+# from the work directory rather than embedded twice in two quoting styles.
+rm -rf "$work/out" "$work/build.sh"
+mkdir -p "$work/out"
+cat > "$work/build.sh" <<'BUILD'
+apk add --no-cache alpine-sdk doas >/dev/null
+adduser -D -G abuild build
+echo "permit nopass :abuild" > /etc/doas.d/abuild.conf
+install -d -o build -g abuild /var/cache/distfiles
+cp -R /work/packages /home/build/packages-src
+chown -R build:abuild /home/build/packages-src
+# The throwaway signing key is generated as root and then handed down, because
+# abuild-keygen -a installs the public half into /etc/apk/keys and the build
+# user cannot write there: run as that user it aborts before writing any key at
+# all. Untrusted, abuild still signs the packages and then apk index refuses
+# them, so a complete successful compile fails at the last step. The signature
+# made in here is replaced on the machine that owns the real key regardless.
+abuild-keygen -a -n >/dev/null 2>&1
+# Current abuild keeps keys under $HOME/.config/abuild; older versions used
+# $HOME/.abuild, and -a only prints an instruction to install the public half
+# rather than installing it. Find whichever directory actually holds a key, and
+# do the installing here: unless /etc/apk/keys trusts it, abuild signs the
+# packages and then apk index refuses them, failing after a complete compile.
+keys=""
+for candidate in "$HOME/.config/abuild" "$HOME/.abuild"; do
+    if ls "$candidate"/*.rsa >/dev/null 2>&1; then keys=$candidate; break; fi
+done
+if [ -z "$keys" ]; then
+    echo 'remote-build: abuild-keygen produced no signing key' >&2
+    exit 6
+fi
+cp "$keys"/*.rsa.pub /etc/apk/keys/
+mine=/home/build/.config/abuild
+install -d "$mine"
+cp "$keys"/*.rsa "$keys"/*.rsa.pub "$mine"/
+[ -f "$keys/abuild.conf" ] && sed "s|$keys|$mine|g" "$keys/abuild.conf" > "$mine/abuild.conf"
+chown -R build:abuild /home/build/.config
+for directory in /home/build/packages-src/*/; do
+    su build -s /bin/sh -c "cd $directory && abuild -r"
+done
+mkdir -p /work/out
+# Current abuild writes its repository under $HOME/.local/share/abuild rather
+# than $HOME/packages, so search the whole home instead of naming one layout.
+find /home/build -type f -name '*.apk' -exec cp {} /work/out/ \;
+if [ -z "$(ls -A /work/out)" ]; then
+    echo 'remote-build: the build produced no APK to collect' >&2
+    exit 7
+fi
+BUILD
+
+if engine=$(command -v podman || command -v docker); then
+    "$engine" run --rm --network=host -v "$work:/work:z" "$image" /bin/sh -eu /work/build.sh
+elif command -v incus >/dev/null 2>&1; then
+    # Incus is a system manager rather than a process runner: an unprivileged
+    # member of the incus group cannot bind-mount a host directory into an
+    # instance, so the work directory is pushed in and the results pulled back.
+    # It also names images differently -- alpine:edge is images:alpine/edge.
+    incus_image="images:$(printf '%s' "$image" | tr ':' '/')"
+    name="oldbook-build-$$"
+    # A profile that carries no root disk cannot create an instance at all, and
+    # a host may keep its default profile that way deliberately. Name a pool for
+    # this instance instead of editing a profile other instances share.
+    storage=""
+    if ! incus profile device list default 2>/dev/null | grep -qx root; then
+        pool=$(incus storage list --format csv 2>/dev/null | cut -d, -f1 | head -1)
+        if [ -z "$pool" ]; then
+            echo 'remote-build: this host has no incus storage pool to build in' >&2
+            exit 5
+        fi
+        echo "remote-build: building on incus storage pool $pool" >&2
+        storage="--storage $pool"
+    fi
+    # shellcheck disable=SC2086
+    incus launch "$incus_image" "$name" --ephemeral $storage >/dev/null
+    trap 'incus delete --force "$name" >/dev/null 2>&1 || true' EXIT INT TERM
+    # apk reaches for the index immediately, so wait for the instance to have a
+    # route rather than racing it and failing on a name lookup.
+    waited=0
+    until incus exec "$name" -- sh -c 'ip route 2>/dev/null | grep -q default'; do
+        waited=$((waited + 1))
+        if [ "$waited" -gt 90 ]; then
+            echo 'remote-build: the build instance never got a network' >&2
+            exit 4
+        fi
+        sleep 1
+    done
+    incus exec "$name" -- mkdir -p /work
+    incus file push -q -r "$work/packages" "$name/work/"
+    incus file push -q "$work/build.sh" "$name/work/build.sh"
+    incus exec "$name" -- /bin/sh -eu /work/build.sh
+    rm -rf "$work/out"
+    incus file pull -q -r "$name/work/out" "$work/"
+else
+    echo 'remote-build: no container engine (podman, docker or incus) on this host' >&2
+    exit 3
+fi
+'''
+
+
+def run(args, **kw):
+    return subprocess.run([str(x) for x in args], check=True, **kw)
+
+
+def output(args):
+    return subprocess.check_output([str(x) for x in args], text=True)
+
+
+def buildable():
+    """Package directories in this checkout that carry an APKBUILD."""
+    return sorted(path.parent.name for path in PACKAGES.glob('*/APKBUILD'))
+
+
+def describe(name):
+    fields = {}
+    for line in (PACKAGES / name / 'APKBUILD').read_text().splitlines():
+        key, _, value = line.partition('=')
+        if key in ('pkgname', 'pkgver', 'pkgrel') and value:
+            fields[key] = value.strip().strip('"\'')
+    if not {'pkgver', 'pkgrel'} <= set(fields):
+        raise RuntimeError(f'APKBUILD without a version: {name}')
+    return fields.setdefault('pkgname', name), f"{fields['pkgver']}-r{fields['pkgrel']}"
+
+
+def gzip_segments(raw):
+    """Byte ranges of the concatenated gzip streams an APK is made of."""
+    spans, position = [], 0
+    while position < len(raw):
+        stream = zlib.decompressobj(31)
+        stream.decompress(raw[position:])
+        if not stream.eof:
+            raise RuntimeError('Truncated gzip segment in APK')
+        end = len(raw) - len(stream.unused_data)
+        if end <= position:
+            raise RuntimeError('Empty gzip segment in APK')
+        spans.append((position, end))
+        position = end
+    return spans
+
+
+def apk_parts(raw):
+    """Split an APK into its signature, control and data segments.
+
+    A signed APK has three segments and an unsigned one has two. Only the
+    control segment is signed, and its SHA-1 is the identity apk publishes as
+    `C:`, so replacing the signature cannot change which package this is.
+    """
+    spans = gzip_segments(raw)
+    parts = [raw[start:end] for start, end in spans]
+    if len(parts) == 2:
+        return b'', parts[0], parts[1]
+    if len(parts) == 3:
+        return parts[0], parts[1], parts[2]
+    raise RuntimeError(f'Unexpected APK segment count: {len(parts)}')
+
+
+def signature_segment(signature, key_name, mtime=0):
+    """One gzip segment holding the .SIGN member apk expects to read first.
+
+    The end-of-archive marker has to go. apk reads the whole APK as a single
+    tar stream that happens to be split across gzip segments, so a signature
+    segment that terminates its tar hides the control and data segments behind
+    it and apk rejects the file as inconsistent rather than unsigned.
+    """
+    entry = tarfile.TarInfo(f'.SIGN.RSA.{key_name}')
+    entry.size = len(signature)
+    entry.mtime = mtime
+    entry.mode = 0o644
+    entry.uid = entry.gid = 0
+    entry.uname = entry.gname = ''
+    entry.pax_headers = {'atime': '0', 'ctime': '0'}
+    plain = io.BytesIO()
+    with tarfile.open(fileobj=plain, mode='w', format=tarfile.PAX_FORMAT) as archive:
+        archive.addfile(entry, io.BytesIO(signature))
+    body = plain.getvalue()
+    while body.endswith(b'\0' * tarfile.BLOCKSIZE):
+        body = body[:-tarfile.BLOCKSIZE]
+    body += b'\0' * (-len(body) % tarfile.BLOCKSIZE)
+    compressed = io.BytesIO()
+    with gzip.GzipFile(fileobj=compressed, mode='wb', compresslevel=9, mtime=mtime) as stream:
+        stream.write(body)
+    return compressed.getvalue()
+
+
+def public_key_name(private_key):
+    name = Path(private_key).name + '.pub'
+    if not (Path('/etc/apk/keys') / name).is_file():
+        raise RuntimeError(f'Public key is not trusted by apk: /etc/apk/keys/{name}')
+    return name
+
+
+def sign(path, private_key=PRIVATE_KEY, key_name=None):
+    """Replace an APK's signature with one made by this machine's key."""
+    key_name = key_name or public_key_name(private_key)
+    raw = Path(path).read_bytes()
+    _, control, data = apk_parts(raw)
+    signature = subprocess.run(['openssl', 'dgst', '-sha1', '-sign', str(private_key)],
+                               input=control, capture_output=True, check=True).stdout
+    mtime = int(os.environ.get('SOURCE_DATE_EPOCH', 0))
+    Path(path).write_bytes(signature_segment(signature, key_name, mtime) + control + data)
+    return key_name
+
+
+def identity(path):
+    """The identity apk itself computes, so a rebuild can be compared to a lock."""
+    with tempfile.TemporaryDirectory(prefix='oldbook-identity-') as directory:
+        index = Path(directory) / 'APKINDEX.tar.gz'
+        run(['apk', 'index', '--no-warnings', '--output', index, path],
+            stdout=subprocess.DEVNULL)
+        with tarfile.open(index, 'r:gz') as archive:
+            record = archive.extractfile('APKINDEX').read().decode()
+    fields = dict(line.split(':', 1) for line in record.splitlines() if ':' in line)
+    return {'name': fields.get('P'), 'version': fields.get('V'), 'apk_identity': fields.get('C')}
+
+
+def reachable(host, timeout=8):
+    result = subprocess.run(['ssh', '-o', 'BatchMode=yes', '-o', f'ConnectTimeout={timeout}',
+                             host, 'true'], capture_output=True, text=True, timeout=timeout + 5)
+    return (result.returncode == 0, (result.stderr or '').strip().splitlines()[-1:] or [''])
+
+
+def select_host(preferred=None, probed=None):
+    """The first build host that answers, reported honestly when none does.
+
+    Each probe waits out its own connect timeout, so `probed` is called with
+    the host about to be tried: that is the only event this search has, and it
+    is what moves the spinner while the terminal is otherwise silent.
+    """
+    refusals = []
+    for host in ([preferred] if preferred else HOSTS):
+        if probed is not None:
+            probed(host)
+        ok, message = reachable(host)
+        if ok:
+            return host
+        refusals.append(f'  {host}: {message[0]}')
+    raise RuntimeError('No build host is reachable.\n' + '\n'.join(refusals) +
+                       '\nOpen one of them and run this again; see docs/REMOTE-BUILD.md.')
+
+
+def stage(names, directory):
+    """Copy the recipes somewhere the pinned sources can travel beside them.
+
+    Every APKBUILD here is built with options="!net", so the upstream tarball
+    has to be present before the container starts; shipping the recipe alone
+    got as far as installing a toolchain and then failed on a checksum for a
+    file that was never sent. The bytes live in Fossil's unversioned storage
+    addressed by their own checksum, which is the same checksum abuild verifies,
+    so exporting by hash cannot ship the wrong source. A package that pins no
+    source, or whose source is already beside its recipe, simply copies across.
+    """
+    exported = {}
+    for name in names:
+        # abuild leaves src/ and pkg/ behind in a recipe directory: its own
+        # staging, full of absolute symlinks to a machine that is not the build
+        # host and to sources that live in the archive rather than on disk. They
+        # are regenerated over there, so shipping them is at best wasted bytes
+        # and at worst a dangling link that stops the copy dead.
+        shutil.copytree(PACKAGES / name, directory / name, symlinks=True,
+                        ignore=shutil.ignore_patterns('src', 'pkg', '__pycache__',
+                                                      '*.pyc', '*-original*'))
+        manifest = directory / name / 'manifest.json'
+        if not manifest.is_file():
+            continue
+        try:
+            document = json.loads(manifest.read_text())
+        except ValueError:
+            continue
+        declared = document.get('source')
+        entries = declared if isinstance(declared, list) else [declared] if declared else []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+            filename, digest = entry.get('filename'), entry.get('sha256')
+            if not filename or not digest or (directory / name / filename).exists():
+                continue
+            target = directory / name / filename
+            run(['fossil', 'uv', 'export', f'sha256/{digest}/{filename}', str(target)], cwd=REPO)
+            if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
+                raise RuntimeError(
+                    f'{name}: the archived {filename} does not match its manifest checksum')
+            exported.setdefault(name, []).append(filename)
+    return exported
+
+
+def remote(host, names, image, work, plan=False, steps=None):
+    """Ship the package directories, build them over there, bring APKs back.
+
+    The three phases are named on the terminal as they run because the middle
+    one is a compile: without a line saying what is being waited on, several
+    silent minutes look identical to a hung ssh session. The build phase is
+    declared noisy, so the container's own output is never drawn over.
+    """
+    send = ['ssh', host, f'rm -rf {work}/packages && mkdir -p {work}/packages && '
+                         f'tar -xf - -C {work}/packages']
+    build = ['ssh', host, 'sh', '-s', '--', work, image]
+    collect = ['ssh', host, f'tar -C {work}/out -cf - .']
+    if plan:
+        print('Would send:  tar -cf - -C alpine/packages ' + ' '.join(names) +
+              ' | ' + ' '.join(send))
+        print('Would build: ' + ' '.join(build) + '  <<remote script>>')
+        print('Would fetch: ' + ' '.join(collect))
+        print('\n--- remote script ---\n' + REMOTE_SCRIPT)
+        return []
+    steps = loading.StepList(loading.Terminal(sys.stdout)) if steps is None else steps
+    with steps.step('ship ' + ', '.join(names) + f' to {host}'):
+        staging = Path(tempfile.mkdtemp(prefix='oldbook-remote-stage-'))
+        try:
+            stage(names, staging)
+            archive = subprocess.run(['tar', '-cf', '-', '-C', str(staging), *names],
+                                     capture_output=True, check=True).stdout
+        finally:
+            shutil.rmtree(staging, ignore_errors=True)
+        run(send, input=archive)
+    with steps.step(f'build in {image} on {host}', quiet=False):
+        run(build, input=REMOTE_SCRIPT.encode())
+    with steps.step('collect the finished APKs'):
+        produced = Path(tempfile.mkdtemp(prefix='oldbook-remote-build-'))
+        run(['tar', '-xf', '-', '-C', str(produced)],
+            input=subprocess.run(collect, capture_output=True, check=True).stdout)
+    return sorted(produced.glob('*.apk'))
+
+
+def build(names, host=None, image=IMAGE, cache=CACHE, work='.cache/oldbook-remote-build',
+          plan=False, force_local=False):
+    unknown = [name for name in names if name not in buildable()]
+    if unknown:
+        raise RuntimeError('No APKBUILD for: ' + ', '.join(unknown))
+    if force_local:
+        raise RuntimeError('Local builds are refused by policy. This machine is the '
+                           f'desktop; set {ESCAPE}=1 and call abuild directly if you '
+                           'really mean to heat it up.')
+    if plan:
+        chosen = host or HOSTS[0]
+        print(f'Building {", ".join(names)} on {chosen} in {image}', flush=True)
+        return remote(chosen, names, image, work, plan=True)
+    # One step list for the whole build, so shipping, compiling, collecting and
+    # signing read as one sequence rather than four helpers each clearing its
+    # throat differently.
+    steps = loading.StepList(loading.Terminal(sys.stdout))
+    with steps.step('reach a build host'):
+        chosen = select_host(host, probed=lambda name: steps.tick(note=name))
+    print(f'Building {", ".join(names)} on {chosen} in {image}', flush=True)
+    produced = remote(chosen, names, image, work, steps=steps)
+    if not produced:
+        raise RuntimeError('The build host produced no APKs')
+    cache.mkdir(parents=True, exist_ok=True)
+    results = []
+    for source in produced:
+        with steps.step(source.name):
+            destination = cache / source.name
+            shutil.copyfile(source, destination)
+            key_name = sign(destination)
+            run(['apk', 'verify', destination], stdout=subprocess.DEVNULL)
+            results.append(dict(identity(destination), path=destination, signed_by=key_name))
+            # The finished line is the one this tool has always printed.
+            steps.label = f"{source.name}  {results[-1]['apk_identity']}"
+    shutil.rmtree(produced[0].parent, ignore_errors=True)
+    return results
+
+
+GUARD_SHIM = f'''#!/bin/sh
+# Installed by alpine/bin/remote-build. This laptop is the desktop, not the
+# build machine: compiling here pins both fans for minutes at a time. Packages
+# are built on a build host instead.
+if [ "${{{ESCAPE}:-}}" = 1 ]; then
+    exec /usr/bin/abuild "$@"
+fi
+echo "abuild is disabled on this machine. Build on a build host instead:" >&2
+echo "    alpine/bin/remote-build build <package>" >&2
+echo "Set {ESCAPE}=1 to override for one command." >&2
+exit 1
+'''
+
+
+def guard(install=None):
+    if install is None:
+        return f'{GUARD} is ' + ('installed' if GUARD.is_file() else 'not installed')
+    if install:
+        GUARD.parent.mkdir(parents=True, exist_ok=True)
+        GUARD.write_text(GUARD_SHIM)
+        GUARD.chmod(0o755)
+        return f'Installed {GUARD}'
+    GUARD.unlink(missing_ok=True)
+    return f'Removed {GUARD}'
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    commands = parser.add_subparsers(dest='command', required=True)
+    commands.add_parser('hosts', help='report which build hosts answer')
+    commands.add_parser('list', help='list packages this checkout can build')
+    make = commands.add_parser('build', help='build packages remotely and sign them here')
+    make.add_argument('packages', nargs='+')
+    make.add_argument('--host', choices=HOSTS)
+    make.add_argument('--image', default=IMAGE)
+    make.add_argument('--cache', type=Path, default=CACHE)
+    make.add_argument('--plan', action='store_true', help='print the commands, connect to nothing')
+    make.add_argument('--force-local', action='store_true', help=argparse.SUPPRESS)
+    resign = commands.add_parser('sign', help='re-sign an APK with this machine key')
+    resign.add_argument('apks', nargs='+', type=Path)
+    resign.add_argument('--key', type=Path, default=PRIVATE_KEY)
+    shim = commands.add_parser('guard', help='refuse local abuild through ~/.local/bin')
+    group = shim.add_mutually_exclusive_group()
+    group.add_argument('--install', dest='install', action='store_true', default=None)
+    group.add_argument('--remove', dest='install', action='store_false')
+    args = parser.parse_args()
+    if args.command == 'hosts':
+        for host in HOSTS:
+            ok, message = reachable(host)
+            print(f'{host:<10} {"reachable" if ok else "unreachable: " + message[0]}')
+    elif args.command == 'list':
+        for name in buildable():
+            package, version = describe(name)
+            cached = (CACHE / f'{package}-{version}.apk').is_file()
+            print(f'{name:<20} {version:<16} {"cached" if cached else "MISSING"}')
+    elif args.command == 'build':
+        build(args.packages, host=args.host, image=args.image, cache=args.cache,
+              plan=args.plan, force_local=args.force_local)
+    elif args.command == 'sign':
+        for path in args.apks:
+            print(f'Signed {path} with {sign(path, args.key)}')
+    elif args.command == 'guard':
+        print(guard(args.install))
+
+
+if __name__ == '__main__':
+    main()

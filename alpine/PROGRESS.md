@@ -32,6 +32,36 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## The remote builder actually builds now — 2026-09-09
+
+`remote-build` had never once run to completion. The earlier session that wrote
+it recorded the two build hosts as unreachable and stopped there, so nothing
+had exercised the far side. With `bak` open, seven attempts turned up six real
+defects, each hidden behind the one before it.
+
+bak has neither podman nor docker, only Incus, which the script did not know
+about; its default profile carries no root disk, so instance creation failed
+outright; the pinned sources never travelled, so a complete toolchain installed
+and then died on a checksum for a file that was never sent; abuild's own `src/`
+and `pkg/` staging shipped as dangling absolute symlinks and stopped the copy;
+`abuild-keygen -a` neither installs the public key nor writes where the script
+looked, so abuild signed packages that `apk index` then rejected as UNTRUSTED
+after a full successful compile; and the finished APKs were collected from a
+path abuild no longer uses.
+
+Three of those are the same root cause: abuild moved to XDG directories, keys
+to `~/.config/abuild` and packages to `~/.local/share/abuild`, and this script
+was written against the old layout. The warning naming the new package path was
+in the log from the first attempt and was read past four times, because each
+round chased the loudest error rather than the earliest. Both locations are
+discovered now instead of asserted, and the script fails with its own exit code
+when a key or an APK does not appear.
+
+`waybar 0.15.0-r4` is built, signed and archived — the package the earlier
+session recorded as an unrecoverable gap. Isolating the keygen step in a
+throwaway container, rather than spending another five-minute compile per
+guess, is what found the last two. Nothing compiled on the laptop at any point.
+
 ## The theme reaches past the session — 2026-09-08
 
 The user asked with emphasis for "my lock screen, login screen, shutdown

@@ -860,10 +860,27 @@ are deterministic. The signature segment must not carry a tar end-of-archive
 marker, which would hide the control and data segments and make apk reject the
 package as inconsistent.
 
+The far side is whatever container engine the host has. podman and docker are
+run directly; Incus is a system manager rather than a process runner, so an
+unprivileged member of the incus group cannot bind-mount and the work directory
+is pushed in and the results pulled back instead, with the image name
+translated and a storage pool named for that one instance rather than a shared
+profile edited. Every recipe here builds with `options="!net"`, so the pinned
+upstream source must travel beside it: sources are exported from the archive by
+their own checksum, which is the checksum abuild verifies, and re-checked before
+shipping. abuild's own `src/` and `pkg/` staging is never shipped. The
+container generates its own signing key and installs the public half itself,
+because `abuild-keygen -a` only prints an instruction to do so and refuses
+outright when run as the unprivileged build user; without that, abuild signs
+packages that `apk index` then rejects as untrusted, after a complete compile.
+Key and package locations are discovered rather than assumed, since abuild
+moved both under XDG directories.
+
 - Implementation: [remote builder](bin/remote-build), [guide](../docs/REMOTE-BUILD.md).
 - Checks: [signature, policy and host selection](tests/test_remote_build.py).
   Container execution on the far side is not exercised by these checks; an
-  actual remote build is separate evidence.
+  actual remote build is separate evidence, and `waybar 0.15.0-r4` built and
+  signed on `bak` through Incus is that evidence.
 
 ### PERSONAL-DESKTOP
 
