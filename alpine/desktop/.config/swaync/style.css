@@ -1,32 +1,167 @@
+/* Ghost Planet notifications.
+ *
+ * Every colour here is a role in the active theme's palette, never a shade
+ * picked by eye: the theme renderer maps each declared value to that theme's
+ * own colour, and anything off-palette gets snapped to whichever role happens
+ * to sit nearest. Staying on the thirteen roles is what makes a generated
+ * theme land exactly rather than approximately.
+ *
+ * Roles used, in Gruvbox Dark terms:
+ *   #1d2021 hard ground   #282828 ground     #3c3836 surface   #504945 border
+ *   #928374 muted         #ebdbb2 foreground #fbf1c7 bright    #32302f raised
+ *   #fabd2f accent        #fb4934 red        #b8bb26 green     #83a598 blue
+ */
+
 * { font-family: "JetBrainsMono Nerd Font", sans-serif; font-size: 12px; }
-.control-center, .notification, .widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid {
+
+/* The layer spans the whole output and must never show. Only cards paint. */
+.blank-window { background: transparent; }
+.floating-notifications, .floating-notifications.background { background: transparent; }
+
+.control-center, .widget-title, .widget-dnd, .widget-mpris, .widget-volume,
+.widget-backlight, .widget-buttons-grid, .widget-inhibitors, .widget-menubar {
   background: rgba(40, 40, 40, 0.97);
   color: #ebdbb2;
   border: none;
   border-radius: 14px;
 }
 .control-center { padding: 12px; box-shadow: 0 10px 32px rgba(29, 32, 33, 0.65); }
-.notification { margin: 8px; padding: 12px; }
-.notification-row:focus, .notification-row:hover { background: #504945; }
+
+/* ── The row is a container, never a surface ──────────────────────────────
+   swaync gives the row the full width of the layer. Any background on it
+   paints a rectangle out across the desktop with nothing to justify it, which
+   is exactly what a hover used to do. Everything visible belongs to the card. */
+.notification-row,
+.notification-row:focus,
+.notification-row:hover,
+.notification-background,
+.notification-background:hover,
+.notification-background:focus,
+.notification-content,
 .control-center .control-center-list,
 .control-center .control-center-list > row,
+.control-center .control-center-list > row:hover,
+.control-center .control-center-list > row:selected,
 .control-center .notification-group,
 .control-center .notification-row,
 .control-center .notification-background { background: transparent; box-shadow: none; }
-.control-center .notification-row:hover { background: rgba(80, 73, 69, 0.65); }
-.widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight, .widget-buttons-grid { margin: 6px 0; padding: 10px; }
-.widget-title > button, .widget-dnd > switch slider, .widget-buttons-grid > flowbox > flowboxchild > button { background: #3c3836; color: #ebdbb2; border-radius: 10px; }
-.widget-title > button:hover, .widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #665c54; }
+
+/* ── The card ─────────────────────────────────────────────────────────────
+   Ground, corner, urgency rail and shadow. The rail is the only chrome that
+   changes with urgency, so a critical message reads at a glance without
+   shouting in a second colour. */
+.notification {
+  background: rgba(40, 40, 40, 0.97);
+  color: #ebdbb2;
+  margin: 8px;
+  padding: 12px 14px;
+  border: none;
+  border-left: 3px solid #fabd2f;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(29, 32, 33, 0.55);
+  transition: background 120ms ease-out, box-shadow 120ms ease-out;
+}
+.notification-row:hover .notification,
+.notification-row:focus .notification { background: #32302f; box-shadow: 0 12px 30px rgba(29, 32, 33, 0.72); }
+.notification-row:focus .notification { border-color: #fbf1c7; }
+
+/* Urgency. Low recedes, critical sits on a faintly warmed ground. */
+.notification.low { border-left-color: #504945; }
+.notification.low .summary { color: #ebdbb2; font-weight: normal; }
+.notification.normal { border-left-color: #fabd2f; }
+.notification.critical { border-left-color: #fb4934; background: rgba(50, 48, 47, 0.97); }
+.notification.critical .summary { color: #fb4934; }
+.notification-row:hover .notification.critical { background: #32302f; }
+
+/* Inside the card: the message, then who sent it and when. */
+.notification .summary { color: #fbf1c7; font-weight: bold; font-size: 13px; }
+.notification .body { color: #ebdbb2; font-size: 12px; }
+.notification .time { color: #928374; font-size: 11px; }
+.notification .app-name { color: #928374; font-size: 10px; letter-spacing: 0.6px; }
+.notification .app-icon { color: #fabd2f; margin-right: 6px; }
+.notification .image, .notification .body-image { border-radius: 9px; margin-right: 10px; }
+.notification progressbar { margin-top: 8px; }
+.notification progressbar trough { background: #504945; border: none; border-radius: 8px; min-height: 6px; }
+.notification progressbar progress { background: #fabd2f; border-radius: 8px; }
+
+/* Close: invisible until the pointer is on the card, red only on itself. */
+.notification .close-button {
+  background: transparent;
+  color: #282828;
+  border: none;
+  border-radius: 8px;
+  margin: 2px;
+  padding: 2px 6px;
+  transition: background 120ms ease-out, color 120ms ease-out;
+}
+.notification-row:hover .close-button { color: #928374; }
+.notification .close-button:hover { background: #fb4934; color: #1d2021; }
+
+/* Actions and inline reply. */
+.notification-action {
+  background: #3c3836;
+  color: #ebdbb2;
+  border: none;
+  border-radius: 9px;
+  margin: 8px 4px 0 0;
+  padding: 5px 12px;
+}
+.notification-action:hover { background: #504945; color: #fbf1c7; }
+.notification-action:active { background: #fabd2f; color: #1d2021; }
+.notification-default-action { border-radius: 14px; }
+.inline-reply { margin-top: 8px; }
+.inline-reply-entry {
+  background: #1d2021;
+  color: #ebdbb2;
+  caret-color: #fabd2f;
+  border: 1px solid #504945;
+  border-radius: 9px;
+  padding: 4px 8px;
+}
+.inline-reply-entry:focus { border-color: #fabd2f; }
+.inline-reply-button { background: #3c3836; color: #ebdbb2; border: none; border-radius: 9px; margin-left: 6px; padding: 4px 10px; }
+.inline-reply-button:hover { background: #504945; color: #fbf1c7; }
+.inline-reply-button:disabled { background: transparent; color: #504945; }
+
+/* ── Groups ───────────────────────────────────────────────────────────────
+   Several messages from one app collapse under a quiet header. */
+.notification-group-headers { color: #928374; font-size: 11px; letter-spacing: 0.6px; margin: 0 10px; }
+.notification-group-icon { color: #fabd2f; }
+.notification-group-collapse-button,
+.notification-group-close-all-button {
+  background: transparent;
+  color: #928374;
+  border: none;
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin: 0 2px;
+}
+.notification-group-collapse-button:hover { background: #3c3836; color: #ebdbb2; }
+.notification-group-close-all-button:hover { background: #fb4934; color: #1d2021; }
+.notification-group:hover .notification-group-headers { color: #ebdbb2; }
+
+/* Nothing waiting is a state worth designing, not an empty box. */
+.control-center-list-placeholder { color: #504945; font-size: 13px; padding: 28px 0; }
+
+/* ── Panel furniture ──────────────────────────────────────────────────── */
+.widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight,
+.widget-buttons-grid, .widget-inhibitors { margin: 6px 0; padding: 10px; }
+.widget-title > label { color: #fabd2f; font-weight: bold; }
+.widget-title > button, .widget-dnd > switch slider,
+.widget-buttons-grid > flowbox > flowboxchild > button { background: #3c3836; color: #ebdbb2; border: none; border-radius: 10px; }
+.widget-title > button:hover,
+.widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #504945; }
+.widget-label > label { color: #928374; font-size: 11px; }
+.widget-dnd > switch { background: #504945; border: none; border-radius: 12px; }
+.widget-dnd > switch:checked { background: #fabd2f; }
+.widget-dnd > switch slider { background: #ebdbb2; border-radius: 50%; }
+.widget-inhibitors > button { background: #3c3836; color: #ebdbb2; border: none; border-radius: 10px; }
+.widget-inhibitors > button:hover { background: #504945; }
+
 progressbar, scale highlight { background: #fabd2f; border-radius: 8px; }
 scale trough { background: #504945; border-radius: 8px; min-height: 9px; }
 scale slider { background: #fabd2f; border: none; border-radius: 50%; min-width: 14px; min-height: 14px; margin: -3px; box-shadow: 0 1px 4px rgba(29, 32, 33, 0.6); }
 scale slider:hover { background: #fbf1c7; }
-
-.notification.critical { border-color: #fb4934; }
-.notification .summary { color: #fbf1c7; font-weight: bold; }
-.notification .time, .notification .app-name { color: #a89984; }
-.widget-title > label { color: #fabd2f; font-weight: bold; }
-.widget-dnd > switch:checked { background: #d79921; }
 
 /* Now transmitting: the MPRIS player card. Album art is the blurred backdrop
    of its own card; the overlay keeps titles legible over any cover. */
@@ -40,7 +175,7 @@ scale slider:hover { background: #fbf1c7; }
 .widget-mpris .widget-mpris-player .mpris-overlay { padding: 12px 14px; background: rgba(29, 32, 33, 0.72); }
 .widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-album-art { border-radius: 9px; box-shadow: 0 6px 18px rgba(29, 32, 33, 0.6); }
 .widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title { color: #fbf1c7; font-weight: bold; font-size: 13px; }
-.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: #a89984; font-size: 11px; }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: #928374; font-size: 11px; }
 .widget-mpris .widget-mpris-player .mpris-overlay > box > button { background: transparent; color: #ebdbb2; border-radius: 8px; padding: 2px 6px; }
 .widget-mpris .widget-mpris-player .mpris-overlay > box > button:hover { background: rgba(80, 73, 69, 0.85); color: #fabd2f; }
 .widget-mpris > box > button { background: transparent; color: #928374; border-radius: 8px; }
@@ -50,17 +185,17 @@ scale slider:hover { background: #fbf1c7; }
 /* Sound system and moonlight control: amber sliders on charcoal troughs. */
 .widget-volume, .widget-backlight { padding: 8px 12px; }
 .widget-volume label, .widget-backlight label { color: #fabd2f; font-size: 15px; margin-right: 8px; }
-.widget-volume button { background: #3c3836; color: #a89984; border-radius: 8px; padding: 2px 8px; margin-left: 6px; }
+.widget-volume button { background: #3c3836; color: #928374; border-radius: 8px; padding: 2px 8px; margin-left: 6px; }
 .widget-volume button:hover { background: #504945; color: #fbf1c7; }
 .per-app-volume { background: rgba(60, 56, 54, 0.75); border-radius: 10px; margin: 8px 0 0; padding: 4px 6px; }
 .widget-volume row { background: transparent; border-radius: 8px; padding: 4px 6px; }
 .widget-volume row:hover { background: rgba(80, 73, 69, 0.55); }
-.widget-volume row label { color: #d5c4a1; font-size: 11px; margin: 0; }
+.widget-volume row label { color: #ebdbb2; font-size: 11px; margin: 0; }
 
-/* Quick actions: charcoal keys, amber when a toggle is engaged. */
+/* Quick actions: charcoal keys, accent when a toggle is engaged. */
 .widget-buttons-grid { padding: 8px; }
 .widget-buttons-grid flowbox, .widget-buttons-grid flowboxchild { background: transparent; padding: 0; margin: 0; }
-.widget-buttons-grid flowboxchild > button { background: #3c3836; color: #ebdbb2; border-radius: 10px; margin: 3px; padding: 8px 4px; font-size: 12px; }
-.widget-buttons-grid flowboxchild > button:hover { background: #665c54; color: #fbf1c7; }
+.widget-buttons-grid flowboxchild > button { background: #3c3836; color: #ebdbb2; border: none; border-radius: 10px; margin: 3px; padding: 8px 4px; font-size: 12px; }
+.widget-buttons-grid flowboxchild > button:hover { background: #504945; color: #fbf1c7; }
 .widget-buttons-grid flowboxchild > button.toggle:checked { background: #fabd2f; color: #1d2021; }
-.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #d79921; color: #1d2021; }
+.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #fbf1c7; color: #1d2021; }

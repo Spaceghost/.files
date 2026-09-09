@@ -195,7 +195,21 @@ Notifications appear over ordinary windows without moving/resizing them, taking
 terminal focus or sliding out a panel. Keep notification surfaces on TOP below
 overlay stay-on-top chrome, with no exclusive zone. Only an explicit action opens
 compact history. The empty host stays transparent; style actual cards rather
-than blurring/shadowing/clipping the entire hosting surface. The control center
+than blurring/shadowing/clipping the entire hosting surface. That rule reaches
+the notification row as well as the layer: swaync gives the row the full width
+of the output, so a background on the row paints a rectangle across the desktop
+around the card. Rows, backgrounds and group containers stay transparent, and
+the card carries the ground, the corner, the shadow and the urgency rail.
+
+Urgency is one rail colour and nothing else — low recedes to the border colour,
+critical takes red and warms the card ground slightly — so a critical message
+reads at a glance without a second shouting colour. Every state has a designed
+appearance: actions, inline reply and its focus ring, grouped notifications with
+their collapse and close-all controls, progress, the app icon and image, and the
+empty history placeholder. Every colour declared must be a role in the active
+theme's palette, never a shade chosen by eye, because the theme renderer snaps
+an off-palette value to whichever role is nearest and a generated theme then
+lands approximately instead of exactly. The control center
 carries the playing MPRIS track with album art, sound and brightness sliders and
 a quick-action grid above the history; those widgets are additive and never
 change popup placement or the bar's notification clicks.

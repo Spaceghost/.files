@@ -395,6 +395,38 @@ photographed.
 Lock LED through `oldbook-notification-led` until the window is visited;
 ordinary notices never light it. Off: remove its launch from `oldbook-session`.
 
+## Notification cards
+
+A notification is a card and nothing around it paints. That is the whole design,
+and it is also the fix for the grey rectangle that used to appear around a
+hovered notification: swaync gives the row the full width of the output, so the
+old `.notification-row:hover` background drew a slab across the desktop with
+nothing to justify it. Rows, backgrounds and group containers are transparent
+now; the card owns the ground, the 14px corner, the shadow and a three-pixel
+urgency rail down its left edge.
+
+The rail is the only thing urgency changes. Low takes the border colour and
+drops the bold summary, normal takes the accent, critical takes red and warms
+the card ground a shade — one change, not a second shouting colour. Hovering
+lifts the card by a step of ground and a deeper shadow over 120ms, and the close
+button is invisible until the pointer is on the card, then red only under the
+pointer itself.
+
+Every other state is drawn too: action buttons as pills that press to accent,
+the inline reply entry with an accent caret and focus border, grouped messages
+under a quiet header whose collapse and close-all controls stay ghosted until
+hover, the progress bar as accent on a border-coloured trough, the app icon in
+accent, rounded images, and an empty history that says so in the border colour
+rather than showing a blank box.
+
+Every colour in the stylesheet is a palette role — the thirteen the theme
+declares, plus the three the renderer special-cases. That is deliberate: the
+theme renderer maps declared values to the active theme's colours and snaps
+anything off-palette to whichever role sits nearest, so a sheet full of
+hand-picked shades themes approximately. This one themes exactly. Off:
+`~/.config/swaync/style.css` is a link into the checkout; delete it and swaync
+falls back to its own default styling.
+
 ## Windows
 
 **Caption strip.** Window titles live in `oldbook-decoration`, a translucent
