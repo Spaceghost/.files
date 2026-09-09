@@ -24,6 +24,16 @@
       "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
     },
     {
+      "id": "rice",
+      "title": "New rice",
+      "enabled": true,
+      "priority": 56,
+      "prefer": "left",
+      "width": 420,
+      "height": 250,
+      "text": "${color1}󰏪 NEW RICE${color2} ${hr 1}\n${execpi 300 ~/.local/bin/oldbook-rice panel --width 50}"
+    },
+    {
       "id": "power",
       "title": "Power",
       "enabled": true,

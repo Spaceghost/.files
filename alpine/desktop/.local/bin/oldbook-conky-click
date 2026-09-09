@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Open reading history, advance a card or return to the earlier passage after a desktop click."""
+"""Open reading history, advance a card, step the rice list or return to the earlier passage."""
 import argparse
 import fcntl
 import os
@@ -13,7 +13,16 @@ ACTIONS = {'scripture': ('oldbook-scripture', 'next'),
            'scripture-previous': ('oldbook-scripture', 'previous'),
            'witness': ('oldbook-scripture', 'witness-next'),
            'ghost': ('oldbook-journal', 'next'),
-           'gallery': ('oldbook-wallpaper', 'next')}
+           'gallery': ('oldbook-wallpaper', 'next'),
+           # The rice list answers every button: left steps to the next entry,
+           # right steps back, the wheel turns a page, the middle button ticks
+           # an entry off and the header link sets the selected one off.
+           'rice': ('oldbook-rice', 'next'),
+           'rice-back': ('oldbook-rice', 'previous'),
+           'rice-page-down': ('oldbook-rice', 'page-down'),
+           'rice-page-up': ('oldbook-rice', 'page-up'),
+           'rice-try': ('oldbook-rice', 'try'),
+           'rice-tried': ('oldbook-rice', 'tried')}
 
 
 def main():
@@ -40,6 +49,11 @@ def main():
         subprocess.run([str(BIN / helper), action], check=True)
         if args.card == 'ghost':
             subprocess.run([str(BIN / 'oldbook-scripture'), 'refresh', 'ghost'], check=True)
+        elif args.card.startswith('rice'):
+            # Every rice click changes what the card says, including Try, which
+            # ticks the entry off. Waiting out the slow refresh would read as a
+            # dead card, so replace this one now and leave the others alone.
+            subprocess.run([str(BIN / 'oldbook-scripture'), 'refresh', 'rice'], check=True)
     return 0
 
 

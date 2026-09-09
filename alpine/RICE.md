@@ -385,6 +385,37 @@ quips per dated note, four-minute cadence, a personal SQLite database behind
 [desktop-journal](verification/desktop-journal/panels.png),
 [conky-policy](verification/conky-policy/panels.png).
 
+## The rice card
+
+Features land faster than anyone remembers them: a paragraph here, a contract
+in FEATURES.md, and then a wait for someone to read the right file. The rice
+card is the desktop saying it itself — a quiet Conky card listing what was
+added most recently, newest at the top, from
+`~/.config/oldbook/rice.json`. A new feature is one new entry at the top of
+that file and nothing else.
+
+Conky has no hover, so the description is not a tooltip: it is the card's own
+lower half, and it always describes the **selected** row. The pointer moves the
+selection rather than pointing at it. Left-click steps forward, right-click
+steps back, the middle button ticks an entry off as tried, the wheel turns a
+page, and the header **Try** link runs the entry — or posts a notification with
+the full description when it is something only you can do, like a keybinding or
+the lock screen. Running counts as trying, so Try ticks it; middle-click takes
+that back.
+
+The card's height never changes. Short pages and short summaries are padded,
+because a description block that resized would move the legend out from under
+the pointer between clicks. Per-row hit testing was rejected on the same
+grounds: the only precedent for pixel geometry here estimates line height from
+the font size, which is close enough to place the Scripture History link and
+not close enough to pick one row out of five.
+
+Refresh is 300 seconds, there is no telemetry on it, and at battery-critical
+the description block sheds while the list of names stays. It sits below
+`ghost` in the placement order so every existing card keeps first pick of the
+space — the tradeoff being that a busy wallpaper can leave it out entirely.
+Off: delete the `rice` card from `desktop/.config/conky/panels.json`.
+
 ## Notifications
 
 **Placement.** SwayNC popups sit on the top layer with no exclusive zone, so

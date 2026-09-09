@@ -598,14 +598,19 @@
         "alpine/desktop/.config/conky/panels.json",
         "alpine/tests/test_conky_clicks.py",
         "alpine/tests/verify_conky_clicks.py",
-        "alpine/verification/conky-clicks/*"
+        "alpine/verification/conky-clicks/*",
+        "alpine/desktop/.local/lib/oldbook/rice_tour.py",
+        "alpine/desktop/.local/bin/oldbook-rice",
+        "alpine/desktop/.config/oldbook/rice.json",
+        "alpine/tests/test_rice_tour.py"
       ],
       "tests": [
         "test_astro.py",
         "test_conky_clicks.py",
         "test_conky_layout.py",
         "test_conky_policy.py",
-        "test_desktop_space.py"
+        "test_desktop_space.py",
+        "test_rice_tour.py"
       ],
       "evidence": [
         "verification/conky-clicks/README.md"

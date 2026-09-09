@@ -696,6 +696,18 @@ disk/network I/O or thermals: Waybar owns those. Background refresh is 60–300
 seconds, except hourly Scripture. Preserve native reading-card click actions;
 Scripture search may adapt to free space.
 
+The rice card lists what was recently added to the machine, newest first, from
+`~/.config/oldbook/rice.json` — one file where a new feature is one new entry at
+the top. Conky has no hover, so the description is not a tooltip but the card's
+own lower half, always describing the selected row, with the pointer moving the
+selection rather than pointing at it: left steps forward, right steps back, the
+middle button ticks an entry as tried, the wheel turns a page and the header
+link runs the entry or says how when only a person can. The card's height must
+not change between pages or entries, because a block that resized would move
+the legend out from under the pointer. It is placed below `ghost` so every
+existing card keeps first pick of the space, and the description block sheds at
+battery-critical while the list of names stays.
+
 - Implementation: [runtime policy](desktop/.local/lib/oldbook/conky_policy.py),
   [layout](desktop/.local/lib/oldbook/conky_layout.py), [panels](desktop/.config/conky/panels.json),
   [sun and moon](desktop/.local/lib/oldbook/astro.py), [masthead helper](desktop/.local/bin/oldbook-astro).

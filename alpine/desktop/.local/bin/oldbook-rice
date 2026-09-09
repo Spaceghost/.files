@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+"""Show the newest rice on the desktop card, and set the selected one off.
+
+The desktop card is a Conky panel, so every interaction arrives here as one
+word from `oldbook-conky-click`: a left click asks for `next`, a right click
+for `previous`, the wheel for a page, the middle button ticks the entry off,
+and the Try link in the card's header runs it. The same words work by hand in
+a terminal, which is how the card is checked without clicking at it.
+
+Nothing here decides what the list contains. `~/.config/oldbook/rice.json` is
+the list, and a new feature is a new entry at the top of that file.
+"""
+import argparse
+import json
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import rice_tour
+
+TERMINAL = ['foot', '--app-id=oldbook-rice']
+
+
+def pick(entries, state, identity=None):
+    if identity:
+        for entry in entries:
+            if entry['id'] == identity:
+                return entry
+        raise ValueError('No such rice entry: ' + identity)
+    if not entries:
+        raise ValueError('The rice list is empty')
+    return entries[rice_tour.clamp(state['cursor'], len(entries))]
+
+
+def announce(entry):
+    """Say how to set it off, on the notification cards this list also names."""
+    body = rice_tour.describe(entry)
+    if not shutil.which('notify-send'):
+        print(f'{entry["title"]}\n{body}')
+        return
+    subprocess.Popen(['notify-send', '--app-name=Rice tour', '-h',
+                      'string:x-canonical-private-synchronous:oldbook-rice',
+                      entry['title'], body], stdin=subprocess.DEVNULL,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                     start_new_session=True)
+
+
+def launch(entry):
+    """Run the entry detached, so a click never waits on what it started.
+
+    Anything that prints rather than draws asks for a terminal; without one its
+    output would land in a log nobody opens, which is not a demonstration.
+    """
+    command = list(entry['run'])
+    if entry.get('terminal'):
+        terminal = shutil.which(TERMINAL[0])
+        if terminal is None:
+            announce(entry)
+            return False
+        held = shlex.join(command) + "; printf '\\n[enter closes] '; read _"
+        command = [terminal, *TERMINAL[1:], f'--title={entry["title"]}',
+                   '-e', 'sh', '-c', held]
+    elif shutil.which(command[0]) is None:
+        announce(entry)
+        return False
+    subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                     stderr=subprocess.DEVNULL, start_new_session=True)
+    return True
+
+
+def attempt(entries, state, identity=None):
+    """The Try link: run what can be run, and say how for what cannot."""
+    entry = pick(entries, state, identity)
+    if not entry.get('run'):
+        announce(entry)
+        return 0
+    if launch(entry) and entry['id'] not in state['tried']:
+        # Running it is trying it; the middle button takes the tick back.
+        state['tried'].append(entry['id'])
+        rice_tour.write_state(state)
+    return 0
+
+
+def tick(entries, state, identity=None):
+    entry = pick(entries, state, identity)
+    if entry['id'] in state['tried']:
+        state['tried'].remove(entry['id'])
+    else:
+        state['tried'].append(entry['id'])
+    rice_tour.write_state(state)
+    return 0
+
+
+def step(entries, state, count, pages=False, rows=rice_tour.ROWS):
+    """A page has to be the page the card drew, or the wheel skips entries."""
+    total = len(entries)
+    cursor = rice_tour.clamp(state['cursor'], total)
+    state['cursor'] = (rice_tour.page_move(cursor, total, count, rows)
+                       if pages else rice_tour.move(cursor, total, count))
+    rice_tour.write_state(state)
+    return 0
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('action', nargs='?', default='panel',
+                        choices=['panel', 'list', 'show', 'next', 'previous',
+                                 'page-down', 'page-up', 'try', 'tried'])
+    parser.add_argument('id', nargs='?', help='act on this entry instead of the selected one')
+    parser.add_argument('--width', type=int, default=rice_tour.WIDTH,
+                        help='columns the card has for text')
+    parser.add_argument('--rows', type=int, default=rice_tour.ROWS,
+                        help='entries listed on one page of the card')
+    parser.add_argument('--json', action='store_true', help='print the entry as JSON')
+    arguments = parser.parse_args(argv)
+    try:
+        entries = rice_tour.load()
+    except OSError:
+        # A desktop without the list still draws a card that says so; every
+        # other action would be guessing, so those still report the failure.
+        if arguments.action != 'panel':
+            raise
+        entries = []
+    state = rice_tour.read_state()
+    if arguments.action == 'panel':
+        print(rice_tour.panel(entries, state, max(20, arguments.width),
+                              max(1, arguments.rows), rice_tour.detailed_now()))
+        return 0
+    if arguments.action == 'list':
+        print(rice_tour.listing(entries, state))
+        return 0
+    if arguments.action == 'show':
+        entry = pick(entries, state, arguments.id)
+        print(json.dumps(entry, indent=2) if arguments.json
+              else f'{entry["title"]}\n{rice_tour.describe(entry)}')
+        return 0
+    if arguments.action == 'try':
+        return attempt(entries, state, arguments.id)
+    if arguments.action == 'tried':
+        return tick(entries, state, arguments.id)
+    steps = {'next': (1, False), 'previous': (-1, False),
+             'page-down': (1, True), 'page-up': (-1, True)}
+    count, pages = steps[arguments.action]
+    return step(entries, state, count, pages, max(1, arguments.rows))
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+        print(f'oldbook-rice: {error}', file=sys.stderr)
+        sys.exit(1)

@@ -32,6 +32,34 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## The desktop lists its own new rice — 2026-09-08
+
+The user asked for "a conky list of the things I need to try that you worked on
+to rice the machine", newest at the top, scrollable, "maybe hovering shows a
+tooltip and you can make decisions on what all the interactions should map to".
+
+Conky has no hover, so the tooltip became the card's lower half: it always
+describes the selected row and the pointer moves the selection rather than
+pointing at it. Left steps forward, right steps back, middle ticks an entry as
+tried, the wheel pages, and the header link runs the entry or posts the full
+description when it is something only a person can do. The card's height is
+fixed and short pages are padded, because a block that resized would move the
+legend out from under the pointer between two clicks. Per-row hit testing was
+rejected: the estimated line height that places the Scripture History link is
+not accurate enough to pick one row out of five, and guessing would have made
+every click a coin toss.
+
+The list lives in `~/.config/oldbook/rice.json`, so adding a feature to the
+tour is adding one entry at the top of one file.
+
+One placement consequence is worth recording. At a priority above `ghost` the
+new card took the lower-right space the reading contract reserves for slow
+text, and broke that pinned check; it now sits below `ghost` and is placed
+last, so a busy wallpaper can leave it out. Thirty tests for the tour and
+forty-six across the Conky suites pass. Nothing was seen on the live desktop:
+the card needs a deploy and a Conky restart, and wheel paging is unproven
+against real pointer input, so both stay the user's check.
+
 ## One way for the terminal to wait — 2026-09-08
 
 Asked for a shared "loading language" during a round of rice work, on the

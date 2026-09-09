@@ -39,6 +39,7 @@ LADDER = {
     'terminal-progress': 'mains',
     'window-context-detail': 'battery-low',
     'reading-cards': 'battery-low',
+    'rice-tour': 'battery-low',
     'screen-corners': 'battery-low',
     'sound-cues': 'battery-low',
 }

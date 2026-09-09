@@ -186,7 +186,7 @@ def write_selection(document):
 
 def refresh_panel(identifier='scripture'):
     """Replace only an owned text card, bypassing its cached execpi text."""
-    if identifier not in ('scripture', 'witness', 'ghost'):
+    if identifier not in ('scripture', 'witness', 'ghost', 'rice'):
         raise ValueError('No refreshable text card: ' + identifier)
     directory = Path.home() / '.local/state/oldbook/conky'
     if not directory.is_dir() or (directory / 'disabled').exists():
