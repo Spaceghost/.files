@@ -387,6 +387,33 @@ def refresh_accent():
     return ['bar accent refresh FAILED; the bar may keep the previous accent']
 
 
+CLAUDE_THEME_NAME = 'oldbook'
+
+
+def refresh_claude():
+    """Report whether Claude Code will take the palette that was just deployed.
+
+    Claude Code watches its own themes directory and repaints running sessions
+    when the file changes, so the deployed symlink is the whole mechanism and
+    there is nothing to signal. What it cannot do is choose the theme: that is
+    one line in the user's settings, which this reads and never edits, because
+    a theme command silently rewriting an application's settings file is not a
+    trade anyone offered.
+    """
+    theme = Path.home() / '.claude/themes' / (CLAUDE_THEME_NAME + '.json')
+    settings = Path.home() / '.claude/settings.json'
+    if not theme.exists():
+        return ['Claude Code theme NOT deployed; sessions keep their own colours']
+    try:
+        selected = json.loads(settings.read_text()).get('theme')
+    except (OSError, ValueError):
+        return ['Claude Code theme deployed; its settings could not be read']
+    if selected == 'custom:' + CLAUDE_THEME_NAME:
+        return ['Claude Code repainted (its themes directory is watched)']
+    return ['Claude Code theme deployed but not selected; set '
+            f'"theme": "custom:{CLAUDE_THEME_NAME}" in ~/.claude/settings.json']
+
+
 def refresh_session():
     """Push the active theme into everything already running that can take it.
 
@@ -442,6 +469,8 @@ def refresh_session():
     count = tmux_reload()
     if count:
         notes.append(f'tmux servers reloaded ({count})')
+
+    notes.extend(refresh_claude())
 
     applications = here / 'oldbook-refresh-application-theme'
     if applications.is_file():

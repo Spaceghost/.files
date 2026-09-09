@@ -59,6 +59,15 @@ already-running GTK and Qt clients keep the cursor they loaded, and `gtk.css`
 has no reload channel. The bar's accent must be re-elected before Waybar is
 signalled, not after, or the previous theme's accent survives the switch.
 
+Claude Code is a themed surface like any other, and a reactive one: it watches
+its own themes directory and repaints running sessions when the deployed file
+changes. Every profile carries `.claude/themes/oldbook.json`, covering the whole
+override set rather than a handful of visible colours, with diff grounds tinted
+from the theme's own background and `base` following the palette's light or dark
+reading. The file name is fixed because `custom:oldbook` in the user's settings
+resolves against it; selecting the theme is the user's line to write, and the
+switch reports whether it is selected rather than editing their settings file.
+
 Every built-in and generated theme is a complete desktop design: palette,
 typography, geometry, spacing, window treatment, launcher, widgets, application
 styling and matching artwork. Switching must apply it across the desktop.

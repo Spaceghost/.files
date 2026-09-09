@@ -24,10 +24,37 @@ class CompleteThemes(unittest.TestCase):
                              '.config/sway/theme.conf', '.config/swayfx/effects.conf',
                              '.config/waybar/config.jsonc', '.config/conky/panels.json',
                              '.config/fuzzel/fuzzel.ini', '.config/nvim/init.lua',
-                             '.config/btop/btop.conf', '.tmux.conf'):
+                             '.config/btop/btop.conf', '.tmux.conf',
+                             '.claude/themes/oldbook.json'):
                     self.assertIn(name, files)
                 bar = json.loads(files['.config/waybar/config.jsonc'])[0]
                 self.assertEqual(bar['mpris']['on-click-middle'], '~/.local/bin/oldbook-pithos middle')
+
+    def test_claude_code_carries_the_whole_palette_and_its_own_light_or_dark(self):
+        renderer = importlib.import_module('desktop_theme')
+        baseline = json.loads(
+            (REPO / 'alpine/desktop/.claude/themes/oldbook.json').read_text())
+        for source in (REPO / 'alpine/themes').glob('*.json'):
+            theme = json.loads(source.read_text())
+            palette = renderer.colors(theme)
+            with self.subTest(theme=theme['id']):
+                body = json.loads(
+                    renderer.render_profile(REPO, theme)['.claude/themes/oldbook.json'])
+                # The file name is what "custom:oldbook" resolves against, so a
+                # per-theme name would break the reference on every switch.
+                self.assertEqual(body['name'], 'oldbook')
+                self.assertEqual(body['base'],
+                                 'light' if renderer.is_light(palette) else 'dark')
+                self.assertEqual(set(body['overrides']), set(baseline['overrides']))
+                for key, value in body['overrides'].items():
+                    self.assertRegex(value, r'^rgb\(\d{1,3}, \d{1,3}, \d{1,3}\)$', key)
+                self.assertEqual(body['overrides']['text'],
+                                 'rgb(%d, %d, %d)' % renderer.rgb(palette['foreground']))
+                self.assertEqual(body['overrides']['inverseText'],
+                                 'rgb(%d, %d, %d)' % renderer.rgb(palette['background']))
+                # Two themes must not produce the same guide colours.
+                self.assertNotEqual(body['overrides'], baseline['overrides']
+                                    if theme['id'] != 'gruvbox-dark' else None)
 
     def test_the_derived_blur_stays_within_a_sane_reach(self):
         """SceneFX reaches 2^(blur_passes + 1) * blur_radius. Deriving the

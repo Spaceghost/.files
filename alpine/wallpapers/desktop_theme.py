@@ -120,6 +120,14 @@ def colors(theme):
     return result
 
 
+def is_light(palette):
+    """True when the theme paints dark text on a light ground."""
+    def luminance(value):
+        return sum(channel * weight for channel, weight
+                   in zip(rgb(value), (.2126, .7152, .0722))) / 255
+    return luminance(palette['background']) > luminance(palette['foreground'])
+
+
 def distance(first, second):
     return sum((a - b) ** 2 for a, b in zip(rgb(first), rgb(second)))
 
@@ -222,7 +230,8 @@ def render_profile(repo, theme):
     # theme switch used to leave them in the previous theme: LXQt's own Qt
     # settings and its selectable palette preset, and the screenshot annotator.
     paths.update(('.config/waybar/config.jsonc', '.config/conky/panels.json',
-                  '.config/lxqt/lxqt.conf', '.config/satty/config.toml', LXQT_PRESET))
+                  '.config/lxqt/lxqt.conf', '.config/satty/config.toml', LXQT_PRESET,
+                  CLAUDE_THEME))
     files = {}
     for path in sorted(paths):
         source = base / path
@@ -251,6 +260,11 @@ def render_profile(repo, theme):
     # pixel reach, expensive and muddy at any gap.
     change('.config/swayfx/effects.conf', r'^blur_radius \d+',
            f'blur_radius {max(2, min(radius // 2, 8))}')
+    # Claude Code decides its own dimming and contrast from this one word, so a
+    # light palette has to say so; the file name is what `custom:oldbook` in
+    # ~/.claude/settings.json resolves against and never varies.
+    change(CLAUDE_THEME, r'"base": "\w+"',
+           '"base": "%s"' % ('light' if is_light(palette) else 'dark'))
     change('.config/foot/foot.ini', r'^pad=.*', f'pad={spacing}x{spacing} center')
     change('.config/foot/foot.ini', r'^alpha=.*', f'alpha={design["opacity"]}')
     change('.config/ghostty/config', r'^background-opacity\s*=.*', f'background-opacity = {design["opacity"]}')
@@ -309,6 +323,11 @@ CURSOR_DIRECTORY = '.local/share/icons/Oldbook-Ghost'
 # Drawn, not recoloured: the text pass must skip these or it tries to decode a
 # cursor as UTF-8. `render_assets` owns everything under them.
 ASSET_PREFIXES = (CURSOR_DIRECTORY + '/cursors/', '.config/wlogout/icons/')
+# Claude Code watches this directory and repaints a running session when the
+# file under it changes, so switching desktop themes restyles open sessions
+# without restarting them. The name is fixed: settings.json selects the theme by
+# it, and a per-theme name would break that reference on every switch.
+CLAUDE_THEME = '.claude/themes/oldbook.json'
 # LXQt reads its selectable palettes by file name, so the rendered preset takes
 # the theme's own name rather than staying Gruvbox's in every profile.
 LXQT_PRESET = '.local/share/lxqt/palettes/Gruvbox-Dark'
