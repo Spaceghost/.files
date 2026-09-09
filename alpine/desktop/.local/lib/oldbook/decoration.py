@@ -11,6 +11,12 @@ SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
 OPACITY_FLOOR = 0.2
 IGNORED_CAPTION_APPS = frozenset((
     'com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
+    # The firewall's prompt is a decision, not a window you live in: it appears
+    # to be answered and then goes. A caption naming it is chrome on a dialog.
+    # It is an Xwayland Qt window, so it carries no app_id at all and is only
+    # recognisable by its class -- which is why identity is matched across all
+    # three fields rather than app_id alone.
+    'opensnitch-ui', 'opensnitch_ui',
 ))
 # A picture-in-picture window is a video parked on the desktop to keep watching
 # while doing something else. It is deliberately small, its title says nothing
@@ -23,14 +29,29 @@ PICTURE_IN_PICTURE_TITLES = frozenset(('picture-in-picture', 'picture in picture
 
 
 def picture_in_picture(node):
-    if node.get('app_id') in PICTURE_IN_PICTURE_APPS:
+    if window_identity(node) & {name.casefold() for name in PICTURE_IN_PICTURE_APPS}:
         return True
     return str(node.get('name') or '').strip().casefold() in PICTURE_IN_PICTURE_TITLES
 
 
+def window_identity(node):
+    """Every name a window answers to, folded for comparison.
+
+    A Wayland client has an `app_id`; an Xwayland one has a class and an
+    instance instead and no `app_id` whatsoever, so anything matching on
+    `app_id` alone silently never matches half the windows on the desktop.
+    """
+    properties = node.get('window_properties') or {}
+    return {str(value).casefold() for value in
+            (node.get('app_id'), properties.get('class'), properties.get('instance'))
+            if value}
+
+
 def ignored_caption(node):
     """Windows the strip must not attach itself to."""
-    return node.get('app_id') in IGNORED_CAPTION_APPS or picture_in_picture(node)
+    if window_identity(node) & {name.casefold() for name in IGNORED_CAPTION_APPS}:
+        return True
+    return picture_in_picture(node)
 
 
 def validate_settings(values):
