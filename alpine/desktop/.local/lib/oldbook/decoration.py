@@ -69,6 +69,56 @@ def window_opacity(node, terminal=False, theme=None, saved=SETTINGS_DEFAULTS['op
     return 1.0 if not terminal else float(fallback)
 
 
+# SwayFX accepts a window corner radius of 0 to 99 and nothing else.
+CORNER_LIMIT = 99
+
+
+def window_radius(value):
+    """The compositor's own window corner radius, as a number the strip can use.
+
+    SwayFX 0.6 has no per-window corner radius to ask for. `cmd_corner_radius`
+    writes the single global `config->corner_radius` whatever criteria precede
+    it -- setting one container is an unimplemented TODO in that function -- and
+    it widens the titlebar padding on the way past, so squaring one window
+    would square every window opened afterwards. The strip therefore never asks
+    the compositor to change a window. It reads the same theme number the
+    compositor's own `corner_radius` line is generated from, so the two move
+    together on a theme switch exactly as the terminal opacity does, and closes
+    the seam itself.
+    """
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return 0
+    try:
+        value = int(value)
+    except (ValueError, OverflowError):
+        return 0
+    return max(0, min(CORNER_LIMIT, value))
+
+
+def seam_overlap(mode, edge, radius):
+    """How far an attached strip climbs over its window to close the seam.
+
+    Exactly the height of the arc the compositor clipped out of the window's
+    bottom corners. The strip fills those two clipped corners and squares its
+    own top, so the pair reads as one shape, and it covers no row of window
+    content that the compositor was drawing: the only pixels it adds are the
+    ones the rounding took away. Nothing else merges -- a right-edge strip
+    meets a vertical side, and a workspace strip belongs to no window at all.
+    """
+    return window_radius(radius) if mode == 'window' and edge == 'bottom' else 0
+
+
+def corner_radii(corner_radius, square, merged):
+    """(top, bottom) corner radius for the strip itself.
+
+    A fullscreen tiled caption is square all round, as it has always been. A
+    caption merged into the window above it is square where the two meet and
+    keeps the saved rounding where the pair ends.
+    """
+    radius = 0 if square else max(0, int(corner_radius))
+    return (0 if merged else radius), radius
+
+
 def save_settings(path, values, legacy_position=None):
     settings = validate_settings(values)
     path = Path(path)

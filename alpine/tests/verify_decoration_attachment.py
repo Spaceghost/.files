@@ -174,6 +174,53 @@ def bottom_corner_pixels(image_path, rect):
             "right_inset": pixel(x + width - 10, y)}
 
 
+def theme_radius():
+    """The window corner radius this desktop's theme configures SwayFX with.
+
+    The private compositor has to round its windows by the same number the real
+    one does, because the strip closes the seam from that number and from no
+    other source: SwayFX 0.6 will not report a container's radius and will not
+    let anybody set one. A fixture rounding by some other amount would prove
+    nothing about the desktop it stands in for.
+    """
+    directory = REPO / "alpine/themes"
+    identity = (directory / "current").read_text().strip()
+    return int(json.loads((directory / (identity + ".json")).read_text())["design"]["radius"])
+
+
+def seam_pixels(image_path, client):
+    """The window's clipped bottom corners and the strip that has to fill them.
+
+    At the window's outermost column the whole of its last row lies outside the
+    corner arc, so that pixel is the compositor's cut-out and nothing of the
+    window is drawn in it. The row immediately below is the strip's own first
+    row. Merged, both are the same fill over the same desktop and must come out
+    the same colour; unmerged, the cut-out is bare desktop and cannot.
+    """
+    import gi
+
+    gi.require_version("GdkPixbuf", "2.0")
+    from gi.repository import GdkPixbuf
+
+    picture = GdkPixbuf.Pixbuf.new_from_file(str(image_path))
+    pixels = picture.get_pixels()
+    stride, channels = picture.get_rowstride(), picture.get_n_channels()
+
+    def pixel(x, y):
+        start = y * stride + x * channels
+        return tuple(pixels[start:start + 3])
+
+    left, right = client["x"], client["x"] + client["width"] - 1
+    cut, strip = client["y"] + client["height"] - 1, client["y"] + client["height"]
+    return {"left_cut": pixel(left, cut), "left_strip": pixel(left, strip),
+            "right_cut": pixel(right, cut), "right_strip": pixel(right, strip),
+            "desktop": pixel(max(0, left - 4), cut)}
+
+
+def near(first, second, tolerance=3):
+    return all(abs(one - two) <= tolerance for one, two in zip(first, second))
+
+
 def run_verifier(output, prioritize_ui=False):
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -193,8 +240,8 @@ def run_verifier(output, prioritize_ui=False):
     sources = [HELPER, *(REPO / "alpine/desktop/.local/lib/oldbook" / name
                         for name in ("decoration.py", "decoration_actions.py",
                                      "decoration_placement.py", "decoration_motion.py",
-                                     "decoration_watch.py", "overlay_theme.py",
-                                     "ui_priority.py"))]
+                                     "decoration_reserve.py", "decoration_watch.py",
+                                     "overlay_theme.py", "ui_priority.py"))]
 
     def source_hashes():
         return {str(path.relative_to(REPO)): hashlib.sha256(path.read_bytes()).hexdigest()
@@ -228,6 +275,8 @@ def run_verifier(output, prioritize_ui=False):
         preferences.write_text(json.dumps({
             "position": "bottom", "opacity": 0.78, "corner_radius": 7
         }) + "\n")
+        merge_radius = theme_radius()
+        evidence["window_corner_radius"] = merge_radius
         sway_config = output / "sway.conf"
         sway_config.write_text(
             "xwayland disable\n"
@@ -240,7 +289,7 @@ def run_verifier(output, prioritize_ui=False):
             "floating_modifier Mod4\n"
             "default_border pixel 0\n"
             "default_floating_border pixel 0\n"
-            "corner_radius 7\n"
+            f"corner_radius {merge_radius}\n"
             "smart_corner_radius enable\n"
             'layer_effects "oldbook-decoration" {\n    corner_radius 0\n}\n'
             'for_window [app_id="attachment-floating"] floating enable, '
@@ -400,11 +449,16 @@ def run_verifier(output, prioritize_ui=False):
                 if not band_holds(state) or len(state["bands"]) != 1:
                     return False
                 expected_tiled = dict(state["usable"])
+                # Along the bottom the strip and its window are one shape: the
+                # surface starts `merge_radius` rows higher, exactly the arc the
+                # compositor clipped out of the window's bottom corners, and
+                # fills those corners so the pair has no seam. The caption's own
+                # rows have not moved -- only what is above them is new.
                 geometry = (
                     actual["x"] == client["x"]
-                    and actual["y"] == client["y"] + client["height"]
+                    and actual["y"] + merge_radius == client["y"] + client["height"]
                     and actual["width"] == client["width"]
-                    and 0 < actual["height"] < 80
+                    and 0 < actual["height"] - merge_radius < 80
                 ) if edge == "bottom" else (
                     actual["x"] == client["x"] + client["width"]
                     and actual["y"] == client["y"]
@@ -533,6 +587,25 @@ def run_verifier(output, prioritize_ui=False):
                 baseline = settled
                 prioritize(decoration)
 
+                # The compositor clips a quarter disc out of each of the
+                # window's bottom corners and the desktop shows through it. That
+                # cut-out is the pinch between a window and its strip, and it is
+                # the one thing SwayFX 0.6 will not let anybody square: its
+                # `corner_radius` command writes the global config value
+                # whatever criteria precede it. So the strip fills the cut-out
+                # itself, in the colour of its own first row.
+                seam = seam_pixels(output / "attached-bottom.png",
+                                   initial["clients"]["attachment-floating"]["rect"])
+                evidence["seam_pixels"] = seam
+                require(near(seam["left_cut"], seam["left_strip"])
+                        and near(seam["right_cut"], seam["right_strip"]),
+                        f"the strip did not fill the window's clipped corners: {seam}")
+                require(not near(seam["left_cut"], seam["desktop"], 6)
+                        and not near(seam["right_cut"], seam["desktop"], 6),
+                        f"the window's bottom corners still show the desktop: {seam}")
+                checks.append("attached-bottom-corners-merge-into-the-strip")
+                write_evidence()
+
                 ipc(command='mode "window-switcher"')
                 time.sleep(0.05)
                 ipc(command=f'[con_id={floating_id}] move absolute position 300 220')
@@ -629,9 +702,66 @@ def run_verifier(output, prioritize_ui=False):
                 checks.append("hover-handoffs-have-no-intermediate-geometry")
                 capture("hover-return-bottom", lambda state: attached(state, "bottom"),
                         "hover return did not keep the original attachment")
+
+                # An exclusive zone is a tiling instruction and nothing else.
+                # Sway clamps no floating move, and a bottom reservation changes
+                # the workspace's height without moving its origin, which is the
+                # one case `arrange_workspace` leaves floating coordinates alone
+                # for -- so a float left sitting in the band stays there. The
+                # strip has to be what brings it back, and it does so without
+                # disturbing the window that owns the caption.
+                band_top = HEIGHT - band_size["px"]
+                ipc(command=f'[con_id={hover["id"]}] move absolute position 900 {band_top - 240}')
+                intrusion = snapshot()["clients"]["attachment-hover"]["rect"]
+                evidence["band_intrusion"] = intrusion
+                require(intrusion["y"] + intrusion["height"] > band_top,
+                        f"the fixture did not place the float inside the band: {intrusion}")
+
+                def clear_of_band(state):
+                    rect = state["clients"]["attachment-hover"]["rect"]
+                    return (attached(state, "bottom") and band_holds(state)
+                            and rect["y"] + rect["height"] <= band_top
+                            and rect["x"] == intrusion["x"])
+
+                capture("band-guard-clears-floating-intrusion", clear_of_band,
+                        "a floating window left inside the band was not put back")
+                evidence["band_cleared_to"] = (
+                    states["band-guard-clears-floating-intrusion"]["clients"]
+                    ["attachment-hover"]["rect"])
                 ipc(command="focus_follows_mouse no")
                 expected_exits.add("attachment-hover")
                 ipc(command=f'[con_id={hover["id"]}] kill')
+
+                # The strip covers the window's last rows to close the seam, and
+                # a click there is aimed at the window, so the surface keeps its
+                # input region on the caption alone. Middle-click is the sharpest
+                # probe there is: on the caption it tiles the window at once, and
+                # inside the seam it must do nothing whatsoever.
+                probe = snapshot()["caption_global_rect"]
+                move_pointer(probe["x"] + probe["width"] / 2,
+                             probe["y"] + merge_radius / 2)
+                event("press 274")
+                event("release 274")
+                time.sleep(0.6)
+                inside = snapshot()
+                require(inside["clients"]["attachment-floating"]["floating"].endswith("_on")
+                        and attached(inside, "bottom"),
+                        "a click inside the seam reached the strip instead of the window")
+                states["seam-click-reaches-the-window"] = inside
+                checks.append("seam-click-reaches-the-window")
+                write_evidence()
+                move_pointer(probe["x"] + probe["width"] / 2,
+                             probe["y"] + merge_radius + 10)
+                event("press 274")
+                event("release 274")
+                capture("caption-click-below-the-seam-tiles", lambda state:
+                        workspace_edge(state, "bottom")
+                        and state["clients"]["attachment-floating"]["floating"].endswith("_off"),
+                        "middle-click on the caption below the seam did not tile the window")
+                ipc(command=f"[con_id={floating_id}] floating enable, resize set 620 360, "
+                            "move absolute position 200 160, focus")
+                capture("seam-probe-restores-attachment", lambda state: attached(state, "bottom"),
+                        "restoring the float after the seam probe lost its caption")
 
                 rect = initial["clients"]["attachment-floating"]["rect"]
                 drag_keyboard = spawn("drag-keyboard", ["wtype", "-M", "logo", "-s", "2000", "-m", "logo"])

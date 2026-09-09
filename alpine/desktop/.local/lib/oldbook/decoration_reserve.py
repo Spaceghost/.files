@@ -119,6 +119,69 @@ def band_measurement(measures, edge):
     return found if isinstance(found, int) and found > 0 else band_thickness(0)
 
 
+def band_region(output_rect, edge, thickness):
+    """The strip of one output the band holds, in the tree's global coordinates.
+
+    Layer surfaces report output-local extents; containers report global ones,
+    so the reservation has to be restated in the containers' terms before any
+    window can be compared against it.
+    """
+    edge = band_edge(edge)
+    try:
+        x, y = int(output_rect['x']), int(output_rect['y'])
+        width, height = int(output_rect['width']), int(output_rect['height'])
+        thickness = max(0, int(thickness))
+    except (KeyError, TypeError, ValueError, OverflowError):
+        return None
+    if thickness <= 0 or width <= 0 or height <= 0:
+        return None
+    if edge == 'bottom':
+        thickness = min(thickness, height)
+        return {'x': x, 'y': y + height - thickness, 'width': width, 'height': thickness}
+    thickness = min(thickness, width)
+    return {'x': x + width - thickness, 'y': y, 'width': thickness, 'height': height}
+
+
+def band_clearance(rect, region, edge, bounds=None):
+    """Where a floating window has to sit to leave the band alone, or None.
+
+    The exclusive zone is the compositor's whole answer, and it only covers
+    tiled layout. Sway clamps no floating move, and `arrange_workspace` re-fixes
+    floating coordinates only when the workspace *origin* moves -- a bottom
+    reservation moves the workspace's height and never its origin -- so a float
+    that was already sitting there when the band appeared is left exactly where
+    it was, on top of it, forever.
+
+    The correction is the smallest one that clears the reservation, and it never
+    pushes a window off the far side of `bounds`: a window too tall to fit above
+    the band goes as far up as it can and stops, which is both the best that can
+    be done for it and the reason the correction settles instead of repeating.
+    """
+    edge = band_edge(edge)
+    if not region:
+        return None
+    try:
+        x, y = int(rect['x']), int(rect['y'])
+        width, height = int(rect['width']), int(rect['height'])
+    except (KeyError, TypeError, ValueError, OverflowError):
+        return None
+    if width <= 0 or height <= 0:
+        return None
+    if edge == 'bottom':
+        if y + height <= int(region['y']):
+            return None
+        wanted = int(region['y']) - height
+        if bounds:
+            wanted = max(wanted, int(bounds.get('y', wanted)))
+        return None if wanted == y else (x, wanted)
+    if x + width <= int(region['x']):
+        return None
+    wanted = int(region['x']) - width
+    if bounds:
+        wanted = max(wanted, int(bounds.get('x', wanted)))
+    return None if wanted == x else (wanted, y)
+
+
 def band_plan(placements, edge, thickness, enabled=True):
     """One reservation per output, from the saved edge rather than the live one.
 

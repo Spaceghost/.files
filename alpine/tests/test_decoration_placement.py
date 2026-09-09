@@ -366,6 +366,69 @@ class ReservedBandTests(unittest.TestCase):
         self.assertEqual(self.band.band_anchors('bottom'), ('BOTTOM', 'LEFT', 'RIGHT'))
         self.assertEqual(self.band.band_anchors('right'), ('RIGHT', 'TOP', 'BOTTOM'))
 
+    def test_the_band_region_restates_the_reservation_in_window_coordinates(self):
+        """Layer extents are output-local; container rectangles are global."""
+        screen = {'x': 1440, 'y': -120, 'width': 1280, 'height': 720}
+        self.assertEqual(self.band.band_region(screen, 'bottom', 39),
+                         {'x': 1440, 'y': 561, 'width': 1280, 'height': 39})
+        self.assertEqual(self.band.band_region(screen, 'right', 39),
+                         {'x': 2681, 'y': -120, 'width': 39, 'height': 720})
+        # Nothing is held back by a band that is not there, and a thickness
+        # larger than the output cannot reach past it.
+        self.assertIsNone(self.band.band_region(screen, 'bottom', 0))
+        self.assertIsNone(self.band.band_region({}, 'bottom', 39))
+        self.assertEqual(self.band.band_region(screen, 'bottom', 5000)['y'], -120)
+
+    def test_a_float_inside_the_band_is_moved_the_smallest_distance_out(self):
+        """The exclusive zone arranges tiled windows and nothing else.
+
+        Sway clamps no floating move, and `arrange_workspace` re-fixes floating
+        coordinates only when the workspace origin moves -- which a bottom
+        reservation never does -- so a float there stays there.
+        """
+        region = self.band.band_region(
+            {'x': 0, 'y': 0, 'width': 1440, 'height': 900}, 'bottom', 39)
+        bounds = {'x': 13, 'y': 59, 'width': 1414, 'height': 789}
+        clear = {'x': 200, 'y': 400, 'width': 620, 'height': 360}
+        self.assertIsNone(self.band.band_clearance(clear, region, 'bottom', bounds))
+        intruding = dict(clear, y=700)
+        self.assertEqual(self.band.band_clearance(intruding, region, 'bottom', bounds),
+                         (200, 501))
+        # A window too tall to fit above the band goes as far up as it can and
+        # stops there, so the correction settles instead of repeating.
+        tall = {'x': 200, 'y': 300, 'width': 620, 'height': 1000}
+        self.assertEqual(self.band.band_clearance(tall, region, 'bottom', bounds),
+                         (200, 59))
+        self.assertIsNone(self.band.band_clearance(
+            dict(tall, y=59), region, 'bottom', bounds))
+        side = self.band.band_region({'x': 0, 'y': 0, 'width': 1440, 'height': 900},
+                                     'right', 39)
+        self.assertEqual(self.band.band_clearance(
+            {'x': 1000, 'y': 100, 'width': 600, 'height': 200}, side, 'right', bounds),
+            (801, 100))
+        self.assertIsNone(self.band.band_clearance(clear, None, 'bottom', bounds))
+
+    def test_only_settled_visible_floats_are_taken_out_of_the_band(self):
+        region = self.band.band_region(
+            {'x': 0, 'y': 0, 'width': 1280, 'height': 720}, 'bottom', 39)
+        regions = {'eDP-1': region}
+        low = {'x': 100, 'y': 600, 'width': 400, 'height': 200}
+        intruder = view(7, dict(low))
+        tiled = view(4, dict(low))
+        full = view(8, dict(low), fullscreen=1)
+        parked = dict(view(9, dict(low)), scratchpad_state='fresh')
+        tree = {'nodes': [output('eDP-1', [workspace(
+            2, [tiled], [intruder, full, parked], [7, 8, 9, 4])])]}
+        corrections = self.model.band_corrections(tree, regions, 'bottom')
+        self.assertEqual([item['id'] for item in corrections], [7])
+        self.assertEqual(corrections[0]['position'], (100, 481))
+        self.assertEqual(corrections[0]['output'], 'eDP-1')
+        # An output holding nothing back has nothing to keep anybody out of,
+        # and the scratchpad is not an output the strip decorates.
+        self.assertEqual(self.model.band_corrections(tree, {}, 'bottom'), [])
+        intruder['rect'] = {'x': 100, 'y': 100, 'width': 400, 'height': 200}
+        self.assertEqual(self.model.band_corrections(tree, regions, 'bottom'), [])
+
     def test_the_caption_budget_leaves_room_for_the_controls(self):
         wide = self.band.character_budget(1440, 7.5, 200)
         narrow = self.band.character_budget(400, 7.5, 200)

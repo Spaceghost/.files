@@ -394,7 +394,8 @@
         "alpine/desktop/.local/lib/oldbook/decoration.py",
         "alpine/desktop/.local/lib/oldbook/decoration_placement.py",
         "alpine/themes/profiles/*/.config/swayfx/effects.conf",
-        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py"
+        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py",
+        "alpine/tests/verify_decoration_transition.py"
       ],
       "tests": [
         "test_decoration_placement.py",

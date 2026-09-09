@@ -25,6 +25,7 @@ CRITICAL = 10
 LADDER = {
     'gallery-drift': 'mains',
     'cat-bed': 'mains',
+    'decoration-band-guard': 'battery-low',
     'gallery-generation': 'mains',
     'phosphor': 'mains',
     'shaders': 'mains',

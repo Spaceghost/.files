@@ -4,6 +4,7 @@ import argparse
 import configparser
 import fcntl
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -11,20 +12,28 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import air
-from decoration import (action_command, load_settings, save_settings, vertical_title,
-                        window_opacity)
+from decoration import (action_command, corner_radii, load_settings, save_settings,
+                        seam_overlap, vertical_title, window_opacity, window_radius)
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
 import decoration_reserve
+import power_source
 import window_context
 from overlay_theme import THEMES, read_palette
-from decoration_placement import output_placements
+from decoration_placement import band_corrections, output_placements
 from decoration_motion import advance, advance_rect
 from decoration_watch import TreeWatch
+
+# A float has to hold still this long before the band puts it back, so a drag
+# is corrected once on release instead of being fought at every polled frame,
+# and no faster than the repeat interval if something keeps reasserting it.
+BAND_SETTLE = 0.5
+BAND_REPEAT = 1.5
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -79,6 +88,30 @@ def design_opacity(directory=THEMES):
     return value if 0 < value <= 1 else None
 
 
+def design_radius(directory=THEMES):
+    """The corner radius the compositor rounds this theme's windows with.
+
+    `desktop_theme` writes the SwayFX `corner_radius` line from this same
+    number, so reading it here keeps the strip's seam and the compositor's
+    windows on one value across a theme switch -- the arrangement the terminal
+    opacity already uses, and the only one available: SwayFX 0.6 will not tell
+    a caller what a container's radius is, and will not let it set one.
+    """
+    return window_radius(design_descriptor(directory).get('radius'))
+
+
+def components(color, alpha):
+    """A '#rrggbb' string as cairo components at this alpha, or None."""
+    text = str(color or '').lstrip('#')
+    if len(text) != 6:
+        return None
+    try:
+        red, green, blue = (int(text[index:index + 2], 16) / 255 for index in (0, 2, 4))
+    except ValueError:
+        return None
+    return (red, green, blue, max(0.0, min(1.0, float(alpha))))
+
+
 def appearance():
     config = configparser.ConfigParser(interpolation=None)
     config.read(CONFIG / 'foot/foot.ini')
@@ -93,7 +126,8 @@ def appearance():
     if design and design != family:
         family, size = design, size + 1
     return (family, min(40, max(5, size)), read_palette(),
-            load_settings(SETTINGS, STATE / 'position'), design_opacity())
+            load_settings(SETTINGS, STATE / 'position'), design_opacity(),
+            design_radius())
 
 
 def queue_geometry_update(callback):
@@ -177,7 +211,21 @@ def daemon():
             orientation = Gtk.Orientation.HORIZONTAL if edge == 'bottom' else Gtk.Orientation.VERTICAL
             self.box = Gtk.Box(orientation=orientation, spacing=4)
             self.box.get_style_context().add_class('caption')
-            self.window.add(self.box)
+            # The strip and the window it decorates are one shape along the
+            # bottom, so the surface starts above the caption: the seam area
+            # covers the window's last rows and fills the two corners the
+            # compositor clipped out of them. It is empty and invisible in
+            # every other placement.
+            self.seam = 0
+            self.fill = None
+            self.input_shape = None
+            self.shell = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            self.fillets = Gtk.DrawingArea()
+            self.fillets.connect('draw', self.draw_seam)
+            self.shell.pack_start(self.fillets, False, False, 0)
+            self.shell.pack_start(self.box, True, True, 0)
+            self.window.add(self.shell)
+            self.shell.show()
             self.brand = self.button('', 'Window actions', lambda button: self.popup(button))
             self.brand.get_style_context().add_class('brand')
             self.image = Gtk.Image.new_from_icon_name('application-x-executable-symbolic', Gtk.IconSize.MENU)
@@ -304,19 +352,22 @@ def daemon():
             rect = placement['rect']
             geometry = (tuple(rect.get(key, 0) for key in ('x', 'y', 'width', 'height')),
                         tuple(output_rect.get(key, 0) for key in ('x', 'y')),
-                        self.previous_style)
+                        self.previous_style, self.seam)
             if geometry == self.previous_geometry:
                 return
             x = rect['x'] - output_rect['x']
             y = rect['y'] - output_rect['y']
             if self.edge == 'bottom':
-                y += rect['height']
+                # The caption's own rows stay exactly where they have always
+                # been; only the seam above them is new, so the surface starts
+                # that much higher and is that much taller.
+                y += rect['height'] - self.seam
                 width = max(1, rect['width'])
-                height = max(1, self.box.get_preferred_height_for_width(width)[1])
+                height = max(1, self.shell.get_preferred_height_for_width(width)[1])
             else:
                 x += rect['width']
                 height = max(1, rect['height'])
-                width = max(1, self.box.get_preferred_width_for_height(height)[1])
+                width = max(1, self.shell.get_preferred_width_for_height(height)[1])
             self.motion_target = dict(x=x, y=y, width=width, height=height)
             if self.motion_rect is None or not self.animations:
                 self.motion_rect = dict(self.motion_target)
@@ -336,6 +387,57 @@ def daemon():
                                              size[1] if self.edge == 'right' else -1)
                 self.window.resize(*size)
                 self.rendered_size = size
+                self.refresh_input()
+
+        def draw_seam(self, widget, context):
+            """Fill the two corners the compositor clipped out of the window.
+
+            The rounding removes a quarter disc from each bottom corner and the
+            desktop shows through it, which is the pinch between the window and
+            its strip. Painting exactly that removed shape -- and only it, in
+            the colour the caption's own first row already has -- squares the
+            pair's outline without hiding a single row the window was drawing.
+            """
+            width = widget.get_allocated_width()
+            radius = min(self.seam, width // 2)
+            if radius <= 0 or self.fill is None:
+                return False
+            context.set_source_rgba(*self.fill)
+            context.new_path()
+            context.move_to(0, 0)
+            context.line_to(0, radius)
+            context.line_to(radius, radius)
+            context.arc(radius, 0, radius, math.pi / 2, math.pi)
+            context.close_path()
+            context.move_to(width, 0)
+            context.line_to(width, radius)
+            context.line_to(width - radius, radius)
+            context.arc_negative(width - radius, 0, radius, math.pi / 2, 0)
+            context.close_path()
+            context.fill()
+            return False
+
+        def refresh_input(self):
+            """Leave the seam rows to the window they are drawn over.
+
+            The surface covers the window's last rows to close the seam, and a
+            click there is aimed at the window. An input region that stops at
+            the caption keeps the pointer on the window it belongs to, exactly
+            as the band's empty region keeps a click off the screen edge.
+            """
+            size = self.rendered_size
+            if size is None or (self.seam, size) == self.input_shape:
+                return
+            try:
+                import cairo
+                region = None
+                if self.seam > 0:
+                    region = cairo.Region(cairo.RectangleInt(
+                        0, self.seam, max(1, size[0]), max(1, size[1] - self.seam)))
+                self.window.input_shape_combine_region(region)
+            except (ImportError, AttributeError, TypeError, ValueError):
+                return
+            self.input_shape = (self.seam, size)
 
         def animate(self):
             if self.animations and self.window.get_mapped() and not self.tick_id:
@@ -509,14 +611,30 @@ def daemon():
         def restyle(self, style, square, opacity):
             if (style, square, opacity) == self.previous_style:
                 return
-            family, size, colors, settings, _theme = style
+            family, size, colors, settings, _theme, window_corner = style
             family = family.replace('\\', '\\\\').replace('"', '\\"')
             if colors['accent'] != self.accent:
                 self.accent = colors['accent']
                 self.breath_painted = None
             self.palette = colors
             self.powerline = bool(settings['powerline'])
-            radius = 0 if square else settings['corner_radius']
+            # Attached along the bottom the strip and its window are one shape:
+            # square where they meet, rounded only where the pair ends, and the
+            # window's clipped corners filled with the caption's own first-row
+            # colour so the join has no seam, no gap and no second edge.
+            seam = seam_overlap(self.attachment_mode, self.edge, window_corner)
+            top, radius = corner_radii(settings['corner_radius'], square, bool(seam))
+            self.fill = components(colors['surface'], min(1, opacity + .16))
+            if seam != self.seam:
+                self.seam = seam
+                self.fillets.set_size_request(-1, seam)
+                self.previous_geometry = None
+            self.fillets.set_visible(seam > 0)
+            self.fillets.queue_draw()
+            self.refresh_input()
+            # A shadow that reaches up past a squared top edge would draw the
+            # join it exists to remove; below and beside the pair it still lands.
+            shade = ('0 4px 12px -2px' if seam else '0 3px 12px')
             # Ghost Observatory captions: roomier padding, medium-weight title.
             padding = '3px 9px' if self.edge == 'bottom' else '9px 3px'
             self.provider.load_from_data(f'''
@@ -526,9 +644,10 @@ def daemon():
                         alpha({colors['surface']}, {min(1, opacity + .16):.3f}),
                         alpha({colors['background']}, {opacity:.3f}));
                     border: none;
-                    outline: none; border-radius: {radius}px;
+                    outline: none;
+                    border-radius: {top}px {top}px {radius}px {radius}px;
                     padding: {padding}; min-height: 28px;
-                    box-shadow: 0 3px 12px alpha({colors['background_hard']}, .55);
+                    box-shadow: {shade} alpha({colors['background_hard']}, .55);
                 }}
                 #workspace-decoration button {{
                     background: transparent; background-image: none;
@@ -684,6 +803,7 @@ def daemon():
             self.previous_display = None
             self.previous_geometry = None
             self.rendered_size = None
+            self.input_shape = None
             self.motion_rect = None
             self.motion_target = None
             self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
@@ -766,6 +886,9 @@ def daemon():
     breath_state = {'target': air.CAPTION_LOW, 'interval': 400,
                     'allow': air.read_preferences().get('caption', True)}
     last_tree = {}
+    # Floating windows found inside the reservation: what each was last seen
+    # doing, when it stopped changing, and when it was last put back.
+    intruders = {}
     stop = threading.Event()
     style = appearance()
     pending_lock = threading.Lock()
@@ -845,7 +968,57 @@ def daemon():
             captions[name].update(contexts.get(name, {'id': None, 'workspace': '', 'node': {}}),
                                   last_tree, style, placement, output_rects[name])
         settle_bands(placements, monitors)
+        guard_band(last_tree, output_rects)
         return False
+
+    def guard_band(tree, output_rects):
+        """Put settled floating windows back out of the band's reservation.
+
+        The exclusive zone is the whole of the compositor's answer and it only
+        arranges tiled windows. Nothing in Sway clamps a floating move, and a
+        bottom reservation changes the workspace's height without moving its
+        origin, which is the one case `arrange_workspace` does not re-fix
+        floating coordinates for -- so a float already sitting there when the
+        band appears is left on top of it with nothing to put it back.
+
+        A correction waits for the window to hold still: a drag emits no events
+        and is followed by polling, and correcting mid-drag would fight the
+        pointer at frame rate. Waiting for the rectangle to settle turns that
+        into one quiet move after the button comes up, and the repeat guard
+        keeps an application that re-asserts its own position from turning into
+        a loop.
+        """
+        # Only where a reservation actually exists, and only as thick as that
+        # one is: an output with no band on it is holding nothing back, and a
+        # window sitting there is not in anybody's way.
+        edge = style[3]['position']
+        regions = {name: decoration_reserve.band_region(
+                       output_rects[name], edge, band.thickness)
+                   for name, band in bands.items()
+                   if name in output_rects and band.edge == edge}
+        if not regions:
+            intruders.clear()
+            return
+        now = time.monotonic()
+        commands = []
+        found = set()
+        for item in band_corrections(tree, regions, edge):
+            identity = item['id']
+            found.add(identity)
+            rect = tuple(item['rect'][key] for key in ('x', 'y', 'width', 'height'))
+            seen, settled, corrected = intruders.get(identity, (None, now, 0.0))
+            if seen != rect:
+                intruders[identity] = (rect, now, corrected)
+                continue
+            if now - settled < BAND_SETTLE or now - corrected < BAND_REPEAT:
+                continue
+            intruders[identity] = (rect, settled, now)
+            commands.append('[con_id={}] move absolute position {} px {} px'.format(
+                identity, *item['position']))
+        for identity in [key for key in intruders if key not in found]:
+            intruders.pop(identity, None)
+        if commands and power_source.allows('decoration-band-guard'):
+            launch(['swaymsg', '-q', '; '.join(commands)])
 
     def settle_bands(placements, monitors):
         """One reservation per output, held whatever the captions are doing.

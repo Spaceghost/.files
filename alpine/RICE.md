@@ -470,6 +470,38 @@ always did. Set `"reserve_band": false` in `~/.config/oldbook/decoration.json`
 and the band disappears entirely, leaving the strip overlaying windows — also
 jump-free, just covering content instead of sitting beside it.
 
+### The strip merges into its window
+
+Attached along the bottom, the strip and the window read as one shape rather
+than two objects touching. SwayFX cannot square a single window's corners —
+`corner_radius` is global whatever criteria you give it — so the strip does the
+work: it climbs exactly the theme's corner radius over the window, which is the
+height of the arc the compositor clipped away, squares its own top corners, and
+fills those two clipped corners in the colour its own first row already carries.
+
+Nothing of the window is covered. The only pixels added are the ones the
+rounding removed, and those rows are kept out of the strip's input region, so
+clicking there still reaches the window underneath. The radius comes from the
+same theme value the compositor's own is generated from, so a theme switch moves
+both together. And because the window itself is never modified, detaching,
+moving to another window, going fullscreen or killing the daemon all restore its
+corners by simply drawing nothing.
+
+### Floating windows stay out of the band
+
+An exclusive zone only instructs tiling. Sway clamps a floating drag against
+nothing at all, and it re-fixes floating coordinates only when a workspace's
+*origin* moves — which a bottom reservation never does, since it changes the
+height. So every float already on screen when the band appeared sat on top of
+it, permanently, with nothing that would ever move it back.
+
+A float that settles inside the band is now moved the smallest distance that
+clears it, never past the far side of its workspace, so a window too tall to fit
+goes as far up as it can and stops. It waits for the rectangle to hold still
+first: a drag emits no events, and correcting mid-drag would fight the pointer
+at frame rate. Fullscreen views are meant to cover the band and are left alone,
+as are the drop-downs, which park themselves.
+
 ### Repository, tabs and powerline
 
 The place segment names the repository and how the checkout stands, for Fossil

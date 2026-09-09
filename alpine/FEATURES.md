@@ -136,7 +136,22 @@ the active theme's design opacity, the same value the terminal configuration is
 generated from, so the two move together on a theme switch, and an ordinary
 application gets an opaque strip so its caption reads as part of that window
 rather than a translucent slab over it. An empty workspace has no window to
-belong to and keeps the saved value. Caption
+belong to and keeps the saved value.
+
+An attached bottom strip merges into the window it decorates rather than sitting
+against it. SwayFX 0.6 cannot square one window's corners — `cmd_corner_radius`
+is annotated as not yet handling per-container settings, writes the global
+radius whatever criteria precede it and widens the titlebar padding on the way
+past — so the strip closes the seam itself: it climbs exactly the theme's corner
+radius over the window, which is the height of the arc the compositor clipped,
+squares its own top corners and fills those two clipped corners in the colour
+its own first row already carries. No row of window content may be hidden; the
+only pixels added are the ones the rounding took away, and the seam rows stay
+out of the input region so a click there still reaches the window. The radius
+comes from the same theme value the compositor's own `corner_radius` is
+generated from, so the two move together on a theme switch. Nothing about the
+window is changed, so detaching, moving to another window, fullscreen or losing
+the daemon restores its corners by drawing nothing. Caption
 typography follows the active theme's design typeface (Inter Medium for Gruvbox
 Dark) one point above the terminal size, left-aligned with Ghost Observatory
 padding; a theme without a design font keeps the terminal font.
@@ -184,7 +199,20 @@ is two pixels taller than plain Latin. Thickness is remembered per edge: a
 bottom caption's height is no measurement of a vertical strip's width, and
 borrowing one for the other moved the reservation 16 pixels on entering
 fullscreen. The band paints nothing — an empty toolkit window still fills
-itself with the toolkit's background unless told otherwise. Actual fullscreen on
+itself with the toolkit's background unless told otherwise.
+
+An exclusive zone is a tiling instruction and nothing more, so the band alone
+does not keep floating windows out of its reservation: sway clamps a floating
+drag against nothing, and `arrange_workspace` re-fixes floating coordinates only
+when the workspace *origin* moves, which a bottom reservation never does because
+it changes the height. Every float already on screen when the band appeared sat
+on it permanently. A settled float found inside the band is therefore moved the
+smallest distance that clears it and never past the far side of its workspace,
+so a window too large to fit goes as far as it can and stops rather than
+looping. The correction waits for the rectangle to hold still, because a drag
+emits no events and correcting mid-drag would fight the pointer. Fullscreen
+views, which are meant to cover the band, and scratchpad windows, which belong
+to the helper that parks them, are left alone. Actual fullscreen on
 its visible workspace forces the workspace
 bottom caption; global fullscreen applies on every output. Hidden-workspace
 fullscreen does not interfere. Restore the saved edge afterward. Fullscreen tiled

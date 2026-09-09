@@ -19,7 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'alpine/tests'))
-from verify_decoration_attachment import SwayIPC, walk
+from verify_decoration_attachment import SwayIPC, theme_radius, walk
 
 
 if len(sys.argv) > 1 and sys.argv[1] == 'observe':
@@ -92,6 +92,16 @@ if not (source / 'alpine/desktop/.local/lib/oldbook').exists():
         source / 'alpine/desktop/.local/lib/oldbook',
         ignore=shutil.ignore_patterns('__pycache__'),
     )
+# The strip reads its typeface, its terminal opacity and the compositor's window
+# rounding from the active theme descriptor. Without one the private daemon runs
+# on fallbacks and stops being the thing under test, so the descriptors travel
+# with the source it is run from.
+themes = source / 'alpine/themes'
+themes.mkdir(parents=True, exist_ok=True)
+for descriptor in ['current', *(p.name for p in (origin / 'alpine/themes').glob('*.json'))]:
+    target = themes / descriptor
+    if not target.exists():
+        shutil.copy2(origin / 'alpine/themes' / descriptor, target)
 helper = source / 'alpine/desktop/.local/bin/oldbook-decoration'
 
 
@@ -151,6 +161,10 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
         'focus_follows_mouse no\n'
         'default_border pixel 0\n'
         'default_floating_border pixel 0\n'
+        # The strip closes the seam from the theme's radius, so the private
+        # compositor has to round its windows by that same number or the
+        # fixture is measuring a shape the desktop never makes.
+        f'corner_radius {theme_radius()}\n'
     )
     log = (output / 'runtime.log').open('w')
     procs = []
@@ -266,10 +280,14 @@ with tempfile.TemporaryDirectory(prefix='decoration-transition-') as temporary:
                     return False
                 caption = sample['captions'][0]
                 window_rect = sample['window']
+                # An attached bottom strip climbs over the arc the compositor
+                # clipped out of the window's corners, so the two are one shape.
+                # Its own rows have not moved; only the seam above them is new.
                 return (
                     caption['layer'] == 'top'
                     and caption['rect']['x'] == window_rect['x']
-                    and caption['rect']['y'] == window_rect['y'] + window_rect['height']
+                    and caption['rect']['y'] + theme_radius()
+                        == window_rect['y'] + window_rect['height']
                     and caption['rect']['width'] == window_rect['width']
                 )
 

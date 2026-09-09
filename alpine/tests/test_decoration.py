@@ -124,8 +124,10 @@ class DecorationTests(unittest.TestCase):
                 'background_hard': '#13091f'}
             script['appearance'].__globals__['design_font'] = lambda: None
             script['appearance'].__globals__['design_opacity'] = lambda: 0.78
+            script['appearance'].__globals__['design_radius'] = lambda: 22
 
-            family, size, colors, settings, theme_opacity = script['appearance']()
+            (family, size, colors, settings, theme_opacity,
+             window_corner) = script['appearance']()
 
             self.assertEqual((family, size), ('Fixture Mono', 9.5))
             self.assertEqual(settings, {'position': 'bottom', 'opacity': 0.78,
@@ -134,6 +136,10 @@ class DecorationTests(unittest.TestCase):
             # The strip matches the window it decorates, so the theme's terminal
             # transparency travels with the appearance.
             self.assertEqual(theme_opacity, 0.78)
+            # The compositor's own window rounding travels with it too: the
+            # strip closes the seam from this number and SwayFX will not report
+            # or set a container's radius for anyone to ask instead.
+            self.assertEqual(window_corner, 22)
             self.assertEqual(colors['surface'], '#261631')
             self.assertEqual(colors['accent'], '#dca7ff')
             self.assertEqual(colors['muted'], '#816b91')
@@ -144,6 +150,55 @@ class DecorationTests(unittest.TestCase):
             self.assertEqual(script['appearance']()[:2], ('Fixture Sans', 10.5))
             script['appearance'].__globals__['design_font'] = lambda: 'Fixture Mono'
             self.assertEqual(script['appearance']()[:2], ('Fixture Mono', 9.5))
+
+    def test_an_attached_bottom_strip_and_its_window_are_one_shape(self):
+        """The seam is closed on the strip's side, never on the compositor's.
+
+        SwayFX 0.6 has no per-window corner radius: `cmd_corner_radius` writes
+        the single global config value whatever criteria precede it and widens
+        the titlebar padding on the way past, so asking it to square one window
+        squares every window opened afterwards. The strip climbs over the arc
+        the compositor clipped instead, which also means there is nothing to
+        undo when the caption detaches or moves to another window.
+        """
+        self.assertEqual(self.model.seam_overlap('window', 'bottom', 22), 22)
+        # A right-edge strip meets a vertical side and a workspace strip
+        # belongs to no window at all; neither has a seam to close.
+        self.assertEqual(self.model.seam_overlap('window', 'right', 22), 0)
+        self.assertEqual(self.model.seam_overlap('workspace', 'bottom', 22), 0)
+        # A theme with no radius, or an unusable one, simply does not merge.
+        self.assertEqual(self.model.seam_overlap('window', 'bottom', None), 0)
+        self.assertEqual(self.model.seam_overlap('window', 'bottom', True), 0)
+        self.assertEqual(self.model.window_radius(-4), 0)
+        self.assertEqual(self.model.window_radius(400), self.model.CORNER_LIMIT)
+
+    def test_merged_corners_are_square_only_where_the_two_surfaces_meet(self):
+        self.assertEqual(self.model.corner_radii(6, False, True), (0, 6))
+        self.assertEqual(self.model.corner_radii(6, False, False), (6, 6))
+        # Fullscreen tiled chrome stays square all round, as it always was.
+        self.assertEqual(self.model.corner_radii(6, True, False), (0, 0))
+        self.assertEqual(self.model.corner_radii(6, True, True), (0, 0))
+
+    def test_design_radius_follows_the_theme_the_compositor_was_built_from(self):
+        script = runpy.run_path(str(SCRIPT))
+        with tempfile.TemporaryDirectory(prefix='oldbook-decoration-radius-') as directory:
+            root = Path(directory)
+            (root / 'current').write_text('fixture\n')
+            (root / 'fixture.json').write_text(json.dumps(
+                {'design': {'font': 'Fixture Sans', 'radius': 22, 'opacity': 0.78}}))
+            self.assertEqual(script['design_radius'](root), 22)
+            (root / 'fixture.json').write_text(json.dumps({'design': {}}))
+            self.assertEqual(script['design_radius'](root), 0)
+            (root / 'current').write_text('missing\n')
+            self.assertEqual(script['design_radius'](root), 0)
+
+    def test_the_seam_fill_is_the_captions_own_first_row(self):
+        script = runpy.run_path(str(SCRIPT))
+        self.assertEqual(script['components']('#261631', 1.0),
+                         (0x26 / 255, 0x16 / 255, 0x31 / 255, 1.0))
+        self.assertEqual(script['components']('#261631', 3)[3], 1.0)
+        self.assertIsNone(script['components']('not a colour', 1.0))
+        self.assertIsNone(script['components'](None, 1.0))
 
     def test_design_font_reads_the_active_theme_descriptor(self):
         script = runpy.run_path(str(SCRIPT))
