@@ -58,7 +58,8 @@
         "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
         "alpine/desktop/.local/lib/oldbook/lock_scene.py",
         "alpine/packages/swaylock-effects/*",
-        "alpine/verification/lock-screen/*"
+        "alpine/verification/lock-screen/*",
+        "alpine/tests/test_lock.py"
       ],
       "tests": [
         "test_lock.py"
@@ -744,6 +745,18 @@
         "test_fossil_bootstrap.py",
         "test_package_archive.py",
         "test_source_archive.py"
+      ],
+      "evidence": []
+    },
+    {
+      "id": "BUILD-HOST",
+      "paths": [
+        "alpine/bin/remote-build",
+        "alpine/packages/*/APKBUILD",
+        "docs/REMOTE-BUILD.md"
+      ],
+      "tests": [
+        "test_remote_build.py"
       ],
       "evidence": []
     },

@@ -77,6 +77,16 @@ swaylockd remains the automatic fallback. Lock acquisition must wait for actual
 readiness, serialize concurrent requests and reject stale process/compositor
 identities; a matching process name is insufficient.
 
+A locked session ignores the power key. The MacBook's power key sits beside
+Backspace and elogind powers the machine off on a short press, counting each
+autorepeat of a held key as another press, so the locker is launched holding an
+elogind `handle-power-key` block inhibitor and holds it for exactly as long as
+it lives, however it ends. elogind's `PowerKeyIgnoreInhibited` must stay `no`
+for that to hold. A missing or refused inhibitor must never prevent locking: a
+power key that still works is not a reason to leave the session open. The
+several-second hold the SMC turns into a hardware power cut sits below Linux
+and stays out of reach.
+
 - Implementation: [oldbook-lock](desktop/.local/bin/oldbook-lock),
   [lock scene](desktop/.local/lib/oldbook/lock_scene.py),
   [coexisting swaylock-effects](packages/swaylock-effects/README.md).
@@ -706,6 +716,29 @@ Full Fossil backups carry UV artifacts; a Git export alone does not.
   [source archive](tests/test_source_archive.py), [Fossil bootstrap](tests/test_fossil_bootstrap.py).
   Distinguish existing-host architecture identity from noarch repository indexing.
 
+### BUILD-HOST
+
+Compile packages on a build host, not on this MacBook. `alienware` and `bak`
+carry the work; this machine ships the package directory, the far side builds it
+in a throwaway Alpine container, and only the finished APK comes back. Both
+machines are x86_64, so this is a native build on faster hardware rather than
+cross-compilation, and the container supplies the musl sysroot and `-dev`
+packages `abuild` needs. An unreachable build host is a reason to stop and say
+so, never permission to fall back to this laptop's CPU.
+
+The signing key never leaves this machine. The build host signs with a key it
+generates for itself and that signature is replaced here. An APK v2 signature
+covers the control segment alone, so re-signing is one SHA-1 over a few hundred
+bytes and leaves the identity apk records as `C:` untouched; the re-signed bytes
+are deterministic. The signature segment must not carry a tar end-of-archive
+marker, which would hide the control and data segments and make apk reject the
+package as inconsistent.
+
+- Implementation: [remote builder](bin/remote-build), [guide](../docs/REMOTE-BUILD.md).
+- Checks: [signature, policy and host selection](tests/test_remote_build.py).
+  Container execution on the far side is not exercised by these checks; an
+  actual remote build is separate evidence.
+
 ### PERSONAL-DESKTOP
 
 The personal Cascadia package/command is named **spaceghost-desktop**. Keep the
@@ -781,6 +814,7 @@ These replacements are already decided; do not ask the user to choose again.
 | swaynag logout prompt on Super+Shift+E; fuzzel session menu on the battery | wlogout power deck with confirmations kept for log out, reboot and shut down (`SESSION-OWNERSHIP`, `BAR-LAYOUT`). |
 | JSON/random desktop notes, telemetry cards or lost old study text | Durable reading/journal contracts (`CONKY-READING`, `JOURNAL`, `SCRIPTURE`). |
 | npm Codex or partial CLI-only installation | Complete native APK and preserved tool/resource layout (`CODEX-PACKAGING`). |
+| Compiling packages on the MacBook | Remote build on `alienware`/`bak` with local signing (`BUILD-HOST`). |
 | Personal package named oldbook-desktop | spaceghost-desktop (`PERSONAL-DESKTOP`); old artifacts are recovery history. |
 
 The current requests do not establish an unresolved preference conflict. Actual

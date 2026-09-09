@@ -153,6 +153,82 @@ class LockRegressionTests(unittest.TestCase):
             with self.assertRaises(ProcessLookupError):
                 os.kill(int((root / 'started').read_text()), 0)
 
+    def test_the_locker_holds_a_power_key_inhibitor_for_its_whole_life(self):
+        """elogind powers the machine off on a short press of the MacBook's
+        power key, which sits beside Backspace: brushing it while typing a
+        password must not end the session instead of unlocking it."""
+        with tempfile.TemporaryDirectory(prefix='oldbook-lock-power-') as directory:
+            root = Path(directory)
+            wayland = socket.socket(socket.AF_UNIX)
+            wayland.bind(str(root / 'wayland-test'))
+            self.addCleanup(wayland.close)
+            fake_bin = root / 'bin'
+            fake_bin.mkdir()
+            inhibit = fake_bin / 'elogind-inhibit'
+            inhibit.write_text('#!/bin/sh\n'
+                               f'printf "%s\\n" "$@" > {root / "inhibit-arguments"}\n'
+                               'while [ "$1" != "--" ]; do shift; done\n'
+                               'shift\n'
+                               f'echo $$ > {root / "holder-pid"}\n'
+                               'exec "$@"\n')
+            inhibit.chmod(0o755)
+            helper = fake_bin / 'swaylockd'
+            helper.write_text('#!/usr/bin/python3\nimport os,sys,time\n'
+                              f'open({str(root / "locker-pid")!r}, "w").write(str(os.getpid()))\n'
+                              'os.write(int(sys.argv[sys.argv.index("-R") + 1]), b"\\n")\n'
+                              'time.sleep(20)\n')
+            helper.chmod(0o755)
+            env = dict(os.environ, HOME=directory, XDG_RUNTIME_DIR=directory,
+                       WAYLAND_DISPLAY='wayland-test', OLDBOOK_LOCK_BACKEND='stock',
+                       PATH=str(fake_bin) + ':/usr/bin:/bin')
+            result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=5)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            arguments = (root / 'inhibit-arguments').read_text().splitlines()
+            self.assertIn('--what=handle-power-key', arguments)
+            self.assertIn('--mode=block', arguments)
+            holder = int((root / 'holder-pid').read_text())
+            locker = int((root / 'locker-pid').read_text())
+            os.kill(holder, 0)  # The lock is up and elogind is still held off the key.
+            os.killpg(locker, signal.SIGKILL)
+            deadline = time.monotonic() + 3
+            while time.monotonic() < deadline:
+                try:
+                    os.kill(holder, 0)
+                except ProcessLookupError:
+                    break
+                time.sleep(.05)
+            else:
+                self.fail('the power key stayed inhibited after the lock ended')
+
+    def test_a_missing_inhibitor_never_prevents_locking(self):
+        """A power key that still works is no reason to leave the session open."""
+        with tempfile.TemporaryDirectory(prefix='oldbook-lock-nopower-') as directory:
+            root = Path(directory)
+            wayland = socket.socket(socket.AF_UNIX)
+            wayland.bind(str(root / 'wayland-test'))
+            self.addCleanup(wayland.close)
+            fake_bin = root / 'bin'
+            fake_bin.mkdir()
+            helper = fake_bin / 'swaylockd'
+            helper.write_text('#!/usr/bin/python3\nimport os,sys,time\n'
+                              f'open({str(root / "locker-pid")!r}, "w").write(str(os.getpid()))\n'
+                              'os.write(int(sys.argv[sys.argv.index("-R") + 1]), b"\\n")\n'
+                              'time.sleep(20)\n')
+            helper.chmod(0o755)
+            (fake_bin / 'python3').symlink_to('/usr/bin/python3')
+            env = dict(os.environ, HOME=directory, XDG_RUNTIME_DIR=directory,
+                       WAYLAND_DISPLAY='wayland-test', OLDBOOK_LOCK_BACKEND='stock',
+                       PATH=str(fake_bin))
+            try:
+                result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=5)
+                self.assertEqual(result.returncode, 0, result.stderr)
+            finally:
+                if (root / 'locker-pid').exists():
+                    try:
+                        os.killpg(int((root / 'locker-pid').read_text()), signal.SIGKILL)
+                    except ProcessLookupError:
+                        pass
+
     def test_nonprivate_runtime_is_rejected_before_launch(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-lock-test-') as directory:
             Path(directory).chmod(0o755)

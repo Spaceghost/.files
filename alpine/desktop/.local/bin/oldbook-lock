@@ -26,6 +26,10 @@ STOCK_SUPERVISOR = 'swaylockd'
 EFFECTS_LOCKER = 'swaylock-effects'
 FIRST_RUN_OPTIONS = {'-R': 1, '--ready-fd': 1, '--fade-in': 1, '--screenshots': 0, '-S': 0}
 MAX_RESTARTS = 5
+POWER_KEY_INHIBITOR = 'elogind-inhibit'
+POWER_KEY_HOLDER = [POWER_KEY_INHIBITOR, '--what=handle-power-key', '--mode=block',
+                    '--who=oldbook-lock', '--why=A locked session ignores the power key',
+                    '--', 'cat']
 
 
 def private_directory(path):
@@ -133,15 +137,45 @@ def launchers(runtime, command=None):
     return [effects, stock]
 
 
+def inhibit_power_key():
+    """Keep elogind off the power key for exactly as long as the locker lives.
+
+    The MacBook's power key is a keyboard key beside Backspace, and elogind
+    powers the machine off on a short press: brushing it while typing a
+    password ends the session instead of unlocking it. elogind honours a block
+    inhibitor on handle-power-key, so the locker is launched holding one. The
+    holder waits on this pipe rather than tracking a process, which releases
+    the inhibitor the moment the locker's tree ends however it ends; the caller
+    passes the returned descriptor to the locker and closes its own copy. A
+    missing or refused inhibitor returns None, because a power key that still
+    works is never a reason to leave the session unlocked.
+    """
+    if shutil.which(POWER_KEY_INHIBITOR) is None:
+        return None
+    read_fd, write_fd = os.pipe()
+    try:
+        subprocess.Popen(POWER_KEY_HOLDER, stdin=read_fd, stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL, start_new_session=True)
+        return write_fd
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
+        os.close(write_fd)
+        print(f'oldbook-lock: the power key stays live ({error})', file=sys.stderr)
+        return None
+    finally:
+        os.close(read_fd)
+
+
 def launch_until_ready(label, build, directory, record, compositor, runtime, timeout):
     deadline = time.monotonic() + timeout
     read_fd, write_fd = os.pipe()
+    inhibitor_fd = inhibit_power_key()
     process = None
     try:
         # Keep the supervisor in the foreground so its lifetime is identifiable.
         # A process name alone never proves a locked surface.
         argv = build(write_fd)
-        process = subprocess.Popen(argv, pass_fds=(write_fd,), start_new_session=True,
+        inherited = (write_fd,) if inhibitor_fd is None else (write_fd, inhibitor_fd)
+        process = subprocess.Popen(argv, pass_fds=inherited, start_new_session=True,
                                    stdin=subprocess.DEVNULL,
                                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         os.close(write_fd)
@@ -180,6 +214,8 @@ def launch_until_ready(label, build, directory, record, compositor, runtime, tim
         os.close(read_fd)
         if write_fd >= 0:
             os.close(write_fd)
+        if inhibitor_fd is not None:
+            os.close(inhibitor_fd)
 
 
 def cue(name):

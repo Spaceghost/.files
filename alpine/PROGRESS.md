@@ -2,6 +2,86 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The power key does nothing behind the lock — 2026-09-08
+
+The power key powered this machine off mid-session at 21:14 today, and the user
+asked for it to be inert while the Super+Escape lock is up: "Even if she sits on
+the key for an hour, I don't want it to do anything." `/var/log/messages` named
+the cause exactly — elogind logged "Power key pressed short." and then "Powering
+off..." — so the decision belongs to elogind's `HandlePowerKey=poweroff`, not to
+the compositor. elogind reads the button devices itself, so a Sway binding never
+sees the press it acts on and could not have fixed this.
+
+`oldbook-lock` now launches the locker holding an elogind `handle-power-key`
+block inhibitor. The holder waits on a pipe the locker inherits rather than
+watching a process, so the inhibitor is released the moment the locker's tree
+ends however it ends — unlock, crash or SIGKILL — and it covers the stock
+`swaylockd` fallback as well as the effects supervisor, both of which keep the
+inherited descriptor open. A missing or refused inhibitor is reported and
+ignored: a power key that still works never keeps the session unlocked.
+
+Verified against the live daemon, not only in tests. Driving the real helper
+with a fake locker, elogind reported `BlockInhibited` as `handle-power-key`
+attributed to `oldbook-lock` and cleared it when the locker died. A virtual
+power button on `uinput` then pressed the key for real, with a second `shutdown`
+inhibitor held as a net so a failure could not have powered the machine off:
+elogind logged "Power key pressed short." and stopped there. No "Powering off",
+and the net was never reached. Holding the key for ten seconds showed that
+elogind counts every autorepeat as a fresh press — forty-one of them — and
+refused all forty-one, which is what makes a sat-on key safe rather than a race.
+
+Two limits recorded rather than papered over. The several-second hold that the
+SMC turns into a hardware power cut happens below Linux, and no inhibitor
+reaches it. And the key is inert only while the lock is up; an unlocked session
+still powers off on a press, unchanged from before.
+
+## Compilation moved off the laptop — 2026-09-08
+
+The user asked to stop compiling software on the MacBook: "I don't want to
+compile software on here unnecessarily." A Waybar C++ build had just held both
+fans at maximum for several minutes at 75 °C. `alpine/bin/remote-build` now
+ships a package directory to `alienware` or `bak`, builds it there in a
+throwaway Alpine container and brings only the finished APK back.
+
+He asked specifically about `zig cc`, and it is the wrong tool here. Both
+machines are x86_64, so this is a native build on faster hardware rather than
+cross-compilation, and `abuild` is a package build system that needs a complete
+musl sysroot of `-dev` packages, patches and `pkg-config` paths — which a
+drop-in C compiler does not supply and a rootless Alpine container does.
+
+**The signing key stays on this machine.** The build host signs with a key it
+generates for itself and `remote-build` replaces that signature here. Working
+this out corrected a wrong assumption: `abuild-sign` signs a whole file, which
+is right for an APKINDEX but wrong for a package, where an APK v2 signature
+covers **only the control segment**. Signing the whole body produced a
+mathematically valid signature that apk still called "BAD signature". A second
+detail cost as much: the signature segment must carry no tar end-of-archive
+marker. With one, apk never reaches the control and data segments behind it and
+rejects the package as "file format is invalid or inconsistent". Both are pinned
+by tests. Because the control segment is exactly what apk hashes into the `C:`
+identity, re-signing provably cannot change which package a file is, and signing
+the same package twice is byte-identical.
+
+`~/.local/bin/abuild` now refuses to compile on this machine and names the
+remote command instead; `OLDBOOK_ALLOW_LOCAL_BUILD=1` overrides one command.
+
+**Five of the seven missing APKs are recovered.** The cause was ours, not
+Alpine's: `fetch_missing` solved against this machine's own world, which pins
+locally built packages by checksum, so the one Waybar r4 APK that no repository
+carries made every unrelated fetch unsolvable — `linux-pam-dev`, `satty` and
+`wlogout` were all available upstream the whole time. It now solves in an empty
+root with nothing to satisfy, stages the download and keeps only what the
+closure is short of. All five were checked with `apk verify` and matched to the
+installed identity before being filed.
+
+`waybar-0.15.0-r4` and `waybar-openrc-0.15.0-r4` remain, and they genuinely need
+a compile. Neither build host accepts a connection from `oldbook` today:
+`alienware` answers "tailnet policy does not permit you to SSH to this node" and
+`bak` refuses publickey authentication. `remote-build` reports both refusals and
+stops rather than building here. The package lock cannot refresh until one of
+those hosts opens; the remote container recipe itself is therefore unexercised
+and is recorded as a validation gap, not as proof.
+
 ## Test suite repaired — 2026-09-08
 
 `python3 -m unittest discover -s alpine/tests` runs 1342 tests green again. It
