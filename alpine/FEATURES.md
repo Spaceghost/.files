@@ -732,8 +732,13 @@ entry; bed mode is the only one implemented.
 The machine is warmed only while its input is parked, and the cat may park it
 herself. A decided judgement on an unlocked session engages the same guard
 Super+Shift+Escape does, which takes the keyboard and pointer while leaving the
-desktop visible, and releases it the moment she leaves; the linger holds it
-through her shifting her weight. This supersedes the earlier requirement that
+desktop visible. The guard is then hers for the sitting: a cat that steps off
+the keys has not necessarily left, so handing the desktop back would both flap
+the keyboard and make her return land on a live session that warms nothing.
+Only the heat follows her, stopping when she goes and warming again when she
+comes back. The user ends the guard with the gesture that would have started
+it, and the daemon ends it by stopping. This supersedes the earlier requirement
+that
 the session be locked *before* she settled, which was the same rule stated as a
 precondition the user had to satisfy rather than one the desktop could meet.
 The reasoning it replaces is preserved exactly: nothing is warmed while anyone

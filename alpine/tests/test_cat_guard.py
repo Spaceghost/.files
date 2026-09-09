@@ -1,4 +1,4 @@
-"""A cat parks the keyboard herself, and gets it back when she leaves."""
+"""A cat parks the keyboard herself, and keeps it for the sitting."""
 import importlib.machinery
 import importlib.util
 import json
@@ -95,14 +95,24 @@ class GuardTests(unittest.TestCase):
         self.assertTrue(record['input_parked'])
         self.assertTrue(record['present'])
 
-    def test_the_keyboard_comes_back_when_she_goes(self):
+    def test_the_keyboard_stays_parked_so_she_can_come_back(self):
         self.tick(CAT)
         record = self.tick(GONE, when=1002.0)
 
-        self.assertEqual(self.calls(), ['start', 'stop'])
-        self.assertFalse(record['guard_engaged'])
-        self.assertFalse(record['input_parked'])
+        # She is off the keys, so nothing is warmed; but the desktop is still
+        # hers, because a cat that has got up has not necessarily left.
+        self.assertEqual(self.calls(), ['start'])
+        self.assertTrue(record['guard_engaged'])
+        self.assertTrue(record['input_parked'])
         self.assertFalse(record['present'])
+
+    def test_she_is_warmed_again_when_she_returns(self):
+        self.tick(CAT)
+        self.assertFalse(self.tick(GONE, when=1002.0)['present'])
+        record = self.tick(CAT, when=1004.0)
+
+        self.assertEqual(self.calls(), ['start'], 'the guard was never re-taken')
+        self.assertTrue(record['present'])
 
     def test_shifting_her_weight_does_not_hand_the_keyboard_back(self):
         self.tick(CAT)
@@ -135,6 +145,15 @@ class GuardTests(unittest.TestCase):
         guard.release()
 
         self.assertEqual(self.calls(), [], 'the user parked their own inputs')
+
+    def test_only_the_user_or_the_watcher_stopping_takes_the_guard_back(self):
+        guard = self.module.InputGuard(self.watch)
+        self.assertTrue(guard.engage())
+
+        guard.release()
+
+        self.assertFalse(guard.engaged)
+        self.assertEqual(self.calls(), ['start', 'stop'])
 
     def test_a_guard_that_will_not_let_go_says_so(self):
         guard = self.module.InputGuard(self.watch)

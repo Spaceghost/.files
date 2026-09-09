@@ -178,9 +178,14 @@ class InputGuard:
 
     Two rules keep this honest. A guard this daemon did not engage is never
     released -- if the user parked their own inputs, they leave when they say
-    so and not when a cat wanders off. And a guard that refuses to start is a
-    refusal to warm: the machine is only ever made hot while input is parked,
-    so failing to park is failing to qualify.
+    so. And a guard that refuses to start is a refusal to warm: the machine is
+    only ever made hot while input is parked, so failing to park is failing to
+    qualify.
+
+    Once engaged it is held for the sitting rather than dropped the moment she
+    steps off the keys, so she can come back to a machine that is still hers
+    and be warmed again. The user ends it with the same gesture that would have
+    started it by hand, and the daemon ends it by stopping.
     """
 
     def __init__(self, command=None):
@@ -206,7 +211,7 @@ class InputGuard:
         self.refusal = None if ok else f'the input guard would not start: {error}'
         return self.engaged
 
-    def release(self, reason='the cat left'):
+    def release(self, reason='the watcher is stopping'):
         if not self.engaged:
             return
         ok, error = self._run('stop')
@@ -368,12 +373,18 @@ class Service:
         # A cat is warmed only on a machine whose input is parked, which is the
         # old rule; what has changed is that she no longer has to wait for the
         # user to have locked it first. A decided judgement -- not the linger,
-        # a fresh one with its corroboration -- engages the guard itself, and
-        # the guard goes the moment she does.
+        # a fresh one with its corroboration -- engages the guard itself.
+        #
+        # The guard is not released when she gets up. A cat leaves the keyboard
+        # and comes back to it, and handing the desktop over in between would
+        # mean her return lands on a live session and warms nothing; worse, the
+        # keyboard would flap between parked and live all evening. So the guard
+        # is hers for the sitting, and the user takes it back the way they
+        # always could, by holding the gesture that started it. Only the heat
+        # follows her: bed mode stops when she goes and warms again when she
+        # returns, because that is the part that costs something.
         if enabled and not locked and judgement['deciding']:
             self.guard.engage()
-        elif not judgement['present']:
-            self.guard.release()
         parked = bool(locked or self.guard.engaged)
         present = bool(judgement['present'] and parked and enabled)
         if present:
