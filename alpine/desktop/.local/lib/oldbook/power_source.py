@@ -24,6 +24,7 @@ CRITICAL = 10
 # silently switch it off, only registering it can.
 LADDER = {
     'gallery-drift': 'mains',
+    'cat-bed': 'mains',
     'gallery-generation': 'mains',
     'phosphor': 'mains',
     'shaders': 'mains',

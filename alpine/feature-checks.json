@@ -558,6 +558,24 @@
       "evidence": []
     },
     {
+      "id": "CAT-BED",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-cat",
+        "alpine/desktop/.local/lib/oldbook/cat_presence.py",
+        "alpine/desktop/.local/lib/oldbook/thermal.py",
+        "alpine/bin/oldbook-fan-hold",
+        "alpine/tests/test_cat_presence.py",
+        "alpine/tests/test_cat_bed.py",
+        "alpine/tests/test_cat_fans.py"
+      ],
+      "tests": [
+        "test_cat_presence.py",
+        "test_cat_bed.py",
+        "test_cat_fans.py"
+      ],
+      "evidence": []
+    },
+    {
       "id": "AMBIENT-DISPLAY",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-ambient-display",

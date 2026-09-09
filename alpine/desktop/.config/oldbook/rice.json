@@ -2,13 +2,29 @@
   "version": 1,
   "entries": [
     {
+      "id": "cat-bed",
+      "title": "Bed mode for the cat",
+      "date": "2026-09-09",
+      "summary": "Locked, it notices a cat on the keyboard and runs warm on purpose for her.",
+      "trigger": "Lock the session and let her settle; oldbook-cat show reports what it sees.",
+      "detail": "Five keys held for two seconds is necessary but never enough, and three clean keystrokes in ten seconds veto it outright. It never runs unlocked, never on battery, hands the fans back before it cuts load, and takes stricter ceilings with the lid shut.",
+      "run": [
+        "oldbook-cat",
+        "show"
+      ]
+    },
+    {
       "id": "notification-cards",
       "title": "Notification cards",
       "date": "2026-09-08",
       "summary": "A notification is a card and nothing around it paints; a three-pixel rail carries the urgency.",
       "trigger": "notify-send 'Ghost Planet' 'Received'",
       "detail": "Send one at each urgency to watch the rail change, then Super+Shift+N for the styled history.",
-      "run": ["notify-send", "Ghost Planet", "Received"]
+      "run": [
+        "notify-send",
+        "Ghost Planet",
+        "Received"
+      ]
     },
     {
       "id": "strip-process-chain",
@@ -25,7 +41,10 @@
       "summary": "Mains, battery, low, critical: one posture the session agrees on, and a ladder to shed by.",
       "trigger": "oldbook-power-mode show",
       "detail": "'ladder' prints what survives at each posture; 'override battery-low' holds one by hand, 'auto' releases it.",
-      "run": ["oldbook-power-mode", "show"],
+      "run": [
+        "oldbook-power-mode",
+        "show"
+      ],
       "terminal": true
     },
     {
@@ -51,7 +70,10 @@
       "summary": "Every workspace as a card of real window stills, the focused one outlined in amber.",
       "trigger": "F3",
       "detail": "Drag a still onto another card to move that window. F3 again, or Escape, puts it away.",
-      "run": ["oldbook-mission-control", "toggle"]
+      "run": [
+        "oldbook-mission-control",
+        "toggle"
+      ]
     },
     {
       "id": "launchpad",
@@ -60,7 +82,10 @@
       "summary": "Every application as a large icon over the blurred painting, filtering from the first keystroke.",
       "trigger": "F4",
       "detail": "Page dots underneath; type to filter, Enter to launch, Escape to close.",
-      "run": ["oldbook-launchpad", "toggle"]
+      "run": [
+        "oldbook-launchpad",
+        "toggle"
+      ]
     },
     {
       "id": "workspace-peek",
@@ -85,7 +110,10 @@
       "summary": "Each painting's hue elects one of the theme's own accents for pill, launcher, lock and strip.",
       "trigger": "oldbook-palette show",
       "detail": "It runs on every painting change; 'show' says which accent won and why, 'clear' returns to the theme.",
-      "run": ["oldbook-palette", "show"],
+      "run": [
+        "oldbook-palette",
+        "show"
+      ],
       "terminal": true
     },
     {
@@ -95,7 +123,10 @@
       "summary": "Six synthesized cues under a second each: lock, unlock, low battery, a new painting and more.",
       "trigger": "oldbook-sound unlock",
       "detail": "'oldbook-sound list' names all six. They are quiet on purpose and follow the desktop's mute.",
-      "run": ["oldbook-sound", "unlock"]
+      "run": [
+        "oldbook-sound",
+        "unlock"
+      ]
     },
     {
       "id": "idle-gallery",

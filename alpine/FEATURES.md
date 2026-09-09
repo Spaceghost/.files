@@ -632,6 +632,44 @@ change hook must not silence the hooks after it.
   A synthetic supply tree is not an unplugged machine; pulling the cord and
   watching the ladder shed remains the user's check.
 
+### CAT-BED
+
+While the session is locked, the desktop may notice that a cat is lying on the
+keyboard and be kind to her: bed mode runs the machine deliberately warm and
+holds the fans down. Interactions are a named set with one selected, so adding
+another is adding an entry; bed mode is the only one implemented.
+
+Detection must be lopsided in favour of refusing. Five keys held together for
+two seconds is necessary but never sufficient, and one corroborating signal is
+required: a connected patch of keys, no clean keystroke in five seconds, a
+trackpad contact area above 45 percent of the device's own maximum, or three
+keys in autorepeat. Three clean press-and-release events within ten seconds veto
+the judgement outright, whatever else is true. Above all the daemon must not
+publish a cat unless the locker's own readiness record names a live process: an
+unlocked session is a person, and a person is never warmed.
+
+Warming a laptop deliberately, with the fans held down and the lid possibly
+shut, makes safety the feature rather than a caveat. Three sensor families are
+all required — package and core temperatures, the battery, the palm rest — and
+an unreadable sensor is a stop, never a zero. Fans are always handed back before
+load is cut, by construction and by test, and a closed lid takes a stricter set
+of ceilings; an unknown lid is treated as closed. The fan hold must survive
+nothing: it is released by the pipe closing, by a heartbeat measured on
+CLOCK_BOOTTIME so a suspend counts against it, by the holder's own reading of
+the temperature, and by a restorer forked before any write into its own session.
+It runs on mains only, never on a hand-set battery posture, and a second thermal
+stop latches it off for the session.
+
+- Implementation: [interactions and bed mode](desktop/.local/bin/oldbook-cat),
+  [detector](desktop/.local/lib/oldbook/cat_presence.py),
+  [thermal policy](desktop/.local/lib/oldbook/thermal.py),
+  [privileged fan hold](bin/oldbook-fan-hold).
+- Checks: [detector](tests/test_cat_presence.py), [bed mode](tests/test_cat_bed.py),
+  [fan restoration](tests/test_cat_fans.py).
+  Every thermal and fan path is tested against synthetic sysfs trees; no bed
+  mode has ever run on this machine, no real fan has been held, and no cat has
+  been observed. A physical run is the user's check.
+
 ### AMBIENT-DISPLAY
 
 The panel may follow the Apple SMC light sensor: a dark room settles it at a

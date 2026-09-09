@@ -712,6 +712,42 @@ fallback). Tweak `desktop/.local/bin/oldbook-screenshot` and
 to silence it, `satty` to return to Swappy. Evidence: [osd/flash.png](verification/osd/flash.png),
 [osd/satty.png](verification/osd/satty.png); the sound has not been heard live.
 
+## Bed mode, also for the cat
+
+While the session is locked, the desktop can notice that a cat is lying on the
+keyboard and be nice to her: it runs the machine deliberately warm and holds the
+fans down, so she has somewhere heated to sit. `oldbook-cat show` reports what it
+currently sees; `oldbook-cat stop` disables it and restores the fans directly.
+
+Detection is deliberately reluctant. Five keys held together for two seconds is
+necessary and never sufficient — one corroborating signal is also required: a
+connected patch of neighbouring keys, no clean keystroke anywhere in five
+seconds, a trackpad contact area above 45 percent of that device's own maximum,
+or three keys in autorepeat. Three clean press-and-release events within ten
+seconds veto the whole judgement however much else agrees. And it never
+publishes a cat at all unless the lock's own readiness record names a live
+process, because an unlocked session is a person and a person is never warmed.
+
+The safety is the feature. Three sensor families are all required — package and
+core temperature, the battery, the palm rest — and a sensor that cannot be read
+is a stop rather than a zero. The fans are always handed back **before** load is
+cut, by construction and by test. A closed lid gets a stricter set of ceilings,
+and an unknown lid is treated as closed. It runs on mains only, sits for at most
+three hours, rests ten minutes after a stop, and latches off for the session
+after a second one.
+
+The fan hold is the dangerous part, so it is released four independent ways: the
+pipe closing when the daemon dies however it dies, a heartbeat measured on
+`CLOCK_BOOTTIME` so a suspend counts against it, the holder's own reading of the
+temperature, and a restorer forked before any write into its own session so that
+killing the holder's whole process group still restores. Heat and hold share a
+fate — the load is `PR_SET_PDEATHSIG` children on the same pipe — so the worst
+reachable state is quiet fans on an idle machine.
+
+If a cat was seen within the last thirty seconds and the lid closes, an elogind
+`handle-lid-switch` inhibitor keeps the machine awake under the stricter
+ceilings, released the instant that window lapses.
+
 ## Watch mode, for the cat
 
 `Super+Shift+Escape` holds every key and every pointer event away from the
