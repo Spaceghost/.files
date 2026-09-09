@@ -911,6 +911,31 @@ has watched it spin.
 
 ![The wait cursor's frames](verification/animated-cursors/frames.png)
 
+## How the terminal waits
+
+Every long helper used to invent its own waiting noise or make none at all:
+`package-archive` counted every fiftieth APK, `remote-build` printed one line
+and then went silent for the length of a compile, `check-features --run` let
+seventeen unittest processes talk over each other. There is one vocabulary now,
+with three words and no more.
+
+A **segmented bar** (`▰▱`) for work with a known total, settling exactly on it.
+A **stepped spinner** (`▖▘▝▗`) for work with no total, which advances only when
+the caller reports a step — a spinner waiting on a silent process shows a still
+glyph, so nothing here can become ambient motion. And a **step list** for
+multi-phase work, where each finished phase keeps its line and takes a result
+mark from the `+ = ! x` alphabet `oldbook-rebuild` already uses, so the desktop
+has one answer to "did it work".
+
+There is no timer, thread or frame clock anywhere in it. A repaint happens
+because the caller reported work, is capped at ten a second, is skipped when
+the line has not changed, and stops in the same instant the work does. Colour
+is the active theme's roles. A pipe, a set `NO_COLOR`, a dumb or Linux-console
+`TERM`, a stream that is not UTF-8, a battery, or `OLDBOOK_LOADING=plain` all
+fall back to the same plain stepped lines with no escape codes and no redraw.
+Progress goes to stderr wherever stdout is parsed, and the per-item lines those
+callers already printed are byte-identical to what they were.
+
 ## Sound
 
 The desktop is nearly quiet, and never load-bearing: a missing player, a

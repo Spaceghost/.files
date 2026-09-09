@@ -394,6 +394,33 @@ meanwhile. The keyboard's saved level and mode survive the whole cycle.
   the kernel can coalesce writes. Suspend/resume and physical keypresses need
   their own observation.
 
+### TERMINAL-PROGRESS
+
+Long-running helpers speak one waiting vocabulary rather than each inventing
+its own: a segmented bar for a known total, a stepped spinner for an unknown
+one, and a step list whose finished phases keep their line and a result mark in
+the `+ = ! x` alphabet the rebuild helper already uses. Colour comes from the
+active theme's roles, never a hardcoded shade.
+
+Nothing in it moves on its own. There is no timer, thread or frame clock: a
+repaint happens only because the caller reported work, is capped at ten a
+second, is skipped when the line is unchanged, and stops in the same instant
+the work stops. A spinner waiting on a silent process shows a still glyph, so
+the language can never become ambient motion. A pipe, an empty-but-set
+`NO_COLOR`, a dumb or console `TERM`, a non-UTF-8 stream or a battery all fall
+back to the same plain stepped lines with no escape codes and no redraw, and a
+bar with nothing to say stays silent until the work outlasts a short interval.
+Adoption must not change a caller's existing output: progress belongs on
+stderr where stdout is parsed, and the per-item lines callers already printed
+stay byte-identical.
+
+- Implementation: [loading language](desktop/.local/lib/oldbook/loading.py),
+  adopted in [remote builder](bin/remote-build), [impact report](bin/check-features)
+  and [package archive](bin/package-archive).
+- Checks: [loading tests](tests/test_loading.py).
+  A counted repaint budget is not a physical frame rate; how a real build
+  scrolls past on this panel remains the user's check.
+
 ### SHORTCUT-HELP
 
 Hold Super alone for half a second for a contextual, themed shortcut guide;

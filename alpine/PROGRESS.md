@@ -32,6 +32,34 @@ youngest-child walk, the /proc directory rejection, a vanished process, Git HEAD
 parsing including a detached head, and each caption shape. A rendered string in
 a test is not the strip on the panel; the live caption is the user's check.
 
+## One way for the terminal to wait — 2026-09-08
+
+Asked for a shared "loading language" during a round of rice work, on the
+grounds that the user likes discrete, stepped terminal animation and dislikes
+anything that moves on its own. `loading.py` has three words: a segmented bar
+for a known total, a stepped spinner for an unknown one, and a step list whose
+finished phases keep their line and a result mark in the alphabet
+`oldbook-rebuild` already used.
+
+The discipline is the point. There is no timer, thread or frame clock: a
+repaint happens only because a caller reported work, is capped at ten a second
+and skipped when the line is unchanged, so drawing stops in the same instant
+the work does. The spinner advances on reported steps rather than elapsed time,
+which means a silent wait shows a still glyph instead of spinning at nothing. A
+pty-driven simulation of a full remote build, about two and a half seconds of
+work, produced eleven repaints in total.
+
+Adoption had one rule: change nothing a caller already printed. remote-build's
+per-APK line is byte-identical and pinned by a test; check-features and
+package-archive draw on stderr so their parsed stdout is untouched. One
+hand-rolled progress print in `package-archive.snapshot()` was deliberately
+left alone and commented instead, because folding it in would have changed an
+existing stdout line — that one is offered rather than taken.
+
+Forty-nine tests compare rendered lines as pure strings. A counted repaint
+budget is not a physical frame rate, so how a real build scrolls past on this
+panel is recorded as the user's check.
+
 ## The desktop learned where its power comes from — 2026-09-08
 
 Opening a round of rice work, the user attached one condition: "the only thing

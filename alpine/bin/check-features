@@ -50,6 +50,21 @@ def affected(features, paths):
              for path in paths for pattern in item['paths'])]
 
 
+def review(count):
+    """The shared loading language, asked for only when checks actually run.
+
+    The impact report is what agents run constantly and it must keep working
+    from nothing but this file and the index; only `--run`, which then sits
+    there for minutes, has anything to show progress about. Steps go to stderr
+    so `--json` on stdout stays exactly as parseable as it was.
+    """
+    sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+    import loading
+    # Each check file is a unittest process that prints as it goes, so no step
+    # gets a live line to overwrite; its result mark lands after it is done.
+    return loading.StepList(loading.Terminal(sys.stderr), total=count)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     selection = parser.add_mutually_exclusive_group()
@@ -104,11 +119,14 @@ def main(argv=None):
         print(str(len(tests)) + ' unique check files. ' + report['note'], flush=True)
     if args.run:
         failed = []
+        steps = review(len(tests))
         for test in tests:
+            steps.start(test, quiet=False)
             result = subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'alpine/tests',
                                      '-p', test, '-v'], cwd=REPO)
             if result.returncode:
                 failed.append(test)
+            steps.finish('failed' if result.returncode else 'done')
         if failed:
             print('Failed feature checks: ' + ', '.join(failed), file=sys.stderr)
             return 1

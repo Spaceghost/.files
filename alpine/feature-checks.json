@@ -438,6 +438,17 @@
       ]
     },
     {
+      "id": "TERMINAL-PROGRESS",
+      "paths": [
+        "alpine/desktop/.local/lib/oldbook/loading.py",
+        "alpine/tests/test_loading.py"
+      ],
+      "tests": [
+        "test_loading.py"
+      ],
+      "evidence": []
+    },
+    {
       "id": "SHORTCUT-HELP",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-shortcuts",

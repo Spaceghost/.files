@@ -8,10 +8,14 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 
 REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+import loading
+
 LOCKS = REPO / 'alpine/packages/locks'
 
 
@@ -71,15 +75,33 @@ def fetch_missing(installed, cache, repositories):
     if not missing:
         return
     with tempfile.TemporaryDirectory(prefix='oldbook-fetch-') as td:
-        repos = Path(td)/'repositories'
-        repos.write_text('\n'.join(line.split(maxsplit=1)[-1]
-                                   if line.startswith('@') else line
-                                   for line in repositories.splitlines())+'\n')
+        # Solve in an empty root rather than against this machine. Our own world
+        # pins locally built packages by checksum, and one such APK that no
+        # repository carries makes every unrelated fetch unsolvable; an empty
+        # root has no world to satisfy.
+        root = Path(td)/'root'
+        (root/'lib/apk/db').mkdir(parents=True)
+        (root/'etc/apk/keys').mkdir(parents=True)
+        (root/'lib/apk/db/installed').touch()
+        (root/'etc/apk/world').touch()
+        for key in Path('/etc/apk/keys').glob('*.pub'):
+            shutil.copyfile(key, root/'etc/apk/keys'/key.name)
+        (root/'etc/apk/repositories').write_text(
+            '\n'.join(line.split(maxsplit=1)[-1] if line.startswith('@') else line
+                      for line in repositories.splitlines())+'\n')
         # apk fetch requires recursive solver mode to interpret version
         # constraints. Only missing APKs enter that solver: already cached
-        # local packages need no official repository entry.
-        run(['apk', '--repositories-file', repos, 'fetch', '--recursive', '--output', cache] +
-            [f"{x['name']}={x['version']}" for x in missing])
+        # local packages need no official repository entry. An empty root drags
+        # in each dependency too, so stage the download and keep only the APKs
+        # this closure is actually short of.
+        staging = Path(td)/'staging'
+        staging.mkdir()
+        run(['apk', '--root', root, '--no-cache', 'fetch', '--recursive',
+             '--output', staging] + [f"{x['name']}={x['version']}" for x in missing])
+        for item in missing:
+            name = f"{item['name']}-{item['version']}.apk"
+            if (staging/name).is_file():
+                shutil.copyfile(staging/name, cache/name)
 
 
 def public_keys():
@@ -126,6 +148,8 @@ def snapshot(cache):
         uv_add(path, uv, known)
         entries.append(dict(item, artifact_arch=artifact['arch'],
                             filename=path.name, sha256=checksum, artifact=uv))
+        # Ad-hoc progress, predating the shared loading language. Folding it in
+        # would move an existing stdout line, so it waits on the user's word.
         if i % 50 == 0:
             print(f'Archived {i}/{len(installed)} APKs', flush=True)
     if (installed != packages() or world != Path('/etc/apk/world').read_text()
@@ -185,20 +209,29 @@ def load_lock(path):
 
 
 def export(m, cache):
+    # Several hundred APKs, every one of them either already cached or a Fossil
+    # export away: a known total, which is the one shape the segmented bar is
+    # for. It draws on stderr, so the stdout this command is read for is
+    # untouched, and off a terminal it says nothing at all unless the export is
+    # slow enough that somebody is sitting there waiting for it.
     cache.mkdir(parents=True,exist_ok=True)
-    for i,pkg in enumerate(m['packages'],1):
-        path=cache/pkg['filename']
-        if path.is_symlink():
-            raise RuntimeError(f'Archive cache symlink is not supported: {path}')
-        if not path.exists():
-            with tempfile.TemporaryDirectory(prefix='.export-', dir=cache) as td:
-                partial=Path(td)/pkg['filename']
-                run(['fossil','uv','export',pkg['artifact'],partial],cwd=REPO)
-                if sha(partial) != pkg['sha256']:
-                    raise RuntimeError(f'Corrupt Fossil artifact: {pkg["artifact"]}')
-                partial.rename(path)
-        if sha(path) != pkg['sha256']:
-            raise RuntimeError(f'Checksum mismatch: {path}')
+    bar = loading.Progress('verified archived APKs', len(m['packages']),
+                           loading.Terminal(sys.stderr))
+    with bar:
+        for i,pkg in enumerate(m['packages'],1):
+            path=cache/pkg['filename']
+            if path.is_symlink():
+                raise RuntimeError(f'Archive cache symlink is not supported: {path}')
+            if not path.exists():
+                with tempfile.TemporaryDirectory(prefix='.export-', dir=cache) as td:
+                    partial=Path(td)/pkg['filename']
+                    run(['fossil','uv','export',pkg['artifact'],partial],cwd=REPO)
+                    if sha(partial) != pkg['sha256']:
+                        raise RuntimeError(f'Corrupt Fossil artifact: {pkg["artifact"]}')
+                    partial.rename(path)
+            if sha(path) != pkg['sha256']:
+                raise RuntimeError(f'Checksum mismatch: {path}')
+            bar.update(i)
     print('Verified',len(m['packages']),'archived APKs',flush=True)
 
 
