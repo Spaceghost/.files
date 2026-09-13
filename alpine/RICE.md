@@ -203,6 +203,31 @@ channel, so the blur only ever samples wallpaper.
 If you want the softer two-pass blur back, widen the channel to match rather
 than the other way round: `gaps inner 17` restores a 16-pixel reach safely.
 
+### Animation first
+
+Jack: "I need animation to take absolute priority." The machine runs agents,
+builds and watchers beside the desktop, and under that load a flight went
+choppy even with the compositor's threads at nice -10, because the kernel's
+autogroups rank sessions before threads: the desktop's session got one fair
+share against each agent's, whatever its own threads said. `oldbook-ui-priority`,
+the root helper that `oldbook-session` and each drawing daemon ask through doas
+once at start, now does three things, each bounded to processes it can prove
+are the desktop's and reset in anything they fork. The compositor's render
+thread runs SCHED_RR at the lowest realtime priority; children return to
+ordinary scheduling by SCHED_RESET_ON_FORK, and the kernel's realtime throttle
+keeps even a spinning thread from taking the machine. The panels, the notifier,
+the shortcut guide, the reading cards and the daemons that draw run at nice
+-15, the compositor's helper threads at -10. And the desktop's own session
+groups are weighted at nice -20, so against any other session they get about
+ninety-nine parts in a hundred of a contended core; a daemon started by hand
+in a terminal never drags that terminal's group up with it. Check:
+`doas oldbook-ui-priority --check --session "$SWAYSOCK"` prints every desktop
+thread's policy and every group's weight. Off: `doas chrt --other -p 0 <tid>`
+returns a thread, `echo 0 | doas tee /proc/<pid>/autogroup` a group, and
+removing the helper from `/usr/local/sbin` stops it being asked. Evidence: the
+live `--check` output after applying it, 2026-09-13; how the flight feels under
+load is his to judge.
+
 ## Control deck bar
 
 The Waybar at the top is a 34-pixel floating strip with 6-pixel margins, split

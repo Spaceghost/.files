@@ -2450,3 +2450,27 @@ login. No live compositor restart or fresh-machine boot is claimed. Evidence:
 - Catalogue: `landing-ripple` in rice.json, a subsection in RICE.md, and the
   ripple's files, tests and evidence in the DECORATION-STYLE and MOTION
   contracts.
+
+## Animation first — 2026-09-13
+
+- Jack, watching a choppy strip flight: "I need animation to take absolute
+  priority." The machine at that moment: 0% idle, load 9 to 18 on eight cores,
+  seven `claude` processes, fossil and the CUE watcher churning. The compositor's
+  threads were already at nice -10 and the daemons' at -5, and it made no
+  difference, because `kernel.sched_autogroup_enabled` is 1: CPU is shared
+  between sessions first, and only then between threads inside one. Every agent
+  ran in a session of its own, so the desktop's session got one share in eight.
+- `oldbook-ui-priority` now weights the desktop's session groups at nice -20
+  (the compositor's, the session script's, and any led by a desktop daemon; a
+  group holding a shell, terminal or agent is never touched), runs the
+  compositor's render thread SCHED_RR at priority 1 with SCHED_RESET_ON_FORK,
+  and puts the panels, notifier, guide, reading cards and drawing daemons at
+  nice -15. Conky and the background, OSD, workspaces and wallpaper daemons
+  joined the recognised set.
+- Validation: 13 helper tests pass, including the realtime call's policy and
+  parameter, the tiers, and the group rules against a fake /proc. Applied live
+  through `install-desktop-system` and one `--session` run; the check output is
+  recorded below the entry in the daemon's state directory
+  (`~/.local/state/oldbook/ui-priority.json`).
+- Not verified: the feel of a flight under load by eye; a long soak for any
+  realtime side effect, which the kernel's 95% throttle bounds in any case.

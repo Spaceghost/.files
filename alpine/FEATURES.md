@@ -293,6 +293,13 @@ Avoid redundant resize/layout work and unbounded update queues. Honor disabled
 desktop animations. Do not trade away high-quality still previews silently.
 React on the first available frame and prioritize compositor/UI work under load.
 Child applications and background jobs must retain ordinary scheduling priority.
+Animation takes absolute priority (Jack, 2026-09-13): the compositor's render
+thread runs SCHED_RR at the lowest realtime priority with children reset, the
+desktop's own threads sit at nice -15 (the compositor's helper threads at -10),
+and the desktop's session autogroups are weighted at nice -20, so no agent,
+shell or build session can take the compositor's share. All of it is applied
+once by the root helper at session and daemon start, never in a callback, and
+only to processes it can prove are the desktop's.
 
 - Implementation: [decoration motion](desktop/.local/lib/oldbook/decoration_motion.py),
   [watcher](desktop/.local/lib/oldbook/decoration_watch.py),

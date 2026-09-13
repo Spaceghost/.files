@@ -153,6 +153,83 @@ class PriorityTests(unittest.TestCase):
             self.assertFalse(self.helper.boost_thread(123, -5))
             self.assertEqual((state.policy, state.nice), (os.SCHED_FIFO, -11))
 
+    def test_desktop_threads_sit_well_below_zero_and_the_compositor_lowest(self):
+        self.process()
+        self.assertEqual(self.identify()['nice'], -15)
+        self.process(executable='/usr/bin/swayfx')
+        self.assertEqual(self.identify()['nice'], -10)
+        self.process(executable='/usr/bin/conky')
+        self.assertEqual(self.identify()['nice'], -15)
+
+    def test_the_compositor_render_thread_goes_round_robin_with_children_reset(self):
+        # Jack: "I need animation to take absolute priority." The one thread
+        # that renders every frame runs realtime; anything it forks does not.
+        class Scheduler:
+            policy = os.SCHED_OTHER
+            calls = []
+
+            def getscheduler(self, tid):
+                return self.policy
+
+            def setscheduler(self, tid, policy, parameter):
+                self.calls.append((tid, policy, parameter.sched_priority))
+                self.policy = policy
+
+        state = Scheduler()
+        with patch.object(self.helper.os, 'sched_getscheduler', state.getscheduler), \
+                patch.object(self.helper.os, 'sched_setscheduler', state.setscheduler):
+            self.assertTrue(self.helper.realtime_thread(123, 1))
+            self.assertEqual(state.calls, [(123, os.SCHED_RR | os.SCHED_RESET_ON_FORK, 1)])
+            # Running again is harmless: round-robin from an earlier run is renewed.
+            self.assertTrue(self.helper.realtime_thread(123, 1))
+            state.policy = os.SCHED_FIFO
+            self.assertFalse(self.helper.realtime_thread(123, 1))
+            self.assertEqual(len(state.calls), 2)
+        self.assertEqual(self.helper.COMPOSITOR_REALTIME, 1)
+
+    def member(self, pid, group, leader, comm, executable='/usr/bin/waybar', argv=None,
+               uid=None, environ=b'SWAYSOCK=/run/user/1000/live.sock\0'):
+        """A process in the fake /proc, in a session group with a leader."""
+        path = self.proc / str(pid)
+        path.mkdir(parents=True, exist_ok=True)
+        exe = path / 'exe'
+        exe.unlink(missing_ok=True)
+        exe.symlink_to(executable)
+        (path / 'cmdline').write_bytes(b'\0'.join(a.encode() for a in
+                                      (argv or [executable])) + b'\0')
+        owner = self.uid if uid is None else uid
+        (path / 'status').write_text(f'Name:\t{comm}\nUid:\t{owner}\t{owner}\t{owner}\t{owner}\nTgid:\t{pid}\n')
+        (path / 'stat').write_text(f'{pid} ({comm}) S 1 {pid} {leader} ' + '0 ' * 16 + '321 0\n')
+        (path / 'comm').write_text(comm + '\n')
+        (path / 'autogroup').write_text(f'/autogroup-{group} nice 0\n')
+        (path / 'environ').write_bytes(environ)
+        return path
+
+    def test_only_the_desktops_own_session_groups_are_weighted(self):
+        live = '/run/user/1000/live.sock'
+        # The compositor's group, whoever leads it (greetd's worker is root's).
+        self.member(300, 16, 299, 'swayfx', executable='/usr/bin/swayfx')
+        # The session script's group: the daemons it started, under its shell.
+        self.member(310, 24, 305, 'sh', executable='/bin/busybox',
+                    argv=['/bin/sh', '/home/jack/.local/bin/oldbook-session'])
+        self.member(311, 24, 305, 'swaync', executable='/usr/bin/swaync')
+        # A daemon that is its own session leader.
+        self.member(320, 27, 320, 'superhold', executable='/usr/bin/superhold')
+        # A terminal group: a shell, an agent and a panel started by hand in it.
+        self.member(330, 64, 330, 'zsh', executable='/bin/zsh')
+        self.member(331, 64, 330, 'claude', executable='/usr/bin/claude')
+        self.member(332, 64, 330, 'waybar', executable='/usr/bin/waybar')
+        # A group with no desktop process at all.
+        self.member(340, 70, 340, 'firefox', executable='/usr/bin/firefox')
+        # A desktop process from another session's environment.
+        self.member(350, 80, 349, 'waybar', executable='/usr/bin/waybar',
+                    environ=b'SWAYSOCK=/run/user/1000/other.sock\0')
+        groups = self.helper.desktop_groups(self.uid, self.home, live, 300, self.proc)
+        self.assertEqual(groups, {'16', '24', '27'})
+        self.helper.weight_group(311, self.helper.GROUP_NICE, self.proc)
+        self.assertEqual((self.proc / '311/autogroup').read_text().strip(), '-20')
+        self.assertEqual(self.helper.GROUP_NICE, -20)
+
     def test_failed_reset_never_applies_negative_nice(self):
         with patch.object(self.helper.os, 'sched_getscheduler', return_value=os.SCHED_OTHER), \
                 patch.object(self.helper.os, 'sched_setscheduler', side_effect=PermissionError), \
