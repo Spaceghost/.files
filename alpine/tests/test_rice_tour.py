@@ -2,6 +2,7 @@
 import importlib.machinery
 import importlib.util
 import json
+import shutil
 import math
 import os
 from pathlib import Path
@@ -67,6 +68,17 @@ class ListTests(unittest.TestCase):
                                     max_lines=2, placeholder='…')
             self.assertNotIn('…', ''.join(wrapped),
                              f'{item["id"]} does not fit the card in two lines')
+
+    def test_the_shipped_list_is_exactly_what_the_cue_source_renders(self):
+        # rice.json is rendered from alpine/cue/rice, byte for byte, so the list
+        # cannot drift from its source; alpine/cue/rice/README.md says how.
+        cue = shutil.which('cue')
+        if cue is None:
+            self.skipTest('cue is not installed')
+        rendered = subprocess.run(
+            [cue, 'export', './alpine/cue/rice', '-e', 'rice', '--out', 'json'],
+            cwd=REPO, capture_output=True, check=True).stdout
+        self.assertEqual(rendered, SHIPPED.read_bytes())
 
     def test_an_entry_the_card_could_not_draw_is_refused(self):
         for broken in ({'id': 'BAD'}, entry('no-date', '8 September 2026'),

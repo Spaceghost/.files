@@ -660,7 +660,8 @@
         "alpine/desktop/.local/lib/oldbook/rice_tour.py",
         "alpine/desktop/.local/bin/oldbook-rice",
         "alpine/desktop/.config/oldbook/rice.json",
-        "alpine/tests/test_rice_tour.py"
+        "alpine/tests/test_rice_tour.py",
+        "alpine/cue/rice/*"
       ],
       "tests": [
         "test_astro.py",
