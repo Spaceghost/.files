@@ -572,7 +572,13 @@ terminal size, left-aligned, with letter-spaced state text and a 28-pixel
 minimum height. Left click opens the window picker, middle click toggles
 floating, Shift+right-click opens `oldbook-decoration-settings`, `Super+Ctrl+B`
 returns it to the bottom. Tweak `~/.config/oldbook/decoration.json` through the
-editor. Evidence: [decoration-context](verification/decoration-context/bottom-strip.png),
+editor. A strip landing in its band strikes the water: a train of rings leaves
+the strip's own edge and crosses the lower third of the screen in under a
+second, refracting a photograph of the screen rather than drawing over it, and
+nothing is drawn where the water is still. The file's `ripple` object shapes
+it -- `source` (`bar` or `point`), `duration`, `reach`, `spacing`, `strength`,
+`shade`, limits in `ripple.py` -- and it sits on the power ladder as `shaders`,
+so it never runs on battery. Evidence: [decoration-context](verification/decoration-context/bottom-strip.png),
 [decoration-framerate](verification/decoration-framerate/README.md),
 [ghost-observatory](verification/ghost-observatory/production-floating.png).
 

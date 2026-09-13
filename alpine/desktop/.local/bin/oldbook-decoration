@@ -1380,7 +1380,7 @@ def daemon():
     ripples = {}
 
     def strike(caption):
-        """Answer a landing in the band with one ring across the lower screen.
+        """Answer a landing in the band with rings leaving the strip's own edge.
 
         The photograph is taken on a worker thread. `grim` costs tens of
         milliseconds, the strip has only just come to rest, and paying for it
@@ -1397,8 +1397,11 @@ def daemon():
         local = {'x': 0, 'y': 0, 'width': output_rect.get('width', 0),
                  'height': output_rect.get('height', 0)}
         area = ripple.region(local, caption.edge)
-        point = ripple.origin({key: rect[key] for key in ('x', 'y', 'width', 'height')},
-                              area)
+        # The wave's shape is read from decoration.json at every strike, so a
+        # change there is heard by the next landing rather than the next daemon.
+        settings = load_settings(SETTINGS, STATE / 'position')
+        plan = ripple.plan({key: rect[key] for key in ('x', 'y', 'width', 'height')},
+                           area, caption.edge, settings['ripple'], settings['corner_radius'])
         monitor = caption.monitor
         ripples[name] = True
         photograph = STATE / ('ripple-' + re.sub(r'[^A-Za-z0-9_-]', '_', name) + '.ppm')
@@ -1411,7 +1414,7 @@ def daemon():
             if stop.is_set():
                 return release()
             try:
-                ripple.Ripple(monitor, area, point, pixels, size, on_done=release).start()
+                ripple.Ripple(monitor, area, plan, pixels, size, on_done=release).start()
             except Exception as error:
                 print('ripple: ' + type(error).__name__ + ': ' + str(error), file=sys.stderr)
                 release()

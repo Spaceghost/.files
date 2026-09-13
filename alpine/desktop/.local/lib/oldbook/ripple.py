@@ -1,13 +1,13 @@
 """Struck-water rings over the lower screen, for the moment the strip lands.
 
 The caption flies when it attaches or detaches, and a flight that ends in the
-band has an impact. This draws it: one ring leaving the point the strip came to
-rest at, refracting whatever is actually on the screen rather than drawing
-light over it, and gone inside a second.
+band has an impact. This draws it: a train of rings leaving the strip's own
+edge, refracting whatever is actually on the screen rather than drawing light
+over it, and gone inside a second.
 
 What it refracts is a still photograph. wlr-screencopy hands over the composited
 output through `grim`, the same way the show-desktop animation gets its card, and
-that frame is displaced in a fragment shader for the length of the ring. Nothing
+that frame is displaced in a fragment shader for the length of the wave. Nothing
 underneath is touched: the surface is click-through, sits on the overlay layer,
 and destroys itself when the wave has passed.
 
@@ -18,7 +18,9 @@ machine whose fans are audible.
 
 The pure geometry and the policy live here as plain functions so they can be
 tested without a compositor; the surface below imports GTK only when asked to
-draw.
+draw. How the wave looks is not fixed here: the `ripple` object in
+decoration.json can change any of DEFAULTS, and settings() is where a stray
+edit to it is caught.
 """
 import math
 import os
@@ -30,22 +32,85 @@ import power_source
 
 # How much of the output the wave is allowed to cross, measured from its edge.
 REGION_FRACTION = 1.0 / 3.0
-# The whole effect, in seconds. Long enough to read as water, short enough that
-# it is over before it can be waited for.
-DURATION = 0.72
-# Rings per unit of region, and how fast the front travels across it. Together
-# these decide how many crests are in the air at once.
-FREQUENCY = 26.0
-SPEED = 1.25
-# The crest's displacement at its strongest, as a fraction of the region.
-AMPLITUDE = 0.016
-# The inverse width of the ring around the travelling front: the disturbance
-# falls away as a bell of about 1/SHARPNESS across. Larger is a thinner, harder
-# ring; smaller is a swell rather than a ripple.
-SHARPNESS = 5.5
 # The effect this asks the power ladder about. Registered as 'mains' already,
 # so it does not run on battery without anything here having to know that.
 EFFECT = 'shaders'
+
+# How the wave looks: the whole vocabulary of decoration.json's `ripple`
+# object, with the value each key takes when it is left out. Lengths are in
+# logical pixels, the units the compositor places and sizes the strip in.
+DEFAULTS = {
+    # Where the rings leave from. 'bar' is the strip's own outline, the way a
+    # plank dropped flat sends a straight wave along its length with arcs only
+    # at its ends; 'point' drops a stone at the middle of the landed edge.
+    'source': 'bar',
+    # The whole effect, in seconds. Long enough to read as water, short enough
+    # that it is over before it can be waited for.
+    'duration': 0.9,
+    # How far the front has travelled by the end, as a fraction of the water
+    # between the strip and the far edge of the band. Whatever this is, the
+    # wave dies out before that edge rather than ending in a hard line.
+    'reach': 1.0,
+    # From one crest to the next.
+    'spacing': 40,
+    # How far a crest bends what is under it, at its strongest.
+    'strength': 14,
+    # How much a crest catches the light and a trough loses it, as a swing in
+    # brightness either way. Zero draws only the bend.
+    'shade': 0.09,
+}
+LIMITS = {'duration': (0.2, 3.0), 'reach': (0.2, 1.0), 'spacing': (8, 400),
+          'strength': (0, 40), 'shade': (0.0, 0.3)}
+SOURCES = ('bar', 'point')
+
+# The shape of the wave itself, shared with the shader below and not settable:
+# these are what make it water rather than what make it this water.
+#
+# The disturbed water is an annulus behind the front. Water past the front has
+# not been reached yet and water nearer the strip than this fraction of the
+# front's distance has already closed, so at the strike itself the annulus has
+# no width and nothing at all is drawn: the wave grows out of the strip's edge
+# instead of appearing around it.
+TAIL = 0.4
+# Crests move slower than the packet they ride in, as the short ripples a small
+# impact makes do, so each is born at the front and drifts back through the
+# annulus as it widens.
+CREST = 0.75
+# How the strength dies with age: an exponent on the time left.
+DECAY = 1.2
+# The last part of the available water over which the wave fades out, so it
+# never reaches the edge of the surface it is drawn on at any strength.
+MARGIN = 0.25
+
+
+def settings(values=None):
+    """The ripple's settings with defaults filled in and each value checked.
+
+    Anything that is not a key of DEFAULTS, or is outside the range LIMITS
+    holds it to, raises ValueError so that a mistake in decoration.json is
+    reported rather than drawn.
+    """
+    if values is None:
+        values = {}
+    if not isinstance(values, dict):
+        raise ValueError('Decoration ripple settings must be an object')
+    unknown = set(values) - set(DEFAULTS)
+    if unknown:
+        raise ValueError('Unknown decoration ripple setting: ' + sorted(unknown)[0])
+    result = dict(DEFAULTS)
+    result.update(values)
+    if result['source'] not in SOURCES:
+        raise ValueError('Decoration ripple source must be bar or point')
+    for key, (low, high) in LIMITS.items():
+        value = result[key]
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError('Decoration ripple ' + key + ' must be a number')
+        value = float(value)
+        if not math.isfinite(value) or not low <= value <= high:
+            raise ValueError('Decoration ripple {} must be between {} and {}'.format(
+                key, low, high))
+        result[key] = value
+    return result
 
 
 def region(output_rect, edge='bottom', fraction=REGION_FRACTION):
@@ -69,19 +134,137 @@ def region(output_rect, edge='bottom', fraction=REGION_FRACTION):
     return {'x': x + width - span, 'y': y, 'width': span, 'height': height}
 
 
-def origin(rect, area):
-    """Where the wave starts, in the region's own 0..1 coordinates.
+def thickness(area, edge='bottom'):
+    """The band's depth: the length of water the wave has to cross, and the
+    unit every distance the shader works in is measured in, so the wave looks
+    the same whichever edge the strip lives on."""
+    return max(1, int(area.get('height' if edge == 'bottom' else 'width', 1)))
 
-    The middle of the strip's landed edge: the point it arrived on, not its
-    centre of area, so the rings leave the surface of the water rather than the
-    inside of the bar.
+
+def origin(rect, area, edge='bottom'):
+    """Where a stone would drop, in the region's own 0..1 coordinates, y down.
+
+    The middle of the strip's landed edge -- the edge facing the water, not the
+    strip's centre of area -- so the rings leave the surface of the water rather
+    than the inside of the bar.
     """
     width = max(1, int(area.get('width', 1)))
     height = max(1, int(area.get('height', 1)))
-    centre_x = rect.get('x', 0) + rect.get('width', 0) / 2.0
-    centre_y = rect.get('y', 0)
+    if edge == 'bottom':
+        centre_x = rect.get('x', 0) + rect.get('width', 0) / 2.0
+        centre_y = rect.get('y', 0)
+    else:
+        centre_x = rect.get('x', 0)
+        centre_y = rect.get('y', 0) + rect.get('height', 0) / 2.0
     return (min(1.0, max(0.0, (centre_x - area.get('x', 0)) / width)),
             min(1.0, max(0.0, (centre_y - area.get('y', 0)) / height)))
+
+
+def source(rect, area, edge='bottom', shape='bar', corner_radius=0):
+    """The struck outline the rings leave, as a rounded box: its centre, the
+    half extents of the box inside the rounding, and the corner radius, all in
+    units of the band's thickness with y down, measured from the region's
+    top-left corner.
+
+    'bar' is the strip itself, so a strip the width of the screen sends a
+    straight front up the band with arcs only at its ends. 'point' collapses
+    the box to the middle of the landed edge: a stone dropped there.
+    """
+    unit = float(thickness(area, edge))
+    if shape == 'point':
+        x, y = origin(rect, area, edge)
+        return {'centre': (x * area.get('width', 1) / unit, y * area.get('height', 1) / unit),
+                'half': (0.0, 0.0), 'radius': 0.0}
+    centre = ((rect.get('x', 0) + rect.get('width', 0) / 2.0 - area.get('x', 0)) / unit,
+              (rect.get('y', 0) + rect.get('height', 0) / 2.0 - area.get('y', 0)) / unit)
+    half = (max(0.0, rect.get('width', 0) / 2.0 / unit),
+            max(0.0, rect.get('height', 0) / 2.0 / unit))
+    radius = min(max(0.0, float(corner_radius)) / unit, min(half))
+    return {'centre': centre, 'half': (half[0] - radius, half[1] - radius), 'radius': radius}
+
+
+def travel(rect, area, edge='bottom'):
+    """How much water lies between the strip's landed edge and the far edge of
+    the band, in units of the band's thickness: the furthest a wave could go
+    before it met the edge of the surface it is drawn on."""
+    unit = float(thickness(area, edge))
+    if edge == 'bottom':
+        available = (rect.get('y', 0) - area.get('y', 0)) / unit
+    else:
+        available = (rect.get('x', 0) - area.get('x', 0)) / unit
+    return min(1.0, max(0.15, available))
+
+
+def smoothstep(lower, upper, value):
+    if upper <= lower:
+        return 1.0 if value >= upper else 0.0
+    step = min(1.0, max(0.0, (value - lower) / (upper - lower)))
+    return step * step * (3.0 - 2.0 * step)
+
+
+def envelope(distance, age, travel=1.0, reach=1.0):
+    """How disturbed the water is, 0..1, at one distance from the strip's edge
+    and one moment of the wave's life (``age`` runs 0..1).
+
+    An annulus behind the travelling front, widening as it goes, fading with
+    age and dying out before the far edge of the band. It is exactly zero at
+    the strike itself, inside the strip, ahead of the front and once the wave
+    is spent, which is what keeps the surface transparent -- and the screen
+    untouched -- everywhere the water is still.
+    """
+    if not 0.0 <= age <= 1.0 or distance <= 0.0:
+        return 0.0
+    front = age * reach * travel
+    tail = front * TAIL
+    if distance <= tail or distance >= front:
+        return 0.0
+    position = (distance - tail) / (front - tail)
+    bump = 6.75 * position * position * (1.0 - position)
+    fade = (1.0 - age) ** DECAY
+    edge = 1.0 - smoothstep(travel * (1.0 - MARGIN), travel, distance)
+    return bump * fade * edge
+
+
+def slope(distance, age, travel=1.0, reach=1.0, spacing=0.15):
+    """How the water is tilted, -1..1: the crests and troughs riding in the
+    envelope, ``spacing`` apart in the band's units.
+
+    The tilt is what bends the picture under it and what catches the light,
+    so this one curve is both the displacement and the shading. Over a
+    wavelength it averages to nothing, which is why the wave never brightens
+    the screen as a whole: only its crests do, and each has a trough.
+    """
+    strength = envelope(distance, age, travel, reach)
+    if strength == 0.0:
+        return 0.0
+    front = age * reach * travel
+    phase = 2.0 * math.pi * (distance - CREST * front) / spacing
+    return strength * math.cos(phase)
+
+
+def plan(rect, area, edge='bottom', values=None, corner_radius=0):
+    """Everything one strike tells the shader, worked out from the strip's
+    landed rectangle, the region and the settings: the struck outline, the
+    water available, and the wave's own numbers in the band's units."""
+    values = settings(values)
+    unit = float(thickness(area, edge))
+    width = max(1, int(area.get('width', 1)))
+    height = max(1, int(area.get('height', 1)))
+    box = source(rect, area, edge, values['source'], corner_radius)
+    return {
+        'centre': box['centre'], 'half': box['half'], 'radius': box['radius'],
+        'travel': travel(rect, area, edge), 'reach': values['reach'],
+        # Texture coordinates run 0..1 across the region either way. `scale`
+        # turns them into the band's units and `texel` is one logical pixel
+        # back in texture terms, so a bend of so many pixels stays so many
+        # pixels however the region is shaped.
+        'scale': (width / unit, height / unit),
+        'texel': (1.0 / width, 1.0 / height),
+        'spacing': values['spacing'] / unit,
+        'strength': values['strength'],
+        'shade': values['shade'],
+        'duration': values['duration'],
+    }
 
 
 def allowed(animations=True, current=None):
@@ -135,65 +318,6 @@ def parse_ppm(data):
     return width, height, index + 1
 
 
-def ring_envelope(distance, elapsed, duration=DURATION, speed=SPEED, sharpness=SHARPNESS):
-    """How close this point and moment are to the travelling front, and how
-    much the whole wave has aged: the bell that keeps the disturbance near the
-    front and lets it die out as the strike is left behind.
-
-    The disturbance only exists near the front: ahead of it the water has not
-    been reached, behind it the surface has already closed. A bell rather than
-    a spike, or the ring is a wire instead of a wave.
-    """
-    if duration <= 0:
-        raise ValueError('duration must be positive')
-    if not 0 <= elapsed <= duration:
-        return 0.0
-    age = elapsed / duration
-    front = age * speed
-    ring = (distance - front) * sharpness
-    envelope = math.exp(-ring * ring)
-    fade = (1.0 - age) ** 1.5
-    return envelope * fade
-
-
-def radial_reach(distance):
-    """How much a ripple this far from the strike still carries, physically:
-    energy spreads outward and weakens, so a crest near the point of impact
-    moves further than one already most of the way across the region."""
-    return 1.0 / (1.0 + 1.5 * distance * distance)
-
-
-def visibility(distance, elapsed, duration=DURATION, speed=SPEED, sharpness=SHARPNESS):
-    """How much of the frozen photograph should be shown at this point and
-    moment, as an alpha in 0..1.
-
-    This is what makes the surface transparent rather than a slab: it is
-    non-zero only in the travelling band around the front, close to the
-    strike. Everywhere else -- which is almost everywhere, almost all the
-    time -- the real, live desktop underneath is what a viewer actually sees,
-    because nothing is drawn over it at all.
-    """
-    return ring_envelope(distance, elapsed, duration, speed, sharpness) * radial_reach(distance)
-
-
-def crest(distance, elapsed, duration=DURATION, frequency=FREQUENCY,
-          speed=SPEED, amplitude=AMPLITUDE, sharpness=SHARPNESS):
-    """How far the water is pushed at one distance and one moment.
-
-    The same curve the shader runs, kept here in Python so the shape of the
-    wave can be tested without a GPU: a travelling front at ``speed`` with a
-    ring of crests behind it, fading with age and with distance from the strike.
-    """
-    if duration <= 0:
-        raise ValueError('duration must be positive')
-    if not 0 <= elapsed <= duration:
-        return 0.0
-    age = elapsed / duration
-    front = age * speed
-    return amplitude * visibility(distance, elapsed, duration, speed, sharpness) * math.sin(
-        distance * frequency - age * speed * frequency)
-
-
 VERTEX_SHADER = """#version 300 es
 in vec2 position;
 out vec2 texture_position;
@@ -203,48 +327,76 @@ void main() {
 }
 """
 
-# The same curve as crest() above, run per pixel. The photograph is sampled at
-# a displaced coordinate rather than drawn over, so what bends is whatever was
-# actually on the screen.
+# The same curves as envelope() and slope() above, run per pixel. The
+# photograph is sampled at a displaced coordinate rather than drawn over, so
+# what bends is whatever was actually on the screen.
 FRAGMENT_SHADER = """#version 300 es
 precision highp float;
 in vec2 texture_position;
 out vec4 fragment;
 uniform sampler2D screen;
-uniform vec2 origin;
+// Texture coordinates to the band's units, and one logical pixel back.
 uniform vec2 scale;
+uniform vec2 texel;
+// The struck outline: a rounded box in the band's units, y down.
+uniform vec2 centre;
+uniform vec2 half_size;
+uniform float radius;
+// The water available past the outline, and the wave's own numbers.
+uniform float travel;
+uniform float reach;
+uniform float spacing;
+uniform float strength;
+uniform float shade;
 uniform float age;
-uniform float frequency;
-uniform float speed;
-uniform float amplitude;
-uniform float sharpness;
+
+const float TAIL = %(tail)s;
+const float CREST = %(crest)s;
+const float DECAY = %(decay)s;
+const float MARGIN = %(margin)s;
 
 void main() {
-    vec2 offset = (texture_position - origin) * scale;
-    float distance = length(offset);
-    float front = age * speed;
-    float ring = (distance - front) * sharpness;
-    float envelope = exp(-ring * ring);
-    float fade = pow(1.0 - age, 1.5);
-    float reach = 1.0 / (1.0 + 1.5 * distance * distance);
-    // Non-zero only in the band around the travelling front: this is the
-    // surface's alpha as well as the wave's strength, so almost the entire
-    // output stays fully transparent and the real, live desktop underneath is
-    // what is actually seen there -- not a second-old photograph pretending
-    // to be it. Only the ring itself, for the moment it crosses a pixel, is
-    // drawn at all.
-    float coverage = envelope * fade * reach;
-    float height = amplitude * coverage
-                 * sin(distance * frequency - age * speed * frequency);
-    vec2 direction = distance > 0.0001 ? offset / distance : vec2(0.0);
-    vec2 sampled = texture_position + direction * height / max(scale, vec2(0.0001));
-    vec4 colour = texture(screen, clamp(sampled, 0.0, 1.0));
+    // The photograph's first row is the bottom of the screen, so the texture
+    // runs upward; the strip was placed with y running down, and the geometry
+    // is worked out the way it was placed.
+    vec2 point = vec2(texture_position.x, 1.0 - texture_position.y) * scale;
+    vec2 relative = point - centre;
+    // Distance to the box inside the rounding, and the way out of it: the
+    // rings leave the outline along its normal, straight off a side and
+    // fanning out around a corner.
+    vec2 away = relative - clamp(relative, -half_size, half_size);
+    float apart = length(away);
+    float water = apart - radius;
+    vec2 normal = apart > 0.00001 ? away / apart : vec2(0.0);
+
+    float front = age * reach * travel;
+    float tail = front * TAIL;
+    float position = clamp((water - tail) / max(front - tail, 0.00001), 0.0, 1.0);
+    float bump = 6.75 * position * position * (1.0 - position);
+    float fade = pow(max(1.0 - age, 0.0), DECAY);
+    float edge = 1.0 - smoothstep(travel * (1.0 - MARGIN), travel, water);
+    float envelope = (water > tail && water < front) ? bump * fade * edge : 0.0;
+    float phase = 6.28318530718 * (water - CREST * front) / spacing;
+    float slope = envelope * cos(phase);
+
+    // Bend the picture along the normal by the tilt, in logical pixels; the
+    // normal's y is flipped back into the texture's upward direction.
+    vec2 bend = vec2(normal.x, -normal.y) * slope * strength * texel;
+    vec4 colour = texture(screen, clamp(texture_position + bend, 0.0, 1.0));
     // A crest catches the light and a trough loses it, which is what makes the
-    // bend read as water rather than as a lens.
-    colour.rgb += vec3(height * 6.0);
-    fragment = vec4(colour.rgb, clamp(coverage * 3.0, 0.0, 1.0));
+    // bend read as water rather than as a lens. Together they add nothing.
+    colour.rgb = clamp(colour.rgb + vec3(shade * slope), 0.0, 1.0);
+    // The surface exists only where the water is disturbed, blended by how
+    // disturbed it is; everywhere else the live desktop underneath is what is
+    // seen, not a moment-old photograph of it. GTK composites this canvas as
+    // premultiplied alpha, so the colour is scaled by its own coverage --
+    // written straight, every half-covered pixel would come out brighter
+    // than the desktop it was meant to match.
+    float alpha = clamp(envelope * 2.0, 0.0, 1.0);
+    fragment = vec4(colour.rgb * alpha, alpha);
 }
-"""
+""" % {'tail': repr(float(TAIL)), 'crest': repr(float(CREST)),
+       'decay': repr(float(DECAY)), 'margin': repr(float(MARGIN))}
 
 
 # GTK4 hands out an OpenGL ES context and no Python binding for it. PyOpenGL is
@@ -350,10 +502,11 @@ class Ripple:
     """One wave, on its own surface, for as long as it takes to cross.
 
     Built already holding its photograph, so the first frame it draws is the
-    strike rather than a blank overlay waiting for one.
+    strike rather than a blank overlay waiting for one. ``plan`` is what
+    plan() returned for this strike: the outline, the water and the settings.
     """
 
-    def __init__(self, monitor, area, point, pixels, size, on_done=None):
+    def __init__(self, monitor, area, plan, pixels, size, on_done=None):
         import ctypes
         import gi
         gi.require_version('Gtk', '4.0')
@@ -362,7 +515,8 @@ class Ripple:
         from gi.repository import GLib, Gtk, Gtk4LayerShell
         self._ctypes, self._Gtk, self._shell = ctypes, Gtk, Gtk4LayerShell
         self._GLib = GLib
-        self.area, self.point, self.pixels, self.size = area, point, pixels, size
+        self.area, self.plan, self.pixels, self.size = area, plan, pixels, size
+        self.duration = max(0.05, float(plan['duration']))
         self.on_done = on_done
         self.started = None
         self.library = None
@@ -422,7 +576,7 @@ class Ripple:
         self.canvas.add_tick_callback(self.frame)
 
     def frame(self, widget, _clock):
-        if self.started is not None and time.monotonic() - self.started >= DURATION:
+        if self.started is not None and time.monotonic() - self.started >= self.duration:
             self.finish()
             return False
         widget.queue_draw()
@@ -475,29 +629,26 @@ class Ripple:
     def draw(self, canvas, _context):
         if self.program is None or self.started is None:
             return False
-        ctypes, library = self._ctypes, self.library
-        age = min(1.0, (time.monotonic() - self.started) / DURATION)
+        ctypes, library, plan = self._ctypes, self.library, self.plan
+        age = min(1.0, (time.monotonic() - self.started) / self.duration)
         library.glClearColor(0.0, 0.0, 0.0, 0.0)
         library.glClear(_GL['COLOR_BUFFER_BIT'])
         library.glUseProgram(ctypes.c_uint(self.program))
         library.glBindVertexArray(ctypes.c_uint(self.vertices))
         library.glActiveTexture(_GL['TEXTURE0'])
         library.glBindTexture(_GL['TEXTURE_2D'], ctypes.c_uint(self.texture))
-        # Distance has to mean the same in both directions or the rings are
-        # ellipses: the shorter side is scaled to the longer one.
-        width, height = float(self.size[0]), float(self.size[1])
-        longest = max(width, height)
         for name, value in (('screen', 0),):
             place = library.glGetUniformLocation(ctypes.c_uint(self.program), name.encode())
             if place >= 0:
                 library.glUniform1i(place, value)
-        for name, value in (('age', age), ('frequency', FREQUENCY), ('speed', SPEED),
-                            ('amplitude', AMPLITUDE), ('sharpness', SHARPNESS)):
+        for name, value in (('age', age), ('travel', plan['travel']), ('reach', plan['reach']),
+                            ('spacing', plan['spacing']), ('strength', plan['strength']),
+                            ('shade', plan['shade']), ('radius', plan['radius'])):
             place = library.glGetUniformLocation(ctypes.c_uint(self.program), name.encode())
             if place >= 0:
                 library.glUniform1f(place, float(value))
-        for name, pair in (('origin', self.point),
-                           ('scale', (width / longest, height / longest))):
+        for name, pair in (('scale', plan['scale']), ('texel', plan['texel']),
+                           ('centre', plan['centre']), ('half_size', plan['half'])):
             place = library.glGetUniformLocation(ctypes.c_uint(self.program), name.encode())
             if place >= 0:
                 library.glUniform2f(place, float(pair[0]), float(pair[1]))

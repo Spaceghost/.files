@@ -4,11 +4,15 @@ import json
 import math
 from pathlib import Path
 import runpy
+import sys
 import tempfile
 import unittest
 
 MODEL = Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook/decoration.py'
 SCRIPT = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-decoration'
+# The model validates the landing wave's settings through its sibling module.
+sys.path.insert(0, str(MODEL.parent))
+import ripple  # noqa: E402
 
 
 class DecorationTests(unittest.TestCase):
@@ -132,7 +136,7 @@ class DecorationTests(unittest.TestCase):
             self.assertEqual((family, size), ('Fixture Mono', 9.5))
             self.assertEqual(settings, {'position': 'bottom', 'opacity': 0.78,
                                         'corner_radius': 7, 'reserve_band': True,
-                                        'powerline': False})
+                                        'powerline': False, 'ripple': ripple.settings()})
             # The strip matches the window it decorates, so the theme's terminal
             # transparency travels with the appearance.
             self.assertEqual(theme_opacity, 0.78)
@@ -220,7 +224,8 @@ class DecorationTests(unittest.TestCase):
     def test_decoration_settings_validate_ranges_and_types(self):
         self.assertTrue(hasattr(self.model, 'validate_settings'))
         defaults = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
-                    'reserve_band': True, 'powerline': False}
+                    'reserve_band': True, 'powerline': False,
+                    'ripple': ripple.settings()}
         self.assertEqual(self.model.validate_settings({}), defaults)
         self.assertEqual(self.model.validate_settings(
             {'position': 'right', 'opacity': 0.2, 'corner_radius': 24}),
@@ -230,12 +235,17 @@ class DecorationTests(unittest.TestCase):
         self.assertEqual(self.model.validate_settings(
             {'powerline': True, 'reserve_band': False}),
             dict(defaults, powerline=True, reserve_band=False))
+        # The landing wave's object is ripple.settings' to judge: a partial one
+        # is filled in, and a wrong one is reported rather than drawn.
+        self.assertEqual(self.model.validate_settings({'ripple': {'spacing': 30}}),
+                         dict(defaults, ripple=ripple.settings({'spacing': 30})))
         invalid = [
             {'unknown': 1}, {'position': 'top'}, {'opacity': True},
             {'opacity': math.nan}, {'opacity': 0.19}, {'opacity': 1.01},
             {'corner_radius': True}, {'corner_radius': 1.5},
             {'corner_radius': -1}, {'corner_radius': 25},
             {'powerline': 'yes'}, {'reserve_band': 1},
+            {'ripple': 3}, {'ripple': {'source': 'edge'}}, {'ripple': {'spacing': 'wide'}},
         ]
         for values in invalid:
             with self.subTest(values=values), self.assertRaises(ValueError):
@@ -304,7 +314,7 @@ class DecorationTests(unittest.TestCase):
             self.assertTrue(config.is_symlink())
             self.assertEqual(saved, {'position': 'bottom', 'opacity': 0.55,
                                      'corner_radius': 7, 'reserve_band': True,
-                                     'powerline': False})
+                                     'powerline': False, 'ripple': ripple.settings()})
             self.assertEqual(json.loads(target.read_text()), saved)
             self.assertEqual(legacy.read_text(), 'bottom\n')
 

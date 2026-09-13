@@ -5,9 +5,13 @@ import os
 from pathlib import Path
 import unicodedata
 
+import ripple
 
+# The `ripple` object is the landing wave's own vocabulary: ripple.DEFAULTS and
+# ripple.settings() own its keys and limits, so they are named in one place.
 SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
-                     'reserve_band': True, 'powerline': False}
+                     'reserve_band': True, 'powerline': False,
+                     'ripple': dict(ripple.DEFAULTS)}
 OPACITY_FLOOR = 0.2
 IGNORED_CAPTION_APPS = frozenset((
     'com.oldbook.dropdown', 'oldbook-dropdown', 'com.oldbook.monitor',
@@ -82,6 +86,7 @@ def validate_settings(values):
         if not isinstance(result[name], bool):
             raise ValueError('Decoration ' + name.replace('_', ' ') + ' must be true or false')
     result['opacity'] = opacity
+    result['ripple'] = ripple.settings(result['ripple'])
     return result
 
 

@@ -204,10 +204,21 @@ being reachable. The chain is plain /proc reads and always runs; asking tmux
 for the pane and Fossil for the branch is on the power ladder as
 `window-context-detail`.
 
+A strip landing in its band strikes the water. A train of rings leaves the
+strip's own edge and crosses the lower third of the output in under a second,
+refracting a photograph of the screen rather than drawing over it; nothing is
+drawn where the water is still, so the live desktop shows through everywhere
+the wave is not. The `ripple` object in decoration.json sets where the rings
+leave from (`bar`, the whole outline, or `point`), their duration, reach,
+spacing, strength and shading; the effect sits on the power ladder as
+`shaders` and never runs on battery.
+
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),
+  [landing ripple](desktop/.local/lib/oldbook/ripple.py),
   [preferences](desktop/.config/oldbook/decoration.json).
 - Checks: [decoration tests](tests/test_decoration.py),
+  [ripple tests](tests/test_ripple.py),
   [settings verifier](tests/verify_decoration_settings.py),
   [interactive strip evidence](verification/decoration-context/).
   The initial contextual-menu work explicitly left some tmux/media actions unprobed.
