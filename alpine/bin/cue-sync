@@ -1,0 +1,85 @@
+#!/usr/bin/env python3
+"""Validate, render and apply the CUE-generated desktop fragments, live.
+
+The local dev loop for alpine/cue/: edit a .cue source file, run this, done --
+one command, no separate render-then-apply-later split. It:
+
+  1. runs `cue vet` over alpine/cue/ and stops here, with the real cue error,
+     if anything fails validation;
+  2. renders every CUE-owned fragment into its marked region via
+     alpine/bin/cue-render (which is just as strict: a missing or duplicate
+     marker is a hard error, not a silent no-op);
+  3. reloads the running Waybar for this session, the same session-scoped
+     way oldbook-waybar-dim already does it (SIGUSR2 to waybar processes that
+     match this session's XDG_RUNTIME_DIR/WAYLAND_DISPLAY, not a blind pkill
+     by name).
+
+oldbook-cue-watch (the Fossil-commit-triggered watcher) calls this exact
+script after each `fossil update`, so the local dev path and the automatic
+path never drift apart.
+"""
+import importlib.machinery
+import importlib.util
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]  # .../alpine
+CUE_DIR = ROOT / 'cue'
+RENDER_SCRIPT = Path(__file__).resolve().parent / 'cue-render'
+WAYBAR_DIM_SCRIPT = ROOT / 'desktop/.local/bin/oldbook-waybar-dim'
+
+
+def _load(name, path):
+    loader = importlib.machinery.SourceFileLoader(name, str(path))
+    spec = importlib.util.spec_from_loader(loader.name, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+def run_cue_vet():
+    try:
+        result = subprocess.run(['cue', 'vet', str(CUE_DIR) + '/...'],
+                                 capture_output=True, text=True, check=False)
+    except FileNotFoundError as error:
+        sys.exit(f'cue-sync: cannot run cue: {error}')
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip()
+        sys.exit(f'cue-sync: cue vet failed:\n{detail}')
+
+
+def reload_waybar():
+    """Best-effort: a dev session with no waybar running (or no Wayland
+    session at all, e.g. under test) is not an error -- there is simply
+    nothing to reload.
+    """
+    try:
+        waybar_dim = _load('oldbook_waybar_dim', WAYBAR_DIM_SCRIPT)
+    except OSError as error:
+        print(f'cue-sync: could not load {WAYBAR_DIM_SCRIPT}: {error}; skipping reload',
+              file=sys.stderr)
+        return
+    reloaded = list(waybar_dim.waybar_processes())
+    waybar_dim.reload_style()
+    if reloaded:
+        print(f'cue-sync: reloaded waybar (pid {", ".join(str(p) for p in reloaded)})')
+    else:
+        print('cue-sync: no waybar process found for this session; nothing to reload')
+
+
+def main():
+    run_cue_vet()
+    render = _load('cue_render', RENDER_SCRIPT)
+    changed = render.render_all(check=False)
+    if changed:
+        for path in changed:
+            print(f'cue-sync: wrote {path}')
+    else:
+        print('cue-sync: nothing changed')
+    reload_waybar()
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
