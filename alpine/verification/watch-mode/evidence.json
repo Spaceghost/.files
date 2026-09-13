@@ -15,13 +15,16 @@
       "engaged": true,
       "record": {
         "process": {
-          "pid": 7233,
-          "start_time": "1146665",
-          "boot_id": "daff675c-1ea9-4ca2-b423-7c9ca08806f4"
+          "pid": 28718,
+          "start_time": "161044",
+          "boot_id": "7c8e7e2b-4ff1-42f0-b2d6-68cc797a8c0a"
         },
-        "engaged_at": 1788938752.5997584,
+        "engaged_at": 1789332319.3862891,
         "mode": "watch",
         "keyboard_proven": true,
+        "keyboard_held": true,
+        "holds": 0,
+        "reentries": 0,
         "release": "hold Super+Shift+Escape for a second"
       }
     },
@@ -29,13 +32,19 @@
       "binding_state": "watch",
       "still_engaged": true
     },
+    "reload": {
+      "reentered": true,
+      "guard_alive": true,
+      "binding_state": "watch",
+      "reentries": 1
+    },
     "clean_hold": {
       "released": true,
       "returncode": 0,
       "binding_state": "default",
       "record_removed": true,
       "stdout": "",
-      "stderr": "/home/jack/.files/alpine/desktop/.local/bin/oldbook-watch:122: PyGIDeprecationWarning: GLib.unix_signal_add is deprecated; use GLibUnix.signal_add instead\n  GLib.unix_signal_add(GLib.PRIORITY_HIGH, signum, lambda: finish('signal') or True)"
+      "stderr": "(process:28718): Gtk-WARNING **: 13:45:19.329: Unable to acquire session bus: Could not connect: No such file or directory"
     },
     "killed": {
       "reengaged": true,
@@ -44,8 +53,8 @@
     }
   },
   "screenshots": {
-    "desktop.png": "2090aebfcf400d7a0b25715c06f74aba3f2324c94c002205f86d9e8526f90f7c",
-    "watching.png": "c324c20977efb28baf67f2bce1492cf5004c66d3f0ec9f50c4a48b0284db0dc0",
-    "released.png": "2090aebfcf400d7a0b25715c06f74aba3f2324c94c002205f86d9e8526f90f7c"
+    "desktop.png": "3bd48cbefa8e3e2c24d4ddf2372656af546eba219b1c799ba0515b3be879e194",
+    "watching.png": "5c96dd789f6bdaf2c0562883051d2723cf683aa3064f490741f3af2400b405f9",
+    "released.png": "3bd48cbefa8e3e2c24d4ddf2372656af546eba219b1c799ba0515b3be879e194"
   }
 }

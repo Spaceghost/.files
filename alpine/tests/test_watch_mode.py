@@ -125,17 +125,22 @@ class WatchStateTests(unittest.TestCase):
                 module['runtime_directory'](directory)
 
 
+def recording_sway(root):
+    """An environment whose swaymsg records every call and always succeeds."""
+    binary = root / 'bin'
+    binary.mkdir()
+    recorder = binary / 'swaymsg'
+    recorder.write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> ' + str(root / 'calls') + '\n'
+                        'echo \'[{"success": true}]\'\n')
+    recorder.chmod(0o755)
+    return dict(os.environ, PATH=str(binary) + ':/usr/bin:/bin')
+
+
 class NeverStuckTests(unittest.TestCase):
     """The one outcome worse than not starting is a desktop nobody can reach."""
 
     def fake_sway(self, root):
-        binary = root / 'bin'
-        binary.mkdir()
-        recorder = binary / 'swaymsg'
-        recorder.write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> ' + str(root / 'calls') + '\n'
-                            'echo \'[{"success": true}]\'\n')
-        recorder.chmod(0o755)
-        return dict(os.environ, PATH=str(binary) + ':/usr/bin:/bin')
+        return recording_sway(root)
 
     def test_the_watchdog_restores_the_default_mode_when_the_guard_is_killed(self):
         with tempfile.TemporaryDirectory(prefix='oldbook-watch-dog-') as directory:
@@ -229,6 +234,21 @@ class HonestyTests(unittest.TestCase):
         self.assertEqual(bindings, [], 'the watch mode binds nothing at all: a settled cat '
                                        'holds five keys at once, and any chord is hers')
 
+    def test_the_mode_block_carries_one_line_so_sway_creates_the_mode(self):
+        """Sway creates a mode only when a line inside its block runs: the
+        opener is a block start, not a command, so an empty block leaves no
+        `watch` mode at all, `swaymsg mode watch` is refused as unknown, and
+        the guard reads that as a refusal to start. The line must bind
+        nothing, and `set` is the one mode subcommand that does not."""
+        body = CONFIG.read_text().split('mode "watch" {', 1)[1].split('}', 1)[0]
+        commands = [line.strip() for line in body.splitlines()
+                    if line.strip() and not line.strip().startswith('#')]
+        self.assertTrue(commands, 'an empty mode block creates no mode, so the guard '
+                                  'can never start')
+        for command in commands:
+            self.assertTrue(command.startswith('set '),
+                            f'the watch block may carry nothing that binds: {command!r}')
+
 
 class OnlyTheUserLeavesTests(unittest.TestCase):
     """Catbed mode is applied by hand and ended by hand, and it outlasts
@@ -241,15 +261,36 @@ class OnlyTheUserLeavesTests(unittest.TestCase):
         self.assertNotIn('ended early', text)
 
     def test_a_mode_change_that_is_not_ours_is_undone(self):
-        self.assertEqual(module['mode_change']('{ "change": "default", "pango_markup": false }'),
-                         'default')
-        self.assertEqual(module['mode_change']('{"change": "watch"}'), 'watch')
-        self.assertIsNone(module['mode_change']('not json'))
-        self.assertIsNone(module['mode_change']('{"change": 3}'))
-        self.assertIsNone(module['mode_change']('[]'))
+        lost = module['mode_lost']
+        self.assertTrue(lost('{ "change": "default", "pango_markup": false }'))
+        self.assertTrue(lost('{ "change": "resize", "pango_markup": false }'))
+        self.assertFalse(lost('{ "change": "watch", "pango_markup": false }'),
+                         'our own re-entry is not a loss')
+        self.assertFalse(lost('not json'))
+        self.assertFalse(lost('{"change": 3, "pango_markup": false}'))
+        self.assertFalse(lost('[]'))
         text = WATCH.read_text()
         self.assertIn('watch_mode.mode_events()', text)
-        self.assertIn('mode != watch_mode.SWAY_MODE', text)
+        self.assertIn('watch_mode.mode_lost(', text)
+
+    def test_a_reload_is_a_loss_although_sway_sends_no_mode_event(self):
+        """A reload resets every binding mode to default and announces itself
+        only as a workspace event whose change is "reload". A guard listening
+        for mode events alone never hears it, never re-enters, and leaves the
+        compositor's bindings live under the cat -- which is what happened."""
+        lost = module['mode_lost']
+        self.assertTrue(lost('{"change": "reload", "current": null, "old": null}'))
+        for change in ('focus', 'init', 'empty', 'move', 'rename', 'urgent'):
+            self.assertFalse(lost(f'{{"change": "{change}", "current": {{"id": 1}}, "old": null}}'),
+                             f'a workspace {change} says nothing about modes')
+        with tempfile.TemporaryDirectory(prefix='oldbook-watch-events-') as directory:
+            root = Path(directory)
+            events = module['mode_events'](recording_sway(root))
+            events.wait(timeout=10)
+            recorded = (root / 'calls').read_text()
+            self.assertIn('subscribe', recorded)
+            self.assertIn('"mode"', recorded)
+            self.assertIn('"workspace"', recorded, 'the reload arrives as a workspace event')
 
     def test_the_guard_holds_what_the_lock_holds_and_lets_go_last(self):
         text = WATCH.read_text()

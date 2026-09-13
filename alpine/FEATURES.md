@@ -740,8 +740,11 @@ lock takes the keyboard and hands it back at the password while the guard
 waits, holding the pointer and the empty mode; a Sway reload that resets the
 binding mode is undone by the guard re-entering it; and the `watch` mode binds
 nothing at all — the earlier four-modifier emergency chord is gone, because
-any chord Sway answers is one a settled cat can produce. While it is up the
-guard holds what the lock holds (CATBED-GUARD). This supersedes the 2026-09-09
+any chord Sway answers is one a settled cat can produce. Its block is not
+empty, though: Sway creates a mode only from a line inside its block, and an
+empty block is no mode and so no catbed mode, so the block carries one `set`
+line, which binds nothing. While it is up the guard holds what the lock holds
+(CATBED-GUARD). This supersedes the 2026-09-09
 decision that the cat watcher engages and releases the guard for her; see
 [the decision](../docs/superpowers/decisions/2026-09-13-catbed-mode-is-the-users.md).
 Recovery from a wedged guard is `oldbook-watch stop` from a terminal, or

@@ -88,6 +88,14 @@ include "{REPO / 'alpine/desktop/.config/sway/local.d/watch.conf'}"
     base_env = os.environ.copy()
     base_env.update(WLR_BACKENDS='headless', WLR_HEADLESS_OUTPUTS='1', WLR_RENDERER='pixman',
                     WLR_RENDERER_ALLOW_SOFTWARE='1', NO_AT_BRIDGE='1', GTK_USE_PORTAL='0')
+    # The guard under test must not reach the live session: no notification on
+    # its bus, no cue through its speakers, and no hold on its power keys or
+    # its SysRq, which the real policy would take through elogind and doas.
+    quiet = output / 'quiet'
+    quiet.mkdir()
+    (quiet / 'catbed.json').write_text('{"version": 1, "keys": [], "sysrq": {"guard": false}}\n')
+    base_env.update(DBUS_SESSION_BUS_ADDRESS='unix:path=' + str(quiet / 'no-bus'),
+                    OLDBOOK_SOUND_DIR=str(quiet), CATBED_GUARD_CONFIG=str(quiet / 'catbed.json'))
     for key in ('SWAYSOCK', 'WAYLAND_DISPLAY', 'DISPLAY', 'XDG_RUNTIME_DIR'):
         base_env.pop(key, None)
     with (output / 'runtime.log').open('w') as log:
@@ -122,6 +130,10 @@ include "{REPO / 'alpine/desktop/.config/sway/local.d/watch.conf'}"
                 (output / 'evidence.json').write_text(json.dumps(evidence, indent=2) + '\n')
                 raise SystemExit(json.dumps(evidence['guard_output']))
             session.shot(output / 'watching.png')
+            # The card at native resolution: the band under the top edge where
+            # it sits, so its words can be read without opening the full frame.
+            subprocess.run(['grim', '-g', f'0,0 {width}x160', str(output / 'indicator.png')],
+                           env=session.env, check=True, timeout=90)
 
             # A cat's hold: the chord plus a stray key. This must never leave.
             chord(session, 1400, extra='a')
@@ -129,6 +141,21 @@ include "{REPO / 'alpine/desktop/.config/sway/local.d/watch.conf'}"
             evidence['steps']['dirty_hold'] = {
                 'binding_state': binding_state(session),
                 'still_engaged': guard.poll() is None and binding_state(session) == 'watch'}
+
+            # A reload returns every binding mode to default and announces it
+            # only as a workspace event. The guard must notice, re-enter its
+            # own mode, count the re-entry in its record, and still be there
+            # to be released by hand afterwards.
+            session.ipc('reload')
+            reentered = wait_for(lambda: binding_state(session) == 'watch'
+                                 and (Path(session.runtime) / 'oldbook/watch.json').exists()
+                                 and json.loads((Path(session.runtime) / 'oldbook/watch.json')
+                                                .read_text()).get('reentries', 0) >= 1, 15)
+            evidence['steps']['reload'] = {
+                'reentered': reentered, 'guard_alive': guard.poll() is None,
+                'binding_state': binding_state(session),
+                'reentries': json.loads((Path(session.runtime) / 'oldbook/watch.json').read_text())
+                .get('reentries') if (Path(session.runtime) / 'oldbook/watch.json').exists() else None}
 
             # A person's hold: the chord alone, held for over a second.
             chord(session, 1400)

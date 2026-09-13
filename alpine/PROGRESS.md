@@ -2,6 +2,40 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Catbed mode could not start, and a reload was invisible to it — 2026-09-13
+
+Jack: "Does catbed not turn off its catbed mode now? Does the keys all lock?
+Did you finish all that before?" Reading the guard against the compositor's
+own source and driving it in a private headless SwayFX session found two
+things the same day's rewrite had left behind.
+
+The mode did not exist. Sway creates a binding mode only when a line inside
+its block runs: `mode "watch" {` is a block opener, not a command, so the
+empty block that replaced the emergency chord left no `watch` mode at all.
+`swaymsg mode watch` was refused as unknown, and the guard read that refusal
+correctly — "Catbed mode did not start — Sway would not enter the watch mode"
+— so Super+Shift+Escape could not park anything. The live compositor's
+binding modes were default, resize and window-switcher. The block now carries
+one `set` line, the one mode subcommand that binds nothing, and
+`test_watch_mode` refuses an empty block.
+
+A reload was invisible. The guard subscribed to Sway's mode events to re-enter
+its mode after a reload, but a reload resets every binding mode to default
+without sending a mode event; Sway announces it as a workspace event whose
+change is "reload". The subscription now covers both, `mode_lost()` decides
+which lines mean the mode is no longer ours, and the guard counts its
+re-entries in its record so evidence can show one.
+
+Verified headless, never live. `verify-headless` from a private checkout
+engaged the guard, held a dirty chord without leaving, reloaded the private
+compositor and saw the guard re-enter `watch` with one re-entry recorded,
+released on the clean hold, and recovered from SIGKILL through the watchdog;
+the evidence under `verification/watch-mode/` is that run. What holds through
+a lock is read from the compositor's source rather than driven: on unlock sway
+re-focuses the seat's exclusive layer surface, so the guard gets the keyboard
+back at the password. The live checks are the user's: Super+Ctrl+Shift+C to
+reload Sway so the mode exists, then Super+Shift+Escape.
+
 ## The agent picker says what it runs and lands on the prompt — 2026-09-13
 
 Jack: "Make the new agent launcher in my super+n also default to and show me

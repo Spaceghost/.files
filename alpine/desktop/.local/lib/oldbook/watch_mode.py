@@ -43,7 +43,8 @@ for them. The screen lock takes the keyboard away -- a session lock sits above
 every layer surface -- and gives it back at the password, so a guard that has
 lost the keyboard waits for it rather than ending, holding the pointer and the
 empty mode throughout. A Sway reload returns the compositor to its default
-mode, so the guard listens for mode changes and re-enters its own. The cat
+mode without a mode event -- it is announced only as a workspace event whose
+change is "reload" -- so the guard subscribes to both and re-enters its own. The cat
 watcher reads whether the guard is up and never engages or releases it. And
 while it is up the guard holds exactly what the lock holds -- the power,
 suspend and hibernate keys with the login manager, and SysRq through the root
@@ -236,22 +237,34 @@ def mode_watchdog(environment=None):
 
 
 def mode_events(environment=None):
-    """Sway's mode changes as they happen: a `swaymsg -m` subscription whose
-    stdout carries one compact JSON object per line. The guard reads it to put
-    itself back after a reload, which returns every binding mode to default."""
-    return subprocess.Popen(['swaymsg', '-r', '-m', '-t', 'subscribe', '["mode"]'],
+    """Sway's mode changes and reloads as they happen: a `swaymsg -m`
+    subscription whose stdout carries one compact JSON object per line. A
+    reload returns every binding mode to default and sends no mode event at
+    all -- Sway announces it as a workspace event whose change is "reload" --
+    so both kinds are subscribed to, and mode_lost() tells them apart."""
+    return subprocess.Popen(['swaymsg', '-r', '-m', '-t', 'subscribe', '["mode", "workspace"]'],
                             stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                             stderr=subprocess.DEVNULL, env=environment)
 
 
-def mode_change(line):
-    """The mode one subscription line reports, or None for anything else."""
+def mode_lost(line):
+    """Does one subscription line say the binding mode is no longer ours?
+
+    A mode event names the mode Sway switched to, and any mode but our own is
+    a loss. A workspace event is a loss only when its change is "reload", the
+    one thing Sway says about a reload; focus, init, empty and the rest are
+    not about modes at all. Anything unparseable is not a loss either: the
+    guard re-enters on evidence, never on noise.
+    """
     try:
         document = json.loads(line)
     except (ValueError, TypeError):
-        return None
-    change = document.get('change') if isinstance(document, dict) else None
-    return change if isinstance(change, str) else None
+        return False
+    if not isinstance(document, dict) or not isinstance(document.get('change'), str):
+        return False
+    if 'pango_markup' in document:
+        return document['change'] != SWAY_MODE
+    return document['change'] == 'reload'
 
 
 def announce(summary, body, urgent=True):
@@ -446,12 +459,14 @@ class Guard:
                 int(FOCUS_LOSS_GRACE_SECONDS * 1000), self._keyboard_lost)
 
     def _keyboard_lost(self):
-        """Only a keyboard that exists and is elsewhere ends watch mode.
+        """Only a keyboard that exists and is elsewhere is reported as lost.
 
-        A seat that lost its keyboard outright has nothing left to park, so the
-        guard stays up and keeps eating the pointer; a keyboard that is present
-        and pointed at something else means the guard is no longer doing what
-        it says, and ending is the honest answer.
+        A seat that lost its keyboard outright has nothing left to park, so
+        nothing is said; a keyboard that is present and pointed at something
+        else -- the screen lock, nearly always -- is reported so the guard can
+        record that it is waiting for it. Nothing here ends watch mode: the
+        lock hands the keyboard back at the password, and the compositor gives
+        it to the exclusive overlay surface again on unlock.
         """
         self._loss_timer = None
         if not self.closed and self.keyboard_capable() and not self.windows[0].is_active():

@@ -70,14 +70,14 @@ def run(runtime):
     loop = GLib.MainLoop()
     session = {'engaged': False, 'engaged_at': None, 'reason': None, 'failure': None,
                'watchdog': None, 'keyboard_proven': False, 'keyboard': True, 'held': [],
-               'events': None, 'pending': b'', 'finishing': False}
+               'events': None, 'pending': b'', 'finishing': False, 'reentries': 0}
 
     def record():
         watch_mode.publish({'process': watch_mode.process_identity(os.getpid()),
                             'engaged_at': session['engaged_at'], 'mode': watch_mode.SWAY_MODE,
                             'keyboard_proven': session['keyboard_proven'],
                             'keyboard_held': session['keyboard'],
-                            'holds': len(session['held']),
+                            'holds': len(session['held']), 'reentries': session['reentries'],
                             'release': 'hold Super+Shift+Escape for a second'}, runtime)
 
     def engage(proven=True):
@@ -121,7 +121,8 @@ def run(runtime):
             record()
 
     def follow_mode():
-        """Put the mode back if anything resets it; a reload does."""
+        """Put the mode back if anything resets it. A reload does, and says so
+        only as a workspace event, so the subscription covers both."""
         try:
             session['events'] = watch_mode.mode_events()
         except OSError as error:
@@ -145,14 +146,16 @@ def run(runtime):
         session['pending'] += chunk
         *lines, session['pending'] = session['pending'].split(b'\n')
         for line in lines:
-            mode = watch_mode.mode_change(line.decode(errors='replace'))
-            if (mode is not None and mode != watch_mode.SWAY_MODE
+            if (watch_mode.mode_lost(line.decode(errors='replace'))
                     and session['engaged'] and not session['finishing']):
                 try:
                     watch_mode.sway(f'mode "{watch_mode.SWAY_MODE}"')
                 except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
                     watch_mode.announce('Catbed mode could not re-enter its Sway mode',
                                         f'{error}. Run: swaymsg mode watch')
+                    continue
+                session['reentries'] += 1
+                record()
         return True
 
     def finish(reason):
