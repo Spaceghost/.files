@@ -312,6 +312,14 @@ def render_profile(repo, theme):
     # The preset is a named entry in LXQt Appearance, so it carries the theme's
     # own name; the previous theme's preset stays selectable beside it.
     files[f'.local/share/lxqt/palettes/{preset_name(theme)}'] = files.pop(LXQT_PRESET)
+    # qt6ct's color scheme file was carrying the reference theme's own file
+    # name (gruvbox-dark.conf) into every generated profile regardless of its
+    # actual theme -- harmless (qt6ct.conf's own path always pointed at
+    # whichever copy sat beside it, so the right colors always loaded), but
+    # misleading enough that a catppuccin-mocha profile's qt6ct file looked
+    # like a leftover gruvbox one. Named the same way the LXQt preset above
+    # already is.
+    files[f'.config/qt6ct/colors/{preset_name(theme)}.conf'] = files.pop(QT6CT_PRESET)
     for version in ('3.0', '4.0'):
         change(f'.config/gtk-{version}/settings.ini', r'^gtk-font-name=.*', f'gtk-font-name={font} 11')
         change(f'.config/gtk-{version}/settings.ini', r'^gtk-icon-theme-name=.*',
@@ -323,7 +331,7 @@ def render_profile(repo, theme):
             f'button {{ padding: {max(3, spacing // 2)}px {spacing}px; }}\n')
     change('.config/qt6ct/qt6ct.conf', r'^general=.*', f'general="{font},11,-1,5,50,0,0,0,0,0"')
     change('.config/qt6ct/qt6ct.conf', r'^color_scheme_path=.*',
-           f'color_scheme_path={Path.home()}/.config/qt6ct/colors/gruvbox-dark.conf')
+           f'color_scheme_path={Path.home()}/.config/qt6ct/colors/{preset_name(theme)}.conf')
     change('.config/fuzzel/fuzzel.ini', r'^font=.*', f'font={font}:size=13')
     change('.config/fuzzel/fuzzel.ini', r'^width=48$', f'width={design["launcher_width"]}')
     change('.config/fuzzel/fuzzel.ini', r'^radius=.*', f'radius={radius}')
@@ -367,6 +375,7 @@ CLAUDE_THEME = '.claude/themes/oldbook.json'
 # LXQt reads its selectable palettes by file name, so the rendered preset takes
 # the theme's own name rather than staying Gruvbox's in every profile.
 LXQT_PRESET = '.local/share/lxqt/palettes/Gruvbox-Dark'
+QT6CT_PRESET = '.config/qt6ct/colors/gruvbox-dark.conf'
 
 
 def preset_name(theme):
