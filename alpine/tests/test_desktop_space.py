@@ -1,13 +1,25 @@
 """Desktop panels reclaim free edges and yield to fixed desktop chrome."""
 import importlib.machinery
+import os
 from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import desktop_space
+
+SETTINGS_HOME = tempfile.TemporaryDirectory()
+
+
+def setUpModule():
+    # search_rectangle reads the Scripture bar's clearance setting: never the real one.
+    patcher = mock.patch.dict(os.environ, {'XDG_CONFIG_HOME': SETTINGS_HOME.name})
+    patcher.start()
+    unittest.addModuleCleanup(patcher.stop)
+    unittest.addModuleCleanup(SETTINGS_HOME.cleanup)
 
 
 def output(surfaces=()):
@@ -39,7 +51,8 @@ class DesktopSpaceTests(unittest.TestCase):
     def test_free_edges_reclaim_bottom_and_right_despite_workspace_fullscreen_marker(self):
         space = desktop_space.screen_space(output(), tree(floating=True))
         self.assertEqual((space['bottom'], space['right']), (16, 16))
-        self.assertEqual(desktop_space.search_rectangle(space)['y'], 820)
+        # The cards reclaim the free edge; the search bar keeps its clearance.
+        self.assertEqual(desktop_space.search_rectangle(space)['y'], 776)
 
     def test_fixed_bottom_caption_uses_clearance_while_attached_caption_does_not(self):
         caption = surface('oldbook-decoration', 5, 867, 1430, 28)
@@ -110,6 +123,59 @@ class DesktopSpaceTests(unittest.TestCase):
         control_center = surface('swaync-control-center', 1060, 40, 380, 827, 'top')
         space = desktop_space.screen_space(output([control_center]), tree(floating=True))
         self.assertEqual(space['right'], 16)
+
+
+class SearchBarPlacementTests(unittest.TestCase):
+    """The Scripture bar ignores the window decoration and starts clear of the bottom bars."""
+
+    def bar(self, surfaces=(), snapshot=None):
+        space = desktop_space.screen_space(output(surfaces), snapshot or tree(floating=True),
+                                           decoration=False)
+        return desktop_space.search_rectangle(space)
+
+    def test_the_decoration_never_moves_the_bar_on_any_layer_or_edge(self):
+        free = self.bar()
+        self.assertEqual(free, {'x': 340, 'y': 776, 'width': 760, 'height': 64})
+        for decoration in (surface('oldbook-decoration', 5, 867, 1430, 28, 'overlay'),
+                           surface('oldbook-decoration', 169, 768, 1096, 56, 'top'),
+                           surface('oldbook-decoration', 1390, 45, 45, 850, 'overlay'),
+                           surface('oldbook-decoration-band', 0, 861, 1440, 39, 'bottom'),
+                           surface('oldbook-decoration-band', 1401, 0, 39, 900, 'background')):
+            self.assertEqual(self.bar([decoration]), free, decoration)
+
+    def test_it_starts_above_the_bottom_bars_and_windows_never_move_it(self):
+        tiled = tree()
+        tiled['nodes'][0]['nodes'][0]['nodes'][0]['rect']['height'] = 690
+        for snapshot in (tree(floating=True), tiled, tree(floating=True, fullscreen=1),
+                         tree(floating=True, hidden_fullscreen=2)):
+            rectangle = self.bar(snapshot=snapshot)
+            self.assertEqual(rectangle['y'] + rectangle['height'],
+                             900 - desktop_space.CAPTION_CLEARANCE)
+
+    def test_a_real_fixed_bottom_bar_still_lifts_it(self):
+        self.assertEqual(self.bar([surface('dock', 200, 820, 1040, 80)])['y'], 900 - 96 - 64)
+
+    def test_the_clearance_is_a_setting_with_a_safe_default(self):
+        settings = Path(os.environ['XDG_CONFIG_HOME']) / 'oldbook/scripture-bar.json'
+        settings.parent.mkdir(exist_ok=True)
+        self.addCleanup(settings.unlink, missing_ok=True)
+        settings.write_text('{"bottom_clearance": 90}')
+        self.assertEqual(self.bar()['y'], 900 - 90 - 64)
+        for broken in ('{"bottom_clearance": true}', '{"bottom_clearance": -4}',
+                       '{"bottom_clearance": 9000}', '{"bottom_clearance": "90"}', '[90]', 'not json'):
+            settings.write_text(broken)
+            self.assertEqual(self.bar()['y'], 776, broken)
+
+    def test_the_card_planner_reserves_the_bottom_edge_the_bar_sits_on(self):
+        planned = desktop_space.search_rectangle(desktop_space.conky_space(
+            desktop_space.screen_space(output(), tree(floating=True))))
+        placed = self.bar()
+        self.assertEqual(planned['y'] + planned['height'], placed['y'] + placed['height'])
+
+    def test_the_bar_reads_the_screen_without_the_decoration(self):
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-scripture-bar').read_text()
+        self.assertIn('read_screen(decoration=False)', source)
+        self.assertIn('search_bottom(screen, clearance)', source)
 
 
 def region_tree(*, current='1', fullscreen=0, tiled=False):

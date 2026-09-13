@@ -717,6 +717,7 @@
       "id": "SCRIPTURE",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-scripture*",
+        "alpine/desktop/.local/lib/oldbook/desktop_space.py",
         "alpine/desktop/.local/bin/oldbook-conky-click",
         "alpine/desktop/.local/lib/oldbook/conky_click.lua",
         "alpine/desktop/.local/lib/oldbook/conky_layout.py",
@@ -747,7 +748,8 @@
         "test_conky_clicks.py",
         "test_scripture_bar_theme.py",
         "test_scripture_runtime_policy.py",
-        "test_scripture_search.py"
+        "test_scripture_search.py",
+        "test_desktop_space.py"
       ],
       "evidence": [
         "verification/scripture-history/README.md",

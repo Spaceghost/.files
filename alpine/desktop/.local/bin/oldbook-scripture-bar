@@ -20,7 +20,7 @@ from gi.repository import Gtk, Gdk, GLib, GtkLayerShell, Pango
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 from overlay_theme import gtk_css, read_palette
-from desktop_space import read_screen, search_rectangle
+from desktop_space import read_screen, search_bottom, search_clearance, search_rectangle
 import scripture
 from scripture_search import SearchIndex
 from scripture_bar_ipc import endpoint, request, SCOPES
@@ -47,7 +47,8 @@ class SearchBar:
         GtkLayerShell.init_for_window(self.window)
         GtkLayerShell.set_namespace(self.window, 'oldbook-scripture')
         GtkLayerShell.set_layer(self.window, GtkLayerShell.Layer.BOTTOM)
-        # Match the planner’s absolute screen coordinates, independent of bars.
+        # Margins count from the output's own edges, so no reservation moves the
+        # bar; refresh_geometry alone decides where it sits.
         GtkLayerShell.set_exclusive_zone(self.window, -1)
         GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.BOTTOM, True)
         GtkLayerShell.set_anchor(self.window, GtkLayerShell.Edge.LEFT, True)
@@ -148,21 +149,32 @@ class SearchBar:
         if self.editing:
             return GLib.SOURCE_CONTINUE
         try:
-            screen = read_screen()
+            # The window decoration is not read at all. Wherever the caption
+            # strip is -- docked in its band, attached to a window, on the
+            # bottom or the right -- the bar stays where it is, already clear of
+            # the bottom bars from its first frame. Windows and fullscreen do
+            # not move it either; only a real fixed bar deeper than its
+            # clearance does.
+            screen = read_screen(decoration=False)
         except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
             return GLib.SOURCE_CONTINUE
-        if screen == self.geometry:
+        clearance = search_clearance()
+        rectangle = search_rectangle(screen, clearance)
+        placement = (screen['name'], rectangle['x'], rectangle['width'],
+                     search_bottom(screen, clearance))
+        # Touch the surface only when the place changes: every layer commit
+        # costs a frame, and this SwayFX drops ON_DEMAND focus on each one.
+        if placement == self.geometry:
             return GLib.SOURCE_CONTINUE
         display = Gdk.Display.get_default()
         for index in range(display.get_n_monitors()):
             if Gdk.Screen.get_default().get_monitor_plug_name(index) == screen['name']:
                 GtkLayerShell.set_monitor(self.window, display.get_monitor(index))
                 break
-        rectangle = search_rectangle(screen)
         self.window.set_size_request(rectangle['width'], -1)
-        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, screen['bottom'])
+        GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.BOTTOM, placement[3])
         GtkLayerShell.set_margin(self.window, GtkLayerShell.Edge.LEFT, rectangle['x'])
-        self.geometry = screen
+        self.geometry = placement
         return GLib.SOURCE_CONTINUE
 
     def cleanup_geometry(self, *_arguments):

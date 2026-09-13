@@ -2,6 +2,30 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The Scripture bar stays out of the bottom bars — 2026-09-13
+
+Jack: "Make sure the bible bar in the bottom ignores the window decoration
+position entirely and just is always out of the bars area in the bottom to
+begin with"
+
+- The bar took its margin from `screen_space()`, which skipped the caption
+  strip only on the top layer. Docked in its band the strip is an overlay
+  surface, so focus moving between a floating and a tiled window swung the bar
+  between 16 px and 60 px above the edge, up to a second late, and back down
+  into the band's rows; a strip on the right edge nudged it sideways.
+- The bar now reads the screen with `decoration=False`, which reads neither
+  `oldbook-decoration` nor its band on any layer or edge, and sits at
+  `search_bottom()`: 60 px by default (`bottom_clearance` in
+  `~/.config/oldbook/scripture-bar.json`), or a real fixed bar's depth when that
+  is deeper. Windows and fullscreen no longer move it, and it touches its
+  surface only when its computed place changes. The Conky planner's reading
+  and every wallpaper layout's cache key are unchanged, and the planner and
+  the bar now share a bottom edge.
+- Verified: the 32 tests in `test_desktop_space.py`, which now cover every
+  decoration surface on both edges, windows, fullscreen, a dock, bad settings
+  and the shared bottom edge, and no longer read the real settings file.
+- Not verified on the panel: the session was locked with its output off.
+
 ## The bar's powerline chain paints — 2026-09-13
 
 Jack: "The powershell in my swaybar is going to look so cool when it isn't

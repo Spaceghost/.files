@@ -1052,7 +1052,7 @@ is welcome, and the masthead's offline sunrise/sunset/moon line appears only for
 an explicit `~/.config/oldbook/location.json`. No CPU, memory, processes,
 disk/network I/O or thermals: Waybar owns those. Background refresh is 60–300
 seconds, except hourly Scripture. Preserve native reading-card click actions;
-Scripture search may adapt to free space.
+the Scripture search bar holds its clearance and never follows the decoration.
 
 The rice card lists what was recently added to the machine, newest first, from
 `~/.config/oldbook/rice.json` — one file where a new feature is one new entry at
@@ -1092,7 +1092,11 @@ personal database is not a repository artifact.
 Super+/ focuses an editable Bible search in the existing desktop search bar;
 typing and results stay in that bar without opening a picker window. This
 supersedes the earlier button that launched Fuzzel. Release its keyboard grab
-after selection, cancellation or focus loss. Super+Shift+/ searches all
+after selection, cancellation or focus loss. The bar never reads the window
+decoration — the caption strip docked, attached, on the bottom or on the right —
+and starts at its clearance above the bottom bars (`bottom_clearance` in
+`~/.config/oldbook/scripture-bar.json`, 60 px by default), moving only for a
+real fixed bar deeper than that; windows and fullscreen never move it. Super+Shift+/ searches all
 collections with Bible results after Torah, Talmud and reflections. Selection displays immediately
 and holds for an hour. Preserve complete passages, attribution, continuous
 passage→reflection→practice presentation, offline sources and prior study text.
@@ -1116,11 +1120,11 @@ is edited or removed. Other cards ignore right-clicks.
 
 - Implementation: [Scripture modules](desktop/.local/lib/oldbook/scripture.py),
   [card clicks](desktop/.local/lib/oldbook/conky_click.lua),
-  [inline search bar](desktop/.local/bin/oldbook-scripture-bar),
+  [inline search bar](desktop/.local/bin/oldbook-scripture-bar), [its placement](desktop/.local/lib/oldbook/desktop_space.py),
   [history](desktop/.local/lib/oldbook/scripture_history.py),
   [generation](desktop/.local/lib/oldbook/scripture_generation.py).
 - Checks: [selection](tests/test_scripture_selection.py), [history](tests/test_scripture_history.py),
-  [inline search](tests/test_scripture_search.py),
+  [inline search](tests/test_scripture_search.py), [bar placement](tests/test_desktop_space.py),
   [inline keyboard verification](tests/verify_scripture_inline.py),
   [study](tests/test_scripture_study.py), [local generation](tests/test_scripture_generation.py),
   [local runtime lifecycle](tests/test_scripture_local.py),

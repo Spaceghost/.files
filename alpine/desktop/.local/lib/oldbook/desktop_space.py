@@ -22,6 +22,12 @@ EDGE_MARGIN = 16
 CAPTION_CLEARANCE = 60
 SEARCH_WIDTH = 760
 SEARCH_HEIGHT = 64
+# The window decoration's own surfaces: the caption strip -- docked in its band
+# or attached to a window, on the bottom or the right -- and the band itself.
+DECORATION = ('oldbook-decoration', 'oldbook-decoration-band')
+# The Scripture bar's one setting, under XDG_CONFIG_HOME.
+SEARCH_SETTINGS = Path('oldbook/scripture-bar.json')
+SEARCH_CLEARANCE_LIMIT = 400
 
 # The free region is published on the grid `oldbook-conky` already analyses the
 # painting with, so "is this cell free" and "is the painting calm here" are one
@@ -36,11 +42,14 @@ COVERABLE = frozenset({'wallpaper', 'oldbook-background', 'oldbook-decoration-ba
 EFFECT_NAMESPACE = 'oldbook-edges'
 
 
-def screen_space(output, tree):
+def screen_space(output, tree, decoration=True):
     """Reserve occupied edges, excluding floating captions and our own cards.
 
     SwayFX surface extents are output-local; tree rectangles are global.
     Workspace fullscreen markers are synthetic and must never reserve space.
+    With `decoration=False` the window decoration is not read at all, on any
+    layer or edge: that is the Scripture bar's reading, because a bar that
+    followed the caption strip jumped every time the strip docked or attached.
     """
     rect = output['rect']
     width, height = int(rect['width']), int(rect['height'])
@@ -58,7 +67,8 @@ def screen_space(output, tree):
         if (layer == 'background'
                 or name in ('conky', 'wallpaper', 'oldbook-scripture', EFFECT_NAMESPACE)
                 or name.startswith('swaync')
-                or (name == 'oldbook-decoration' and layer == 'top')):
+                or (name == 'oldbook-decoration' and layer == 'top')
+                or (not decoration and name in DECORATION)):
             continue
         extent = surface.get('extent', {})
         x, y = extent.get('x', 0), extent.get('y', 0)
@@ -91,12 +101,40 @@ def screen_space(output, tree):
     return space
 
 
-def search_rectangle(screen):
+def search_clearance(path=None):
+    """How far above the output's bottom edge the Scripture bar sits.
+
+    The default clears the bottom bars area outright -- the caption band and the
+    strip docked in it -- without reading where either is, so the bar starts out
+    of their way and never has to move. `bottom_clearance` in
+    ~/.config/oldbook/scripture-bar.json changes it; a missing, unreadable or
+    unreasonable file keeps the default.
+    """
+    if path is None:
+        base = os.environ.get('XDG_CONFIG_HOME') or str(Path.home() / '.config')
+        path = Path(base) / SEARCH_SETTINGS
+    try:
+        value = json.loads(Path(path).read_text()).get('bottom_clearance', CAPTION_CLEARANCE)
+    except (OSError, ValueError, AttributeError):
+        return CAPTION_CLEARANCE
+    if (isinstance(value, bool) or not isinstance(value, int)
+            or not 0 <= value <= SEARCH_CLEARANCE_LIMIT):
+        return CAPTION_CLEARANCE
+    return value
+
+
+def search_bottom(screen, clearance=None):
+    """The bar's distance from the bottom edge: its clearance, or a real bar's depth."""
+    clearance = search_clearance() if clearance is None else clearance
+    return max(clearance, screen.get('bottom', EDGE_MARGIN))
+
+
+def search_rectangle(screen, clearance=None):
     left, right = screen.get('left', EDGE_MARGIN), screen.get('right', EDGE_MARGIN)
     width = min(SEARCH_WIDTH, max(1, screen['width'] - left - right))
     # Center inside the free horizontal span when a fixed right strip is present.
     return {'x': left + max(0, (screen['width'] - left - right - width) // 2),
-            'y': max(0, screen['height'] - screen.get('bottom', EDGE_MARGIN) - SEARCH_HEIGHT),
+            'y': max(0, screen['height'] - search_bottom(screen, clearance) - SEARCH_HEIGHT),
             'width': width, 'height': SEARCH_HEIGHT}
 
 
@@ -133,7 +171,7 @@ def read_layout(socket_path=None, connection=None):
     return [output for output in outputs if output.get('active')], tree
 
 
-def read_screen(socket_path=None, output_name=None):
+def read_screen(socket_path=None, output_name=None, decoration=True):
     outputs, tree = read_layout(socket_path)
     if not outputs:
         raise RuntimeError('No active output to place desktop panels on')
@@ -141,7 +179,7 @@ def read_screen(socket_path=None, output_name=None):
     candidates = physical or outputs
     chosen = next((output for output in outputs if output['name'] == output_name), None)
     chosen = chosen or next((output for output in candidates if output.get('focused')), candidates[0])
-    return screen_space(chosen, tree)
+    return screen_space(chosen, tree, decoration)
 
 
 def surface_rectangles(output, namespace=EFFECT_NAMESPACE):

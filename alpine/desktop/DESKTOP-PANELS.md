@@ -20,11 +20,17 @@ bytes, the screen geometry, the theme and the panel set, so one painting is
 always dressed the same way and is only re-analysed when one of those changes.
 `oldbook-wallpaper` refits the panels whenever the desktop image changes.
 
-Scripture search uses a 16-pixel margin when the bottom edge is free. A fullscreen
-window, tiled window reaching the bottom, or fixed edge bar moves it to a
-clearance position (at least 60 pixels). Floating captions do not displace it.
-Larger fixed bars reserve their actual depth plus breathing room. The bar reads
-Sway directly once a second, without launching polling subprocesses.
+The Scripture search bar sits 60 pixels above the bottom edge from its first
+frame, already clear of the bottom bars area where the caption strip docks, and
+it never reads the window decoration: the strip docked in its band, attached to
+a floating window, or moved to the right edge leaves the bar exactly where it
+is, and so do tiled windows reaching the bottom and fullscreen. Only a real
+fixed bar deeper than that clearance, such as a dock or a Waybar moved to the
+bottom, lifts it by its depth plus breathing room. `bottom_clearance` in
+`~/.config/oldbook/scripture-bar.json` changes the distance; a missing or
+unreasonable file keeps 60. The bar reads Sway directly once a second, without
+launching polling subprocesses, touches its surface only when its place
+actually changes, and the panel planner reserves the same bottom edge.
 
 Conky stays in stable clearance positions, with at least 60 pixels at the bottom
 and right. Window and fullscreen changes never trigger a Conky reflow or restart.
