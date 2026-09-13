@@ -124,6 +124,22 @@ class DesktopSpaceTests(unittest.TestCase):
         space = desktop_space.screen_space(output([control_center]), tree(floating=True))
         self.assertEqual(space['right'], 16)
 
+    def test_the_landing_wave_does_not_lift_the_search_bar(self):
+        # The ripple is an overlay over the lower third of the output for
+        # under a second: screen-wide, bottom-anchored, exactly the shape of
+        # a fixed bar. Jack: "The ripple.py should be ignored by the conky
+        # bible bar." Reserving it lifted the bar 316 pixels on one poll and
+        # dropped it on the next.
+        wave = surface(desktop_space.RIPPLE_NAMESPACE, 0, 600, 1440, 300, 'overlay')
+        still = desktop_space.screen_space(output(), tree(floating=True))
+        space = desktop_space.screen_space(output([wave]), tree(floating=True))
+        self.assertEqual(space, still)
+        self.assertEqual(desktop_space.search_rectangle(space),
+                         desktop_space.search_rectangle(still))
+        # A right-edge strip's wave is a tall band on the right; same answer.
+        side = surface(desktop_space.RIPPLE_NAMESPACE, 960, 0, 480, 900, 'overlay')
+        self.assertEqual(desktop_space.screen_space(output([side]), tree(floating=True)), still)
+
 
 class SearchBarPlacementTests(unittest.TestCase):
     """The Scripture bar ignores the window decoration and starts clear of the bottom bars."""
@@ -242,6 +258,14 @@ class FreeRegionTests(unittest.TestCase):
         # would carve a third of the output out of the region for nothing.
         host = surface('swaync-notification-window', 1060, 46, 380, 815, 'top')
         region = desktop_space.free_region(output([host]), region_tree())
+        self.assertEqual([item for item in region['occupied'] if item['kind'] == 'layer'], [])
+
+    def test_the_landing_wave_is_not_an_occupier(self):
+        # It shows a photograph of exactly what is under it, so an effect
+        # drawing there is what it shows; carving the band out would clear a
+        # third of the output for the length of a wave and paint it back.
+        wave = surface(desktop_space.RIPPLE_NAMESPACE, 0, 600, 1440, 300, 'overlay')
+        region = desktop_space.free_region(output([wave]), region_tree())
         self.assertEqual([item for item in region['occupied'] if item['kind'] == 'layer'], [])
 
     def test_the_bar_and_the_caption_are_occupied(self):

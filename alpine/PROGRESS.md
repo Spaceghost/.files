@@ -82,6 +82,25 @@ features not things like fixes unless they're major additions."
   `test_rice_tour.py`.
 - Not verified: the triggers by hand; none of the new entries was set off live.
 
+## The Scripture bar ignores the landing ripple — 2026-09-13
+
+Jack: "The ripple.py should be ignored by the conky bible bar."
+
+- The wave's surface is an OVERLAY over the lower third of the output for
+  under a second: bottom-anchored and screen-wide, exactly the shape of a fixed
+  bottom bar, and `screen_space()` reserved it like one. The bar's once-a-second
+  poll caught it most of the time, lifted the bar 316 px on that poll and
+  dropped it back on the next, every time the strip docked.
+- `desktop_space.RIPPLE_NAMESPACE` (`oldbook-ripple`) is skipped by name in
+  both readings: the margins, so the Scripture bar and the Conky planner never
+  see it, and the free region, so an effect keeps drawing under it -- which is
+  exactly what the wave shows, a photograph of what is under it.
+- Verified: the 34 tests in `test_desktop_space.py`, two of them new: a
+  bottom-edge and a right-edge wave leave every margin and the search
+  rectangle unchanged, and the wave is not an occupier.
+- Not verified on the panel: the live desktop was in catbed mode throughout;
+  the running bar reads the module at start and picks this up on restart.
+
 ## The bar's chain comes off the right island — 2026-09-13
 
 Jack, an hour after the chain first painted: "I really hate the way the

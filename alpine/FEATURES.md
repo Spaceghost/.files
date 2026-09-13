@@ -1161,7 +1161,9 @@ after selection, cancellation or focus loss. The bar never reads the window
 decoration — the caption strip docked, attached, on the bottom or on the right —
 and starts at its clearance above the bottom bars (`bottom_clearance` in
 `~/.config/oldbook/scripture-bar.json`, 60 px by default), moving only for a
-real fixed bar deeper than that; windows and fullscreen never move it. Super+Shift+/ searches all
+real fixed bar deeper than that; windows and fullscreen never move it, and
+neither does the landing ripple, whose bottom-anchored overlay is skipped by
+name (`oldbook-ripple`) for the second it exists. Super+Shift+/ searches all
 collections with Bible results after Torah, Talmud and reflections. Selection displays immediately
 and holds for an hour. Preserve complete passages, attribution, continuous
 passage→reflection→practice presentation, offline sources and prior study text.

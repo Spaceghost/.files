@@ -26,7 +26,12 @@ it never reads the window decoration: the strip docked in its band, attached to
 a floating window, or moved to the right edge leaves the bar exactly where it
 is, and so do tiled windows reaching the bottom and fullscreen. Only a real
 fixed bar deeper than that clearance, such as a dock or a Waybar moved to the
-bottom, lifts it by its depth plus breathing room. `bottom_clearance` in
+bottom, lifts it by its depth plus breathing room. The landing ripple is not
+one: for under a second after the strip docks it is an overlay across the
+lower third of the output, bottom-anchored and screen-wide, exactly the shape
+of a fixed bar, and it is skipped by its `oldbook-ripple` namespace so the
+bar does not leap a third of the way up the screen on one poll and drop back
+on the next. `bottom_clearance` in
 `~/.config/oldbook/scripture-bar.json` changes the distance; a missing or
 unreasonable file keeps 60. The bar reads Sway directly once a second, without
 launching polling subprocesses, touches its surface only when its place

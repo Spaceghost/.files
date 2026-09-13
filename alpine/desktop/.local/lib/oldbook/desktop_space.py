@@ -40,6 +40,15 @@ GRID_COLUMNS, GRID_ROWS = 72, 45
 # card. Leaving Conky out of the occupied set is the way this goes wrong.
 COVERABLE = frozenset({'wallpaper', 'oldbook-background', 'oldbook-decoration-band'})
 EFFECT_NAMESPACE = 'oldbook-edges'
+# The landing wave. It is an OVERLAY surface over the lower third of the
+# output for under a second, anchored to the bottom edge and as wide as the
+# screen, which is exactly the shape of a fixed bottom bar -- and it is
+# nothing of the kind: it refracts a photograph of what is under it and takes
+# no input. Reserving it lifted the Scripture search bar a third of the way up
+# the screen on the next one-second poll and dropped it back on the one after,
+# every time the strip landed. Jack: "The ripple.py should be ignored by the
+# conky bible bar."
+RIPPLE_NAMESPACE = 'oldbook-ripple'
 
 
 def screen_space(output, tree, decoration=True):
@@ -65,7 +74,8 @@ def screen_space(output, tree, decoration=True):
         # below today, and CONKY-READING forbids the reflow that would follow if
         # it ever did.
         if (layer == 'background'
-                or name in ('conky', 'wallpaper', 'oldbook-scripture', EFFECT_NAMESPACE)
+                or name in ('conky', 'wallpaper', 'oldbook-scripture', EFFECT_NAMESPACE,
+                            RIPPLE_NAMESPACE)
                 or name.startswith('swaync')
                 or (name == 'oldbook-decoration' and layer == 'top')
                 or (not decoration and name in DECORATION)):
@@ -196,7 +206,13 @@ def surface_rectangles(output, namespace=EFFECT_NAMESPACE):
     rectangles = []
     for surface in output.get('layer_shell_surfaces', []):
         name = surface.get('namespace') or ''
-        if name in COVERABLE or name == namespace or name.startswith('swaync'):
+        # The ripple is skipped for the opposite reason to swaync: it is not
+        # transparent but it is a picture of exactly what it covers, taken a
+        # moment before, so whatever draws under it is what it shows. Carving
+        # its band out of the region would have the effect clear a third of
+        # the output for the length of a wave and then come back.
+        if (name in COVERABLE or name == namespace or name.startswith('swaync')
+                or name == RIPPLE_NAMESPACE):
             continue
         extent = surface.get('extent') or {}
         width, height = int(extent.get('width', 0)), int(extent.get('height', 0))
