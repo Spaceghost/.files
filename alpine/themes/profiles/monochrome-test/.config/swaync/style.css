@@ -1,0 +1,253 @@
+/* Ghost Planet notifications.
+ *
+ * Every colour here is a role in the active theme's palette, never a shade
+ * picked by eye: the theme renderer maps each declared value to that theme's
+ * own colour, and anything off-palette gets snapped to whichever role happens
+ * to sit nearest. Staying on the thirteen roles is what makes a generated
+ * theme land exactly rather than approximately.
+ *
+ * Roles used, in Monochrome Test terms:
+ *   #000000 hard ground   #000000 ground     #000000 surface   #ffffff border
+ *   #ffffff muted         #ffffff foreground #ffffff bright    #0e0e0e raised
+ *   #ffffff accent        #ffffff red        #ffffff green     #ffffff blue
+ */
+
+* { font-family: "JetBrainsMono Nerd Font", sans-serif; font-size: 12px; }
+
+/* The layer spans the whole output and must never show. Only cards paint. */
+.blank-window { background: transparent; }
+.floating-notifications, .floating-notifications.background { background: transparent; }
+
+.control-center, .widget-title, .widget-dnd, .widget-mpris, .widget-volume,
+.widget-backlight, .widget-buttons-grid, .widget-inhibitors, .widget-menubar {
+  background: rgba(0, 0, 0, 0.97);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+}
+.control-center { padding: 12px; box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65); }
+
+/* ── The row is a container, never a surface ──────────────────────────────
+   swaync gives the row the full width of the layer. Any background on it
+   paints a rectangle out across the desktop with nothing to justify it, which
+   is exactly what a hover used to do. Everything visible belongs to the card. */
+.notification-row,
+.notification-row:focus,
+.notification-row:hover,
+.notification-background,
+.notification-background:hover,
+.notification-background:focus,
+.notification-content,
+.control-center .control-center-list,
+.control-center .control-center-list > row,
+.control-center .control-center-list > row:hover,
+.control-center .control-center-list > row:selected,
+.control-center .notification-group,
+.control-center .notification-row,
+.control-center .notification-background { background: transparent; box-shadow: none; }
+/* ── The card ─────────────────────────────────────────────────────────────
+   Restraint is the whole design. A dark, almost flat ground; one crisp accent
+   rail; and light that only ever kisses the rail rather than washing the card.
+   An earlier attempt bloomed the accent 26px inward and turned every card
+   olive -- glow spread must stay small or it stops being light and becomes a
+   stain. Every colour is a palette role, so this re-derives in any theme. */
+.notification {
+  background-color: alpha(#000000, 0.97);
+  background-image: linear-gradient(to bottom,
+                    alpha(#000000, 0.22) 0%, alpha(#000000, 0.14) 46%,
+                    alpha(#000000, 0.34) 100%);
+  color: #ffffff;
+  margin: 8px 10px;
+  padding: 13px 14px 13px 18px;
+  border: none;
+  border-left: 3px solid #ffffff;
+  border-radius: 13px;
+  box-shadow:
+    inset 5px 0 6px -7px alpha(#ffffff, 0.75),    /* a kiss of light at the rail */
+    inset 0 1px 0 0 alpha(#ffffff, 0.08),         /* top hairline */
+    0 1px 0 0 alpha(#000000, 0.55),               /* a crisp base edge */
+    0 10px 26px -10px alpha(#000000, 0.85);
+  transition: background-color 150ms ease-out, box-shadow 150ms ease-out,
+              border-color 150ms ease-out;
+}
+
+/* Hover lifts: the rail brightens, the shadow deepens, the ground warms one
+   step. The card must still read as the same card. */
+.notification-row:hover .notification {
+  background-color: alpha(#0e0e0e, 0.98);
+  border-left-color: mix(#ffffff, #ffffff, 0.45);
+  box-shadow:
+    inset 6px 0 8px -7px alpha(#ffffff, 0.95),
+    inset 0 1px 0 0 alpha(#ffffff, 0.14),
+    0 1px 0 0 alpha(#000000, 0.55),
+    0 16px 34px -12px alpha(#000000, 0.92),
+    0 0 18px -8px alpha(#ffffff, 0.30);
+}
+.notification-row:focus .notification { border-left-color: #ffffff; }
+
+/* ── Urgency: the rail, and only the rail ────────────────────────────────── */
+.notification.low { border-left-color: #ffffff; }
+.notification.low .summary { color: #ffffff; font-weight: normal; }
+.notification.normal { border-left-color: #ffffff; }
+.notification.critical {
+  border-left-color: #ffffff;
+  box-shadow:
+    inset 5px 0 6px -7px alpha(#ffffff, 0.8),
+    inset 0 1px 0 0 alpha(#ffffff, 0.14),
+    0 1px 0 0 alpha(#000000, 0.55),
+    0 10px 26px -10px alpha(#000000, 0.85);
+}
+.notification.critical .summary { color: mix(#ffffff, #ffffff, 0.35); }
+.notification-row:hover .notification.critical {
+  border-left-color: mix(#ffffff, #ffffff, 0.4);
+  box-shadow:
+    inset 6px 0 8px -7px alpha(#ffffff, 0.95),
+    inset 0 1px 0 0 alpha(#ffffff, 0.2),
+    0 1px 0 0 alpha(#000000, 0.55),
+    0 16px 34px -12px alpha(#000000, 0.92),
+    0 0 20px -8px alpha(#ffffff, 0.35);
+}
+
+/* Inside the card: the message, then who sent it and when. */
+.notification .summary {
+  color: #ffffff; font-weight: bold; font-size: 13.5px;
+  margin-bottom: 1px;
+}
+.notification .body { color: alpha(#ffffff, 0.72); font-size: 12px; }
+.notification .time { color: #ffffff; font-size: 11px; }
+.notification .app-name {
+  color: alpha(#ffffff, 0.9); font-size: 9.5px;
+  letter-spacing: 1.2px; font-weight: bold;
+}
+.notification .app-icon {
+  color: #ffffff; margin-right: 6px;
+  -gtk-icon-shadow: 0 1px 3px alpha(#000000, 0.8);
+}
+.notification .image, .notification .body-image { border-radius: 9px; margin-right: 10px; }
+.notification progressbar { margin-top: 8px; }
+.notification progressbar trough { background: #ffffff; border: none; border-radius: 8px; min-height: 6px; }
+.notification progressbar progress { background: #ffffff; border-radius: 8px; }
+
+/* Close: invisible until the pointer is on the card, red only on itself. */
+.notification .close-button {
+  background: alpha(#000000, 0.0);
+  color: alpha(#ffffff, 0.0);
+  border: none;
+  border-radius: 50%;
+  min-width: 24px; min-height: 24px;
+  margin: 1px 0 0 8px;
+  padding: 0;
+  transition: background 140ms ease-out, color 140ms ease-out;
+}
+.notification-row:hover .close-button {
+  background: alpha(#000000, 0.55);
+  color: alpha(#ffffff, 0.85);
+  box-shadow: inset 0 0 0 1px alpha(#ffffff, 0.10);
+}
+.notification .close-button:hover {
+  background: #ffffff; color: #000000;
+  box-shadow: 0 0 12px -3px alpha(#ffffff, 0.8);
+}
+
+/* Actions and inline reply. */
+.notification-action {
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 9px;
+  margin: 8px 4px 0 0;
+  padding: 5px 12px;
+}
+.notification-action:hover { background: #ffffff; color: #ffffff; }
+.notification-action:active { background: #ffffff; color: #000000; }
+.notification-default-action { border-radius: 14px; }
+.inline-reply { margin-top: 8px; }
+.inline-reply-entry {
+  background: #000000;
+  color: #ffffff;
+  caret-color: #ffffff;
+  border: 1px solid #ffffff;
+  border-radius: 9px;
+  padding: 4px 8px;
+}
+.inline-reply-entry:focus { border-color: #ffffff; }
+.inline-reply-button { background: #000000; color: #ffffff; border: none; border-radius: 9px; margin-left: 6px; padding: 4px 10px; }
+.inline-reply-button:hover { background: #ffffff; color: #ffffff; }
+.inline-reply-button:disabled { background: transparent; color: #ffffff; }
+
+/* ── Groups ───────────────────────────────────────────────────────────────
+   Several messages from one app collapse under a quiet header. */
+.notification-group-headers { color: #ffffff; font-size: 11px; letter-spacing: 0.6px; margin: 0 10px; }
+.notification-group-icon { color: #ffffff; }
+.notification-group-collapse-button,
+.notification-group-close-all-button {
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin: 0 2px;
+}
+.notification-group-collapse-button:hover { background: #000000; color: #ffffff; }
+.notification-group-close-all-button:hover { background: #ffffff; color: #000000; }
+.notification-group:hover .notification-group-headers { color: #ffffff; }
+
+/* Nothing waiting is a state worth designing, not an empty box. */
+.control-center-list-placeholder { color: #ffffff; font-size: 13px; padding: 28px 0; }
+
+/* ── Panel furniture ──────────────────────────────────────────────────── */
+.widget-title, .widget-dnd, .widget-mpris, .widget-volume, .widget-backlight,
+.widget-buttons-grid, .widget-inhibitors { margin: 6px 0; padding: 10px; }
+.widget-title > label { color: #ffffff; font-weight: bold; }
+.widget-title > button, .widget-dnd > switch slider,
+.widget-buttons-grid > flowbox > flowboxchild > button { background: #000000; color: #ffffff; border: none; border-radius: 10px; }
+.widget-title > button:hover,
+.widget-buttons-grid > flowbox > flowboxchild > button:hover { background: #ffffff; }
+.widget-label > label { color: #ffffff; font-size: 11px; }
+.widget-dnd > switch { background: #ffffff; border: none; border-radius: 12px; }
+.widget-dnd > switch:checked { background: #ffffff; }
+.widget-dnd > switch slider { background: #ffffff; border-radius: 50%; }
+.widget-inhibitors > button { background: #000000; color: #ffffff; border: none; border-radius: 10px; }
+.widget-inhibitors > button:hover { background: #ffffff; }
+
+progressbar, scale highlight { background: #ffffff; border-radius: 8px; }
+scale trough { background: #ffffff; border-radius: 8px; min-height: 9px; }
+scale slider { background: #ffffff; border: none; border-radius: 50%; min-width: 14px; min-height: 14px; margin: -3px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6); }
+scale slider:hover { background: #ffffff; }
+
+/* Now transmitting: the MPRIS player card. Album art is the blurred backdrop
+   of its own card; the overlay keeps titles legible over any cover. */
+:root {
+  --mpris-album-art-icon-size: 84px;
+  --widget-volume-row-icon-size: 22px;
+}
+.widget-mpris { padding: 0; }
+.widget-mpris .widget-mpris-player { margin: 0; border-radius: 14px; box-shadow: none; background: #000000; }
+.widget-mpris .widget-mpris-player .mpris-background { filter: blur(14px); }
+.widget-mpris .widget-mpris-player .mpris-overlay { padding: 12px 14px; background: rgba(0, 0, 0, 0.72); }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-album-art { border-radius: 9px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6); }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-title { color: #ffffff; font-weight: bold; font-size: 13px; }
+.widget-mpris .widget-mpris-player .mpris-overlay .widget-mpris-subtitle { color: #ffffff; font-size: 11px; }
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button { background: transparent; color: #ffffff; border-radius: 8px; padding: 2px 6px; }
+.widget-mpris .widget-mpris-player .mpris-overlay > box > button:hover { background: rgba(255, 255, 255, 0.85); color: #ffffff; }
+.widget-mpris > box > button { background: transparent; color: #ffffff; border-radius: 8px; }
+.widget-mpris > box > button:hover { color: #ffffff; }
+.widget-mpris > box > button:disabled { color: #ffffff; }
+
+/* Sound system and moonlight control: amber sliders on charcoal troughs. */
+.widget-volume, .widget-backlight { padding: 8px 12px; }
+.widget-volume label, .widget-backlight label { color: #ffffff; font-size: 15px; margin-right: 8px; }
+.widget-volume button { background: #000000; color: #ffffff; border-radius: 8px; padding: 2px 8px; margin-left: 6px; }
+.widget-volume button:hover { background: #ffffff; color: #ffffff; }
+.per-app-volume { background: rgba(0, 0, 0, 0.75); border-radius: 10px; margin: 8px 0 0; padding: 4px 6px; }
+.widget-volume row { background: transparent; border-radius: 8px; padding: 4px 6px; }
+.widget-volume row:hover { background: rgba(255, 255, 255, 0.55); }
+.widget-volume row label { color: #ffffff; font-size: 11px; margin: 0; }
+
+/* Quick actions: charcoal keys, accent when a toggle is engaged. */
+.widget-buttons-grid { padding: 8px; }
+.widget-buttons-grid flowbox, .widget-buttons-grid flowboxchild { background: transparent; padding: 0; margin: 0; }
+.widget-buttons-grid flowboxchild > button { background: #000000; color: #ffffff; border: none; border-radius: 10px; margin: 3px; padding: 8px 4px; font-size: 12px; }
+.widget-buttons-grid flowboxchild > button:hover { background: #ffffff; color: #ffffff; }
+.widget-buttons-grid flowboxchild > button.toggle:checked { background: #ffffff; color: #000000; }
+.widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #ffffff; color: #000000; }
