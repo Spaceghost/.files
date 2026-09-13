@@ -569,7 +569,7 @@ def use(identity, *, reload=True):
         deployer = runpy.run_path(str(REPO / 'alpine/bin/deploy-home'))
         deployed = deployer['deploy'](Path.home(), profile)
     record(theme['id'])
-    notes = asset_notes + refresh_boot_palette(theme)
+    notes = list(asset_notes)
     if reload:
         try:
             gallery = runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper'))
@@ -583,6 +583,18 @@ def use(identity, *, reload=True):
         # A wallpaper failure must not strand already-deployed application files
         # on disk while running clients retain the previous theme.
         notes.extend(refresh_session())
+    # Boot-chain refresh (console palette, GRUB theme render, the doas install
+    # into /etc and /boot) touches nothing in the running session -- it is the
+    # one step with multi-minute timeout budgets (install-boot-console alone
+    # allows 600s), so it used to run first and make every visible reload
+    # above wait on it for no reason: the whole desktop sat unchanged, with no
+    # feedback, until a root-owned boot install finished. It still runs
+    # unconditionally and still has to complete before `use` returns -- a
+    # theme switch that reported success while the boot chain silently lagged
+    # is the exact bug this refresh exists to prevent, so this stays
+    # synchronous, not backgrounded -- but now it runs last, after the parts
+    # a person is actually looking at have already changed.
+    notes.extend(refresh_boot_palette(theme))
     return theme, profile, deployed, notes
 
 
