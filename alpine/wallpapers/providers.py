@@ -50,6 +50,25 @@ DEFAULTS = {
 }
 
 
+def runner_environment():
+    """The environment every model runner is started with, and nothing more.
+
+    A deliberate allowlist: no API credentials, no agent socket overrides, no
+    inherited Codex internals and no arbitrary developer settings reach a
+    runner, whether cron or a person started it. PATH is spelled out for the
+    same reason -- and it ends with ~/.local/bin, because that is where this
+    desktop keeps the Claude CLI, and a chain that lists Claude but cannot
+    find it only ever reported "[Errno 2] No such file or directory: 'claude'"
+    where a design should have been.
+    """
+    env = {name: os.environ[name] for name in ('HOME', 'USER', 'LOGNAME', 'LANG', 'TZ')
+           if name in os.environ}
+    env['HOME'] = str(Path.home())
+    env['PATH'] = '/usr/local/bin:/usr/bin:/bin:' + str(Path.home() / '.local/bin')
+    env['CODEX_HOME'] = str(Path.home() / '.codex')
+    return env
+
+
 def settings(config, name=None):
     """The providers block, with anything the config leaves out filled in."""
     block = dict(DEFAULTS)
@@ -77,6 +96,23 @@ def exhausted(reason):
         return False
     folded = str(reason).casefold()
     return any(phrase in folded for phrase in EXHAUSTED)
+
+
+def codex_command(work, model):
+    """The Codex CLI invocation both designing and painting are built from.
+
+    Ephemeral, ignoring personal configuration, sandboxed to the working
+    directory, with every tool but native image generation disabled; the
+    design step further turns the sandbox read-only and image generation off.
+    """
+    return ['codex', '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral',
+            '--skip-git-repo-check', '--sandbox', 'workspace-write', '--cd', str(work),
+            '--enable', 'image_generation', '--disable', 'plugins', '--disable', 'apps',
+            '--disable', 'multi_agent', '--disable', 'shell_tool', '--disable', 'hooks',
+            '-c', 'model_reasoning_effort="low"', '-c', 'web_search="disabled"',
+            '-c', 'project_doc_max_bytes=0', '-m', model, '--color', 'never', '--json',
+            '--output-schema', str(work / 'schema.json'),
+            '--output-last-message', str(work / 'result.json'), '-']
 
 
 # ---- designing -------------------------------------------------------------

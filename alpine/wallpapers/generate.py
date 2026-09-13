@@ -21,7 +21,9 @@ import time
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import has_symlink, load_theme, safe_theme_id
+import painting_policy
 import prompt_catalog
+import providers
 
 STATE = Path.home() / '.local/state/oldbook/wallpaper-generation'
 SCHEMA = {'type': 'object', 'properties': {'image_path': {'type': 'string'}},
@@ -35,14 +37,28 @@ def atomic_json(path, data):
 
 
 def clean_environment():
-    # Deliberate allowlist: never pass API credentials, agent socket overrides,
-    # inherited Codex internals, or arbitrary developer settings into cron.
-    env = {name: os.environ[name] for name in ('HOME', 'USER', 'LOGNAME', 'LANG', 'TZ')
-           if name in os.environ}
-    env['HOME'] = str(Path.home())
-    env['PATH'] = '/usr/local/bin:/usr/bin:/bin'
-    env['CODEX_HOME'] = str(Path.home() / '.codex')
-    return env
+    """The allowlisted runner environment; shared with oldbook-theme create."""
+    return providers.runner_environment()
+
+
+THEME_COMMAND = REPO / 'alpine/desktop/.local/bin/oldbook-theme'
+
+
+def apply_theme(identity):
+    """Switch the desktop to a theme now; None on success, else the reason.
+
+    A newly designed theme is applied the moment it exists rather than after
+    its debut painting, because the painting is the one step that can take
+    minutes or fail outright, and a theme is not a painting.
+    """
+    try:
+        response = subprocess.run(['/usr/bin/python3', str(THEME_COMMAND), 'use', identity],
+                                  capture_output=True, text=True, timeout=300)
+    except (OSError, subprocess.SubprocessError) as error:
+        return str(error)
+    if response.returncode:
+        return response.stderr.strip()[:1500] or 'Could not apply the complete theme'
+    return None
 
 
 def bootstrap_history(config=None):
@@ -140,15 +156,9 @@ def validate_image(path, generated_root, started):
     return resolved, width, height
 
 
-def codex_command(work, model):
-    return ['codex', '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral',
-            '--skip-git-repo-check', '--sandbox', 'workspace-write', '--cd', str(work),
-            '--enable', 'image_generation', '--disable', 'plugins', '--disable', 'apps',
-            '--disable', 'multi_agent', '--disable', 'shell_tool', '--disable', 'hooks',
-            '-c', 'model_reasoning_effort="low"', '-c', 'web_search="disabled"',
-            '-c', 'project_doc_max_bytes=0', '-m', model, '--color', 'never', '--json',
-            '--output-schema', str(work / 'schema.json'),
-            '--output-last-message', str(work / 'result.json'), '-']
+# The Codex invocation lives with the other providers; oldbook-theme create
+# builds its design request from the same one.
+codex_command = providers.codex_command
 
 
 
@@ -448,8 +458,9 @@ def activate_artwork(record, metadata, entry):
     try:
         # Apply the palette used for this painting, including existing themes.
         # The active theme may have changed while generation was in progress.
-        # Unthemed artwork has no desktop profile to apply.
-        if entry.get('theme') not in (None, 'none'):
+        # Unthemed artwork has no desktop profile to apply, and a theme this
+        # run applied when it was designed is not applied a second time.
+        if entry.get('theme') not in (None, 'none') and not metadata.get('theme_applied'):
             response = subprocess.run(['/usr/bin/python3',
                 str(REPO / 'alpine/desktop/.local/bin/oldbook-theme'), 'use', entry['theme']],
                 capture_output=True, text=True, timeout=120)
@@ -505,6 +516,11 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             if record.exists():
                 print(f'{day}: daily job already reserved; no new job.')
                 return 0
+            if not painting_policy.allows('scheduled'):
+                # Nothing is reserved: the day stays open for a person's own
+                # request, and switching the schedule on paints the same day.
+                print(painting_policy.refusal('scheduled'))
+                return 0
         config = prompt_catalog.load_catalog(REPO / 'alpine/wallpapers/prompts.json')
         history = load_history(config)
         metadata = {'day': day, 'manual': manual,
@@ -517,11 +533,9 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
             lock.flush()
             notify('Space Ghost is designing a theme…', new_theme or 'A surprise collection and its first painting.')
             try:
+                # No login gate here: the design chain has three providers and
+                # each says for itself whether it can answer.
                 env = clean_environment()
-                login = subprocess.run(['codex', 'login', 'status'], env=env, capture_output=True,
-                                       text=True, timeout=20)
-                if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
-                    raise RuntimeError('Theme generation requires existing Codex ChatGPT login.')
                 selected_theme = retry_generation(
                     lambda log: design_theme(REPO, config, env, log, new_theme, codex_command,
                                              history=history),
@@ -533,6 +547,18 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 atomic_json(record, metadata)
                 notify_failure('theme', error, record)
                 raise
+            # The theme exists now, so the desktop takes it now. The painting
+            # that follows is additive; nothing about the theme waits on it.
+            problem = apply_theme(selected_theme['id']) if activate else None
+            metadata.update(theme_applied=activate and problem is None)
+            if problem:
+                metadata['theme_apply_error'] = problem
+            atomic_json(record, metadata)
+            if activate:
+                notify('Theme applied: ' + selected_theme['name']
+                       if problem is None else 'Theme saved, not applied',
+                       ('Painting its first picture now.' if problem is None
+                        else problem[:300] + '\nChoose it from the deck to try again.'))
         else:
             selected_theme = load_theme(REPO, theme)
         gallery = REPO / 'alpine/assets/gallery'
@@ -558,10 +584,6 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 from new_themes import design_scene
                 try:
                     env = clean_environment()
-                    login = subprocess.run(['codex', 'login', 'status'], env=env,
-                                           capture_output=True, text=True, timeout=20)
-                    if login.returncode or 'Logged in using ChatGPT' not in login.stdout + login.stderr:
-                        raise RuntimeError('Scene design requires existing Codex ChatGPT login.')
                     notify('Space Ghost is inventing a new scene…',
                            'Designing a fresh subject and mix beyond the existing catalog.')
                     scene, insertion, medium = retry_generation(

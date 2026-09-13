@@ -62,7 +62,9 @@ class ThemeCompletionTests(unittest.TestCase):
     def test_success_names_theme_and_previews_exact_saved_image_after_activation(self):
         result, notices, events = self.generate()
         self.assertEqual(result, 0)
-        self.assertEqual(events, ['checkpoint', 'use', 'select', 'complete-notification'])
+        # The theme is applied the moment it is designed, before any painting;
+        # only the painting's selection waits on the painter.
+        self.assertEqual(events, ['use', 'checkpoint', 'select', 'complete-notification'])
         self.assertEqual(len(notices), 1)
         self.assertIn('Theme created: Moonlight & <Brass>', notices[0])
         self.assertIn('Moonlight &amp; &lt;Brass&gt;', notices[0][-1])

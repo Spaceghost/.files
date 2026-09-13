@@ -52,6 +52,11 @@ class ThemedArtworkTests(unittest.TestCase):
         self.stack.enter_context(mock.patch.object(generator, 'STATE', self.state))
         self.stack.enter_context(mock.patch.object(generator, 'REPO', self.repo))
         self.stack.enter_context(mock.patch.object(art, 'REPO', self.repo))
+        # These tests are about what a painting does once asked for, so the
+        # schedule's own switch is on here; test_painting_policy covers it off.
+        self.stack.enter_context(mock.patch.object(
+            generator.painting_policy, 'load',
+            return_value={'scheduled': True, 'debut_painting': False}))
         self.stack.enter_context(mock.patch.object(generator, 'clean_environment', return_value={
             'HOME': str(self.root), 'CODEX_HOME': str(self.root / 'codex'),
             'PATH': '/usr/local/bin:/usr/bin:/bin'}))
