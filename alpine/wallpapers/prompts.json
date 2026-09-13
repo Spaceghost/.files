@@ -487,5 +487,27 @@
       "description": "A stop-motion animation still: handmade clay and fabric models, visible fingerprints and fibres, shallow macro focus and warm miniature stage lighting.",
       "enabled": true
     }
-  ]
+  ],
+  "providers": {
+    "design": [
+      "codex",
+      "claude",
+      "alienware"
+    ],
+    "image": [
+      "codex",
+      "alienware"
+    ],
+    "claude": {
+      "model": "claude-sonnet-5",
+      "timeout_seconds": 300
+    },
+    "alienware": {
+      "design_endpoint": "https://alienware.bishop-bearded.ts.net:11434",
+      "design_model": "qwen3.5:27b-text",
+      "timeout_seconds": 600,
+      "image_endpoint": "",
+      "image_model": ""
+    }
+  }
 }

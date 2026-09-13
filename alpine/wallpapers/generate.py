@@ -367,13 +367,42 @@ def retry_generation(operation, *, record, metadata, lock, phase, title, log):
                 'phase': phase, 'attempt': attempt, 'error': str(error),
                 'log': attempt_log.name})
             atomic_json(record, metadata)
-            if attempt == 4:
+            from new_themes import Exhausted
+            # Every provider has said it is out of credit or not logged in.
+            # Another attempt buys the same sentence eight seconds later.
+            if attempt == 4 or isinstance(error, Exhausted):
                 raise
             delay = 2 ** attempt
             phase_name = {'theme': 'theme design', 'scene': 'scene design', 'image': 'painting'}[phase]
             notify(f'Retrying {phase_name} · {attempt}/3',
                    f'{title}. Trying again in {delay} seconds.')
             time.sleep(delay)
+
+
+def paint(config, prompt, env, log):
+    """Ask each painter in turn until one produces an image.
+
+    Shorter than the design chain and for a plain reason: Claude does not
+    generate images, so putting it here would only spend a minute finding that
+    out. Codex paints, and the Alienware paints once something there can.
+    """
+    import providers
+    from new_themes import Exhausted, log_reason
+
+    log = Path(log)
+    failures, terminal = [], True
+    for position, name in enumerate(providers.chain(config, 'image')):
+        attempt = log if position == 0 else log.with_name(f'{log.stem}.{name}{log.suffix}')
+        try:
+            if name == 'codex':
+                return generate_native(config, prompt, env, attempt)
+            return providers.PAINTERS[name](config, prompt, env, attempt)
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+            reason = log_reason(attempt) or str(error)
+            failures.append(f'{name}: {reason}')
+            terminal = terminal and providers.exhausted(reason)
+    summary = '; '.join(failures) or 'no image provider is configured'
+    raise (Exhausted if terminal and failures else RuntimeError)(summary)
 
 
 def generate_native(config, prompt, env, log):
@@ -576,12 +605,15 @@ def run_once(scene_override=None, *, manual=False, activate=False, theme='active
                 notify('Space Ghost is painting…', scene['title'] + '. Your new artwork will ' + destination_notice + ' when ready.')
             prompt = prompt_catalog.compose_prompt(config, selected_theme, scene, insertion,
                                                    medium, seed)
-            def paint(log):
-                source_path = generate_native(config, prompt, env, log)
+            # Not named `paint`: a closure of that name shadowed the chain's own
+            # paint() and called itself, so every request stopped on a
+            # TypeError before any painter was asked.
+            def attempt(log):
+                source_path = paint(config, prompt, env, log)
                 return validate_image(source_path,
                                       Path(env['CODEX_HOME']) / 'generated_images', started)
             source, width, height = retry_generation(
-                paint, record=record, metadata=metadata, lock=lock, phase='image',
+                attempt, record=record, metadata=metadata, lock=lock, phase='image',
                 title=scene['title'], log=record.with_suffix('.jsonl'))
             digest = hashlib.sha256(source.read_bytes()).hexdigest()
             if has_symlink(gallery, REPO):

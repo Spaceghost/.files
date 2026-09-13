@@ -123,7 +123,46 @@ def failed(log, fallback):
     return RuntimeError(reason or fallback)
 
 
+class Exhausted(RuntimeError):
+    """Every provider refused for a reason that another attempt will not change."""
+
+
 def request_design(config, env, log, prompt, schema, command_builder):
+    """Ask each provider in turn until one designs it.
+
+    Codex first, because it is the only one that can also paint and so keeps a
+    whole run on one account; then Claude; then the household's own GPUs. The
+    first answer wins and the rest are never asked. Each provider writes its own
+    log beside the first, so a run that fell through two of them leaves three
+    files rather than one that has been overwritten twice.
+
+    A provider that says it is out of credit or not logged in has answered the
+    question for this run, and the chain records that. When every provider says
+    something of that kind the error is Exhausted, which the retry loop does not
+    retry: waiting eight seconds to be told about the same usage limit again
+    helps nobody.
+    """
+    import providers
+
+    order = providers.chain(config, 'design')
+    log = Path(log)
+    failures, terminal = [], True
+    for position, name in enumerate(order):
+        attempt = log if position == 0 else log.with_name(
+            f'{log.stem}.{name}{log.suffix}')
+        try:
+            if name == 'codex':
+                return codex_design(config, env, attempt, prompt, schema, command_builder)
+            return providers.DESIGNERS[name](config, env, attempt, prompt, schema)
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+            reason = log_reason(attempt) or str(error)
+            failures.append(f'{name}: {reason}')
+            terminal = terminal and providers.exhausted(reason)
+    summary = '; '.join(failures) or 'no design provider is configured'
+    raise (Exhausted if terminal and failures else RuntimeError)(summary)
+
+
+def codex_design(config, env, log, prompt, schema, command_builder):
     """Use the existing login for a bounded text-only proposal before painting."""
     with tempfile.TemporaryDirectory(prefix='oldbook-theme-') as directory:
         work = Path(directory)
