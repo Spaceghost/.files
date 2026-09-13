@@ -87,6 +87,7 @@ screen yet and you are the first.
 | `Super+Escape` | The desktop dissolves into the blurred painting: clock, caption card, the hour's Scripture | First sighting |
 | `Super+Shift+E` or click the battery | Five charcoal power tiles over the blurred desktop | First sighting |
 | `Super+G` | The painting picker with a rounded thumbnail on every row | Seen live |
+| Focus a floating window, then a tiled one | The caption strip flies home and rings leave its edge across the lower screen | The first version was seen live; the rebuilt wave is a first sighting |
 | Open a new terminal | The Space Ghost splash beside the painting | Seen live |
 | Skip a track in Pithos | A card slides in at the bottom right for four seconds | First sighting |
 | `oldbook-palette show` | Which accent this painting elected, and why | Command output only |
@@ -572,13 +573,8 @@ terminal size, left-aligned, with letter-spaced state text and a 28-pixel
 minimum height. Left click opens the window picker, middle click toggles
 floating, Shift+right-click opens `oldbook-decoration-settings`, `Super+Ctrl+B`
 returns it to the bottom. Tweak `~/.config/oldbook/decoration.json` through the
-editor. A strip landing in its band strikes the water: a train of rings leaves
-the strip's own edge and crosses the lower third of the screen in under a
-second, refracting a photograph of the screen rather than drawing over it, and
-nothing is drawn where the water is still. The file's `ripple` object shapes
-it -- `source` (`bar` or `point`), `duration`, `reach`, `spacing`, `strength`,
-`shade`, limits in `ripple.py` -- and it sits on the power ladder as `shaders`,
-so it never runs on battery. Evidence: [ripple-water](verification/ripple-water/README.md),
+editor. Landing in its band, the strip strikes the water; that is its own
+entry, [below](#the-strip-strikes-the-water). Evidence:
 [decoration-context](verification/decoration-context/bottom-strip.png),
 [decoration-framerate](verification/decoration-framerate/README.md),
 [ghost-observatory](verification/ghost-observatory/production-floating.png).
@@ -638,6 +634,39 @@ where the local Fossil review browser lives. Evidence:
 [ghostty-dropdown](verification/ghostty-dropdown/live.png),
 [console-monitor-foot](verification/console-monitor-foot/monitor.png),
 [strata](verification/strata/desktop.png).
+
+### The strip strikes the water
+
+When the caption strip lands in its band -- flying home from a floating
+window, or crossing to the other edge on `Super+Ctrl+B` or
+`oldbook-decoration toggle` -- a train of rings leaves its own outline and
+crosses the lower third of the screen in under a second. What bends is a
+photograph of the screen taken at the landing, refracted in a fragment shader
+rather than drawn over, so text and windows warp and settle as if under water;
+nothing is drawn where the water is still, so the live desktop shows through
+everywhere the wave is not. A strip the width of the screen sends a straight
+front up the band with arcs only at its ends. The first version (2026-09-09)
+lightened the whole band and started its ring in the middle of the band rather
+than at the strip; both were shader defects, fixed on 2026-09-13 and taken
+apart in [ripple-water](verification/ripple-water/README.md).
+
+Tweak: the `ripple` object in `~/.config/oldbook/decoration.json` --
+`source` (`bar`, the strip's outline, or `point`, a stone dropped at the middle
+of its edge), `duration` in seconds, `reach` (how far across the band the front
+gets by the end), `spacing` and `strength` in logical pixels (between crests,
+and at the deepest bend), `shade` (how much a crest catches the light). The
+limits are `LIMITS` in `desktop/.local/lib/oldbook/ripple.py`, a wrong value is
+reported by the settings editor rather than drawn, and a change is heard by
+the next landing rather than the next daemon. Preview a candidate without
+striking the desktop: `python3 verification/ripple-water/render.py . '{"strength": 20}'`.
+Off: `"ripple": {"enabled": false}`; it also stays quiet with desktop
+animations off and on every battery posture, since it sits on the power ladder
+as `shaders`. The surface is exempted from SwayFX's corner radius, shadow and
+blur (`layer_effects "oldbook-ripple"` in `swayfx/effects.conf`), and the
+photograph is of the band alone (`grim -g`), which cut the landing-to-first-
+frame gap from about 165 ms to 67 ms. Evidence:
+[ripple-water](verification/ripple-water/README.md) (offline render, numpy,
+not a compositor); the live strike since the rewrite awaits a look.
 
 ## Input and Apple keys
 
@@ -1229,6 +1258,7 @@ the notification centre and the splash refer to. The power deck makes no sound.
 | Sound cues | all six played once | waveforms | any cue firing from its own occasion |
 | GRUB menu | | simulation, not GRUB | everything, until the next boot |
 | Ambient screen | sensor read, both pause rules refused to write | | an eased fade, a real room change |
+| Landing ripple | the first version, before the rewrite | offline numpy render of the shader, not a compositor | the rebuilt strike by eye |
 
 Two gaps are worth stating plainly, neither of them from these rounds.
 

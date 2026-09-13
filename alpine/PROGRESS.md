@@ -2412,3 +2412,41 @@ login. No live compositor restart or fresh-machine boot is claimed. Evidence:
   checkout; the same change is committed at the renamed branch tip.
 - Not verified: a physical right-click on the live seat (only the private
   headless seat was driven) and a physical hour of rotation after a return.
+
+## The strip strikes the water — 2026-09-13
+
+- Jack: "I really like the new ripple.py, but it sort of brightens a bit
+  before rippling and it doesn't ripple out from the bar in a watery way."
+  Three shader defects made exactly that: straight colour written where GTK
+  4.22 composites the GLArea as premultiplied alpha, so every partly covered
+  pixel came out brighter than the desktop under it; the origin's y measured
+  from the region's top against a texture coordinate that runs from the
+  bottom, so the ring started about 260 logical pixels above the strip; and
+  one crest crossing the band's height in about 120 ms.
+- The wave is rebuilt around the strip: rings leave its outline as a
+  rounded-box distance field, the disturbed water is an annulus behind a
+  front that starts with no width, crest and trough shading averages to
+  zero, and the shader writes premultiplied colour. A `ripple` object in
+  decoration.json (`enabled`, `source`, `duration`, `reach`, `spacing`,
+  `strength`, `shade`) is validated by `ripple.settings()` through
+  `decoration.validate_settings()` and read at every strike; the settings
+  editor carries it through its Apply button.
+- Validation: 54 ripple tests, 75 across the decoration family and the
+  feature contracts pass. A numpy transliteration of both shaders was
+  rendered frame by frame over a synthetic screen
+  (`verification/ripple-water/`): the old shader lifted the band's mean
+  brightness by 0.10 at the strike and 0.18 by the end, the new one stays
+  within 0.005 of zero and touches only the water it disturbs.
+- Live: a concurrent session merged its band-only `grim -g` capture (about
+  165 ms to 67 ms from landing to first frame) and a SwayFX
+  `layer_effects "oldbook-ripple"` exemption on top (47d9a27dba,
+  bd98f3d360), updated `~/.files` and restarted the daemon at 18:30 UTC;
+  the log carries no warmup failure, so the GLSL compiles on the real
+  context. Check-ins 6ee76c6022, ac495c1f44, cfec78f611.
+- Not verified: the rebuilt strike by eye on the panel. The `enabled`
+  switch is in the vocabulary from its check-in on, but a running daemon
+  learns a new key only when restarted; until then a decoration.json that
+  sets it falls back to the defaults, as it does for any unknown key.
+- Catalogue: `landing-ripple` in rice.json, a subsection in RICE.md, and the
+  ripple's files, tests and evidence in the DECORATION-STYLE and MOTION
+  contracts.

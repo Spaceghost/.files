@@ -380,7 +380,10 @@
         "alpine/desktop/.local/lib/oldbook/air.py",
         "alpine/desktop/.local/lib/oldbook/window_context.py",
         "alpine/tests/test_window_context.py",
-        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py"
+        "alpine/desktop/.local/lib/oldbook/decoration_reserve.py",
+        "alpine/desktop/.local/lib/oldbook/ripple.py",
+        "alpine/tests/test_ripple.py",
+        "alpine/verification/ripple-water/*"
       ],
       "tests": [
         "test_decoration.py",
@@ -388,10 +391,12 @@
         "test_overlay_theme.py",
         "test_decoration_handoff.py",
         "test_air.py",
-        "test_window_context.py"
+        "test_window_context.py",
+        "test_ripple.py"
       ],
       "evidence": [
-        "verification/decoration-context/"
+        "verification/decoration-context/",
+        "verification/ripple-water/README.md"
       ]
     },
     {
@@ -432,7 +437,8 @@
         "alpine/desktop/.local/lib/oldbook/ui_priority.py",
         "alpine/desktop/.local/lib/oldbook/ui_command.py",
         "alpine/desktop/.local/lib/oldbook/graphics_warmup.py",
-        "alpine/desktop/.local/lib/oldbook/air.py"
+        "alpine/desktop/.local/lib/oldbook/air.py",
+        "alpine/desktop/.local/lib/oldbook/ripple.py"
       ],
       "tests": [
         "test_carousel_view.py",
@@ -444,7 +450,8 @@
         "test_decoration_handoff.py",
         "test_ui_priority_request.py",
         "test_ui_startup.py",
-        "test_air.py"
+        "test_air.py",
+        "test_ripple.py"
       ],
       "evidence": [
         "verification/decoration-framerate/README.md",
