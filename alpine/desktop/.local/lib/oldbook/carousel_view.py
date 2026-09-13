@@ -43,7 +43,7 @@ def card_layout(count, position, width, height):
         scale = 1.0 / (1.0 + .10 * distance)
         depth = -110.0 * distance
         x = width / 2 + card_width * (.29 * delta + .36 * math.tanh(delta * 1.4))
-        y = height * .47 + min(distance, 3) * 7
+        y = height * .47
         sine, cosine = math.sin(math.radians(angle)), math.cos(math.radians(angle))
         corners = []
         for local_x, local_y in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
