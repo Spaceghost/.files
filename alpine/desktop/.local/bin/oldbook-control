@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
-"""Space Ghost command deck. Fixed actions; menu text is never evaluated as shell."""
+"""Space Ghost command deck. Fixed actions; menu text is never evaluated as shell.
+
+A deck reports before it offers. Opening this one reads the desktop's own
+preference files -- the power posture, the active theme, the switches -- so the
+prompt says where the machine stands, and every switch says which way it is set
+before it is thrown. A row that carries neither mark is one whose state could
+not be read, and it claims nothing rather than guessing.
+
+Nothing on this deck moves. It is drawn once, when he opens it, and the only
+thing that changes it is him: no polling, no timers, no animation.
+
+The state reading is on the shared power ladder as `control-deck-state`. The
+posture itself is always read, because when the power is short that is the one
+line worth having; the rest of the state is what gets shed.
+"""
 import json
 import os
 from pathlib import Path
@@ -9,7 +23,22 @@ import sys
 
 HOME = Path.home()
 BIN = HOME / ".local/bin"
+REPO = Path(__file__).resolve().parents[4]
 PRIVACYCTL = Path("/usr/local/sbin/privacyctl")
+# OpenSnitch asks before an application may reach the network. Stopping the
+# daemon removes the nftables queue with it, so the switch is the real thing
+# rather than a preference an application could ignore.
+FIREWALL_SERVICE = "opensnitchd"
+
+# The ladder in power_source decides; an unregistered effect runs everywhere, so
+# a deck on a desktop without the power module still reports its switches.
+LADDER_EFFECT = "control-deck-state"
+# Two marks, kept apart on purpose: a switch is on or off, a choice out of many
+# is the selected one or not. The keyboard and screen menus already read this way.
+ON, OFF = "◉", "◌"
+PICKED, UNPICKED = "●", "○"
+# Where a row's keyboard shortcut starts, in the panel font's own columns.
+KEY_COLUMN = 46
 
 
 def run(args, **kwargs):
@@ -20,8 +49,8 @@ def notify(title, body):
     run(["notify-send", title, body])
 
 
-def choose(title, options):
-    answer = run([BIN / "oldbook-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(12, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
+def choose(title, options, lines=18):
+    answer = run([BIN / "oldbook-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(lines, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
     return answer.stdout.strip() if answer.returncode == 0 else ""
 
 
@@ -32,6 +61,171 @@ def launch(args):
     subprocess.Popen([str(arg) for arg in args], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
+def terminal(title, action):
+    """Open one of this deck's own reports; the deck holds the page, not a shell."""
+    launch(["foot", f"--title={title}", "-e", BIN / "oldbook-control", action])
+
+
+def terminal_wifi(title, action):
+    """Open one of the Wi-Fi deck's reports; that command holds its own pages."""
+    launch(["foot", f"--title={title}", "-e", BIN / "oldbook-wifi", action])
+
+
+def hold():
+    print("\nPress Enter to return to the control room.")
+    try:
+        input()
+    except EOFError:
+        pass
+
+
+_LOADED = False
+
+
+def library():
+    """Put the desktop's own modules on the path, once and without duplicates."""
+    global _LOADED
+    if not _LOADED:
+        sys.path[:0] = [str(BIN.parent / "lib/oldbook"),
+                        str(REPO / "alpine/desktop/.local/lib/oldbook"),
+                        str(REPO / "alpine/wallpapers")]
+        _LOADED = True
+
+
+def read_json(path):
+    try:
+        document = json.loads(Path(path).read_text())
+    except (OSError, ValueError):
+        return {}
+    return document if isinstance(document, dict) else {}
+
+
+def config(name):
+    return Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config")) / "oldbook" / name
+
+
+def probe(name, *arguments):
+    """A helper's own JSON answer, or None when it cannot give one."""
+    if not shutil.which(str(BIN / name)):
+        return None
+    result = run([BIN / name, *arguments], capture_output=True, text=True)
+    try:
+        document = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        return None
+    return document if isinstance(document, dict) else None
+
+
+def posture():
+    """The desktop's shared power posture, or None where there is no module."""
+    library()
+    try:
+        import power_source
+        return power_source.published()
+    except (ImportError, OSError, ValueError, RuntimeError):
+        return None
+
+
+def detailed(record):
+    """May the deck read the rest of the desktop's state at this posture?"""
+    library()
+    try:
+        import power_source
+        return power_source.allows(LADDER_EFFECT, (record or {}).get("posture"))
+    except (ImportError, OSError, ValueError, RuntimeError):
+        return True
+
+
+def power_summary(record):
+    """One short phrase for the prompt: where the power comes from, and how much."""
+    if not record or not record.get("posture"):
+        return ""
+    capacity = record.get("capacity")
+    charge = f" {capacity}%" if isinstance(capacity, int) else ""
+    shed = record.get("shed") or []
+    held = f" · SHEDDING {len(shed)}" if shed else ""
+    return f"{str(record['posture']).replace('-', ' ').upper()}{charge}{held}"
+
+
+def themes():
+    """(active identity, catalogue) from the same list every overlay reads."""
+    library()
+    try:
+        from theme_catalog import available_themes
+        active = (REPO / "alpine/themes/current").read_text().strip()
+        return active, available_themes(REPO)
+    except (ImportError, OSError, ValueError, RuntimeError):
+        return None, []
+
+
+def night_light():
+    """The three answers oldbook-sun-light gives, without waking wlsunset."""
+    if not config("location.json").is_file():
+        return "unconfigured"
+    return run(["pgrep", "-u", str(os.getuid()), "-x", "wlsunset"],
+               stdout=subprocess.DEVNULL).returncode == 0
+
+
+def switches(record):
+    """Every switch the deck can read from a file, with None for unreadable."""
+    state = dict.fromkeys(("theme", "night", "cues", "card", "breath", "watch",
+                           "cat", "ambient", "firewall"))
+    if not detailed(record):
+        return state
+    active, catalogue = themes()
+    state["theme"] = next((entry["name"] for entry in catalogue
+                           if entry["id"] == active), active or None)
+    state["night"] = night_light()
+    state["cues"] = read_json(config("sound.json")).get("enabled", True) is not False
+    state["card"] = read_json(config("osd.json")).get("card", True) is not False
+    state["ambient"] = bool(read_json(config("ambient-display.json")).get("enabled"))
+    state["firewall"] = firewall_running()
+    library()
+    try:
+        import air
+        state["breath"] = bool(air.read_preferences()["caption"])
+    except (ImportError, OSError, ValueError, KeyError):
+        pass
+    try:
+        import watch_mode
+        state["watch"] = bool(watch_mode.engaged())
+    except (ImportError, OSError, ValueError, RuntimeError):
+        pass
+    try:
+        import cat_interactions
+        state["cat"] = bool(cat_interactions.enabled())
+    except (ImportError, OSError, ValueError, RuntimeError):
+        pass
+    return state
+
+
+def columns(text):
+    """Display columns in the panel font: a Nerd Font icon takes two, the rest one."""
+    return sum(2 if 0xE000 <= ord(letter) <= 0xF8FF or 0xF0000 <= ord(letter) <= 0xFFFFD
+               else 1 for letter in text)
+
+
+def row(glyph, text, key=""):
+    """One row, with the keyboard shortcut of the rows that have one aligned."""
+    label = f"{glyph}  {text}"
+    if not key:
+        return label
+    return label + " " * max(2, KEY_COLUMN - columns(label)) + key
+
+
+def switch(glyph, name, value, when_on, when_off, key="", unknown=""):
+    """One row that says which way it is set before it is thrown."""
+    if value is None:
+        return row(glyph, name + (f" · {unknown}" if unknown else ""), key)
+    return row(glyph, f"{name} · {ON if value else OFF} "
+                      f"{when_on if value else when_off}", key)
+
+
+def rule(name):
+    """A section rule. Selecting one simply draws the deck again."""
+    return f"──  {name}  " + "─" * max(3, KEY_COLUMN + 8 - columns(name))
+
+
 def windows():
     answer = run(["swaymsg", "-t", "get_tree", "-r"], capture_output=True, text=True)
     if answer.returncode:
@@ -40,7 +234,7 @@ def windows():
     def walk(node, workspace=""):
         if node.get("type") == "workspace":
             workspace = node.get("name", "")
-        app = node.get("app_id") or node.get("window_properties", {}).get("class")
+        app = node.get("app_id") or (node.get("window_properties") or {}).get("class")
         if app:
             title = " ".join(str(node.get("name", app)).split())[:70]
             label = f"{workspace}  ·  {app}  ·  {title}  [{node['id']}]"
@@ -61,13 +255,74 @@ def firewall():
         notify("Application firewall", "OpenSnitch is still being installed. No security state is inferred from this menu.")
         return
     if run(["pgrep", "-u", str(os.getuid()), "-f", "(^|/)opensnitch-ui( |$)"], stdout=subprocess.DEVNULL).returncode == 0:
+        # Qt reaches Sway as a native surface or through Xwayland; try both names
+        # rather than assume, and say so plainly when neither has a window up.
         run(["swaymsg", '[app_id=".*opensnitch.*"] focus'])
+        run(["swaymsg", '[class=".*[Oo]pen[Ss]nitch.*"] focus'])
         notify("Application firewall", "OpenSnitch is already running. Open its window from the tray if hidden.")
         return
     runtime = Path(os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")) / "opensnitch"
     runtime.mkdir(mode=0o700, exist_ok=True)
     os.chmod(runtime, 0o700)
     launch(["opensnitch-ui", "--socket", f"unix://{runtime / 'osui.sock'}"])
+
+
+def openrc_root():
+    return Path(os.environ.get("OLDBOOK_OPENRC_ROOT", "/run/openrc"))
+
+
+def initd_root():
+    return Path(os.environ.get("OLDBOOK_INITD_ROOT", "/etc/init.d"))
+
+
+def firewall_running():
+    """True up, False down, None when there is nothing to report.
+
+    Read from OpenRC's own state directory rather than by asking `rc-service`,
+    because drawing this deck must not run anything: every other switch here is
+    a file read, and a deck that shelled out once per row would be a deck that
+    costs something to look at. OpenRC keeps a symlink per started service, so
+    the file is the answer.
+    """
+    if not (initd_root() / FIREWALL_SERVICE).is_file():
+        return None
+    started = openrc_root() / "started"
+    if not started.is_dir():
+        return None
+    return (started / FIREWALL_SERVICE).exists()
+
+
+def firewall_toggle():
+    """Stop or start the daemon, asking first only in the direction that costs.
+
+    Every other switch on this deck throws silently, because the worst a wrong
+    one does is change how the desktop looks. This one can leave every
+    application on the machine reaching the network unasked, so the off
+    direction is confirmed and the on direction is not.
+    """
+    running = firewall_running()
+    if running is None:
+        notify("Application firewall",
+               "OpenSnitch's service could not be read, so nothing was changed.")
+        return
+    if running:
+        answer = choose("LOWER THE FIREWALL?", [
+            f"{OFF}  Leave it filtering",
+            f"{ON}  Stop it \u00b7 applications connect freely",
+        ], lines=2)
+        if not answer.startswith(ON):
+            return
+        action, told = "stop", "Firewall down. Applications reach the network unasked."
+    else:
+        action, told = "start", "Firewall up. New connections need your approval again."
+    result = run(["doas", "-n", "rc-service", FIREWALL_SERVICE, action],
+                 capture_output=True, text=True)
+    if result.returncode != 0:
+        reason = (result.stderr or "").strip().splitlines()
+        notify("Application firewall",
+               f"OpenSnitch could not be {action}ped. " + (reason[-1] if reason else "doas refused."))
+        return
+    notify("Application firewall", told)
 
 
 def network_report():
@@ -78,11 +333,33 @@ def network_report():
     run(["ip", "route"])
     print("\nRadio state:")
     run([BIN / "oldbook-panel-status", "radio"])
-    print("\nPress Enter to return to the control room.")
-    try:
-        input()
-    except EOFError:
-        pass
+    hold()
+
+
+def power_report():
+    """Where the power comes from and what the desktop still runs on it."""
+    print("\033[1;35mSPACE GHOST · POWER POSTURE\033[0m\n")
+    run([BIN / "oldbook-power-mode", "show"])
+    print("\nWhat still runs at each posture:\n")
+    run([BIN / "oldbook-power-mode", "ladder"])
+    hold()
+
+
+def cat_report():
+    """What the cat watcher sees, and what it has done to the fans."""
+    print("\033[1;35mSPACE GHOST · BED MODE\033[0m\n")
+    run([BIN / "oldbook-cat", "status"])
+    print("\nInteractions:\n")
+    run([BIN / "oldbook-cat", "interactions"])
+    print("\nFans:\n")
+    run([BIN / "oldbook-cat", "fans"])
+    hold()
+
+
+def rice_report():
+    print("\033[1;35mSPACE GHOST · THE RICE, CATALOGUED\033[0m\n")
+    run([BIN / "oldbook-rice", "list"])
+    hold()
 
 
 def radio_off():
@@ -95,7 +372,9 @@ def radio_off():
 
 
 def power():
-    options = {"󰌾  Lock the Ghost Planet": lambda: launch([BIN / "oldbook-lock"]), "󰒲  Lock and suspend": suspend, "󰍃  End Sway session…": logout}
+    options = {row("󰌾", "Lock the Ghost Planet", "Super+Escape"): lambda: launch([BIN / "oldbook-lock"]),
+               row("󰒲", "Lock and suspend"): suspend,
+               row("󰍃", "End Sway session…"): logout}
     selected = choose("SESSION CONTROL", list(options))
     if selected in options:
         options[selected]()
@@ -180,6 +459,139 @@ def ambient_display():
         run([BIN / "oldbook-ambient-display", options[selected]])
 
 
+def theme():
+    """Switch the whole desktop's theme, from the list every overlay reads."""
+    active, catalogue = themes()
+    if not catalogue:
+        notify("Desktop theme", "The theme catalogue could not be read from this checkout.")
+        return
+    options = {}
+    for entry in sorted(catalogue, key=lambda theme: theme["name"].casefold()):
+        chosen = entry["id"] == active
+        mark = PICKED if chosen else UNPICKED
+        tail = " · reapply across the desktop" if chosen else ""
+        options[f"{mark}  {entry['name']}{tail}"] = entry["id"]
+    workshop = "󰸉  Paint a new one · the gallery's own theme workshop"
+    options[workshop] = None
+    name = next((entry["name"] for entry in catalogue if entry["id"] == active), active)
+    selected = choose(f"DESKTOP THEME · {str(name or 'UNKNOWN').upper()}", list(options))
+    if selected not in options:
+        return
+    if options[selected] is None:
+        launch([BIN / "oldbook-wallpaper", "pick"])
+    else:
+        # Switching redraws every application; it must never block this menu.
+        launch([BIN / "oldbook-theme", "use", options[selected], "--notify"])
+
+
+def power_posture():
+    """Hold a posture by hand, or hand the decision back to the batteries."""
+    record = posture()
+    if record is None:
+        notify("Power posture", "This desktop has no shared power posture module.")
+        return
+    library()
+    try:
+        from power_source import POSTURES
+    except ImportError:
+        POSTURES = ("mains", "battery", "battery-low", "battery-critical")
+    held = record.get("override")
+    measured = str(record.get("measured", "unknown")).replace("-", " ")
+    options = {f"{PICKED if held is None else UNPICKED}  Automatic · follow the "
+               f"batteries, reading {measured} now": "auto"}
+    for name in POSTURES:
+        mark = PICKED if held == name else UNPICKED
+        options[f"{mark}  Hold {name.replace('-', ' ')}"] = name
+    report = "󰊚  What still runs at each posture"
+    options[report] = None
+    heading = f"POWER POSTURE · {power_summary(record) or 'UNKNOWN'}"
+    selected = choose(heading, list(options))
+    if selected not in options:
+        return
+    if options[selected] is None:
+        terminal("Power Posture", "power-report")
+    else:
+        run([BIN / "oldbook-power-mode", "override", options[selected]])
+
+
+def watch():
+    """Watch mode: a guard against a cat on the keyboard, and never a lock."""
+    library()
+    try:
+        import watch_mode
+        engaged = bool(watch_mode.engaged())
+        leaving = watch_mode.HOW_TO_LEAVE
+    except (ImportError, OSError, ValueError, RuntimeError):
+        engaged, leaving = False, "Hold  Super + Shift + Escape  for a second to return"
+    if engaged:
+        options = {"◉  Release the keyboard now": "stop", "←  Leave it watching": None}
+    else:
+        options = {"󰈈  Engage · the keyboard stops answering": "start",
+                   "←  Not now": None}
+    selected = choose(f"WATCH MODE · {leaving.upper()}", list(options))
+    if selected in options and options[selected]:
+        launch([BIN / "oldbook-watch", options[selected]])
+
+
+def cat():
+    """Bed mode: the machine runs warm on purpose while she is lying on it."""
+    state = probe("oldbook-cat", "status", "--json") or {}
+    record = state.get("record") or {}
+    bed = record.get("bed") or {}
+    enabled = state.get("enabled")
+    running = bool(bed.get("running"))
+    if not shutil.which(str(BIN / "oldbook-cat")):
+        notify("Bed mode", "oldbook-cat is not installed on this desktop yet.")
+        return
+    options = {}
+    if enabled:
+        options["◉  Watching for her · stop watching"] = "off"
+    else:
+        options["◌  Watch for her · locked, warm, and only on mains"] = "on"
+    if running:
+        options["󰄛  She is abed · give the fans back now"] = "stop"
+    options["󰊚  What the watcher sees · status, interactions, fans"] = None
+    heading = ("BED MODE · SHE IS ABED" if running else
+               "BED MODE · WATCHING" if enabled else "BED MODE · OFF")
+    selected = choose(heading, list(options))
+    if selected not in options:
+        return
+    if options[selected] is None:
+        terminal("Bed Mode", "cat-report")
+    else:
+        launch([BIN / "oldbook-cat", options[selected]])
+
+
+def rice():
+    """The tour of everything on this desktop that exists to be looked at.
+
+    Reading only. The card's own Try link still runs an entry; a menu on the
+    command deck describes it and says how to set it off, so nothing on the
+    desktop changes because he went looking at the list of what it can do.
+    """
+    library()
+    try:
+        import rice_tour
+        entries = rice_tour.load()
+        tried = set(rice_tour.read_state().get("tried") or ())
+    except (ImportError, OSError, ValueError, RuntimeError, KeyError):
+        notify("The rice", "The rice list could not be read from this desktop.")
+        return
+    options = {}
+    for entry in entries:
+        mark = PICKED if entry["id"] in tried else UNPICKED
+        options[f"{mark}  {rice_tour.short_date(entry['date'])}  {entry['title']}"] = entry
+    listing = "󰋖  The whole list, in a terminal"
+    options[listing] = None
+    selected = choose(f"THE RICE · {len(tried)} OF {len(entries)} TRIED", list(options))
+    if selected not in options:
+        return
+    if options[selected] is None:
+        terminal("The Rice", "rice-report")
+    else:
+        notify(options[selected]["title"], rice_tour.describe(options[selected]))
+
+
 def suspend():
     if run([BIN / "oldbook-lock"]).returncode == 0:
         run(["loginctl", "suspend"])
@@ -192,89 +604,158 @@ def logout():
 
 def track_card():
     """Switch the now-transmitting card on or off for the next daemon start."""
-    path = Path(os.environ.get("XDG_CONFIG_HOME", HOME / ".config")) / "oldbook/osd.json"
-    try:
-        settings = json.loads(path.read_text())
-        if not isinstance(settings, dict):
-            settings = {}
-    except (OSError, ValueError):
-        settings = {}
+    path = config("osd.json")
+    settings = read_json(path)
     wanted = settings.get("card", True) is False
     settings["card"] = wanted
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + f".{os.getpid()}.tmp")
     temporary.write_text(json.dumps(settings, indent=2) + "\n")
     temporary.replace(path)
+    # oldbook-osd reads this once, when it starts, so say when it takes hold
+    # rather than let the pill imply the next song is already covered.
     run(["notify-send", "-h", "string:x-canonical-private-synchronous:oldbook-osd-card",
          "Now transmitting",
-         "Track cards on · they announce the next song" if wanted else
-         "Track cards off · the music plays unannounced"])
+         "Track cards on from the next session · they announce the song" if wanted else
+         "Track cards off from the next session · the music plays unannounced"])
 
 
-def desktop_breath():
-    """Let the painting and the caption follow the keyboard's breath, or hold still."""
-    sys.path.insert(0, str(BIN.parent / "lib/oldbook"))
+# The painting never breathes. `air` forces this half off at every read and
+# write; the deck pins it too, so no row, argument or future edit here can put a
+# moving image back on the desktop. The caption's accent wash is a colour on a
+# small strip, driven by his own keystrokes, and is still a real choice.
+BREATH_WALLPAPER = False
+
+
+def breath_preferences(caption):
+    """Exactly what the deck writes: the caption may breathe, the painting may not."""
+    return {"wallpaper": BREATH_WALLPAPER, "caption": bool(caption)}
+
+
+def caption_breath():
+    """Let the caption's wash follow the keyboard's breath, or hold still."""
+    library()
     import air
-    settings = air.read_preferences()
-    wanted = not (settings["wallpaper"] and settings["caption"])
-    air.write_preferences({"wallpaper": wanted, "caption": wanted})
+    wanted = not air.read_preferences()["caption"]
+    air.write_preferences(breath_preferences(wanted))
     run(["notify-send", "-h", "string:x-canonical-private-synchronous:oldbook-breath",
-         "Desktop breath",
-         "The painting breathes with your keys" if wanted else
-         "The painting holds its breath"])
+         "Caption breath",
+         "The caption wash follows your keys" if wanted else
+         "The caption wash holds still"])
+
+
+def deck(section="main", record=None):
+    """The rows of one section, in order, with the state each one can report.
+
+    The posture is read once for the whole draw and handed in, so the prompt and
+    the rows can never disagree about where the power is coming from.
+    """
+    if section == "network":
+        return [
+            # The Wi-Fi deck owns everything that transmits.  Choosing a network
+            # is why this section gets opened away from home; the read-only
+            # report below it is why it gets opened at home.
+            (row("󰤨", "Wi-Fi · choose a network"),
+             lambda: launch([BIN / "oldbook-wifi", "menu"])),
+            (row("󰉹", "Known networks · saved, held and forgotten"),
+             lambda: launch([BIN / "oldbook-wifi", "known"])),
+            (row("󰄨", "Air survey · what is on each channel"),
+             lambda: terminal_wifi("Air Survey", "survey")),
+            (row("󰀃", "Hotspot · serve a network"),
+             lambda: launch([BIN / "oldbook-wifi", "hotspot"])),
+            (row("󰤨", "Connection report · no scanning"),
+             lambda: terminal("Transmission Status", "network-report")),
+            (switch("󰒃", "Application firewall", firewall_running(),
+                    "applications ask first", "applications connect freely",
+                    unknown="state unreadable"), firewall_toggle),
+            (row("󰒃", "OpenSnitch window · rules and connections"), firewall),
+            (row("󰤭", "Turn radios off"), radio_off),
+            (row("󰏪", "Privacy controller guide"),
+             lambda: launch(["foot", "--title=Radio Controls", "-e", "less", REPO / "alpine/security/radio/README.md"])),
+        ]
+    record = posture() if record is None else record
+    state = switches(record)
+    night = state["night"]
+    return [
+        (rule("THE SHIP"), None),
+        (row("󰊠", "Applications", "Super+D"), lambda: launch([BIN / "oldbook-menu"])),
+        (row("▦", "Expo · all workspaces", "Super+E"), lambda: launch([BIN / "oldbook-expo"])),
+        (row("󰖯", "Switch window"), windows),
+        (row("◈", "Ghostty terminal", "Super+Enter"), lambda: launch(["ghostty"])),
+        (row("󰂚", "Notifications"), lambda: run(["swaync-client", "-t", "-sw"])),
+        (rule("THE LOOK"), None),
+        (row("󰸉", "Artwork gallery", "Super+G"), lambda: launch([BIN / "oldbook-wallpaper", "pick"])),
+        (row("󰸌", f"Theme · {state['theme'] or 'the catalogue is unreadable'}"), theme),
+        (row("↓", "Bottom decoration", "Super+Ctrl+B"), lambda: launch([BIN / "oldbook-decoration", "bottom"])),
+        (row("▷", "Video background · choose or stop"), lambda: launch([BIN / "oldbook-video-background", "picker"])),
+        (row("▶", "YouTube · desktop player & PiP"), lambda: launch([BIN / "oldbook-youtube", "menu"])),
+        (row("󰽪", "The rice, catalogued · what there is to look at"), rice),
+        (rule("THE LIGHT"), None),
+        (row("☀", "Keyboard glow · breathing and brightness"), keyboard),
+        (switch("󰃞", "Ambient screen", state["ambient"],
+                "following the room", "your own brightness"), ambient_display),
+        (row("󰖨", "Night light · needs a location.json first") if night == "unconfigured"
+         else switch("󰖨", "Night light", night, "warm after sunset", "daytime colour"),
+         lambda: run([BIN / "oldbook-sun-light", "toggle"])),
+        (switch("󰗑", "Caption breath", state["breath"],
+                "the caption wash follows your keys", "the caption wash holds still"),
+         caption_breath),
+        (rule("THE SOUND"), None),
+        (row("󰕾", "Sound studio · mixer and microphone"), lambda: launch(["pavucontrol"])),
+        (switch("󰎈", "Sound cues", state["cues"], "the Ghost Planet chimes", "silence"),
+         lambda: run([BIN / "oldbook-sound", "toggle"])),
+        (switch("󰋋", "Now transmitting", state["card"],
+                "the track is announced", "the music plays unannounced"), track_card),
+        (rule("THE MACHINE"), None),
+        (row("󰚥", f"Power posture · {power_summary(record).lower() or 'unknown'}"), power_posture),
+        (row("󰍛", "Reactor · CPU, memory, processes"), lambda: launch(["foot", "--title=Ghost Reactor", "-e", "btop"])),
+        # The gesture that engages and releases it is the submenu's whole
+        # heading, where it is read rather than squeezed into this row's tail.
+        (switch("󰈈", "Watch mode", state["watch"],
+                "the keyboard is guarded", "the keyboard answers"), watch),
+        (switch("󰄛", "Bed mode for the cat", state["cat"],
+                "watching for her", "not watching"), cat),
+        (row("󰤨", "Transmissions · network and privacy"), lambda: menu("network")),
+        (switch("󰒃", "Application firewall", state["firewall"],
+                "applications ask first", "applications connect freely",
+                unknown="state unreadable"), firewall_toggle),
+        (rule("THE PLANET"), None),
+        (row("󰘧", "Edit the Ghost Planet · Fossil checkout"), lambda: launch(["thunar", REPO])),
+        (row("󰋖", "Help · desktop commands and shortcuts"), lambda: launch(["foot", "--title=Ghost Planet Help", "-e", "less", REPO / "alpine/desktop/README.md"])),
+        (row("󰌾", "Session · lock, suspend, logout"), power),
+    ]
 
 
 def menu(section="main"):
-    items = {
-        "main": {
-            "󰊠  Applications                              Super+D": lambda: launch([BIN / "oldbook-menu"]),
-            "▦  Expo · all workspaces                  Super+E": lambda: launch([BIN / "oldbook-expo"]),
-            "󰖯  Switch window": windows,
-            "↓  Bottom decoration                       Super+Ctrl+B": lambda: launch([BIN / "oldbook-decoration", "bottom"]),
-            "󰸉  Artwork gallery": lambda: launch([BIN / "oldbook-wallpaper", "pick"]),
-            "▶  YouTube · desktop player & PiP": lambda: launch([BIN / "oldbook-youtube", "menu"]),
-            "▷  Video background · choose or stop": lambda: launch([BIN / "oldbook-video-background", "picker"]),
-            "◈  Ghostty terminal": lambda: launch(["ghostty"]),
-            "󰍛  Reactor · CPU, memory, processes": lambda: launch(["foot", "--title=Ghost Reactor", "-e", "btop"]),
-            "󰤨  Transmissions · network and privacy": lambda: menu("network"),
-            "󰕾  Sound studio · mixer and microphone": lambda: launch(["pavucontrol"]),
-            "☀  Keyboard glow · breathing and brightness": keyboard,
-            "󰖨  Night light · warm after sunset, needs location.json": lambda: run([BIN / "oldbook-sun-light", "toggle"]),
-            "󰃞  Ambient screen · the panel follows the room light": ambient_display,
-            "󰎈  Sound cues · the Ghost Planet chimes on and off": lambda: run([BIN / "oldbook-sound", "toggle"]),
-            "󰎈  Now transmitting · announce the track on screen": track_card,
-            "󰗑  Desktop breath · the painting swells with your typing": desktop_breath,
-            "󰒃  Application firewall": firewall,
-            "󰂚  Notifications": lambda: run(["swaync-client", "-t", "-sw"]),
-            "󰘧  Edit the Ghost Planet · Fossil checkout": lambda: launch(["thunar", HOME / ".files"]),
-            "󰌾  Session · lock, suspend, logout": power,
-            "?  Help · desktop commands and shortcuts": lambda: launch(["foot", "--title=Ghost Planet Help", "-e", "less", HOME / ".files/alpine/desktop/README.md"]),
-        },
-        "network": {
-            # The Wi-Fi deck owns everything that transmits.  Choosing a network
-            # is why this section gets opened away from home, so it leads; the
-            # read-only report below it is why it gets opened at home.
-            "󰤨  Wi-Fi · choose a network": lambda: launch([BIN / "oldbook-wifi", "menu"]),
-            "󰉹  Known networks · saved, held and forgotten": lambda: launch([BIN / "oldbook-wifi", "known"]),
-            "󰄨  Air survey · what is on each channel": lambda: launch(["foot", "--title=Air Survey", "-e", BIN / "oldbook-wifi", "survey"]),
-            "󰀃  Hotspot · serve a network": lambda: launch([BIN / "oldbook-wifi", "hotspot"]),
-            "󰤨  Connection report · no scanning": lambda: launch(["foot", "--title=Transmission Status", "-e", BIN / "oldbook-control", "network-report"]),
-            "󰒃  Application firewall": firewall,
-            "󰤭  Turn radios off": radio_off,
-            "󰏪  Privacy controller guide": lambda: launch(["foot", "--title=Radio Controls", "-e", "less", HOME / ".files/alpine/security/radio/README.md"]),
-        },
-    }
-    options = items[section]
-    selected = choose("SPACE GHOST · CONTROL DECK" if section == "main" else "TRANSMISSION CONTROL", list(options))
-    if selected in options:
-        options[selected]()
+    record = posture() if section == "main" else None
+    options = dict(deck(section, record))
+    if section == "main":
+        summary = power_summary(record)
+        title = "SPACE GHOST · CONTROL DECK" + (f" · {summary}" if summary else "")
+    else:
+        title = "TRANSMISSION CONTROL"
+    selected = choose(title, list(options))
+    if selected not in options:
+        return
+    action = options[selected]
+    # A section rule is not an action; picking one simply draws the deck again.
+    (action or (lambda: menu(section)))()
+
+
+REPORTS = {"network-report": network_report, "power-report": power_report,
+           "cat-report": cat_report, "rice-report": rice_report}
+DIRECT = {"windows": windows, "firewall": firewall, "power": power,
+          "firewall-toggle": firewall_toggle,
+          "keyboard": keyboard, "theme": theme, "posture": power_posture,
+          "watch": watch, "cat": cat, "rice": rice, "breath": caption_breath,
+          "ambient": ambient_display, **REPORTS}
 
 
 if __name__ == "__main__":
     action = sys.argv[1] if len(sys.argv) > 1 else "main"
     if action in ("main", "network"):
         menu(action)
-    elif action in ("windows", "firewall", "network-report", "power", "keyboard"):
-        {"windows": windows, "firewall": firewall, "network-report": network_report, "power": power, "keyboard": keyboard}[action]()
+    elif action in DIRECT:
+        DIRECT[action]()
     else:
-        raise SystemExit("usage: oldbook-control [windows|network|network-report|firewall|power|keyboard]")
+        raise SystemExit("usage: oldbook-control [" + "|".join(("main", "network", *DIRECT)) + "]")
