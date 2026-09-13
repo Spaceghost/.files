@@ -10,6 +10,42 @@ import tempfile
 
 from theme_catalog import has_symlink, safe_theme_id
 
+
+def strip_jsonc_comments(text):
+    """Drop // line comments outside strings, so plain json.loads can read a .jsonc file.
+
+    Waybar's own parser accepts these comments, which is why the base config
+    documents its per-core CPU format inline; a naive regex would also cut a
+    "//" that only looks like a comment because it sits inside a string.
+    """
+    result, in_string, escaped = [], False, False
+    index, length = 0, len(text)
+    while index < length:
+        char = text[index]
+        if in_string:
+            result.append(char)
+            if escaped:
+                escaped = False
+            elif char == '\\':
+                escaped = True
+            elif char == '"':
+                in_string = False
+            index += 1
+            continue
+        if char == '"':
+            in_string = True
+            result.append(char)
+            index += 1
+            continue
+        if char == '/' and index + 1 < length and text[index + 1] == '/':
+            index = text.find('\n', index)
+            if index == -1:
+                break
+            continue
+        result.append(char)
+        index += 1
+    return ''.join(result)
+
 DESIGN_SCHEMA = {
     'type': 'object', 'additionalProperties': False,
     'properties': {
@@ -292,7 +328,7 @@ def render_profile(repo, theme):
     change('.config/fuzzel/fuzzel.ini', r'^width=48$', f'width={design["launcher_width"]}')
     change('.config/fuzzel/fuzzel.ini', r'^radius=.*', f'radius={radius}')
     change('.config/fuzzel/fuzzel.ini', r'^horizontal-pad=.*', f'horizontal-pad={spacing + 16}')
-    bar = json.loads(files['.config/waybar/config.jsonc'])
+    bar = json.loads(strip_jsonc_comments(files['.config/waybar/config.jsonc']))
     bar[0]['position'] = design['bar_position']
     bar[0]['spacing'] = max(2, spacing // 2)
     files['.config/waybar/config.jsonc'] = json.dumps(bar, indent=2) + '\n'
