@@ -1422,15 +1422,27 @@ def daemon():
 
         def photograph_output():
             try:
-                ripple.capture(name, photograph)
+                # area is in the output's own logical coordinates; grim's -g
+                # wants the compositor's global ones, the same space
+                # output_rect's own x/y are already in. Capturing exactly this
+                # rectangle -- rather than the whole panel, cropped down after
+                # -- is what actually cost the delay: measured live, capturing
+                # the whole panel took roughly 150ms of a 165ms gap between
+                # landing and the first visible frame; capturing just this
+                # region measured at 67ms.
+                geometry = ripple.geometry_string(
+                    output_rect.get('x', 0) + area['x'], output_rect.get('y', 0) + area['y'],
+                    area['width'], area['height'])
+                ripple.capture(photograph, geometry=geometry)
                 data = photograph.read_bytes()
                 width, height, offset = ripple.parse_ppm(data)
-                # grim hands back the output's real, physical pixels; area is
-                # in the compositor's logical units, same as sway reports the
-                # output itself in. A HiDPI panel needs the two reconciled or
-                # the crop lands on the wrong, wrongly-sized slice entirely.
+                # grim already cropped to exactly this rectangle at the
+                # output's own scale, so what it captured *is* the region:
+                # crop() only still needs to reconcile grim's physical pixels
+                # against area's logical size, from a zero origin.
                 scale = monitor.get_scale_factor() if monitor is not None else 1
-                pixels, span, thickness = ripple.crop(data, offset, width, height, area, scale)
+                local_area = {'x': 0, 'y': 0, 'width': area['width'], 'height': area['height']}
+                pixels, span, thickness = ripple.crop(data, offset, width, height, local_area, scale)
             except Exception as error:
                 print('ripple capture: ' + type(error).__name__, file=sys.stderr)
                 GLib.idle_add(release)

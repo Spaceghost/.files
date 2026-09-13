@@ -280,10 +280,28 @@ def allowed(animations=True, current=None):
     return bool(power_source.allows(EFFECT, current=current))
 
 
-def capture(output_name, destination):
-    """Photograph one output through wlr-screencopy, as a binary pixmap."""
-    subprocess.run(['grim', '-o', str(output_name), '-t', 'ppm', str(destination)],
-                   check=True, stdin=subprocess.DEVNULL,
+def geometry_string(x, y, width, height):
+    """grim's -g syntax: the same "X,Y WxH" slurp already speaks."""
+    return f'{x},{y} {width}x{height}'
+
+
+def capture(destination, geometry=None, output_name=None):
+    """Photograph the screen through wlr-screencopy, as a binary pixmap.
+
+    A geometry crops at the source rather than after: grim resolves it
+    against the output's own scale itself, so the capture, its encode and the
+    disk round-trip only ever pay for the pixels the ripple actually needs.
+    Measured live, capturing the whole panel just to throw two-thirds of it
+    away a moment later in crop() was the largest single cost in the whole
+    strike -- about 150ms of a roughly 165ms gap between landing and the
+    first visible frame, dwarfing everything else in the chain.
+    """
+    if geometry is None and output_name is None:
+        raise ValueError('capture needs a geometry or an output name')
+    command = ['grim']
+    command += ['-g', geometry] if geometry is not None else ['-o', str(output_name)]
+    command += ['-t', 'ppm', str(destination)]
+    subprocess.run(command, check=True, stdin=subprocess.DEVNULL,
                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                    timeout=4)
     return Path(destination)
