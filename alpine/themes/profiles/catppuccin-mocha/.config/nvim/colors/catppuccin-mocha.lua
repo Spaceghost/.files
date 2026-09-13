@@ -1,7 +1,7 @@
 -- Self-contained Catppuccin Mocha: no plugin bootstrap or network dependency.
 vim.cmd("highlight clear")
 vim.o.background = "dark"
-vim.g.colors_name = "gruvbox-dark"
+vim.g.colors_name = "catppuccin-mocha"
 local p = {
     bg = "#1e1e2e", hard = "#11111b", soft = "#282839", bg1 = "#313244",
     bg2 = "#45475a", bg3 = "#585b70", fg = "#cdd6f4", bright = "#d7def6",

@@ -21,9 +21,9 @@ mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
 
 autoload -Uz compinit
 compinit -d "${XDG_CACHE_HOME:-$HOME/.cache}/zsh/zcompdump"
-# Gruvbox file colors: directories, links, executables, archives, and images.
-export LS_COLORS='di=38;2;250;189;47:ln=38;2;142;192;124:ex=38;2;184;187;38:or=38;2;251;73;52:*.tar=38;2;254;128;25:*.gz=38;2;254;128;25:*.zip=38;2;254;128;25:*.png=38;2;211;134;155:*.jpg=38;2;211;134;155:*.webp=38;2;211;134;155'
-export EZA_COLORS="${LS_COLORS}:uu=38;2;131;165;152:gu=38;2;146;131;116:da=38;2;168;153;132:sn=38;2;235;219;178"
+# Catppuccin Mocha file colors: directories, links, executables, archives, and images.
+export LS_COLORS='di=38;2;249;226;175:ln=38;2;148;226;213:ex=38;2;166;227;161:or=38;2;243;139;168:*.tar=38;2;250;179;135:*.gz=38;2;250;179;135:*.zip=38;2;250;179;135:*.png=38;2;203;166;247:*.jpg=38;2;203;166;247:*.webp=38;2;203;166;247'
+export EZA_COLORS="${LS_COLORS}:uu=38;2;137;180;250:gu=38;2;108;112;134:da=38;2;166;173;200:sn=38;2;205;214;244"
 zstyle ':completion:*' menu select
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 

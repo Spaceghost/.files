@@ -14,11 +14,11 @@ vim.opt.timeoutlen = 400
 vim.opt.clipboard = "unnamedplus"
 vim.opt.list = true
 vim.opt.listchars = { tab = "» ", trail = "·", extends = "›", precedes = "‹" }
-vim.cmd.colorscheme("gruvbox-dark")
+vim.cmd.colorscheme("catppuccin-mocha")
 vim.keymap.set("n", "<leader>w", "<cmd>write<cr>", { silent = true })
 vim.keymap.set("n", "<leader>q", "<cmd>quit<cr>", { silent = true })
 
--- Chrome: a hand-rolled Gruvbox statusline and winbar. No plugin manager, no plugins.
+-- Chrome: a hand-rolled Catppuccin Mocha statusline and winbar. No plugin manager, no plugins.
 vim.opt.laststatus = 3
 vim.opt.showmode = false
 vim.opt.fillchars = {
