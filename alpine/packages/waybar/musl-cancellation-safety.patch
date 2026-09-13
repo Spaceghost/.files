@@ -1,0 +1,176 @@
+--- a/include/util/command.hpp
++++ b/include/util/command.hpp
+@@ -6,6 +6,8 @@
+ #include <sys/wait.h>
+ #include <unistd.h>
+ 
++#include <cerrno>
++
+ #ifdef __linux__
+ #include <sys/prctl.h>
+ #endif
+@@ -15,6 +17,8 @@
+ 
+ #include <array>
+ 
++#include "util/sleeper_thread.hpp"
++
+ extern std::mutex reap_mtx;
+ extern std::list<pid_t> reap;
+ 
+@@ -28,10 +32,20 @@
+ inline std::string read(FILE* fp) {
+   std::array<char, 128> buffer = {0};
+   std::string output;
+-  while (feof(fp) == 0) {
+-    if (fgets(buffer.data(), 128, fp) != nullptr) {
+-      output += buffer.data();
++  // Read the descriptor directly rather than through fgets(): fgets() holds the
++  // FILE lock across a cancellation point, and a thread cancelled there on musl
++  // (which unwinds nothing) leaves the FILE locked forever, which later
++  // deadlocks exit() and every forked child that runs exit(). A plain read()
++  // holds no lock, so a cancellation inside it orphans nothing.
++  int fd = fileno(fp);
++  for (;;) {
++    ssize_t n = ::read(fd, buffer.data(), buffer.size());
++    if (n > 0) {
++      output.append(buffer.data(), static_cast<size_t>(n));
++      continue;
+     }
++    if (n < 0 && errno == EINTR) continue;
++    break;
+   }
+ 
+   // Remove last newline
+@@ -58,7 +72,11 @@
+     } else if (WIFCONTINUED(stat)) {
+       spdlog::debug("Cmd continued");
+     } else if (ret == -1) {
++      if (errno == EINTR) continue;
++      // ECHILD: the child was reaped elsewhere (the module destructor, say).
++      // Nothing is left to wait for, and looping here would spin forever.
+       spdlog::debug("waitpid failed: {}", strerror(errno));
++      break;
+     } else {
+       break;
+     }
+@@ -78,6 +96,15 @@
+     return nullptr;
+   }
+ 
++  // Cancellation stays disabled from here until the parent holds its end of the
++  // pipe, and the child inherits that state across fork(). Module threads are
++  // ended with pthread_cancel() on reload. On musl there is no forced unwinding,
++  // and a child forked from a thread with a cancellation pending acts on it at
++  // its first cancellation point, the close() below: pthread_exit() on the
++  // child's only thread turns into exit(0), and __stdio_exit then deadlocks on
++  // a FILE lock some other thread of the parent held at fork time. The child
++  // never execs and never exits, and the parent is left mid reload.
++  CancellationGuard no_cancel;
+   pid_t child_pid = fork();
+ 
+   if (child_pid < 0) {
+@@ -113,7 +140,9 @@
+       setenv("WAYBAR_OUTPUT_NAME", output_name.c_str(), 1);
+     }
+     execlp("/bin/sh", "sh", "-c", cmd.c_str(), (char*)0);
+-    exit(0);
++    // Never exit() in the forked child of a multithreaded parent: the atexit
++    // handlers and the stdio teardown belong to the parent. _exit() skips both.
++    _exit(127);
+   } else {
+     ::close(fd[1]);
+   }
+@@ -141,6 +170,8 @@
+ inline int32_t forkExec(const std::string& cmd, const std::string& output_name) {
+   if (cmd == "") return -1;
+ 
++  // See open(): the child must not inherit a pending cancellation.
++  CancellationGuard no_cancel;
+   pid_t pid = fork();
+ 
+   if (pid < 0) {
+@@ -161,7 +192,7 @@
+       setenv("WAYBAR_OUTPUT_NAME", output_name.c_str(), 1);
+     }
+     execl("/bin/sh", "sh", "-c", cmd.c_str(), (char*)0);
+-    exit(0);
++    _exit(127);
+   } else {
+     reap_mtx.lock();
+     reap.push_back(pid);
+--- a/src/modules/battery.cpp
++++ b/src/modules/battery.cpp
+@@ -65,8 +65,13 @@
+   thread_timer_ = [this] {
+     // Make sure we eventually update the list of batteries even if we miss an
+     // inotify event for some reason
+-    refreshBatteries();
+-    dp.emit();
++    {
++      // refreshBatteries() reads sysfs under battery_list_mutex_; on musl a
++      // cancellation acted on in there would leave the mutex locked forever.
++      util::CancellationGuard no_cancel;
++      refreshBatteries();
++      dp.emit();
++    }
+     thread_timer_.sleep_for(interval_);
+   };
+   thread_ = [this] {
+@@ -91,8 +96,11 @@
+       signalfd_siginfo signal_info;
+       read(poll_fds_[0].fd, &signal_info, sizeof(signal_info));
+     }
+-    refreshBatteries();
+-    dp.emit();
++    {
++      util::CancellationGuard no_cancel;
++      refreshBatteries();
++      dp.emit();
++    }
+   };
+ #endif
+ }
+--- a/src/modules/custom.cpp
++++ b/src/modules/custom.cpp
+@@ -78,7 +78,15 @@
+       }
+     });
+     size_t len = 0;
+-    if (getline(&buff, &len, fp_) == -1) {
++    ssize_t got;
++    {
++      // getline() holds the FILE lock across its read. A thread cancelled there
++      // on musl leaves fp_ locked forever, and exit() later deadlocks on it.
++      // The destructor ends the script first, so the read returns on its own.
++      util::CancellationGuard no_cancel;
++      got = getline(&buff, &len, fp_);
++    }
++    if (got == -1) {
+       int exit_code = 1;
+       if (fp_) {
+         exit_code = WEXITSTATUS(util::command::close(fp_, pid_));
+--- a/src/modules/network.cpp
++++ b/src/modules/network.cpp
+@@ -207,6 +207,11 @@
+   // update via here not working
+   thread_timer_ = [this] {
+     {
++      // getInfo() talks to netlink under the mutex. A cancellation acted on in
++      // there would leave the mutex locked forever on musl, where a cancelled
++      // thread runs no destructors; the main thread then blocks in update().
++      // sleep_for() still ends the thread promptly: stop() clears do_run_.
++      util::CancellationGuard no_cancel;
+       std::lock_guard<std::mutex> lock(mutex_);
+       if (ifid_ > 0) {
+         getInfo();
+@@ -231,6 +236,9 @@
+ 
+     int ec = epoll_wait(efd_, events.data(), EPOLL_MAX, -1);
+     if (ec > 0) {
++      // The netlink callbacks take the mutex; keep the cancellation point at
++      // the epoll_wait() above, where nothing is held.
++      util::CancellationGuard no_cancel;
+       for (auto i = 0; i < ec; i++) {
+         if (events[i].data.fd == nl_socket_get_fd(ev_sock_)) {
+           int rc = 0;

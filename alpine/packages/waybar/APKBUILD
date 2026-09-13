@@ -2,8 +2,8 @@
 # Maintainer: Oldbook local package <oldbook@localhost.invalid>
 pkgname=waybar
 pkgver=0.15.0
-pkgrel=4
-pkgdesc="Highly customizable Wayland bar with Sway IPC event recovery"
+pkgrel=5
+pkgdesc="Highly customizable Wayland bar with Sway IPC event recovery and musl reload safety"
 url="https://github.com/Alexays/Waybar/"
 arch="all"
 license="MIT"
@@ -33,6 +33,7 @@ subpackages="$pkgname-doc $pkgname-openrc $pkgname-dbg"
 source="Waybar-$pkgver.tar.gz
 	waybar.initd
 	sway-ipc-reconnect.patch
+	musl-cancellation-safety.patch
 	"
 builddir="$srcdir/Waybar-$pkgver"
 options="!net"
@@ -73,4 +74,5 @@ sha512sums="
 f267c1ad2af1e4e74c3d8c966009a013c0b5c2849bfaf312b3b91e9d6f6856dc5466118f308208948118ea1de0cf70986cc3b592cc830f84d634b8518c5b8c9e  Waybar-0.15.0.tar.gz
 901d75623de9ae20488a7af8e15720779b37abaf278d8d6fe7c00c2b53e1630f13e31eb031db4e011de0b44b5242cb6c52d5889aca6b23286d016ffdd6738cd5  waybar.initd
 8a5aa9d17059560e218b84caaff18555ccd2192331a314b282cfa63004402123a4b73bd5912b3fe0c9df4a09805c3b6e0c48b63bfb645e4b1c1a2a584ebeb464  sway-ipc-reconnect.patch
+1a21922f0a0affd3dc3e7d4aef7f3861f666b33150773f909c5395ceeec662f84448a434b7a316ff099535a35b971658f49f2e0e6b13f23951f4ce1e2359dfa8  musl-cancellation-safety.patch
 "

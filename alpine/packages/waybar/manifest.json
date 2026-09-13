@@ -1,7 +1,7 @@
 {
   "name": "waybar",
   "version": "0.15.0",
-  "revision": 4,
+  "revision": 5,
   "upstream_commit": "90b209add8937514d0a987aa842e701bd8f1232e",
   "source_date_epoch": 1770408903,
   "source": {
@@ -17,5 +17,13 @@
     "upstream_commit": "b0b46ec039199d99c36a0d6637e13e292d66fbdc",
     "url": "https://github.com/Alexays/Waybar/commit/b0b46ec039199d99c36a0d6637e13e292d66fbdc",
     "patch_sha256": "b7599913a305ea4390111250005ed5728b0dffdec58572a43e41e7843fc7b6f2"
-  }
+  },
+  "local_patches": [
+    {
+      "file": "musl-cancellation-safety.patch",
+      "sha256": "c4036f097fdf5a9c3412ab192593061413e02f27d02956dda847bf9b6880b6f1",
+      "reason": "Reload safety on musl: pthread_cancel from SleeperThread::stop() must not be inherited by forked module children or act while a module mutex or a FILE lock is held.",
+      "upstream": "not yet filed; see README.md"
+    }
+  ]
 }

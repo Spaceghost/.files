@@ -1,5 +1,48 @@
 # Oldbook verification
 
+# The bar no longer freezes on reload — 2026-09-13
+
+Jack: "The swaybar is broken!"
+
+- The whole bar would wedge within minutes: the GUI stopped, clicks did
+  nothing, and `ps` showed a growing set of extra `waybar` processes that never
+  ran a script. gdb on the live process (session 01TsLqPS7JCdvfGbZcFZr9dB) put
+  the main thread in `Gtk::Label::~Label -> g_malloc` blocked on musl's
+  `__malloc_lock`, with worker threads piled on the same lock.
+- Root cause is musl-specific and lives in Waybar itself. A `SIGUSR2` reload
+  tears every module down, and `SleeperThread::stop()` ends each worker with
+  `pthread_cancel()`. glibc turns that into a forced unwind that runs
+  destructors; musl unwinds nothing, so a cancelled thread's locks stay held.
+  A worker cancelled between `fork()` and `exec` in `util::command::open()`
+  hands the pending cancellation to its child, whose first `close()` acts on it;
+  `pthread_exit()` on the child's only thread becomes `exit(0)`, and
+  `__stdio_exit` then deadlocks on a `FILE` lock another thread held at fork
+  time. A worker cancelled inside `fgets()`/`getline()` or under the network or
+  battery mutex leaves that lock held, which wedges the main thread.
+- Fix: `waybar-0.15.0-r5` carries `musl-cancellation-safety.patch`. It disables
+  cancellation across `fork()`/`exec` (the child inherits it and uses
+  `_exit(127)` if exec fails), reads command output with `read(2)` instead of
+  `fgets()`, guards the `getline()` and the locked network/battery worker
+  regions with the `CancellationGuard` Waybar already ships, and stops
+  `command::close()` spinning on `ECHILD`. Built on `bak` in a throwaway Alpine
+  container via `alpine/bin/remote-build` and re-signed here; never on the
+  MacBook. The companion `oldbook-waybar-art` cairo change (decode the badge
+  with `cairo_image_surface_create_from_png` instead of forking gdk-pixbuf into
+  glycin) removes the other frequent fork source and is already installed.
+- Also: `cue-sync` now sends its `SIGUSR2` only when a rendered file actually
+  changed, not on every Fossil commit, so routine commits from other sessions
+  no longer reload the bar for nothing.
+- Verified: the r5 bar survived a storm of 40 reloads in 12 s with its main
+  thread still in its event loop; children now exit cleanly (they become
+  reapable zombies) instead of hanging forever in `exit()`. Under r4 the same
+  storm wedged the main thread on the malloc lock. The upstream report for
+  Waybar is at docs/upstream/waybar-musl-reload-freeze.md.
+- Not fixed here (separate, pre-existing, documented in that report): under a
+  rapid reload storm Waybar leaves some children un-reaped; normal single
+  reloads reap fine, and a restart clears them. A safe fix is not a global
+  `waitpid(-1)` because GLib owns its own gspawn children.
+
+
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
 ## The theme workshop stops waiting for a painting — 2026-09-13
