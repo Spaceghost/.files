@@ -2,6 +2,22 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The rice list has every feature, by date — 2026-09-13
+
+Jack: "Update the rice list so it has all the features by date. Only include
+features not things like fixes unless they're major additions."
+
+- 90 entries from 2026-09-07 to 2026-09-13: the twenty already listed, kept as
+  they were, and 70 features read out of the alpine-oldbook history, each dated
+  by the Los Angeles day it first landed. Fixes, tweaks, docs, tests, evidence,
+  packaging and infrastructure stay out; a superseded feature is folded into
+  what replaced it, and anything removed is gone. `desktop-breath` now
+  describes the keys breathing as you type, not the painting swelling, which
+  was removed on 2026-09-09.
+- Verified: `cue vet`, the byte-for-byte render and all 31 tests in
+  `test_rice_tour.py`.
+- Not verified: the triggers by hand; none of the new entries was set off live.
+
 ## The Scripture bar stays out of the bottom bars — 2026-09-13
 
 Jack: "Make sure the bible bar in the bottom ignores the window decoration
