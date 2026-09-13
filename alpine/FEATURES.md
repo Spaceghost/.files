@@ -208,10 +208,10 @@ A strip landing in its band strikes the water. A train of rings leaves the
 strip's own edge and crosses the lower third of the output in under a second,
 refracting a photograph of the screen rather than drawing over it; nothing is
 drawn where the water is still, so the live desktop shows through everywhere
-the wave is not. The `ripple` object in decoration.json sets where the rings
-leave from (`bar`, the whole outline, or `point`), their duration, reach,
-spacing, strength and shading; the effect sits on the power ladder as
-`shaders` and never runs on battery.
+the wave is not. The `ripple` object in decoration.json switches it off
+(`enabled`) and sets where the rings leave from (`bar`, the whole outline, or
+`point`), their duration, reach, spacing, strength and shading; the effect
+sits on the power ladder as `shaders` and never runs on battery.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),

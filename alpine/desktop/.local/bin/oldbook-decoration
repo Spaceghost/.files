@@ -1400,6 +1400,8 @@ def daemon():
         # The wave's shape is read from decoration.json at every strike, so a
         # change there is heard by the next landing rather than the next daemon.
         settings = load_settings(SETTINGS, STATE / 'position')
+        if not settings['ripple']['enabled']:
+            return
         plan = ripple.plan({key: rect[key] for key in ('x', 'y', 'width', 'height')},
                            area, caption.edge, settings['ripple'], settings['corner_radius'])
         monitor = caption.monitor

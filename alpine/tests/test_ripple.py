@@ -114,7 +114,7 @@ class Travel(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_defaults_fill_in_when_nothing_is_set(self):
-        expected = {key: (value if key == 'source' else float(value))
+        expected = {key: (value if key in ('source', 'enabled') else float(value))
                     for key, value in ripple.DEFAULTS.items()}
         self.assertEqual(ripple.settings(), expected)
         self.assertEqual(ripple.settings(None), expected)
@@ -134,6 +134,7 @@ class Settings(unittest.TestCase):
     def test_rejects_anything_outside_the_vocabulary(self):
         invalid = [
             [], 'bar', {'sharpness': 3}, {'source': 'edge'}, {'source': None},
+            {'enabled': 'yes'}, {'enabled': 1}, {'enabled': None},
             {'duration': 'long'}, {'duration': True}, {'duration': math.nan},
             {'duration': math.inf}, {'duration': 0.1}, {'duration': 3.1},
             {'reach': 0}, {'reach': 1.5}, {'spacing': 4}, {'spacing': 401},
@@ -142,6 +143,10 @@ class Settings(unittest.TestCase):
         for values in invalid:
             with self.subTest(values=values), self.assertRaises(ValueError):
                 ripple.settings(values)
+
+    def test_ships_switched_on_and_can_be_switched_off(self):
+        self.assertIs(ripple.settings()['enabled'], True)
+        self.assertIs(ripple.settings({'enabled': False})['enabled'], False)
 
     def test_does_not_touch_what_it_was_given(self):
         given = {'spacing': 30}

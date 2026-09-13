@@ -40,6 +40,9 @@ EFFECT = 'shaders'
 # object, with the value each key takes when it is left out. Lengths are in
 # logical pixels, the units the compositor places and sizes the strip in.
 DEFAULTS = {
+    # Whether a landing strikes the water at all. Off takes no photograph and
+    # maps no surface; the strip simply lands.
+    'enabled': True,
     # Where the rings leave from. 'bar' is the strip's own outline, the way a
     # plank dropped flat sends a straight wave along its length with arcs only
     # at its ends; 'point' drops a stone at the middle of the landed edge.
@@ -99,6 +102,8 @@ def settings(values=None):
         raise ValueError('Unknown decoration ripple setting: ' + sorted(unknown)[0])
     result = dict(DEFAULTS)
     result.update(values)
+    if not isinstance(result['enabled'], bool):
+        raise ValueError('Decoration ripple enabled must be true or false')
     if result['source'] not in SOURCES:
         raise ValueError('Decoration ripple source must be bar or point')
     for key, (low, high) in LIMITS.items():
