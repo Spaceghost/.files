@@ -53,11 +53,11 @@ window#waybar { background: transparent; color: #ebdbb2; }
     animation: oldbook-ghost-wander 11s ease-in-out infinite;
 }
 #workspaces { margin: 3px 5px 3px 0; }
-#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a89984; transition: all 180ms ease-in-out; }
+#workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a89984; transition: background 260ms cubic-bezier(0.34, 1.56, 0.64, 1), color 220ms ease-out; }
 #workspaces button.empty { color: #7c6f64; }
 #workspaces button:hover { background: #504945; color: #fbf1c7; box-shadow: none; }
 #workspaces button.focused {
-    background: linear-gradient(110deg, alpha(#fabd2f, .22), alpha(#fabd2f, .10));
+    background: linear-gradient(110deg, alpha(#fabd2f, .34), alpha(#fabd2f, .16));
     color: @oldbook_workspace_active;
     font-weight: 400;
     box-shadow: none;
@@ -157,20 +157,20 @@ window#waybar #status:hover {
    backgrounds already use (see #idle_inhibitor.activated, #battery.critical).
    clock keeps its own already-authored background untouched; the chain just
    treats that color as the chip on either side of it. */
-#group-telemetry { background: #543f46; border-radius: 11px; }
-#group-transmission { background: #3c4845; border-radius: 11px; }
-#group-sound { background: #5b584c; border-radius: 11px; }
-#group-power { background: #5f4f25; border-radius: 11px; }
-#custom-notifications { background: #3f503c; border-radius: 11px; }
+#group-telemetry { background: #4a2438; border-radius: 11px; }
+#group-transmission { background: #1f3a4a; border-radius: 11px; }
+#group-sound { background: #4a3f1f; border-radius: 11px; }
+#group-power { background: #4a2818; border-radius: 11px; }
+#custom-notifications { background: #1f4a2e; border-radius: 11px; }
 #custom-sep0, #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4, #custom-sep5, #custom-sep6 {
     padding: 0; margin: 0; font-size: 15px;
 }
-#custom-sep0 { color: #1d2021; background: #543f46; }
-#custom-sep1 { color: #543f46; background: #3c4845; }
-#custom-sep2 { color: #3c4845; background: #5b584c; }
-#custom-sep3 { color: #5b584c; background: #5f4f25; }
-#custom-sep4 { color: #5f4f25; background: #3f503c; }
-#custom-sep5 { color: #3f503c; background: #504945; }
+#custom-sep0 { color: #1d2021; background: #4a2438; }
+#custom-sep1 { color: #4a2438; background: #1f3a4a; }
+#custom-sep2 { color: #1f3a4a; background: #4a3f1f; }
+#custom-sep3 { color: #4a3f1f; background: #4a2818; }
+#custom-sep4 { color: #4a2818; background: #1f4a2e; }
+#custom-sep5 { color: #1f4a2e; background: #504945; }
 #custom-sep6 { color: #504945; background: #1d2021; }
 
 @import url("waybar-accent.css");
