@@ -7,6 +7,16 @@ rice: {
 	version: 1
 	entries: [
 		{
+			id:       "agent-picker-names-the-model"
+			title:    "The agent picker says what it will run"
+			date:     "2026-09-13"
+			summary:  "Super+N leads with the best Codex and Claude, model and effort named, and opens on the prompt."
+			trigger:  "Super+N, Enter, Enter: the best Codex opens where you used it last, straight on its prompt."
+			detail:   "Each preset's model and effort are fields the line prints and the command carries; lead, quick and remember_workdir in ~/.config/oldbook/agents.json say which presets lead, which one Super+Ctrl+N starts and whether the directory list opens on last time's. A preset marked trust has its directory accepted with Claude Code or Codex before the session exists, so neither stops on its trust screen; set trust to false on a preset to be asked again."
+			run: ["oldbook-agents", "show"]
+			terminal: true
+		},
+		{
 			id:      "caption-names-the-agent"
 			title:   "The strip names what your agent is doing"
 			date:    "2026-09-13"

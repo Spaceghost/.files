@@ -2,6 +2,60 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The agent picker says what it runs and lands on the prompt — 2026-09-13
+
+Jack: "Make the new agent launcher in my super+n also default to and show me
+the model and effort level. I want the current codex/claude best as the first
+couple options, they should also accept all trust too." Then: "I want it to be
+more intuitive and very useful to getting to immediate typing upon hitting the
+last enter key."
+
+- The picker's first two lines are now `✦  New Codex · gpt-6-astra · ultra ·
+  trusts all` and `✦  New Claude · claude-fable-5-1 · max · trusts all`. A
+  preset's `model` and `effort` are fields the line prints and `{model}` /
+  `{effort}` in its command carry, checked against each other when the file
+  loads; `lead`, `quick` and `remember_workdir` are settings in `agents.json`
+  rather than names in the code. Two *choose model and effort…* presets ask
+  from lists, first entry preselected, before the directory; the directory
+  list opens on wherever that preset last started. `gpt-6-astra` is priority
+  one in Codex's own model catalogue (`~/.codex/models_cache.json`) and
+  `ultra` the top of its effort list; `claude --model best -p` resolved to
+  `claude-fable-5-1`, so the file names that model outright and shows it.
+- What stood between the last Enter and typing was a trust screen. Claude Code
+  opens on "Is this a project you created or one you trust?" with *No, exit*
+  preselected even under `--dangerously-skip-permissions`, and Codex on "Do
+  you trust the contents of this directory?" even under
+  `--dangerously-bypass-approvals-and-sandbox`; both were watched in private
+  tmux servers. Each tool names a config entry as the way to pre-accept —
+  `projects[…].hasTrustDialogAccepted` in `~/.claude.json`, a `[projects."…"]`
+  table with `trust_level = "trusted"` in `~/.codex/config.toml`; a `-c`
+  override on the Codex command line does not do it — keyed by the git root
+  inside a git repository, which Codex's own screen states. `agent_trust.py`
+  writes that record before the session exists for any local preset with
+  `"trust": true`, through a rename that keeps the file's mode, and both
+  tools were then seen to open straight on their prompt, `~` included.
+- Verified: 63 agent tests pass in under two seconds, covering the rendering,
+  the file checks, the picker order, the choose flow, the directory memory
+  and both trust writers; the rice tests pass with the new entry rendered
+  from CUE. `oldbook-agents show` printed the lines above against the live
+  tmux server. Evidence: `alpine/verification/agent-launcher/menu.json`.
+- Not exercised: the Fuzzel menu under a hand. The first run of the new
+  picker tests did open two real Fuzzel prompts and one notification on the
+  desktop, because `runpy.run_path` returns a copy of the script's namespace
+  and the patches never reached the functions; the tests now patch the
+  functions' own globals, and load the script with the menu and the notifier
+  disarmed so a missed patch fails instead of opening anything.
+- Side effect kept: `/home/jack` is now accepted in `~/.claude.json`, which
+  the probe set and every session started in `~` benefits from. The probes'
+  own scratch entries in both files were removed.
+- Recovery: revert `oldbook-agents`, `agent_launcher.py`, `agent_trust.py`
+  and `agents.json`; delete `~/.local/state/oldbook/agents/last-workdir.json`
+  to forget the directory memory; set `"trust": false` on a preset to be
+  asked by the tool again.
+
+####### SUGGESTED CONFLICT RESOLUTION follows ###################
+
+
 ## Nothing a cat presses stops the machine, and catbed mode is his alone — 2026-09-13
 
 The user's original ask, on 2026-09-08, was that while the screen is locked

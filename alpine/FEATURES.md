@@ -571,6 +571,38 @@ is skipped outright for every window that is not a terminal. Toggle with the
   [app_identity](desktop/.local/lib/oldbook/app_identity.py).
 - Checks: [agent status tests](tests/test_agent_status.py).
 
+### AGENT-LAUNCHER
+
+Super+N reaches a prompt that is ready to type into in the fewest keys, and
+never hides what it is about to run. The picker leads with the best Codex and
+the best Claude, each line naming its model, its effort and that it trusts
+everything; `lead` in `agents.json` says which presets those are and `quick`
+which one Super+Ctrl+N starts. Running sessions follow, then the remaining
+presets, then *Close*. A preset's `model` and `effort` are fields the picker
+prints and `{model}` and `{effort}` in its command carry, so the line and the
+command cannot disagree, and the file is refused on load when they could. A
+preset that lists `models` or `efforts` instead of naming one asks, first
+option preselected, before the directory.
+
+The directory list opens on wherever that preset last started, then the
+configured places, so Enter, Enter is the usual route; `remember_workdir`
+switches the memory off. A preset with `"trust": true` has its directory
+accepted with its tool before the session exists — Claude Code and Codex both
+otherwise stop on a trust screen whatever permission flags they carry — keyed
+by the git root inside a git work tree and by the directory otherwise; a
+remote preset writes nothing. Failing to write that record is reported by
+notification and does not stop the launch. Every failure the launcher itself
+hits reaches the desktop as a notification quoting the cause, because a
+Super+N launch has no terminal to print to.
+
+- Implementation: [oldbook-agents](desktop/.local/bin/oldbook-agents),
+  [agent_launcher](desktop/.local/lib/oldbook/agent_launcher.py),
+  [agent_trust](desktop/.local/lib/oldbook/agent_trust.py), presets in
+  [agents.json](desktop/.config/oldbook/agents.json), described in
+  [AGENTS-AND-LIBRARY.md](desktop/AGENTS-AND-LIBRARY.md).
+- Checks: [agent tests](tests/test_agents.py); evidence in
+  [agent-launcher](verification/agent-launcher/).
+
 ### SHORTCUT-HELP
 
 Hold Super alone for half a second for a contextual, themed shortcut guide;

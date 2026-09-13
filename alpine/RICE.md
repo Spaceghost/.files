@@ -50,7 +50,7 @@ in both, or run `oldbook-theme sync` after editing the desktop copy.
 | `Super+=`, `Super+-`, `Super+C` | Grow or shrink from the centre; centre and raise |
 | `Super+Ctrl+B` | Return the caption strip to the bottom edge |
 | `Super+Shift+V` | Clipboard history picker |
-| `Super+i`, `Super+Shift+i`, `Super+N` | Next AI window; agent menu; agent session picker |
+| `Super+i`, `Super+Shift+i`, `Super+N` | Next AI window; agent menu; agent picker, the best Codex and Claude first with model and effort named |
 | `Print`, `Shift+Print`, `Ctrl+Print` | Screenshot with flash and shutter click, then Satty |
 | Volume, mic and brightness keys | The change shows on the bottom-centre pill |
 | `F5` / `F6` | Keyboard light down / up, also while locked |
@@ -77,6 +77,7 @@ screen yet and you are the first.
 
 | Do this | Watch for | Seen before? |
 | --- | --- | --- |
+| Super+N, Enter, Enter | The best Codex, its model and effort on the line, opens where you used it last, straight on its prompt with no trust screen | First sighting |
 | Mission Control (F3) | Every workspace as a card of real window stills, the focused one outlined in amber; drag a still onto another card to move that window | First sighting |
 | Launchpad (F4), then type | Every application over the blurred painting, filtering from the first keystroke, page dots underneath | First sighting |
 | Rest the pointer on a workspace button | After a third of a second, a peek of that workspace's windows beneath the bar | First sighting |
@@ -1047,6 +1048,18 @@ checkout, the session menu and help. Script: `desktop/.local/bin/oldbook-control
 floating picture-in-picture or pinned behind the desktop. Evidence:
 [youtube](verification/youtube/pip-mode.png).
 
+**Agent picker.** `Super+N`: the best Codex and the best Claude lead the
+list, each line naming its model, its effort and that it trusts everything —
+`✦  New Codex · gpt-6-astra · ultra · trusts all`. Enter, then Enter on the
+directory the list opened on because you used it last, and the prompt is ready
+to type into, the tool's own trust screen already answered on its behalf. Two
+*choose model and effort…* lines ask from the lists in
+`desktop/.config/oldbook/agents.json`, first entry preselected; `lead`, `quick`
+and `remember_workdir` there say which presets lead, which Super+Ctrl+N starts
+and whether the directory memory is on, and `"trust": false` on a preset
+brings its trust screen back. Script: `desktop/.local/bin/oldbook-agents`.
+Evidence: [agent-launcher](verification/agent-launcher/menu.json).
+
 ## Sun and moon
 
 An explicit `~/.config/oldbook/location.json` (copy
@@ -1288,6 +1301,7 @@ the notification centre and the splash refer to. The power deck makes no sound.
 
 | Item | Live on the panel | Headless render | Not yet seen |
 | --- | --- | --- | --- |
+| Agent picker lines, trust pre-acceptance | both tools' trust screens, and their absence once the record was written, in a private tmux server | the lines, printed | the Fuzzel menu itself under a hand |
 | Ghost Observatory geometry | reload applied | yes | corners, shadows and frame rate by eye |
 | Artwork badge thumbnail | yes | yes | |
 | Signal meter | bar strip seen | yes | |

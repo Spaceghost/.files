@@ -1,0 +1,170 @@
+{
+  "isolation": "Shipped agents.json loaded from the checkout; two synthetic sessions; the picker lines built by oldbook-agents entries() and the commands by agent_launcher.new_session_command(). No menu was opened, no tmux session created, no trust record written.",
+  "entry": "alpine/desktop/.local/bin/oldbook-agents",
+  "lines": [
+    "✦  New Codex · gpt-6-astra · ultra · trusts all",
+    "✦  New Claude · claude-fable-5-1 · max · trusts all",
+    "󰆍  agent-claude-best — ~/.files · 2w · attached",
+    "󰆍  agent-codex-best-2 — ~/src/notes · 1w",
+    "✦  New Codex · choose model and effort… · trusts all",
+    "✦  New Claude · choose model and effort… · trusts all",
+    "✦  New Shell — A plain tmux shell, here",
+    "✦  New Codex on alienware — Codex CLI over Tailscale SSH",
+    "✦  New Claude Code on alienware — Claude Code over Tailscale SSH",
+    "✦  New Local model on alienware · qwen3.5:27b-text — on the box with the GPU",
+    "✦  New Local model on alienware · qwen3.5:9b — quicker to load",
+    "✦  New Shell on alienware — A plain login shell over Tailscale SSH",
+    "󰅖  Close a session…"
+  ],
+  "actions": [
+    [
+      "new",
+      "codex-best"
+    ],
+    [
+      "new",
+      "claude-best"
+    ],
+    [
+      "attach",
+      "agent-claude-best"
+    ],
+    [
+      "attach",
+      "agent-codex-best-2"
+    ],
+    [
+      "new",
+      "codex"
+    ],
+    [
+      "new",
+      "claude"
+    ],
+    [
+      "new",
+      "shell"
+    ],
+    [
+      "new",
+      "alienware-codex"
+    ],
+    [
+      "new",
+      "alienware-claude"
+    ],
+    [
+      "new",
+      "alienware-ollama"
+    ],
+    [
+      "new",
+      "alienware-ollama-small"
+    ],
+    [
+      "new",
+      "alienware-shell"
+    ],
+    [
+      "close",
+      null
+    ]
+  ],
+  "lead": [
+    {
+      "id": "codex-best",
+      "line": "Codex · gpt-6-astra · ultra · trusts all",
+      "title": "Codex · gpt-6-astra · ultra",
+      "command": [
+        "tmux",
+        "new-session",
+        "-d",
+        "-s",
+        "agent-codex-best",
+        "-c",
+        "/home/jack/.files",
+        "--",
+        "codex",
+        "--search",
+        "--dangerously-bypass-approvals-and-sandbox",
+        "--model",
+        "gpt-6-astra",
+        "-c",
+        "model_reasoning_effort=\"ultra\""
+      ]
+    },
+    {
+      "id": "claude-best",
+      "line": "Claude · claude-fable-5-1 · max · trusts all",
+      "title": "Claude · claude-fable-5-1 · max",
+      "command": [
+        "tmux",
+        "new-session",
+        "-d",
+        "-s",
+        "agent-claude-best",
+        "-c",
+        "/home/jack/.files",
+        "--",
+        "claude",
+        "--model",
+        "claude-fable-5-1",
+        "--effort",
+        "max",
+        "--dangerously-skip-permissions",
+        "--settings",
+        "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
+      ]
+    }
+  ],
+  "choose": [
+    {
+      "id": "codex",
+      "asks": [
+        "model",
+        "effort"
+      ],
+      "models": [
+        "gpt-6-astra",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-5.3-codex-spark"
+      ],
+      "efforts": [
+        "ultra",
+        "max",
+        "xhigh",
+        "high",
+        "medium",
+        "low"
+      ]
+    },
+    {
+      "id": "claude",
+      "asks": [
+        "model",
+        "effort"
+      ],
+      "models": [
+        "claude-fable-5-1",
+        "claude-opus-5",
+        "claude-sonnet-5",
+        "claude-haiku-4-5-20251001"
+      ],
+      "efforts": [
+        "max",
+        "xhigh",
+        "high",
+        "medium",
+        "low"
+      ]
+    }
+  ],
+  "trust_screens_observed": {
+    "claude": "claude --dangerously-skip-permissions --settings {\"skipDangerousModePermissionPrompt\":true} in /home/jack and in an untrusted scratch directory: \"Quick safety check: Is this a project you created or one you trust?\" with \"No, exit\" preselected; gone once projects[<dir>].hasTrustDialogAccepted was true in ~/.claude.json, home directory included.",
+    "codex": "codex --dangerously-bypass-approvals-and-sandbox --model gpt-6-astra -c model_reasoning_effort=\"ultra\" in an untrusted scratch directory: \"Do you trust the contents of this directory?\" with \"Yes, continue\" preselected; still shown with -c projects.\"<dir>\".trust_level=\"trusted\" on the command line; gone once [projects.\"<dir>\"] trust_level = \"trusted\" was in ~/.codex/config.toml. In a git subdirectory the screen itself said trust applies to the repository root, and a table for the root removed it.",
+    "where": "Private tmux servers (tmux -L agents-probe, tmux -L codex-probe), 2026-09-13, Claude Code 2.1.270 and codex-cli 0.153.4; the probe sessions and their scratch trust records were removed afterwards."
+  }
+}

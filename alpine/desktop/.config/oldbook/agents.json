@@ -12,33 +12,43 @@
     "~/src/*",
     "~/go"
   ],
+  "remember_workdir": true,
+  "lead": [
+    "codex-best",
+    "claude-best"
+  ],
+  "quick": "codex-best",
   "agents": [
     {
-      "id": "codex-ultra",
-      "title": "Codex · Astra ultra",
-      "subtitle": "GPT-6 Astra · ultra reasoning · uncontained",
+      "id": "codex-best",
+      "title": "Codex",
       "enabled": true,
+      "model": "gpt-6-astra",
+      "effort": "ultra",
+      "trust": true,
       "command": [
         "codex",
         "--search",
         "--dangerously-bypass-approvals-and-sandbox",
         "--model",
-        "gpt-6-astra",
+        "{model}",
         "-c",
-        "model_reasoning_effort=\"ultra\""
+        "model_reasoning_effort=\"{effort}\""
       ]
     },
     {
-      "id": "claude-max",
-      "title": "Claude · best max",
-      "subtitle": "Best available Claude · max effort · uncontained",
+      "id": "claude-best",
+      "title": "Claude",
       "enabled": true,
+      "model": "claude-fable-5-1",
+      "effort": "max",
+      "trust": true,
       "command": [
         "claude",
         "--model",
-        "best",
+        "{model}",
         "--effort",
-        "max",
+        "{effort}",
         "--dangerously-skip-permissions",
         "--settings",
         "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
@@ -47,23 +57,58 @@
     {
       "id": "codex",
       "title": "Codex",
-      "subtitle": "OpenAI Codex CLI, here",
       "enabled": true,
+      "models": [
+        "gpt-6-astra",
+        "gpt-5.6-sol",
+        "gpt-5.6-terra",
+        "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-5.3-codex-spark"
+      ],
+      "efforts": [
+        "ultra",
+        "max",
+        "xhigh",
+        "high",
+        "medium",
+        "low"
+      ],
+      "trust": true,
       "command": [
         "codex",
         "--search",
         "--dangerously-bypass-approvals-and-sandbox",
-        "-s",
-        "danger-full-access"
+        "--model",
+        "{model}",
+        "-c",
+        "model_reasoning_effort=\"{effort}\""
       ]
     },
     {
       "id": "claude",
-      "title": "Claude Code",
-      "subtitle": "Anthropic Claude Code, here",
+      "title": "Claude",
       "enabled": true,
+      "models": [
+        "claude-fable-5-1",
+        "claude-opus-5",
+        "claude-sonnet-5",
+        "claude-haiku-4-5-20251001"
+      ],
+      "efforts": [
+        "max",
+        "xhigh",
+        "high",
+        "medium",
+        "low"
+      ],
+      "trust": true,
       "command": [
         "claude",
+        "--model",
+        "{model}",
+        "--effort",
+        "{effort}",
         "--dangerously-skip-permissions",
         "--settings",
         "{\"sandbox\":{\"enabled\":false},\"skipDangerousModePermissionPrompt\":true}"
@@ -110,27 +155,29 @@
     {
       "id": "alienware-ollama",
       "title": "Local model on alienware",
-      "subtitle": "Qwen3.5 27B on the box with the GPU",
+      "subtitle": "on the box with the GPU",
       "enabled": true,
       "host": "alienware",
+      "model": "qwen3.5:27b-text",
       "command": [
         "ollama",
         "run",
-        "qwen3.5:27b-text"
+        "{model}"
       ],
       "transport": "tailscale-ssh"
     },
     {
       "id": "alienware-ollama-small",
-      "title": "Local model on alienware (9B)",
-      "subtitle": "Qwen3.5 9B, quicker to load",
+      "title": "Local model on alienware",
+      "subtitle": "quicker to load",
       "enabled": true,
       "host": "alienware",
       "transport": "tailscale-ssh",
+      "model": "qwen3.5:9b",
       "command": [
         "ollama",
         "run",
-        "qwen3.5:9b"
+        "{model}"
       ]
     },
     {

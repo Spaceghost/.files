@@ -3,17 +3,35 @@ import json
 from pathlib import Path
 import runpy
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
+import tomllib
 import unittest
 from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 import agent_launcher as launcher
+import agent_trust as trust
 
 LIVE = REPO / 'alpine/desktop/.config/oldbook/agents.json'
+SCRIPT = REPO / 'alpine/desktop/.local/bin/oldbook-agents'
+
+
+def script():
+    """The launcher's own namespace, disarmed.
+
+    runpy hands back a copy of the globals, so a patch on that copy never
+    reaches the functions; a function's __globals__ is the dict they read.
+    The menu and the notifier are replaced at load so a test that reaches
+    either fails loudly instead of opening Fuzzel or a card on the desktop.
+    """
+    namespace = runpy.run_path(str(SCRIPT))['main'].__globals__
+    namespace['FUZZEL'] = Path('/nonexistent/oldbook-fuzzel')
+    namespace['notify'] = lambda *args, **kwargs: None
+    return namespace
 
 
 def config(**extra):
@@ -180,16 +198,18 @@ class CommandTests(unittest.TestCase):
 class QuickLaunchTests(unittest.TestCase):
     def test_quick_launch_starts_a_fresh_uncontained_ultra_session(self):
         document = launcher.load_config(LIVE)
-        agent = next((a for a in document['agents'] if a['id'] == 'codex-ultra'), None)
+        agent = launcher.quick_agent(document)
         self.assertIsNotNone(agent, 'quick-launch preset is missing')
-        name = launcher.session_name(document, agent['id'], {'agent-codex-ultra'})
+        self.assertEqual(agent['id'], 'codex-best')
+        name = launcher.session_name(document, agent['id'], {'agent-codex-best'})
         command = launcher.new_session_command(document, agent, name, '/tmp/project with spaces')
-        self.assertNotEqual(name, 'agent-codex-ultra')
+        self.assertNotEqual(name, 'agent-codex-best')
         self.assertEqual(command[:8], ['tmux', 'new-session', '-d', '-s', name,
                                       '-c', '/tmp/project with spaces', '--'])
         self.assertIn('--dangerously-bypass-approvals-and-sandbox', command)
         self.assertEqual(command[command.index('--model') + 1], 'gpt-6-astra')
         self.assertIn('model_reasoning_effort="ultra"', command)
+        self.assertTrue(agent.get('trust'), 'the quick launch must not stop at a trust screen')
 
     def test_only_real_keyboards_with_either_super_key_trigger_launch(self):
         def bits(*keys):
@@ -219,7 +239,7 @@ class PreflightTests(unittest.TestCase):
     """A remote agent explains itself instead of leaving a session that dies."""
 
     def module(self):
-        return runpy.run_path(str(REPO / 'alpine/desktop/.local/bin/oldbook-agents'))
+        return script()
 
     def agent(self, **extra):
         return dict({'id': 'far', 'title': 'Far', 'host': 'alienware',
@@ -236,7 +256,6 @@ class PreflightTests(unittest.TestCase):
         module = self.module()
         denial = subprocess.CompletedProcess(
             [], 1, '', 'tailscale: tailnet policy does not permit you to SSH to this node')
-        # runpy hands back a namespace dict, so the name is replaced in place.
         with mock.patch.dict(module, {'reachable': lambda *a, **k: True}), \
                 mock.patch.object(module['subprocess'], 'run', return_value=denial):
             with self.assertRaisesRegex(RuntimeError, 'tailnet policy'):
@@ -252,6 +271,419 @@ class PreflightTests(unittest.TestCase):
     def test_a_local_agent_needs_no_preflight(self):
         module = self.module()
         self.assertIsNone(module['preflight']({'id': 'codex', 'command': ['codex']}))
+
+
+def preset(**extra):
+    agent = {'id': 'claude', 'title': 'Claude', 'model': 'claude-fable-5-1', 'effort': 'max',
+             'trust': True,
+             'command': ['claude', '--model', '{model}', '--effort', '{effort}',
+                         '--settings', '{"sandbox":{"enabled":false}}']}
+    agent.update(extra)
+    return agent
+
+
+def open_preset():
+    agent = preset(models=['claude-fable-5-1', 'claude-opus-5'], efforts=['max', 'low'])
+    del agent['model'], agent['effort']
+    return agent
+
+
+class ChoiceTests(unittest.TestCase):
+    """The picker line and the command line are built from the same two words."""
+
+    def write(self, document):
+        handle = tempfile.NamedTemporaryFile('w', suffix='.json', delete=False)
+        json.dump(document, handle)
+        handle.close()
+        self.addCleanup(lambda: Path(handle.name).unlink(missing_ok=True))
+        return handle.name
+
+    def test_the_model_and_effort_reach_the_command(self):
+        command = launcher.render_command(preset())
+        self.assertEqual(command[command.index('--model') + 1], 'claude-fable-5-1')
+        self.assertEqual(command[command.index('--effort') + 1], 'max')
+        # Literal braces elsewhere in the command are not a template.
+        self.assertIn('{"sandbox":{"enabled":false}}', command)
+
+    def test_a_chosen_value_replaces_the_preset(self):
+        command = launcher.render_command(preset(), {'model': 'claude-opus-5', 'effort': None})
+        self.assertEqual(command[command.index('--model') + 1], 'claude-opus-5')
+        self.assertEqual(command[command.index('--effort') + 1], 'max')
+
+    def test_a_preset_that_leaves_the_choice_open_must_be_asked(self):
+        agent = open_preset()
+        self.assertEqual(launcher.open_choices(agent), ['model', 'effort'])
+        self.assertEqual(launcher.open_choices(preset()), [])
+        with self.assertRaises(ValueError):
+            launcher.render_command(agent)
+        command = launcher.render_command(agent, {'model': 'claude-opus-5', 'effort': 'low'})
+        self.assertEqual(command[command.index('--model') + 1], 'claude-opus-5')
+
+    def test_the_preset_value_is_offered_first_and_only_once(self):
+        agent = preset(models=['claude-opus-5', 'claude-fable-5-1'])
+        self.assertEqual(launcher.options(agent, 'model'), ['claude-fable-5-1', 'claude-opus-5'])
+        self.assertEqual(launcher.options(open_preset(), 'effort'), ['max', 'low'])
+
+    def test_the_picker_line_names_model_effort_and_trust(self):
+        self.assertEqual(launcher.describe(preset()),
+                         'Claude · claude-fable-5-1 · max · trusts all')
+        self.assertEqual(launcher.describe(open_preset()),
+                         'Claude · choose model and effort… · trusts all')
+        self.assertEqual(launcher.describe(open_preset(), {'model': 'claude-opus-5'}),
+                         'Claude · claude-opus-5 · choose effort… · trusts all')
+        self.assertEqual(launcher.describe(preset(trust=False, subtitle='here')),
+                         'Claude · claude-fable-5-1 · max — here')
+        far = {'id': 'far', 'title': 'Local model on alienware', 'host': 'alienware',
+               'model': 'qwen3.5:9b', 'command': ['ollama', 'run', '{model}']}
+        self.assertEqual(launcher.describe(far), 'Local model on alienware · qwen3.5:9b')
+        far['title'] = 'Local model'
+        self.assertEqual(launcher.describe(far), 'Local model · alienware · qwen3.5:9b')
+
+    def test_the_window_title_carries_the_model_and_effort(self):
+        self.assertEqual(launcher.title(preset()), 'Claude · claude-fable-5-1 · max')
+        self.assertEqual(launcher.title(preset(), {'effort': 'low'}),
+                         'Claude · claude-fable-5-1 · low')
+        self.assertEqual(launcher.title({'id': 'shell', 'title': 'Shell', 'command': ['zsh']}),
+                         'Shell')
+
+    def test_a_named_model_the_command_never_uses_is_refused(self):
+        document = config()
+        document['agents'][0]['model'] = 'gpt-6-astra'
+        with self.assertRaisesRegex(ValueError, 'never uses'):
+            launcher.load_config(self.write(document))
+
+    def test_a_placeholder_without_a_model_is_refused(self):
+        document = config()
+        document['agents'][0]['command'] = ['codex', '--model', '{model}']
+        with self.assertRaisesRegex(ValueError, 'neither a model'):
+            launcher.load_config(self.write(document))
+        document['agents'][0]['models'] = ['gpt-6-astra']
+        launcher.load_config(self.write(document))
+
+    def test_lead_and_quick_must_name_real_agents(self):
+        for key, value in (('lead', ['codex', 'nope']), ('quick', 'nope'), ('quick', ['codex'])):
+            document = config(**{key: value})
+            with self.assertRaises(ValueError):
+                launcher.load_config(self.write(document))
+        document = launcher.load_config(self.write(config(lead=['far', 'codex'], quick='codex')))
+        self.assertEqual([agent['id'] for agent in launcher.lead_agents(document)],
+                         ['far', 'codex'])
+        self.assertEqual(launcher.quick_agent(document)['id'], 'codex')
+        self.assertEqual(launcher.lead_agents(config()), [])
+        self.assertIsNone(launcher.quick_agent(config()))
+
+    def test_a_disabled_lead_preset_is_left_out(self):
+        document = config(lead=['far', 'codex'])
+        document['agents'][1]['enabled'] = False
+        self.assertEqual([agent['id'] for agent in launcher.lead_agents(document)], ['codex'])
+
+    def test_trust_must_be_a_switch(self):
+        document = config()
+        document['agents'][0]['trust'] = 'yes'
+        with self.assertRaises(ValueError):
+            launcher.load_config(self.write(document))
+
+    def test_the_live_file_leads_with_the_best_codex_and_claude(self):
+        document = launcher.load_config(LIVE)
+        lead = launcher.lead_agents(document)
+        self.assertEqual([agent['id'] for agent in lead], ['codex-best', 'claude-best'])
+        codex, claude = lead
+        self.assertEqual((codex['model'], codex['effort']), ('gpt-6-astra', 'ultra'))
+        self.assertEqual((claude['model'], claude['effort']), ('claude-fable-5-1', 'max'))
+        for agent in lead:
+            self.assertTrue(agent['trust'], agent['id'])
+            self.assertEqual(launcher.open_choices(agent), [], agent['id'])
+        self.assertEqual(launcher.quick_agent(document)['id'], 'codex-best')
+        self.assertEqual(launcher.describe(codex), 'Codex · gpt-6-astra · ultra · trusts all')
+        self.assertEqual(launcher.describe(claude),
+                         'Claude · claude-fable-5-1 · max · trusts all')
+
+    def test_every_local_codex_and_claude_preset_trusts_all(self):
+        document = launcher.load_config(LIVE)
+        for agent in launcher.enabled_agents(document):
+            if agent.get('host') or trust.tool_name(agent['command']) not in ('claude', 'codex'):
+                continue
+            self.assertTrue(agent.get('trust'), agent['id'])
+            self.assertEqual(launcher.open_choices(agent) or ['model', 'effort'],
+                             ['model', 'effort'], agent['id'])
+
+    def test_the_live_choose_presets_lead_with_the_best(self):
+        document = launcher.load_config(LIVE)
+        agents = {agent['id']: agent for agent in document['agents']}
+        self.assertEqual(launcher.options(agents['codex'], 'model')[0], 'gpt-6-astra')
+        self.assertEqual(launcher.options(agents['codex'], 'effort')[0], 'ultra')
+        self.assertEqual(launcher.options(agents['claude'], 'model')[0], 'claude-fable-5-1')
+        self.assertEqual(launcher.options(agents['claude'], 'effort')[0], 'max')
+
+
+class TrustTests(unittest.TestCase):
+    """A trusting preset has its directory accepted before the tool can ask."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-agent-trust-')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.claude = self.root / '.claude.json'
+        self.codex = self.root / 'config.toml'
+
+    def test_claude_gets_the_directory_accepted_in_its_own_file(self):
+        self.claude.write_text(json.dumps({'numStartups': 3, 'projects': {
+            '/x': {'hasTrustDialogAccepted': False, 'allowedTools': []}}}))
+        self.claude.chmod(0o600)
+        self.assertEqual(trust.grant_claude('/x', self.claude), self.claude)
+        document = json.loads(self.claude.read_text())
+        self.assertIs(document['projects']['/x']['hasTrustDialogAccepted'], True)
+        self.assertEqual(document['projects']['/x']['allowedTools'], [])
+        self.assertEqual(document['numStartups'], 3)
+        self.assertEqual(self.claude.stat().st_mode & 0o777, 0o600)
+        self.assertIsNone(trust.grant_claude('/x', self.claude), 'already accepted')
+
+    def test_claude_file_and_project_are_created_when_missing(self):
+        self.assertEqual(trust.grant_claude('/new place', self.claude), self.claude)
+        document = json.loads(self.claude.read_text())
+        self.assertIs(document['projects']['/new place']['hasTrustDialogAccepted'], True)
+
+    def test_claude_file_that_is_not_an_object_is_refused_not_replaced(self):
+        self.claude.write_text('[1, 2]')
+        with self.assertRaises(ValueError):
+            trust.grant_claude('/x', self.claude)
+        self.assertEqual(self.claude.read_text(), '[1, 2]')
+
+    def test_codex_gets_a_project_table(self):
+        self.codex.write_text('model = "gpt-6-astra"\n\n[projects."/home/jack"]\n'
+                              'trust_level = "trusted"\n')
+        key = '/x/y "quoted"\\slash'
+        self.assertEqual(trust.grant_codex(key, self.codex), self.codex)
+        document = tomllib.loads(self.codex.read_text())
+        self.assertEqual(document['projects'][key]['trust_level'], 'trusted')
+        self.assertEqual(document['projects']['/home/jack']['trust_level'], 'trusted')
+        self.assertEqual(document['model'], 'gpt-6-astra')
+        self.assertIsNone(trust.grant_codex(key, self.codex), 'already trusted')
+
+    def test_codex_file_is_created_when_missing(self):
+        trust.grant_codex('/x', self.codex)
+        self.assertEqual(tomllib.loads(self.codex.read_text()),
+                         {'projects': {'/x': {'trust_level': 'trusted'}}})
+
+    def test_an_earlier_untrusted_answer_is_overturned_in_place(self):
+        self.codex.write_text('[projects."/x"]\ntrust_level = "untrusted"\n\n'
+                              '[projects."/y"]\ntrust_level = "trusted"\n')
+        trust.grant_codex('/x', self.codex)
+        document = tomllib.loads(self.codex.read_text())
+        self.assertEqual(document['projects']['/x'], {'trust_level': 'trusted'})
+        self.assertEqual(document['projects']['/y'], {'trust_level': 'trusted'})
+        self.assertEqual(self.codex.read_text().count('[projects."/x"]'), 1)
+
+    def test_the_key_is_the_git_root_inside_a_repository(self):
+        plain = self.root / 'plain'
+        plain.mkdir()
+        self.assertEqual(trust.trust_key(plain), str(plain.resolve()))
+        if not shutil.which('git'):
+            self.skipTest('git is not installed')
+        repo = self.root / 'repo'
+        (repo / 'sub').mkdir(parents=True)
+        subprocess.run(['git', '-C', str(repo), 'init', '-q'], check=True, timeout=30)
+        self.assertEqual(trust.trust_key(repo / 'sub'), str(repo.resolve()))
+
+    def test_only_claude_and_codex_keep_such_an_answer(self):
+        self.assertIsNone(trust.grant(['zsh'], self.root, self.claude, self.codex))
+        self.assertIsNone(trust.grant(['ollama', 'run', 'x'], self.root, self.claude, self.codex))
+        self.assertFalse(self.claude.exists())
+        self.assertFalse(self.codex.exists())
+        self.assertEqual(trust.grant(['/usr/local/bin/codex', '--search'], self.root,
+                                     self.claude, self.codex), self.codex)
+        self.assertEqual(trust.grant(['claude'], self.root, self.claude, self.codex),
+                         self.claude)
+
+
+class WorkdirMemoryTests(unittest.TestCase):
+    """The directory list opens on wherever the preset last started."""
+
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='oldbook-agents-memory-')
+        self.addCleanup(self.temp.cleanup)
+        self.home = Path(self.temp.name)
+        (self.home / 'src/one').mkdir(parents=True)
+        (self.home / 'src/two').mkdir(parents=True)
+        self.state = self.home / 'state/last-workdir.json'
+
+    def options(self, document, agent='codex'):
+        return launcher.workdir_options(document, agent, home=self.home, state=self.state)
+
+    def test_last_time_leads_the_list_without_repeating(self):
+        document = config(workdirs=['~', '~/src/*'])
+        paths, last = self.options(document)
+        self.assertIsNone(last)
+        self.assertEqual(paths[0], self.home.resolve())
+        launcher.remember_workdir('codex', self.home / 'src/two', state=self.state)
+        paths, last = self.options(document)
+        self.assertEqual(last, (self.home / 'src/two').resolve())
+        self.assertEqual(paths[0], last)
+        self.assertEqual(paths.count(last), 1)
+        self.assertEqual(len(paths), 3)
+        # Another preset keeps its own memory.
+        self.assertIsNone(self.options(document, 'claude')[1])
+
+    def test_a_directory_outside_the_list_is_still_offered_first(self):
+        document = config(workdirs=['~'])
+        extra = self.home / 'src/one'
+        launcher.remember_workdir('codex', extra, state=self.state)
+        paths, last = self.options(document)
+        self.assertEqual(paths, [extra.resolve(), self.home.resolve()])
+
+    def test_a_vanished_directory_is_forgotten(self):
+        document = config(workdirs=['~'])
+        gone = self.home / 'src/one'
+        launcher.remember_workdir('codex', gone, state=self.state)
+        gone.rmdir()
+        paths, last = self.options(document)
+        self.assertIsNone(last)
+        self.assertEqual(paths, [self.home.resolve()])
+
+    def test_a_broken_record_is_ignored_and_rewritten(self):
+        self.state.parent.mkdir(parents=True)
+        self.state.write_text('not json')
+        self.assertIsNone(launcher.remembered_workdir('codex', state=self.state))
+        launcher.remember_workdir('codex', self.home, state=self.state)
+        self.assertEqual(json.loads(self.state.read_text()), {'codex': str(self.home.resolve())})
+
+    def test_the_memory_can_be_switched_off(self):
+        document = config(workdirs=['~'], remember_workdir=False)
+        launcher.remember_workdir('codex', self.home / 'src/one', state=self.state)
+        self.assertEqual(self.options(document), ([self.home.resolve()], None))
+
+
+class PickerTests(unittest.TestCase):
+    """What Super+N lists, in what order, and what a choice leads to."""
+
+    def module(self):
+        return script()
+
+    def test_the_namespace_under_test_is_the_one_the_functions_read(self):
+        module = self.module()
+        self.assertIs(module, module['choose'].__globals__)
+        with mock.patch.dict(module, {'menu': lambda *a, **k: None}):
+            self.assertIsNone(module['choose'](open_preset()))
+        with self.assertRaises(OSError):
+            module['menu']('x ❯ ', ['one'])
+
+    def test_the_lead_presets_come_first_then_sessions_then_the_rest(self):
+        module = self.module()
+        document = launcher.load_config(LIVE)
+        live = [{'name': 'agent-claude-best', 'windows': '2', 'attached': True, 'path': '/tmp/x'}]
+        labels, actions = module['entries'](document, live)
+        self.assertEqual([actions[label] for label in labels[:3]],
+                         [('new', 'codex-best'), ('new', 'claude-best'),
+                          ('attach', 'agent-claude-best')])
+        self.assertEqual(labels[0], '✦  New Codex · gpt-6-astra · ultra · trusts all')
+        self.assertEqual(labels[1], '✦  New Claude · claude-fable-5-1 · max · trusts all')
+        self.assertEqual(actions[labels[-1]], ('close', None))
+        rest = [actions[label][1] for label in labels[3:-1]]
+        self.assertEqual(rest[:2], ['codex', 'claude'])
+        self.assertNotIn('codex-best', rest)
+        self.assertEqual(len(set(labels)), len(labels), 'every line must be selectable')
+
+    def test_an_open_preset_asks_model_then_effort_with_the_first_option_preselected(self):
+        module = self.module()
+        asked = []
+
+        def menu(prompt, options, **_):
+            asked.append((prompt, options[0]))
+            return options[1]
+
+        with mock.patch.dict(module, {'menu': menu}):
+            self.assertEqual(module['choose'](open_preset()),
+                             {'model': 'claude-opus-5', 'effort': 'low'})
+            self.assertEqual(module['choose'](preset()), {})
+        self.assertEqual(asked, [('Claude model ❯ ', 'claude-fable-5-1'),
+                                 ('Claude effort ❯ ', 'max')])
+
+    def test_escape_while_choosing_launches_nothing(self):
+        module = self.module()
+        with mock.patch.dict(module, {'menu': lambda *a, **k: None}):
+            self.assertIsNone(module['choose'](open_preset()))
+
+    def test_whatever_was_not_asked_takes_the_first_option(self):
+        module = self.module()
+        self.assertEqual(module['complete'](open_preset()),
+                         {'model': 'claude-fable-5-1', 'effort': 'max'})
+        self.assertEqual(module['complete'](open_preset(), {'effort': 'low', 'model': None}),
+                         {'model': 'claude-fable-5-1', 'effort': 'low'})
+        self.assertEqual(module['complete'](preset(), {'model': 'claude-opus-5'}),
+                         {'model': 'claude-opus-5'})
+
+    def test_the_directory_menu_opens_on_last_time_and_names_the_session(self):
+        module = self.module()
+        temp = tempfile.TemporaryDirectory(prefix='oldbook-agents-pick-')
+        self.addCleanup(temp.cleanup)
+        home = Path(temp.name)
+        (home / 'work').mkdir()
+        document = config(workdirs=['~'])
+        shown = []
+
+        def menu(prompt, options, **_):
+            shown.append((prompt, options))
+            return options[0]
+
+        def workdir_options(document, agent_id, home=None, state=None):
+            return [home_ / 'work', home_], home_ / 'work'
+        home_ = home
+        with mock.patch.dict(module, {'menu': menu}), \
+                mock.patch.object(module['launcher'], 'workdir_options', workdir_options), \
+                mock.patch.object(module['launcher'], 'short_path',
+                                  lambda path, home=None: str(path).replace(str(home_), '~')):
+            chosen = module['choose_workdir'](document, preset(), {'effort': 'low'})
+        self.assertEqual(chosen, home / 'work')
+        self.assertEqual(shown[0][0], 'Claude · claude-fable-5-1 · low in ❯ ')
+        self.assertEqual(shown[0][1][:2], ['~/work  · last time', '~'])
+        self.assertEqual(shown[0][1][-1], '…  Another directory')
+
+    def test_start_accepts_trust_before_the_session_exists_and_titles_the_window(self):
+        module = self.module()
+        document = config()
+        agent = preset()
+        calls = []
+
+        def run(command, **_):
+            calls.append(('run', command[:2]))
+            return subprocess.CompletedProcess(command, 0, '', '')
+
+        with mock.patch.dict(module, {'sessions': lambda: [],
+                                      'attach': lambda *a, **k: calls.append(('attach', a[2]))}), \
+                mock.patch.object(module['subprocess'], 'run', run), \
+                mock.patch.object(module['subprocess'], 'Popen',
+                                  side_effect=AssertionError('a terminal was opened')), \
+                mock.patch.object(module['trust'], 'grant',
+                                  lambda command, workdir: calls.append(('grant', command[0], workdir))), \
+                mock.patch.object(module['launcher'], 'remember_workdir',
+                                  lambda agent_id, path: calls.append(('remember', agent_id))):
+            name = module['start'](document, agent, '/tmp/work', choices={'effort': 'low'})
+        self.assertEqual(name, 'agent-claude')
+        self.assertEqual(calls, [('grant', 'claude', '/tmp/work'),
+                                 ('run', ['tmux', 'new-session']),
+                                 ('run', ['tmux', 'has-session']),
+                                 ('remember', 'claude'),
+                                 ('attach', 'Claude · claude-fable-5-1 · low')])
+
+    def test_a_trust_record_that_cannot_be_written_does_not_stop_the_launch(self):
+        module = self.module()
+        warnings = []
+
+        def failing(command, workdir):
+            raise ValueError('config.toml is not valid TOML')
+
+        with mock.patch.dict(module, {'warn': lambda message: warnings.append(message)}), \
+                mock.patch.object(module['trust'], 'grant', failing):
+            self.assertIsNone(module['grant_trust'](preset(), '/tmp/work'))
+        self.assertEqual(len(warnings), 1)
+        self.assertIn('config.toml is not valid TOML', warnings[0])
+        self.assertIn('will ask about trusting', warnings[0])
+
+    def test_a_preset_without_trust_or_on_a_host_writes_nothing(self):
+        module = self.module()
+        with mock.patch.object(module['trust'], 'grant', side_effect=AssertionError('written')):
+            self.assertIsNone(module['grant_trust'](preset(trust=False), '/tmp/work'))
+            self.assertIsNone(module['grant_trust'](preset(host='alienware'), '/tmp/work'))
 
 
 if __name__ == '__main__':
