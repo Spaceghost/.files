@@ -1422,7 +1422,12 @@ def daemon():
                 ripple.capture(name, photograph)
                 data = photograph.read_bytes()
                 width, height, offset = ripple.parse_ppm(data)
-                pixels, span, thickness = ripple.crop(data, offset, width, height, area)
+                # grim hands back the output's real, physical pixels; area is
+                # in the compositor's logical units, same as sway reports the
+                # output itself in. A HiDPI panel needs the two reconciled or
+                # the crop lands on the wrong, wrongly-sized slice entirely.
+                scale = monitor.get_scale_factor() if monitor is not None else 1
+                pixels, span, thickness = ripple.crop(data, offset, width, height, area, scale)
             except Exception as error:
                 print('ripple capture: ' + type(error).__name__, file=sys.stderr)
                 GLib.idle_add(release)

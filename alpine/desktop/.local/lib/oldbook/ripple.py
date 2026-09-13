@@ -135,6 +135,47 @@ def parse_ppm(data):
     return width, height, index + 1
 
 
+def ring_envelope(distance, elapsed, duration=DURATION, speed=SPEED, sharpness=SHARPNESS):
+    """How close this point and moment are to the travelling front, and how
+    much the whole wave has aged: the bell that keeps the disturbance near the
+    front and lets it die out as the strike is left behind.
+
+    The disturbance only exists near the front: ahead of it the water has not
+    been reached, behind it the surface has already closed. A bell rather than
+    a spike, or the ring is a wire instead of a wave.
+    """
+    if duration <= 0:
+        raise ValueError('duration must be positive')
+    if not 0 <= elapsed <= duration:
+        return 0.0
+    age = elapsed / duration
+    front = age * speed
+    ring = (distance - front) * sharpness
+    envelope = math.exp(-ring * ring)
+    fade = (1.0 - age) ** 1.5
+    return envelope * fade
+
+
+def radial_reach(distance):
+    """How much a ripple this far from the strike still carries, physically:
+    energy spreads outward and weakens, so a crest near the point of impact
+    moves further than one already most of the way across the region."""
+    return 1.0 / (1.0 + 1.5 * distance * distance)
+
+
+def visibility(distance, elapsed, duration=DURATION, speed=SPEED, sharpness=SHARPNESS):
+    """How much of the frozen photograph should be shown at this point and
+    moment, as an alpha in 0..1.
+
+    This is what makes the surface transparent rather than a slab: it is
+    non-zero only in the travelling band around the front, close to the
+    strike. Everywhere else -- which is almost everywhere, almost all the
+    time -- the real, live desktop underneath is what a viewer actually sees,
+    because nothing is drawn over it at all.
+    """
+    return ring_envelope(distance, elapsed, duration, speed, sharpness) * radial_reach(distance)
+
+
 def crest(distance, elapsed, duration=DURATION, frequency=FREQUENCY,
           speed=SPEED, amplitude=AMPLITUDE, sharpness=SHARPNESS):
     """How far the water is pushed at one distance and one moment.
@@ -149,14 +190,7 @@ def crest(distance, elapsed, duration=DURATION, frequency=FREQUENCY,
         return 0.0
     age = elapsed / duration
     front = age * speed
-    # The disturbance only exists near the front: ahead of it the water has not
-    # been reached, behind it the surface has already closed. A bell rather than
-    # a spike, or the ring is a wire instead of a wave.
-    ring = (distance - front) * sharpness
-    envelope = math.exp(-ring * ring)
-    fade = (1.0 - age) ** 1.5
-    reach = 1.0 / (1.0 + 1.5 * distance * distance)
-    return amplitude * envelope * fade * reach * math.sin(
+    return amplitude * visibility(distance, elapsed, duration, speed, sharpness) * math.sin(
         distance * frequency - age * speed * frequency)
 
 
@@ -193,15 +227,22 @@ void main() {
     float envelope = exp(-ring * ring);
     float fade = pow(1.0 - age, 1.5);
     float reach = 1.0 / (1.0 + 1.5 * distance * distance);
-    float height = amplitude * envelope * fade * reach
+    // Non-zero only in the band around the travelling front: this is the
+    // surface's alpha as well as the wave's strength, so almost the entire
+    // output stays fully transparent and the real, live desktop underneath is
+    // what is actually seen there -- not a second-old photograph pretending
+    // to be it. Only the ring itself, for the moment it crosses a pixel, is
+    // drawn at all.
+    float coverage = envelope * fade * reach;
+    float height = amplitude * coverage
                  * sin(distance * frequency - age * speed * frequency);
     vec2 direction = distance > 0.0001 ? offset / distance : vec2(0.0);
     vec2 sampled = texture_position + direction * height / max(scale, vec2(0.0001));
     vec4 colour = texture(screen, clamp(sampled, 0.0, 1.0));
     // A crest catches the light and a trough loses it, which is what makes the
     // bend read as water rather than as a lens.
-    colour.rgb += vec3(height * 6.0) * fade;
-    fragment = colour;
+    colour.rgb += vec3(height * 6.0);
+    fragment = vec4(colour.rgb, clamp(coverage * 3.0, 0.0, 1.0));
 }
 """
 
@@ -279,20 +320,28 @@ def program(library):
     return linked
 
 
-def crop(data, offset, width, height, area):
+def crop(data, offset, width, height, area, scale=1.0):
     """The region's own pixels, bottom row first, ready to upload.
 
     A texture's first row is its bottom one and a portable pixmap's is its top,
     so the crop is taken upside down rather than flipping the sampler and
     making every coordinate in the shader read backwards.
+
+    ``area`` is in the compositor's own logical units -- the same ones Sway
+    reports outputs in and layer-shell margins are placed with -- but grim
+    hands over the photograph at the output's real, physical resolution. On
+    any output where those differ, ``scale`` is what converts one to the
+    other; left at 1 it is a no-op for an unscaled output. Skipping this once
+    cropped a thin, wrongly-placed sliver of the screen on a HiDPI panel
+    instead of the intended band.
     """
     import numpy
     frame = numpy.frombuffer(data, dtype=numpy.uint8, count=width * height * 3,
                              offset=offset).reshape(height, width, 3)
-    left = max(0, min(width - 1, int(area['x'])))
-    top = max(0, min(height - 1, int(area['y'])))
-    right = max(left + 1, min(width, left + int(area['width'])))
-    bottom = max(top + 1, min(height, top + int(area['height'])))
+    left = max(0, min(width - 1, round(area['x'] * scale)))
+    top = max(0, min(height - 1, round(area['y'] * scale)))
+    right = max(left + 1, min(width, left + round(area['width'] * scale)))
+    bottom = max(top + 1, min(height, top + round(area['height'] * scale)))
     return numpy.ascontiguousarray(frame[top:bottom, left:right][::-1]), \
         right - left, bottom - top
 
@@ -322,6 +371,10 @@ class Ripple:
         self.window.set_decorated(False)
         self.window.set_name('oldbook-ripple')
         self.window.set_can_focus(False)
+        # Without this, GTK's own window background -- opaque on this theme --
+        # sits behind the GL canvas and defeats every alpha the shader draws.
+        self.provider = Gtk.CssProvider()
+        self.provider.load_from_string('#oldbook-ripple { background: transparent; }')
         Gtk4LayerShell.init_for_window(self.window)
         Gtk4LayerShell.set_namespace(self.window, 'oldbook-ripple')
         Gtk4LayerShell.set_monitor(self.window, monitor)
@@ -335,8 +388,12 @@ class Ripple:
         Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.LEFT, area['x'])
         Gtk4LayerShell.set_margin(self.window, Gtk4LayerShell.Edge.TOP, area['y'])
         Gtk4LayerShell.set_exclusive_zone(self.window, -1)
-        self.window.set_size_request(size[0], size[1])
-        self.window.set_default_size(size[0], size[1])
+        # Layer-shell surfaces are placed and sized in the compositor's own
+        # logical units, same as the margins just above -- unlike ``size``,
+        # which is the cropped photograph's physical pixel dimensions and is
+        # only what the GL texture itself is uploaded at.
+        self.window.set_size_request(round(area['width']), round(area['height']))
+        self.window.set_default_size(round(area['width']), round(area['height']))
         self.canvas = Gtk.GLArea()
         self.canvas.set_has_depth_buffer(False)
         self.canvas.set_has_stencil_buffer(False)
@@ -345,6 +402,8 @@ class Ripple:
         self.canvas.connect('unrealize', self.dispose)
         self.window.set_child(self.canvas)
         self.window.connect('realize', self.untouchable)
+        Gtk.StyleContext.add_provider_for_display(
+            self.window.get_display(), self.provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def untouchable(self, _widget):
         """The wave is a picture, not a control; clicks belong underneath it."""
@@ -462,6 +521,9 @@ class Ripple:
         if self.window is None:
             return
         window, self.window = self.window, None
+        display = window.get_display()
+        if not display.is_closed():
+            self._Gtk.StyleContext.remove_provider_for_display(display, self.provider)
         window.destroy()
         self.pixels = None
         if self.on_done is not None:
