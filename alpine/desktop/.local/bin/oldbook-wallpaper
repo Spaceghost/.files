@@ -470,16 +470,29 @@ def generation_status():
         return None
 
 
-def start_generation(theme='active', *, new_theme=None):
+def start_generation(theme='active'):
+    """Ask the gallery for one painting, by name: the one call that always paints."""
     GENERATION.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(GENERATION, 0o700)
     with (GENERATION / 'manual.log').open('a') as log:
         command = ['/usr/bin/python3', str(REPO / 'alpine/wallpapers/generate.py'),
                    '--manual', '--activate', '--theme', theme]
-        if new_theme is not None:
-            command += ['--new-theme=' + new_theme]
         subprocess.Popen(command, stdin=subprocess.DEVNULL,
                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+
+
+def create_theme(phrase=None):
+    """Hand a new theme to the theme command: designed as text and applied at once.
+
+    A theme is not a painting. It used to be requested through the generator,
+    which designed it, saved it and then waited on a painter that might be out
+    of credit before the desktop was ever switched; now the theme command
+    designs and applies it, and whether a painting follows is the painting
+    policy's to say. None asks for a surprise.
+    """
+    command = ['/usr/bin/python3', str(Path(__file__).resolve().parent / 'oldbook-theme'), 'create']
+    command += ['--random'] if phrase is None else [phrase]
+    subprocess.Popen([*command, '--notify'], stdin=subprocess.DEVNULL, start_new_session=True)
 
 
 def prompt_theme():
@@ -490,7 +503,7 @@ def prompt_theme():
     except FileNotFoundError:
         return
     if phrase.returncode == 0 and phrase.stdout.strip():
-        start_generation(new_theme=phrase.stdout.strip())
+        create_theme(phrase.stdout.strip())
 
 
 def edit_prompts():
@@ -525,7 +538,7 @@ def status(thumbnail_height=None):
     controls = ('Left: gallery & themes · Right: next artwork\n'
                 'Middle: pause/resume · scroll: browse (↑ previous / ↓ next)\n'
                 'Command/Super+click: generate & switch · new scene and mix\n'
-                'Super+Shift+left: random complete theme · debut painting included\n'
+                'Super+Shift+left: random complete theme · applied at once, no painting\n'
                 'Super+Shift+right: describe a complete theme · name generated\n'
                 'Super+Shift+G: desktop panels on/off\n'
                 'Shift+click: edit prompts · “Zorak, fix the script!”\n'
@@ -712,7 +725,7 @@ def pick():
         break
     if selected is not None:
         if selected == random_label:
-            start_generation(new_theme='')
+            create_theme()
         elif selected == phrase_label:
             prompt_theme()
         elif selected == generate_label:
@@ -814,7 +827,7 @@ def main():
     elif args.action == 'generate':
         start_generation(args.theme)
     elif args.action == 'new-theme':
-        start_generation(new_theme='')
+        create_theme()
     elif args.action == 'prompt-theme':
         prompt_theme()
     elif args.action == 'edit-prompts':

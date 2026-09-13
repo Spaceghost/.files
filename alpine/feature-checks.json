@@ -38,11 +38,37 @@
         "test_theme_switch.py",
         "test_cursor_theme.py",
         "test_theme_boundary.py",
-        "test_monochrome_leaks.py"
+        "test_monochrome_leaks.py",
+        "test_theme_workshop.py",
+        "test_boot_chain_completeness.py"
       ],
       "evidence": [
         "verification/complete-themes/",
         "verification/animated-cursors/"
+      ]
+    },
+    {
+      "id": "THEME-WORKSHOP",
+      "paths": [
+        "alpine/desktop/.local/bin/oldbook-theme",
+        "alpine/desktop/.local/bin/oldbook-control",
+        "alpine/desktop/.local/bin/oldbook-wallpaper",
+        "alpine/wallpapers/new_themes.py",
+        "alpine/wallpapers/providers.py",
+        "alpine/wallpapers/painting_policy.py",
+        "alpine/wallpapers/generate.py",
+        "alpine/desktop/.config/oldbook/painting.json",
+        "alpine/packages/waybar-art/art.c"
+      ],
+      "tests": [
+        "test_theme_workshop.py",
+        "test_painting_policy.py",
+        "test_new_themes.py",
+        "test_control_deck.py",
+        "test_theme_boundary.py"
+      ],
+      "evidence": [
+        "verification/theme-workshop/"
       ]
     },
     {
@@ -110,7 +136,8 @@
         "test_manual_artwork.py",
         "test_new_themes.py",
         "test_theme_picker.py",
-        "test_thumbnails.py"
+        "test_thumbnails.py",
+        "test_control_deck.py"
       ],
       "evidence": [
         "verification/gallery-thumbnails/"
@@ -123,14 +150,16 @@
         "alpine/desktop/.local/bin/oldbook-wallpaper",
         "alpine/desktop/.local/bin/oldbook-theme",
         "alpine/bin/deploy-home",
-        "alpine/wallpapers/generate.py"
+        "alpine/wallpapers/generate.py",
+        "alpine/wallpapers/painting_policy.py"
       ],
       "tests": [
         "test_generation_retries.py",
         "test_manual_artwork.py",
         "test_new_themes.py",
         "test_theme_completion_notification.py",
-        "test_themed_artwork.py"
+        "test_themed_artwork.py",
+        "test_painting_policy.py"
       ],
       "evidence": []
     },

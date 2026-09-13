@@ -49,6 +49,21 @@ def notify(title, body):
     run(["notify-send", title, body])
 
 
+def ask(title):
+    """One line of free text from the launcher, or None when he backs out.
+
+    The same Fuzzel the menus use, with no rows at all: the prompt is the whole
+    window, so a description is typed right here rather than in some other
+    tool's picker. Escape, or Enter on nothing, is an answer of None.
+    """
+    answer = run([BIN / "oldbook-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62",
+                  "--lines", "0"], input="", text=True, capture_output=True)
+    if answer.returncode != 0:
+        return None
+    text = " ".join(answer.stdout.split())
+    return text or None
+
+
 def choose(title, options, lines=18):
     answer = run([BIN / "oldbook-fuzzel", "--dmenu", "--prompt", f" {title} › ", "--width", "62", "--lines", str(min(lines, len(options)))], input="\n".join(options) + "\n", text=True, capture_output=True)
     return answer.stdout.strip() if answer.returncode == 0 else ""
@@ -459,8 +474,16 @@ def ambient_display():
         run([BIN / "oldbook-ambient-display", options[selected]])
 
 
+# The theme menu's own rows, below the catalogue. A new theme is described
+# right here and applied the moment it is designed; the gallery is where the
+# paintings are, and it is offered as that rather than as the way to a theme.
+DESCRIBE_THEME = "✦  New theme · describe it here, it is designed and applied"
+SURPRISE_THEME = "✦  New theme · surprise me"
+GALLERY = "󰸉  Artwork gallery · paintings and prompts"
+
+
 def theme():
-    """Switch the whole desktop's theme, from the list every overlay reads."""
+    """Switch the whole desktop's theme, or describe a new one, from one list."""
     active, catalogue = themes()
     if not catalogue:
         notify("Desktop theme", "The theme catalogue could not be read from this checkout.")
@@ -471,17 +494,26 @@ def theme():
         mark = PICKED if chosen else UNPICKED
         tail = " · reapply across the desktop" if chosen else ""
         options[f"{mark}  {entry['name']}{tail}"] = entry["id"]
-    workshop = "󰸉  Paint a new one · the gallery's own theme workshop"
-    options[workshop] = None
+    options[DESCRIBE_THEME] = "describe"
+    options[SURPRISE_THEME] = "surprise"
+    options[GALLERY] = "gallery"
     name = next((entry["name"] for entry in catalogue if entry["id"] == active), active)
     selected = choose(f"DESKTOP THEME · {str(name or 'UNKNOWN').upper()}", list(options))
     if selected not in options:
         return
-    if options[selected] is None:
+    choice = options[selected]
+    # Everything below redraws the desktop or opens a window; none of it may
+    # hold this menu, so each is launched and left to report for itself.
+    if choice == "describe":
+        phrase = ask("Describe the new theme")
+        if phrase:
+            launch([BIN / "oldbook-theme", "create", phrase, "--notify"])
+    elif choice == "surprise":
+        launch([BIN / "oldbook-theme", "create", "--random", "--notify"])
+    elif choice == "gallery":
         launch([BIN / "oldbook-wallpaper", "pick"])
     else:
-        # Switching redraws every application; it must never block this menu.
-        launch([BIN / "oldbook-theme", "use", options[selected], "--notify"])
+        launch([BIN / "oldbook-theme", "use", choice, "--notify"])
 
 
 def power_posture():

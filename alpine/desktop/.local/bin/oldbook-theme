@@ -13,12 +13,22 @@ running so the change is visible without logging out.
 The selection reaches past the session too.  The power deck is part of the
 profile like any other surface, and the console palette every text-mode screen
 reads is regenerated here so GRUB, the kernel console, the initramfs passphrase
-prompt and the rescue gettys are brought up to date immediately: a theme is not
-considered complete while any of them still needs a human to remember a
-follow-up command, so this runs the GRUB theme render and the root install
-itself rather than only printing a reminder.
+prompt and the rescue gettys follow the switch: a theme is not considered
+complete while any of them still needs a human to remember a follow-up
+command, so the GRUB theme render and the root install run without one.  They
+are the one part of a switch that takes minutes and touches nothing anyone is
+looking at, so they run in the background after the visible desktop has
+already changed, and report how they went as a notification.
+
+`create` is the theme workshop: a description typed into the command deck
+becomes a complete theme -- palette, typography, geometry, every application
+profile, its own folder icons and the nearest installed pointer set -- and is
+applied the moment it is designed.  No painting is asked for; a painting is a
+separate, optional thing the gallery does on request.
 """
 import argparse
+import datetime as dt
+import fcntl
 import json
 import os
 from pathlib import Path
@@ -34,9 +44,21 @@ import time
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
-from desktop_theme import ensure_profile
+from desktop_theme import ensure_profile, validate_design
+import failure_notice
+import painting_policy
 
 THEMES = REPO / 'alpine/themes'
+# How the boot chain is published after a switch: after the visible desktop has
+# changed and without holding it up (background), in this process (now), or
+# not at all (skip, for a files-only switch that will be followed by another).
+BOOT_CHAIN_MODES = ('background', 'now', 'skip')
+NOTIFY_APP = 'Desktop themes'
+
+
+def state_directory():
+    """Where this command keeps its own records; evaluated per call, never cached."""
+    return Path.home() / '.local/state/oldbook/theme'
 
 
 def base_ghostty(repo):
@@ -146,69 +168,174 @@ def sync_profiles(repo):
     return written
 
 
-def run_boot_step(command, timeout):
-    """Run one boot-chain step, keeping its own words on failure.
+def run_boot_step(command, timeout, log=None):
+    """Run one step, keeping its own words on failure and its whole output in a log.
 
     A generic "FAILED" note here would be exactly the failure this desktop's
     other notifications were built to stop producing: something broke and the
     person seeing it has no way to tell what. install-boot-console and
     build-grub-theme already say precisely what went wrong on stderr, so that
-    text is what a failure note carries, not a label standing in for it.
+    text is what a failure note carries, not a label standing in for it. When
+    a log is given, everything the step said is appended to it, so a
+    notification's button has a whole run to open and not only its last line.
     """
     try:
         result = subprocess.run(command, capture_output=True, text=True,
                                 stdin=subprocess.DEVNULL, timeout=timeout)
     except (OSError, subprocess.SubprocessError) as error:
         return False, str(error)
+    if log is not None:
+        try:
+            with Path(log).open('a') as stream:
+                stream.write(f'$ {" ".join(str(part) for part in command)}\n')
+                stream.write(result.stdout or '')
+                stream.write(result.stderr or '')
+                stream.write(f'[exit {result.returncode}]\n')
+        except OSError:
+            pass
     if result.returncode:
         return False, (result.stderr or result.stdout).strip()[:2000]
     return True, result.stdout
 
 
-def refresh_boot_palette(theme):
-    """Regenerate the console palette and carry it all the way to the boot chain.
+def render_console_palette(theme):
+    """Regenerate the checkout's console palette for a theme; (changed, notes).
 
     The lock reads the active palette already, and there is no login screen --
     greetd autologins into Sway, because the LUKS passphrase is the real gate --
     so the surfaces a theme switch used to miss are the ones on either side of
     the session: the GRUB menu, the kernel console, the initramfs passphrase
-    prompt and the rescue gettys.  All four read one generated file.
-
-    A theme is not complete while any of these still needs a human to remember
-    a follow-up command -- that is the same failure as no coverage at all, just
-    quieter, and it is exactly how every theme but the one whose boot chain was
-    once built by hand stayed on that one's GRUB menu regardless of what was
-    selected everywhere else. So this runs the whole chain itself: the console
-    palette (a checkout-only write, like the Ghostty sync above), the GRUB
-    theme render (also checkout-only, no root), and finally the root install
-    that actually publishes both to /etc and /boot. install-boot-console keeps
-    its own backups and rolls itself back on any failure, including a grub.cfg
-    it cannot validate, so a failure here leaves the previous boot chain intact
-    -- it is reported, not silently retried or forced through.
+    prompt and the rescue gettys.  All four read this one generated file, and
+    writing it is a checkout-only write like the Ghostty sync above: fast, no
+    root, and the whole of what the rest of the chain waits on.
     """
     builder = REPO / 'alpine/bin/build-console-palette'
     if not builder.is_file():
-        return []
+        return False, []
     try:
         _path, changed, _palette = runpy.run_path(str(builder))['build'](REPO, theme['id'])
     except (OSError, ValueError, RuntimeError, ImportError) as error:
-        return ['boot console palette FAILED: ' + str(error)]
-    if not changed:
-        return []
-    notes = ['boot console palette updated']
+        return False, ['boot console palette FAILED: ' + str(error)]
+    return changed, (['boot console palette updated'] if changed else [])
+
+
+def publish_boot_chain(log=None):
+    """Render the GRUB theme and install it and the palette into /etc and /boot.
+
+    A theme is not complete while any boot-time surface still needs a human to
+    remember a follow-up command -- that is the same failure as no coverage at
+    all, just quieter, and it is exactly how every theme but the one whose boot
+    chain was once built by hand stayed on that one's GRUB menu regardless of
+    what was selected everywhere else. So both steps run here without one: the
+    GRUB theme render (checkout-only, no root), then the root install that
+    actually publishes to /etc and /boot. install-boot-console keeps its own
+    backups and rolls itself back on any failure, including a grub.cfg it
+    cannot validate, so a failure here leaves the previous boot chain intact
+    -- it is reported, not silently retried or forced through.
+    """
+    notes = []
+    # The log is passed only when there is one, so a caller's own step runner
+    # with the old two-argument shape still fits.
+    extra = () if log is None else (log,)
     grub_builder = REPO / 'alpine/bin/build-grub-theme'
     if grub_builder.is_file():
-        ok, detail = run_boot_step(['/usr/bin/python3', str(grub_builder)], 120)
+        ok, detail = run_boot_step(['/usr/bin/python3', str(grub_builder)], 120, *extra)
         if not ok:
             notes.append('GRUB theme render FAILED: ' + detail)
             return notes
         notes.append('GRUB theme rendered')
     installer = REPO / 'alpine/bin/install-boot-console'
     if installer.is_file():
-        ok, detail = run_boot_step(['doas', '/usr/bin/python3', str(installer)], 600)
+        ok, detail = run_boot_step(['doas', '/usr/bin/python3', str(installer)], 600, *extra)
         notes.append('boot console installed for next boot' if ok
                      else 'boot console install FAILED: ' + detail)
     return notes
+
+
+def refresh_boot_palette(theme, log=None):
+    """The whole boot chain in this process: palette, GRUB render, root install."""
+    changed, notes = render_console_palette(theme)
+    if not changed:
+        return notes
+    return notes + publish_boot_chain(log)
+
+
+def boot_chain_pending():
+    """True when a publish step exists to run after the palette changes."""
+    return any((REPO / 'alpine/bin' / name).is_file()
+               for name in ('build-grub-theme', 'install-boot-console'))
+
+
+def refresh_boot_palette_later(theme):
+    """Regenerate the palette now; publish it to GRUB and /boot in the background.
+
+    The publish is the one part of a switch that takes minutes -- the root
+    install alone has a ten-minute budget -- and touches nothing anyone is
+    looking at, so it no longer holds the visible switch up: "The ones we
+    can't see can be asynchronously applied to their theme but the visible
+    should theme right away upon selection." It still happens without anyone
+    remembering a command, which is the rule that matters. `oldbook-theme
+    boot-chain` carries it out, serialised by a lock so two quick switches
+    publish in order and the last one wins, and reports how it went as a
+    notification: a failure carries the installer's own words with the whole
+    run one click away.
+    """
+    changed, notes = render_console_palette(theme)
+    if not changed or not boot_chain_pending():
+        return notes
+    state = state_directory()
+    try:
+        state.mkdir(parents=True, exist_ok=True)
+        with (state / 'boot-chain.log').open('ab') as stream:
+            subprocess.Popen(['/usr/bin/python3', str(Path(__file__).resolve()), 'boot-chain',
+                              theme['id']], stdin=subprocess.DEVNULL, stdout=stream,
+                             stderr=subprocess.STDOUT, start_new_session=True)
+    except OSError as error:
+        return notes + ['boot chain publish FAILED to start: ' + str(error)]
+    return notes + ['boot chain publishing in the background: GRUB, the console and the '
+                    'passphrase prompt follow at the next boot; a failure is reported']
+
+
+def boot_chain(identity):
+    """Publish the committed console palette to GRUB and /boot, and say how it went.
+
+    This is what `use` starts in the background. Successive switches queue on
+    the lock rather than racing the root install, and each publishes whatever
+    palette is committed when its turn comes, so the boot chain ends on the
+    theme that was selected last.
+    """
+    theme = load_theme(REPO, identity)
+    state = state_directory()
+    state.mkdir(parents=True, exist_ok=True)
+    log = state / 'boot-chain.log'
+    with (state / 'boot-chain.lock').open('a+') as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        started = dt.datetime.now(dt.timezone.utc).isoformat()
+        notes = publish_boot_chain(log)
+    failures = [note for note in notes if 'FAILED' in note]
+    record = {'theme': theme['id'], 'name': theme['name'], 'started_utc': started,
+              'finished_utc': dt.datetime.now(dt.timezone.utc).isoformat(),
+              'notes': notes, 'ok': not failures}
+    temporary = (state / 'boot-chain.json').with_suffix(f'.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps(record, indent=2) + '\n')
+    temporary.replace(state / 'boot-chain.json')
+    for note in notes:
+        print(note)
+    if failures:
+        failure_notice.announce('Boot chain not themed',
+                                theme['name'] + '\n' + '\n'.join(failures)
+                                + '\n\nThe whole run: ' + str(log), log)
+    elif notes:
+        notify_user('Boot chain themed', 'GRUB, the console and the passphrase prompt follow '
+                    + theme['name'] + ' at the next boot.', urgency='low')
+    return 1 if failures else 0
+
+
+def notify_user(title, body, urgency=None):
+    command = ['notify-send', '--app-name=' + NOTIFY_APP]
+    if urgency:
+        command.append('--urgency=' + urgency)
+    run([*command, '--', title, body], 10)
 
 
 def profile_directory(identity):
@@ -554,7 +681,44 @@ def refresh_session():
     return notes
 
 
-def use(identity, *, reload=True):
+def ensure_icon_set(repo, theme, profile):
+    """Build the folder icons a theme names when nothing on the machine has them.
+
+    `design.icons` is a name, and for the shipped themes it names a set that is
+    versioned under alpine/desktop. A theme created from a description names a
+    set nobody has built yet, and a GTK, Qt or LXQt window pointed at a missing
+    set falls back to bare hicolor folders -- one more surface quietly left in
+    somebody else's colours. So the set is drawn once, here, into the theme's
+    own profile: the locked Papirus folders recoloured to the theme's roles in
+    about a second, deployed with the rest of the profile, and rebuilt from the
+    descriptor if it is ever lost. A theme naming a set that is installed
+    anywhere already is left exactly as it is.
+    """
+    try:
+        name = validate_design(theme.get('design'))['icons']
+    except ValueError as error:
+        return ['folder icons FAILED: ' + str(error)]
+    roots = [profile / '.local/share/icons', repo / 'alpine/desktop/.local/share/icons',
+             Path.home() / '.local/share/icons', Path.home() / '.icons',
+             Path('/usr/local/share/icons'), Path('/usr/share/icons')]
+    if any((root / name / 'index.theme').is_file() for root in roots):
+        return []
+    builder = repo / 'alpine/bin/build-icon-theme'
+    if not builder.is_file():
+        return []
+    output = profile / '.local/share/icons' / name
+    if has_symlink(output, repo):
+        return ['folder icons FAILED: the profile icon directory must not follow symlinks']
+    ok, detail = run_boot_step(['/usr/bin/python3', str(builder), '--theme', theme['id'],
+                                '--output', str(output)], 120)
+    if ok:
+        return [f'folder icons built ({name})']
+    return [f'folder icons FAILED ({name}; file managers fall back to Papirus): ' + detail]
+
+
+def use(identity, *, reload=True, boot_chain='background'):
+    if boot_chain not in BOOT_CHAIN_MODES:
+        raise ValueError('Unknown boot chain mode: ' + str(boot_chain))
     theme = load_theme(REPO, identity)
     # Binary surfaces -- the pointer shapes and the power deck's glyph tiles --
     # are written beside the text ones, and a failure to draw them is reported
@@ -563,6 +727,7 @@ def use(identity, *, reload=True):
     profile = ensure_profile(REPO, theme, notes=asset_notes)
     deployed = None
     if profile is not None:
+        asset_notes.extend(ensure_icon_set(REPO, theme, profile))
         sync_ghostty_profile(REPO, profile, theme)
         # The deployer owns the symlink journal and its rollback, so switching
         # themes reuses it rather than inventing a second way to write HOME.
@@ -583,31 +748,178 @@ def use(identity, *, reload=True):
         # A wallpaper failure must not strand already-deployed application files
         # on disk while running clients retain the previous theme.
         notes.extend(refresh_session())
-    # Boot-chain refresh (console palette, GRUB theme render, the doas install
-    # into /etc and /boot) touches nothing in the running session -- it is the
-    # one step with multi-minute timeout budgets (install-boot-console alone
-    # allows 600s), so it used to run first and make every visible reload
-    # above wait on it for no reason: the whole desktop sat unchanged, with no
-    # feedback, until a root-owned boot install finished. It still runs
-    # unconditionally and still has to complete before `use` returns -- a
-    # theme switch that reported success while the boot chain silently lagged
-    # is the exact bug this refresh exists to prevent, so this stays
-    # synchronous, not backgrounded -- but now it runs last, after the parts
-    # a person is actually looking at have already changed.
-    notes.extend(refresh_boot_palette(theme))
+    # The boot chain touches nothing in the running session and is the one
+    # step with multi-minute budgets, so by default the palette is written now
+    # and the GRUB render and root install are published in the background,
+    # after everything a person is looking at has already changed. `now` keeps
+    # it in this process for a caller that must wait; `skip` is for a
+    # files-only switch another switch will follow.
+    if boot_chain == 'now':
+        notes.extend(refresh_boot_palette(theme))
+    elif boot_chain == 'background':
+        notes.extend(refresh_boot_palette_later(theme))
     return theme, profile, deployed, notes
 
 
+class DesignStopped(RuntimeError):
+    """The design chain gave up; carries the log of the attempt that failed."""
+
+    def __init__(self, reason, log):
+        super().__init__(reason)
+        self.log = log
+
+
+def design_with_retries(config, env, log, phrase, *, history=None, attempts=4,
+                        sleep=time.sleep):
+    """Ask the design chain up to four times; a chain that is spent ends it early.
+
+    The waits are the generator's own (two, four, eight seconds), and the
+    reason kept is the runner's last words rather than a flattened exception,
+    so what reaches the notification is "usage limit ... try again at" and
+    not "design failed".
+    """
+    from new_themes import Exhausted, design_theme, log_reason
+    import providers
+    last = log
+    for attempt in range(1, attempts + 1):
+        last = log if attempt == 1 else log.with_name(f'{log.stem}.attempt-{attempt}{log.suffix}')
+        try:
+            return design_theme(REPO, config, env, last, phrase, providers.codex_command,
+                                history=history)
+        except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+            reason = log_reason(last) or str(error).strip() or 'No reason was recorded.'
+            if attempt == attempts or isinstance(error, Exhausted):
+                raise DesignStopped(reason, last) from error
+            sleep(2 ** attempt)
+    raise DesignStopped('No reason was recorded.', last)
+
+
+def paint_history():
+    """What has been painted, for the designer's novelty context; None when unknown."""
+    import prompt_catalog
+    path = Path.home() / '.local/state/oldbook/wallpaper-generation/history.json'
+    try:
+        return prompt_catalog.PaintHistory.load(path, ())
+    except (OSError, ValueError, RuntimeError):
+        return None
+
+
+def request_debut_painting(theme):
+    """Start the gallery painting a first picture for a theme, detached; a note."""
+    generator = REPO / 'alpine/wallpapers/generate.py'
+    if not generator.is_file():
+        return ['debut painting FAILED: the gallery generator is not in this checkout']
+    state = Path.home() / '.local/state/oldbook/wallpaper-generation'
+    try:
+        state.mkdir(parents=True, exist_ok=True, mode=0o700)
+        with (state / 'manual.log').open('a') as log:
+            subprocess.Popen(['/usr/bin/python3', str(generator), '--manual', '--activate',
+                              '--theme', theme['id']], stdin=subprocess.DEVNULL, stdout=log,
+                             stderr=subprocess.STDOUT, start_new_session=True)
+    except OSError as error:
+        return ['debut painting FAILED to start: ' + str(error)]
+    return ['debut painting requested from the gallery']
+
+
+def create(phrase, *, notify=False, reload=True, boot_chain='background'):
+    """Design a theme from a description, save it, and apply it. No painting.
+
+    The whole of a theme comes out of one text design: palette, typography,
+    geometry, opacity, bar and widget edges and launcher width from the model;
+    every application profile, the pointer shapes, the power deck's tiles and
+    the boot palette rendered from those; the nearest installed pointer set
+    and a folder icon set of its own chosen and built here. Then it is applied
+    the way any theme is, so the visible desktop changes the moment the design
+    exists. Whether a first painting is then requested is the painting policy's
+    to say, and it is off unless ~/.config/oldbook/painting.json says otherwise.
+    """
+    import prompt_catalog
+    import providers
+    config = prompt_catalog.load_catalog(REPO / 'alpine/wallpapers/prompts.json')
+    state = state_directory()
+    (state / 'designs').mkdir(parents=True, exist_ok=True, mode=0o700)
+    with (state / 'design.lock').open('a+') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print('oldbook-theme: a theme is already being designed', file=sys.stderr)
+            if notify:
+                notify_user('A theme is already being designed',
+                            'It is applied when it is ready; this request was not queued.')
+            return 2
+        log = state / 'designs' / f'{time.time_ns()}-{os.getpid()}.jsonl'
+        if notify:
+            notify_user('Designing a theme…', (phrase or 'A surprise.')
+                        + '\nIt is applied the moment it is designed; no painting is needed.',
+                        urgency='low')
+        try:
+            theme = design_with_retries(config, providers.runner_environment(), log, phrase,
+                                        history=paint_history())
+        except DesignStopped as error:
+            print('oldbook-theme: theme design stopped: ' + str(error), file=sys.stderr)
+            if notify:
+                failure_notice.announce('Theme design stopped',
+                                        str(error) + '\n\nThe whole run: ' + str(error.log),
+                                        error.log if Path(error.log).exists() else None)
+            return 1
+    # The lock is released: applying is the ordinary switch, on the ordinary path.
+    theme, profile, deployed, notes = use(theme['id'], reload=reload, boot_chain=boot_chain)
+    if painting_policy.allows('debut_painting'):
+        notes.extend(request_debut_painting(theme))
+    else:
+        notes.append(painting_policy.refusal('debut_painting'))
+    report(theme, deployed, notes, notify, created=True)
+    return 1 if any('FAILED' in note for note in notes) else 0
+
+
+def report(theme, deployed, notes, notify, *, created=False):
+    """Print what a switch did and, when asked, say it on the desktop too."""
+    print(('Created and switched to ' if created else 'Switched to ') + theme['name'])
+    if deployed is None:
+        print('  Configuration already matched this theme.')
+    else:
+        print(f'  Previous configuration backed up to {deployed}')
+    for note in notes:
+        print('  ' + note)
+    failures = [note for note in notes if 'FAILED' in note]
+    if notify:
+        title = 'Theme needs attention' if failures else (
+            'Theme created and applied' if created else 'Theme applied')
+        details = failures + [note for note in notes if 'not managed' in note]
+        body = theme['name'] + ('\n' + '\n'.join(details) if details else '')
+        run(['notify-send', '--app-name=' + NOTIFY_APP, title, body])
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('list', 'current', 'use', 'refresh', 'sync'))
-    parser.add_argument('theme', nargs='?')
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument('action', choices=('list', 'current', 'use', 'refresh', 'sync',
+                                           'create', 'boot-chain'))
+    parser.add_argument('theme', nargs='?',
+                        help='a theme ID for use and boot-chain; the description for create')
+    parser.add_argument('--random', action='store_true',
+                        help='for create: invent a theme from no description at all')
     parser.add_argument('--no-reload', action='store_true',
                         help='apply the files without touching the running session')
+    parser.add_argument('--boot-chain', choices=BOOT_CHAIN_MODES, default='background',
+                        help='for use and create: publish GRUB and the boot console in the '
+                             'background (default), in this process (now), or not at all (skip)')
     parser.add_argument('--notify', action='store_true',
                         help='show the result in a desktop notification')
     args = parser.parse_args()
     active = current_identity()
+    if args.action == 'create':
+        if args.random == bool(args.theme):
+            parser.error('create takes one description, or --random for a surprise')
+        phrase = '' if args.random else args.theme.strip()
+        if len(phrase) > 500 or any(ord(character) < 32 for character in phrase):
+            parser.error('a description is one line of at most 500 characters')
+        return create(phrase, notify=args.notify, reload=not args.no_reload,
+                      boot_chain=args.boot_chain)
+    if args.action == 'boot-chain':
+        if not args.theme:
+            parser.error('boot-chain requires a theme ID')
+        return boot_chain(args.theme)
     if args.action == 'current':
         print(active)
         return 0
@@ -627,27 +939,16 @@ def main():
     if not args.theme:
         parser.error('use requires a theme ID')
     try:
-        theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload)
+        theme, profile, deployed, notes = use(args.theme, reload=not args.no_reload,
+                                              boot_chain=args.boot_chain)
     except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         if args.notify:
-            run(['notify-send', '--app-name=Desktop themes', '--urgency=critical',
+            run(['notify-send', '--app-name=' + NOTIFY_APP, '--urgency=critical',
                  'Could not switch theme', str(error)])
         print(f'oldbook-theme: {error}', file=sys.stderr)
         return 1
-    print(f'Switched to {theme["name"]}')
-    if deployed is None:
-        print('  Configuration already matched this theme.')
-    else:
-        print(f'  Previous configuration backed up to {deployed}')
-    for note in notes:
-        print('  ' + note)
-    failures = [note for note in notes if 'FAILED' in note]
-    if args.notify:
-        title = 'Theme needs attention' if failures else 'Theme applied'
-        details = failures + [note for note in notes if 'not managed' in note]
-        body = theme['name'] + ('\n' + '\n'.join(details) if details else '')
-        run(['notify-send', '--app-name=Desktop themes', title, body])
-    return 1 if failures else 0
+    report(theme, deployed, notes, args.notify)
+    return 1 if any('FAILED' in note for note in notes) else 0
 
 
 if __name__ == '__main__':

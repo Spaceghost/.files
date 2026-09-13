@@ -51,7 +51,21 @@ Binary assets follow the theme too, not only text: the cursor shapes and the
 power deck's glyph tiles are drawn per theme into its profile, `design.cursors`
 names the inherited pointer set and `design.icons` the icon folder. Redrawing
 Gruvbox's must reproduce its committed bytes exactly, which is what proves these
-are generated rather than merely regenerated-looking.
+are generated rather than merely regenerated-looking. A theme whose named
+folder set is installed nowhere has it built into its own profile on first use,
+so no theme points a toolkit at folders that do not exist; a generated theme
+never names assets itself -- the nearest installed pointer set to its palette
+is chosen for it and its folder set is named after it (`THEME-WORKSHOP`).
+
+The visible desktop switches at once and the invisible surfaces follow
+without holding it up: `use` regenerates the console palette in the switch
+and publishes the GRUB render and the root install in the background
+(`oldbook-theme boot-chain`, serialised by a lock so the last switch wins),
+reporting a failure as a notification carrying the installer's own words
+with the log one click away. "The ones we can't see can be asynchronously
+applied to their theme but the visible should theme right away upon
+selection." Asynchronous never means optional: no boot-time surface may
+depend on a human remembering a command after a switch.
 
 Switching is reactive, and what cannot be made reactive is reported at switch
 time rather than hidden: third-party Qt windows read their palette at startup,
@@ -85,9 +99,53 @@ application failures must be visible instead of reporting an unqualified success
   [theme switch](tests/test_theme_switch.py), [theme picker](tests/test_theme_picker.py),
   [application refresh](tests/test_application_theme_refresh.py),
   [cursor theme](tests/test_cursor_theme.py) with
-  [drawn frames and a session load](verification/animated-cursors/README.md).
+  [drawn frames and a session load](verification/animated-cursors/README.md),
+  [boot chain](tests/test_boot_chain_completeness.py), [session edges](tests/test_theme_boundary.py),
+  [workshop](tests/test_theme_workshop.py).
   [Recorded previews](verification/complete-themes/) cover selected themes;
   they do not prove every running application accepts every change immediately.
+
+### THEME-WORKSHOP
+
+A new theme is made from a description typed where the theme is chosen, and
+never waits on a painting. The command deck's theme menu carries **New theme ·
+describe it here** and **New theme · surprise me**; the description is typed
+into the deck's own prompt and reaches `oldbook-theme create` as one literal
+argument, never passing through the gallery. The gallery's theme rows and the
+artwork badge's Super+Shift clicks run the same command. "I want to select the
+option to make a new theme and just type there, not go to the wallpaper
+section. … I want to freely generate themes even without the image gen."
+
+`create` designs the theme as text through the provider chain (Codex, Claude,
+the Alienware), saves the descriptor, and applies it exactly as `use` applies
+any theme: every profile file, pointer shapes and power-deck tiles rendered
+from the descriptor, the nearest installed Simp1e pointer set chosen for its
+palette, its own folder icon set built into its profile, visible surfaces
+refreshed at once and the boot chain published in the background. The model
+is never asked to name a pointer or icon set. Design retries with the
+generator's own waits and stops at once when every provider is spent; a
+stopped design is announced with the runner's own reason and the log one
+click away; a second request while one is designing is refused, not queued.
+
+Painting is a separate, optional step under `~/.config/oldbook/painting.json`
+(`alpine/wallpapers/painting_policy.py`): `debut_painting` decides whether a
+new theme is given a first painting and `scheduled` whether the hourly job
+paints, and both ship off. An explicit request -- Generate new artwork, Paint
+in an existing theme, Super+click on the badge, `generate.py --manual` --
+always paints. "Temporarily disable it for theme-gen and elsewhere unless
+called specifically." When the generator's own `--new-theme` is asked to
+paint, the theme is still applied the moment it is designed, before the
+painter is asked.
+
+- Implementation: [oldbook-theme](desktop/.local/bin/oldbook-theme),
+  [command deck](desktop/.local/bin/oldbook-control), [gallery](desktop/.local/bin/oldbook-wallpaper),
+  [designer](wallpapers/new_themes.py), [providers](wallpapers/providers.py),
+  [painting policy](wallpapers/painting_policy.py), [generator](wallpapers/generate.py).
+- Checks: [workshop](tests/test_theme_workshop.py), [painting policy](tests/test_painting_policy.py),
+  [new themes](tests/test_new_themes.py), [deck](tests/test_control_deck.py),
+  [session edges](tests/test_theme_boundary.py);
+  [a design answered by the Alienware in a scratch checkout](verification/theme-workshop/README.md).
+  No test designs with a live model or switches the live desktop.
 
 ### GHOST-BRAND
 
@@ -971,7 +1029,9 @@ notification daemon, never by the AI attention stream, whose meaning is separate
 
 Left-click opens the gallery; right-click advances; middle-click pauses; scroll
 browses. Super+left generates artwork, Shift+left edits prompts, Super+Shift+left
-creates a random complete theme and Super+Shift+right prompts for a theme.
+creates a random complete theme and Super+Shift+right prompts for a theme; both
+theme actions design and apply through `oldbook-theme create` and paint nothing
+unless the painting policy says so (`THEME-WORKSHOP`).
 Preserve the searchable existing-theme picker, prompt-created names, image
 paging, explicit deletion flow, help and command deck. New actions are additive;
 ordinary artwork selection remains distinct from choosing a desktop theme.
@@ -995,11 +1055,16 @@ generation. Unthemed artwork changes only the painting. Nonactivating/manual
 save-only and daily jobs do not switch the desktop. Failed activation keeps the
 saved artifact and reports the failure; it must not repaint to retry activation.
 New-theme completion names the theme and previews the actual saved painting.
+A theme the generator designs is applied as soon as it is saved, before its
+painting, and is not applied a second time when the painting lands. The daily
+job paints only while `scheduled` is on in the painting policy; a manual
+request never consults it.
 
 - Implementation: [generator activation](wallpapers/generate.py).
 - Checks: [themed artwork](tests/test_themed_artwork.py), [new themes](tests/test_new_themes.py),
   [completion notices](tests/test_theme_completion_notification.py),
-  [retry behavior](tests/test_generation_retries.py).
+  [retry behavior](tests/test_generation_retries.py),
+  [painting policy](tests/test_painting_policy.py).
   Mocked provider tests do not request paid images or establish live activation.
 
 ### ARTWORK-ARCHIVE

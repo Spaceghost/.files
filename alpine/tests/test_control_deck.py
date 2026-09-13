@@ -310,7 +310,7 @@ class HelperTests(DeckTestCase):
             'oldbook-power-mode': ('override', 'show', 'ladder'),
             'oldbook-watch': ('start', 'stop'),
             'oldbook-cat': ('status', 'on', 'off', 'stop', 'interactions', 'fans'),
-            'oldbook-theme': ('use',),
+            'oldbook-theme': ('use', 'create'),
             'oldbook-rice': ('list',),
         }
         for helper, arguments in expected.items():
@@ -371,6 +371,74 @@ class SubmenuTests(DeckTestCase):
             control.theme()
         self.assertEqual(self.launched, [])
         self.assertEqual(self.notified[0][0], 'Desktop theme')
+
+    def catalogue(self):
+        return mock.patch.object(control, 'themes', lambda: (
+            'gruvbox-dark', [{'id': 'gruvbox-dark', 'name': 'Gruvbox Dark'}]))
+
+    def test_a_new_theme_is_described_right_here_and_handed_to_the_theme_command(self):
+        """Jack: "I want to select the option to make a new theme and just type
+        there, not go to the wallpaper section." The description is typed in
+        the deck's own prompt and reaches the theme command as one literal
+        argument; no painting is asked for anywhere on the way."""
+        phrase = 'moonlit library; $(touch /tmp/never)'
+        with self.catalogue(), mock.patch.object(control, 'ask', return_value=phrase) as ask:
+            self.answers = [control.DESCRIBE_THEME]
+            control.theme()
+        ask.assert_called_once()
+        self.assertIn('Describe', ask.call_args.args[0])
+        self.assertEqual(self.launched, [[str(control.BIN / 'oldbook-theme'), 'create',
+                                          phrase, '--notify']])
+        self.assertFalse(any('Paint a new' in row or 'workshop' in row for row in self.offered),
+                         'the gallery is no longer the way to a theme')
+
+    def test_backing_out_of_the_description_creates_nothing(self):
+        with self.catalogue(), mock.patch.object(control, 'ask', return_value=None):
+            self.answers = [control.DESCRIBE_THEME]
+            control.theme()
+        self.assertEqual(self.launched, [])
+
+    def test_a_surprise_theme_needs_no_description(self):
+        with self.catalogue():
+            self.answers = [control.SURPRISE_THEME]
+            control.theme()
+        self.assertEqual(self.launched, [[str(control.BIN / 'oldbook-theme'), 'create',
+                                          '--random', '--notify']])
+
+    def test_the_gallery_row_opens_the_gallery_and_nothing_else(self):
+        with self.catalogue():
+            self.answers = [control.GALLERY]
+            control.theme()
+        self.assertEqual(self.launched, [[str(control.BIN / 'oldbook-wallpaper'), 'pick']])
+
+    def test_the_theme_menu_lists_the_catalogue_before_its_own_rows(self):
+        with self.catalogue():
+            self.answers = ['']
+            control.theme()
+        self.assertEqual(self.offered[-3:], [control.DESCRIBE_THEME, control.SURPRISE_THEME,
+                                             control.GALLERY])
+        self.assertTrue(self.offered[0].endswith('Gruvbox Dark · reapply across the desktop'))
+
+    def test_a_description_is_typed_into_the_launcher_with_no_rows(self):
+        answered = []
+
+        def run(args, **kwargs):
+            answered.append(([str(argument) for argument in args], kwargs))
+            return types.SimpleNamespace(returncode=0, stdout='  moon   books \n', stderr='')
+
+        with mock.patch.object(control, 'run', run):
+            self.assertEqual(control.ask('Describe the new theme'), 'moon books')
+        command, kwargs = answered[0]
+        self.assertEqual(command[-2:], ['--lines', '0'])
+        self.assertEqual(kwargs.get('input'), '')
+        self.assertIn('Describe the new theme', ' '.join(command))
+        # Escape, or Enter on nothing, is no answer at all.
+        with mock.patch.object(control, 'run', lambda *a, **k: types.SimpleNamespace(
+                returncode=1, stdout='typed then escaped', stderr='')):
+            self.assertIsNone(control.ask('Describe the new theme'))
+        with mock.patch.object(control, 'run', lambda *a, **k: types.SimpleNamespace(
+                returncode=0, stdout='   \n', stderr='')):
+            self.assertIsNone(control.ask('Describe the new theme'))
 
     def test_the_posture_menu_hands_the_decision_back(self):
         self.supplies(mains=True, capacity=86)

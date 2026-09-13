@@ -2,6 +2,70 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The theme workshop stops waiting for a painting — 2026-09-13
+
+Jack: "the theme selector in my super+shift+d when I generate is requiring
+wallpapers to generate to make the theme, that shouldn't be. I want to select
+the option to make a new theme and just type there, not go to the wallpaper
+section. … I want to freely generate themes even without the image gen. In
+fact, if you can't switch the bg generator to use a different freeer api or
+set up my alienware to generate images for you, then temporarily disable it
+for theme-gen and elsewhere unless called specifically."
+
+- What was wrong: the deck's only route to a new theme opened the gallery, and
+  the gallery ran the wallpaper generator, which designed the theme as text,
+  saved it and then waited on Codex image generation before the desktop was
+  switched. Codex is out of credit until 2026-09-14 18:21; the Claude fallback
+  was never found (the generator's clean PATH omitted `~/.local/bin`); the
+  Alienware lookup failed DNS once; and the model was being asked to name a
+  pointer set, which is how the last run ended on "Invalid theme design
+  cursors". Separately, the provider chain that had been running since
+  2026-09-09 was uncommitted and its painting closure shadowed the chain's
+  own `paint()`, so every painting request since then died on a TypeError.
+- Landed first: the provider chain itself (`providers.py`, the design and
+  image chains, the prompts block) with that closure renamed, as its own
+  commit, because it is what the desktop was actually running.
+- `oldbook-theme create PHRASE | --random`: designs through the chain, saves,
+  chooses the nearest installed Simp1e set for the palette, names and builds
+  the theme's own folder icons into its profile, and applies through `use`.
+  Retries with the generator's waits; a spent chain stops at once; a stopped
+  design is announced with the runner's own reason and the log behind a
+  button; a second request while designing is refused. The deck's theme menu
+  gains **New theme · describe it here** (typed in the deck's own prompt) and
+  **New theme · surprise me**; its old "Paint a new one" row is now plainly
+  the artwork gallery. The gallery's theme rows and the badge's Super+Shift
+  clicks run the same command.
+- `use --boot-chain background|now|skip`: the console palette is written in
+  the switch; the GRUB render and the doas install run detached in
+  `oldbook-theme boot-chain`, serialised by a lock, recorded in
+  `~/.local/state/oldbook/theme/boot-chain.json`, announced quietly on success
+  and critically, with the log, on failure. Visible surfaces no longer wait
+  minutes on an invisible one.
+- Painting policy: `~/.config/oldbook/painting.json` (`scheduled`,
+  `debut_painting`, both shipped off). The hourly job paints only when
+  `scheduled` is on; a new theme gets a painting only when `debut_painting`
+  is; explicit requests always paint. `generate.py --new-theme` applies the
+  theme before painting and no longer gates design on a Codex login.
+- Free painters: the keyless Pollinations API answered but anonymously serves
+  one model, caps output near 968x608 and watermarks the image despite
+  `nologo=true` (sample kept out of the repository); SSH to the Alienware is
+  still refused by the tailnet policy, so no diffusion server could be put
+  there. Painting is therefore off unless called, as asked.
+- Validation: 20 tests in `test_theme_workshop.py`, 9 in
+  `test_painting_policy.py`, six new deck tests, four new designer tests, the
+  boot-chain switching tests rewritten for the split; the generator suites
+  pass on the landed chain. One real design ran through the Alienware rung
+  alone in a scratch copy of the checkout: qwen3.5:27b answered in 544 s with
+  *Scriptorium Shadows*, whose profile rendered complete
+  (`verification/theme-workshop/`). Codex was not asked (out of credit) and
+  Claude was not asked (to spend nothing); with the PATH fix Claude is the
+  first provider that will answer until Codex's credit returns.
+- Not verified: the deck prompt under a hand, a real `create` on the live
+  desktop, the background boot publish end to end, and any painting at all --
+  none of which an agent may exercise on the live session. The pre-existing
+  monochrome-test failures in `test_theme_boundary` and `test_complete_themes`
+  are unchanged.
+
 ## The rice list has every feature, by date — 2026-09-13
 
 Jack: "Update the rice list so it has all the features by date. Only include

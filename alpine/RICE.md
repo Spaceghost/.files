@@ -78,6 +78,7 @@ screen yet and you are the first.
 | Do this | Watch for | Seen before? |
 | --- | --- | --- |
 | Super+N, Enter, Enter | The best Codex, its model and effort on the line, opens where you used it last, straight on its prompt with no trust screen | First sighting |
+| Super+Shift+D, Theme, New theme · describe it here, a few words, Enter | A notice that the design has started, then the whole desktop restyles the moment it lands; GRUB and the boot console follow in the background and say so | First sighting |
 | Mission Control (F3) | Every workspace as a card of real window stills, the focused one outlined in amber; drag a still onto another card to move that window | First sighting |
 | Launchpad (F4), then type | Every application over the blurred painting, filtering from the first keystroke, page dots underneath | First sighting |
 | Rest the pointer on a workspace button | After a third of a second, a peek of that workspace's windows beneath the bar | First sighting |
@@ -372,10 +373,25 @@ cache and the theme directory; rows fall back to text. Evidence:
 the timer and the daily painting use; each descriptor under `themes/<id>.json`
 carries a palette, an image style and the design fields (font, radius,
 spacing, opacity, bar and widget edges). Super+Shift+click on the badge invents
-a complete random theme with a debut painting; Super+Shift+right-click asks for
-a description. The eighteen earlier themes are preserved under `archive/`.
+a complete random theme and applies it at once; Super+Shift+right-click asks
+for a description. Both run `oldbook-theme create`, the same workshop the
+command deck's theme menu opens, and neither paints anything: a theme is not a
+painting. The eighteen earlier themes are preserved under `archive/`.
 Evidence: [gallery-themes](verification/gallery-themes/launcher.png),
 [launcher-themes](verification/launcher-themes/gallery-paged.png).
+
+**When the painter is asked.** Painting spends Codex image credits and stops
+when they run out, so it has a switch of its own in
+`~/.config/oldbook/painting.json`: `scheduled` for the hourly job's daily
+painting, `debut_painting` for a first painting after a new theme. Both ship
+off, so nothing is painted unless asked for by name -- Generate new artwork,
+Paint in an existing theme…, Super+click on the badge, `generate.py --manual`
+-- and those always paint. Library `wallpapers/painting_policy.py`. Off: it
+is off; set either key to `true` to switch that kind back on. The keyless
+Pollinations API was tried as a free painter and rejected: one model, output
+capped near 968x608 and a watermark despite `nologo`. Evidence:
+`tests/test_painting_policy.py`; the schedule is not installed on this
+machine, so nothing scheduled has been watched either way.
 
 **Nocturnes after dark.** With a location file in place (see Sun and moon),
 the timer draws night paintings with three times the weight of the rest
@@ -1204,6 +1220,27 @@ preserved profiles. Evidence: [theme-review](verification/theme-review/gruvbox-d
 [complete-themes](verification/complete-themes/astronomers-vigil.png) (an
 archived generated theme, kept as proof of the pipeline).
 
+**The theme workshop.** `Super+Shift+D`, **Theme**, **New theme · describe it
+here**, a few words, Enter: the description is typed into the deck's own
+prompt and `oldbook-theme create` designs a complete theme from it as text --
+Codex, then Claude, then the Alienware's own model, whichever answers first --
+and applies it the moment it is saved. Every profile file, the pointer shapes
+and the power deck's tiles are rendered from the descriptor; the nearest
+installed Simp1e pointer set is chosen for its palette and a folder icon set
+of its own is built into its profile, because a model cannot know what is
+installed here and the run that was asked stopped on "Invalid theme design
+cursors". **New theme · surprise me** needs no description. No painting is
+asked for on the way (see *When the painter is asked* under Gallery), so a
+theme arrives whether or not anybody's image credit does. The visible desktop
+switches at once; GRUB, the console and the passphrase prompt are published in
+the background by `oldbook-theme boot-chain` and announce a failure with the
+installer's own words. Off: choose a shipped theme from the same menu; the
+workshop rows do nothing until picked. Evidence:
+[verification/theme-workshop/](verification/theme-workshop/README.md), where
+the Alienware designed *Scriptorium Shadows* into a scratch checkout in nine
+minutes and every profile file rendered from it; the deck prompt itself and a
+real switch have not been watched under a hand.
+
 **The accent follows the painting.** The theme's colours stay where they are,
 but its accent moves with the artwork. Each new painting is reduced to a
 weighted hue signature in OKLab, every pixel counting by chroma times lightness
@@ -1311,6 +1348,7 @@ the notification centre and the splash refer to. The power deck makes no sound.
 | Item | Live on the panel | Headless render | Not yet seen |
 | --- | --- | --- | --- |
 | Agent picker lines, trust pre-acceptance | both tools' trust screens, and their absence once the record was written, in a private tmux server | the lines, printed | the Fuzzel menu itself under a hand |
+| Theme workshop | | the Alienware designed a theme into a scratch checkout; the profile rendered complete; every switch step ran against stubs | the deck prompt, a real switch, the background boot publish |
 | Ghost Observatory geometry | reload applied | yes | corners, shadows and frame rate by eye |
 | Artwork badge thumbnail | yes | yes | |
 | Signal meter | bar strip seen | yes | |

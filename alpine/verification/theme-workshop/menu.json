@@ -1,0 +1,25 @@
+{
+  "isolation": "The deck script loaded from the checkout with its menu replaced by a recorder and its launcher disarmed; the rows are what oldbook-control theme() offers against the shipped catalogue. No Fuzzel window opened, nothing was launched, nothing on the desktop changed.",
+  "entry": "alpine/desktop/.local/bin/oldbook-control",
+  "heading": "DESKTOP THEME · GRUVBOX DARK",
+  "rows": [
+    "○  Catppuccin Mocha",
+    "●  Gruvbox Dark · reapply across the desktop",
+    "○  Monochrome Test",
+    "✦  New theme · describe it here, it is designed and applied",
+    "✦  New theme · surprise me",
+    "󰸉  Artwork gallery · paintings and prompts"
+  ],
+  "describe_row_launches": [
+    "/home/jack/.local/bin/oldbook-theme",
+    "create",
+    "<typed description>",
+    "--notify"
+  ],
+  "surprise_row_launches": [
+    "/home/jack/.local/bin/oldbook-theme",
+    "create",
+    "--random",
+    "--notify"
+  ]
+}

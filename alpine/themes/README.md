@@ -70,7 +70,6 @@ way toward `yellow_dim` in every theme, not a flat surface grey.
 ```sh
 cd ~/.files
 $EDITOR alpine/themes/<id>.json          # thirteen colours and eight design values
-alpine/bin/build-icon-theme --theme <id> # optional: its own folder icons
 oldbook-theme sync                       # render its profile, cursors and deck tiles
 oldbook-theme use <id>
 ```
@@ -78,6 +77,31 @@ oldbook-theme use <id>
 `oldbook-theme sync` renders every profile's text files, draws that theme's
 pointer shapes and power-deck glyph tiles, and derives its Ghostty palette from
 its Foot one. Nothing here compiles: the image builders are cairo and Pango.
+A theme whose `design.icons` names a folder set that is installed nowhere has
+that set built into its profile on its first `use`, from the locked Papirus
+package, in about a second; `alpine/bin/build-icon-theme --theme <id>` builds
+one by hand into the shared desktop tree instead.
+
+## Describing a theme
+
+A theme need not be authored at all. `Super+Shift+D`, **Theme**, **New theme ·
+describe it here**, a few words, Enter -- or from a terminal:
+
+```sh
+oldbook-theme create 'a monastery library after dark, ink and candlelight'
+oldbook-theme create --random
+```
+
+The description goes to the design chain as text (Codex, then Claude, then the
+Alienware's own model) and comes back as a complete descriptor: three colours
+and the design block, which the renderer turns into everything above. The
+pointer set and the folder icons are never the model's to name -- it cannot
+know what is installed here -- so the nearest installed Simp1e set to the
+palette is chosen and a folder set of the theme's own is built. Then the theme
+is applied exactly as `use` applies one. No painting is asked for: a theme is
+not a painting, and it used to wait on a painter that might be out of credit
+before the desktop was ever switched. Whether a first painting follows is the
+[painting policy](../wallpapers/README.md#when-the-painter-is-asked)'s to say.
 
 ## What reacts to a theme switch, and what does not
 
@@ -98,7 +122,15 @@ its Foot one. Nothing here compiles: the image builders are cairo and Pango.
 | LXQt Qt apps | the plugin rereads `lxqt.conf`, which is now part of the profile |
 | fuzzel, wlogout, swaynag, satty | spawned per invocation, so they read the new files |
 | cava | `SIGTERM`; its supervisor brings it back |
-| The boot chain | the console palette is regenerated; `build-grub-theme` and `install-boot-console` publish it |
+| The boot chain | the console palette is regenerated in the switch; `build-grub-theme` and `install-boot-console` publish it in the background (`oldbook-theme boot-chain`), and a failure arrives as a notification with the log one click away |
+
+The boot chain is the one step that is deliberately not waited for: the root
+install alone has a ten-minute budget and changes nothing anyone is looking
+at, so `use` writes the palette, starts the publish detached and returns once
+the visible desktop has changed. Successive switches queue on a lock and the
+last one wins. `--boot-chain now` keeps it in the foreground for a script that
+must wait; `--boot-chain skip` is for a files-only switch another will follow.
+The outcome is recorded in `~/.local/state/oldbook/theme/boot-chain.json`.
 
 Three things a running session cannot be made to follow, and are reported
 rather than hidden:

@@ -19,13 +19,14 @@ failed keeps its place with a plain tile, and a helper that fails opens nothing.
 This small native musl CFFI widget adds three actions to the original artwork
 button: **Command/Super + left click** generates and switches, **Shift +
 left click** opens the prompt editor, and **Command/Super + Shift + left click**
-creates a random named theme and switches to its first painting through the
-gallery's existing new-theme generator. Left click opens the gallery, right
+creates a random named theme and applies it at once through
+`oldbook-theme create`. Left click opens the gallery, right
 click advances to the next image and hands the crossfade the point it landed
 on, so the new painting grows out of the badge; middle click pauses, and
 scrolling moves to the previous or next image. Super/Command + Shift + right click opens a free-form theme description;
-the generator invents its name and creates a complete desktop design and first
-painting. Empty input or Escape cancels. Other right, middle and scroll actions
+the theme command invents its name and creates and applies a complete desktop
+design; a painting follows only when the painting policy asks for one. Empty
+input or Escape cancels. Other right, middle and scroll actions
 keep their usual behavior. The
 widget displays the complete tooltip, icon and state classes from
 `oldbook-wallpaper status` without rewriting the help text. A bounded startup

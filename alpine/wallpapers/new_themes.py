@@ -11,20 +11,105 @@ import tempfile
 import uuid
 
 from theme_catalog import available_themes, has_symlink
-from desktop_theme import DESIGN_SCHEMA, validate_design
+from desktop_theme import DESIGN_DEFAULTS, DESIGN_SCHEMA, preset_name, rgb, validate_design
 import prompt_catalog
 
 PALETTE_KEYS = ('background', 'foreground', 'accent')
+# The pointer set and the folder icons are asset names, not design choices a
+# model can make: it cannot know which Simp1e variants are installed on this
+# machine, and the last run to ask it stopped on "Invalid theme design cursors"
+# for exactly that reason. Both are chosen here from the palette it returns.
+ASSET_KEYS = ('cursors', 'icons')
+MODEL_DESIGN_SCHEMA = {
+    'type': 'object', 'additionalProperties': False,
+    'properties': {key: rule for key, rule in DESIGN_SCHEMA['properties'].items()
+                   if key not in ASSET_KEYS},
+    'required': [key for key in DESIGN_SCHEMA['required'] if key not in ASSET_KEYS]}
 SCHEMA = {
     'type': 'object', 'additionalProperties': False,
     'properties': {
         'name': {'type': 'string'}, 'image_style': {'type': 'string'},
         'scene': {'type': 'string'},
-        'design': DESIGN_SCHEMA,
+        'design': MODEL_DESIGN_SCHEMA,
         'palette': {'type': 'object', 'additionalProperties': False,
                     'properties': {key: {'type': 'string'} for key in PALETTE_KEYS},
                     'required': list(PALETTE_KEYS)}},
     'required': ['name', 'image_style', 'scene', 'palette', 'design']}
+
+# The Simp1e pointer variants and the ground and accent each was drawn for. A
+# generated theme takes whichever *installed* one sits nearest its own
+# background and accent, so its pointer never names a set that is not here.
+CURSOR_SETS = {
+    'simp1e-cursors-gruvbox-dark': ('#282828', '#fabd2f'),
+    'simp1e-cursors-gruvbox-light': ('#fbf1c7', '#d79921'),
+    'simp1e-cursors-catppuccin-mocha': ('#1e1e2e', '#cba6f7'),
+    'simp1e-cursors-catppuccin-macchiato': ('#24273a', '#c6a0f6'),
+    'simp1e-cursors-catppuccin-frappe': ('#303446', '#ca9ee6'),
+    'simp1e-cursors-catppuccin-latte': ('#eff1f5', '#8839ef'),
+    'simp1e-cursors-rose-pine': ('#191724', '#c4a7e7'),
+    'simp1e-cursors-rose-pine-moon': ('#232136', '#c4a7e7'),
+    'simp1e-cursors-rose-pine-dawn': ('#faf4ed', '#907aa9'),
+    'simp1e-cursors-nord-dark': ('#2e3440', '#88c0d0'),
+    'simp1e-cursors-nord-light': ('#eceff4', '#5e81ac'),
+    'simp1e-cursors-tokyo-night': ('#1a1b26', '#7aa2f7'),
+    'simp1e-cursors-kanagawa': ('#1f1f28', '#7e9cd8'),
+    'simp1e-cursors-everforest-dark': ('#2d353b', '#a7c080'),
+    'simp1e-cursors-dark': ('#1e1e1e', '#ffffff'),
+    'simp1e-cursors-light': ('#f0f0f0', '#000000'),
+}
+
+
+def icon_roots():
+    """Where an installed pointer set may live, nearest the user first."""
+    return [Path.home() / '.local/share/icons', Path.home() / '.icons',
+            Path('/usr/local/share/icons'), Path('/usr/share/icons')]
+
+
+def installed_cursor_sets(roots=None):
+    """The Simp1e pointer sets actually present on this machine."""
+    found = set()
+    for root in (icon_roots() if roots is None else roots):
+        try:
+            entries = list(Path(root).glob('simp1e-cursors-*'))
+        except OSError:
+            continue
+        found.update(entry.name for entry in entries if (entry / 'cursors').is_dir())
+    return sorted(found)
+
+
+def choose_cursor_set(palette, installed=None):
+    """The installed Simp1e set nearest this palette's ground and accent.
+
+    Only sets this module knows the colours of are compared; anything else
+    installed is left alone rather than guessed at, and a machine with none of
+    them keeps the shipped default so the pointer is never left without a set.
+    """
+    installed = installed_cursor_sets() if installed is None else installed
+    background = palette['background']
+    accent = palette.get('accent') or palette.get('yellow') or palette['foreground']
+
+    def distance(first, second):
+        return sum((a - b) ** 2 for a, b in zip(rgb(first), rgb(second)))
+
+    best = None
+    for name in installed:
+        reference = CURSOR_SETS.get(name)
+        if reference is None:
+            continue
+        score = distance(background, reference[0]) + distance(accent, reference[1])
+        if best is None or score < best[0]:
+            best = (score, name)
+    return best[1] if best else DESIGN_DEFAULTS['cursors']
+
+
+def icon_set_name(name, identity):
+    """The folder set a generated theme's profile points every toolkit at.
+
+    Named the way the LXQt preset already is, so the theme's own name is what
+    a file manager's settings dialog shows; built by oldbook-theme when the
+    theme is first applied. Bounded to the length the design schema accepts.
+    """
+    return ('Oldbook-' + preset_name({'name': name, 'id': identity}))[:64]
 
 
 def theme_prompt(phrase, style=''):
@@ -50,10 +135,15 @@ def theme_prompt(phrase, style=''):
             '\nVariation seed: ' + uuid.uuid4().hex)
 
 
-def save_theme(repo, definition, phrase):
+def save_theme(repo, definition, phrase, *, cursor_sets=None):
     if not isinstance(definition, dict) or set(definition) != set(SCHEMA['required']):
         raise ValueError('Theme response has unexpected fields')
-    validate_design(definition['design'])
+    design = definition['design']
+    if isinstance(design, dict):
+        # Whatever a model says about assets is discarded, not validated: the
+        # names are this machine's to choose.
+        design = {key: value for key, value in design.items() if key not in ASSET_KEYS}
+    validate_design(design)
     for key, limit in (('name', 80), ('image_style', 4000), ('scene', 2000)):
         value = definition[key]
         if (not isinstance(value, str) or not value.strip() or len(value) > limit
@@ -70,7 +160,9 @@ def save_theme(repo, definition, phrase):
     if has_symlink(directory, repo):
         raise RuntimeError('Theme destination must be a regular directory in the checkout')
     directory.mkdir(parents=True, exist_ok=True)
-    theme = dict(definition, id=identity, source_phrase=phrase,
+    design = validate_design(dict(design, cursors=choose_cursor_set(palette, cursor_sets),
+                                  icons=icon_set_name(definition['name'], identity)))
+    theme = dict(definition, design=design, id=identity, source_phrase=phrase,
                  generated_by='ghost-gallery', created_utc=dt.datetime.now(dt.timezone.utc).isoformat())
     # Exclusive creation cannot replace an existing collection or follow a symlink.
     with (directory / (identity + '.json')).open('x') as output:

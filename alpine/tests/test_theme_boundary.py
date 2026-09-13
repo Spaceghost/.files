@@ -20,6 +20,7 @@ from pathlib import Path
 import re
 import runpy
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -393,7 +394,13 @@ class SurfacesOutsideTheOldFileSet(unittest.TestCase):
 
 
 class SwitchingReachesTheBootChain(unittest.TestCase):
-    """Selecting a theme leaves the checkout ready for one root command."""
+    """Selecting a theme carries it to the boot chain without a human's help.
+
+    The palette is regenerated in the switch itself; the GRUB render and the
+    root install -- the slow, invisible part -- are published in the background
+    by default, so the visible desktop never waits on them, and in this process
+    when a caller asks to wait. Either way nobody has to remember a command.
+    """
 
     def repository(self, root):
         for relative in ('alpine/desktop', 'alpine/themes/profiles/gruvbox-dark',
@@ -401,7 +408,8 @@ class SwitchingReachesTheBootChain(unittest.TestCase):
             shutil.copytree(REPO / relative, root / relative,
                             ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         for relative in ('alpine/themes/gruvbox-dark.json', 'alpine/themes/current',
-                         'alpine/bin/deploy-home', 'alpine/bin/build-console-palette'):
+                         'alpine/bin/deploy-home', 'alpine/bin/build-console-palette',
+                         'alpine/bin/build-grub-theme', 'alpine/bin/install-boot-console'):
             target = root / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(REPO / relative, target)
@@ -415,17 +423,66 @@ class SwitchingReachesTheBootChain(unittest.TestCase):
             home.mkdir()
             theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/oldbook-theme'))
             palette = root / console_palette.RELATIVE
-            with mock.patch.object(Path, 'home', return_value=home):
-                _theme, _profile, _deployed, notes = theme['use']('boundary-probe', reload=False)
+            steps = []
+
+            def fake_step(command, timeout, log=None):
+                steps.append(Path(command[-1]).name)
+                return True, ''
+
+            with mock.patch.object(Path, 'home', return_value=home), \
+                    mock.patch.dict(theme['use'].__globals__, {'run_boot_step': fake_step}):
+                _theme, _profile, _deployed, notes = theme['use'](
+                    'boundary-probe', reload=False, boot_chain='now')
             document = boot_console.load_palette(palette.read_text())
             self.assertEqual(document['theme'], 'boundary-probe')
             self.assertEqual(document['colors'][15], ALTERNATE['palette']['foreground'])
             self.assertEqual([note for note in notes if 'FAILED' in note], [])
-            self.assertTrue(any('install-boot-console' in note for note in notes), notes)
+            self.assertEqual(steps, ['build-grub-theme', 'install-boot-console'],
+                             'a switch renders the GRUB theme and installs the boot console itself')
+            self.assertTrue(any('boot console installed' in note for note in notes), notes)
             # Reapplying the same theme is not a change to carry into the boot.
-            with mock.patch.object(Path, 'home', return_value=home):
+            with mock.patch.object(Path, 'home', return_value=home), \
+                    mock.patch.dict(theme['use'].__globals__, {'run_boot_step': fake_step}):
+                _theme, _profile, _deployed, again = theme['use'](
+                    'boundary-probe', reload=False, boot_chain='now')
+            self.assertEqual(again, [])
+
+    def test_by_default_the_publish_runs_in_the_background_after_the_switch(self):
+        """Jack: "The ones we can't see can be asynchronously applied to their
+        theme but the visible should theme right away upon selection." """
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.repository(Path(directory) / 'repo')
+            home = Path(directory) / 'home'
+            home.mkdir()
+            theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/oldbook-theme'))
+            steps, launched = [], []
+
+            def fake_step(command, timeout, log=None):
+                steps.append(command)
+                return True, ''
+
+            def fake_popen(command, **kwargs):
+                launched.append((command, kwargs))
+                return mock.Mock(pid=4242)
+
+            with mock.patch.object(Path, 'home', return_value=home), \
+                    mock.patch.dict(theme['use'].__globals__, {'run_boot_step': fake_step}), \
+                    mock.patch.object(subprocess, 'Popen', side_effect=fake_popen):
+                _theme, _profile, _deployed, notes = theme['use']('boundary-probe', reload=False)
+            self.assertEqual(steps, [], 'nothing slow runs in the switch itself')
+            self.assertEqual(len(launched), 1)
+            command, kwargs = launched[0]
+            self.assertEqual(command[-2:], ['boot-chain', 'boundary-probe'])
+            self.assertEqual(Path(command[-3]).name, 'oldbook-theme')
+            self.assertTrue(kwargs.get('start_new_session'))
+            self.assertTrue(any('background' in note for note in notes), notes)
+            self.assertTrue(any('boot console palette updated' in note for note in notes), notes)
+            # The palette is already current, so nothing is published twice.
+            with mock.patch.object(Path, 'home', return_value=home), \
+                    mock.patch.object(subprocess, 'Popen', side_effect=fake_popen):
                 _theme, _profile, _deployed, again = theme['use']('boundary-probe', reload=False)
             self.assertEqual(again, [])
+            self.assertEqual(len(launched), 1)
 
     def test_a_checkout_without_the_boot_sources_still_switches(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -434,9 +491,11 @@ class SwitchingReachesTheBootChain(unittest.TestCase):
             home = Path(directory) / 'home'
             home.mkdir()
             theme = runpy.run_path(str(root / 'alpine/desktop/.local/bin/oldbook-theme'))
-            with mock.patch.object(Path, 'home', return_value=home):
+            with mock.patch.object(Path, 'home', return_value=home), \
+                    mock.patch.object(subprocess, 'Popen') as launch:
                 _theme, _profile, _deployed, notes = theme['use']('gruvbox-dark', reload=False)
             self.assertEqual(notes, [])
+            launch.assert_not_called()
 
     def test_a_broken_palette_source_is_reported_rather_than_hidden(self):
         with tempfile.TemporaryDirectory() as directory:

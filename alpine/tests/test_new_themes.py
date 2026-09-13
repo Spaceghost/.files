@@ -73,20 +73,20 @@ class NewThemeTests(unittest.TestCase):
                 mock.patch.object(art.subprocess, 'run', side_effect=[
                     CompletedProcess([], 0, '✦  Create theme from prompt\n', ''),
                     CompletedProcess([], 1, '', '')]), \
-                mock.patch.object(art, 'start_generation') as start:
+                mock.patch.object(art, 'create_theme') as create:
             art.pick()
-        start.assert_not_called()
+        create.assert_not_called()
 
-    def test_phrase_menu_passes_literal_text_to_background_job(self):
+    def test_phrase_menu_passes_literal_text_to_the_theme_command(self):
         from subprocess import CompletedProcess
         phrase = 'Moon books; $(touch /tmp/nope)'
         with mock.patch.object(art, 'load_gallery', return_value=([], {})), \
                 mock.patch.object(art.subprocess, 'run', side_effect=[
                     CompletedProcess([], 0, '✦  Create theme from prompt\n', ''),
                     CompletedProcess([], 0, phrase + '\n', '')]), \
-                mock.patch.object(art, 'start_generation') as start:
+                mock.patch.object(art, 'create_theme') as create:
             art.pick()
-        start.assert_called_once_with(new_theme=phrase)
+        create.assert_called_once_with(phrase)
 
     def test_prompted_theme_command_accepts_description_and_cancel_is_inert(self):
         from subprocess import CompletedProcess
@@ -94,23 +94,67 @@ class NewThemeTests(unittest.TestCase):
             with self.subTest(answer=answer, code=code), \
                     mock.patch('sys.argv', ['oldbook-wallpaper', 'prompt-theme']), \
                     mock.patch.object(art.subprocess, 'run', return_value=CompletedProcess([], code, answer, '')) as prompt, \
-                    mock.patch.object(art, 'start_generation') as start:
+                    mock.patch.object(art, 'create_theme') as create:
                 art.main()
                 if answer and code == 0:
-                    start.assert_called_once_with(new_theme=answer)
+                    create.assert_called_once_with(answer)
                 else:
-                    start.assert_not_called()
+                    create.assert_not_called()
                 self.assertIn('Describe', ' '.join(prompt.call_args.args[0]))
 
-    def test_new_theme_command_launches_random_theme_and_activates_debut_art(self):
-        with tempfile.TemporaryDirectory() as directory, \
-                mock.patch('sys.argv', ['oldbook-wallpaper', 'new-theme']), \
-                mock.patch.object(art, 'GENERATION', Path(directory)), \
+    def test_a_theme_is_designed_and_applied_by_the_theme_command_not_painted(self):
+        """The gallery no longer asks the generator for a theme: a theme is not a
+        painting, and it used to wait on a painter that might be out of credit
+        before the desktop was switched at all."""
+        theme_command = str(REPO / 'alpine/desktop/.local/bin/oldbook-theme')
+        with mock.patch('sys.argv', ['oldbook-wallpaper', 'new-theme']), \
                 mock.patch.object(art.subprocess, 'Popen') as launch:
             art.main()
-        command = launch.call_args.args[0]
-        self.assertIn('--new-theme=', command)
-        self.assertIn('--activate', command)
+        self.assertEqual(launch.call_args.args[0],
+                         ['/usr/bin/python3', theme_command, 'create', '--random', '--notify'])
+        with mock.patch.object(art.subprocess, 'Popen') as launch:
+            art.create_theme('Moon books; $(touch /tmp/nope)')
+        self.assertEqual(launch.call_args.args[0],
+                         ['/usr/bin/python3', theme_command, 'create',
+                          'Moon books; $(touch /tmp/nope)', '--notify'])
+        self.assertNotIn('shell', launch.call_args.kwargs)
+        source = (REPO / 'alpine/desktop/.local/bin/oldbook-wallpaper').read_text()
+        self.assertNotIn('--new-theme', source)
+
+    def test_the_model_is_never_asked_to_name_a_pointer_or_icon_set(self):
+        """It cannot know which Simp1e variants are installed here, and the run
+        that asked it stopped on "Invalid theme design cursors"."""
+        design = new_themes.SCHEMA['properties']['design']
+        for key in new_themes.ASSET_KEYS:
+            self.assertNotIn(key, design['properties'])
+            self.assertNotIn(key, design['required'])
+        self.assertIn('font', design['required'])
+
+    def test_a_saved_theme_takes_the_nearest_installed_pointer_set_and_its_own_icons(self):
+        definition = self.definition()
+        definition['design'] = dict(definition['design'], cursors='invented-by-a-model', icons='')
+        with tempfile.TemporaryDirectory() as directory:
+            theme = new_themes.save_theme(Path(directory), definition, 'moon books', cursor_sets=[
+                'simp1e-cursors-rose-pine', 'simp1e-cursors-gruvbox-dark', 'simp1e-cursors-unknown'])
+        # A dark violet-black ground with a gold accent: nearer Gruvbox's charcoal
+        # and amber than Rose Pine's, and the unknown set is never guessed at.
+        self.assertEqual(theme['design']['cursors'], 'simp1e-cursors-gruvbox-dark')
+        self.assertEqual(theme['design']['icons'], 'Oldbook-Moonlit-Library')
+        self.assertEqual(new_themes.choose_cursor_set(
+            {'background': '#191724', 'foreground': '#e0def4', 'accent': '#c4a7e7'},
+            ['simp1e-cursors-rose-pine', 'simp1e-cursors-gruvbox-dark']), 'simp1e-cursors-rose-pine')
+        # With nothing installed the shipped default keeps the pointer whole.
+        self.assertEqual(new_themes.choose_cursor_set(definition['palette'], []),
+                         new_themes.DESIGN_DEFAULTS['cursors'])
+
+    def test_installed_sets_are_found_by_their_cursor_directories(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'simp1e-cursors-nord-dark/cursors').mkdir(parents=True)
+            (root / 'simp1e-cursors-empty').mkdir()
+            (root / 'Oldbook-Ghost/cursors').mkdir(parents=True)
+            self.assertEqual(new_themes.installed_cursor_sets([root, root / 'missing']),
+                             ['simp1e-cursors-nord-dark'])
 
     def test_existing_themes_are_selected_in_a_separate_picker(self):
         from subprocess import CompletedProcess
@@ -166,6 +210,8 @@ class NewThemeTests(unittest.TestCase):
         self.assertIn(theme['scene'], native.call_args.args[1])
         record = json.loads(next((fixture.state / 'manual').glob('*.json')).read_text())
         self.assertTrue(record['activated'])
+        # Applied when designed, before the painter was asked; not applied twice.
+        self.assertTrue(record['theme_applied'])
         entry = json.loads((fixture.repo / record['file']).with_suffix('.json').read_text())
         self.assertEqual(entry['theme'], theme['id'])
         self.assertRegex(entry['theme_descriptor_sha256'], r'^[0-9a-f]{64}$')

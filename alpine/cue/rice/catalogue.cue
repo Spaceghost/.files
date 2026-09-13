@@ -7,6 +7,14 @@ rice: {
 	version: 1
 	entries: [
 		{
+			id:      "theme-workshop-on-the-deck"
+			title:   "New themes are typed into the deck"
+			date:    "2026-09-13"
+			summary: "Super+Shift+D, Theme, New theme: a few words become a whole theme, applied at once, unpainted."
+			trigger: "Super+Shift+D, Theme, New theme · describe it here, then type a description and press Enter."
+			detail:  "oldbook-theme create designs the theme as text (Codex, then Claude, then the Alienware), chooses the nearest installed pointer set, builds its own folder icons and applies it like any theme: the visible desktop at once, GRUB and the boot console in the background with a notice either way. No painting is asked for unless debut_painting is true in ~/.config/oldbook/painting.json; the same file's scheduled key switches the daily painting back on. New theme · surprise me needs no description."
+		},
+		{
 			id:      "catbed-mode-is-yours"
 			title:   "Catbed mode is yours alone to end"
 			date:    "2026-09-13"

@@ -6,11 +6,13 @@ current painting and its story: click for the gallery picker, scroll to browse,
 right-click for the next image, and middle-click to pause. **Super/Command +
 left-click** paints an unpainted scene with a fresh mix and switches directly to it when ready.
 **Shift + left-click** opens the prompt editor. **Super/Command + Shift +
-left-click** creates a random new named theme and switches to its first painting.
+left-click** creates a random new named theme and applies it at once.
 **Super/Command + Shift + right-click** asks for a theme description, not a title.
-The generator invents the name and creates a complete desktop theme and debut
-painting. Empty input or Escape cancels. Themes must include application styling,
-typography and layout as well as colors; incomplete designs are rejected.
+The theme command invents the name and creates a complete desktop theme, which
+is applied the moment it is designed; no painting is made unless the painting
+policy says so (see below). Empty input or Escape cancels. Themes must include
+application styling, typography and layout as well as colors; incomplete
+designs are rejected.
 Left and right Shift and Super keys work. Other right/middle clicks and
 scrolling keep their usual actions even when a modifier is held.
 The gallery also offers **Generate new artwork & switch to it**. The same controls
@@ -29,10 +31,44 @@ oldbook-wallpaper generate --theme gruvbox-dark
 oldbook-wallpaper edit-prompts
 ```
 
-When a new theme and its painting finish, Ghost Gallery sends a desktop
-notification with the theme name and painting preview. It says whether the
-desktop switched or the work was saved in the gallery, and reports any pending
-local checkpoint. Failed image generation does not announce finished artwork.
+When a painting finishes, Ghost Gallery sends a desktop notification with the
+painting preview. It says whether the desktop switched or the work was saved
+in the gallery, and reports any pending local checkpoint. Failed image
+generation does not announce finished artwork. A new theme is announced by
+the theme command as soon as it is applied, painting or no painting.
+
+## When the painter is asked
+
+Painting is the one step that spends something outside the machine (Codex
+image credits) and the one that stops when that account runs dry, so it has a
+policy of its own in `~/.config/oldbook/painting.json` (the shipped default is
+`alpine/desktop/.config/oldbook/painting.json`):
+
+```json
+{
+  "scheduled": false,
+  "debut_painting": false
+}
+```
+
+- `scheduled`: the hourly cron job paints one painting a day. Off, the job
+  still repairs pending checkpoints and reserves nothing, so switching it on
+  paints the same day.
+- `debut_painting`: a theme created from a description also gets a first
+  painting, requested from the gallery after the theme is already applied.
+
+Both default to off: painting is disabled for theme creation and for the
+schedule unless called specifically. An explicit request always paints --
+**Generate new artwork & switch to it**, **Paint in an existing theme…**,
+Super+click on the badge, or `generate.py --manual` from a terminal -- because
+a person asking for a painting by name is what "called specifically" means. A
+missing or malformed policy file is the shipped default, never an error.
+
+The image chain is still Codex, then the Alienware once something there can
+paint. The keyless Pollinations API was tried as a free painter on 2026-09-13
+and is not wallpaper-grade anonymously: one model, output capped near 968x608
+and a watermark despite `nologo`. A registered (free) Pollinations token would
+lift both limits; it would live in 1Password like every other secret.
 
 The gallery preserves the painting list and appends next/previous, pause/resume,
 **Help & gallery controls**, and **Open command deck** alongside generation.
@@ -272,37 +308,50 @@ same prompt again is intentionally creative and is not deterministic.
 
 ## Create a new theme
 
-Right-click the artwork widget to open **Ghost Gallery**:
+The shortest way is the command deck: `Super+Shift+D`, **Theme**, **New theme ·
+describe it here**, type a few words, Enter. The description is typed into the
+deck's own prompt and never passes through the gallery. **New theme · surprise
+me** invents one from no description at all.
+
+The gallery offers the same two things:
 
 - **Create theme from prompt** is on the first screen. Describe what you want;
-  the generator invents the name, palette, art direction, and first scene.
-  Escape cancels without requesting generation.
+  the designer invents the name, palette, art direction, and first scene.
+  Escape cancels without requesting anything.
 - **Paint in an existing theme…** opens a separate alphabetical picker; type to
-  filter the theme names, then select one for another painting.
-- **Random new theme**, under **Gallery actions…**, invents a collection without a prompt.
+  filter the theme names, then select one for another painting. This is the
+  explicit request that paints.
+- **Random new theme**, under **Gallery actions…**, invents a theme without a prompt.
 
-Both run in the background through the existing Codex ChatGPT login. A busy
-indicator and desktop notifications cover theme design and painting. Once ready,
-its first wallpaper is selected. The named collection then appears in the
-existing-theme picker for future paintings. These are gallery themes;
-application colors and the default rotation theme remain independently configured.
+All of them run `oldbook-theme create`, in the background. The design is text
+only -- Codex, then Claude, then the Alienware, whichever answers first -- and
+the theme is complete the moment it is saved: every application profile,
+pointer shapes and power-deck tiles are rendered from it, the nearest installed
+Simp1e pointer set is chosen for its palette, its own folder icon set is built
+into its profile, and it is applied like any other theme, visible surfaces at
+once and the boot chain in the background. Notifications say when the design
+starts, when the theme is applied, and -- with the runner's own reason and the
+log one click away -- when a design stops. No painting is requested unless
+`debut_painting` is on in the painting policy above; the gallery's
+**Paint in an existing theme…** paints one later on request.
 
-Theme definitions live in `alpine/themes/<unique-id>.json`. The first successful
-image checkpoint includes its new descriptor and PNG/JSON pair, with autosync off.
-Theme design and painting each retry up to three times after the initial attempt.
-Notifications show retry progress and each attempt keeps a separate private log.
-A successful theme design is reused for all image retries. If painting still
-fails, the saved collection remains available in the existing-theme picker.
-If a checkpoint fails, files remain saved
-and the existing pending-checkpoint recovery applies. Private request logs are
-under `~/.local/state/oldbook/wallpaper-generation/manual/`.
+Theme definitions live in `alpine/themes/<unique-id>.json`. Design retries up
+to three times after the initial attempt with the generator's own waits, and
+stops at once when every provider says it is spent; each attempt keeps its own
+private log under `~/.local/state/oldbook/theme/designs/`. A painting made for
+the theme later is checkpointed with its descriptor exactly as before.
 
 Command-line equivalents:
 
 ```sh
-python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme
+oldbook-theme create 'Moonlit library'          # design, save, apply; no painting
+oldbook-theme create --random                   # a surprise
 python3 ~/.files/alpine/wallpapers/generate.py --manual --activate --new-theme 'Moonlit library'
 ```
+
+The last form is the explicit one that also paints: it applies the theme as
+soon as it is designed and then paints its debut picture through the image
+chain.
 
 ## Crossfade
 
