@@ -76,11 +76,11 @@
         },
         {
             "id": "powerline-chains",
-            "title": "Powerline chains in prompt, tmux and bar",
+            "title": "Powerline chains in prompt and tmux",
             "date": "2026-09-13",
-            "summary": "The prompt, the tmux status line and the bar draw their segments as rounded powerline chips.",
-            "trigger": "Open a terminal in a checkout and read the prompt, then the tmux status line and the bar.",
-            "detail": "Rounded Nerd Font separators in every theme profile's starship.toml, .tmux.conf and Waybar config. The caption strip's own separators are a separate setting, off by default."
+            "summary": "The prompt and the tmux status line draw their segments as rounded powerline chips.",
+            "trigger": "Open a terminal in a checkout and read the prompt, then the tmux status line.",
+            "detail": "Rounded Nerd Font separators in every theme profile's starship.toml and .tmux.conf. The bar's chain was taken off again the same day (Jack: \"swaybar too ugly on rhs now\"): the right island is coloured text on one dark ground. The caption strip's own separators are a separate setting, off by default."
         },
         {
             "id": "claude-alert-lands-on-session",

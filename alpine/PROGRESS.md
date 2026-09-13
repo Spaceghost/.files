@@ -82,6 +82,34 @@ features not things like fixes unless they're major additions."
   `test_rice_tour.py`.
 - Not verified: the triggers by hand; none of the new entries was set off live.
 
+## The bar's chain comes off the right island — 2026-09-13
+
+Jack, an hour after the chain first painted: "I really hate the way the
+swaybar looks with that powerline stuff. Even the window deco bar doesn't look
+appealing. Take screenshots and make some design decisions. It doesn't even
+follow theming." Then: "swaybar too ugly on rhs now; continue after fixing."
+
+- Screenshots first: the right island was five chips in hand-mixed dark tints
+  (`#4a2438`, `#1f3a4a`, `#4a3f1f`, `#4a2818`, `#1f4a2e`) that appear in no
+  theme descriptor, joined by radial-gradient caps, beside a left island whose
+  only colour is the accent at low alpha behind the focused workspace. The
+  strip below it wore solid accent grounds behind its segments. Neither is
+  how this desktop uses colour anywhere else.
+- Decision: the status modules go back to coloured text on the one dark
+  ground the island already had, with the clock's accent tint and the hover
+  pills as the only fills; the seven `custom/sepN` modules and the chip block
+  are gone from every chained profile (gruvbox-dark, catppuccin-mocha,
+  monochrome-test). A three-line rule folds `#custom-sep0..6` away so a bar
+  still running the old module list is fixed by the stylesheet reload alone --
+  the running bar was not signalled, at jack-02's request while it patches
+  Waybar's SIGUSR2 freeze. The strip's `powerline` setting is off in the live
+  decoration.json; the prompt and tmux chains were not complained of and stay.
+- Verified: the live bar's right island after the CSS reload, read from a
+  `grim` crop at native resolution; JSON still parses in all three profiles;
+  `cue vet`, the byte-for-byte rice render and the 31 rice tests.
+- Not verified: the module list without the separators, which needs the
+  restart jack-02 is about to do.
+
 ## The Scripture bar stays out of the bottom bars — 2026-09-13
 
 Jack: "Make sure the bible bar in the bottom ignores the window decoration

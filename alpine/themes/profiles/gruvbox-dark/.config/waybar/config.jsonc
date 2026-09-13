@@ -30,19 +30,12 @@
     "group/status": {
       "orientation": "horizontal",
       "modules": [
-        "custom/sep0",
         "group/telemetry",
-        "custom/sep1",
         "group/transmission",
-        "custom/sep2",
         "group/sound",
-        "custom/sep3",
         "group/power",
-        "custom/sep4",
         "custom/notifications",
-        "custom/sep5",
         "clock",
-        "custom/sep6",
         "tray"
       ]
     },
@@ -346,34 +339,6 @@
       "on-click": "~/.local/bin/oldbook-agents bar-click",
       "on-click-right": "~/.local/bin/oldbook-workspaces ai-menu"
     },
-    "expand-center": false,
-    "custom/sep0": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep1": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep2": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep3": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep4": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep5": {
-      "format": "\ue0b4",
-      "tooltip": false
-    },
-    "custom/sep6": {
-      "format": "\ue0b4",
-      "tooltip": false
-    }
+    "expand-center": false
   }
 ]
