@@ -93,10 +93,18 @@ transcripts, credentials, sessions, or other Claude files. Existing exact
 handlers are not duplicated.
 
 The click side lives outside `~/.claude/settings.json`: `oldbook-claude-notify-focus`
-is a plain script under `~/.local/bin`, wired as the `claude-focus` entry in
-`~/.config/swaync/config.json` (see "Auto-dismiss and click-to-jump routing"
-above). The installer does not touch swaync's config; that file is part of the
-ordinary desktop overlay like the rest of `~/.config`.
+under `~/.local/bin`, and the `claude-focus` entry the installer adds to
+`~/.config/swaync/config.json` ahead of the generic `focus-sender` fallback
+(see "Auto-dismiss and click-to-jump routing" above). Both destinations are
+normally a symlink from the HOME overlay (`deploy-home`) into whatever
+checkout is currently linked; the installer instead writes each one an
+ordinary file holding this checkout's exact bytes, recorded in the same
+backup manifest as `settings.json` (`version: 2`, an `assets` entry per file)
+so `--rollback` restores a symlink or a prior file exactly, not just
+`settings.json`. `--repo` picks the checkout these two files are read from
+and defaults to wherever `install-claude-notifications` itself is running
+from, so running it from a checkout other than the one HOME is linked to
+deploys that checkout's content without writing to the linked one.
 
 Before replacement, it writes an exact mode-0600 copy and a hash manifest under
 the private directory

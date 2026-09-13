@@ -339,10 +339,20 @@ class ClaudeNotificationInstallerTests(unittest.TestCase):
         source_helper.chmod(0o755)
         self.helper.symlink_to(source_helper)
 
-    def install(self):
+        self.repo = Path(self.temp.name) / 'repo'
+        focus = self.repo / 'alpine/desktop/.local/bin/oldbook-claude-notify-focus'
+        focus.parent.mkdir(parents=True, exist_ok=True)
+        focus.write_text('#!/bin/sh\necho fixture-focus-script\n')
+        focus.chmod(0o755)
+        config = self.repo / 'alpine/desktop/.config/swaync/config.json'
+        config.parent.mkdir(parents=True)
+        config.write_text('{"scripts": {"claude-focus": {"exec": "fixture"}}}\n')
+        config.chmod(0o644)
+
+    def install(self, repo=None):
         return subprocess.run(
             [sys.executable, str(INSTALLER), '--target', str(self.home),
-             '--helper', str(self.helper)],
+             '--helper', str(self.helper), '--repo', str(repo or self.repo)],
             text=True, capture_output=True, timeout=5)
 
     def test_install_preserves_settings_and_existing_hooks(self):
@@ -391,6 +401,125 @@ class ClaudeNotificationInstallerTests(unittest.TestCase):
         self.assertEqual(stat.S_IMODE(backup.stat().st_mode), 0o700)
         self.assertEqual(stat.S_IMODE(
             backup.joinpath('settings.json').stat().st_mode), 0o600)
+
+        # The click handler and swaync config are deployed too, as ordinary
+        # files holding this repo's exact bytes -- not symlinks into whatever
+        # checkout the HOME overlay happens to be linked to.
+        focus = self.home / '.local/bin/oldbook-claude-notify-focus'
+        self.assertFalse(focus.is_symlink())
+        self.assertEqual(focus.read_text(),
+                         (self.repo / 'alpine/desktop/.local/bin'
+                          '/oldbook-claude-notify-focus').read_text())
+        self.assertEqual(stat.S_IMODE(focus.stat().st_mode), 0o755)
+        config = self.home / '.config/swaync/config.json'
+        self.assertFalse(config.is_symlink())
+        self.assertEqual(json.loads(config.read_text()),
+                         {'scripts': {'claude-focus': {'exec': 'fixture'}}})
+        manifest = json.loads(backup.joinpath('manifest.json').read_text())
+        self.assertEqual(manifest['version'], 2)
+        self.assertEqual(set(manifest['assets']),
+                         {'.local/bin/oldbook-claude-notify-focus', '.config/swaync/config.json'})
+        for entry in manifest['assets'].values():
+            self.assertFalse(entry['existed'])
+
+    def test_install_deploys_over_an_existing_symlinked_asset(self):
+        focus = self.home / '.local/bin/oldbook-claude-notify-focus'
+        focus.parent.mkdir(parents=True, exist_ok=True)
+        elsewhere = self.home / 'elsewhere-focus-script'
+        elsewhere.write_text('#!/bin/sh\necho old\n')
+        focus.symlink_to(elsewhere)
+        config = self.home / '.config/swaync/config.json'
+        config.parent.mkdir(parents=True)
+        real_config = self.home / 'the-real-config.json'
+        real_config.write_text('{"scripts": {}}\n')
+        config.symlink_to(real_config)
+
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(focus.is_symlink())
+        self.assertIn('fixture-focus-script', focus.read_text())
+        self.assertFalse(config.is_symlink())
+        self.assertEqual(json.loads(config.read_text()),
+                         {'scripts': {'claude-focus': {'exec': 'fixture'}}})
+        # Neither symlink target was touched -- only the HOME entries changed.
+        self.assertEqual(elsewhere.read_text(), '#!/bin/sh\necho old\n')
+        self.assertEqual(real_config.read_text(), '{"scripts": {}}\n')
+
+        manifest = json.loads(Path(result.stdout.strip()).joinpath('manifest.json').read_text())
+        focus_entry = manifest['assets']['.local/bin/oldbook-claude-notify-focus']
+        self.assertEqual(focus_entry, {**focus_entry, 'existed': True, 'kind': 'symlink',
+                                       'target': str(elsewhere)})
+        config_entry = manifest['assets']['.config/swaync/config.json']
+        self.assertEqual(config_entry['kind'], 'symlink')
+        self.assertEqual(config_entry['target'], str(real_config))
+
+    def test_install_deploys_over_an_existing_plain_asset_file(self):
+        focus = self.home / '.local/bin/oldbook-claude-notify-focus'
+        focus.parent.mkdir(parents=True, exist_ok=True)
+        focus.write_text('#!/bin/sh\necho stale-copy\n')
+        focus.chmod(0o755)
+
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('fixture-focus-script', focus.read_text())
+        manifest = json.loads(Path(result.stdout.strip()).joinpath('manifest.json').read_text())
+        entry = manifest['assets']['.local/bin/oldbook-claude-notify-focus']
+        self.assertEqual(entry['kind'], 'file')
+        self.assertEqual(entry['existed'], True)
+        backup = Path(result.stdout.strip())
+        saved = backup / 'asset-.local__bin__oldbook-claude-notify-focus.orig'
+        self.assertEqual(saved.read_text(), '#!/bin/sh\necho stale-copy\n')
+
+    def test_install_refuses_when_a_deployment_source_is_missing(self):
+        broken_repo = Path(self.temp.name) / 'broken-repo'
+        (broken_repo / 'alpine/desktop/.local/bin').mkdir(parents=True)
+        (broken_repo / 'alpine/desktop/.config/swaync').mkdir(parents=True)
+        # oldbook-claude-notify-focus is missing from this repo on purpose.
+        (broken_repo / 'alpine/desktop/.config/swaync/config.json').write_text('{}')
+        result = self.install(repo=broken_repo)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('deployment source is missing', result.stderr)
+        # Nothing was left behind -- settings.json was never even reached.
+        self.assertFalse((self.claude / 'settings.json').exists())
+        self.assertFalse((self.home / '.local/bin/oldbook-claude-notify-focus').exists())
+
+    def test_rollback_restores_a_symlinked_asset_and_removes_a_first_install(self):
+        focus = self.home / '.local/bin/oldbook-claude-notify-focus'
+        focus.parent.mkdir(parents=True, exist_ok=True)
+        elsewhere = self.home / 'elsewhere-focus-script'
+        elsewhere.write_text('old script\n')
+        focus.symlink_to(elsewhere)
+
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        backup = Path(result.stdout.strip())
+        config = self.home / '.config/swaync/config.json'
+        self.assertTrue(config.is_file())
+        self.assertFalse(config.is_symlink())
+
+        rollback = subprocess.run(
+            [sys.executable, str(INSTALLER), '--target', str(self.home),
+             '--rollback', str(backup)], text=True, capture_output=True, timeout=5)
+        self.assertEqual(rollback.returncode, 0, rollback.stderr)
+        self.assertTrue(focus.is_symlink())
+        self.assertEqual(os.readlink(focus), str(elsewhere))
+        # config.json did not exist before install, so rollback removes it.
+        self.assertFalse(config.exists())
+
+    def test_rollback_refuses_if_a_deployed_asset_changed(self):
+        result = self.install()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        backup = Path(result.stdout.strip())
+        focus = self.home / '.local/bin/oldbook-claude-notify-focus'
+        focus.write_text('#!/bin/sh\necho tampered\n')
+        rollback = subprocess.run(
+            [sys.executable, str(INSTALLER), '--target', str(self.home),
+             '--rollback', str(backup)], text=True, capture_output=True, timeout=5)
+        self.assertNotEqual(rollback.returncode, 0)
+        self.assertIn('changed since installation', rollback.stderr)
+        # Refusing must not have touched settings.json either.
+        self.assertEqual(json.loads((self.claude / 'settings.json').read_text())
+                         ['hooks']['Stop'][0]['hooks'][0]['command'], str(self.helper))
 
     def test_install_is_idempotent_for_its_exact_handlers(self):
         first = self.install()

@@ -1,5 +1,18 @@
 #!/usr/bin/env python3
-"""Safely install or roll back Oldbook's supported Claude Code hooks."""
+"""Safely install or roll back Oldbook's supported Claude Code hooks.
+
+Besides the `~/.claude/settings.json` hooks, this also deploys the two files
+the notification feature needs that are not part of Claude Code's own
+configuration: the swaync click handler (`oldbook-claude-notify-focus`) and
+`~/.config/swaync/config.json`, which wires it in ahead of the generic
+fallback. Both are normally a symlink into the HOME overlay's source checkout
+(deploy-home); this installer instead writes each destination an ordinary
+file holding this checkout's exact bytes, so it never depends on -- or
+writes to -- whatever checkout the overlay symlinks currently point at. That
+makes it safe to run from a checkout other than the one already linked into
+HOME, which is the ordinary case when a change is being deployed before the
+linked checkout has caught up with it.
+"""
 import argparse
 import hashlib
 import json
@@ -15,6 +28,13 @@ NOTIFICATION_MATCHER = (
     'permission_prompt|idle_prompt|elicitation_dialog|elicitation_url_dialog|'
     'agent_needs_input|quota_auto_resume_stale|quota_auto_resume_disabled'
 )
+REPO_DEFAULT = Path(__file__).resolve().parents[2]
+ASSET_SOURCES = {
+    Path('.local/bin/oldbook-claude-notify-focus'):
+        Path('alpine/desktop/.local/bin/oldbook-claude-notify-focus'),
+    Path('.config/swaync/config.json'):
+        Path('alpine/desktop/.config/swaync/config.json'),
+}
 
 
 def digest(data):
@@ -28,6 +48,23 @@ def read_regular(path):
     if not stat.S_ISREG(info.st_mode):
         raise RuntimeError(f'refusing non-regular file: {path}')
     return path.read_bytes(), stat.S_IMODE(info.st_mode)
+
+
+def read_any(path):
+    """A deploy target's current state: a symlink, a regular file, or nothing.
+
+    Unlike read_regular, a symlink is expected here -- it is the normal state
+    of a file the HOME overlay manages -- and is recorded so rollback can put
+    it back exactly rather than losing track of where it pointed.
+    """
+    if path.is_symlink():
+        return {'kind': 'symlink', 'target': os.readlink(path)}
+    if not path.exists():
+        return None
+    info = path.stat(follow_symlinks=False)
+    if not stat.S_ISREG(info.st_mode):
+        raise RuntimeError(f'refusing non-regular file: {path}')
+    return {'kind': 'file', 'data': path.read_bytes(), 'mode': stat.S_IMODE(info.st_mode)}
 
 
 def sync_directory(path):
@@ -88,38 +125,75 @@ def add_hook(document, event, handler, matcher=None):
     groups.append(group)
 
 
-def make_backup(target, original, original_mode, replacement):
+def backup_root(target):
     root = target / '.local/state/oldbook/claude-notifications/backups'
     root.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(root, 0o700)
     backup = root / str(time.time_ns())
     backup.mkdir(mode=0o700)
-    if original is not None:
-        atomic_write(backup / 'settings.json', original, 0o600)
-    manifest = {
-        'version': 1,
-        'settings': {
-            'existed': original is not None,
-            'mode': original_mode,
-            'before_sha256': digest(original) if original is not None else None,
-            'after_sha256': digest(replacement),
-        },
-    }
-    atomic_write(
-        backup / 'manifest.json',
-        json.dumps(manifest, indent=2).encode() + b'\n',
-        0o600,
-    )
     return backup
 
 
-def install(target, helper):
+def asset_safe_name(relative):
+    return 'asset-' + str(relative).replace('/', '__') + '.orig'
+
+
+def deploy_assets(target, repo, backup):
+    """Replace each asset destination with this checkout's exact bytes.
+
+    Returns one manifest entry per asset, recording enough of its prior state
+    (symlink target, or a copy of prior file bytes under `backup`) that
+    rollback can restore it exactly, the same guarantee settings.json already
+    has.
+    """
+    entries = {}
+    deployed = []
+    try:
+        for relative, source_relative in ASSET_SOURCES.items():
+            source = (repo / source_relative).resolve()
+            if not source.is_file() or source.is_symlink():
+                raise RuntimeError(f'deployment source is missing: {source}')
+            destination = target / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            original = read_any(destination)
+            data = source.read_bytes()
+            mode = stat.S_IMODE(source.stat().st_mode)
+            entry = {'after_sha256': digest(data), 'mode': mode,
+                     'existed': original is not None}
+            if original is not None:
+                entry['kind'] = original['kind']
+                if original['kind'] == 'symlink':
+                    entry['target'] = original['target']
+                else:
+                    entry['before_sha256'] = digest(original['data'])
+                    entry['original_mode'] = original['mode']
+                    atomic_write(backup / asset_safe_name(relative), original['data'], 0o600)
+            entries[str(relative)] = entry
+            atomic_write(destination, data, mode)
+            deployed.append((destination, original))
+    except Exception:
+        for destination, original in reversed(deployed):
+            try:
+                destination.unlink(missing_ok=True)
+                if original is not None:
+                    if original['kind'] == 'symlink':
+                        destination.symlink_to(original['target'])
+                    else:
+                        atomic_write(destination, original['data'], original['mode'])
+            except OSError:
+                pass
+        raise
+    return entries
+
+
+def install(target, helper, repo=None):
     target = target.resolve()
     helper = helper.expanduser()
     if not helper.is_absolute():
         helper = Path.cwd() / helper
     if not helper.is_file() or not os.access(helper, os.X_OK):
         raise RuntimeError(f'notification helper is not executable: {helper}')
+    repo = (repo or REPO_DEFAULT).resolve()
 
     claude = target / '.claude'
     claude.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -136,7 +210,28 @@ def install(target, helper):
     add_hook(document, 'Stop', handler)
     add_hook(document, 'UserPromptSubmit', handler)
     replacement = json.dumps(document, indent=2).encode() + b'\n'
-    backup = make_backup(target, original, original_mode, replacement)
+
+    backup = backup_root(target)
+    if original is not None:
+        atomic_write(backup / 'settings.json', original, 0o600)
+    # Assets first: if a source is missing or a write fails, settings.json is
+    # never touched at all, which is the cleaner failure to leave behind.
+    asset_entries = deploy_assets(target, repo, backup)
+    manifest = {
+        'version': 2,
+        'settings': {
+            'existed': original is not None,
+            'mode': original_mode,
+            'before_sha256': digest(original) if original is not None else None,
+            'after_sha256': digest(replacement),
+        },
+        'assets': asset_entries,
+    }
+    atomic_write(
+        backup / 'manifest.json',
+        json.dumps(manifest, indent=2).encode() + b'\n',
+        0o600,
+    )
     try:
         atomic_write(settings, replacement, original_mode)
     except Exception:
@@ -158,10 +253,13 @@ def rollback(target, backup):
         manifest = json.loads((backup / 'manifest.json').read_bytes())
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise RuntimeError(f'cannot read backup manifest: {error}') from error
-    if not isinstance(manifest, dict) or manifest.get('version') != 1:
+    if not isinstance(manifest, dict) or manifest.get('version') not in (1, 2):
         raise RuntimeError('unsupported backup manifest')
     entry = manifest.get('settings')
     if not isinstance(entry, dict):
+        raise RuntimeError('invalid backup manifest')
+    assets = manifest.get('assets', {}) if manifest.get('version') == 2 else {}
+    if not isinstance(assets, dict):
         raise RuntimeError('invalid backup manifest')
 
     settings = target / '.claude/settings.json'
@@ -169,26 +267,60 @@ def rollback(target, backup):
     if current is None or digest(current) != entry.get('after_sha256'):
         raise RuntimeError('settings.json changed since installation; refusing rollback')
     if entry.get('existed'):
-        original, _ = read_regular(backup / 'settings.json')
-        if original is None or digest(original) != entry.get('before_sha256'):
+        settings_original, _ = read_regular(backup / 'settings.json')
+        if settings_original is None or digest(settings_original) != entry.get('before_sha256'):
             raise RuntimeError('backup copy changed: settings.json')
-        atomic_write(settings, original, entry['mode'])
+
+    # Every asset is checked -- current state matches what install() left
+    # behind, and its saved copy is intact -- before anything is changed.
+    asset_originals = {}
+    for relative, asset in assets.items():
+        if not isinstance(asset, dict):
+            raise RuntimeError('invalid backup manifest')
+        destination = target / relative
+        current_asset = read_any(destination)
+        if (current_asset is None or current_asset['kind'] != 'file'
+                or digest(current_asset['data']) != asset.get('after_sha256')):
+            raise RuntimeError(f'{relative} changed since installation; refusing rollback')
+        if asset.get('existed') and asset.get('kind') == 'file':
+            original_data, _ = read_regular(backup / asset_safe_name(relative))
+            if original_data is None or digest(original_data) != asset.get('before_sha256'):
+                raise RuntimeError(f'backup copy changed: {relative}')
+            asset_originals[relative] = original_data
+
+    if entry.get('existed'):
+        atomic_write(settings, settings_original, entry['mode'])
     else:
         settings.unlink()
         sync_directory(settings.parent)
+
+    for relative, asset in assets.items():
+        destination = target / relative
+        destination.unlink(missing_ok=True)
+        sync_directory(destination.parent)
+        if not asset.get('existed'):
+            continue
+        if asset['kind'] == 'symlink':
+            destination.symlink_to(asset['target'])
+            sync_directory(destination.parent)
+        else:
+            atomic_write(destination, asset_originals[relative], asset['original_mode'])
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--target', type=Path, default=Path.home())
     parser.add_argument('--helper', type=Path)
+    parser.add_argument('--repo', type=Path,
+                        help='Source checkout for the deployed assets (default: '
+                             'wherever this script itself is running from)')
     parser.add_argument('--rollback', type=Path)
     args = parser.parse_args()
     if args.rollback:
         rollback(args.target, args.rollback)
         return
     helper = args.helper or args.target / '.local/bin/oldbook-claude-notify'
-    print(install(args.target, helper))
+    print(install(args.target, helper, repo=args.repo))
 
 
 if __name__ == '__main__':
