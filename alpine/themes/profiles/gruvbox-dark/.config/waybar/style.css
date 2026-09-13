@@ -32,6 +32,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
     padding: 0;
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
+/* BEGIN cue-generated: ghost-wander -- edit alpine/cue/waybar/ghost_wander.cue and run alpine/bin/cue-sync, not this block */
 @keyframes oldbook-ghost-wander {
     0%    { margin: 3px 5px 3px 3px; }
     12.5% { margin: 1px 5px 5px 3px; }
@@ -52,6 +53,7 @@ window#waybar { background: transparent; color: #ebdbb2; }
 #custom-ghost.wander {
     animation: oldbook-ghost-wander 11s ease-in-out infinite;
 }
+/* END cue-generated: ghost-wander */
 #workspaces { margin: 3px 5px 3px 0; }
 #workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #a89984; transition: background 260ms cubic-bezier(0.34, 1.56, 0.64, 1), color 220ms ease-out; }
 #workspaces button.empty { color: #7c6f64; }

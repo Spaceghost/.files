@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""Render CUE-owned fragments into the marked regions of their target files.
+
+This is the "plain files don't suffice alone" answer for config that used to
+get hand-copy-pasted identically across multiple theme profiles (the
+#custom-ghost wander animation was the first: byte-for-byte duplicated into
+gruvbox-dark, catppuccin-mocha and monochrome-test). CUE (alpine/cue/) holds
+the parameters; this script evaluates them and writes rendered text into a
+marked region of each target file, never touching anything outside it.
+
+A target file must already contain exactly one marker pair:
+
+    /* BEGIN cue-generated: <name> ... */
+    ...
+    /* END cue-generated: <name> */
+
+(or the `//`-comment equivalent in a JSONC file). Only the text strictly
+between the marker lines is replaced; the marker lines themselves, and
+everything outside them, are left untouched. Missing, duplicate or
+out-of-order markers are a hard error -- this never appends a new block or
+silently does nothing.
+
+Usage: alpine/bin/cue-render [--check]
+
+--check renders in memory and exits nonzero if any target file would change,
+without writing anything (used by cue-sync's idempotency and by tests).
+"""
+import subprocess
+import sys
+from fractions import Fraction
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+CUE_DIR = ROOT / 'cue/waybar'
+
+BEGIN_TAG = 'BEGIN cue-generated: {name}'
+END_TAG = 'END cue-generated: {name}'
+
+# One clean sine-like rise and fall traced across 8 evenly spaced waypoints,
+# as fractions of amplitudePx away from the resting margin-top (see
+# ghost_wander.cue for where this shape comes from). margin-bottom mirrors it
+# so the total top+bottom margin never changes.
+_GHOST_OFFSETS = [Fraction(0), Fraction(-2, 3), Fraction(-1), Fraction(-2, 3),
+                  Fraction(0), Fraction(2, 3), Fraction(1), Fraction(2, 3)]
+_GHOST_PERCENTS = ['0', '12.5', '25', '37.5', '50', '62.5', '75', '87.5']
+
+_GHOST_COMMENT = '''/* Jack: "make the little ghost ... float in place and wander ... like a
+   tomagatchi." Small enough to read as idle rather than broken; enabled by
+   oldbook-waybar-ghost-class, which only adds this class when he has not
+   turned it off (ghost.json's wander key) and the power ladder still
+   allows the ghost-wander effect (sheds at low battery like every other
+   small ambient motion on this desktop). */'''
+
+
+def cue_export():
+    try:
+        result = subprocess.run(['cue', 'export', str(CUE_DIR), '--out', 'json'],
+                                 capture_output=True, text=True, check=False)
+    except FileNotFoundError as error:
+        sys.exit(f'cue-render: cannot run cue: {error}')
+    if result.returncode != 0:
+        sys.exit(f'cue-render: cue export failed:\n{result.stderr.strip()}')
+    import json
+    return json.loads(result.stdout)['profiles']
+
+
+def _px(value):
+    """Format a Fraction/number of pixels the way a hand-written value would be."""
+    fraction = Fraction(value).limit_denominator(1000)
+    if fraction.denominator == 1:
+        return str(fraction.numerator)
+    return str(float(fraction))
+
+
+def render_ghost_css(params):
+    top0 = Fraction(params['restMargin']['top'])
+    right = params['restMargin']['right']
+    bottom0 = Fraction(params['restMargin']['bottom'])
+    left = params['restMargin']['left']
+    amplitude = Fraction(params['amplitudePx'])
+    margin_sum = top0 + bottom0
+
+    lines = [f"@keyframes {params['keyframesName']} {{"]
+    for percent, offset in zip(_GHOST_PERCENTS, _GHOST_OFFSETS):
+        top = top0 + amplitude * offset
+        bottom = margin_sum - top
+        label = f'{percent}%'
+        lines.append(f'    {label:<6}{{ margin: {_px(top)}px {right}px {_px(bottom)}px {left}px; }}')
+    lines.append(f'    100%  {{ margin: {_px(top0)}px {right}px {_px(bottom0)}px {left}px; }}')
+    lines.append('}')
+    lines.append(_GHOST_COMMENT)
+    lines.append('#custom-ghost.wander {')
+    lines.append(f"    animation: {params['keyframesName']} {params['durationSeconds']}s {params['timingFunction']};")
+    lines.append('}')
+    return '\n'.join(lines) + '\n'
+
+
+def render_ghost_config_fragment(params):
+    lines = [
+        f'      "exec": "{params["helperCommand"]}",',
+        '      "return-type": "json",',
+        f'      "interval": {params["pollIntervalSeconds"]}',
+    ]
+    return '\n'.join(lines) + '\n'
+
+
+# Each target: (relative path from repo root, fragment name, render function,
+# profile -> params).
+def targets(profiles):
+    result = []
+    for name, params in profiles.items():
+        base = ROOT / f'themes/profiles/{name}/.config/waybar'
+        result.append((base / 'style.css', 'ghost-wander', render_ghost_css(params)))
+        result.append((base / 'config.jsonc', 'ghost-wander', render_ghost_config_fragment(params)))
+    return result
+
+
+def find_marker_region(text, name, path):
+    begin_needle = BEGIN_TAG.format(name=name)
+    end_needle = END_TAG.format(name=name)
+    lines = text.split('\n')
+    begin_indexes = [i for i, line in enumerate(lines) if begin_needle in line]
+    end_indexes = [i for i, line in enumerate(lines) if end_needle in line]
+    if not begin_indexes:
+        sys.exit(f'cue-render: {path}: no "{begin_needle}" marker found; refusing to guess where to write')
+    if len(begin_indexes) > 1:
+        sys.exit(f'cue-render: {path}: {len(begin_indexes)} "{begin_needle}" markers found, expected exactly 1')
+    if not end_indexes:
+        sys.exit(f'cue-render: {path}: no "{end_needle}" marker found; refusing to guess where the block ends')
+    if len(end_indexes) > 1:
+        sys.exit(f'cue-render: {path}: {len(end_indexes)} "{end_needle}" markers found, expected exactly 1')
+    begin, end = begin_indexes[0], end_indexes[0]
+    if end <= begin:
+        sys.exit(f'cue-render: {path}: "{end_needle}" marker appears before "{begin_needle}"; file is corrupt')
+    return begin, end
+
+
+def apply_render(text, name, content, path):
+    begin, end = find_marker_region(text, name, path)
+    lines = text.split('\n')
+    new_lines = lines[:begin + 1] + content.rstrip('\n').split('\n') + lines[end:]
+    return '\n'.join(new_lines)
+
+
+def render_all(check=False, profiles=None):
+    """Validate and compute every target's new content before writing any of
+    them, so a bad marker in the fifth file never leaves the first four
+    written and the rest not -- either every target is rendered, or none is.
+
+    `profiles` is exposed as a parameter (default: run `cue export`) so
+    tests can exercise the marker/idempotency/error-path logic below without
+    needing the `cue` binary at all.
+    """
+    if profiles is None:
+        profiles = cue_export()
+    updates = []  # (path, updated_text) for files that actually change
+    for path, name, content in targets(profiles):
+        if not path.is_file():
+            sys.exit(f'cue-render: target file does not exist: {path}')
+        original = path.read_text()
+        updated = apply_render(original, name, content, path)
+        if updated != original:
+            updates.append((path, updated))
+    if not check:
+        for path, updated in updates:
+            path.write_text(updated)
+    return [path for path, _ in updates]
+
+
+def main(argv):
+    check = '--check' in argv
+    changed = render_all(check=check)
+    if check:
+        if changed:
+            print('cue-render --check: would change:', file=sys.stderr)
+            for path in changed:
+                print(f'  {path}', file=sys.stderr)
+            return 1
+        return 0
+    for path in changed:
+        print(f'cue-render: wrote {path}')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))

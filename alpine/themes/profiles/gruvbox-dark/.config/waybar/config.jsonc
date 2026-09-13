@@ -51,9 +51,11 @@
       "tooltip-format": "<b>SPACE GHOST'S COMMAND DECK</b>\nBroadcasting live from the Oldbook. Zorak still does not have root.\n\nLeft: open command deck \u00b7 Right: launch applications",
       "on-click": "~/.local/bin/oldbook-control",
       "on-click-right": "~/.local/bin/oldbook-menu",
+      // BEGIN cue-generated: ghost-wander -- edit alpine/cue/waybar/ghost_wander.cue and run alpine/bin/cue-sync, not this block
       "exec": "~/.local/bin/oldbook-waybar-ghost-class",
       "return-type": "json",
       "interval": 30
+      // END cue-generated: ghost-wander
     },
     "sway/workspaces": {
       "disable-scroll": false,
