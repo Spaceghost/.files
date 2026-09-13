@@ -212,7 +212,9 @@ the wave is not. The `ripple` object in decoration.json switches it off
 (`enabled`) and sets where the rings leave from (`bar`, the whole outline, or
 `point`), their duration, reach, spacing, strength and shading; the effect
 sits on the power ladder as `landing-ripple`, running unplugged and shedding
-at battery-low.
+at battery-low. The band is photographed on the strip's final approach and
+the wave begins on the landing frame, or not at all: a picture that arrives
+more than two frames after the landing is dropped.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),

@@ -164,7 +164,10 @@ class Plan(unittest.TestCase):
         self.assertEqual(plan['shade'], ripple.DEFAULTS['shade'])
         self.assertEqual(plan['duration'], ripple.DEFAULTS['duration'])
         self.assertEqual(plan['reach'], ripple.DEFAULTS['reach'])
-        self.assertAlmostEqual(plan['travel'], (862 - 600) / 300)
+        # The water begins a shore's width outside the outline, and the far
+        # edge is that much nearer for it.
+        self.assertAlmostEqual(plan['shore'], ripple.SHORE / 300)
+        self.assertAlmostEqual(plan['travel'], (862 - 600 - ripple.SHORE) / 300)
         box = ripple.source(STRIP, AREA, 'bottom', 'bar', 6)
         for key in ('centre', 'half', 'radius'):
             self.assertEqual(plan[key], box[key])
@@ -182,7 +185,7 @@ class Plan(unittest.TestCase):
         plan = ripple.plan(SIDE_STRIP, SIDE_AREA, 'right')
         self.assertEqual(plan['scale'], (1.0, 3.0))
         self.assertEqual(plan['texel'], (1 / 300, 1 / 900))
-        self.assertAlmostEqual(plan['travel'], (1162 - 900) / 300)
+        self.assertAlmostEqual(plan['travel'], (1162 - 900 - ripple.SHORE) / 300)
 
 
 class Policy(unittest.TestCase):
@@ -318,7 +321,7 @@ class Shader(unittest.TestCase):
                           ripple.FRAGMENT_SHADER)
 
     def test_every_number_the_plan_carries_has_a_uniform(self):
-        for name in ('scale', 'texel', 'centre', 'half_size', 'radius', 'travel',
+        for name in ('scale', 'texel', 'centre', 'half_size', 'radius', 'shore', 'travel',
                      'reach', 'spacing', 'strength', 'shade', 'age'):
             self.assertRegex(ripple.FRAGMENT_SHADER, r'uniform (vec2|float) ' + name + ';')
 

@@ -52,6 +52,12 @@ FLIGHT_DAMPING = 0.82
 # a dragged window, where settling exactly matters more than settling soon; a
 # rebound chased to that precision spends a third of a second inaudibly small.
 FLIGHT_TOLERANCE = 0.5
+# How near home the strip is, in logical pixels, when the band is photographed
+# for its wave, and how long after the landing the wave may still begin. The
+# picture takes tens of milliseconds and the wave has to start on the landing
+# frame; Jack: "If the ripple won't be immediate, don't show it at all."
+STRIKE_APPROACH = 6
+STRIKE_BUDGET = 0.034
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -566,6 +572,7 @@ def daemon():
             attached strip already lives in -- and handed back to the anchors
             at the far end.
             """
+            abandon_strike(self)
             departure = self.motion_rect
             if departure is None or self.attachment_mode != 'window':
                 departure = self.workspace_extent(output_rect)
@@ -598,6 +605,7 @@ def daemon():
             if self.attachment_mode == 'window':
                 # Taking hold of a window is a grab, not an impact. Nothing
                 # struck anything, so nothing rings.
+                abandon_strike(self)
                 return
             self.anchor_band()
             self.content_size = None
@@ -743,6 +751,13 @@ def daemon():
                     response=FLIGHT_RESPONSE if self.flying else 0.045,
                     tolerance=FLIGHT_TOLERANCE if self.flying else 0.05,
                     damping=FLIGHT_DAMPING if self.flying else 1.0)
+                if self.flying and not settled and self.attachment_mode != 'window':
+                    # Nearly home: photograph the band now, so the wave can
+                    # begin on the very frame the strip comes to rest.
+                    remaining = max(abs(self.motion_rect[key] - self.motion_target[key])
+                                    for key in ('x', 'y', 'width', 'height'))
+                    if remaining <= STRIKE_APPROACH:
+                        prepare_strike(self)
                 self.render_geometry()
                 if settled and self.flying:
                     self.land()
@@ -1395,19 +1410,32 @@ def daemon():
     # One wave per output at a time. A second strike while the first is still
     # crossing would photograph the first and refract a refraction.
     ripples = {}
+    # Photographs taken on the strip's final approach, one per output, waiting
+    # for the landing that will show them.
+    approaches = {}
 
-    def strike(caption):
-        """Answer a landing in the band with rings leaving the strip's own edge.
+    def output_name(caption):
+        return caption.monitor.get_connector() if caption.monitor is not None else None
 
-        The photograph is taken on a worker thread. `grim` costs tens of
-        milliseconds, the strip has only just come to rest, and paying for it
-        on the main loop would stall the very frame the landing finished on.
+    def abandon_strike(caption):
+        """Forget a photograph whose landing is no longer coming."""
+        approaches.pop(output_name(caption), None)
+
+    def prepare_strike(caption):
+        """Photograph the band while the strip is still in the air.
+
+        The wave has to begin on the frame the strip lands, and `grim` takes
+        tens of milliseconds even for the band alone, so the picture is taken
+        on the final approach -- the target has been known since the flight
+        began -- and held until land() asks for it. The strip is within a few
+        pixels of home when the shutter goes; the wave leaves the outline a
+        little way out (ripple.SHORE), so those pixels are never in the water.
         """
         output_rect = caption.output_rect
-        name = caption.monitor.get_connector() if caption.monitor is not None else None
-        rect = caption.motion_target or caption.motion_rect
+        name = output_name(caption)
+        rect = caption.motion_target
         if (not output_rect or not name or rect is None or name in ripples
-                or not ripple.allowed(animations=caption.animations)):
+                or name in approaches or not ripple.allowed(animations=caption.animations)):
             return
         # Layer-shell margins are measured from the output, so everything here
         # is in the output's own coordinates rather than the compositor's.
@@ -1422,21 +1450,47 @@ def daemon():
         plan = ripple.plan({key: rect[key] for key in ('x', 'y', 'width', 'height')},
                            area, caption.edge, settings['ripple'], settings['corner_radius'])
         monitor = caption.monitor
-        ripples[name] = True
         photograph = STATE / ('ripple-' + re.sub(r'[^A-Za-z0-9_-]', '_', name) + '.ppm')
+        approach = {'ready': None, 'landed': None}
+        approaches[name] = approach
 
         def release():
             ripples.pop(name, None)
             return False
 
-        def taken(pixels, size):
-            if stop.is_set():
-                return release()
+        def present():
+            """Show the wave, now that the picture and the landing are both here.
+
+            Only if it is immediate. A wave that began well after the strip had
+            come to rest would read as lag rather than as an impact, so past
+            the budget the picture is dropped and nothing is shown at all.
+            """
+            approaches.pop(name, None)
+            pixels, size = approach['ready']
+            if time.monotonic() - approach['landed'] > STRIKE_BUDGET:
+                return
+            ripples[name] = True
             try:
                 ripple.Ripple(monitor, area, plan, pixels, size, on_done=release).start()
             except Exception as error:
                 print('ripple: ' + type(error).__name__ + ': ' + str(error), file=sys.stderr)
                 release()
+
+        approach['present'] = present
+
+        def taken(pixels, size):
+            # A flight retargeted or abandoned since the shutter went has
+            # already forgotten this approach, and its picture with it.
+            if stop.is_set() or approaches.get(name) is not approach:
+                return False
+            approach['ready'] = (pixels, size)
+            if approach['landed'] is not None:
+                present()
+            return False
+
+        def failed():
+            if approaches.get(name) is approach:
+                approaches.pop(name, None)
             return False
 
         def photograph_output():
@@ -1464,13 +1518,27 @@ def daemon():
                 pixels, span, thickness = ripple.crop(data, offset, width, height, local_area, scale)
             except Exception as error:
                 print('ripple capture: ' + type(error).__name__, file=sys.stderr)
-                GLib.idle_add(release)
+                GLib.idle_add(failed)
                 return
             finally:
                 photograph.unlink(missing_ok=True)
             GLib.idle_add(taken, pixels, (span, thickness))
 
         threading.Thread(target=photograph_output, daemon=True).start()
+
+    def strike(caption):
+        """Answer a landing in the band with the wave prepared on the approach.
+
+        Nothing is photographed here. By now the picture is in hand, about to
+        arrive, or was never taken because the flight was too short or the
+        ripple is off; whatever arrives later than the budget is not shown.
+        """
+        approach = approaches.get(output_name(caption))
+        if approach is None:
+            return
+        approach['landed'] = time.monotonic()
+        if approach['ready'] is not None:
+            approach['present']()
 
     def usable_areas(tree):
         """What each output has left after every exclusive zone on it.

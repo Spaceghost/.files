@@ -86,6 +86,11 @@ DECAY = 1.2
 # The last part of the available water over which the wave fades out, so it
 # never reaches the edge of the surface it is drawn on at any strength.
 MARGIN = 0.25
+# How far outside the strip's outline the water begins, in logical pixels.
+# The band is photographed on the strip's final approach, while it is still a
+# few pixels from home, so the picture holds a strip not quite where the live
+# one is; the wave leaves the outline this far out and never shows it.
+SHORE = 8
 
 
 def settings(values=None):
@@ -258,9 +263,11 @@ def plan(rect, area, edge='bottom', values=None, corner_radius=0):
     width = max(1, int(area.get('width', 1)))
     height = max(1, int(area.get('height', 1)))
     box = source(rect, area, edge, values['source'], corner_radius)
+    shore = SHORE / unit
     return {
         'centre': box['centre'], 'half': box['half'], 'radius': box['radius'],
-        'travel': travel(rect, area, edge), 'reach': values['reach'],
+        'shore': shore, 'travel': max(0.15, travel(rect, area, edge) - shore),
+        'reach': values['reach'],
         # Texture coordinates run 0..1 across the region either way. `scale`
         # turns them into the band's units and `texel` is one logical pixel
         # back in texture terms, so a bend of so many pixels stays so many
@@ -367,6 +374,7 @@ uniform vec2 texel;
 uniform vec2 centre;
 uniform vec2 half_size;
 uniform float radius;
+uniform float shore;
 // The water available past the outline, and the wave's own numbers.
 uniform float travel;
 uniform float reach;
@@ -391,7 +399,7 @@ void main() {
     // fanning out around a corner.
     vec2 away = relative - clamp(relative, -half_size, half_size);
     float apart = length(away);
-    float water = apart - radius;
+    float water = apart - radius - shore;
     vec2 normal = apart > 0.00001 ? away / apart : vec2(0.0);
 
     float front = age * reach * travel;
@@ -668,7 +676,8 @@ class Ripple:
                 library.glUniform1i(place, value)
         for name, value in (('age', age), ('travel', plan['travel']), ('reach', plan['reach']),
                             ('spacing', plan['spacing']), ('strength', plan['strength']),
-                            ('shade', plan['shade']), ('radius', plan['radius'])):
+                            ('shade', plan['shade']), ('radius', plan['radius']),
+                            ('shore', plan['shore'])):
             place = library.glGetUniformLocation(ctypes.c_uint(self.program), name.encode())
             if place >= 0:
                 library.glUniform1f(place, float(value))

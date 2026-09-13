@@ -662,9 +662,10 @@ striking the desktop: `python3 verification/ripple-water/render.py . '{"strength
 Off: `"ripple": {"enabled": false}`; it also stays quiet with desktop
 animations off, and it sheds at battery-low, since it sits on the power ladder
 as `landing-ripple` beside the other small motions. The surface is exempted from SwayFX's corner radius, shadow and
-blur (`layer_effects "oldbook-ripple"` in `swayfx/effects.conf`), and the
-photograph is of the band alone (`grim -g`), which cut the landing-to-first-
-frame gap from about 165 ms to 67 ms. Evidence:
+blur (`layer_effects "oldbook-ripple"` in `swayfx/effects.conf`). The band is
+photographed on the strip's final approach, a few pixels before it settles,
+so the wave begins on the landing frame itself; a picture that is not in hand
+within two frames of the landing is dropped rather than shown late. Evidence:
 [ripple-water](verification/ripple-water/README.md) (offline render, numpy,
 not a compositor); the live strike since the rewrite awaits a look.
 
