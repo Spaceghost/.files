@@ -13,17 +13,20 @@ BEGIN = '# BEGIN oldbook-git-mirror (managed by alpine/bin/install-git-mirror-sc
 END = '# END oldbook-git-mirror'
 
 
-def cron_command(home, repo):
+def cron_command(home, repo, remote_branch=None):
     home, repo = Path(home), Path(repo)
     if any('\n' in str(path) or '\r' in str(path) for path in (home, repo)):
         raise ValueError('Cron paths cannot contain newline characters')
     if not home.is_absolute() or not repo.is_absolute():
         raise ValueError('Cron paths must be absolute')
-    command = shlex.join([
+    argv = [
         '/usr/bin/env', 'HOME=' + str(home),
         'PATH=' + str(home / '.local/bin') + ':/usr/local/bin:/usr/bin:/bin',
         '/usr/bin/python3', str(repo / 'alpine/bin/publish-git-mirror'), '--scheduled',
-    ])
+    ]
+    if remote_branch:
+        argv += ['--remote-branch', remote_branch]
+    command = shlex.join(argv)
     # Cron processes percent signs before the shell, including inside quotes.
     return command.replace('%', '\\%')
 
@@ -65,9 +68,12 @@ def main():
     parser.add_argument('--remove', action='store_true', help='remove only the managed mirror job')
     parser.add_argument('--print', action='store_true', dest='print_only',
                         help='print the proposed crontab without installing it')
+    parser.add_argument('--remote-branch',
+                        help='publish under a different GitHub branch name than the local one, '
+                             'e.g. when this desktop is a second open leaf (see docs/GITHUB-FOSSIL.md)')
     args = parser.parse_args()
     home = Path.home()
-    command = None if args.remove else cron_command(home, REPO)
+    command = None if args.remove else cron_command(home, REPO, args.remote_branch)
     current = subprocess.run(['crontab', '-l'], capture_output=True)
     error = current.stderr.decode('utf-8', errors='replace')
     if current.returncode and 'no crontab' not in error.lower() and 'no such file' not in error.lower():
