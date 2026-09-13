@@ -1,0 +1,34 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "name": "gruvbox-dark-chain-renders",
+      "passed": true,
+      "image": "gruvbox-dark.png"
+    },
+    {
+      "name": "catppuccin-mocha-chain-renders",
+      "passed": true,
+      "image": "catppuccin-mocha.png"
+    },
+    {
+      "name": "monochrome-test-chain-renders",
+      "passed": true,
+      "image": "monochrome-test.png"
+    }
+  ],
+  "scope": "Private headless SwayFX and real Waybar for each theme; still labels stand in for helper-driven modules; the live session is never touched.",
+  "source_sha256": {
+    "alpine/themes/profiles/gruvbox-dark/.config/waybar/style.css": "b1907d4146860f152338f9542f77e952af40e27fab51806eeea519a0783501d4",
+    "alpine/themes/profiles/gruvbox-dark/.config/waybar/config.jsonc": "5947ea566b517a9123492ffa87a2359bd2118725af19db6a4e41f13764baec06",
+    "alpine/themes/profiles/catppuccin-mocha/.config/waybar/style.css": "221b63ea1dfcce0a787f767e9b6dd45d0697a2ca8284b9401ab5e3c938e14aed",
+    "alpine/themes/profiles/catppuccin-mocha/.config/waybar/config.jsonc": "3bf35cf1a0106aa917b0f84b3e6ef4272926770169007125e40f6708c5eb0f5e",
+    "alpine/themes/profiles/monochrome-test/.config/waybar/style.css": "bd2a4f2377fe2ed0a1261c693fc9d772479a9676720743ae054ff2dc7d94bf9c",
+    "alpine/themes/profiles/monochrome-test/.config/waybar/config.jsonc": "2f5ef7f932a0cbd986c823241ece9d2b14d82ee7cde2f154d968a4d97f531eb3"
+  },
+  "verifier_sha256": "99d035de8a7bab792dec62c403df61963d4fac216a3d1262f1852c870907d78c",
+  "cleanup": {
+    "matched_processes": 0,
+    "remaining_processes": 0
+  }
+}

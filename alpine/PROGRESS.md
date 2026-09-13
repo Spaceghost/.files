@@ -2,6 +2,33 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## The bar's powerline chain paints — 2026-09-13
+
+Jack: "The powershell in my swaybar is going to look so cool when it isn't
+broken. Fix it, stat!"
+
+- The chips had never painted. Waybar names the box of `group/telemetry`
+  `#telemetry` — the stylesheet already addressed `group/status` as `#status`
+  — so `#group-telemetry` and its three siblings matched nothing, and the only
+  colour in the chain was the separators' own. The earlier recolouring changed
+  colours on selectors that drew nothing, which is why it could not help.
+- The separators were strips. A 15 px U+E0B4 glyph is as tall as its line, not
+  as tall as a chip, so the next chip's colour stood above and below each half
+  circle, and rounded chips left notches beside square separators. Caps are now
+  `radial-gradient(ellipse farthest-side …)` backgrounds that fill the
+  separator at any height; chips are square and margin-free; the caps beside
+  the clock wear the palette's `alpha(@oldbook_accent, .18)`; hover tints the
+  notification and clock chips from inside so they keep meeting their caps.
+  monochrome-test's white chips now carry black text, a defect the unpainted
+  chips had hidden.
+- Verified: every chain stylesheet parses under GTK3 with its imports
+  (`test_waybar_status_chain.py`), and private headless SwayFX renders of all
+  three themes show one continuous chain (`verification/powerline-chain/`). The
+  gruvbox-dark stylesheet was written live; Waybar reloaded it on SIGUSR2 and
+  stayed up with its surface mapped.
+- Not verified: the chain on the panel itself, because the session was locked
+  with the output powered off; hover; and a drawer opened by the pointer.
+
 ## Catbed mode could not start, and a reload was invisible to it — 2026-09-13
 
 Jack: "Does catbed not turn off its catbed mode now? Does the keys all lock?

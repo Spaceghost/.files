@@ -149,30 +149,39 @@ window#waybar #status:hover {
    imported last so its rules win over the declared accent above. */
 
 /* ── Powerline status chain ───────────────────────────────────────────────
-   group/status's members each get a persistent chip background instead of
-   only a hover highlight, and a rounded separator (U+E0B4) is inserted
-   between them as its own tiny custom/ module -- waybar has no built-in
-   inline separator, so a glyph-only module bridging each pair of neighbours
-   is how this extends the group/status grouping that was already here rather
-   than fighting it. Chip colors are this profile's own accents blended down
-   toward the island ground, the same derivation this profile's dim status
-   backgrounds already use (see #idle_inhibitor.activated, #battery.critical).
-   clock keeps its own already-authored background untouched; the chain just
-   treats that color as the chip on either side of it. */
-#group-telemetry { background: #4a2438; border-radius: 11px; }
-#group-transmission { background: #1f3a4a; border-radius: 11px; }
-#group-sound { background: #4a3f1f; border-radius: 11px; }
-#group-power { background: #4a2818; border-radius: 11px; }
-#custom-notifications { background: #1f4a2e; border-radius: 11px; }
+   group/status's members are flush, square-ended chips, and the rounded cap
+   between two of them is drawn by the glyph-only custom/sepN module in its
+   place (waybar has no inline separator of its own). The cap is a radial
+   gradient rather than the U+E0B4 glyph the module carries: a glyph is only
+   as tall as its font's line, never as tall as the chip, so the next chip's
+   colour showed above and below it as a strip. An ellipse sized farthest-side
+   fills the separator's whole box at any bar height, in any face. The glyph
+   stays only so waybar keeps the module, transparent and too small to size
+   anything. sep0 opens the chain in the first chip's colour over the island
+   and sep6 closes it in the clock's; the clock chip is oldbook-palette's
+   accent tint, so the caps beside it use the same alpha(@oldbook_accent, .18).
+   Waybar names a group's box after the part of group/<name> past the slash
+   (#status is group/status), so a chip is #telemetry, never #group-telemetry,
+   which matches nothing and is why the chips never painted. Hover tints a
+   chip from inside instead of replacing its colour, so the caps still meet it. */
+#telemetry { background: #4a2438; }
+#transmission { background: #1f3a4a; }
+#sound { background: #4a3f1f; }
+#power { background: #4a2818; }
+#custom-notifications { background: #1f4a2e; }
+#telemetry, #transmission, #sound, #power,
+#custom-notifications, #clock { border-radius: 0; margin: 0; }
 #custom-sep0, #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4, #custom-sep5, #custom-sep6 {
-    padding: 0; margin: 0; font-size: 15px;
+    padding: 0; margin: 0; min-width: 14px; font-size: 1px; color: transparent;
 }
-#custom-sep0 { color: #1d2021; background: #4a2438; }
-#custom-sep1 { color: #4a2438; background: #1f3a4a; }
-#custom-sep2 { color: #1f3a4a; background: #4a3f1f; }
-#custom-sep3 { color: #4a3f1f; background: #4a2818; }
-#custom-sep4 { color: #4a2818; background: #1f4a2e; }
-#custom-sep5 { color: #1f4a2e; background: #504945; }
-#custom-sep6 { color: #504945; background: #1d2021; }
+#custom-notifications:hover { background: #1f4a2e; box-shadow: inset 0 0 0 99px rgba(146, 131, 116, 0.22); }
+#clock:hover { background: alpha(@oldbook_accent, .18); box-shadow: inset 0 0 0 99px rgba(146, 131, 116, 0.22); }
+#custom-sep0 { background-image: radial-gradient(ellipse farthest-side at right, #4a2438 94%, alpha(#4a2438, 0) 100%); }
+#custom-sep1 { background-color: #1f3a4a; background-image: radial-gradient(ellipse farthest-side at left, #4a2438 94%, alpha(#4a2438, 0) 100%); }
+#custom-sep2 { background-color: #4a3f1f; background-image: radial-gradient(ellipse farthest-side at left, #1f3a4a 94%, alpha(#1f3a4a, 0) 100%); }
+#custom-sep3 { background-color: #4a2818; background-image: radial-gradient(ellipse farthest-side at left, #4a3f1f 94%, alpha(#4a3f1f, 0) 100%); }
+#custom-sep4 { background-color: #1f4a2e; background-image: radial-gradient(ellipse farthest-side at left, #4a2818 94%, alpha(#4a2818, 0) 100%); }
+#custom-sep5 { background-color: alpha(@oldbook_accent, .18); background-image: radial-gradient(ellipse farthest-side at left, #1f4a2e 94%, alpha(#1f4a2e, 0) 100%); }
+#custom-sep6 { background-image: radial-gradient(ellipse farthest-side at left, alpha(@oldbook_accent, .18) 94%, alpha(@oldbook_accent, 0) 100%); }
 
 @import url("waybar-accent.css");

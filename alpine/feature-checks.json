@@ -198,16 +198,20 @@
         "alpine/packages/waybar-art/*",
         "alpine/packages/waybar-art/art.c",
         "alpine/themes/profiles/*/.config/waybar/*",
-        "alpine/wallpapers/desktop_theme.py"
+        "alpine/wallpapers/desktop_theme.py",
+        "alpine/tests/verify_powerline_chain.py",
+        "alpine/verification/powerline-chain/*"
       ],
       "tests": [
         "test_bar_ipc_recovery.py",
         "test_cava_bar.py",
         "test_pithos_controls.py",
-        "test_waybar_dim.py"
+        "test_waybar_dim.py",
+        "test_waybar_status_chain.py"
       ],
       "evidence": [
-        "verification/waybar-reactivity/README.md"
+        "verification/waybar-reactivity/README.md",
+        "verification/powerline-chain/README.md"
       ]
     },
     {

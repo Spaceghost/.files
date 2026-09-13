@@ -153,11 +153,26 @@ The optional `custom/cava` signal meter sits after the media controls, has no
 clicks or tooltip, collapses when silent, stops cava when nothing plays, and is
 removable by deleting it from `modules-center`.
 
+The status island on the right is a powerline chain: `group/status` holds flush,
+square-ended chips in the theme's own tones, joined and closed by rounded caps.
+A chip is styled by the name Waybar gives its group's box — `#telemetry` for
+`group/telemetry`, as `#status` is `group/status` — never `#group-telemetry`,
+which matches nothing and left every chip unpainted. Each `custom/sepN` draws
+its cap as a `radial-gradient(ellipse farthest-side …)` over the next chip's
+colour rather than sizing a font glyph, because a glyph is only as tall as its
+line and never as tall as a chip. The caps beside the clock wear
+`alpha(@oldbook_accent, .18)`, the tint `oldbook-palette` gives the clock, and
+hover tints a chain chip from inside so it keeps meeting its caps. Every theme's
+stylesheet must parse under GTK3: one refused property takes the whole bar down.
+
 - Implementation: [Waybar config](desktop/.config/waybar/config.jsonc),
-  [Pithos controls](desktop/.local/bin/oldbook-pithos), [native artwork module](packages/waybar-art/art.c).
+  [Pithos controls](desktop/.local/bin/oldbook-pithos), [native artwork module](packages/waybar-art/art.c),
+  [a theme's status chain](themes/profiles/gruvbox-dark/.config/waybar/style.css).
 - Checks: [Pithos tests](tests/test_pithos_controls.py),
   [music verifier](tests/verify_waybar_music.py), [bar recovery](tests/test_bar_ipc_recovery.py),
-  [recorded bar interactions](verification/waybar-reactivity/README.md).
+  [recorded bar interactions](verification/waybar-reactivity/README.md),
+  [status chain](tests/test_waybar_status_chain.py),
+  [chain renders](verification/powerline-chain/README.md).
 
 ### DECORATION-STYLE
 
