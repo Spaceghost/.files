@@ -290,13 +290,17 @@ static GtkWidget *peek_card(JsonObject *window, int scale) {
         ? json_node_get_string(node) : NULL;
     GtkWidget *image = NULL;
     if (still && *still) {
-        GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(still, NULL);
-        if (pixbuf) {
-            cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(pixbuf, scale, NULL);
+        /* Decode the capture with cairo's libpng reader, not
+         * gdk_pixbuf_new_from_file: on musl gdk-pixbuf forks a sandboxed glycin
+         * subprocess per decode, and forking this threaded GTK process to load a
+         * peek still can orphan musl's malloc lock and freeze the whole bar. The
+         * window stills are always PNG, so cairo reads them in this thread. */
+        cairo_surface_t *surface = cairo_image_surface_create_from_png(still);
+        if (cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS) {
+            cairo_surface_set_device_scale(surface, scale, scale);
             image = gtk_image_new_from_surface(surface);
-            cairo_surface_destroy(surface);
-            g_object_unref(pixbuf);
         }
+        cairo_surface_destroy(surface);
     }
     if (!image) {
         image = gtk_drawing_area_new();

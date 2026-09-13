@@ -110,19 +110,29 @@ static void clear_thumbnail(Artwork *art) {
  * thumbnail is trivial, so it happens inline unlike the painting itself. */
 static void load_thumbnail(Artwork *art, const char *path) {
     if (g_strcmp0(path, art->thumbnail) == 0) return;
-    GError *error = NULL;
-    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file(path, &error);
-    if (!pixbuf) {
-        g_debug("Artwork thumbnail unavailable: %s", error ? error->message : path);
-        g_clear_error(&error);
+    /* Decode the thumbnail in this thread with cairo's own PNG reader rather
+     * than through gdk_pixbuf_new_from_file. On a musl system gdk-pixbuf hands
+     * every decode to a forked, bwrap-sandboxed glycin subprocess; forking this
+     * heavily threaded GTK process to load a badge intermittently orphans
+     * musl's malloc lock and deadlocks the whole bar mid widget-teardown. The
+     * status helper always emits a PNG (already sized for this panel's scale),
+     * and cairo reads it with libpng right here, forking nothing. */
+    cairo_surface_t *surface = cairo_image_surface_create_from_png(path);
+    cairo_status_t status = cairo_surface_status(surface);
+    if (status != CAIRO_STATUS_SUCCESS) {
+        g_debug("Artwork thumbnail unavailable: %s (%s)",
+                cairo_status_to_string(status), path);
+        cairo_surface_destroy(surface);
         clear_thumbnail(art);
         return;
     }
-    cairo_surface_t *surface = gdk_cairo_surface_create_from_pixbuf(
-        pixbuf, thumbnail_scale(art), gtk_widget_get_window(art->image));
+    /* The PNG is THUMBNAIL_HEIGHT * scale physical pixels tall; tag it with the
+     * device scale so GTK draws it at the right logical size, exactly as
+     * gdk_cairo_surface_create_from_pixbuf did with the scale argument. */
+    int scale = thumbnail_scale(art);
+    cairo_surface_set_device_scale(surface, scale, scale);
     gtk_image_set_from_surface(GTK_IMAGE(art->image), surface);
     cairo_surface_destroy(surface);
-    g_object_unref(pixbuf);
     g_free(art->thumbnail);
     art->thumbnail = g_strdup(path);
 }
