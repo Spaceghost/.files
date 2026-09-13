@@ -218,10 +218,75 @@ class SelfTriggeredWriteTests(unittest.TestCase):
         with unittest.mock.patch.object(module, 'handle_commit', fake_handle_commit), \
              unittest.mock.patch.object(module.select, 'select', fake_select):
             with self.assertRaises(self.StopWatching):
-                module.watch_forever(inotify=inotify, debounce_seconds=0)
+                module.watch_forever(inotify=inotify, debounce_seconds=0,
+                                     min_interval_seconds=0)
 
         self.assertEqual(calls, [1], 'handle_commit() must not be called again '
                                      'for the write it just made itself')
+
+    def test_min_interval_bounds_the_rate_even_if_the_drain_ever_misses(self):
+        """Live evidence: the drain above did not hold up under real
+        concurrent load even once implemented -- the same repeat happened
+        anyway. min_interval_seconds is the actual guarantee: whatever wakes
+        the loop, however often, handle_commit() cannot run twice closer
+        together than this, so a self-triggering loop is capped at a steady
+        rate instead of spinning as fast as fossil/cue-sync can be spawned.
+        """
+        module = load_helper()
+        calls = []
+        # A fake clock advances only when the loop itself sleeps, so the test
+        # proves the *requested* sleep duration is correct without a real
+        # multi-second wait.
+        clock = {'now': 0.0}
+
+        def fake_monotonic():
+            return clock['now']
+
+        def fake_sleep(seconds):
+            self.assertGreaterEqual(seconds, 0)
+            clock['now'] += seconds
+
+        def fake_handle_commit():
+            calls.append(clock['now'])
+            if len(calls) >= 3:
+                raise self.StopWatching('enough calls observed')
+
+        class AlwaysReadyInotify:
+            """The adversarial case the drain cannot fully rule out: every
+            wait, at every point in the loop, finds an event already queued
+            -- self-triggered or otherwise. Only min_interval_seconds keeps
+            handle_commit() from running flat out against this."""
+            fd = 99
+
+            def add_watch(self, path, mask):
+                pass
+
+            def read_events(self):
+                return ['event']
+
+        # Ready on every odd call, not-ready on every even one, so each drain
+        # loop (pre- and post-handle_commit) drains exactly one queued event
+        # and then exits rather than spinning forever on an always-ready fd.
+        select_calls = {'n': 0}
+
+        def fake_select(*_args, **_kwargs):
+            select_calls['n'] += 1
+            return ([1], [], []) if select_calls['n'] % 2 else ([], [], [])
+
+        with unittest.mock.patch.object(module, 'handle_commit', fake_handle_commit), \
+             unittest.mock.patch.object(module.select, 'select', fake_select), \
+             unittest.mock.patch.object(module.time, 'monotonic', fake_monotonic), \
+             unittest.mock.patch.object(module.time, 'sleep', fake_sleep):
+            with self.assertRaises(self.StopWatching):
+                module.watch_forever(inotify=AlwaysReadyInotify(), debounce_seconds=0,
+                                     min_interval_seconds=5)
+
+        self.assertEqual(len(calls), 3)
+        # The clock only moves via fake_sleep, so consecutive calls at least
+        # min_interval_seconds apart on the fake clock proves the loop
+        # actually waited rather than calling straight through.
+        self.assertGreaterEqual(calls[1] - calls[0], 5)
+        self.assertGreaterEqual(calls[2] - calls[1], 5)
 
 
 if __name__ == '__main__':

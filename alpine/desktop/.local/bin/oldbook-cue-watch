@@ -30,6 +30,7 @@ import select
 import struct
 import subprocess
 import sys
+import time
 
 REPO_FILE = Path.home() / '.local/share/fossil/files.fossil'
 CHECKOUT = Path.home() / '.files'
@@ -133,10 +134,22 @@ def handle_commit():
     print(output.strip(), flush=True)
 
 
-def watch_forever(inotify=None, debounce_seconds=0.2):
+def watch_forever(inotify=None, debounce_seconds=2.0, min_interval_seconds=3.0):
+    """The drain below is a best effort, not a guarantee: it did not hold up
+    live (fossil update and cue-sync still triggered a repeat despite a
+    drain, evidently because their own write's event was not always queued
+    within one debounce window under real, heavily concurrent load). What
+    actually bounds the damage is min_interval_seconds: handle_commit() runs
+    at most once per that many seconds, full stop, regardless of how many
+    wakes -- self-triggered or genuinely external -- arrive in between. A
+    burst of real commits is delayed by at most that long, which is nothing
+    for a background sync; a self-triggering loop is capped at the same rate
+    instead of running as fast as fossil and cue-sync can be spawned.
+    """
     inotify = inotify or Inotify()
     inotify.add_watch(REPO_FILE, IN_CLOSE_WRITE | IN_MODIFY)
     print(f'oldbook-cue-watch: watching {REPO_FILE}', flush=True)
+    last_run = None
     while True:
         for _ in inotify.read_events():
             pass  # the blocking read itself is the wakeup; the mask doesn't matter
@@ -147,6 +160,11 @@ def watch_forever(inotify=None, debounce_seconds=0.2):
         while select.select([inotify.fd], [], [], debounce_seconds)[0]:
             for _ in inotify.read_events():
                 pass
+        if last_run is not None:
+            remaining = min_interval_seconds - (time.monotonic() - last_run)
+            if remaining > 0:
+                time.sleep(remaining)
+        last_run = time.monotonic()
         handle_commit()
         # fossil update and cue-sync both write through files.fossil themselves
         # (a no-op update still touches its own bookkeeping tables), which
