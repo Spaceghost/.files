@@ -46,15 +46,14 @@ DAEMONS = {'oldbook-carousel', 'oldbook-showdesktop', 'oldbook-decoration',
 DAEMON_NICE = -15
 # The weight of a desktop session group against every other session.
 GROUP_NICE = -20
-# A group holding any of these is somebody's workspace -- a terminal, a shell,
-# an agent -- and is never weighted, even if a desktop daemon was started by
-# hand inside it. Matched on the kernel's comm, which nothing here trusts for
-# more than this refusal.
-WORKSPACE_COMMS = {'zsh', 'bash', 'fish', 'sh', 'tmux: server', 'foot', 'ghostty',
+# A group holding any of these is somebody's workspace -- a terminal, an
+# interactive shell, an agent -- and is never weighted, even if a desktop
+# daemon was started by hand inside it. Matched on the kernel's comm, which
+# nothing here trusts for more than this refusal. Plain `sh` is not listed:
+# it is the interpreter of every script the desktop runs, from oldbook-session
+# to a panel module, and an interactive login here is zsh.
+WORKSPACE_COMMS = {'zsh', 'bash', 'fish', 'tmux: server', 'foot', 'ghostty',
                    'claude', 'codex', 'node'}
-# The one shell that is the desktop's own: oldbook-session runs under /bin/sh
-# and its group holds the daemons it starts.
-SESSION_SCRIPT = 'oldbook-session'
 
 
 def session_owner(session, uid):
@@ -161,15 +160,6 @@ def identify(pid, uid, home, proc=Path('/proc')):
     return None
 
 
-def session_script(path):
-    """Whether this process is the desktop's own session script under its shell."""
-    try:
-        args = (path / 'cmdline').read_bytes().rstrip(b'\0').split(b'\0')
-        return any(Path(os.fsdecode(arg)).name == SESSION_SCRIPT for arg in args[:3])
-    except (OSError, ValueError):
-        return False
-
-
 def desktop_groups(uid, home, session, compositor_pid, proc=Path('/proc')):
     """The autogroups that are the desktop's own, and so may be weighted.
 
@@ -194,7 +184,7 @@ def desktop_groups(uid, home, session, compositor_pid, proc=Path('/proc')):
         except (OSError, ValueError, IndexError, KeyError):
             continue
         identity = identify(pid, uid, home, proc)
-        workspace = comm in WORKSPACE_COMMS and not session_script(entry)
+        workspace = comm in WORKSPACE_COMMS
         members.setdefault(group, []).append({
             'pid': pid, 'desktop': identity is not None, 'leader': leader,
             'workspace': workspace,

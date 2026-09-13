@@ -209,10 +209,13 @@ class PriorityTests(unittest.TestCase):
         live = '/run/user/1000/live.sock'
         # The compositor's group, whoever leads it (greetd's worker is root's).
         self.member(300, 16, 299, 'swayfx', executable='/usr/bin/swayfx')
-        # The session script's group: the daemons it started, under its shell.
+        # The session script's group: the daemons it started, under its shell,
+        # and a panel module's own sh child -- script interpreters, not shells.
         self.member(310, 24, 305, 'sh', executable='/bin/busybox',
                     argv=['/bin/sh', '/home/jack/.local/bin/oldbook-session'])
         self.member(311, 24, 305, 'swaync', executable='/usr/bin/swaync')
+        self.member(312, 24, 305, 'sh', executable='/bin/busybox',
+                    argv=['sh', '-c', 'oldbook-waybar-ghost-class'])
         # A daemon that is its own session leader.
         self.member(320, 27, 320, 'superhold', executable='/usr/bin/superhold')
         # A terminal group: a shell, an agent and a panel started by hand in it.
