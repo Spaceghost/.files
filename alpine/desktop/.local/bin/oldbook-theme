@@ -493,9 +493,21 @@ def refresh_session():
         notes.append('Qt applications read their colours at startup; '
                      'open Qt windows keep the previous theme until restarted')
 
-    if any(True for _ in owned_processes('firefox')):
-        notes.append('Firefox custom styling is not managed; '
-                     'browser appearance may retain its own theme')
+    # oldbook-firefox-theme-host, a native messaging host Firefox itself keeps
+    # alive for as long as a themed window is open, watches this file's mtime
+    # and relays a fresh copy -- the same "nothing to signal, just something to
+    # watch" shape refresh_claude already uses. Writing it here needs no
+    # process to actually be running: a window that opens later still gets
+    # today's theme the moment it connects.
+    try:
+        sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
+        import firefox_theme
+        firefox_theme.write_state()
+        notes.append('Firefox theme file updated'
+                     + (' (live within a few seconds)' if any(True for _ in owned_processes('firefox'))
+                        else ''))
+    except (OSError, ValueError, RuntimeError, ImportError, KeyError) as error:
+        notes.append('Firefox theme FAILED: ' + str(error))
     return notes
 
 

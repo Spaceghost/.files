@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Register the Oldbook Theme extension and its native messaging host.
+
+Firefox only accepts an unsigned extension through Enterprise Policy, so this
+adds one more entry to Extensions.Install beside the 1Password one already
+there rather than replacing it, and only touches /etc/firefox/policies/policies.json
+when the packaged .xpi's bytes actually changed. The native messaging host
+manifest is written under both the XDG-relocated and legacy Mozilla config
+directories, since this build's profiles live under ~/.config/mozilla and it
+is not documented whether native messaging host lookup followed that move.
+"""
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import zipfile
+
+REPO = Path(__file__).resolve().parents[1]
+SOURCE = REPO / 'desktop/.local/share/oldbook/firefox-theme-extension'
+XPI = Path('/usr/local/share/oldbook/firefox-theme/oldbook-theme.xpi')
+POLICIES = Path('/etc/firefox/policies/policies.json')
+HOST_NAME = 'oldbook_theme'
+EXTENSION_ID = 'theme@oldbook.local'
+
+
+def build_xpi(destination):
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
+        for name in sorted(os.listdir(SOURCE)):
+            archive.write(SOURCE / name, name)
+
+
+def sha256(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+
+
+def install_xpi():
+    with tempfile.TemporaryDirectory() as directory:
+        candidate = Path(directory) / 'oldbook-theme.xpi'
+        build_xpi(candidate)
+        if sha256(candidate) == sha256(XPI):
+            return False
+        subprocess.run(['doas', 'mkdir', '-p', str(XPI.parent)], check=True)
+        subprocess.run(['doas', 'cp', str(candidate), str(XPI)], check=True)
+        subprocess.run(['doas', 'chmod', '644', str(XPI)], check=True)
+    return True
+
+
+def update_policies():
+    try:
+        current = json.loads(subprocess.run(['doas', 'cat', str(POLICIES)],
+                                            capture_output=True, check=True).stdout)
+    except (subprocess.CalledProcessError, ValueError):
+        current = {'policies': {}}
+    installs = current.setdefault('policies', {}).setdefault('Extensions', {}).setdefault('Install', [])
+    if str(XPI) in installs:
+        return False
+    installs.append(str(XPI))
+    with tempfile.NamedTemporaryFile('w', delete=False, suffix='.json') as handle:
+        json.dump(current, handle, indent=2)
+        handle.write('\n')
+        temporary = handle.name
+    try:
+        subprocess.run(['doas', 'mkdir', '-p', str(POLICIES.parent)], check=True)
+        subprocess.run(['doas', 'cp', temporary, str(POLICIES)], check=True)
+        subprocess.run(['doas', 'chmod', '644', str(POLICIES)], check=True)
+    finally:
+        os.unlink(temporary)
+    return True
+
+
+def native_host_manifest():
+    return {
+        'name': HOST_NAME,
+        'description': "Pushes the active oldbook desktop theme's palette to Firefox.",
+        'path': str(Path.home() / '.local/bin/oldbook-firefox-theme-host'),
+        'type': 'stdio',
+        'allowed_extensions': [EXTENSION_ID],
+    }
+
+
+def install_native_host():
+    manifest = json.dumps(native_host_manifest(), indent=2) + '\n'
+    changed = False
+    for base in (Path.home() / '.config/mozilla', Path.home() / '.mozilla'):
+        target = base / 'native-messaging-hosts' / f'{HOST_NAME}.json'
+        target.parent.mkdir(parents=True, exist_ok=True, mode=0o755)
+        if not target.is_file() or target.read_text() != manifest:
+            target.write_text(manifest)
+            changed = True
+    return changed
+
+
+def main():
+    changed = []
+    if install_xpi():
+        changed.append('extension package')
+    if update_policies():
+        changed.append('Firefox policy')
+    if install_native_host():
+        changed.append('native messaging host manifest')
+    if changed:
+        print('Installed/updated: ' + ', '.join(changed)
+              + '. Restart Firefox (all profiles) for the policy change to take effect.')
+    else:
+        print('Oldbook Theme extension already installed and up to date.')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

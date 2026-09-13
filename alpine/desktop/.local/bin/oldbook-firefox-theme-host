@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Native messaging host: relay the desktop's Firefox palette into a live browser.
+
+Firefox starts this process the moment a themed window calls
+`runtime.connectNative` and keeps its stdin/stdout pipes open for as long as
+that connection lives, killing it on disconnect. That is the whole contract:
+watch `firefox_theme.state_path()` and write a fresh native-messaging frame
+whenever its mtime moves. The first iteration always sends, since `last` starts
+at a value the real mtime can never equal, so a freshly connected window gets
+today's theme immediately rather than waiting for the next switch.
+"""
+import json
+import os
+import struct
+import sys
+import time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../lib/oldbook'))
+from firefox_theme import current_message, state_path
+
+
+def send(message):
+    body = json.dumps(message).encode()
+    sys.stdout.buffer.write(struct.pack('<I', len(body)))
+    sys.stdout.buffer.write(body)
+    sys.stdout.buffer.flush()
+
+
+def main():
+    path = state_path()
+    last = None
+    while True:
+        try:
+            mtime = path.stat().st_mtime
+        except OSError:
+            mtime = None
+        if mtime != last:
+            last = mtime
+            send(current_message())
+        time.sleep(1)
+
+
+if __name__ == '__main__':
+    main()
