@@ -22,6 +22,8 @@ from decoration import (action_command, corner_radii, focused_child, load_settin
                         window_radius)
 from decoration_actions import (application_items, execute, launchers, menu_items,
                                 output_contexts, terminal_source, window_item, window_items)
+import agent_status
+from app_identity import ApplicationResolver
 import decoration_reserve
 import power_source
 import ripple
@@ -54,6 +56,10 @@ FLIGHT_TOLERANCE = 0.5
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
 SETTINGS = CONFIG / 'oldbook/decoration.json'
+RUNTIME = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}')) / 'oldbook'
+# Shared rather than built fresh per tick: it holds no state between calls,
+# only the uid this session already runs as.
+AGENT_RESOLVER = ApplicationResolver()
 
 
 def position():
@@ -1014,6 +1020,17 @@ def daemon():
             opacity = window_opacity(node, terminal is not None,
                                      style[4], style[3]['opacity'])
             parts = window_context.strip_segments(context, self.budget(placement))
+            # Only a terminal can be an agent window, and resolving one costs a
+            # tmux round trip: skip it outright for every ordinary application,
+            # which is most windows most of the time.
+            if style[3].get('agent_status', True) and terminal and node.get('id') is not None:
+                identity = AGENT_RESOLVER.resolve_all([node]).get(node['id'], {})
+                if identity.get('kind') in ('claude', 'codex'):
+                    records = agent_status.load_records(
+                        RUNTIME / (identity['kind'] + '-events'), time.time())
+                    mark = agent_status.glyph(identity, records)
+                    if mark:
+                        parts = [*parts, ('agent', mark)]
             display_state = (tuple(context.get(key) for key in
                              ('id', 'title', 'app', 'workspace', 'floating', 'fullscreen')),
                              tuple(parts), style, square, opacity,

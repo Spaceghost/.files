@@ -10,7 +10,7 @@ import ripple
 # The `ripple` object is the landing wave's own vocabulary: ripple.DEFAULTS and
 # ripple.settings() own its keys and limits, so they are named in one place.
 SETTINGS_DEFAULTS = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
-                     'reserve_band': True, 'powerline': False,
+                     'reserve_band': True, 'powerline': False, 'agent_status': True,
                      'ripple': dict(ripple.DEFAULTS)}
 OPACITY_FLOOR = 0.2
 IGNORED_CAPTION_APPS = frozenset((
@@ -82,7 +82,7 @@ def validate_settings(values):
     radius = result['corner_radius']
     if isinstance(radius, bool) or not isinstance(radius, int) or not 0 <= radius <= 24:
         raise ValueError('Decoration corner radius must be an integer from 0 to 24')
-    for name in ('reserve_band', 'powerline'):
+    for name in ('reserve_band', 'powerline', 'agent_status'):
         if not isinstance(result[name], bool):
             raise ValueError('Decoration ' + name.replace('_', ' ') + ' must be true or false')
     result['opacity'] = opacity

@@ -66,6 +66,10 @@ ROLE_COLORS = {
     'chain': ('surface', 'foreground'),
     'place': ('background_hard', 'foreground'),
     'tabs': ('surface', 'muted'),
+    # An agent's own state glyph (agent_status.WAITING/WORKING): the one
+    # segment meant to catch the eye, since it names the one thing on this
+    # strip that might actually need a reply.
+    'agent': ('accent', 'background_hard'),
 }
 
 _CACHE = {}

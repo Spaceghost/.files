@@ -135,7 +135,7 @@ class DecorationTests(unittest.TestCase):
 
             self.assertEqual((family, size), ('Fixture Mono', 9.5))
             self.assertEqual(settings, {'position': 'bottom', 'opacity': 0.78,
-                                        'corner_radius': 7, 'reserve_band': True,
+                                        'corner_radius': 7, 'reserve_band': True, 'agent_status': True,
                                         'powerline': False, 'ripple': ripple.settings()})
             # The strip matches the window it decorates, so the theme's terminal
             # transparency travels with the appearance.
@@ -224,7 +224,7 @@ class DecorationTests(unittest.TestCase):
     def test_decoration_settings_validate_ranges_and_types(self):
         self.assertTrue(hasattr(self.model, 'validate_settings'))
         defaults = {'position': 'bottom', 'opacity': 0.78, 'corner_radius': 7,
-                    'reserve_band': True, 'powerline': False,
+                    'reserve_band': True, 'powerline': False, 'agent_status': True,
                     'ripple': ripple.settings()}
         self.assertEqual(self.model.validate_settings({}), defaults)
         self.assertEqual(self.model.validate_settings(
@@ -313,7 +313,7 @@ class DecorationTests(unittest.TestCase):
                                              legacy)
             self.assertTrue(config.is_symlink())
             self.assertEqual(saved, {'position': 'bottom', 'opacity': 0.55,
-                                     'corner_radius': 7, 'reserve_band': True,
+                                     'corner_radius': 7, 'reserve_band': True, 'agent_status': True,
                                      'powerline': False, 'ripple': ripple.settings()})
             self.assertEqual(json.loads(target.read_text()), saved)
             self.assertEqual(legacy.read_text(), 'bottom\n')
