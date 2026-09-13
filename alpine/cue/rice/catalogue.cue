@@ -7,6 +7,15 @@ rice: {
 	version: 1
 	entries: [
 		{
+			id:      "catbed-mode-is-yours"
+			title:   "Catbed mode is yours alone to end"
+			date:    "2026-09-13"
+			summary: "Super+Shift+Escape parks every key and the pointer. Only that chord, held a second, lets go."
+			trigger: "Super+Shift+Escape; then hold Super+Shift+Escape for a second with no other key down to return."
+			detail:  "A cat guard, not a lock: the desktop stays visible and running while a transparent overlay takes the keyboard and pointer and a Sway mode that binds nothing takes the compositor's own keys. Nothing ends it for you -- not the cat getting up, not a lock and unlock, not a reload. While it is up the power, suspend and hibernate keys and SysRq are held as the lock holds them, from ~/.config/oldbook/catbed.json. A wedged guard is ended with 'oldbook-watch stop' from a terminal or over SSH."
+			run: ["oldbook-watch", "start"]
+		},
+		{
 			id:       "agent-picker-names-the-model"
 			title:    "The agent picker says what it will run"
 			date:     "2026-09-13"

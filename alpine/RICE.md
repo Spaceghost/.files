@@ -843,7 +843,7 @@ If a cat was seen within the last thirty seconds and the lid closes, an elogind
 `handle-lid-switch` inhibitor keeps the machine awake under the stricter
 ceilings, released the instant that window lapses.
 
-## Watch mode, for the cat
+## Catbed mode
 
 `Super+Shift+Escape` holds every key and every pointer event away from the
 session while the desktop stays completely visible and completely running. It
@@ -853,21 +853,30 @@ cat guard and not a lock, it says so on screen, and `Super+Escape` is untouched.
 Leaving is a **hold, not a chord**: the same keys held for one second with *no
 other key down*. That last rule is the actual defence — a settled cat holds a
 handful of neighbouring keys and never exactly one, so the chord alone would be
-reachable by accident and the clean-hold requirement is not. If the guard ever
-wedges, `Ctrl+Alt+Shift+Super+w` ends it from inside the mode.
+reachable by accident and the clean-hold requirement is not. And leaving is
+the user's alone; nothing ends catbed mode for him. The cat getting up does
+not: the cat watcher only reads whether the guard is up. The screen lock takes
+the keyboard and hands it back at the password while the guard waits, holding
+the pointer and the mode. A Sway reload resets the binding mode and the guard
+re-enters it. And the `watch` mode carries no exit chord at all, because a
+settled cat holds five keys at once and any chord Sway answers is one she can
+produce. While it is up the guard holds what the lock holds — the power,
+suspend and hibernate keys and SysRq — from `~/.config/oldbook/catbed.json`.
 
 There is no input-inhibitor protocol on this compositor, which is why it is
 built the way it is: a transparent overlay surface on every output takes the
-pointer, exclusive keyboard interactivity takes the keys, and an empty Sway
-`watch` mode takes Sway's own bindings — without that last part a cat lying
-across `$mod+Shift+q` still reaches it.
+pointer, exclusive keyboard interactivity takes the keys, and a Sway `watch`
+mode that binds nothing takes Sway's own bindings — without that last part a
+cat lying across `$mod+Shift+q` still reaches it. The mode block carries one
+`set` line and nothing else, because Sway only creates a mode from a line
+inside its block; an empty block is no mode, and no mode means no catbed mode.
 
-Being unable to get out is the failure that matters, so there are four ways
+Being unable to get out is the failure that matters, so there are three ways
 back: the mode is restored before the surfaces come down, a watchdog pipe
-restores it if the guard is killed outright, the guard ends itself if it ever
-loses the keyboard, and `oldbook-watch stop` restores it unconditionally. If
-the compositor refuses to hand over input, nothing changes and a critical
-notification says plainly that input was **not** parked.
+restores it if the guard is killed outright, and `oldbook-watch stop` from a
+terminal or over SSH restores it unconditionally. If the compositor refuses to
+hand over input, nothing changes and a critical notification says plainly that
+input was **not** parked.
 
 ## Idle and lock
 
