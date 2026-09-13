@@ -33,11 +33,15 @@ window#waybar { background: transparent; color: #ebdbb2; }
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
 @keyframes oldbook-ghost-wander {
-    0%   { margin: 3px 5px 3px 3px; }
-    25%  { margin: 0px 4px 6px 4px; }
-    50%  { margin: 2px 5px 4px 3px; }
-    75%  { margin: 0px 6px 6px 2px; }
-    100% { margin: 3px 5px 3px 3px; }
+    0%    { margin: 3px 5px 3px 3px; }
+    12.5% { margin: 1px 5px 5px 3px; }
+    25%   { margin: 0px 5px 6px 3px; }
+    37.5% { margin: 1px 5px 5px 3px; }
+    50%   { margin: 3px 5px 3px 3px; }
+    62.5% { margin: 5px 5px 1px 3px; }
+    75%   { margin: 6px 5px 0px 3px; }
+    87.5% { margin: 5px 5px 1px 3px; }
+    100%  { margin: 3px 5px 3px 3px; }
 }
 /* Jack: "make the little ghost ... float in place and wander ... like a
    tomagatchi." Small enough to read as idle rather than broken; enabled by
