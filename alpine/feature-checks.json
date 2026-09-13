@@ -544,6 +544,23 @@
       ]
     },
     {
+      "id": "CATBED-GUARD",
+      "paths": [
+        "alpine/desktop/.local/lib/oldbook/catbed_guard.py",
+        "alpine/desktop/.config/oldbook/catbed.json",
+        "alpine/bin/catbed-sysrq-hold",
+        "alpine/bin/install-catbed-guard",
+        "alpine/system/acpi/*",
+        "alpine/tests/test_catbed_guard.py"
+      ],
+      "tests": [
+        "test_catbed_guard.py",
+        "test_lock.py",
+        "test_watch_mode.py"
+      ],
+      "evidence": []
+    },
+    {
       "id": "FEEDBACK-OSD",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-osd",
@@ -579,6 +596,7 @@
       "id": "CAT-BED",
       "paths": [
         "alpine/desktop/.local/bin/oldbook-cat",
+        "alpine/tests/test_cat_guard.py",
         "alpine/desktop/.local/lib/oldbook/cat_presence.py",
         "alpine/desktop/.local/lib/oldbook/thermal.py",
         "alpine/bin/oldbook-fan-hold",

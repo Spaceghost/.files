@@ -34,10 +34,20 @@ with globals the compositor does advertise:
 Getting stuck is the thing this must never do, so the order is fixed. The guard
 proves it holds the keyboard *before* Sway is put into the empty mode, so a
 compositor that refuses the surface leaves the desktop exactly as it was and
-says so loudly. The mode is restored before the surface is torn down, a
+says so loudly. The mode is restored before the surface is torn down, and a
 watchdog holding a pipe restores it if this process dies in any way at all
-including SIGKILL, and the guard ends itself if it ever stops holding the
-keyboard. Ending early is always safer than stranding the user.
+including SIGKILL.
+
+Once up, catbed mode is the user's until the user ends it, and nothing ends it
+for them. The screen lock takes the keyboard away -- a session lock sits above
+every layer surface -- and gives it back at the password, so a guard that has
+lost the keyboard waits for it rather than ending, holding the pointer and the
+empty mode throughout. A Sway reload returns the compositor to its default
+mode, so the guard listens for mode changes and re-enters its own. The cat
+watcher reads whether the guard is up and never engages or releases it. And
+while it is up the guard holds exactly what the lock holds -- the power,
+suspend and hibernate keys with the login manager, and SysRq through the root
+helper -- because a cat on an unlocked desktop can reach those keys too.
 """
 import json
 import os
@@ -60,15 +70,16 @@ RELEASE_HOLD_SECONDS = 1.0
 # carry on pretending input is parked.
 MAP_DEADLINE_SECONDS = 20.0
 FOCUS_DEADLINE_SECONDS = 5.0
-# Losing the keyboard mid-session means something else took it; end rather than
-# sit on a screen that no longer answers the release chord. Long enough to ride
-# out a keyboard being unplugged and replugged, short enough to be honest.
+# Losing the keyboard mid-session means something else has it -- the screen
+# lock, nearly always. The guard notes it after this grace rather than on the
+# instant, so a keyboard unplugged and replugged is never remarked on, and it
+# waits for the keyboard to come back rather than ending.
 FOCUS_LOSS_GRACE_SECONDS = 5.0
 # Bar height plus the Ghost Observatory gap: the card sits under Waybar, clear
 # of the caption strip, the OSD pill and Conky's lower-right corner.
 INDICATOR_TOP_MARGIN = 52
 GHOST_GLYPH = '\U000f02a0'
-EYEBROW = f'{GHOST_GLYPH}  WATCH MODE · INPUT PARKED'
+EYEBROW = f'{GHOST_GLYPH}  CATBED MODE · INPUT PARKED'
 HOW_TO_LEAVE = 'Hold  Super + Shift + Escape  for a second to return'
 NOT_A_LOCK = 'A cat guard, not a lock. The desktop below is live; Super + Escape still locks.'
 
@@ -222,6 +233,25 @@ def mode_watchdog(environment=None):
         raise RuntimeError(f'Watch mode cannot arm its mode watchdog: {error}') from error
     finally:
         os.close(read_fd)
+
+
+def mode_events(environment=None):
+    """Sway's mode changes as they happen: a `swaymsg -m` subscription whose
+    stdout carries one compact JSON object per line. The guard reads it to put
+    itself back after a reload, which returns every binding mode to default."""
+    return subprocess.Popen(['swaymsg', '-r', '-m', '-t', 'subscribe', '["mode"]'],
+                            stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                            stderr=subprocess.DEVNULL, env=environment)
+
+
+def mode_change(line):
+    """The mode one subscription line reports, or None for anything else."""
+    try:
+        document = json.loads(line)
+    except (ValueError, TypeError):
+        return None
+    change = document.get('change') if isinstance(document, dict) else None
+    return change if isinstance(change, str) else None
 
 
 def announce(summary, body, urgent=True):

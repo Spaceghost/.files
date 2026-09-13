@@ -2,6 +2,75 @@
 
 Verified on Alpine edge x86_64, MacBookPro11,5, 2026-09-07.
 
+## Nothing a cat presses stops the machine, and catbed mode is his alone — 2026-09-13
+
+The user's original ask, on 2026-09-08, was that while the screen is locked
+"there's no amount of pressing or holding of any keys that will shut down the
+machine except magically my password." The power key was made inert behind the
+lock that day. This closes what that left open, from the list he chose, and
+re-draws catbed mode to a sentence he added while choosing: "The only way I
+should be able to unlock it is super+shift+esc, and there should be no
+automatic removal of catbed mode when the cat gets up. It is manually applied
+and manually unapplied. It works through all things all locks and all."
+
+What was still open. `kernel.sysrq` was 1, every function on, and Magic SysRq
+is answered in the kernel beneath the compositor and beneath every inhibitor,
+so `Alt+SysRq+O` powered the machine off through the lock. The lock's
+inhibitor named only `handle-power-key`, and the internal keyboard also emits
+`KEY_SLEEP`. `/etc/acpi/PWRF/00000080` was Alpine's packaged bare `poweroff` —
+acpid is neither running nor enabled here, but had it ever started it would
+have answered the button itself. `/etc/inittab` reboots on `Ctrl+Alt+Del` on
+the rescue ttys; he declined that change, so it stands.
+
+One policy for both parkers. The lock and catbed mode now hold the same
+things, from one module, `catbed_guard.py`, and one file the user owns,
+`~/.config/oldbook/catbed.json`: a block inhibitor on the power, suspend and
+hibernate keys (`lid` may be added, an empty list holds none), and `kernel.sysrq`
+narrowed to 382 — everything but reboot and power-off, so `Alt+SysRq+S` and
+`+U` can still sync and remount a wedged machine before the SMC's hardware cut
+— through `catbed-sysrq-hold`, a root-owned helper run through doas in the
+shape of `oldbook-fan-hold`: it holds while a pipe stays open, forks a restorer
+before writing so a `kill -9` still restores, and keeps a ledger under
+`/run/catbed-sysrq/` so the idle lock arriving over catbed mode restores the
+kernel's own value only when the last holder leaves and never loosens the
+other's mask. A hold that is wanted and cannot be taken is announced with the
+helper's own stderr in the body; a host with no helper at all — Bazzite — is
+logged and not announced. The acpid handler is replaced by one that does
+nothing, and `install-catbed-guard` installs both root files with the usual
+backup to `/var/backups/alpine-rice/`.
+
+Catbed mode is applied by hand and ended by hand. The 2026-09-09 arrangement,
+in which the cat watcher engaged the guard on a decided judgement and released
+it on stopping, is reversed: the watcher reads the guard's record as it reads
+the locker's and never touches it. The guard no longer ends when it loses the
+keyboard — the screen lock takes the keyboard from every layer surface and
+returns it at the password, so that rule had been ending catbed mode at every
+idle lock; it waits instead, holding the pointer and the empty mode. It
+subscribes to Sway's mode events and re-enters `watch` after a reload. It
+holds the same keys and SysRq the lock holds, because a cat on an unlocked
+desktop reaches them too. And the four-modifier emergency chord inside the
+mode is gone: the detector's own definition of a cat is five keys held at
+once. Recovery is `oldbook-watch stop` from a terminal, or killing the guard.
+Recorded in
+[the decision](../docs/superpowers/decisions/2026-09-13-catbed-mode-is-the-users.md).
+
+Verified in tests only. `test_catbed_guard.py` drives the real helper against
+a synthetic sysrq file and ledger — hold, release on pipe close, release by
+the restorer after `kill -9`, nested holds, a ledger left by a crash, and the
+refusal paths — and the lock and guard suites pin that both parkers take the
+holds and release them last. By the standing rule that agents do not exercise
+live desktop features, no lock and no catbed mode was taken from this session;
+the live checks are `doas catbed-sysrq-hold status` while locked,
+`oldbook-watch status` in catbed mode, and elogind's log stopping at "Power
+key pressed short." The ripple's retiming and shader work from the same
+session are recorded under the decoration entries.
+
+Two things found on the way and left alone: `alpine/desktop/.local/lib/oldbook/cat_panel.py`
+and `alpine/packages/swaylock-effects/0003-indicator-panel.patch` are not
+versioned, though the committed `oldbook-cat` imports the first and
+`test_lock.py` reads the second, so both fail at the branch tip in a fresh
+checkout; they belong to another session's in-flight work.
+
 ## The strip says what you are actually looking at — 2026-09-08
 
 The user could not tell Foot from Ghostty at a glance and wanted the decoration

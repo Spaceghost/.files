@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+"""Install the SysRq hold helper and the defused acpid power-button handler.
+
+Both are root-owned files outside HOME, versioned under alpine/ and installed
+the way install-desktop-system installs the fan hold: exact content is compared
+before anything is replaced, and a file that differs is moved to
+/var/backups/alpine-rice/catbed-guard-<nanoseconds>/ under its absolute path
+before the versioned one is written, so every change can be reversed.
+
+    alpine/bin/install-catbed-guard --check     report drift; changes nothing, needs no root
+    doas alpine/bin/install-catbed-guard        install or re-apply
+"""
+import argparse
+import os
+from pathlib import Path
+import shutil
+import time
+
+REPO = Path(__file__).resolve().parents[2]
+FILES = (
+    # Run as root through doas, so it must be a file the desktop user cannot
+    # rewrite; catbed_guard refuses to run one that is not root-owned.
+    (REPO / 'alpine/bin/catbed-sysrq-hold', Path('/usr/local/sbin/catbed-sysrq-hold'), 0o755),
+    # acpid is not enabled on this machine, but its package ships a handler
+    # that powers off on the button with no idea whether input is parked.
+    (REPO / 'alpine/system/acpi/PWRF/00000080', Path('/etc/acpi/PWRF/00000080'), 0o755),
+)
+
+
+def state(source, target, mode):
+    if target.is_symlink() or (target.exists() and not target.is_file()):
+        return 'replace'
+    if not target.exists():
+        return 'missing'
+    if target.read_bytes() != source.read_bytes():
+        return 'replace'
+    info = target.stat()
+    return 'current' if info.st_uid == 0 and (info.st_mode & 0o7777) == mode else 'permissions'
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('--check', action='store_true',
+                        help='report what differs from the versioned files; change nothing')
+    arguments = parser.parse_args(argv)
+    for source, _target, _mode in FILES:
+        if not source.is_file():
+            raise SystemExit(f'Missing versioned source: {source}')
+    plan = [(source, target, mode, state(source, target, mode)) for source, target, mode in FILES]
+    for _source, target, _mode, status in plan:
+        print(f'{status:12} {target}')
+    if arguments.check:
+        return 0 if all(status == 'current' for *_, status in plan) else 1
+    if os.geteuid() != 0:
+        raise SystemExit('Run with doas to install the catbed guard files.')
+    backup = Path('/var/backups/alpine-rice') / ('catbed-guard-' + str(time.time_ns()))
+    for source, target, mode, status in plan:
+        if status == 'current':
+            continue
+        if status != 'permissions':
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if target.exists() or target.is_symlink():
+                saved = backup / target.relative_to('/')
+                saved.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(target), str(saved))
+            target.write_bytes(source.read_bytes())
+        target.chmod(mode)
+        os.chown(target, 0, 0)
+    print('Catbed guard files installed; the next lock or catbed mode uses them.')
+    if backup.exists():
+        print('Previous files:', backup)
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

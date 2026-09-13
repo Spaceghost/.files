@@ -1,4 +1,4 @@
-"""A cat parks the keyboard herself, and keeps it for the sitting."""
+"""Catbed mode is the user's: the watcher reads it and never touches it."""
 import importlib.machinery
 import importlib.util
 import json
@@ -12,19 +12,13 @@ REPO = Path(__file__).resolve().parents[2]
 LIBRARY = REPO / 'alpine/desktop/.local/lib/oldbook'
 SERVICE = REPO / 'alpine/desktop/.local/bin/oldbook-cat'
 sys.path.insert(0, str(LIBRARY))
-
-FAKE_WATCH = '''\
-import os, sys
-with open(os.environ['GUARD_LOG'], 'a') as stream:
-    stream.write(sys.argv[1] + '\\n')
-sys.exit(int(os.environ.get('GUARD_' + sys.argv[1].upper() + '_STATUS', '0')))
-'''
+import watch_mode  # noqa: E402
 
 CAT = {'present': True, 'deciding': True, 'vetoed': False, 'confidence': 0.9,
        'keys_down': 6, 'patch': True, 'signals': [], 'corroboration': ['stillness']}
 GONE = dict(CAT, present=False, deciding=False, confidence=0.0)
 # The linger: she has shifted her weight, so presence holds without a fresh
-# decision. The guard must not flap in that gap.
+# decision.
 SETTLING = dict(CAT, deciding=False, confidence=0.0)
 
 
@@ -41,14 +35,10 @@ class GuardTests(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        (self.root / 'run').mkdir(mode=0o700)
-        self.watch = self.root / 'fake-watch'
-        self.watch.write_text(FAKE_WATCH)
-        self.log = self.root / 'guard.log'
-        for name, value in (('XDG_RUNTIME_DIR', str(self.root / 'run')),
-                            ('OLDBOOK_LOCK_RECORD', str(self.root / 'absent.json')),
-                            ('OLDBOOK_CAT_WATCH_COMMAND', str(self.watch)),
-                            ('GUARD_LOG', str(self.log))):
+        self.runtime = self.root / 'run'
+        self.runtime.mkdir(mode=0o700)
+        for name, value in (('XDG_RUNTIME_DIR', str(self.runtime)),
+                            ('OLDBOOK_LOCK_RECORD', str(self.root / 'absent.json'))):
             os.environ[name] = value
             self.addCleanup(os.environ.pop, name, None)
         self.config = self.root / 'cat.json'
@@ -70,121 +60,91 @@ class GuardTests(unittest.TestCase):
         os.close(read_fd)
         return write_fd
 
-    def calls(self):
-        return self.log.read_text().split() if self.log.exists() else []
+    def park(self):
+        """The user pressed Super+Shift+Escape: the guard's own live record."""
+        watch_mode.publish({'process': watch_mode.process_identity(os.getpid()),
+                            'engaged_at': 1.0, 'mode': watch_mode.SWAY_MODE}, str(self.runtime))
+
+    def guard_record(self):
+        return watch_mode.engaged(str(self.runtime))
 
     def tick(self, judgement, when=1000.0):
         self.service.presence.judge = lambda now: dict(judgement)
         return self.service.tick(when)
 
-    def test_a_decided_cat_on_an_unlocked_session_parks_the_keyboard(self):
+    def test_a_decided_cat_on_a_live_desktop_is_not_warmed_and_nothing_is_taken(self):
         record = self.tick(CAT)
 
-        self.assertEqual(self.calls(), ['start'])
+        self.assertFalse(record['guard_engaged'])
+        self.assertFalse(record['input_parked'])
+        self.assertFalse(record['present'], 'a live desktop means a person, whatever the keys say')
+        self.assertIsNone(self.guard_record(), 'the watcher must never engage the guard')
+
+    def test_a_locked_session_parks_input(self):
+        self.locked = True
+        record = self.tick(CAT)
+
+        self.assertTrue(record['locked'])
+        self.assertTrue(record['input_parked'])
+        self.assertFalse(record['guard_engaged'])
+        self.assertTrue(record['present'])
+
+    def test_catbed_mode_the_user_engaged_parks_input(self):
+        self.park()
+        record = self.tick(CAT)
+
         self.assertTrue(record['guard_engaged'])
         self.assertTrue(record['input_parked'])
         self.assertTrue(record['present'])
         self.assertFalse(record['locked'])
 
-    def test_a_locked_session_already_parks_it_and_needs_no_guard(self):
-        self.locked = True
-        record = self.tick(CAT)
-
-        self.assertEqual(self.calls(), [])
-        self.assertFalse(record['guard_engaged'])
-        self.assertTrue(record['input_parked'])
-        self.assertTrue(record['present'])
-
-    def test_the_keyboard_stays_parked_so_she_can_come_back(self):
+    def test_her_getting_up_releases_nothing(self):
+        self.park()
         self.tick(CAT)
         record = self.tick(GONE, when=1002.0)
 
-        # She is off the keys, so nothing is warmed; but the desktop is still
-        # hers, because a cat that has got up has not necessarily left.
-        self.assertEqual(self.calls(), ['start'])
-        self.assertTrue(record['guard_engaged'])
-        self.assertTrue(record['input_parked'])
-        self.assertFalse(record['present'])
+        self.assertFalse(record['present'], 'off the keys, so nothing is warmed')
+        self.assertTrue(record['guard_engaged'], 'but catbed mode is still up')
+        self.assertIsNotNone(self.guard_record())
 
-    def test_she_is_warmed_again_when_she_returns(self):
-        self.tick(CAT)
-        self.assertFalse(self.tick(GONE, when=1002.0)['present'])
-        record = self.tick(CAT, when=1004.0)
-
-        self.assertEqual(self.calls(), ['start'], 'the guard was never re-taken')
-        self.assertTrue(record['present'])
-
-    def test_shifting_her_weight_does_not_hand_the_keyboard_back(self):
+    def test_shifting_her_weight_keeps_her_warm(self):
+        self.park()
         self.tick(CAT)
         record = self.tick(SETTLING, when=1002.0)
 
-        self.assertEqual(self.calls(), ['start'])
-        self.assertTrue(record['guard_engaged'])
         self.assertTrue(record['present'])
+        self.assertTrue(record['guard_engaged'])
 
-    def test_engaging_twice_is_one_guard(self):
+    def test_she_is_warmed_again_when_she_returns(self):
+        self.park()
         self.tick(CAT)
-        self.tick(CAT, when=1002.0)
+        self.assertFalse(self.tick(GONE, when=1002.0)['present'])
+        self.assertTrue(self.tick(CAT, when=1004.0)['present'])
 
-        self.assertEqual(self.calls(), ['start'])
-
-    def test_a_guard_that_will_not_start_is_a_refusal_to_warm(self):
-        os.environ['GUARD_START_STATUS'] = '1'
-        self.addCleanup(os.environ.pop, 'GUARD_START_STATUS', None)
+    def test_a_stale_guard_record_is_not_catbed_mode(self):
+        watch_mode.publish({'process': {'pid': 2 ** 22 - 1, 'start_time': '1', 'boot_id': 'x'},
+                            'engaged_at': 1.0, 'mode': watch_mode.SWAY_MODE}, str(self.runtime))
         record = self.tick(CAT)
 
-        self.assertEqual(self.calls(), ['start'])
         self.assertFalse(record['guard_engaged'])
-        self.assertFalse(record['input_parked'])
-        self.assertFalse(record['present'], 'a machine that will not park input is not warmed')
-        self.assertIn('would not start', record['guard_refusal'])
+        self.assertFalse(record['present'])
 
-    def test_a_guard_this_daemon_did_not_engage_is_never_released(self):
-        guard = self.module.InputGuard(self.watch)
-
-        guard.release()
-
-        self.assertEqual(self.calls(), [], 'the user parked their own inputs')
-
-    def test_only_the_user_or_the_watcher_stopping_takes_the_guard_back(self):
-        guard = self.module.InputGuard(self.watch)
-        self.assertTrue(guard.engage())
-
-        guard.release()
-
-        self.assertFalse(guard.engaged)
-        self.assertEqual(self.calls(), ['start', 'stop'])
-
-    def test_a_guard_that_will_not_let_go_says_so(self):
-        guard = self.module.InputGuard(self.watch)
-        self.assertTrue(guard.engage())
-        os.environ['GUARD_STOP_STATUS'] = '1'
-        self.addCleanup(os.environ.pop, 'GUARD_STOP_STATUS', None)
-
-        guard.release()
-
-        self.assertFalse(guard.engaged)
-        self.assertIn('would not stop', guard.refusal)
-
-    def test_the_feature_being_off_never_takes_the_keyboard(self):
+    def test_the_feature_being_off_never_counts_her(self):
         document = json.loads(self.config.read_text())
         document['enabled'] = False
         self.config.write_text(json.dumps(document))
+        self.park()
         record = self.tick(CAT)
 
-        self.assertEqual(self.calls(), [])
-        self.assertFalse(record['input_parked'])
         self.assertFalse(record['present'])
+        self.assertIsNotNone(self.guard_record(), 'and the feature being off touches nothing')
 
-    def test_the_watcher_hands_the_keyboard_back_before_it_tidies_anything(self):
-        # The one failure this feature must never have is dying while holding
-        # the user's input, so the release sits in the shutdown path above the
-        # lid, the devices and the parting record.
+    def test_the_watcher_never_starts_or_stops_the_guard(self):
         source = SERVICE.read_text()
-        shutdown = source.split("self.bed.stop('the watcher is stopping')", 1)[1]
-        release = shutdown.index('self.guard.release(')
-        self.assertLess(release, shutdown.index('self.lid(False)'))
-        self.assertLess(release, shutdown.index('self.close_devices()'))
+        for forbidden in ('InputGuard', 'guard.engage', 'guard.release', "'oldbook-watch'",
+                          'OLDBOOK_CAT_WATCH_COMMAND'):
+            self.assertNotIn(forbidden, source)
+        self.assertIn('watch_mode.engaged()', source, 'the guard is read from its own record')
 
 
 if __name__ == '__main__':

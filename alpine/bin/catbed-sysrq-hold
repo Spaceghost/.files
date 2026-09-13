@@ -1,0 +1,317 @@
+#!/usr/bin/python3 -I
+"""Narrow the kernel's SysRq key for exactly as long as someone is alive to say so.
+
+Installed root-owned by install-catbed-guard and run through doas by
+`oldbook-lock` and `oldbook-watch` while input is parked. Alt+SysRq is answered
+by the kernel beneath every compositor and every login-manager inhibitor, so
+while a cat has the keyboard its reboot and power-off functions are switched
+off here and switched back on when the hold ends. Nothing is imported from the
+user's home: a root process must not execute code out of a directory the user
+can write.
+
+The guarantee is built out of file descriptors and process lifetimes, in the
+shape `oldbook-fan-hold` uses:
+
+  the pipe      The hold lasts while stdin -- a pipe from the caller -- stays
+                open. When the caller's whole tree is gone, however it went,
+                the read returns nothing and the mask is put back.
+
+  the restorer  Forked before anything is written, in its own session, holding
+                the other end of a second pipe. If this process is killed with
+                a signal it cannot catch, the restorer sees the pipe close and
+                releases on its behalf.
+
+  the ledger    Holds nest: the lock and catbed mode can both be up at once,
+                and the first to arrive is not necessarily the last to leave.
+                A state directory records the value the kernel had before the
+                first hold and one file per live holder, and the last holder
+                out restores that value. A ledger whose holders are all dead
+                is one left behind by a crash, and its recorded value is still
+                the right one to go back to -- never the narrowed value that
+                happens to be current.
+
+    catbed-sysrq-hold hold [--mask N]   hold until stdin closes; prints "holding"
+    catbed-sysrq-hold restore           put the recorded value back if no holder is alive
+    catbed-sysrq-hold status            the value, the baseline and the live holders, as JSON
+"""
+import argparse
+import errno
+import fcntl
+import json
+import os
+from pathlib import Path
+import select
+import signal
+import sys
+
+DEFAULT_PATH = '/proc/sys/kernel/sysrq'
+DEFAULT_STATE = '/run/catbed-sysrq'
+# Every SysRq function but reboot and power-off, which is bit 128.
+DEFAULT_MASK = 382
+MASK_LIMIT = 511
+
+
+def read_value(path):
+    try:
+        return int(Path(path).read_text().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def write_value(path, value):
+    try:
+        Path(path).write_text(f'{int(value)}\n')
+        return True
+    except (OSError, ValueError):
+        return False
+
+
+def start_time(pid):
+    """The kernel's start time for a pid, so a reused pid is never mistaken for
+    the holder that had it; None once the process is gone."""
+    try:
+        fields = (Path('/proc') / str(int(pid)) / 'stat').read_text().rsplit(')', 1)[1].split()
+        return None if fields[0] in ('Z', 'X') else fields[19]
+    except (OSError, ValueError, IndexError):
+        return None
+
+
+def say(message):
+    try:
+        print(message, flush=True)
+    except (OSError, ValueError):
+        pass
+
+
+class Ledger:
+    """The state directory, under one lock for the length of a transition."""
+
+    def __init__(self, directory):
+        self.directory = Path(directory)
+        self.holders = self.directory / 'holders'
+        self.baseline_file = self.directory / 'baseline'
+        self._lock = None
+
+    def __enter__(self):
+        self.directory.mkdir(mode=0o700, parents=True, exist_ok=True)
+        self.holders.mkdir(mode=0o700, exist_ok=True)
+        self._lock = open(self.directory / 'lock', 'a')
+        fcntl.flock(self._lock, fcntl.LOCK_EX)
+        return self
+
+    def __exit__(self, *_):
+        fcntl.flock(self._lock, fcntl.LOCK_UN)
+        self._lock.close()
+        self._lock = None
+
+    def alive(self):
+        """Live holders by pid; a record whose process is gone or reused is dropped."""
+        live = {}
+        for entry in sorted(self.holders.iterdir()):
+            try:
+                record = json.loads(entry.read_text())
+                pid, started = int(record['pid']), str(record['start'])
+            except (OSError, ValueError, KeyError, TypeError):
+                entry.unlink(missing_ok=True)
+                continue
+            if start_time(pid) == started:
+                live[pid] = record
+            else:
+                entry.unlink(missing_ok=True)
+        return live
+
+    def baseline(self):
+        try:
+            return int(self.baseline_file.read_text().strip())
+        except (OSError, ValueError):
+            return None
+
+    def record_baseline(self, value):
+        self.baseline_file.write_text(f'{int(value)}\n')
+
+    def clear_baseline(self):
+        self.baseline_file.unlink(missing_ok=True)
+
+    def add(self, pid, mask):
+        (self.holders / str(pid)).write_text(json.dumps(
+            {'pid': pid, 'start': start_time(pid), 'mask': mask}) + '\n')
+
+    def remove(self, pid):
+        (self.holders / str(pid)).unlink(missing_ok=True)
+
+
+def effective(ledger):
+    """The mask every live holder is content with: the AND of what they asked
+    for, so a hold that arrives or leaves never loosens another's."""
+    masks = [int(record.get('mask', 0)) for record in ledger.alive().values()]
+    result = MASK_LIMIT
+    for mask in masks:
+        result &= mask
+    return result if masks else None
+
+
+def release(path, state, pid):
+    """Take one holder off the ledger; the last one out restores the kernel.
+
+    Idempotent on purpose: the holder calls it on every exit path and its
+    restorer calls it again, and the second call finds nothing left to do.
+    """
+    with Ledger(state) as ledger:
+        ledger.remove(pid)
+        remaining = effective(ledger)
+        if remaining is not None:
+            write_value(path, remaining)
+            return f'released: sysrq stays at {remaining} for the other holder(s)'
+        baseline = ledger.baseline()
+        if baseline is None:
+            return 'released: nothing recorded to restore'
+        if not write_value(path, baseline):
+            return f'released: could not write {baseline} back to {path}'
+        ledger.clear_baseline()
+        return f'released: sysrq back to {baseline}'
+
+
+def restorer(read_fd, path, state, pid):
+    """The holder's shadow: waits until the holder is gone, then releases for it."""
+    try:
+        os.setsid()
+    except OSError:
+        pass
+    for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+        signal.signal(number, signal.SIG_IGN)
+    try:
+        os.close(0)
+    except OSError:
+        pass
+    while True:
+        try:
+            if not os.read(read_fd, 4096):
+                break
+        except OSError as error:
+            if error.errno not in (errno.EINTR, errno.EAGAIN):
+                break
+    release(path, state, pid)
+    os._exit(0)
+
+
+def take(path, state, pid, mask):
+    """Record this holder and narrow the kernel; the problem, or None.
+
+    The first holder in records what to go back to -- unless a crash left a
+    record behind, in which case that record, and not the narrowed value that
+    happens to be current, is the truth.
+    """
+    with Ledger(state) as ledger:
+        if not ledger.alive() and ledger.baseline() is None:
+            current = read_value(path)
+            if current is None:
+                return f'cannot read {path}'
+            ledger.record_baseline(current)
+        ledger.add(pid, mask)
+        if not write_value(path, effective(ledger)):
+            ledger.remove(pid)
+            return f'cannot write {path}'
+    return None
+
+
+def hold(path, state, mask, stream=None):
+    stream = sys.stdin if stream is None else stream
+    pid = os.getpid()
+    read_fd, write_fd = os.pipe()
+    child = os.fork()
+    if child == 0:
+        os.close(write_fd)
+        restorer(read_fd, path, state, pid)
+    os.close(read_fd)
+    try:
+        problem = take(path, state, pid, mask)
+    except OSError as error:
+        problem = str(error)
+    if problem:
+        # Nothing was taken. Closing the pipe lets the restorer go; it finds
+        # no record of ours and, with no other holder, nothing to undo.
+        os.close(write_fd)
+        say(f'released: {problem}')
+        return 1
+    say('holding')
+
+    def signalled(number, _frame):
+        raise SystemExit(0)
+
+    for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP, signal.SIGQUIT):
+        signal.signal(number, signalled)
+    try:
+        descriptor = stream.fileno()
+        while True:
+            readable, _, _ = select.select([descriptor], [], [])
+            if readable:
+                try:
+                    data = os.read(descriptor, 4096)
+                except OSError:
+                    data = b''
+                if not data:
+                    return 0
+    finally:
+        say(release(path, state, pid))
+        os.close(write_fd)
+
+
+def restore(path, state):
+    with Ledger(state) as ledger:
+        live = ledger.alive()
+        if live:
+            say('holding: ' + ', '.join(str(pid) for pid in sorted(live)))
+            return 1
+        baseline = ledger.baseline()
+        if baseline is None:
+            say('restored: nothing to do')
+            return 0
+        if not write_value(path, baseline):
+            say(f'restored: could not write {baseline} back to {path}')
+            return 1
+        ledger.clear_baseline()
+        say(f'restored: sysrq back to {baseline}')
+        return 0
+
+
+def status(path, state):
+    with Ledger(state) as ledger:
+        document = {'sysrq': read_value(path), 'baseline': ledger.baseline(),
+                    'holders': list(ledger.alive().values())}
+    say(json.dumps(document))
+    return 0
+
+
+def privileged_enough(path):
+    """A helper aimed at the real kernel must be root; a test's file need not be."""
+    return os.geteuid() == 0 or str(path) != DEFAULT_PATH
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument('action', choices=('hold', 'restore', 'status'))
+    parser.add_argument('--mask', type=int, default=DEFAULT_MASK)
+    parser.add_argument('--path', default=DEFAULT_PATH)
+    parser.add_argument('--state', default=DEFAULT_STATE)
+    arguments = parser.parse_args(argv)
+    if not 0 <= arguments.mask <= MASK_LIMIT:
+        print(f'catbed-sysrq-hold: the mask must be between 0 and {MASK_LIMIT}', file=sys.stderr)
+        return 2
+    if not privileged_enough(arguments.path):
+        print('catbed-sysrq-hold: kernel.sysrq needs root', file=sys.stderr)
+        return 1
+    if arguments.path != DEFAULT_PATH and arguments.state == DEFAULT_STATE:
+        print('catbed-sysrq-hold: a test path needs its own --state', file=sys.stderr)
+        return 2
+    if arguments.action == 'hold':
+        return hold(arguments.path, arguments.state, arguments.mask)
+    if arguments.action == 'restore':
+        return restore(arguments.path, arguments.state)
+    return status(arguments.path, arguments.state)
+
+
+if __name__ == '__main__':
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        sys.exit(0)

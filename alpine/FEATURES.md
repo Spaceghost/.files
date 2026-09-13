@@ -116,19 +116,24 @@ swaylockd remains the automatic fallback. Lock acquisition must wait for actual
 readiness, serialize concurrent requests and reject stale process/compositor
 identities; a matching process name is insufficient.
 
-A locked session ignores the power key. The MacBook's power key sits beside
-Backspace and elogind powers the machine off on a short press, counting each
-autorepeat of a held key as another press, so the locker is launched holding a
-`handle-power-key` block inhibitor and holds it for exactly as long as it lives,
-however it ends. The inhibitor comes from whichever login manager the host runs
-— `elogind-inhibit` here, `systemd-inhibit` on the Bazzite replay — and its
-`PowerKeyIgnoreInhibited` must stay `no` for that to hold. A missing or refused inhibitor must never prevent locking: a
-power key that still works is not a reason to leave the session open. The
-several-second hold the SMC turns into a hardware power cut sits below Linux
-and stays out of reach.
+A locked session ignores the power key, and every other key that could stop
+the machine. The MacBook's power key sits beside Backspace and elogind powers
+the machine off on a short press, counting each autorepeat of a held key as
+another press, so the locker is launched holding a block inhibitor on the
+power, suspend and hibernate keys and holds it for exactly as long as it
+lives, however it ends. The inhibitor comes from whichever login manager the
+host runs — `elogind-inhibit` here, `systemd-inhibit` on the Bazzite replay —
+and its `PowerKeyIgnoreInhibited` must stay `no` for that to hold. Magic SysRq
+answers beneath every inhibitor, so the locker also narrows `kernel.sysrq`
+through the root helper for the same lifetime. What is held is the CATBED-GUARD
+policy in `~/.config/oldbook/catbed.json`, shared with catbed mode. A missing
+or refused hold must never prevent locking: a power key that still works is
+not a reason to leave the session open. The several-second hold the SMC turns
+into a hardware power cut sits below Linux and stays out of reach.
 
 - Implementation: [oldbook-lock](desktop/.local/bin/oldbook-lock),
   [lock scene](desktop/.local/lib/oldbook/lock_scene.py),
+  [what is held while parked](desktop/.local/lib/oldbook/catbed_guard.py),
   [coexisting swaylock-effects](packages/swaylock-effects/README.md).
 - Checks: [lock regressions](tests/test_lock.py),
   [headless lock evidence](verification/lock-screen/README.md),
@@ -697,22 +702,76 @@ lying across `$mod+Shift+q` would otherwise reach.
 
 Leaving is a hold rather than a chord — the entry chord held for one second
 with no other key down — because a settled cat holds several neighbouring keys
-and never exactly one. Getting stuck is the failure that matters: the mode is
+and never exactly one, and it is the user's alone. Catbed mode is applied by
+hand and ended by hand: nothing releases it when the cat gets up; the screen
+lock takes the keyboard and hands it back at the password while the guard
+waits, holding the pointer and the empty mode; a Sway reload that resets the
+binding mode is undone by the guard re-entering it; and the `watch` mode binds
+nothing at all — the earlier four-modifier emergency chord is gone, because
+any chord Sway answers is one a settled cat can produce. While it is up the
+guard holds what the lock holds (CATBED-GUARD). This supersedes the 2026-09-09
+decision that the cat watcher engages and releases the guard for her; see
+[the decision](../docs/superpowers/decisions/2026-09-13-catbed-mode-is-the-users.md).
+Recovery from a wedged guard is `oldbook-watch stop` from a terminal, or
+killing it. Getting stuck is still the failure that matters: the mode is
 entered only after the compositor proves it sent `wl_keyboard.enter`, restored
-before the surfaces come down, restored by a watchdog pipe on SIGKILL, and
-dropped by the guard itself if it ever stops holding the keyboard. A refusal
-must change nothing and say plainly that input was NOT parked, because claiming
-input is held when it is not is the worst possible outcome for a feature whose
-purpose is walking away from the machine.
+before the surfaces come down, and restored by a watchdog pipe on SIGKILL. A
+refusal must change nothing and say plainly that input was NOT parked, because
+claiming input is held when it is not is the worst possible outcome for a
+feature whose purpose is walking away from the machine.
 
 - Implementation: [guard](desktop/.local/bin/oldbook-watch),
   [model](desktop/.local/lib/oldbook/watch_mode.py),
-  [binding and mode](desktop/.config/sway/local.d/watch.conf).
+  [binding and mode](desktop/.config/sway/local.d/watch.conf),
+  [what is held while parked](desktop/.local/lib/oldbook/catbed_guard.py).
 - Checks: [watch mode tests](tests/test_watch_mode.py),
   [headless evidence](verification/watch-mode/README.md).
   Headless pixman with a virtual keyboard is neither the Apple panel nor the
   internal keyboard, and no cat was available; the first live guard is the
-  user's check.
+  user's check, and so are a lock and a reload taken while it is up.
+
+### CATBED-GUARD
+
+While input is parked — the screen locked, or catbed mode up — nothing a cat
+can press may shut the machine down or put it to sleep, and both parkers hold
+the same things for exactly as long as they live. The power, suspend and
+hibernate keys are held with a login-manager block inhibitor (`elogind-inhibit`
+here, `systemd-inhibit` on the Bazzite replay), which refuses a press, a hold
+and every autorepeat. Magic SysRq answers in the kernel beneath every
+compositor and inhibitor, so `kernel.sysrq` is narrowed for the same lifetime
+by `catbed-sysrq-hold`, a root-owned helper run through doas that holds while
+a pipe stays open, releases through a forked restorer if killed outright, and
+keeps a ledger so that nested holds — the lock over catbed mode — restore the
+kernel's own value only when the last holder leaves and never loosen an
+earlier holder's mask. The default mask, 382, is every SysRq function except
+reboot and power-off, so Alt+SysRq+S and +U can still sync and remount a
+wedged machine before the hardware cut; 0 switches the key off. Every hold is
+a descriptor handed to the parker's process tree, so release is the pipe
+closing, however the tree ends. A hold that is wanted and cannot be taken is
+announced in the helper's own words at critical urgency and the parker
+proceeds without it; a host that simply has no helper installed is logged, not
+announced. acpid's packaged power-button handler, a bare `poweroff`, is
+replaced by one that does nothing, so a daemon that is not enabled here can
+never bypass the inhibitor if it is ever started.
+
+The policy is the user's, in `~/.config/oldbook/catbed.json`: which keys
+(`power`, `suspend`, `hibernate`, `lid`; an empty list holds none) and the
+SysRq guard and mask. A missing or malformed file, or any one bad value, falls
+back to the shipped default for that value alone. The several-second power
+hold the SMC turns into a hardware cut is below Linux and out of reach; only a
+physical guard covers a sustained sit on that key.
+
+- Implementation: [policy and holds](desktop/.local/lib/oldbook/catbed_guard.py),
+  [shipped policy](desktop/.config/oldbook/catbed.json),
+  [SysRq hold helper](bin/catbed-sysrq-hold), [installer](bin/install-catbed-guard),
+  [defused acpid handler](system/acpi/PWRF/00000080),
+  [lock](desktop/.local/bin/oldbook-lock), [guard](desktop/.local/bin/oldbook-watch).
+- Checks: [policy, holds, helper and installer](tests/test_catbed_guard.py),
+  [lock](tests/test_lock.py), [watch mode](tests/test_watch_mode.py);
+  `alpine/bin/install-catbed-guard --check` reports drift from the versioned
+  root files. The helper is exercised against its own file, never the
+  kernel's; `doas catbed-sysrq-hold status` while locked, and elogind's log
+  refusing the key, are the live check.
 
 ### FEEDBACK-OSD
 
@@ -773,22 +832,15 @@ bed mode runs the machine deliberately warm and holds the fans down.
 Interactions are a named set with one selected, so adding another is adding an
 entry; bed mode is the only one implemented.
 
-The machine is warmed only while its input is parked, and the cat may park it
-herself. A decided judgement on an unlocked session engages the same guard
-Super+Shift+Escape does, which takes the keyboard and pointer while leaving the
-desktop visible. The guard is then hers for the sitting: a cat that steps off
-the keys has not necessarily left, so handing the desktop back would both flap
-the keyboard and make her return land on a live session that warms nothing.
-Only the heat follows her, stopping when she goes and warming again when she
-comes back. The user ends the guard with the gesture that would have started
-it, and the daemon ends it by stopping. This supersedes the earlier requirement
-that
-the session be locked *before* she settled, which was the same rule stated as a
-precondition the user had to satisfy rather than one the desktop could meet.
-The reasoning it replaces is preserved exactly: nothing is warmed while anyone
-could be typing. A guard that refuses to start is therefore a refusal to warm,
-a guard this daemon did not engage is never released, and the keyboard is
-handed back before anything else when the daemon stops.
+The machine is warmed only while its input is parked: the screen locked, or
+catbed mode up. Both are the user's doing. The watcher reads the guard's own
+record exactly as it reads the locker's, and never engages or releases the
+guard — catbed mode is applied by hand and ended by hand (WATCH-MODE), which
+supersedes the 2026-09-09 decision that a decided judgement engaged the guard
+for her and the daemon released it on stopping. Only the heat follows her,
+stopping when she goes and warming again when she comes back. The reasoning
+behind the original pin is preserved exactly: nothing is warmed while anyone
+could be typing, and a session where someone could be typing is a person.
 
 Detection must be lopsided in favour of refusing. Five keys held together for
 two seconds is necessary but never sufficient, and one corroborating signal is
@@ -797,7 +849,7 @@ trackpad contact area above 45 percent of the device's own maximum, or three
 keys in autorepeat. Three clean press-and-release events within ten seconds veto
 the judgement outright, whatever else is true. Above all the daemon must not
 publish a cat while input is live: the locker's own readiness record naming a
-live process, or the daemon's own guard holding the keyboard. A session where
+live process, or catbed mode's own record naming a live guard. A session where
 someone could be typing is a person, and a person is never warmed.
 
 Warming a laptop deliberately, with the fans held down and the lid possibly
@@ -817,7 +869,8 @@ stop latches it off for the session.
   [thermal policy](desktop/.local/lib/oldbook/thermal.py),
   [privileged fan hold](bin/oldbook-fan-hold).
 - Checks: [detector](tests/test_cat_presence.py), [bed mode](tests/test_cat_bed.py),
-  [input guard](tests/test_cat_guard.py), [fan restoration](tests/test_cat_fans.py).
+  [catbed mode read, never taken](tests/test_cat_guard.py),
+  [fan restoration](tests/test_cat_fans.py).
   Every thermal and fan path is tested against synthetic sysfs trees; no bed
   mode has ever run on this machine, no real fan has been held, and no cat has
   been observed. A physical run is the user's check.

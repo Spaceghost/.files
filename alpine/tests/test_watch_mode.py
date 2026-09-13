@@ -216,7 +216,8 @@ class HonestyTests(unittest.TestCase):
         config = CONFIG.read_text()
         self.assertIn('bindsym $mod+Shift+Escape exec ~/.local/bin/oldbook-watch start', config)
         self.assertIn('mode "watch" {', config)
-        self.assertIn('mode "default"', config, 'the mode must contain its own emergency exit')
+        self.assertNotIn('mode "default"', config,
+                         'nothing in the config leaves the mode; only the held chord does')
         self.assertNotIn('$mod+Escape exec', config, 'the real lock binding is not touched here')
         session = (REPO / 'alpine/desktop/.config/sway/config').read_text()
         self.assertIn('bindsym $mod+Escape exec $lock', session)
@@ -225,9 +226,43 @@ class HonestyTests(unittest.TestCase):
         body = CONFIG.read_text().split('mode "watch" {', 1)[1].split('}', 1)[0]
         bindings = [line.strip() for line in body.splitlines()
                     if line.strip().startswith('bindsym')]
-        self.assertEqual(len(bindings), 1, 'the watch mode holds exactly one binding')
-        self.assertIn('Ctrl+Mod1+Shift+Mod4+w', bindings[0],
-                      'the emergency exit stays a four-modifier chord')
+        self.assertEqual(bindings, [], 'the watch mode binds nothing at all: a settled cat '
+                                       'holds five keys at once, and any chord is hers')
+
+
+class OnlyTheUserLeavesTests(unittest.TestCase):
+    """Catbed mode is applied by hand and ended by hand, and it outlasts
+    everything else: the cat getting up, the screen lock, a Sway reload."""
+
+    def test_losing_the_keyboard_waits_instead_of_ending(self):
+        text = WATCH.read_text()
+        self.assertIn('on_keyboard_lost=waiting', text)
+        self.assertNotIn("finish('keyboard-lost')", text)
+        self.assertNotIn('ended early', text)
+
+    def test_a_mode_change_that_is_not_ours_is_undone(self):
+        self.assertEqual(module['mode_change']('{ "change": "default", "pango_markup": false }'),
+                         'default')
+        self.assertEqual(module['mode_change']('{"change": "watch"}'), 'watch')
+        self.assertIsNone(module['mode_change']('not json'))
+        self.assertIsNone(module['mode_change']('{"change": 3}'))
+        self.assertIsNone(module['mode_change']('[]'))
+        text = WATCH.read_text()
+        self.assertIn('watch_mode.mode_events()', text)
+        self.assertIn('mode != watch_mode.SWAY_MODE', text)
+
+    def test_the_guard_holds_what_the_lock_holds_and_lets_go_last(self):
+        text = WATCH.read_text()
+        self.assertIn("catbed_guard.hold_all(", text)
+        run = text.split('def run(runtime):', 1)[1].split('def stop(runtime):', 1)[0]
+        cleanup = run.split('finally:', 1)[1]
+        self.assertLess(cleanup.index('mode "default"'), cleanup.index('guard.close()'))
+        self.assertLess(cleanup.index('guard.close()'), cleanup.index('catbed_guard.release('))
+
+    def test_the_helper_says_it_is_the_users_alone(self):
+        text = WATCH.read_text()
+        self.assertIn("Leaving is the user's alone", text)
+        self.assertIn('no exit chord', text)
 
 
 if __name__ == '__main__':

@@ -12,6 +12,7 @@ path, so every change can be reversed from that directory.
 | Autologin | `greetd/config.toml` | copied by hand (see the greetd notes in `alpine/desktop/README.md`) | `/etc/greetd/config.toml` |
 | Boot console | `boot/console-palette.json` (generated), `boot/issue.template`, `boot/boot_console.py`, `boot/console_palette.py` | `alpine/bin/install-boot-console` | `/etc/default/grub`, `/boot/grub/grub.cfg`, `/etc/issue` |
 | Banner initramfs | `mkinitfs/initramfs-init` (+ stock copy and patch) | `alpine/bin/install-boot-console` | `/boot/initramfs-lts-ghost`, `/etc/grub.d/40_custom` |
+| Catbed guard | `alpine/bin/catbed-sysrq-hold`, `acpi/PWRF/00000080` | `alpine/bin/install-catbed-guard` (`--check` needs no root) | `/usr/local/sbin/catbed-sysrq-hold`, `/etc/acpi/PWRF/00000080` |
 
 ## Boot console
 

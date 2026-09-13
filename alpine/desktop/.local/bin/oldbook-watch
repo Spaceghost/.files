@@ -1,19 +1,24 @@
 #!/usr/bin/env python3
-"""Watch mode: park input off the live desktop so a cat can sit on the keyboard.
+"""Catbed mode: park input off the live desktop so a cat can sit on the keyboard.
 
 A cat guard, not a lock, and never to be described as one. The desktop stays
 fully visible and fully running; a transparent overlay surface takes the
-keyboard and every pointer event, and Sway's empty `watch` mode removes the
-compositor's own bindings. `Super+Escape` remains the real lock and is
-untouched by anything here.
+keyboard and every pointer event, Sway's empty `watch` mode removes the
+compositor's own bindings, and the power, suspend and hibernate keys and SysRq
+are held exactly as the lock holds them. `Super+Escape` remains the real lock
+and is untouched by anything here.
 
   oldbook-watch start    engage (bound to Super+Shift+Escape)
-  oldbook-watch stop     leave, and put Sway back in its default mode
+  oldbook-watch stop     recovery from a terminal: leave, and put Sway back in its default mode
   oldbook-watch status   report honestly whether input is actually parked
 
-Leaving: hold Super+Shift+Escape for a second with no other key down. If this
-helper is ever wedged, `Ctrl+Alt+Shift+Super+w` is bound inside the mode as the
-emergency exit, and killing this process restores the mode by itself.
+Leaving is the user's alone: hold Super+Shift+Escape for a second with no other
+key down. Nothing leaves on the user's behalf -- not the cat getting up, not the
+screen locking and unlocking, not a Sway reload: the guard waits out a lock and
+re-enters its mode after a reload. There is deliberately no exit chord inside
+the mode, because a settled cat holds five keys at once and a chord is a chord.
+Killing this process restores the mode by itself, and `oldbook-watch stop` from
+a terminal does the same by hand.
 
 Nothing here ever reports success it has not proven. If the compositor will not
 give the guard the keyboard, watch mode refuses to start, says so, and leaves
@@ -30,6 +35,7 @@ import sys
 import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import catbed_guard
 import power_source
 import watch_mode
 from overlay_theme import THEMES, read_palette
@@ -62,12 +68,27 @@ def run(runtime):
     watch_mode.sway(kind='get_version')
     from gi.repository import GLib
     loop = GLib.MainLoop()
-    session = {'engaged': False, 'reason': None, 'failure': None, 'watchdog': None,
-               'keyboard_proven': False}
+    session = {'engaged': False, 'engaged_at': None, 'reason': None, 'failure': None,
+               'watchdog': None, 'keyboard_proven': False, 'keyboard': True, 'held': [],
+               'events': None, 'pending': b'', 'finishing': False}
+
+    def record():
+        watch_mode.publish({'process': watch_mode.process_identity(os.getpid()),
+                            'engaged_at': session['engaged_at'], 'mode': watch_mode.SWAY_MODE,
+                            'keyboard_proven': session['keyboard_proven'],
+                            'keyboard_held': session['keyboard'],
+                            'holds': len(session['held']),
+                            'release': 'hold Super+Shift+Escape for a second'}, runtime)
 
     def engage(proven=True):
         """Park input, now that the compositor has shown it will be parked."""
-        if session['engaged'] or session['failure']:
+        if session['failure']:
+            return
+        if session['engaged']:
+            # The keyboard has come back -- from the lock, at the password.
+            if not session['keyboard']:
+                session['keyboard'] = True
+                record()
             return
         session['keyboard_proven'] = proven
         try:
@@ -80,14 +101,63 @@ def run(runtime):
             loop.quit()
             return
         session['engaged'] = True
-        watch_mode.publish({'process': watch_mode.process_identity(os.getpid()),
-                            'engaged_at': time.time(), 'mode': watch_mode.SWAY_MODE,
-                            'keyboard_proven': proven,
-                            'release': 'hold Super+Shift+Escape for a second'}, runtime)
+        session['engaged_at'] = time.time()
+        # What the lock holds, catbed mode holds: a cat on an unlocked desktop
+        # reaches the power key and SysRq exactly as she does behind the lock.
+        session['held'], problems = catbed_guard.hold_all(
+            'oldbook-watch', 'Catbed mode: input is parked')
+        if problems:
+            catbed_guard.announce('Catbed mode is up, but not everything is held', problems)
+        record()
         watch_mode.cue('tick')
+        follow_mode()
+
+    def waiting():
+        """The keyboard is elsewhere -- the screen lock, nearly always. Stay
+        up: the pointer and the mode are still held, and it comes back at the
+        password."""
+        if session['engaged'] and session['keyboard']:
+            session['keyboard'] = False
+            record()
+
+    def follow_mode():
+        """Put the mode back if anything resets it; a reload does."""
+        try:
+            session['events'] = watch_mode.mode_events()
+        except OSError as error:
+            watch_mode.announce('Catbed mode cannot watch for a Sway reload',
+                                f'{error}. A reload would leave the compositor bindings live.',
+                                urgent=False)
+            return
+        GLib.io_add_watch(session['events'].stdout.fileno(), GLib.PRIORITY_DEFAULT,
+                          GLib.IOCondition.IN | GLib.IOCondition.HUP | GLib.IOCondition.ERR,
+                          on_mode_event)
+
+    def on_mode_event(descriptor, condition):
+        if condition & (GLib.IOCondition.HUP | GLib.IOCondition.ERR):
+            return False
+        try:
+            chunk = os.read(descriptor, 4096)
+        except OSError:
+            return False
+        if not chunk:
+            return False
+        session['pending'] += chunk
+        *lines, session['pending'] = session['pending'].split(b'\n')
+        for line in lines:
+            mode = watch_mode.mode_change(line.decode(errors='replace'))
+            if (mode is not None and mode != watch_mode.SWAY_MODE
+                    and session['engaged'] and not session['finishing']):
+                try:
+                    watch_mode.sway(f'mode "{watch_mode.SWAY_MODE}"')
+                except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+                    watch_mode.announce('Catbed mode could not re-enter its Sway mode',
+                                        f'{error}. Run: swaymsg mode watch')
+        return True
 
     def finish(reason):
         session['reason'] = session['reason'] or reason
+        session['finishing'] = True
         loop.quit()
 
     def mapped():
@@ -114,7 +184,7 @@ def run(runtime):
     guard = watch_mode.Guard(read_palette(THEMES),
                              on_release=lambda: finish('released'),
                              on_keyboard=engage,
-                             on_keyboard_lost=lambda: finish('keyboard-lost'),
+                             on_keyboard_lost=waiting,
                              on_mapped=mapped,
                              translucent=power_source.allows(INDICATOR_EFFECT))
     GLib.timeout_add(int(watch_mode.MAP_DEADLINE_SECONDS * 1000), map_deadline)
@@ -135,32 +205,37 @@ def run(runtime):
         loop.run()
     finally:
         # The mode goes back first: if tearing the surfaces down were to hang,
-        # the desktop must already be answering its own keys again.
+        # the desktop must already be answering its own keys again. The holds
+        # go last, so the power key is the final thing handed back.
+        session['finishing'] = True
         if session['engaged']:
             try:
                 watch_mode.sway('mode "default"')
             except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
-                watch_mode.announce('Watch mode could not restore the Sway mode',
+                watch_mode.announce('Catbed mode could not restore the Sway mode',
                                     f'Run: swaymsg mode default ({error})')
         guard.close()
         watch_mode.state_path(runtime).unlink(missing_ok=True)
         if session['watchdog'] is not None:
             os.close(session['watchdog'])
+        if session['events'] is not None:
+            try:
+                session['events'].kill()
+                session['events'].wait(timeout=2)
+            except (OSError, subprocess.SubprocessError):
+                pass
+        catbed_guard.release(session['held'])
     if session['failure']:
-        watch_mode.announce('Watch mode did not start',
+        watch_mode.announce('Catbed mode did not start',
                             f'{session["failure"]}. The desktop is unchanged.')
         return 1
-    if session['reason'] == 'keyboard-lost':
-        watch_mode.announce('Watch mode ended early',
-                            'It stopped holding the keyboard, so the desktop is live again.',
-                            urgent=False)
-        return 0
     watch_mode.cue('tick')
     return 0
 
 
 def stop(runtime):
-    """Leave watch mode from outside, and put Sway back whatever happens."""
+    """Recovery, from a terminal: leave catbed mode and put Sway back whatever
+    happens. Nothing on the desktop calls this -- a cat cannot reach it."""
     record = watch_mode.engaged(runtime)
     if record:
         try:
@@ -187,8 +262,9 @@ def status(runtime):
     except (RuntimeError, OSError, ValueError, subprocess.SubprocessError):
         mode = None
     print(json.dumps({'engaged': bool(record), 'sway_mode': mode,
-                      'security': 'no — watch mode is a cat guard, not a lock',
-                      'release': watch_mode.HOW_TO_LEAVE, 'record': record}, indent=2))
+                      'security': 'no — catbed mode is a cat guard, not a lock',
+                      'release': watch_mode.HOW_TO_LEAVE, 'held': catbed_guard.describe(),
+                      'record': record}, indent=2))
     return 0
 
 
@@ -206,5 +282,5 @@ if __name__ == '__main__':
     try:
         sys.exit(main(sys.argv[1:]))
     except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
-        watch_mode.announce('Watch mode did not start', f'{error}. The desktop is unchanged.')
+        watch_mode.announce('Catbed mode did not start', f'{error}. The desktop is unchanged.')
         sys.exit(1)

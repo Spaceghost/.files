@@ -253,9 +253,14 @@ class BazziteProfileTest(unittest.TestCase):
         spec = importlib.util.spec_from_loader(loader.name, loader)
         lock = importlib.util.module_from_spec(spec)
         loader.exec_module(lock)
-        self.assertIn('systemd-inhibit', lock.POWER_KEY_INHIBITORS)
-        self.assertIn('--what=handle-power-key', lock.POWER_KEY_HOLDER)
-        self.assertIn('--mode=block', lock.POWER_KEY_HOLDER)
+        guard = lock.catbed_guard
+        self.assertIn('systemd-inhibit', guard.INHIBITORS)
+        arguments = guard.inhibit_arguments(guard.DEFAULT_KEYS, 'oldbook-lock', 'why')
+        self.assertTrue(arguments[0].startswith('--what=handle-power-key:'), arguments)
+        self.assertIn('--mode=block', arguments)
+        self.assertIn('hold_parked_input()', path.read_text())
+        self.assertTrue((self.home / '.local/lib/oldbook/catbed_guard.py').is_file(),
+                        'the replay carries the policy module the locker imports')
         self.assertIn('systemd-inhibit', load_helper().RUNTIME_COMMANDS)
 
     def test_deployed_overlay_theme_reads_the_checkout_palette(self):

@@ -1,0 +1,11 @@
+#!/bin/sh
+# The power button belongs to elogind on this machine: HandlePowerKey answers a
+# press, and oldbook-lock and oldbook-watch hold a handle-power-key inhibitor
+# while input is parked so that a cat on the keys cannot power it off. acpid is
+# not enabled here, but Alpine's acpid package ships this file as a bare
+# `poweroff`, which would answer the button itself and bypass both -- so if
+# acpid is ever started, this handler does nothing on purpose.
+#
+# Versioned in ~/.files as alpine/system/acpi/PWRF/00000080 and installed by
+# alpine/bin/install-catbed-guard.
+exit 0

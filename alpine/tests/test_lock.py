@@ -160,7 +160,8 @@ class LockRegressionTests(unittest.TestCase):
         """A short press of the MacBook's power key, which sits beside
         Backspace, powers the machine off: brushing it while typing a password
         must not end the session instead of unlocking it. Alpine supplies the
-        inhibitor as elogind's and the Bazzite replay as systemd's."""
+        inhibitor as elogind's and the Bazzite replay as systemd's. The keys
+        held are catbed_guard's policy: power, suspend and hibernate."""
         for inhibitor in ('elogind-inhibit', 'systemd-inhibit'):
             with self.subTest(inhibitor=inhibitor):
                 self.assert_the_locker_holds(inhibitor)
@@ -195,7 +196,11 @@ class LockRegressionTests(unittest.TestCase):
             result = subprocess.run([str(LOCK)], env=env, capture_output=True, text=True, timeout=5)
             self.assertEqual(result.returncode, 0, result.stderr)
             arguments = (root / 'inhibit-arguments').read_text().splitlines()
-            self.assertIn('--what=handle-power-key', arguments)
+            what = [value for value in arguments if value.startswith('--what=')]
+            self.assertEqual(len(what), 1, arguments)
+            self.assertEqual(set(what[0][len('--what='):].split(':')),
+                             {'handle-power-key', 'handle-suspend-key', 'handle-hibernate-key'},
+                             'the shipped policy holds the power, suspend and hibernate keys')
             self.assertIn('--mode=block', arguments)
             holder = int((root / 'holder-pid').read_text())
             locker = int((root / 'locker-pid').read_text())

@@ -57,6 +57,7 @@ import cat_presence        # noqa: E402
 import overlay_theme       # noqa: E402
 import power_source        # noqa: E402
 import thermal             # noqa: E402
+import watch_mode          # noqa: E402
 
 TICK = 2.0
 # The ladder effect this asks about. It is not registered in power_source yet,
@@ -80,13 +81,6 @@ SAFETY_STOP_LIMIT = 2
 # down, and twenty seconds is a cheap price for the user to see that coming and
 # unlock rather than find out afterwards. Presence lapsing resets it to full.
 ARMING_SECONDS = 20.0
-# The directory this daemon and its siblings are deployed into, so the guard is
-# the same oldbook-watch the keyboard shortcut runs rather than whatever a PATH
-# happens to hold.
-HERE = Path(__file__).resolve().parent
-# Engaging or releasing the guard is a small local command; anything slower
-# than this is a guard that is not going to answer.
-WATCH_TIMEOUT = 10
 # While the countdown is running the loop wakes at least this often, so the
 # number on screen changes once a second instead of once every other second.
 COUNTDOWN_TICK = 1.0
@@ -165,61 +159,22 @@ def lock_record_path():
                                str(Path(runtime) / 'oldbook-screen-lock/ready.json')))
 
 
-class InputGuard:
-    """Park the keyboard on a confident cat, and hand it back when she goes.
+def guard_engaged():
+    """Is catbed mode holding the desktop? Read from the guard's own record.
 
-    Bed mode used to require that the session was already locked, on the
-    reasoning that an unlocked session means a person and a person is never
-    warmed. The reasoning holds; the requirement was the wrong way round. What
-    actually matters is that nothing is typing into anything, and the cat can
-    bring that about herself: a decided judgement engages the same guard
-    Super+Shift+Escape does, which takes the keyboard and pointer while leaving
-    the desktop visible and running.
-
-    Two rules keep this honest. A guard this daemon did not engage is never
-    released -- if the user parked their own inputs, they leave when they say
-    so. And a guard that refuses to start is a refusal to warm: the machine is
-    only ever made hot while input is parked, so failing to park is failing to
-    qualify.
-
-    Once engaged it is held for the sitting rather than dropped the moment she
-    steps off the keys, so she can come back to a machine that is still hers
-    and be warmed again. The user ends it with the same gesture that would have
-    started it by hand, and the daemon ends it by stopping.
+    The guard is the user's: Super+Shift+Escape engages it and a held
+    Super+Shift+Escape ends it, and nothing here ever does either. This daemon
+    only reads whether it is up, exactly as it reads whether the screen is
+    locked, because both mean the same thing for a cat -- nothing she presses
+    reaches anything -- and that is the whole of what bed mode needs to know.
+    It used to engage the guard itself on a decided judgement and hand it back
+    on stopping; the user asked for catbed mode to be applied by hand and
+    ended by hand, and for nothing to remove it when she gets up.
     """
-
-    def __init__(self, command=None):
-        self.command = Path(command) if command else HERE / 'oldbook-watch'
-        self.engaged = False
-        self.refusal = None
-
-    def _run(self, action):
-        try:
-            result = subprocess.run([sys.executable, os.fspath(self.command), action],
-                                    capture_output=True, text=True, timeout=WATCH_TIMEOUT)
-        except (OSError, subprocess.SubprocessError) as error:
-            return False, str(error)
-        if result.returncode:
-            return False, (result.stderr or result.stdout).strip() or 'the guard refused'
-        return True, None
-
-    def engage(self):
-        if self.engaged:
-            return True
-        ok, error = self._run('start')
-        self.engaged = bool(ok)
-        self.refusal = None if ok else f'the input guard would not start: {error}'
-        return self.engaged
-
-    def release(self, reason='the watcher is stopping'):
-        if not self.engaged:
-            return
-        ok, error = self._run('stop')
-        # A guard that will not let go is worse than one that never held: say
-        # so rather than believing the desktop is live when it is not.
-        self.refusal = None if ok else f'the input guard would not stop: {error}'
-        self.engaged = False
-        del reason
+    try:
+        return watch_mode.engaged() is not None
+    except RuntimeError:
+        return False
 
 
 def session_locked():
@@ -227,7 +182,7 @@ def session_locked():
 
     The same record `oldbook-ambient-display` reads, and read the same way: a
     live pid belonging to us. It is one of the two ways input can be parked;
-    the other is the guard above, which a cat engages for herself.
+    the other is catbed mode, which the user engages by hand.
     """
     try:
         record = json.loads(lock_record_path().read_text())
@@ -305,7 +260,6 @@ class Service:
         self.cooldown_reason = None
         self.latched = False
         self.arming_since = None
-        self.guard = InputGuard(os.environ.get('OLDBOOK_CAT_WATCH_COMMAND'))
         self.panel_scale = int(os.environ.get('OLDBOOK_CAT_PANEL_SCALE', '2') or 2)
         self.panel_complained = False
         self.last_record = {}
@@ -370,22 +324,14 @@ class Service:
         chosen = cat_interactions.selected(document)
         judgement = self.presence.judge(now)
         locked = session_locked()
-        # A cat is warmed only on a machine whose input is parked, which is the
-        # old rule; what has changed is that she no longer has to wait for the
-        # user to have locked it first. A decided judgement -- not the linger,
-        # a fresh one with its corroboration -- engages the guard itself.
-        #
-        # The guard is not released when she gets up. A cat leaves the keyboard
-        # and comes back to it, and handing the desktop over in between would
-        # mean her return lands on a live session and warms nothing; worse, the
-        # keyboard would flap between parked and live all evening. So the guard
-        # is hers for the sitting, and the user takes it back the way they
-        # always could, by holding the gesture that started it. Only the heat
-        # follows her: bed mode stops when she goes and warms again when she
-        # returns, because that is the part that costs something.
-        if enabled and not locked and judgement['deciding']:
-            self.guard.engage()
-        parked = bool(locked or self.guard.engaged)
+        guarded = guard_engaged()
+        # A cat is warmed only on a machine whose input is parked: the screen
+        # locked, or catbed mode up. Both are the user's doing. Nothing here
+        # takes the keyboard or gives it back -- catbed mode is applied by
+        # hand and ended by hand, and it outlasts her getting up. Only the
+        # heat follows her: bed mode stops when she goes and warms again when
+        # she returns, because that is the part that costs something.
+        parked = bool(locked or guarded)
         present = bool(judgement['present'] and parked and enabled)
         if present:
             self.last_seen_wall = time.time()
@@ -406,8 +352,7 @@ class Service:
         bed = self.bed_tick(document, chosen, present, enabled, lid_shut, values)
         record = {
             'running': True, 'enabled': enabled, 'locked': locked,
-            'input_parked': parked, 'guard_engaged': self.guard.engaged,
-            'guard_refusal': self.guard.refusal,
+            'input_parked': parked, 'guard_engaged': guarded,
             'present': present, 'detected': judgement['deciding'],
             'vetoed': judgement['vetoed'], 'confidence': judgement['confidence'],
             'keys_down': judgement['keys_down'], 'patch': judgement['patch'],
@@ -594,10 +539,6 @@ class Service:
                 # then say so. Nothing below can be skipped by an exception.
                 if self.bed is not None:
                     self.bed.stop('the watcher is stopping')
-                # The keyboard comes back before anything else is tidied: a
-                # daemon that dies holding the user's input is the one failure
-                # this feature must never have.
-                self.guard.release('the watcher is stopping')
                 self.lid(False)
                 self.close_devices()
                 # The parting record keeps everything a subscriber was reading
