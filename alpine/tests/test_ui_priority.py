@@ -188,7 +188,7 @@ class PriorityTests(unittest.TestCase):
         self.assertEqual(self.helper.COMPOSITOR_REALTIME, 1)
 
     def member(self, pid, group, leader, comm, executable='/usr/bin/waybar', argv=None,
-               uid=None, environ=b'SWAYSOCK=/run/user/1000/live.sock\0'):
+               uid=None, environ=b'SWAYSOCK=/run/user/1000/live.sock\0', state='S'):
         """A process in the fake /proc, in a session group with a leader."""
         path = self.proc / str(pid)
         path.mkdir(parents=True, exist_ok=True)
@@ -199,7 +199,7 @@ class PriorityTests(unittest.TestCase):
                                       (argv or [executable])) + b'\0')
         owner = self.uid if uid is None else uid
         (path / 'status').write_text(f'Name:\t{comm}\nUid:\t{owner}\t{owner}\t{owner}\t{owner}\nTgid:\t{pid}\n')
-        (path / 'stat').write_text(f'{pid} ({comm}) S 1 {pid} {leader} ' + '0 ' * 16 + '321 0\n')
+        (path / 'stat').write_text(f'{pid} ({comm}) {state} 1 {pid} {leader} ' + '0 ' * 16 + '321 0\n')
         (path / 'comm').write_text(comm + '\n')
         (path / 'autogroup').write_text(f'/autogroup-{group} nice 0\n')
         (path / 'environ').write_bytes(environ)
@@ -216,6 +216,8 @@ class PriorityTests(unittest.TestCase):
         self.member(311, 24, 305, 'swaync', executable='/usr/bin/swaync')
         self.member(312, 24, 305, 'sh', executable='/bin/busybox',
                     argv=['sh', '-c', 'oldbook-waybar-ghost-class'])
+        # A zombie child of a panel module: no environment, no vote.
+        self.member(313, 24, 305, 'waybar', environ=b'', state='Z')
         # A daemon that is its own session leader.
         self.member(320, 27, 320, 'superhold', executable='/usr/bin/superhold')
         # A terminal group: a shell, an agent and a panel started by hand in it.

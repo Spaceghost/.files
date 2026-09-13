@@ -178,8 +178,13 @@ def desktop_groups(uid, home, session, compositor_pid, proc=Path('/proc')):
         try:
             if not owned(entry, uid, pid):
                 continue
+            fields = stat_fields(entry)
+            # A zombie or a dying process has no environment left to place
+            # it in a session; it is not a member of anything any more.
+            if fields[0] in ('Z', 'X'):
+                continue
             group = group_of(entry)
-            leader = session_leader(entry) == pid
+            leader = int(fields[3]) == pid
             comm = comm_of(entry)
         except (OSError, ValueError, IndexError, KeyError):
             continue
