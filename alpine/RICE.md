@@ -578,7 +578,8 @@ second, refracting a photograph of the screen rather than drawing over it, and
 nothing is drawn where the water is still. The file's `ripple` object shapes
 it -- `source` (`bar` or `point`), `duration`, `reach`, `spacing`, `strength`,
 `shade`, limits in `ripple.py` -- and it sits on the power ladder as `shaders`,
-so it never runs on battery. Evidence: [decoration-context](verification/decoration-context/bottom-strip.png),
+so it never runs on battery. Evidence: [ripple-water](verification/ripple-water/README.md),
+[decoration-context](verification/decoration-context/bottom-strip.png),
 [decoration-framerate](verification/decoration-framerate/README.md),
 [ghost-observatory](verification/ghost-observatory/production-floating.png).
 
