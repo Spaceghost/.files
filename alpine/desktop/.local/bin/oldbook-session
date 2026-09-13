@@ -160,6 +160,14 @@ fi
 if command -v oldbook-waybar-dim >/dev/null 2>&1; then
     oldbook-waybar-dim 9>&- >>"$art_state/waybar-dim.log" 2>&1 &
 fi
+# Applies alpine/cue/ config automatically whenever a Fossil commit lands on
+# ~/.local/share/fossil/files.fossil (this laptop's or another session's):
+# fossil update in ~/.files, then render + reload live. Event-driven via
+# inotify on the repository file itself, not a poll loop; its own flock
+# keeps a crashed/restarted instance from double-running.
+if command -v oldbook-cue-watch >/dev/null 2>&1; then
+    oldbook-cue-watch 9>&- >>"$art_state/cue-watch.log" 2>&1 &
+fi
 # Volume, brightness and keyboard-light feedback plus the screenshot flash; the
 # key helpers stay quiet when it is absent and never start it themselves.
 if command -v oldbook-osd >/dev/null 2>&1; then

@@ -1,0 +1,170 @@
+#!/usr/bin/env python3
+"""Auto-apply CUE-generated config whenever a Fossil commit lands.
+
+~/.local/share/fossil/files.fossil is shared: several Claude sessions commit
+to it concurrently right now, from this laptop and possibly others. This
+watches that one file with inotify (no polling loop -- the repository's
+rollback-journal mode means a `fossil commit` writes and closes the main db
+file directly, so IN_CLOSE_WRITE fires once per commit) and on each write:
+
+  1. `fossil update` in ~/.files -- exactly the manual step used all session
+     to pick up someone else's commit. Never --force, never anything
+     destructive: a real merge conflict is logged loudly and stops the
+     pipeline right there, leaving the checkout exactly as fossil left it,
+     rather than rendering or applying from a half-merged tree.
+  2. alpine/bin/cue-sync -- the same validate/render/apply-live command used
+     for local dev, so the automatic path can never drift from the manual
+     one. No confirmation step: Jack asked for fully automatic application.
+
+ctypes wraps the raw inotify syscalls directly rather than pulling in
+inotify-tools or a PyPI inotify binding, matching the stdlib-only style the
+rest of this codebase's Python daemons already use (see e.g.
+oldbook-waybar-dim) for a watch loop this small.
+"""
+import ctypes
+import fcntl
+import os
+from pathlib import Path
+import re
+import select
+import struct
+import subprocess
+import sys
+
+REPO_FILE = Path.home() / '.local/share/fossil/files.fossil'
+CHECKOUT = Path.home() / '.files'
+CUE_SYNC = CHECKOUT / 'alpine/bin/cue-sync'
+
+IN_CLOSE_WRITE = 0x00000008
+IN_MODIFY = 0x00000002
+_EVENT_HEADER = struct.Struct('iIII')
+
+# fossil's own update output says things like "***** 1 merge conflicts in
+# <file>" and "WARNING: 1 merge conflicts" -- it never uses the word
+# "conflict" in ordinary, successful update output, so a case-insensitive
+# substring search is a reliable and simple way to catch every phrasing
+# without having to pin fossil's exact wording (which has changed across
+# versions before).
+_CONFLICT_RE = re.compile(r'conflict', re.IGNORECASE)
+
+
+class Inotify:
+    """Thin ctypes wrapper: just enough of inotify(7) to watch one file."""
+
+    def __init__(self):
+        self._libc = ctypes.CDLL(None, use_errno=True)
+        self.fd = self._libc.inotify_init1(0)
+        if self.fd < 0:
+            raise OSError(ctypes.get_errno(), 'inotify_init1 failed')
+
+    def add_watch(self, path, mask):
+        wd = self._libc.inotify_add_watch(self.fd, str(path).encode(), mask)
+        if wd < 0:
+            raise OSError(ctypes.get_errno(), f'inotify_add_watch failed for {path}')
+        return wd
+
+    def read_events(self):
+        """Block until at least one event is available, then yield every
+        event mask currently queued.
+        """
+        buf = os.read(self.fd, 4096)
+        offset = 0
+        while offset < len(buf):
+            wd, mask, cookie, length = _EVENT_HEADER.unpack_from(buf, offset)
+            offset += _EVENT_HEADER.size + length
+            yield mask
+
+    def close(self):
+        os.close(self.fd)
+
+
+def acquire_lock():
+    """Single instance per session: a crashed/restarted watcher must not pile
+    up duplicate triggers. Same non-blocking flock pattern as
+    oldbook-waybar-dim's per-socket lock.
+    """
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', f'/run/user/{os.getuid()}'))
+    lock_dir = runtime / 'oldbook'
+    lock_dir.mkdir(mode=0o700, exist_ok=True)
+    lock_path = lock_dir / 'cue-watch.lock'
+    lock_file = lock_path.open('a')
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        lock_file.close()
+        return None
+    return lock_file
+
+
+def fossil_update(checkout):
+    """Run `fossil update` in `checkout`. Returns (ok, output). Never passes
+    --force or any flag that could discard someone else's uncommitted work;
+    a real conflict is reported, not silently resolved either way.
+    """
+    result = subprocess.run(['fossil', 'update'], cwd=str(checkout),
+                             capture_output=True, text=True, check=False)
+    output = (result.stdout or '') + (result.stderr or '')
+    if result.returncode != 0:
+        return False, output
+    if _CONFLICT_RE.search(output):
+        return False, output
+    return True, output
+
+
+def run_cue_sync():
+    result = subprocess.run([str(CUE_SYNC)], capture_output=True, text=True, check=False)
+    return result.returncode == 0, (result.stdout or '') + (result.stderr or '')
+
+
+def handle_commit():
+    print('oldbook-cue-watch: files.fossil changed; running fossil update', flush=True)
+    ok, output = fossil_update(CHECKOUT)
+    if not ok:
+        print(f'oldbook-cue-watch: fossil update failed or hit a merge conflict '
+              f'in {CHECKOUT}; leaving the checkout as fossil left it and skipping '
+              f'render/apply:\n{output.strip()}', file=sys.stderr, flush=True)
+        return
+    print(output.strip(), flush=True)
+    ok, output = run_cue_sync()
+    if not ok:
+        print(f'oldbook-cue-watch: cue-sync failed:\n{output.strip()}',
+              file=sys.stderr, flush=True)
+        return
+    print(output.strip(), flush=True)
+
+
+def watch_forever(inotify=None, debounce_seconds=0.2):
+    inotify = inotify or Inotify()
+    inotify.add_watch(REPO_FILE, IN_CLOSE_WRITE | IN_MODIFY)
+    print(f'oldbook-cue-watch: watching {REPO_FILE}', flush=True)
+    while True:
+        for _ in inotify.read_events():
+            pass  # the blocking read itself is the wakeup; the mask doesn't matter
+        # A single `fossil commit` typically produces more than one write to
+        # the main db file plus a final close; drain whatever else is
+        # already queued so one commit triggers exactly one run instead of
+        # one per raw event.
+        while select.select([inotify.fd], [], [], debounce_seconds)[0]:
+            for _ in inotify.read_events():
+                pass
+        handle_commit()
+
+
+def main():
+    if not REPO_FILE.is_file():
+        sys.exit(f'oldbook-cue-watch: repository file not found: {REPO_FILE}')
+    if not CUE_SYNC.is_file():
+        sys.exit(f'oldbook-cue-watch: {CUE_SYNC} not found; is {CHECKOUT} a checkout of this repo?')
+    lock = acquire_lock()
+    if lock is None:
+        print('oldbook-cue-watch: another instance already holds the lock; exiting', flush=True)
+        return 0
+    try:
+        watch_forever()
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())
