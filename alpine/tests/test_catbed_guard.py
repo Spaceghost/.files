@@ -123,6 +123,25 @@ class HelperTests(unittest.TestCase):
             if process.poll() is None:
                 process.kill()
             process.wait(timeout=5)
+        # Each holder forked a restorer into its own session, and that shadow
+        # outlives the holder it releases for: it is still writing the value
+        # back and tidying the ledger after the holder is reaped. Removing the
+        # temporary directory under it is the race this waits out.
+        wait_for(lambda: not self.restorers_alive())
+
+    def restorers_alive(self):
+        """Every process still running the helper against this test's state."""
+        marker = str(self.state).encode()
+        for entry in Path('/proc').iterdir():
+            if not entry.name.isdigit():
+                continue
+            try:
+                arguments = (entry / 'cmdline').read_bytes()
+            except OSError:
+                continue
+            if HELPER.name.encode() in arguments and marker in arguments:
+                return True
+        return False
 
     def command(self, *arguments):
         return [sys.executable, '-I', str(HELPER), *arguments,
@@ -151,7 +170,11 @@ class HelperTests(unittest.TestCase):
         return process, write_fd, line
 
     def value(self):
-        return int(self.sysrq.read_text())
+        """The synthetic sysrq file's value, or None while the helper is
+        mid-write: write_text truncates before it writes, so a reader can
+        land on an empty file between the two, and that is not a value."""
+        text = self.sysrq.read_text().strip()
+        return int(text) if text else None
 
     def test_the_mask_is_held_while_the_pipe_is_open_and_put_back_when_it_closes(self):
         process, write_fd, line = self.start_hold(382)
