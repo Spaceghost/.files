@@ -1,5 +1,11 @@
-"""One-time placement of designated instances and independent artwork choices."""
-DEFAULTS = {'Codex': 1, 'Pithos': 2, 'claude': 3, 'btop': 4, 'Firefox': 5, 'Fossil': 10}
+"""One-time placement of designated instances and independent artwork choices.
+
+Only Fossil keeps a default: it mirrors the static
+`assign [app_id="^oldbook-strata$"] workspace number "10: Strata"` rule
+already in sway config, so this dict and that rule agree. Every other name
+that used to appear here silently relocated a window on first sight.
+"""
+DEFAULTS = {'Fossil': 10}
 
 
 class Placement:

@@ -9,6 +9,12 @@ class WorkspaceDefaultsTests(unittest.TestCase):
     def setUp(self):
         self.assertTrue(MODEL.exists(), 'workspace defaults model is missing')
         self.model = runpy.run_path(str(MODEL))
+        # Placement.plan() reads DEFAULTS as a module global, so replacing it
+        # here reaches the real code under test. Only 'Fossil' ships in
+        # production now; these extra names exercise the mechanism generically
+        # (first-claim, restart, adopt, stay) without depending on which real
+        # apps are pinned.
+        self.model['DEFAULTS'].update({'Codex': 1, 'Pithos': 2, 'claude': 3, 'Firefox': 5})
 
     def test_first_instance_moves_once_and_extras_stay_put(self):
         placement = self.model['Placement']()
@@ -46,6 +52,12 @@ class WorkspaceDefaultsTests(unittest.TestCase):
         self.assertEqual(choose(['a', 'b', 'c', 'd'], 'a', 1, {'b', 'c'}), 'd')
         self.assertEqual(choose(['a', 'b', 'c', 'd'], 'a', -1, {'d'}), 'c')
         self.assertEqual(choose(['a', 'b'], 'a', 1, {'b'}), 'a')
+
+    def test_only_fossil_is_pinned_by_default(self):
+        # Loaded straight from the file, before this test's setUp adds any
+        # extra names, so this checks the actual production mapping.
+        production = runpy.run_path(str(MODEL))
+        self.assertEqual(production['DEFAULTS'], {'Fossil': 10})
 
 
 if __name__ == '__main__':
