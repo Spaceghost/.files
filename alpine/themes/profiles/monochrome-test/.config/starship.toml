@@ -1,0 +1,54 @@
+add_newline = false
+# Powerline chain, built the same way as every other profile's, but this
+# theme's own palette (monochrome-test.json) only declares two colors:
+# #000000 and #ffffff. So the chain alternates polarity chip to chip instead
+# of cycling hue -- each chip inverts the theme's own background/foreground
+# roles rather than inventing a shade this theme does not have. That keeps
+# every chip boundary visible (the whole point of this theme is making
+# un-themed surfaces obvious) while staying strictly black-and-white. The
+# `[username]` root case inverts the opposite way from the normal user case,
+# since there is no red here to mark it with instead.
+format = "[](fg:#ffffff)$username[](fg:#ffffff bg:#000000)$hostname[](fg:#000000 bg:#ffffff)$directory[](fg:#ffffff bg:#000000)${custom.fossil}[](fg:#000000 bg:#ffffff)$git_branch$git_status[](fg:#ffffff bg:#000000)$cmd_duration[](fg:#000000)$line_break$character"
+
+[username]
+show_always = true
+style_user = "bg:#ffffff fg:#000000 bold"
+style_root = "bg:#000000 fg:#ffffff bold"
+format = "[ $user ]($style)"
+
+[hostname]
+ssh_only = false
+style = "bg:#000000 fg:#ffffff"
+format = "[ @$hostname ]($style)"
+
+[directory]
+style = "bg:#ffffff fg:#000000 bold"
+truncation_length = 4
+truncate_to_repo = false
+read_only = " 󰌾"
+format = "[ $path$read_only ]($style)"
+
+[git_branch]
+symbol = "󰘬 "
+style = "bg:#ffffff fg:#000000"
+format = "[ $symbol$branch ]($style)"
+
+[git_status]
+style = "bg:#ffffff fg:#000000"
+format = "([$all_status$ahead_behind ]($style))"
+
+[cmd_duration]
+min_time = 500
+format = "[ 󱎫 $duration ]($style)"
+style = "bg:#000000 fg:#ffffff"
+
+[character]
+success_symbol = "[❯](bold #ffffff)"
+error_symbol = "[❯](bold #ffffff)"
+
+[custom.fossil]
+command = "fossil branch current"
+when = "fossil info >/dev/null 2>&1"
+format = "[ 󰜘 $output ]($style)"
+style = "bg:#000000 fg:#ffffff bold"
+shell = ["sh"]

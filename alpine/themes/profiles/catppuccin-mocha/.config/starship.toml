@@ -1,34 +1,47 @@
 add_newline = false
-format = "$username$hostname$directory${custom.fossil}$git_branch$git_status$cmd_duration$line_break$character"
+# Powerline chain: each module below owns a background chip (bg:X fg:#11111b,
+# Catppuccin's own crust, already used as the status bar's ground in
+# .tmux.conf and waybar/style.css). The rounded separator (U+E0B4) between
+# chips is colored fg=previous chip's bg, bg=next chip's bg, so the chips read
+# as one continuous ribbon with no gaps -- matching the rounded, pill-shaped
+# module chrome already used in this theme's waybar. git_branch and
+# git_status share one chip (no separator between them) since git_status only
+# ever appends to git_branch's own output. The trailing separator after
+# cmd_duration has no bg, fading the ribbon back to the terminal before the
+# prompt's second line.
+format = "[](fg:#f9e2af)$username[](fg:#f9e2af bg:#94e2d5)$hostname[](fg:#94e2d5 bg:#89b4fa)$directory[](fg:#89b4fa bg:#cba6f7)${custom.fossil}[](fg:#cba6f7 bg:#fab387)$git_branch$git_status[](fg:#fab387 bg:#a6e3a1)$cmd_duration[](fg:#a6e3a1)$line_break$character"
 
 [username]
 show_always = true
-style_user = "bold #f9e2af"
-style_root = "bold #f38ba8"
-format = "[$user]($style)"
+style_user = "bg:#f9e2af fg:#11111b bold"
+style_root = "bg:#f38ba8 fg:#11111b bold"
+format = "[ $user ]($style)"
 
 [hostname]
 ssh_only = false
-style = "#94e2d5"
-format = "[@$hostname]($style) "
+style = "bg:#94e2d5 fg:#11111b"
+format = "[ @$hostname ]($style)"
 
 [directory]
-style = "bold #cdd6f4"
+style = "bg:#89b4fa fg:#11111b bold"
 truncation_length = 4
 truncate_to_repo = false
 read_only = " 󰌾"
+format = "[ $path$read_only ]($style)"
 
 [git_branch]
 symbol = "󰘬 "
-style = "#cba6f7"
+style = "bg:#fab387 fg:#11111b"
+format = "[ $symbol$branch ]($style)"
 
 [git_status]
-style = "#fab387"
+style = "bg:#fab387 fg:#11111b"
+format = "([$all_status$ahead_behind ]($style))"
 
 [cmd_duration]
 min_time = 500
-format = " [󱎫 $duration]($style)"
-style = "#89b4fa"
+format = "[ 󱎫 $duration ]($style)"
+style = "bg:#a6e3a1 fg:#11111b"
 
 [character]
 success_symbol = "[❯](bold #a6e3a1)"
@@ -37,6 +50,6 @@ error_symbol = "[❯](bold #f38ba8)"
 [custom.fossil]
 command = "fossil branch current"
 when = "fossil info >/dev/null 2>&1"
-format = " [󰜘 $output]($style)"
-style = "bold #f9e2af"
+format = "[ 󰜘 $output ]($style)"
+style = "bg:#cba6f7 fg:#11111b bold"
 shell = ["sh"]

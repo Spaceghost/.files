@@ -315,6 +315,34 @@ window#waybar.top .modules-center { margin: 0 8px; padding: 0; }
 
 /* The accent follows the painting on screen. Written by oldbook-palette;
    imported last so its rules win over the declared accent above. */
+
+/* ── Powerline status chain ───────────────────────────────────────────────
+   group/status's members each get a persistent chip background instead of
+   only a hover highlight, and a rounded separator (U+E0B4) is inserted
+   between them as its own tiny custom/ module -- waybar has no built-in
+   inline separator, so a glyph-only module bridging each pair of neighbours
+   is how this extends the group/status grouping that was already here rather
+   than fighting it. Chip colors are this profile's own accents blended down
+   toward the island ground, the same derivation this profile's dim status
+   backgrounds already use (see #idle_inhibitor.activated, #battery.critical).
+   clock keeps its own already-authored background untouched; the chain just
+   treats that color as the chip on either side of it. */
+#group-telemetry { background: #493e5d; border-radius: 11px; }
+#group-transmission { background: #35425e; border-radius: 11px; }
+#group-sound { background: #494c5c; border-radius: 11px; }
+#group-power { background: #575047; border-radius: 11px; }
+#custom-notifications { background: #385053; border-radius: 11px; }
+#custom-sep0, #custom-sep1, #custom-sep2, #custom-sep3, #custom-sep4, #custom-sep5, #custom-sep6 {
+    padding: 0; margin: 0; font-size: 15px;
+}
+#custom-sep0 { color: #11111b; background: #493e5d; }
+#custom-sep1 { color: #493e5d; background: #35425e; }
+#custom-sep2 { color: #35425e; background: #494c5c; }
+#custom-sep3 { color: #494c5c; background: #575047; }
+#custom-sep4 { color: #575047; background: #385053; }
+#custom-sep5 { color: #385053; background: #45475a; }
+#custom-sep6 { color: #45475a; background: #11111b; }
+
 @import url("waybar-accent.css");
 
 /* catppuccin-mocha: typography and panel shape */
