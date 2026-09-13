@@ -705,9 +705,16 @@ Off: `"ripple": {"enabled": false}`; it also stays quiet with desktop
 animations off, and it sheds at battery-low, since it sits on the power ladder
 as `landing-ripple` beside the other small motions. The surface is exempted from SwayFX's corner radius, shadow and
 blur (`layer_effects "oldbook-ripple"` in `swayfx/effects.conf`). The band is
-photographed on the strip's final approach, a few pixels before it settles,
-so the wave begins on the landing frame itself; a picture that is not in hand
-within two frames of the landing is dropped rather than shown late. Evidence:
+photographed on the strip's final approach, a few pixels from home, and the
+wave begins on the frame the strip first reaches the band -- the contact, not
+the end of the rebound that follows, which the spring takes a fifth of a
+second or more to settle out of; a wave that waited for the settle began long
+after the bar had visibly landed. The wave's clock starts at that contact
+whenever its first frame is drawn, so a picture a frame or two late shows the
+rings where they already are; one more than a tenth of a second late is
+dropped rather than shown. The Scripture bar and the free-region reading skip
+the wave's surface by name, so the bible bar no longer leaps out of its way.
+Evidence:
 [ripple-water](verification/ripple-water/README.md) (offline render, numpy,
 not a compositor); the live strike since the rewrite awaits a look.
 

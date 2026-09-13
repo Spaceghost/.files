@@ -603,9 +603,15 @@ class Ripple:
         except (ImportError, AttributeError, TypeError, ValueError):
             pass
 
-    def start(self):
+    def start(self, started=None):
+        """Present the wave. ``started`` is the instant of the impact when the
+        caller knows it: the wave's age is measured from there, so a first
+        frame drawn a few frames after the strike shows the rings where they
+        already are instead of starting them late. A moment in the future is
+        not an impact yet and is taken as now."""
         self.window.present()
-        self.started = time.monotonic()
+        now = time.monotonic()
+        self.started = now if started is None else min(float(started), now)
         self.canvas.add_tick_callback(self.frame)
 
     def frame(self, widget, _clock):

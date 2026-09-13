@@ -291,8 +291,13 @@ the wave is not. The `ripple` object in decoration.json switches it off
 `point`), their duration, reach, spacing, strength and shading; the effect
 sits on the power ladder as `landing-ripple`, running unplugged and shedding
 at battery-low. The band is photographed on the strip's final approach and
-the wave begins on the landing frame, or not at all: a picture that arrives
-more than two frames after the landing is dropped.
+the wave begins on the frame the strip first reaches the band -- the contact,
+not the end of the rebound and settle that follow it, which run a fifth of a
+second or more. The wave is dated from that contact whenever its first frame
+is drawn, so a picture a frame or two late shows the rings where they already
+are; a picture more than a tenth of a second late is dropped rather than shown.
+The wave's surface is ignored by the Scripture bar and by the free-region
+reading, so nothing on the desktop moves for it.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),

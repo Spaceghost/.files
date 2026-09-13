@@ -133,3 +133,64 @@ class DecorationMotionTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ContactTests(unittest.TestCase):
+    """The strike fires when the strip first reaches home, not when it settles."""
+    FLIGHT = dict(response=0.18, tolerance=0.5, damping=0.82)
+
+    def flight(self, distance, frequency=60):
+        """One docked landing: y falls `distance` px onto the band, width grows."""
+        departure = {'x': 200.0, 'y': 848.0 - distance, 'width': 600.0, 'height': 34.0}
+        target = {'x': 18.0, 'y': 848.0, 'width': 1404.0, 'height': 34.0}
+        signs = motion.approach_signs(departure, target)
+        rect, velocity = dict(departure), {}
+        contact = settled = None
+        for frame in range(1, 600):
+            rect, velocity, done = motion.advance_rect(rect, velocity, target, 1 / frequency,
+                                                       **self.FLIGHT)
+            if contact is None and motion.contact(rect, target, signs):
+                contact = frame
+            if done:
+                settled = frame
+                break
+        return signs, contact, settled
+
+    def test_signs_say_which_way_each_coordinate_sets_out(self):
+        signs = motion.approach_signs({'x': 10, 'y': 500, 'width': 600, 'height': 34.4},
+                                      {'x': 18, 'y': 848, 'width': 1404, 'height': 34})
+        self.assertEqual(signs, {'x': -1, 'y': -1, 'width': -1, 'height': 0})
+
+    def test_contact_is_the_first_frame_home_and_the_settle_comes_much_later(self):
+        for distance in (60, 150, 300, 500):
+            with self.subTest(distance=distance):
+                signs, contact, settled = self.flight(distance)
+                self.assertIsNotNone(contact)
+                self.assertIsNotNone(settled)
+                # Arrival is a fifth of a second in; the rebound and settle
+                # add at least another 150 ms, which the wave no longer waits for.
+                self.assertLessEqual(contact, 13)
+                self.assertGreaterEqual(settled - contact, 9)
+
+    def test_a_strip_still_on_its_way_has_not_made_contact(self):
+        target = {'x': 18, 'y': 848, 'width': 1404, 'height': 34}
+        signs = motion.approach_signs({'x': 200, 'y': 500, 'width': 600, 'height': 34}, target)
+        self.assertFalse(motion.contact({'x': 19, 'y': 840, 'width': 1404, 'height': 34},
+                                        target, signs))
+        # Within the tolerance, or past the target, counts as arrived.
+        self.assertTrue(motion.contact({'x': 18.6, 'y': 847.2, 'width': 1403.5, 'height': 34},
+                                       target, signs))
+        self.assertTrue(motion.contact({'x': 17, 'y': 851, 'width': 1406, 'height': 34},
+                                       target, signs))
+
+    def test_a_coordinate_with_nowhere_to_go_never_blocks_contact(self):
+        target = {'x': 18, 'y': 848, 'width': 1404, 'height': 34}
+        signs = motion.approach_signs(dict(target, y=500), target)
+        self.assertEqual([key for key, sign in signs.items() if sign], ['y'])
+        self.assertTrue(motion.contact(dict(target, y=848.4), target, signs))
+        self.assertFalse(motion.contact(dict(target, y=700), target, signs))
+
+    def test_contact_agrees_across_frame_rates(self):
+        _, at_60, _ = self.flight(300, 60)
+        _, at_120, _ = self.flight(300, 120)
+        self.assertAlmostEqual(at_60 / 60, at_120 / 120, delta=1 / 60)

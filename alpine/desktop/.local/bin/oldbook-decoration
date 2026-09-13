@@ -30,7 +30,7 @@ import ripple
 import window_context
 from overlay_theme import THEMES, read_palette
 from decoration_placement import band_corrections, output_placements
-from decoration_motion import advance, advance_rect
+from decoration_motion import advance, advance_rect, approach_signs, contact
 from decoration_watch import TreeWatch
 
 # A float has to hold still this long before the band puts it back, so a drag
@@ -53,11 +53,27 @@ FLIGHT_DAMPING = 0.82
 # rebound chased to that precision spends a third of a second inaudibly small.
 FLIGHT_TOLERANCE = 0.5
 # How near home the strip is, in logical pixels, when the band is photographed
-# for its wave, and how long after the landing the wave may still begin. The
-# picture takes tens of milliseconds and the wave has to start on the landing
-# frame; Jack: "If the ripple won't be immediate, don't show it at all."
+# for its wave. The picture takes tens of milliseconds, so it is taken on the
+# final approach; the wave leaves the outline further out than this
+# (ripple.SHORE), so the strip in the picture is never in the water.
 STRIKE_APPROACH = 6
-STRIKE_BUDGET = 0.034
+# The impact is the first frame the strip reaches home, not the frame the
+# rebound after it has died away. The flight spring is underdamped on purpose,
+# and its settle -- inside half a pixel and nearly still -- comes 200 to 270 ms
+# after the strip is first seen to arrive (measured at 60 Hz for flights of 60
+# to 500 px); a wave that began at the settle started long after the bar had
+# visibly landed. Jack: "the ripple happens too long after the bar moves." The
+# strip has made contact once every coordinate is within this many logical
+# pixels of its target or has already passed it.
+STRIKE_CONTACT = 1.0
+# How late the wave's first frame may be. The wave's clock starts at the
+# contact itself whenever its first frame is drawn, so a picture that lands a
+# frame or two after the strike shows the rings where they already are rather
+# than starting them late; a wave a tenth of a second old is a ring under
+# thirty pixels out, still reading as the strip's own. Later than that it
+# would appear mid-band from nothing, so it is dropped instead; Jack: "If the
+# ripple won't be immediate, don't show it at all."
+STRIKE_BUDGET = 0.1
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -248,6 +264,8 @@ def daemon():
             # freely from the top-left corner for the length of the move, then
             # handed back to the anchors that own it wherever it lands.
             self.flying = False
+            self.contact_pending = False
+            self.approach = None
             self.band_request = None
             self.output_rect = None
             self.animations = Gtk.Settings.get_default().get_property('gtk-enable-animations')
@@ -579,6 +597,11 @@ def daemon():
             attached = placement['mode'] == 'window'
             self.attachment_mode = placement['mode']
             self.flying = True
+            # Only a strip bound for the band strikes anything; taking hold of
+            # a window is a grab. The contact is watched for from the first
+            # frame, against the way each coordinate sets out.
+            self.contact_pending = not attached
+            self.approach = None
             self.previous_geometry = None
             self.previous_display = None
             # The seam belongs to the mode, not to the strip: attached along
@@ -595,22 +618,31 @@ def daemon():
             self.motion_velocity = {key: 0.0 for key in ('x', 'y', 'width', 'height')}
             if not attached:
                 self.motion_target = self.workspace_extent(output_rect)
+                self.approach = approach_signs(departure, self.motion_target, STRIKE_CONTACT)
             self.frame_time = None
             self.render_geometry()
             self.animate()
 
         def land(self):
-            """Hand the edge back, now the strip has arrived and settled."""
+            """Hand the edge back, now the strip has arrived and settled.
+
+            The water was struck on the contact frame, before the rebound;
+            by now the wave is already crossing the band. Only a flight that
+            somehow settled without ever being seen to arrive strikes here.
+            """
             self.flying = False
             if self.attachment_mode == 'window':
                 # Taking hold of a window is a grab, not an impact. Nothing
                 # struck anything, so nothing rings.
+                self.contact_pending = False
                 abandon_strike(self)
                 return
             self.anchor_band()
             self.content_size = None
             self.size_to_content()
-            strike(self)
+            if self.contact_pending:
+                self.contact_pending = False
+                strike(self)
 
         def attached_extent(self, rect):
             """The size an attached strip takes for the window it decorates.
@@ -751,13 +783,22 @@ def daemon():
                     response=FLIGHT_RESPONSE if self.flying else 0.045,
                     tolerance=FLIGHT_TOLERANCE if self.flying else 0.05,
                     damping=FLIGHT_DAMPING if self.flying else 1.0)
-                if self.flying and not settled and self.attachment_mode != 'window':
-                    # Nearly home: photograph the band now, so the wave can
-                    # begin on the very frame the strip comes to rest.
-                    remaining = max(abs(self.motion_rect[key] - self.motion_target[key])
-                                    for key in ('x', 'y', 'width', 'height'))
-                    if remaining <= STRIKE_APPROACH:
-                        prepare_strike(self)
+                if self.flying and self.attachment_mode != 'window':
+                    if not settled:
+                        # Nearly home: photograph the band now, so the wave
+                        # can begin on the very frame the strip arrives.
+                        remaining = max(abs(self.motion_rect[key] - self.motion_target[key])
+                                        for key in ('x', 'y', 'width', 'height'))
+                        if remaining <= STRIKE_APPROACH:
+                            prepare_strike(self)
+                    if (self.contact_pending and self.approach is not None
+                            and contact(self.motion_rect, self.motion_target,
+                                        self.approach, STRIKE_CONTACT)):
+                        # This is the impact: the strip is home for the first
+                        # time. The rebound and the settle that follow are the
+                        # landing being read, not waited for.
+                        self.contact_pending = False
+                        strike(self)
                 self.render_geometry()
                 if settled and self.flying:
                     self.land()
@@ -1424,11 +1465,11 @@ def daemon():
     def prepare_strike(caption):
         """Photograph the band while the strip is still in the air.
 
-        The wave has to begin on the frame the strip lands, and `grim` takes
+        The wave has to begin on the frame the strip arrives, and `grim` takes
         tens of milliseconds even for the band alone, so the picture is taken
         on the final approach -- the target has been known since the flight
-        began -- and held until land() asks for it. The strip is within a few
-        pixels of home when the shutter goes; the wave leaves the outline a
+        began -- and held until strike() asks for it. The strip is within a
+        few pixels of home when the shutter goes; the wave leaves the outline a
         little way out (ripple.SHORE), so those pixels are never in the water.
         """
         output_rect = caption.output_rect
@@ -1459,11 +1500,13 @@ def daemon():
             return False
 
         def present():
-            """Show the wave, now that the picture and the landing are both here.
+            """Show the wave, now that the picture and the contact are both here.
 
-            Only if it is immediate. A wave that began well after the strip had
-            come to rest would read as lag rather than as an impact, so past
-            the budget the picture is dropped and nothing is shown at all.
+            The wave is dated from the contact, not from this call, so a
+            picture that arrives a frame or two after the strike shows the
+            rings where they already are. Past the budget it would appear
+            mid-band from nothing and read as lag rather than as an impact,
+            so the picture is dropped and nothing is shown at all.
             """
             approaches.pop(name, None)
             pixels, size = approach['ready']
@@ -1471,7 +1514,8 @@ def daemon():
                 return
             ripples[name] = True
             try:
-                ripple.Ripple(monitor, area, plan, pixels, size, on_done=release).start()
+                ripple.Ripple(monitor, area, plan, pixels, size,
+                              on_done=release).start(started=approach['landed'])
             except Exception as error:
                 print('ripple: ' + type(error).__name__ + ': ' + str(error), file=sys.stderr)
                 release()
@@ -1527,11 +1571,14 @@ def daemon():
         threading.Thread(target=photograph_output, daemon=True).start()
 
     def strike(caption):
-        """Answer a landing in the band with the wave prepared on the approach.
+        """Answer the strip's contact with the band with the wave prepared on
+        the approach.
 
-        Nothing is photographed here. By now the picture is in hand, about to
-        arrive, or was never taken because the flight was too short or the
-        ripple is off; whatever arrives later than the budget is not shown.
+        Called on the frame the strip first reaches home, while the rebound is
+        still to come. Nothing is photographed here. By now the picture is in
+        hand, about to arrive, or was never taken because the flight was too
+        short or the ripple is off; whatever arrives later than the budget is
+        not shown.
         """
         approach = approaches.get(output_name(caption))
         if approach is None:

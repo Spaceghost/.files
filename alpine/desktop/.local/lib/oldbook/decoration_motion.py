@@ -81,3 +81,40 @@ def advance_rect(current, velocity, target, elapsed, response=0.10,
             current[key], velocity.get(key, 0.0), target[key], elapsed,
             response=response, tolerance=tolerance, damping=damping)
     return rect, speeds, all(rect[key] == target[key] for key in _RECT_KEYS)
+
+
+def approach_signs(departure, target, tolerance=1.0):
+    """Which way each coordinate of a flight has to go, as -1, 0 or 1.
+
+    Taken once, when the flight begins; contact() reads it to tell a strip
+    that has passed its target from one still on its way. A coordinate that
+    starts within ``tolerance`` of home has nowhere to go and is 0.
+    """
+    signs = {}
+    for key in _RECT_KEYS:
+        offset = departure[key] - target[key]
+        signs[key] = 0 if abs(offset) <= tolerance else (1 if offset > 0 else -1)
+    return signs
+
+
+def contact(rect, target, signs, tolerance=1.0):
+    """Whether a flight has reached its target for the first time.
+
+    The moment of impact is when the strip first gets home, not when the
+    rebound after it has died away: a settling spring passes its target and
+    comes back, and advance() only reports it settled once it is inside the
+    tolerance *and* nearly still, a fifth of a second or more after the strip
+    was seen to arrive. So a coordinate counts as arrived once it is within
+    ``tolerance`` of its target or already past it, judged against the sign it
+    set out with, and the strip has made contact when every coordinate that
+    had anywhere to go has arrived. All four ride the same spring from rest,
+    so they arrive together; the test is per coordinate only so a flight
+    retargeted on the way cannot report contact early on a stale sign.
+    """
+    for key, sign in signs.items():
+        if sign == 0:
+            continue
+        offset = rect[key] - target[key]
+        if abs(offset) > tolerance and offset * sign > 0:
+            return False
+    return True

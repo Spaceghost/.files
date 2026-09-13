@@ -82,6 +82,32 @@ features not things like fixes unless they're major additions."
   `test_rice_tour.py`.
 - Not verified: the triggers by hand; none of the new entries was set off live.
 
+## The strip strikes the water on contact — 2026-09-13
+
+Jack: "Also the ripple happens too long after the bar moves."
+
+- The strike waited for the flight spring to settle. That spring is
+  underdamped on purpose, so the strip passes the band and comes back, and
+  `advance()` reports it settled only once it is inside half a pixel and
+  nearly still: at 60 Hz that is 200 to 267 ms after the strip is first seen
+  to arrive, for flights of 60 to 500 px. The wave then began from nothing, so
+  its first visible ring came later still.
+- The strike now fires on the contact frame -- the first frame on which every
+  coordinate is within a pixel of home or past it (`decoration_motion.contact()`,
+  judged against `approach_signs()` taken when the flight began) -- and the
+  wave is dated from that instant (`Ripple.start(started=)`), so a photograph
+  that lands a frame or two later shows the rings where they already are.
+  `STRIKE_BUDGET` is a tenth of a second: later than that the wave would appear
+  mid-band from nothing, and it is dropped instead, as before. `land()` still
+  hands the edge back at the settle, and strikes only if a flight somehow
+  settled without ever being seen to arrive.
+- Verified: 86 tests across `test_decoration_motion.py` (five new: contact
+  comes at least 150 ms before the settle for every flight length, agrees at
+  60 and 120 Hz, and a coordinate still on its way holds it back while one
+  with nowhere to go never does), `test_ripple.py` and `test_decoration.py`.
+- Not verified by eye: the live desktop was in catbed mode; the daemon has to
+  be restarted to run this at all.
+
 ## The Scripture bar ignores the landing ripple — 2026-09-13
 
 Jack: "The ripple.py should be ignored by the conky bible bar."
