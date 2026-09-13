@@ -194,9 +194,11 @@ class Policy(unittest.TestCase):
             self.assertEqual(ripple.allowed(animations=True, current=posture),
                              power_source.allows(ripple.EFFECT, current=posture))
 
-    def test_registered_at_mains_like_every_other_shader_effect(self):
+    def test_runs_unplugged_and_sheds_at_battery_low(self):
         self.assertTrue(power_source.allows(ripple.EFFECT, current='mains'))
-        self.assertFalse(power_source.allows(ripple.EFFECT, current='battery'))
+        self.assertTrue(power_source.allows(ripple.EFFECT, current='battery'))
+        self.assertFalse(power_source.allows(ripple.EFFECT, current='battery-low'))
+        self.assertFalse(power_source.allows(ripple.EFFECT, current='battery-critical'))
 
 
 class Wave(unittest.TestCase):

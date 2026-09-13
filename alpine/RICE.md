@@ -660,8 +660,8 @@ reported by the settings editor rather than drawn, and a change is heard by
 the next landing rather than the next daemon. Preview a candidate without
 striking the desktop: `python3 verification/ripple-water/render.py . '{"strength": 20}'`.
 Off: `"ripple": {"enabled": false}`; it also stays quiet with desktop
-animations off and on every battery posture, since it sits on the power ladder
-as `shaders`. The surface is exempted from SwayFX's corner radius, shadow and
+animations off, and it sheds at battery-low, since it sits on the power ladder
+as `landing-ripple` beside the other small motions. The surface is exempted from SwayFX's corner radius, shadow and
 blur (`layer_effects "oldbook-ripple"` in `swayfx/effects.conf`), and the
 photograph is of the band alone (`grim -g`), which cut the landing-to-first-
 frame gap from about 165 ms to 67 ms. Evidence:

@@ -28,7 +28,7 @@ rice: {
 			date:    "2026-09-13"
 			summary: "The caption strip landing in its band sends rings up the lower screen for under a second."
 			trigger: "Focus a floating window, then a tiled one"
-			detail:  "The rings refract a photograph of the screen; nothing is drawn where the water is still. Tune or switch off the ripple object in ~/.config/oldbook/decoration.json. Mains only."
+			detail:  "The rings refract a photograph of the screen; nothing is drawn where the water is still. Tune or switch off the ripple object in ~/.config/oldbook/decoration.json. Sheds at battery-low."
 		},
 		{
 			id:      "cat-bed"

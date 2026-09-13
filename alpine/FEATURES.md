@@ -211,7 +211,8 @@ drawn where the water is still, so the live desktop shows through everywhere
 the wave is not. The `ripple` object in decoration.json switches it off
 (`enabled`) and sets where the rings leave from (`bar`, the whole outline, or
 `point`), their duration, reach, spacing, strength and shading; the effect
-sits on the power ladder as `shaders` and never runs on battery.
+sits on the power ladder as `landing-ripple`, running unplugged and shedding
+at battery-low.
 
 - Implementation: [decoration helper](desktop/.local/bin/oldbook-decoration),
   [settings editor](desktop/.local/bin/oldbook-decoration-settings),

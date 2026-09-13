@@ -32,9 +32,11 @@ import power_source
 
 # How much of the output the wave is allowed to cross, measured from its edge.
 REGION_FRACTION = 1.0 / 3.0
-# The effect this asks the power ladder about. Registered as 'mains' already,
-# so it does not run on battery without anything here having to know that.
-EFFECT = 'shaders'
+# The effect this asks the power ladder about. One photograph and under a
+# second of shader is a small motion, so it is registered at 'battery' beside
+# the keyboard breath and the crossfade: it runs unplugged and sheds at
+# battery-low, without anything here having to know what a battery is.
+EFFECT = 'landing-ripple'
 
 # How the wave looks: the whole vocabulary of decoration.json's `ripple`
 # object, with the value each key takes when it is left out. Lengths are in

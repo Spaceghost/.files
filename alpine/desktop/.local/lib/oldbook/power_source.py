@@ -34,6 +34,7 @@ LADDER = {
     'cava': 'battery',
     'gallery-rotation': 'battery',
     'ghost-wander': 'battery',
+    'landing-ripple': 'battery',
     'keyboard-breath': 'battery',
     'wallpaper-crossfade': 'battery',
     'window-animations': 'battery',
