@@ -13,7 +13,10 @@ running so the change is visible without logging out.
 The selection reaches past the session too.  The power deck is part of the
 profile like any other surface, and the console palette every text-mode screen
 reads is regenerated here so GRUB, the kernel console, the initramfs passphrase
-prompt and the rescue gettys can be brought up to date by one root command.
+prompt and the rescue gettys are brought up to date immediately: a theme is not
+considered complete while any of them still needs a human to remember a
+follow-up command, so this runs the GRUB theme render and the root install
+itself rather than only printing a reminder.
 """
 import argparse
 import json
@@ -143,17 +146,45 @@ def sync_profiles(repo):
     return written
 
 
+def run_boot_step(command, timeout):
+    """Run one boot-chain step, keeping its own words on failure.
+
+    A generic "FAILED" note here would be exactly the failure this desktop's
+    other notifications were built to stop producing: something broke and the
+    person seeing it has no way to tell what. install-boot-console and
+    build-grub-theme already say precisely what went wrong on stderr, so that
+    text is what a failure note carries, not a label standing in for it.
+    """
+    try:
+        result = subprocess.run(command, capture_output=True, text=True,
+                                stdin=subprocess.DEVNULL, timeout=timeout)
+    except (OSError, subprocess.SubprocessError) as error:
+        return False, str(error)
+    if result.returncode:
+        return False, (result.stderr or result.stdout).strip()[:2000]
+    return True, result.stdout
+
+
 def refresh_boot_palette(theme):
-    """Regenerate the versioned console palette so the boot chain follows the choice.
+    """Regenerate the console palette and carry it all the way to the boot chain.
 
     The lock reads the active palette already, and there is no login screen --
     greetd autologins into Sway, because the LUKS passphrase is the real gate --
     so the surfaces a theme switch used to miss are the ones on either side of
     the session: the GRUB menu, the kernel console, the initramfs passphrase
-    prompt and the rescue gettys.  All four read one generated file, and writing
-    it here is the same kind of checkout write the Ghostty sync above does.  The
-    root install that publishes it to /etc and /boot stays a separate, deliberate
-    step, so this only ever leaves the checkout ready for it.
+    prompt and the rescue gettys.  All four read one generated file.
+
+    A theme is not complete while any of these still needs a human to remember
+    a follow-up command -- that is the same failure as no coverage at all, just
+    quieter, and it is exactly how every theme but the one whose boot chain was
+    once built by hand stayed on that one's GRUB menu regardless of what was
+    selected everywhere else. So this runs the whole chain itself: the console
+    palette (a checkout-only write, like the Ghostty sync above), the GRUB
+    theme render (also checkout-only, no root), and finally the root install
+    that actually publishes both to /etc and /boot. install-boot-console keeps
+    its own backups and rolls itself back on any failure, including a grub.cfg
+    it cannot validate, so a failure here leaves the previous boot chain intact
+    -- it is reported, not silently retried or forced through.
     """
     builder = REPO / 'alpine/bin/build-console-palette'
     if not builder.is_file():
@@ -164,8 +195,20 @@ def refresh_boot_palette(theme):
         return ['boot console palette FAILED: ' + str(error)]
     if not changed:
         return []
-    return ['boot console palette updated; run alpine/bin/build-grub-theme, then '
-            'doas alpine/bin/install-boot-console, to carry it into the next boot']
+    notes = ['boot console palette updated']
+    grub_builder = REPO / 'alpine/bin/build-grub-theme'
+    if grub_builder.is_file():
+        ok, detail = run_boot_step(['/usr/bin/python3', str(grub_builder)], 120)
+        if not ok:
+            notes.append('GRUB theme render FAILED: ' + detail)
+            return notes
+        notes.append('GRUB theme rendered')
+    installer = REPO / 'alpine/bin/install-boot-console'
+    if installer.is_file():
+        ok, detail = run_boot_step(['doas', '/usr/bin/python3', str(installer)], 600)
+        notes.append('boot console installed for next boot' if ok
+                     else 'boot console install FAILED: ' + detail)
+    return notes
 
 
 def profile_directory(identity):
