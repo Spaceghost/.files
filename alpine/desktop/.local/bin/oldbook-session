@@ -60,7 +60,13 @@ if ! ensure_session_bus; then
     printf '%s\n' 'oldbook-session: no usable D-Bus session bus' >&2
 fi
 if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
-    dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway QT_QPA_PLATFORMTHEME XCURSOR_THEME XCURSOR_SIZE >/dev/null 2>&1 || true
+    # SWAYSOCK has to reach D-Bus-activated services too: swaync ships a
+    # service file (org.erikreider.swaync.service) and is commonly started by
+    # activation rather than by start_service below, and every theme-refresh
+    # signal in oldbook-theme's owned_processes() only matches a process whose
+    # own environ carries this session's SWAYSOCK. Without it here, a theme
+    # switch silently never reaches swaync's CSS, no matter how it started.
+    dbus-update-activation-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway QT_QPA_PLATFORMTHEME XCURSOR_THEME XCURSOR_SIZE SWAYSOCK >/dev/null 2>&1 || true
     if command -v oldbook-gtk-settings >/dev/null 2>&1; then
         oldbook-gtk-settings >/dev/null 2>&1 || true
     fi
