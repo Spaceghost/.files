@@ -148,6 +148,17 @@ def watch_forever(inotify=None, debounce_seconds=0.2):
             for _ in inotify.read_events():
                 pass
         handle_commit()
+        # fossil update and cue-sync both write through files.fossil themselves
+        # (a no-op update still touches its own bookkeeping tables), which
+        # queues a fresh IN_CLOSE_WRITE indistinguishable from a real external
+        # commit -- without this drain, handling one real commit re-triggers
+        # itself on its own write, forever, pinning a core and holding the
+        # database locked against everyone else's commits. Whatever queued
+        # while handle_commit() ran is read and discarded before going back to
+        # a blocking wait for the next genuinely external write.
+        while select.select([inotify.fd], [], [], debounce_seconds)[0]:
+            for _ in inotify.read_events():
+                pass
 
 
 def main():

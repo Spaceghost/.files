@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
@@ -148,6 +149,79 @@ class SingleInstanceLockTests(unittest.TestCase):
         second = self.module.acquire_lock()
         self.assertIsNone(second, 'a second instance must not double-acquire the lock')
         first.close()
+
+
+class SelfTriggeredWriteTests(unittest.TestCase):
+    """handle_commit() (fossil update, then cue-sync) writes through the very
+    file being watched -- a no-op update still touches its own bookkeeping
+    tables. Undrained, that write queues a fresh event indistinguishable from
+    a real external commit, so handling one real commit re-triggers itself on
+    its own write, forever: a tight loop that pins a core and holds the
+    repository's database locked against every other commit.
+    """
+
+    class StopWatching(Exception):
+        pass
+
+    class ScriptedInotify:
+        """One real external event, then one self-triggered event pushed by
+        the mocked handle_commit() itself, mimicking fossil update's own
+        write landing while handle_commit() was running."""
+
+        def __init__(self):
+            self.fd = 99
+            self._queued = ['external-commit']
+            self.watched = None
+
+        def add_watch(self, path, mask):
+            self.watched = path
+
+        def read_events(self):
+            if not self._queued:
+                # The unguarded call at the top of watch_forever's loop is the
+                # real blocking wait for the next external event; with nothing
+                # queued, a real Inotify would block here. Raising instead
+                # ends the test at exactly the point that matters: the loop
+                # correctly returned to waiting rather than calling
+                # handle_commit() again for its own write.
+                raise SelfTriggeredWriteTests.StopWatching(
+                    'reached the blocking wait for a genuinely external event')
+            events, self._queued = self._queued, []
+            return events
+
+        def push_self_triggered_event(self):
+            self._queued.append('self-triggered')
+
+    def test_handle_commits_own_write_does_not_retrigger_it(self):
+        module = load_helper()
+        inotify = self.ScriptedInotify()
+        calls = []
+
+        def fake_handle_commit():
+            calls.append(1)
+            if len(calls) == 1:
+                # Simulate fossil update/cue-sync's own write landing on the
+                # watched file while handle_commit() was still running.
+                inotify.push_self_triggered_event()
+            else:
+                raise self.StopWatching('a second call means the self-triggered '
+                                        'write was not drained')
+
+        # select.select is asked twice per iteration: once to drain any burst
+        # before handle_commit(), once after to drain handle_commit()'s own
+        # write. "Ready" exactly when the scripted inotify has something
+        # queued -- true right after push_self_triggered_event(), false once
+        # read_events() has consumed it.
+        def fake_select(rlist, wlist, xlist, timeout):
+            return (rlist, [], []) if inotify._queued else ([], [], [])
+
+        with unittest.mock.patch.object(module, 'handle_commit', fake_handle_commit), \
+             unittest.mock.patch.object(module.select, 'select', fake_select):
+            with self.assertRaises(self.StopWatching):
+                module.watch_forever(inotify=inotify, debounce_seconds=0)
+
+        self.assertEqual(calls, [1], 'handle_commit() must not be called again '
+                                     'for the write it just made itself')
 
 
 if __name__ == '__main__':
