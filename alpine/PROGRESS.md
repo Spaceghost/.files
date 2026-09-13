@@ -53,9 +53,6 @@ last enter key."
   to forget the directory memory; set `"trust": false` on a preset to be
   asked by the tool again.
 
-####### SUGGESTED CONFLICT RESOLUTION follows ###################
-
-
 ## Nothing a cat presses stops the machine, and catbed mode is his alone — 2026-09-13
 
 The user's original ask, on 2026-09-08, was that while the screen is locked
