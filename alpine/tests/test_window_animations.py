@@ -47,8 +47,12 @@ class AnimationsConfigTests(unittest.TestCase):
     def setUp(self):
         self.settings = settings(ANIMATIONS.read_text())
 
-    def test_animations_are_switched_on(self):
-        self.assertEqual(self.settings.get('animations'), 'enable')
+    def test_animations_are_switched_off(self):
+        """Jack: "The whole part where windows are moving when I alt-<something>
+        between workspaces and windows and such must be fixed now and forever."
+        The workspace slide and window move animations were exactly that
+        motion, so this is off for good, not a duration to tune down."""
+        self.assertEqual(self.settings.get('animations'), 'disable')
 
     def test_workspace_style_is_a_supported_word(self):
         self.assertIn(self.settings.get('animation_workspace_style'),
