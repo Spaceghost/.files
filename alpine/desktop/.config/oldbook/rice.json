@@ -2,6 +2,22 @@
     "version": 1,
     "entries": [
         {
+            "id": "caption-names-the-agent",
+            "title": "The strip names what your agent is doing",
+            "date": "2026-09-13",
+            "summary": "A Claude or Codex window's caption carries its title plus one still glyph for its state.",
+            "trigger": "Focus a Claude Code or Codex terminal that is mid-permission-prompt, then read the bottom strip.",
+            "detail": "The glyph is loading.py's own alphabet -- a blocked mark when a routing record says the agent is waiting on you, a single still spinner frame when Codex reports its own run state and nothing is waiting, nothing otherwise. It changes only when that real state changes, never on a clock: Claude embeds no run-state string of its own, so a Claude window shows the waiting mark or nothing, not a guess dressed as a fact. Toggle with the agent_status key in ~/.config/oldbook/decoration.json."
+        },
+        {
+            "id": "theme-reaches-the-boot-chain",
+            "title": "Themes reach GRUB and the boot console now",
+            "date": "2026-09-13",
+            "summary": "Switching themes now reaches GRUB and the boot console automatically, not just the desktop.",
+            "trigger": "oldbook-theme use catppuccin-mocha, then check /boot/grub/themes/ghost-planet/theme.txt: desktop-color now reads that theme's own background.",
+            "detail": "Before this, only the console palette file regenerated automatically; build-grub-theme and doas install-boot-console needed a human to remember them by hand afterward, so every theme but the one that got that manual treatment once left GRUB and the boot console on gruvbox regardless of what was active everywhere else. A theme now is not allowed to count as complete while any boot-time surface still needs an unenforced follow-up command."
+        },
+        {
             "id": "landing-ripple",
             "title": "The strip strikes the water",
             "date": "2026-09-13",

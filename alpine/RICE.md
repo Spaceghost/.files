@@ -914,6 +914,21 @@ readable before stopped being reachable. On battery-low the tmux and Fossil
 questions stop being asked and the line falls back to the emulator and the
 directory; the chain itself is plain file reads and never sheds.
 
+When the process chain lands on a Claude Code or Codex session, the strip adds
+one more segment: `foot › tmux › claude !`, the exclamation drawn from the same
+stepped alphabet `oldbook-rebuild`'s waiting language uses. It means that
+session's own notifier has a live, unexpired record saying it is waiting on a
+permission or your attention — read from `$XDG_RUNTIME_DIR/oldbook/claude
+-events` or `codex-events`, matched to this window by tty or tmux pane, the
+same routing `oldbook-notification-led` already trusts. Codex additionally
+names its own run state in its title, which shows as a single still spinner
+frame when nothing is waiting; Claude names no equivalent state of its own, so
+a Claude window that is not waiting carries no glyph rather than a guessed
+one. Nothing here spins on a clock — the glyph is redrawn only when a real
+record appears or disappears, the same rule the strip's own loading language
+keeps everywhere else. Switch it off with `agent_status: false` in
+`~/.config/oldbook/decoration.json`.
+
 ## Power posture
 
 The desktop asks one question about the cord and every effect gets the same
@@ -1022,6 +1037,21 @@ status` prints today's figures. Off: delete the location file. Evidence:
 the physical colour ramp has not been watched through an evening.
 
 ## Boot chain
+
+**Theme switches reach the boot chain automatically.** `oldbook-theme use`
+used to regenerate the console palette file and stop there, printing a
+reminder to run `bin/build-grub-theme` and `doas bin/install-boot-console` by
+hand afterward. It no longer stops: every switch renders the GRUB theme and
+installs it for real, so gruvbox-dark is no longer the one theme whose GRUB
+menu and boot console actually match what is selected everywhere else. A
+theme does not count as complete while any boot-time surface still needs an
+unenforced follow-up command. A failed render or install carries the tool's
+own stderr rather than a generic label, and rolls itself back the same way a
+manual run already did; nothing forces a bad `grub.cfg` through. **Next
+boot:** verified live, not simulated — switched through catppuccin-mocha and
+monochrome-test with this wiring active and read `desktop-color` back from the
+installed `/boot/grub/themes/ghost-planet/theme.txt` on the real boot
+partition, then switched back to gruvbox-dark and confirmed it matched again.
 
 **Ghost Planet GRUB menu.** The boot menu shows for three seconds over a
 graded, blurred crop of the current painting, with an amber selection bar, the

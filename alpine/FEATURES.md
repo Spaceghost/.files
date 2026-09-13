@@ -533,6 +533,29 @@ stay byte-identical.
   A counted repaint budget is not a physical frame rate; how a real build
   scrolls past on this panel remains the user's check.
 
+### AGENT-CAPTION
+
+A Claude Code or Codex window's caption strip carries one more segment beyond
+its title: a still glyph from the loading language above, naming whether that
+agent is waiting on a reply. A live, unexpired routing record from
+`oldbook-claude-notify`/`oldbook-codex-notify` matching the window's tty or
+tmux pane reads as waiting; Codex additionally names its own run state in its
+window title, which reads as working when nothing is waiting. Claude embeds no
+equivalent run-state string, so a Claude window that is not waiting shows no
+glyph at all rather than a guess dressed as a fact.
+
+The glyph changes only when one of those two real signals changes, never on a
+clock: this is TERMINAL-PROGRESS's "nothing moves on its own" rule applied to
+a second surface. Resolving a window's identity costs a tmux round trip, so it
+is skipped outright for every window that is not a terminal. Toggle with the
+`agent_status` key in `~/.config/oldbook/decoration.json`.
+
+- Implementation: [agent status](desktop/.local/lib/oldbook/agent_status.py),
+  read from [oldbook-decoration](desktop/.local/bin/oldbook-decoration)'s
+  caption update, window identity from
+  [app_identity](desktop/.local/lib/oldbook/app_identity.py).
+- Checks: [agent status tests](tests/test_agent_status.py).
+
 ### SHORTCUT-HELP
 
 Hold Super alone for half a second for a contextual, themed shortcut guide;
@@ -1245,9 +1268,11 @@ sixteen console colours are generated from the active theme's own terminal
 palette by `bin/build-console-palette`, so the terminals, the console, the LUKS
 prompt, the gettys and the GRUB menu cannot drift apart; the menu takes the
 three shades the ANSI sixteen lack from the theme the palette document names.
-Selecting a theme regenerates the versioned palette and says which two commands
-publish it, and the installer refuses a palette the selection has moved past
-rather than writing a stale one. The
+Selecting a theme regenerates the versioned palette, renders the GRUB theme
+and installs both for real -- no follow-up command is left for a human to
+remember, since a theme does not count as complete while any boot-time
+surface still needs one -- and the installer refuses a palette the selection
+has moved past rather than writing a stale one. The
 palette, the cream-on-charcoal default attribute and the kernel's Terminus 16x32
 are kernel parameters appended to GRUB_CMDLINE_LINUX_DEFAULT; the rescue banner
 is a rendered /etc/issue. Installation is idempotent, backs up every replaced
@@ -1265,6 +1290,7 @@ here reboots, switches VTs or loads a font into a live console.
   [rescue banner](system/boot/issue.template), [banner initramfs](system/mkinitfs/).
 - Checks: [boot console tests](tests/test_boot_console.py),
   [session boundary tests](tests/test_theme_boundary.py),
+  [boot chain completeness tests](tests/test_boot_chain_completeness.py),
   [boot console record](../docs/superpowers/specs/2026-09-08-boot-console.md),
   [LUKS prompt record](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
   A generated grub.cfg and a listed initramfs are not a boot: the visual result
