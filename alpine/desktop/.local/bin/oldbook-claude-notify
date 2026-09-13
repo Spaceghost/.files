@@ -1,8 +1,29 @@
 #!/usr/bin/env python3
-"""Turn supported Claude Code hook events into content-free desktop notices."""
+"""Turn supported Claude Code hook events into content-free desktop notices.
+
+Beyond the visible notice, a waiting-on-you event (`PermissionRequest`, or a
+`Notification` from the attention set below) writes a private routing record
+under $XDG_RUNTIME_DIR/oldbook/claude-events/<sha256(session_id)>.json: the
+printed notification id, the session's tmux pane and controlling tty, and its
+cwd. That record exists for the click handler
+(oldbook-claude-notify-focus) and for this script's own auto-dismiss on
+resolution; none of it reaches the visible banner text, which stays exactly as
+content-free as docs/superpowers/specs/2026-09-07-claude-notifications.md
+describes. `Stop` and `UserPromptSubmit` are both positive evidence the wait
+is over -- Claude finished the turn, or Jack typed something back into that
+exact session -- so both close the outstanding notification by id over the
+session bus and delete the record, whether or not Stop also sends its own
+low-urgency completion notice.
+"""
+import hashlib
 import json
+import os
+from pathlib import Path
+import re
+import stat
 import subprocess
 import sys
+import time
 
 
 ATTENTION_NOTIFICATIONS = {
@@ -14,6 +35,12 @@ ATTENTION_NOTIFICATIONS = {
     'quota_auto_resume_stale',
     'quota_auto_resume_disabled',
 }
+ROUTING_EVENTS = {'permission-requested', 'attention'}
+ROUTING_TTL = 300
+PANE_PATTERN = re.compile(r'%[0-9]+')
+CLOSE_COMMAND = ['gdbus', 'call', '--session', '--dest', 'org.freedesktop.Notifications',
+                 '--object-path', '/org/freedesktop/Notifications', '--method',
+                 'org.freedesktop.Notifications.CloseNotification']
 
 
 def load_event():
@@ -47,23 +74,217 @@ def notification(payload):
     return None
 
 
-def send_notification(urgency, title):
+def routing_event(payload):
+    """Which private routing action, if any, this hook payload calls for.
+
+    Only the two waiting-on-you events start tracking a session. A `Stop` or a
+    fresh prompt from Jack both mean the wait this helper knows about is over
+    -- whether or not `Stop` also sends its own low-urgency 'Done' notice, that
+    notice needs no routing record, since it already auto-expires on its own
+    at swaync's low-urgency timeout.
+    """
+    event = payload.get('hook_event_name')
+    session_id = payload.get('session_id')
+    if event == 'PermissionRequest':
+        return 'permission-requested', session_id
+    if (event == 'Notification'
+            and payload.get('notification_type') in ATTENTION_NOTIFICATIONS):
+        return 'attention', session_id
+    if event in ('Stop', 'UserPromptSubmit'):
+        return 'clear', session_id
+    return None, None
+
+
+def send_notification(urgency, title, capture_id=False):
+    try:
+        result = subprocess.run(
+            ['notify-send', '--app-name=Claude', f'--urgency={urgency}',
+             *(['--print-id'] if capture_id else []), title],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE if capture_id else subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL, timeout=2, check=False)
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    if not capture_id:
+        return None
+    try:
+        return int(result.stdout.strip())
+    except (TypeError, ValueError, AttributeError):
+        return None
+
+
+def close_notification(notification_id):
+    """Best-effort CloseNotification over the desktop's own session bus.
+
+    A notification that already timed out, or an id nothing remembers any
+    more, is not an error: this is cleanup, never the thing the hook exists
+    to report, so a failure here is swallowed exactly like a failed
+    notify-send is.
+    """
+    if not isinstance(notification_id, int) or isinstance(notification_id, bool):
+        return
     try:
         subprocess.run(
-            ['notify-send', '--app-name=Claude', f'--urgency={urgency}', title],
+            [*CLOSE_COMMAND, str(notification_id)],
             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL, timeout=2, check=False)
     except (OSError, subprocess.TimeoutExpired):
         pass
 
 
+def private_directory(path):
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    info = path.stat(follow_symlinks=False)
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError(f'unsafe runtime directory: {path}')
+
+
+def event_directory():
+    runtime_name = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime_name:
+        raise RuntimeError('XDG_RUNTIME_DIR is unset')
+    runtime = Path(runtime_name)
+    info = runtime.stat(follow_symlinks=False)
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError('XDG_RUNTIME_DIR must be an owned private directory')
+    oldbook = runtime / 'oldbook'
+    private_directory(oldbook)
+    events = oldbook / 'claude-events'
+    private_directory(events)
+    return events
+
+
+def session_path(root, session_id):
+    if not isinstance(session_id, str) or not session_id:
+        return None
+    digest = hashlib.sha256(session_id.encode()).hexdigest()
+    return root / f'{digest}.json'
+
+
+def tty_path(device):
+    """Map this Linux process's /proc stat tty_nr to a terminal path."""
+    if type(device) is not int or device <= 0:
+        return None
+    try:
+        major = os.major(device)
+        minor = os.minor(device)
+    except (OverflowError, ValueError):
+        return None
+    if 136 <= major <= 143:
+        return f'/dev/pts/{(major - 136) * 256 + minor}'
+    if major == 4 and 0 < minor < 64:
+        return f'/dev/tty{minor}'
+    return None
+
+
+def current_tty():
+    for descriptor in (0, 1, 2):
+        try:
+            name = os.ttyname(descriptor)
+            if re.fullmatch(r'/dev/(?:pts/[0-9]+|tty[0-9]+)', name):
+                return name
+        except OSError:
+            pass
+    try:
+        process_stat = Path('/proc/self/stat').read_text()
+        close = process_stat.rfind(')')
+        fields = process_stat[close + 1:].split()
+        if close >= 0 and len(fields) >= 5:
+            return tty_path(int(fields[4]))
+    except (OSError, ValueError):
+        pass
+    return None
+
+
+def remove_expired(root, now):
+    for path in root.glob('*.json'):
+        try:
+            document = json.loads(path.read_text())
+            if type(document.get('valid_until')) is int and document['valid_until'] < now:
+                path.unlink()
+        except (OSError, ValueError, AttributeError):
+            continue
+
+
+def read_record(target):
+    try:
+        return json.loads(target.read_text())
+    except (OSError, ValueError):
+        return None
+
+
+def write_event(root, session_id, event, notification_id, cwd, now):
+    target = session_path(root, session_id)
+    if target is None:
+        return
+    # A second waiting-on-you event for a session already being tracked is the
+    # documented possible duplicate (an immediate PermissionRequest, then an
+    # idle_prompt Notification roughly six seconds later): close the earlier
+    # popup rather than leave it stuck on screen once nothing points at it.
+    previous = read_record(target)
+    if isinstance(previous, dict) and previous.get('id') is not None:
+        close_notification(previous['id'])
+    pane = os.environ.get('TMUX_PANE')
+    if not isinstance(pane, str) or PANE_PATTERN.fullmatch(pane) is None:
+        pane = None
+    document = {
+        'version': 1,
+        'event': event,
+        'observed_at': now,
+        'valid_until': now + ROUTING_TTL,
+        'tmux_pane': pane,
+        'cwd': cwd if isinstance(cwd, str) and cwd else None,
+        'tty': current_tty(),
+        'id': notification_id,
+    }
+    temporary = target.with_name(f'.{target.name}.{os.getpid()}.{time.time_ns()}.tmp')
+    descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                         0o600)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            json.dump(document, stream, separators=(',', ':'))
+            stream.write('\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def clear_record(root, session_id):
+    target = session_path(root, session_id)
+    if target is None:
+        return
+    previous = read_record(target)
+    if isinstance(previous, dict) and previous.get('id') is not None:
+        close_notification(previous['id'])
+    target.unlink(missing_ok=True)
+
+
+def update_routing_record(event, session_id, notification_id=None, cwd=None):
+    try:
+        root = event_directory()
+        now = int(time.time())
+        remove_expired(root, now)
+        if event == 'clear':
+            clear_record(root, session_id)
+        else:
+            write_event(root, session_id, event, notification_id, cwd, now)
+    except (OSError, RuntimeError, UnicodeError, ValueError) as error:
+        print(f'oldbook-claude-notify: routing record unavailable: {error}', file=sys.stderr)
+
+
 def main():
     payload = load_event()
     if payload is None:
         return
+    event, session_id = routing_event(payload)
     details = notification(payload)
+    notification_id = None
     if details is not None:
-        send_notification(*details)
+        notification_id = send_notification(*details, capture_id=event in ROUTING_EVENTS)
+    if event is not None and session_id:
+        update_routing_record(event, session_id, notification_id, payload.get('cwd'))
 
 
 if __name__ == '__main__':

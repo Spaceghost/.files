@@ -32,6 +32,11 @@
       "exec": "~/.local/bin/oldbook-sound urgent-notification",
       "urgency": "Critical"
     },
+    "claude-focus": {
+      "exec": "~/.local/bin/oldbook-claude-notify-focus",
+      "app-name": "^Claude$",
+      "run-on": "action"
+    },
     "focus-sender": {
       "exec": "~/.local/bin/oldbook-notify-focus",
       "app-name": ".*",

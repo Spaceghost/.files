@@ -1,0 +1,228 @@
+#!/usr/bin/env python3
+"""Click a Claude notification, land on the session that sent it -- tmux included.
+
+swaync runs this with `run-on: action`, and swaync itself only runs the first
+script whose criteria match: the `claude-focus` entry in config.json is listed
+ahead of the generic `focus-sender` fallback and matches only app-name Claude,
+so a click on one of our notifications always reaches this script rather than
+the generic one, which knows nothing about tmux.
+
+Every Claude Code session this desktop launches through oldbook-agents lives
+inside a named tmux session (agent_launcher.py), so the window currently
+showing the right pane is not always the window Sway would find: the session
+can be fully detached, or its pane can be a background window inside a
+multi-window session whose visible client is showing something else. This
+resolves the click to a live Sway window when the pane is already on screen
+somewhere, using exactly the tty/tmux-pane matching oldbook-notification-led
+already trusts for Codex routing; otherwise it selects the right window and
+pane in tmux and opens a terminal attached to that session -- the same
+`tmux attach-session` pattern `oldbook-agents attach` uses to reattach one.
+
+The routing record this reads comes from oldbook-claude-notify. Landing
+somewhere closes the notification by id and deletes the record, the same
+close-and-clear a Stop or a fresh prompt already does: visiting the session
+should make its notification go away too, not leave it sitting in the tray.
+Finding nothing to land on leaves both alone -- a session nothing can locate
+is not evidence the wait is over.
+"""
+import json
+import os
+from pathlib import Path
+import runpy
+import subprocess
+import sys
+import time
+
+REPO = Path(__file__).resolve().parents[4]
+LIB = REPO / 'alpine/desktop/.local/lib/oldbook'
+sys.path.insert(0, str(LIB))
+from app_identity import ApplicationResolver  # noqa: E402
+from workspace_model import all_views  # noqa: E402
+import agent_launcher as launcher  # noqa: E402
+
+CONFIG = Path.home() / '.config/oldbook/agents.json'
+WORKSPACES = REPO / 'alpine/desktop/.local/bin/oldbook-workspaces'
+CLOSE_COMMAND = ['gdbus', 'call', '--session', '--dest', 'org.freedesktop.Notifications',
+                 '--object-path', '/org/freedesktop/Notifications', '--method',
+                 'org.freedesktop.Notifications.CloseNotification']
+
+
+def event_directory(runtime):
+    return runtime / 'oldbook/claude-events'
+
+
+def live_records(runtime, now=None):
+    """Every not-yet-expired routing record this desktop still owns, newest first."""
+    now = time.time() if now is None else now
+    root = event_directory(runtime)
+    records = []
+    if not root.is_dir():
+        return records
+    for path in root.glob('*.json'):
+        try:
+            if path.stat(follow_symlinks=False).st_uid != os.getuid():
+                continue
+            document = json.loads(path.read_text())
+            if (document.get('version') != 1
+                    or type(document.get('observed_at')) is not int
+                    or type(document.get('valid_until')) is not int
+                    or now >= document['valid_until']):
+                continue
+        except (OSError, ValueError, AttributeError):
+            continue
+        records.append((path, document))
+    records.sort(key=lambda item: item[1]['observed_at'], reverse=True)
+    return records
+
+
+def choose_record(runtime, notification_id):
+    """The record swaync's click told us about, or the newest live one.
+
+    swaync hands the clicked notification's own id back as SWAYNC_ID; a record
+    that id matches is unambiguous. Anything else -- no id, or an id nothing
+    remembers any more -- falls back to the most recently observed live
+    record, which is the best guess available and is explicitly the fallback
+    this feature was designed to make rather than doing nothing.
+    """
+    records = live_records(runtime)
+    if notification_id is not None:
+        matched = next((item for item in records if item[1].get('id') == notification_id), None)
+        if matched is not None:
+            return matched
+    return records[0] if records else (None, None)
+
+
+def matching_window(tree, resolver, document):
+    """A live Sway window this record's tty or tmux pane actually belongs to.
+
+    Only windows the resolver has already placed as kind 'claude' are
+    considered, the same confidence tier oldbook-notification-led uses for
+    Codex routing, and a controlling tty wins over a tmux pane: a pane id can
+    be recycled by a later, unrelated session once tmux reuses it.
+    """
+    windows = all_views(tree)
+    identities = resolver.resolve_all(windows)
+    candidates = {view['id']: identities.get(view['id'], {}) for view in windows
+                  if identities.get(view['id'], {}).get('kind') == 'claude'}
+    tty = document.get('tty')
+    if tty:
+        found = next((identifier for identifier, app in candidates.items()
+                     if app.get('tty') == tty), None)
+        if found is not None:
+            return found
+    pane = document.get('tmux_pane')
+    if pane:
+        return next((identifier for identifier, app in candidates.items()
+                     if app.get('tmux_pane') == pane), None)
+    return None
+
+
+def session_for_pane(pane, runner=subprocess.run):
+    try:
+        result = runner(['tmux', 'list-panes', '-a', '-F', '#{pane_id} #{session_name}'],
+                        capture_output=True, text=True, timeout=5)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if result.returncode:
+        return None
+    for line in result.stdout.splitlines():
+        found_pane, _, session = line.partition(' ')
+        if found_pane == pane and session:
+            return session
+    return None
+
+
+def select_pane(pane, runner=subprocess.run):
+    """Make the target pane the one its session shows, even from a background window.
+
+    Both commands accept a pane id as their target directly and work on a
+    detached session, so this runs before anything attaches -- the terminal
+    that opens next lands on the right window instead of whatever the session
+    last had active.
+    """
+    for command in (['tmux', 'select-window', '-t', pane],
+                    ['tmux', 'select-pane', '-t', pane]):
+        try:
+            runner(command, capture_output=True, timeout=5)
+        except (OSError, subprocess.SubprocessError):
+            pass
+
+
+def attach(session, document=None, popen=subprocess.Popen):
+    """Open a terminal on that session -- the same call oldbook-agents makes to reattach one."""
+    document = launcher.load_config(CONFIG) if document is None else document
+    popen(launcher.attach_command(document, session),
+          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+          stderr=subprocess.DEVNULL, start_new_session=True)
+
+
+def close(path, document, runner=subprocess.run):
+    identifier = document.get('id')
+    if isinstance(identifier, int) and not isinstance(identifier, bool):
+        try:
+            runner([*CLOSE_COMMAND, str(identifier)], stdin=subprocess.DEVNULL,
+                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=2)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    if path is not None:
+        path.unlink(missing_ok=True)
+
+
+def locate(document, workspaces, runtime, resolver=None):
+    """Where a live pane already sits, or the session to reattach -- never both."""
+    sway = None
+    target = None
+    try:
+        sway = workspaces['find_socket'](runtime)
+        tree = workspaces['request'](sway, 4)
+        target = matching_window(tree, resolver or ApplicationResolver(), document)
+    except (OSError, ValueError, RuntimeError):
+        target = None
+    if target is not None:
+        return {'action': 'focus', 'sway': sway, 'target': target}
+    pane = document.get('tmux_pane')
+    session = session_for_pane(pane) if pane else None
+    if session is not None:
+        select_pane(pane)
+        return {'action': 'attach', 'session': session}
+    return {'action': None}
+
+
+def main():
+    runtime_name = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime_name:
+        return 0
+    runtime = Path(runtime_name)
+    notification_id = None
+    raw_id = os.environ.get('SWAYNC_ID', '')
+    if raw_id.lstrip('-').isdigit():
+        notification_id = int(raw_id)
+    path, document = choose_record(runtime, notification_id)
+    if document is None:
+        return 0
+
+    workspaces = runpy.run_path(str(WORKSPACES))
+    plan = locate(document, workspaces, runtime)
+    landed = False
+    if plan['action'] == 'focus':
+        try:
+            workspaces['command'](plan['sway'], f"[con_id={plan['target']}] focus")
+            landed = True
+        except (OSError, ValueError, RuntimeError):
+            pass
+    elif plan['action'] == 'attach':
+        try:
+            attach(plan['session'])
+            landed = True
+        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
+            pass
+    if landed:
+        close(path, document)
+    # Always succeed for the same reason oldbook-notify-focus does: swaync
+    # reports a non-zero script exit as a notification of its own, and a
+    # session nothing can locate any more is a normal outcome, not a failure.
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

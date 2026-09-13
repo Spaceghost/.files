@@ -1,4 +1,5 @@
 """Claude Code notification integration tests with no model or desktop calls."""
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -6,6 +7,7 @@ import stat
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 
@@ -13,12 +15,18 @@ REPO = Path(__file__).resolve().parents[2]
 HELPER = REPO / 'alpine/desktop/.local/bin/oldbook-claude-notify'
 INSTALLER = REPO / 'alpine/bin/install-claude-notifications'
 
+CLOSE_CALL = ['call', '--session', '--dest', 'org.freedesktop.Notifications',
+             '--object-path', '/org/freedesktop/Notifications', '--method',
+             'org.freedesktop.Notifications.CloseNotification']
+
 
 class ClaudeNotifyTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='oldbook-claude-notify-')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        self.runtime = self.root / 'runtime'
+        self.runtime.mkdir(mode=0o700)
         self.bin = self.root / 'bin'
         self.bin.mkdir()
         self.calls = self.root / 'notify-calls.jsonl'
@@ -27,12 +35,29 @@ class ClaudeNotifyTests(unittest.TestCase):
             f'#!{sys.executable}\n'
             'import json, os, sys\n'
             'with open(os.environ["NOTIFY_CALLS"], "a") as stream:\n'
-            '    stream.write(json.dumps(sys.argv[1:]) + "\\n")\n')
+            '    stream.write(json.dumps(sys.argv[1:]) + "\\n")\n'
+            'if "--print-id" in sys.argv[1:]:\n'
+            '    counter = os.environ["NOTIFY_ID_COUNTER"]\n'
+            '    value = int(open(counter).read()) + 1 if os.path.exists(counter) else 1\n'
+            '    open(counter, "w").write(str(value))\n'
+            '    print(value)\n')
         notifier.chmod(0o755)
+        self.gdbus_log = self.root / 'gdbus-calls.jsonl'
+        fake_gdbus = self.bin / 'gdbus'
+        fake_gdbus.write_text(
+            f'#!{sys.executable}\n'
+            'import json, os, sys\n'
+            'with open(os.environ["GDBUS_CALLS"], "a") as stream:\n'
+            '    stream.write(json.dumps(sys.argv[1:]) + "\\n")\n')
+        fake_gdbus.chmod(0o755)
         self.env = {
             **os.environ,
             'PATH': str(self.bin),
             'NOTIFY_CALLS': str(self.calls),
+            'NOTIFY_ID_COUNTER': str(self.root / 'notify-id-counter'),
+            'GDBUS_CALLS': str(self.gdbus_log),
+            'XDG_RUNTIME_DIR': str(self.runtime),
+            'TMUX_PANE': '%9',
         }
 
     def run_helper(self, payload):
@@ -44,6 +69,15 @@ class ClaudeNotifyTests(unittest.TestCase):
         if not self.calls.exists():
             return []
         return [json.loads(line) for line in self.calls.read_text().splitlines()]
+
+    def gdbus_calls(self):
+        if not self.gdbus_log.exists():
+            return []
+        return [json.loads(line) for line in self.gdbus_log.read_text().splitlines()]
+
+    def records(self):
+        root = self.runtime / 'oldbook/claude-events'
+        return list(root.glob('*.json')) if root.exists() else []
 
     def test_permission_request_notifies_without_answering_it(self):
         payload = {
@@ -57,8 +91,28 @@ class ClaudeNotifyTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, '', 'empty stdout leaves the decision to Claude')
         self.assertEqual(self.notifications(), [[
-            '--app-name=Claude', '--urgency=critical',
+            '--app-name=Claude', '--urgency=critical', '--print-id',
             'Claude • Waiting on you']])
+        # The printed id and a private routing record exist so this exact
+        # notification can be auto-dismissed and clicked to the right window
+        # later, but none of that private routing data is on the command line
+        # sent to notify-send above -- the visible banner stays content-free.
+        records = self.records()
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0].name,
+                         hashlib.sha256(b'private-session').hexdigest() + '.json')
+        record = json.loads(records[0].read_text())
+        self.assertEqual(set(record), {
+            'version', 'event', 'observed_at', 'valid_until', 'tmux_pane', 'cwd', 'tty', 'id'})
+        self.assertEqual(record['version'], 1)
+        self.assertEqual(record['event'], 'permission-requested')
+        self.assertEqual(record['tmux_pane'], '%9')
+        self.assertEqual(record['cwd'], '/private/project')
+        self.assertEqual(record['id'], 1)
+        self.assertLessEqual(record['observed_at'], int(time.time()))
+        self.assertEqual(record['valid_until'] - record['observed_at'], 300)
+        self.assertEqual(stat.S_IMODE(records[0].stat().st_mode), 0o600)
+        self.assertEqual(stat.S_IMODE(records[0].parent.stat().st_mode), 0o700)
 
     def test_supported_input_notifications_are_content_free(self):
         kinds = [
@@ -84,9 +138,128 @@ class ClaudeNotifyTests(unittest.TestCase):
         # request, which is Claude stopped and waiting; sending everything
         # critical is how a desktop teaches you to ignore critical.
         expected = [[
-            '--app-name=Claude', '--urgency=normal',
+            '--app-name=Claude', '--urgency=normal', '--print-id',
             'Claude • Needs attention']] * len(kinds)
         self.assertEqual(self.notifications(), expected)
+        # None of these payloads carried a session_id, so there is nothing to
+        # route a later click or auto-dismiss to; no record is written.
+        self.assertEqual(self.records(), [])
+
+    def test_attention_notification_with_a_session_writes_a_routing_record(self):
+        result = self.run_helper({
+            'hook_event_name': 'Notification',
+            'notification_type': 'idle_prompt',
+            'session_id': 'attention-session',
+            'cwd': '/home/jack/other-project',
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        records = self.records()
+        self.assertEqual(len(records), 1)
+        record = json.loads(records[0].read_text())
+        self.assertEqual(record['event'], 'attention')
+        self.assertEqual(record['id'], 1)
+        self.assertEqual(record['cwd'], '/home/jack/other-project')
+
+    def test_a_second_attention_event_for_the_same_session_closes_the_first(self):
+        """The documented possible duplicate must not leave two live popups."""
+        self.run_helper({
+            'hook_event_name': 'PermissionRequest',
+            'session_id': 'duplicate-session',
+        })
+        self.run_helper({
+            'hook_event_name': 'Notification',
+            'notification_type': 'permission_prompt',
+            'session_id': 'duplicate-session',
+        })
+        records = self.records()
+        self.assertEqual(len(records), 1)
+        record = json.loads(records[0].read_text())
+        self.assertEqual(record['id'], 2)
+        self.assertEqual(self.gdbus_calls(), [[*CLOSE_CALL, '1']])
+
+    def test_stop_closes_and_clears_the_routing_record_for_that_session(self):
+        self.run_helper({
+            'hook_event_name': 'PermissionRequest',
+            'session_id': 'resolved-by-stop',
+            'cwd': '/home/jack/project',
+        })
+        self.assertEqual(len(self.records()), 1)
+        result = self.run_helper({
+            'hook_event_name': 'Stop',
+            'session_id': 'resolved-by-stop',
+            'background_tasks': [],
+            'session_crons': [],
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, '')
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.gdbus_calls(), [[*CLOSE_CALL, '1']])
+        # Stop's own low-urgency completion notice still fires alongside the close.
+        self.assertEqual(self.notifications()[-1], [
+            '--app-name=Claude', '--urgency=low', 'Claude • Done'])
+
+    def test_stop_with_background_work_still_clears_the_routing_record(self):
+        self.run_helper({
+            'hook_event_name': 'PermissionRequest',
+            'session_id': 'still-working',
+        })
+        result = self.run_helper({
+            'hook_event_name': 'Stop',
+            'session_id': 'still-working',
+            'background_tasks': [{'id': 'private-task'}],
+            'session_crons': [],
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.gdbus_calls(), [[*CLOSE_CALL, '1']])
+        # No 'Done' notice this time -- background work is still active.
+        self.assertEqual(len(self.notifications()), 1)
+
+    def test_user_prompt_submit_closes_and_clears_the_routing_record(self):
+        self.run_helper({
+            'hook_event_name': 'Notification',
+            'notification_type': 'agent_needs_input',
+            'session_id': 'resolved-by-prompt',
+        })
+        self.assertEqual(len(self.records()), 1)
+        result = self.run_helper({
+            'hook_event_name': 'UserPromptSubmit',
+            'session_id': 'resolved-by-prompt',
+            'prompt': 'private reply',
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, '')
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.gdbus_calls(), [[*CLOSE_CALL, '1']])
+        self.assertEqual(len(self.notifications()), 1,
+                         'clearing routing metadata must not create a notification')
+
+    def test_clearing_an_untracked_session_does_nothing(self):
+        for event in ('Stop', 'UserPromptSubmit'):
+            with self.subTest(event=event):
+                result = self.run_helper({
+                    'hook_event_name': event,
+                    'session_id': 'never-tracked',
+                    'background_tasks': [], 'session_crons': [],
+                })
+                self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.gdbus_calls(), [])
+
+    def test_expired_record_is_removed_on_the_next_event(self):
+        oldbook = self.runtime / 'oldbook'
+        oldbook.mkdir(mode=0o700)
+        events = oldbook / 'claude-events'
+        events.mkdir(mode=0o700)
+        expired = events / ('a' * 64 + '.json')
+        expired.write_text(json.dumps({'valid_until': int(time.time()) - 1}))
+        expired.chmod(0o600)
+        result = self.run_helper({
+            'hook_event_name': 'PermissionRequest', 'session_id': 'current',
+        })
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(expired.exists())
+        self.assertEqual(len(self.records()), 1)
 
     def test_stop_notifies_only_when_no_background_work_is_reported(self):
         completed = self.run_helper({
@@ -148,6 +321,8 @@ class ClaudeNotifyTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stdout, '')
         self.assertEqual(self.notifications(), [])
+        self.assertEqual(self.records(), [])
+        self.assertEqual(self.gdbus_calls(), [])
 
 
 class ClaudeNotificationInstallerTests(unittest.TestCase):
@@ -208,6 +383,7 @@ class ClaudeNotificationInstallerTests(unittest.TestCase):
             'hooks': [handler],
         }])
         self.assertEqual(installed['hooks']['Stop'], [{'hooks': [handler]}])
+        self.assertEqual(installed['hooks']['UserPromptSubmit'], [{'hooks': [handler]}])
         self.assertEqual(stat.S_IMODE(settings.stat().st_mode), 0o640)
 
         backup = Path(result.stdout.strip())
@@ -228,6 +404,7 @@ class ClaudeNotificationInstallerTests(unittest.TestCase):
         self.assertEqual(len(hooks['PermissionRequest']), 1)
         self.assertEqual(len(hooks['Notification']), 1)
         self.assertEqual(len(hooks['Stop']), 1)
+        self.assertEqual(len(hooks['UserPromptSubmit']), 1)
 
     def test_broken_settings_symlink_is_never_replaced(self):
         settings = self.claude / 'settings.json'

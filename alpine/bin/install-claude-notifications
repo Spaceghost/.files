@@ -134,6 +134,7 @@ def install(target, helper):
     add_hook(document, 'PermissionRequest', handler)
     add_hook(document, 'Notification', handler, NOTIFICATION_MATCHER)
     add_hook(document, 'Stop', handler)
+    add_hook(document, 'UserPromptSubmit', handler)
     replacement = json.dumps(document, indent=2).encode() + b'\n'
     backup = make_backup(target, original, original_mode, replacement)
     try:
