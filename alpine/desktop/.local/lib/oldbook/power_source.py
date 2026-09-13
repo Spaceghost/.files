@@ -33,6 +33,7 @@ LADDER = {
     'blur': 'battery',
     'cava': 'battery',
     'gallery-rotation': 'battery',
+    'ghost-wander': 'battery',
     'keyboard-breath': 'battery',
     'wallpaper-crossfade': 'battery',
     'window-animations': 'battery',

@@ -47,10 +47,13 @@
       ]
     },
     "custom/ghost": {
-      "format": "\udb80\udea0",
+      "format": "{}",
       "tooltip-format": "<b>SPACE GHOST'S COMMAND DECK</b>\nBroadcasting live from the Oldbook. Zorak still does not have root.\n\nLeft: open command deck \u00b7 Right: launch applications",
       "on-click": "~/.local/bin/oldbook-control",
-      "on-click-right": "~/.local/bin/oldbook-menu"
+      "on-click-right": "~/.local/bin/oldbook-menu",
+      "exec": "~/.local/bin/oldbook-waybar-ghost-class",
+      "return-type": "json",
+      "interval": 30
     },
     "sway/workspaces": {
       "disable-scroll": false,

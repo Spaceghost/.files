@@ -32,6 +32,23 @@ window#waybar { background: transparent; color: #ffffff; }
     padding: 0;
 }
 #custom-ghost:hover { background: linear-gradient(135deg, #d997ff, #a355d7 65%, #f284bd); }
+@keyframes oldbook-ghost-wander {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(2px, -2px); }
+    40%  { transform: translate(-1px, 1px); }
+    60%  { transform: translate(1px, 2px); }
+    80%  { transform: translate(-2px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+/* Jack: "make the little ghost ... float in place and wander ... like a
+   tomagatchi." Small enough to read as idle rather than broken; enabled by
+   oldbook-waybar-ghost-class, which only adds this class when he has not
+   turned it off (ghost.json's wander key) and the power ladder still
+   allows the ghost-wander effect (sheds at low battery like every other
+   small ambient motion on this desktop). */
+#custom-ghost.wander {
+    animation: oldbook-ghost-wander 11s ease-in-out infinite;
+}
 #workspaces { margin: 3px 5px 3px 0; }
 #workspaces button { padding: 0 7px; margin: 1px 1px; border-radius: 11px; color: #ffffff; transition: all 180ms ease-in-out; }
 #workspaces button.empty { color: #bfbfbf; }

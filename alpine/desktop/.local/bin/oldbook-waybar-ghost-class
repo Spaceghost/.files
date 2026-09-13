@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""Whether the command-deck ghost should wander in its own waybar cell.
+
+Waybar polls this on a plain interval (no file watcher, no daemon): the
+wander is a CSS `@keyframes` loop that only needs to be turned on or off,
+never driven frame by frame, so an occasional re-check is enough to track
+the two things that can change it -- Jack's own toggle and the power
+posture -- without adding a long-running process. The glyph itself never
+changes; only the `wander` class does, which the theme's `style.css` maps
+to the animation.
+"""
+import json
+import os
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+import power_source
+
+GHOST = '󰊠'
+LADDER_EFFECT = 'ghost-wander'
+
+
+def preferences_path():
+    base = os.environ.get('XDG_CONFIG_HOME') or str(Path.home() / '.config')
+    return Path(base) / 'oldbook/ghost.json'
+
+
+def wants_wander():
+    try:
+        return bool(json.loads(preferences_path().read_text()).get('wander', True))
+    except (OSError, ValueError, AttributeError):
+        return True
+
+
+def main():
+    wander = wants_wander() and power_source.allows(LADDER_EFFECT)
+    print(json.dumps({'text': GHOST, 'class': 'wander' if wander else ''}))
+
+
+if __name__ == '__main__':
+    main()
