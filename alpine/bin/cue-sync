@@ -75,9 +75,12 @@ def main():
     if changed:
         for path in changed:
             print(f'cue-sync: wrote {path}')
+        # A SIGUSR2 makes Waybar tear down and rebuild every module, which is
+        # the one moment its worker threads are cancelled mid-work; send it only
+        # when a rendered file actually changed, never as a matter of course.
+        reload_waybar()
     else:
         print('cue-sync: nothing changed')
-    reload_waybar()
     return 0
 
 
