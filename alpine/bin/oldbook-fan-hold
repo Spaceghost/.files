@@ -128,7 +128,7 @@ def restore(root, saved):
     """
     for index, fields in sorted(saved.items()):
         try:
-            write_int(fan_path(root, index, 'manual'), fields.get('manual') or 0)
+            write_int(fan_path(root, index, 'manual'), 0)
         except ValueError:
             continue
         for field in ('output', 'min'):
@@ -230,17 +230,12 @@ class Holder:
     # ---- the hold ----------------------------------------------------------
 
     def apply(self):
-        """Take manual control at each fan's own minimum, or give up entirely."""
-        for index, fields in sorted(self.saved.items()):
-            floor = fields.get('min')
-            if floor is None:
-                return self.finish('a fan has no readable minimum')
-            if not write_int(fan_path(self.root, index, 'output'), floor):
-                return self.finish('a fan output could not be written')
-            if not write_int(fan_path(self.root, index, 'manual'), 1):
-                return self.finish('a fan could not be switched to manual')
-        self.holding = True
-        return True
+        """Refuse the old minimum-speed hold; firmware retains cooling control.
+
+        There is no evaluated adaptive quieting controller on this machine.
+        Keeping this compatibility endpoint lets older callers fail safely.
+        """
+        return self.finish('manual fan dampening is disabled; firmware cooling retained')
 
     def finish(self, reason):
         """End the hold. Idempotent, and the only way the fans come back.

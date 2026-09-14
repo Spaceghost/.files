@@ -3120,3 +3120,23 @@ reported status, and stopped with its state record removed. No live keyboard,
 privileged inhibitor, service, or fan control was touched by that smoke check.
 System installation, hardware lifecycle handoff, and the native shootout remain
 unfinished.
+
+## Catbed authentication and useful-work status, 2026-09-14
+
+Preserved user-owned active theme and boot artwork changes. Catbed's existing
+Wayland guard remains behind the authentication surface; the locker owns password
+input. The live panel now remains visible while the guard is engaged, even when
+presence heuristics change during password entry. It names the registered running
+job or the actual idle/refusal reason. Work eligibility persists behind the lock.
+
+Removed the automatic synthetic-load fallback. No configured useful job means no
+artificial heating. Check sensors before launching useful work, stop the actual
+job at its thermal ceiling, and notice process completion instead of reporting a
+finished job as running. Minimum-speed manual fan holds are refused; recovery
+always returns manual control to zero. Adaptive quieting is not implemented or
+claimed: firmware cooling takes priority and the cat is not treated as a heatsink.
+
+Pending: physical password-entry/lock-unlock confirmation, evaluated adaptive
+quieting, useful job configuration, and deployment of the changed root fan helper.
+The early keyboard helper and camera privacy pipeline remain separate unfinished
+work. No claim of pre-encryption boot coverage or cat-only capture is made.

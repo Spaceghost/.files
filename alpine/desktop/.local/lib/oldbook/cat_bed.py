@@ -329,23 +329,32 @@ class BedMode:
 
     # ---- the sitting -------------------------------------------------------
 
-    def start(self, environment=None):
-        """Begin warming: real work if there is any, the plain load otherwise."""
+    def start(self, environment=None, values=None, lid_shut=None):
+        """Run queued useful work only, after checking the thermal preconditions.
+
+        Never manufacture heat or override firmware cooling. A cat is not a
+        heatsink, and a missing workload is a normal idle state.
+        """
         if self.running:
             return True
         self.stopped_reason = None
         self.notes = []
+        values = thermal.readings() if values is None else values
+        lid_shut = thermal.lid_closed() if lid_shut is None else lid_shut
+        state, reasons = thermal.verdict(values, thermal.regime(lid_shut is not False))
+        if state != 'run':
+            self.stop('; '.join(reasons), safety=True)
+            return False
         job = available_work(self.jobs, environment)
         if job is not None and self.spawn_job(job, environment):
             self.notes.append(f'running real work: {self.job}')
         else:
-            self.notes.append('no real work was waiting; a plain controlled load')
-        self.spawn_workers()
-        self.running = bool(self.workers) or self.job_process is not None
+            self.notes.append('no useful work queued; no artificial heating')
+        self.running = self.job_process is not None
         self.coasting = False
         self.started_at = self.clock()
         if not self.running:
-            self.stopped_reason = 'nothing could be started'
+            self.stopped_reason = 'no useful work queued'
         return self.running
 
     def stop(self, reason, safety=False):
@@ -380,19 +389,15 @@ class BedMode:
         if state == 'stop':
             self.stop('; '.join(reasons), safety=True)
             return self.report(values, limits, name)
-        # Fans before load, always: the hold is given up at a lower temperature
-        # than the one that pauses the heating, so the machine gets its cooling
-        # back before it ever needs the load to stop.
-        if not self.fans.released:
-            action, why = thermal.fan_verdict(values, limits, self.fans.active)
-            if action == 'release':
-                self.fans.stop('; '.join(why) or 'the fans are needed')
-            elif action == 'hold' and not self.fans.active:
-                self.fans.start(name)
         if self.fans.active:
-            self.fans.renew(name)
-        self.coasting = state == 'coast'
-        self.push(0.0 if self.coasting else thermal.duty(values, limits, self.duty))
+            self.fans.stop('firmware cooling is required')
+        # Useful jobs are not duty-controlled synthetic workers. Stop the job
+        # itself at the load ceiling instead of merely reducing a dummy load.
+        if state == 'coast':
+            self.stop('; '.join(reasons), safety=True)
+        elif self.job_process is not None and self.job_process.poll() is not None:
+            result = self.job_process.returncode
+            self.stop('useful work completed' if result == 0 else 'useful work failed')
         return self.report(values, limits, name)
 
     def report(self, values, limits, name):
