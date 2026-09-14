@@ -349,7 +349,10 @@ class Service:
         # screen and the decision to keep heating are the same measurement.
         values = thermal.readings()
         limits = thermal.regime(lid_shut is not False)
-        bed = self.bed_tick(document, chosen, present, enabled, lid_shut, values)
+        # The guard persists behind authentication. Typing a password or the
+        # cat moving must not cancel useful work while Catbed remains enabled.
+        bed = self.bed_tick(document, chosen, present or (guarded and enabled),
+                            enabled, lid_shut, values)
         record = {
             'running': True, 'enabled': enabled, 'locked': locked,
             'input_parked': parked, 'guard_engaged': guarded,
@@ -453,7 +456,7 @@ class Service:
                                          for key, value in values.items()}}
             self.arming_since = None
             self.bed = cat_bed.BedMode(cat_bed.load_jobs(document), clock=self.clock)
-            self.bed.start()
+            self.bed.start(values=values, lid_shut=lid_shut is not False)
         if not self.bed.running:
             return self.retire(self.bed.report(values, limits, name))
         return self.retire(self.bed.update(values, lid_shut is not False))
