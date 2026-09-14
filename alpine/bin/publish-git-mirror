@@ -269,8 +269,19 @@ def publish_locked(checkout, mirror, remote, branch, export_only, only_if_change
         if ancestor == local:
             published_commit = remote_commit
         elif ancestor != remote_commit:
-            merged = run(['git', 'merge-tree', '--write-tree', local, remote_commit],
-                         mirror, capture=True).stdout.splitlines()[0]
+            remote_tree = run(['git', 'rev-parse', remote_commit + '^{tree}'],
+                              mirror, capture=True).stdout.strip()
+            previous_trees = run(['git', 'log', '-n', '128', '--first-parent',
+                                  '--format=%T', local], mirror, capture=True).stdout.splitlines()
+            if remote_tree in previous_trees:
+                # A history-only legacy merge can create several merge bases.
+                # Its complete snapshot is already a local ancestor: replaying
+                # obsolete rename diffs would manufacture content conflicts.
+                merged = run(['git', 'rev-parse', local + '^{tree}'],
+                             mirror, capture=True).stdout.strip()
+            else:
+                merged = run(['git', 'merge-tree', '--write-tree', local, remote_commit],
+                             mirror, capture=True).stdout.splitlines()[0]
             author = run(['git', 'show', '-s', '--format=%an%n%ae', local],
                          mirror, capture=True).stdout.splitlines()
             if len(author) != 2:

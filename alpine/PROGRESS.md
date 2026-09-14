@@ -3018,3 +3018,11 @@ legacy-history merge a824910: its resulting tree matched our pre-lock tree.
 Integrate that already-folded leaf without replaying the obsolete rename again.
 The publisher preserves Git-only remote merge ancestry on a separate publication
 ref; Fossil's export branch stays owned by Fossil. Pushes remain fast-forward.
+
+Publication follow-up: the scheduled publisher advanced GitHub with the older
+lock commit during this run. Its entire tree exactly matched our local parent,
+but the two legacy merge bases manufactured rename conflicts. The publisher
+now recognizes an exact ancestor-tree match before attempting content merging;
+it retains the remote parent and publishes the new tested Fossil snapshot.
+Both this history-only case and genuinely independent remote file additions
+pass isolated local-Git tests. The publication regression batch passes 19 tests.
