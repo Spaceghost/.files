@@ -1,0 +1,43 @@
+{
+  "old_pid": 22029,
+  "new_pid": 28118,
+  "alive_after_seconds": 8,
+  "settings_sha256_before": "a885af662528cfbfe517f15576c037acdc35076b114b0515b82747f7824ac74d",
+  "settings_sha256_after": "a885af662528cfbfe517f15576c037acdc35076b114b0515b82747f7824ac74d",
+  "settings_unchanged": true,
+  "position": "bottom",
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "bed058eb6a7a17348ff23bc55c39354a52c835b723e2daed75b35f135fbde829",
+    "alpine/desktop/.local/lib/oldbook/ripple.py": "336c0da132002e47a20c736ee1a2759df06dd24d55dca4900596663f37984510"
+  },
+  "mapped_layers": [
+    {
+      "output": "eDP-1",
+      "namespace": "oldbook-decoration-band",
+      "extent": {
+        "width": 1440,
+        "height": 1,
+        "x": 0,
+        "y": 899
+      }
+    },
+    {
+      "output": "eDP-1",
+      "namespace": "oldbook-decoration",
+      "extent": {
+        "width": 200,
+        "height": 200,
+        "x": 312,
+        "y": 696
+      }
+    }
+  ],
+  "new_log_errors": false,
+  "live_transitions_forced": false,
+  "output_powered": false,
+  "output_dpms": false,
+  "binding_mode": "watch",
+  "visual_verification": "Deferred: live output is powered off. No wake, mode change or focus change was sent.",
+  "capture_attempt": "grim timed out after four seconds while the output was off; no live screenshot retained.",
+  "allocation_evidence": "native-restart/summary.json reproduces the 200x200 allocation with output off and normal 540x56 allocation 35.7ms after private output wake. The live display was not woken."
+}

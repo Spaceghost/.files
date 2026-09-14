@@ -595,11 +595,18 @@ def daemon():
             if departure is None or self.attachment_mode != 'window':
                 departure = self.workspace_extent(output_rect)
             attached = placement['mode'] == 'window'
+            if attached and self.attachment_mode != 'window' and not self.flying:
+                # Lifting the strip out of its dock disturbs the same water
+                # as setting it down. Photograph its old outline before the
+                # first moving frame; a slow capture is dropped by the same
+                # budget as a landing, never by holding up the flight.
+                prepare_strike(self, rect=departure)
+                strike(self)
             self.attachment_mode = placement['mode']
             self.flying = True
-            # Only a strip bound for the band strikes anything; taking hold of
-            # a window is a grab. The contact is watched for from the first
-            # frame, against the way each coordinate sets out.
+            # A return to the band waits for contact; a departure has already
+            # struck its old dock and must not strike again at the window.
+            # Contact is watched against the way each coordinate sets out.
             self.contact_pending = not attached
             self.approach = None
             self.previous_geometry = None
@@ -632,8 +639,8 @@ def daemon():
             """
             self.flying = False
             if self.attachment_mode == 'window':
-                # Taking hold of a window is a grab, not an impact. Nothing
-                # struck anything, so nothing rings.
+                # Taking hold of the window adds no second wave. Any dock
+                # departure already rang when this flight began.
                 self.contact_pending = False
                 abandon_strike(self)
                 return
@@ -1451,19 +1458,19 @@ def daemon():
     # One wave per output at a time. A second strike while the first is still
     # crossing would photograph the first and refract a refraction.
     ripples = {}
-    # Photographs taken on the strip's final approach, one per output, waiting
-    # for the landing that will show them.
+    # Photographs taken on the strip's final approach or departure, one per
+    # output, waiting for the event that will show them.
     approaches = {}
 
     def output_name(caption):
         return caption.monitor.get_connector() if caption.monitor is not None else None
 
     def abandon_strike(caption):
-        """Forget a photograph whose landing is no longer coming."""
+        """Forget a photograph whose flight was abandoned or retargeted."""
         approaches.pop(output_name(caption), None)
 
-    def prepare_strike(caption):
-        """Photograph the band while the strip is still in the air.
+    def prepare_strike(caption, rect=None):
+        """Photograph the band at departure or on the final approach.
 
         The wave has to begin on the frame the strip arrives, and `grim` takes
         tens of milliseconds even for the band alone, so the picture is taken
@@ -1471,10 +1478,13 @@ def daemon():
         began -- and held until strike() asks for it. The strip is within a
         few pixels of home when the shutter goes; the wave leaves the outline a
         little way out (ripple.SHORE), so those pixels are never in the water.
+        An explicit rectangle is the dock being left: capture starts before
+        changing its geometry and strike() dates the wave from that departure.
         """
         output_rect = caption.output_rect
         name = output_name(caption)
-        rect = caption.motion_target
+        if rect is None:
+            rect = caption.motion_target
         if (not output_rect or not name or rect is None or name in ripples
                 or name in approaches or not ripple.allowed(animations=caption.animations)):
             return

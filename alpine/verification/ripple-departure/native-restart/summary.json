@@ -1,0 +1,119 @@
+{
+  "runs": [],
+  "isolated": true,
+  "synthetic_screenshots": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "bed058eb6a7a17348ff23bc55c39354a52c835b723e2daed75b35f135fbde829",
+    "alpine/desktop/.local/lib/oldbook/ripple.py": "336c0da132002e47a20c736ee1a2759df06dd24d55dca4900596663f37984510"
+  },
+  "installed_helper_resolves_to_source": true,
+  "restart_power_off": {
+    "before_daemon": {
+      "window": {
+        "x": 330,
+        "y": 220,
+        "width": 540,
+        "height": 360
+      },
+      "captions": [],
+      "ripples": [],
+      "outputs": [
+        {
+          "name": "HEADLESS-1",
+          "active": true,
+          "power": false,
+          "dpms": false,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 800
+          },
+          "current_mode": {
+            "width": 1200,
+            "height": 800,
+            "refresh": 60000
+          }
+        }
+      ]
+    },
+    "sleeping": {
+      "window": {
+        "x": 330,
+        "y": 220,
+        "width": 540,
+        "height": 360
+      },
+      "captions": [
+        {
+          "width": 200,
+          "height": 200,
+          "x": 330,
+          "y": 558
+        }
+      ],
+      "ripples": [],
+      "outputs": [
+        {
+          "name": "HEADLESS-1",
+          "active": true,
+          "power": false,
+          "dpms": false,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 800
+          },
+          "current_mode": {
+            "width": 1200,
+            "height": 800,
+            "refresh": 60000
+          }
+        }
+      ]
+    },
+    "awake": {
+      "window": {
+        "x": 330,
+        "y": 220,
+        "width": 540,
+        "height": 360
+      },
+      "captions": [
+        {
+          "width": 540,
+          "height": 56,
+          "x": 330,
+          "y": 558
+        }
+      ],
+      "ripples": [],
+      "outputs": [
+        {
+          "name": "HEADLESS-1",
+          "active": true,
+          "power": true,
+          "dpms": true,
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1200,
+            "height": 800
+          },
+          "current_mode": {
+            "width": 1200,
+            "height": 800,
+            "refresh": 60000
+          }
+        }
+      ]
+    },
+    "attachment_after_power_on_ms": 35.72167600032117,
+    "initial_placeholder_200x200": true,
+    "restored_attachment": true,
+    "live_output_touched": false,
+    "screenshots_taken": false
+  },
+  "passed": true
+}

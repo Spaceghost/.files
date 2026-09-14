@@ -416,7 +416,9 @@
         "alpine/desktop/.local/lib/oldbook/decoration_reserve.py",
         "alpine/desktop/.local/lib/oldbook/ripple.py",
         "alpine/tests/test_ripple.py",
-        "alpine/verification/ripple-water/*"
+        "alpine/tests/verify_ripple_departure.py",
+        "alpine/verification/ripple-water/*",
+        "alpine/verification/ripple-departure/*"
       ],
       "tests": [
         "test_decoration.py",
@@ -429,7 +431,8 @@
       ],
       "evidence": [
         "verification/decoration-context/",
-        "verification/ripple-water/README.md"
+        "verification/ripple-water/README.md",
+        "verification/ripple-departure/README.md"
       ]
     },
     {

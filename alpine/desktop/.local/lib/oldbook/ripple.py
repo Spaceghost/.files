@@ -1,8 +1,8 @@
-"""Struck-water rings over the lower screen, for the moment the strip lands.
+"""Water rings along the screen edge as the caption leaves or reaches its dock.
 
-The caption flies when it attaches or detaches, and a flight that ends in the
-band has an impact. This draws it: a train of rings leaving the strip's own
-edge, refracting whatever is actually on the screen rather than drawing light
+The caption flies when it attaches or detaches, and lifting out of its dock
+disturbs the water just as landing does. This draws it: rings leaving the docked
+strip's own edge, refracting whatever is actually on the screen rather than drawing light
 over it, and gone inside a second.
 
 What it refracts is a still photograph. wlr-screencopy hands over the composited

@@ -1,5 +1,32 @@
 # Oldbook verification
 
+## Ripple when the caption leaves its dock — 2026-09-13
+
+Jack asked that `ripple.py` also apply when the bar moves away from the bottom.
+
+- The existing trigger photographed only a returning strip's final approach.
+  A settled strip now also sends rings from its old docked outline when it
+  lifts away to attach to a floating window. Both bottom and right docks use
+  the same shader, settings, capture crop and power policy. Landing still
+  triggers on first contact, and grabbing the window adds no second wave.
+- Departure starts its capture before the moving frame and dates the wave from
+  takeoff. The flight does not wait for the photograph; the existing 100ms
+  admission limit drops late captures. Retargeting cancels pending captures,
+  and an in-flight reversal does not invent another dock departure.
+- Validation: the new regressions failed before the change and all 61 ripple
+  tests now pass. The affected feature checks ran 302 tests with one existing
+  skip and no failures. Private SwayFX/GLES tests rendered both departure and
+  landing on bottom/right docks with no GL errors and no displaced caption in
+  their saved photographs. Deliberately delayed captures produced no wave.
+- Reloaded only the installed caption daemon with its existing environment;
+  settings hash is unchanged and no new runtime errors appeared. The live
+  display was powered off in the user's watch mode and was left that way.
+  A private power-off/start/power-on test reproduced the initial 200x200 GTK
+  placeholder and confirmed correct allocation after the first output frame.
+- Evidence, screenshots and limits: `verification/ripple-departure/README.md`.
+  Physical display appearance and timing after the user wakes the screen are
+  unverified; the software-rendered native probe does not establish live 60fps.
+
 ## Catbed administers bak through Incus — 2026-09-13
 
 Jack requested the Incus client on catbed with broad permissions on bak.

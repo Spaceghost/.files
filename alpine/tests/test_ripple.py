@@ -1,8 +1,14 @@
 """The ripple's geometry, timing, settings and power policy, checked without a GPU."""
+import ast
 import math
 from pathlib import Path
+import runpy
 import sys
+import tempfile
+import threading
+from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'desktop/.local/lib/oldbook'))
 import power_source
@@ -202,6 +208,140 @@ class Policy(unittest.TestCase):
         self.assertTrue(power_source.allows(ripple.EFFECT, current='battery'))
         self.assertFalse(power_source.allows(ripple.EFFECT, current='battery-low'))
         self.assertFalse(power_source.allows(ripple.EFFECT, current='battery-critical'))
+
+
+class DockDeparture(unittest.TestCase):
+    """Exercise the daemon's real flight/capture callbacks without mapping GTK.
+
+    The photograph, worker scheduling and GL surface are external boundaries;
+    the event ordering, geometry, policy and late/cancelled capture decisions
+    run unchanged. No desktop process is started by this fixture.
+    """
+    def setUp(self):
+        script = Path(__file__).resolve().parents[1] / 'desktop/.local/bin/oldbook-decoration'
+        self.ns = runpy.run_path(str(script))
+        daemon = next(node for node in ast.parse(script.read_text()).body
+                      if isinstance(node, ast.FunctionDef) and node.name == 'daemon')
+        caption = next(node for node in daemon.body
+                       if isinstance(node, ast.ClassDef) and node.name == 'Caption')
+        methods = [node for node in caption.body
+                   if isinstance(node, ast.FunctionDef) and node.name == 'begin_flight']
+        functions = [node for node in daemon.body if isinstance(node, ast.FunctionDef)
+                     and node.name in ('output_name', 'abandon_strike', 'prepare_strike', 'strike')]
+        self.workers = []
+        self.frames = []
+        self.clock = 10.0
+        self.options = {'ripple': ripple.settings(), 'corner_radius': 6}
+        temporary = self.enterContext(tempfile.TemporaryDirectory())
+        self.ns.update(
+            STATE=Path(temporary), ripples={}, approaches={}, stop=threading.Event(),
+            Gtk4LayerShell=SimpleNamespace(set_layer=lambda *args: None,
+                                          Layer=SimpleNamespace(TOP=1, OVERLAY=2)),
+            GLib=SimpleNamespace(idle_add=lambda callback, *args: callback(*args)),
+            threading=SimpleNamespace(Thread=lambda target, daemon: SimpleNamespace(
+                start=lambda: self.workers.append(target))),
+            time=SimpleNamespace(monotonic=lambda: self.clock),
+            load_settings=lambda *args: self.options,
+        )
+        exec(compile(ast.Module(body=methods + functions, type_ignores=[]),
+                     str(script), 'exec'), self.ns)
+        self.enterContext(patch.object(ripple.power_source, 'allows', return_value=True))
+        self.enterContext(patch.object(ripple, 'capture', side_effect=self.photograph))
+        self.enterContext(patch.object(ripple, 'Ripple', side_effect=self.surface))
+        self.caption = SimpleNamespace(
+            monitor=SimpleNamespace(get_connector=lambda: 'TEST-1', get_scale_factor=lambda: 1),
+            edge='bottom', output_rect={'x': 1200, 'y': 300, 'width': 1200, 'height': 900},
+            motion_rect=None, attachment_mode='workspace', flying=False, animations=True,
+            workspace_extent=lambda output: dict(STRIP), window=object(),
+            anchor_free=lambda: None, render_geometry=lambda: None, animate=lambda: None,
+        )
+
+    def photograph(self, destination, geometry):
+        self.geometry = geometry
+        width, height = map(int, geometry.split()[1].split('x'))
+        destination.write_bytes(b'P6 %d %d 255\n' % (width, height) + bytes(width * height * 3))
+
+    def surface(self, monitor, area, plan, pixels, size, on_done):
+        return SimpleNamespace(start=lambda started: self.frames.append(
+            {'area': area, 'plan': plan, 'started': started, 'size': size}))
+
+    def depart(self):
+        self.ns['begin_flight'](self.caption, {'mode': 'window'}, self.caption.output_rect)
+
+    def finish_capture(self, elapsed=0.04):
+        self.clock += elapsed
+        for worker in self.workers:
+            worker()
+        self.workers.clear()
+
+    def test_leaving_the_dock_rings_from_the_old_outline_at_departure_time(self):
+        self.depart()
+        self.finish_capture()
+        self.assertEqual(len(self.frames), 1)
+        frame = self.frames[0]
+        self.assertEqual(frame['area'], AREA)
+        self.assertEqual(self.geometry, '1200,900 1200x300')
+        self.assertEqual(frame['started'], 10.0)
+        self.assertAlmostEqual(frame['plan']['centre'][1], 278.5 / 300)
+        self.assertFalse(self.caption.contact_pending, 'window arrival must not strike again')
+
+    def test_right_dock_uses_its_departed_outline_on_an_offset_output(self):
+        self.caption.edge = 'right'
+        self.caption.workspace_extent = lambda output: dict(SIDE_STRIP)
+        self.depart()
+        self.finish_capture()
+        self.assertEqual(len(self.frames), 1)
+        self.assertEqual(self.frames[0]['area'], {'x': 800, 'y': 0, 'width': 400, 'height': 900})
+        self.assertEqual(self.geometry, '2000,300 400x900')
+        self.assertAlmostEqual(self.frames[0]['plan']['centre'][0], 378.5 / 400)
+
+    def test_a_late_departure_photograph_is_dropped(self):
+        self.depart()
+        self.assertEqual(len(self.workers), 1)
+        self.finish_capture(elapsed=0.11)
+        self.assertEqual(self.frames, [])
+        self.assertEqual(self.ns['approaches'], {})
+
+    def test_retargeting_discards_the_pending_departure(self):
+        self.depart()
+        self.assertEqual(len(self.workers), 1)
+        self.ns['abandon_strike'](self.caption)
+        self.finish_capture()
+        self.assertEqual(self.frames, [])
+
+    def test_a_reversed_landing_has_no_new_dock_departure(self):
+        self.caption.flying = True
+        self.caption.motion_rect = dict(STRIP, y=700)
+        self.depart()
+        self.assertEqual(self.workers, [])
+
+    def test_disabled_animation_disabled_effect_and_busy_output_do_not_capture(self):
+        for reason in ('animation', 'effect', 'busy', 'power'):
+            with self.subTest(reason=reason):
+                self.caption.attachment_mode = 'workspace'
+                self.caption.flying = False
+                self.caption.animations = reason != 'animation'
+                self.options['ripple']['enabled'] = reason != 'effect'
+                self.ns['ripples'].clear()
+                if reason == 'busy':
+                    self.ns['ripples']['TEST-1'] = True
+                ripple.power_source.allows.return_value = reason != 'power'
+                self.depart()
+                self.assertEqual(self.workers, [])
+
+    def test_returning_to_the_dock_still_waits_for_contact(self):
+        self.caption.attachment_mode = 'window'
+        self.caption.motion_rect = dict(STRIP, y=500, width=500)
+        self.ns['begin_flight'](self.caption, {'mode': 'workspace'}, self.caption.output_rect)
+        self.assertTrue(self.caption.contact_pending)
+        self.assertEqual(self.workers, [])
+        self.ns['prepare_strike'](self.caption)
+        self.finish_capture()
+        self.assertEqual(self.frames, [])
+        self.clock = 10.06
+        self.ns['strike'](self.caption)
+        self.assertEqual(len(self.frames), 1)
+        self.assertEqual(self.frames[0]['started'], 10.06)
 
 
 class Wave(unittest.TestCase):

@@ -1,0 +1,464 @@
+Review alpine/FEATURES.md for these pinned behaviors:
+  DECORATION-STYLE — 7 check files
+  DECORATION-PLACEMENT — 3 check files
+  MOTION — 11 check files
+  DEPLOY-RECOVERY — 2 check files
+  AGENT-CAPTION — 2 check files
+18 unique check files. Listed checks cover parts of each contract; passing them is not complete, visual or live-session verification.
+test_claude_never_reports_working_only_waiting_or_nothing (test_agent_status.Glyph.test_claude_never_reports_working_only_waiting_or_nothing) ... ok
+test_codex_with_a_state_and_nothing_waiting_reads_as_working (test_agent_status.Glyph.test_codex_with_a_state_and_nothing_waiting_reads_as_working) ... ok
+test_codex_with_no_state_and_nothing_waiting_shows_nothing (test_agent_status.Glyph.test_codex_with_no_state_and_nothing_waiting_shows_nothing) ... ok
+test_none_for_a_window_that_is_not_an_agent (test_agent_status.Glyph.test_none_for_a_window_that_is_not_an_agent) ... ok
+test_the_working_glyph_is_a_single_still_frame_not_an_animation (test_agent_status.Glyph.test_the_working_glyph_is_a_single_still_frame_not_an_animation)
+agent_status never advances SPINNER on its own -- there is no clock ... ok
+test_waiting_wins_over_a_reported_state (test_agent_status.Glyph.test_waiting_wins_over_a_reported_state) ... ok
+test_a_corrupt_file_is_skipped_not_raised (test_agent_status.LoadRecords.test_a_corrupt_file_is_skipped_not_raised) ... ok
+test_a_missing_directory_reads_as_empty_not_an_error (test_agent_status.LoadRecords.test_a_missing_directory_reads_as_empty_not_an_error) ... ok
+test_reads_every_unexpired_record_in_the_directory (test_agent_status.LoadRecords.test_reads_every_unexpired_record_in_the_directory) ... ok
+test_falls_back_to_pane_when_no_tty (test_agent_status.Matching.test_falls_back_to_pane_when_no_tty) ... ok
+test_matches_by_tty_first (test_agent_status.Matching.test_matches_by_tty_first) ... ok
+test_neither_tty_nor_pane_never_matches (test_agent_status.Matching.test_neither_tty_nor_pane_never_matches) ... ok
+test_false_for_a_non_waiting_event (test_agent_status.Waiting.test_false_for_a_non_waiting_event) ... ok
+test_false_when_no_record_matches_this_window (test_agent_status.Waiting.test_false_when_no_record_matches_this_window) ... ok
+test_true_only_for_a_waiting_event_on_a_matching_record (test_agent_status.Waiting.test_true_only_for_a_waiting_event_on_a_matching_record) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.012s
+
+OK
+  + [1/18] test_agent_status.py
+test_a_record_from_the_future_is_refused (test_air.AirRecordTests.test_a_record_from_the_future_is_refused) ... ok
+test_a_stale_record_is_no_breath_at_all (test_air.AirRecordTests.test_a_stale_record_is_no_breath_at_all) ... ok
+test_broken_records_are_ignored (test_air.AirRecordTests.test_broken_records_are_ignored) ... ok
+test_reads_a_fresh_breathing_record (test_air.AirRecordTests.test_reads_a_fresh_breathing_record) ... ok
+test_the_closing_record_stops_the_scene (test_air.AirRecordTests.test_the_closing_record_stops_the_scene) ... ok
+test_values_outside_their_range_are_clamped (test_air.AirRecordTests.test_values_outside_their_range_are_clamped) ... ok
+test_full_lungs_swell_it_further (test_air.BreathMathsTests.test_full_lungs_swell_it_further) ... ok
+test_no_air_leaves_the_painting_alone (test_air.BreathMathsTests.test_no_air_leaves_the_painting_alone) ... ok
+test_only_the_keystroke_breath_moves_the_caption (test_air.BreathMathsTests.test_only_the_keystroke_breath_moves_the_caption) ... ok
+test_quantising_keeps_stylesheet_rewrites_rare (test_air.BreathMathsTests.test_quantising_keeps_stylesheet_rewrites_rare) ... ok
+test_resting_lungs_swell_the_painting_slightly (test_air.BreathMathsTests.test_resting_lungs_swell_the_painting_slightly) ... ok
+test_the_bottom_of_every_breath_is_the_untouched_painting (test_air.BreathMathsTests.test_the_bottom_of_every_breath_is_the_untouched_painting) ... ok
+test_the_caption_stays_inside_its_band (test_air.BreathMathsTests.test_the_caption_stays_inside_its_band) ... ok
+test_the_swell_never_exceeds_the_documented_ceiling (test_air.BreathMathsTests.test_the_swell_never_exceeds_the_documented_ceiling) ... ok
+test_a_segment_begins_on_the_untouched_painting (test_air.DriftTests.test_a_segment_begins_on_the_untouched_painting) ... ok
+test_directions_alternate_so_two_paintings_never_move_alike (test_air.DriftTests.test_directions_alternate_so_two_paintings_never_move_alike) ... ok
+test_the_drift_reaches_its_zoom_and_stops_there (test_air.DriftTests.test_the_drift_reaches_its_zoom_and_stops_there) ... ok
+test_the_glide_back_lands_exactly_at_rest (test_air.DriftTests.test_the_glide_back_lands_exactly_at_rest) ... ok
+test_the_pan_always_stays_inside_the_room_the_zoom_opens (test_air.DriftTests.test_the_pan_always_stays_inside_the_room_the_zoom_opens) ... ok
+test_zooming_out_is_refused_because_it_would_show_an_edge (test_air.DriftTests.test_zooming_out_is_refused_because_it_would_show_an_edge) ... ok
+test_a_partial_file_fills_in_the_defaults (test_air.PreferenceTests.test_a_partial_file_fills_in_the_defaults) ... ok
+test_an_unreadable_file_falls_back_to_the_still_painting (test_air.PreferenceTests.test_an_unreadable_file_falls_back_to_the_still_painting) ... ok
+test_switches_round_trip (test_air.PreferenceTests.test_switches_round_trip) ... ok
+test_the_wallpaper_does_not_breathe_unless_it_is_asked_to (test_air.PreferenceTests.test_the_wallpaper_does_not_breathe_unless_it_is_asked_to) ... ok
+test_a_worker_that_stops_tells_the_scene_to_settle (test_air.PublishedBreathTests.test_a_worker_that_stops_tells_the_scene_to_settle) ... ok
+test_every_published_record_reads_back (test_air.PublishedBreathTests.test_every_published_record_reads_back) ... ok
+test_keystrokes_fill_the_lungs (test_air.PublishedBreathTests.test_keystrokes_fill_the_lungs) ... ok
+test_the_phase_runs_forward_without_jumping (test_air.PublishedBreathTests.test_the_phase_runs_forward_without_jumping) ... ok
+test_the_publisher_keeps_to_its_own_rate (test_air.PublishedBreathTests.test_the_publisher_keeps_to_its_own_rate) ... ok
+test_the_six_second_breath_is_published (test_air.PublishedBreathTests.test_the_six_second_breath_is_published) ... ok
+test_the_tempo_quickens_as_the_lungs_fill (test_air.PublishedBreathTests.test_the_tempo_quickens_as_the_lungs_fill) ... ok
+test_the_typing_modes_leave_the_desktop_still (test_air.PublishedBreathTests.test_the_typing_modes_leave_the_desktop_still) ... ok
+test_absurd_timings_are_clamped (test_air.ScreensaverProtocolTests.test_absurd_timings_are_clamped) ... ok
+test_an_unbounded_list_is_refused (test_air.ScreensaverProtocolTests.test_an_unbounded_list_is_refused) ... ok
+test_defaults_fill_in (test_air.ScreensaverProtocolTests.test_defaults_fill_in) ... ok
+test_relative_paths_are_refused (test_air.ScreensaverProtocolTests.test_relative_paths_are_refused) ... ok
+test_stopping_needs_no_list (test_air.ScreensaverProtocolTests.test_stopping_needs_no_list) ... ok
+test_the_encoder_round_trips (test_air.ScreensaverProtocolTests.test_the_encoder_round_trips) ... ok
+test_a_collection_with_nothing_rotating_still_drifts (test_air.ScreensaverSelectionTests.test_a_collection_with_nothing_rotating_still_drifts) ... ok
+test_only_rotating_paintings_are_offered (test_air.ScreensaverSelectionTests.test_only_rotating_paintings_are_offered) ... ok
+test_the_list_stays_bounded (test_air.ScreensaverSelectionTests.test_the_list_stays_bounded) ... ok
+test_the_painting_on_screen_is_not_repeated_first (test_air.ScreensaverSelectionTests.test_the_painting_on_screen_is_not_repeated_first) ... ok
+test_a_long_stall_does_not_jump_the_value (test_air.SmootherTests.test_a_long_stall_does_not_jump_the_value) ... ok
+test_a_zero_frame_changes_nothing (test_air.SmootherTests.test_a_zero_frame_changes_nothing) ... ok
+test_bad_settings_are_refused (test_air.SmootherTests.test_bad_settings_are_refused) ... ok
+test_it_never_overshoots (test_air.SmootherTests.test_it_never_overshoots) ... ok
+test_it_settles_exactly_and_stops (test_air.SmootherTests.test_it_settles_exactly_and_stops) ... ok
+test_a_missing_file_reads_as_nothing (test_air.WatcherTests.test_a_missing_file_reads_as_nothing) ... ok
+test_a_vanished_file_clears_the_cache (test_air.WatcherTests.test_a_vanished_file_clears_the_cache) ... ok
+test_it_parses_only_when_the_file_moves_on (test_air.WatcherTests.test_it_parses_only_when_the_file_moves_on) ... ok
+test_the_air_watcher_re_checks_staleness_without_a_new_file (test_air.WatcherTests.test_the_air_watcher_re_checks_staleness_without_a_new_file) ... ok
+
+----------------------------------------------------------------------
+Ran 51 tests in 5.477s
+
+OK
+  + [2/18] test_air.py
+test_delayed_frame_catches_up_to_elapsed_time (test_carousel_responsiveness.Responsiveness.test_delayed_frame_catches_up_to_elapsed_time) ... ok
+test_first_frame_shows_progress_after_request (test_carousel_responsiveness.Responsiveness.test_first_frame_shows_progress_after_request) ... ok
+test_new_input_preserves_running_animation_clock (test_carousel_responsiveness.Responsiveness.test_new_input_preserves_running_animation_clock) ... ok
+test_restarting_after_idle_preserves_visible_navigation (test_carousel_responsiveness.Responsiveness.test_restarting_after_idle_preserves_visible_navigation) ... ok
+test_reveal_finishes_by_200_ms_and_navigation_by_300_ms (test_carousel_responsiveness.Responsiveness.test_reveal_finishes_by_200_ms_and_navigation_by_300_ms) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.004s
+
+OK
+  + [3/18] test_carousel_responsiveness.py
+test_click_uses_the_frontmost_projected_card (test_carousel_view.Layout.test_click_uses_the_frontmost_projected_card) ... ok
+test_empty_carousel_is_safe (test_carousel_view.Layout.test_empty_carousel_is_safe) ... ok
+test_nearby_cards_are_unique_and_wrap_around_the_selection (test_carousel_view.Layout.test_nearby_cards_are_unique_and_wrap_around_the_selection) ... ok
+test_previews_are_letterboxed_without_changing_aspect (test_carousel_view.Layout.test_previews_are_letterboxed_without_changing_aspect) ... ok
+test_selected_card_faces_forward_and_neighbors_turn_inward (test_carousel_view.Layout.test_selected_card_faces_forward_and_neighbors_turn_inward) ... ok
+test_small_candidate_lists_never_duplicate_a_preview (test_carousel_view.Layout.test_small_candidate_lists_never_duplicate_a_preview) ... ok
+test_motion_tracks_elapsed_time_at_different_refresh_rates (test_carousel_view.Motion.test_motion_tracks_elapsed_time_at_different_refresh_rates) ... ok
+test_resting_selection_does_not_overshoot_its_destination (test_carousel_view.Motion.test_resting_selection_does_not_overshoot_its_destination) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.006s
+
+OK
+  + [4/18] test_carousel_view.py
+test_an_attached_bottom_strip_and_its_window_are_one_shape (test_decoration.DecorationTests.test_an_attached_bottom_strip_and_its_window_are_one_shape)
+The seam is closed on the strip's side, never on the compositor's. ... ok
+test_an_explicitly_transparent_window_is_believed_over_the_theme (test_decoration.DecorationTests.test_an_explicitly_transparent_window_is_believed_over_the_theme)
+Sway only reports an opacity where something set one, and a window it ... ok
+test_appearance_combines_foot_font_with_validated_active_palette (test_decoration.DecorationTests.test_appearance_combines_foot_font_with_validated_active_palette) ... ok
+test_captions_follow_each_outputs_selected_workspace (test_decoration.DecorationTests.test_captions_follow_each_outputs_selected_workspace) ... ok
+test_decoration_settings_validate_ranges_and_types (test_decoration.DecorationTests.test_decoration_settings_validate_ranges_and_types) ... ok
+test_design_font_reads_the_active_theme_descriptor (test_decoration.DecorationTests.test_design_font_reads_the_active_theme_descriptor) ... ok
+test_design_opacity_reads_the_active_theme_descriptor (test_decoration.DecorationTests.test_design_opacity_reads_the_active_theme_descriptor) ... ok
+test_design_radius_follows_the_theme_the_compositor_was_built_from (test_decoration.DecorationTests.test_design_radius_follows_the_theme_the_compositor_was_built_from) ... ok
+test_focus_path_includes_floating_windows_and_nested_splits (test_decoration.DecorationTests.test_focus_path_includes_floating_windows_and_nested_splits) ... ok
+test_fullscreen_square_caption_excludes_floating_windows (test_decoration.DecorationTests.test_fullscreen_square_caption_excludes_floating_windows) ... ok
+test_fullscreen_square_caption_uses_visible_output_and_root_state (test_decoration.DecorationTests.test_fullscreen_square_caption_uses_visible_output_and_root_state) ... ok
+test_geometry_update_reaches_main_loop_before_ready_redrawing (test_decoration.DecorationTests.test_geometry_update_reaches_main_loop_before_ready_redrawing) ... /usr/lib/python3.14/site-packages/gi/events.py:803: DeprecationWarning: 'asyncio.AbstractEventLoopPolicy' is deprecated and slated for removal in Python 3.16
+  AbstractEventLoopPolicy = getattr(asyncio, "AbstractEventLoopPolicy", object)
+/usr/lib/python3.14/site-packages/gi/events.py:890: DeprecationWarning: 'asyncio.get_event_loop_policy' is deprecated and slated for removal in Python 3.16
+  if not isinstance(_get_event_loop_policy(), GLibEventLoopPolicy):
+ok
+test_merged_corners_are_square_only_where_the_two_surfaces_meet (test_decoration.DecorationTests.test_merged_corners_are_square_only_where_the_two_surfaces_meet) ... ok
+test_pointer_actions_use_fixed_argv_without_a_shell (test_decoration.DecorationTests.test_pointer_actions_use_fixed_argv_without_a_shell) ... ok
+test_settings_migrate_legacy_position_and_save_through_symlink (test_decoration.DecorationTests.test_settings_migrate_legacy_position_and_save_through_symlink) ... ok
+test_the_seam_fill_is_the_captions_own_first_row (test_decoration.DecorationTests.test_the_seam_fill_is_the_captions_own_first_row) ... ok
+test_the_strip_is_as_transparent_as_the_window_it_decorates (test_decoration.DecorationTests.test_the_strip_is_as_transparent_as_the_window_it_decorates)
+A translucent terminal gets a translucent strip; a solid application ... ok
+test_vertical_text_uses_horizontal_separators_and_preserves_accents (test_decoration.DecorationTests.test_vertical_text_uses_horizontal_separators_and_preserves_accents) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 1.435s
+
+OK
+  + [5/18] test_decoration.py
+test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry (test_decoration_handoff.CaptionHandoffTests.test_handoff_keeps_allocated_controls_and_styles_without_mapping_old_geometry) ... ok
+test_the_caption_reserves_nothing_and_steps_back_over_its_band (test_decoration_handoff.CaptionHandoffTests.test_the_caption_reserves_nothing_and_steps_back_over_its_band)
+Reserving from the caption is exactly what made hovering resize ... skipped 'covered by the isolated child run'
+
+----------------------------------------------------------------------
+Ran 2 tests in 3.035s
+
+OK (skipped=1)
+  + [6/18] test_decoration_handoff.py
+test_a_coordinate_with_nowhere_to_go_never_blocks_contact (test_decoration_motion.ContactTests.test_a_coordinate_with_nowhere_to_go_never_blocks_contact) ... ok
+test_a_strip_still_on_its_way_has_not_made_contact (test_decoration_motion.ContactTests.test_a_strip_still_on_its_way_has_not_made_contact) ... ok
+test_contact_agrees_across_frame_rates (test_decoration_motion.ContactTests.test_contact_agrees_across_frame_rates) ... ok
+test_contact_is_the_first_frame_home_and_the_settle_comes_much_later (test_decoration_motion.ContactTests.test_contact_is_the_first_frame_home_and_the_settle_comes_much_later) ... ok
+test_signs_say_which_way_each_coordinate_sets_out (test_decoration_motion.ContactTests.test_signs_say_which_way_each_coordinate_sets_out) ... ok
+test_60_and_120_hz_follow_the_same_trajectory (test_decoration_motion.DecorationMotionTests.test_60_and_120_hz_follow_the_same_trajectory) ... ok
+test_a_settling_spring_overshoots_once_and_comes_to_rest_exactly (test_decoration_motion.DecorationMotionTests.test_a_settling_spring_overshoots_once_and_comes_to_rest_exactly)
+The landing a released strip makes, and the only place it is wanted. ... ok
+test_damping_outside_its_range_is_refused (test_decoration_motion.DecorationMotionTests.test_damping_outside_its_range_is_refused) ... ok
+test_moving_target_trajectories_remain_consistent_at_60_and_120_hz (test_decoration_motion.DecorationMotionTests.test_moving_target_trajectories_remain_consistent_at_60_and_120_hz) ... ok
+test_opacity_uses_a_small_tolerance_and_settles_at_exact_target (test_decoration_motion.DecorationMotionTests.test_opacity_uses_a_small_tolerance_and_settles_at_exact_target) ... ok
+test_rectangle_settles_exactly_and_keeps_positive_dimensions (test_decoration_motion.DecorationMotionTests.test_rectangle_settles_exactly_and_keeps_positive_dimensions) ... ok
+test_retarget_keeps_motion_bounded_in_both_directions (test_decoration_motion.DecorationMotionTests.test_retarget_keeps_motion_bounded_in_both_directions) ... ok
+test_settling_and_critical_springs_agree_across_frame_rates (test_decoration_motion.DecorationMotionTests.test_settling_and_critical_springs_agree_across_frame_rates) ... ok
+test_stalled_frame_is_bounded_and_zero_time_preserves_motion (test_decoration_motion.DecorationMotionTests.test_stalled_frame_is_bounded_and_zero_time_preserves_motion) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.027s
+
+OK
+  + [7/18] test_decoration_motion.py
+test_fullscreen_context_follows_actual_focused_ancestors_not_siblings (test_decoration_placement.DecorationActionContextTests.test_fullscreen_context_follows_actual_focused_ancestors_not_siblings) ... ok
+test_fullscreen_floating_view_offers_leave_fullscreen (test_decoration_placement.DecorationActionContextTests.test_fullscreen_floating_view_offers_leave_fullscreen) ... ok
+test_normal_floating_view_offers_enter_fullscreen_despite_workspace_marker (test_decoration_placement.DecorationActionContextTests.test_normal_floating_view_offers_enter_fullscreen_despite_workspace_marker) ... ok
+test_attached_caption_tracks_move_and_resize_without_mutating_tree (test_decoration_placement.DecorationPlacementTests.test_attached_caption_tracks_move_and_resize_without_mutating_tree) ... ok
+test_closed_last_ordinary_window_does_not_leave_stale_caption_target (test_decoration_placement.DecorationPlacementTests.test_closed_last_ordinary_window_does_not_leave_stale_caption_target) ... ok
+test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings (test_decoration_placement.DecorationPlacementTests.test_console_only_fullscreen_wrapper_keeps_ordinary_fullscreen_siblings) ... ok
+test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving (test_decoration_placement.DecorationPlacementTests.test_dropdown_focus_history_skips_nested_console_and_resumes_on_leaving) ... ok
+test_empty_workspace_retains_configured_edge (test_decoration_placement.DecorationPlacementTests.test_empty_workspace_retains_configured_edge) ... ok
+test_floating_fullscreen_keeps_rounding_at_forced_bottom (test_decoration_placement.DecorationPlacementTests.test_floating_fullscreen_keeps_rounding_at_forced_bottom) ... ok
+test_focused_floating_caption_uses_window_geometry (test_decoration_placement.DecorationPlacementTests.test_focused_floating_caption_uses_window_geometry) ... ok
+test_fullscreen_console_does_not_override_retained_floating_caption (test_decoration_placement.DecorationPlacementTests.test_fullscreen_console_does_not_override_retained_floating_caption) ... ok
+test_fullscreen_sibling_overrides_floating_focus_and_right_preference (test_decoration_placement.DecorationPlacementTests.test_fullscreen_sibling_overrides_floating_focus_and_right_preference) ... ok
+test_global_floating_fullscreen_keeps_rounding_on_all_outputs (test_decoration_placement.DecorationPlacementTests.test_global_floating_fullscreen_keeps_rounding_on_all_outputs) ... ok
+test_global_fullscreen_anywhere_forces_all_outputs_to_bottom (test_decoration_placement.DecorationPlacementTests.test_global_fullscreen_anywhere_forces_all_outputs_to_bottom) ... ok
+test_hidden_workspace_fullscreen_does_not_displace_visible_floating_caption (test_decoration_placement.DecorationPlacementTests.test_hidden_workspace_fullscreen_does_not_displace_visible_floating_caption) ... ok
+test_ignored_window_focus_keeps_last_ordinary_context_and_geometry (test_decoration_placement.DecorationPlacementTests.test_ignored_window_focus_keeps_last_ordinary_context_and_geometry) ... ok
+test_internal_outputs_and_outputs_without_workspace_have_no_caption (test_decoration_placement.DecorationPlacementTests.test_internal_outputs_and_outputs_without_workspace_have_no_caption) ... ok
+test_leaving_fullscreen_restores_floating_attachment_and_right_preference (test_decoration_placement.DecorationPlacementTests.test_leaving_fullscreen_restores_floating_attachment_and_right_preference) ... ok
+test_nested_floating_container_attaches_to_focused_view (test_decoration_placement.DecorationPlacementTests.test_nested_floating_container_attaches_to_focused_view) ... ok
+test_non_container_fullscreen_markers_do_not_override_window_state (test_decoration_placement.DecorationPlacementTests.test_non_container_fullscreen_markers_do_not_override_window_state) ... ok
+test_similarly_named_terminals_remain_caption_targets (test_decoration_placement.DecorationPlacementTests.test_similarly_named_terminals_remain_caption_targets) ... ok
+test_sway_workspace_fullscreen_marker_does_not_block_floating_attachment (test_decoration_placement.DecorationPlacementTests.test_sway_workspace_fullscreen_marker_does_not_block_floating_attachment) ... ok
+test_sway_workspace_fullscreen_marker_keeps_tiled_preferred_edge (test_decoration_placement.DecorationPlacementTests.test_sway_workspace_fullscreen_marker_keeps_tiled_preferred_edge) ... ok
+test_tiled_focus_keeps_workspace_strip_despite_other_floating_window (test_decoration_placement.DecorationPlacementTests.test_tiled_focus_keeps_workspace_strip_despite_other_floating_window) ... ok
+test_workspace_fullscreen_does_not_change_other_output (test_decoration_placement.DecorationPlacementTests.test_workspace_fullscreen_does_not_change_other_output) ... ok
+test_a_caption_steps_back_over_the_band_it_may_not_reserve (test_decoration_placement.ReservedBandTests.test_a_caption_steps_back_over_the_band_it_may_not_reserve)
+Zero zone keeps the strip inside the usable area; the negative margin ... ok
+test_a_float_inside_the_band_is_moved_the_smallest_distance_out (test_decoration_placement.ReservedBandTests.test_a_float_inside_the_band_is_moved_the_smallest_distance_out)
+The exclusive zone arranges tiled windows and nothing else. ... ok
+test_fullscreen_moves_the_caption_and_leaves_the_band_alone (test_decoration_placement.ReservedBandTests.test_fullscreen_moves_the_caption_and_leaves_the_band_alone)
+Fullscreen ignores exclusive zones, so moving the band would only ... ok
+test_only_settled_visible_floats_are_taken_out_of_the_band (test_decoration_placement.ReservedBandTests.test_only_settled_visible_floats_are_taken_out_of_the_band) ... ok
+test_the_band_is_measured_by_a_caption_on_its_own_edge (test_decoration_placement.ReservedBandTests.test_the_band_is_measured_by_a_caption_on_its_own_edge)
+Fullscreen borrows the bottom while the band stays on the saved edge. ... ok
+test_the_band_is_measured_from_a_reference_line_not_the_live_caption (test_decoration_placement.ReservedBandTests.test_the_band_is_measured_from_a_reference_line_not_the_live_caption) ... ok
+test_the_band_is_the_same_on_every_output_whatever_has_focus (test_decoration_placement.ReservedBandTests.test_the_band_is_the_same_on_every_output_whatever_has_focus)
+A floating window takes its caption with it; the band stays put. ... ok
+test_the_band_only_ever_uses_an_edge_the_strip_uses (test_decoration_placement.ReservedBandTests.test_the_band_only_ever_uses_an_edge_the_strip_uses) ... ok
+test_the_band_region_restates_the_reservation_in_window_coordinates (test_decoration_placement.ReservedBandTests.test_the_band_region_restates_the_reservation_in_window_coordinates)
+Layer extents are output-local; container rectangles are global. ... ok
+test_the_caption_budget_leaves_room_for_the_controls (test_decoration_placement.ReservedBandTests.test_the_caption_budget_leaves_room_for_the_controls) ... ok
+test_turning_the_band_off_reserves_nothing_at_all (test_decoration_placement.ReservedBandTests.test_turning_the_band_off_reserves_nothing_at_all) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 0.263s
+
+OK
+  + [8/18] test_decoration_placement.py
+test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll (test_decoration_watch.DecorationWatchTests.test_attaching_wakes_idle_poll_and_detaching_stops_fast_poll) ... ok
+test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit (test_decoration_watch.DecorationWatchTests.test_carousel_pauses_geometry_polling_and_refreshes_on_mode_exit) ... ok
+test_close_interrupts_blocked_tree_read_and_does_not_restart (test_decoration_watch.DecorationWatchTests.test_close_interrupts_blocked_tree_read_and_does_not_restart) ... ok
+test_disconnect_reconnects_and_shutdown_closes_both_connections (test_decoration_watch.DecorationWatchTests.test_disconnect_reconnects_and_shutdown_closes_both_connections) ... ok
+test_oversized_frame_is_rejected_without_reading_its_body (test_decoration_watch.DecorationWatchTests.test_oversized_frame_is_rejected_without_reading_its_body) ... ok
+test_partial_frames_reuse_connection_and_suppress_unchanged_trees (test_decoration_watch.DecorationWatchTests.test_partial_frames_reuse_connection_and_suppress_unchanged_trees) ... ok
+test_request_processing_does_not_add_another_poll_interval_while_moving (test_decoration_watch.DecorationWatchTests.test_request_processing_does_not_add_another_poll_interval_while_moving) ... ok
+test_semantic_event_refreshes_before_long_idle_poll (test_decoration_watch.DecorationWatchTests.test_semantic_event_refreshes_before_long_idle_poll) ... ok
+test_stationary_attached_caption_releases_half_the_poll_budget (test_decoration_watch.DecorationWatchTests.test_stationary_attached_caption_releases_half_the_poll_budget) ... ok
+test_title_changes_do_not_keep_the_motion_poll_budget_running (test_decoration_watch.DecorationWatchTests.test_title_changes_do_not_keep_the_motion_poll_budget_running) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 2.065s
+
+OK
+  + [9/18] test_decoration_watch.py
+test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback (test_deploy.DeployTest.test_cli_repeated_only_is_forwarded_and_cannot_limit_rollback) ... ok
+test_crash_after_move_is_recoverable_and_blocks_new_deployment (test_deploy.DeployTest.test_crash_after_move_is_recoverable_and_blocks_new_deployment) ... ok
+test_database_backup_manifest_does_not_block_deployment_or_rollback (test_deploy.DeployTest.test_database_backup_manifest_does_not_block_deployment_or_rollback) ... ok
+test_existing_legacy_overlay_symlink_does_not_create_alias (test_deploy.DeployTest.test_existing_legacy_overlay_symlink_does_not_create_alias) ... ok
+test_explicit_legacy_overlay_config_is_not_replaced_by_alias (test_deploy.DeployTest.test_explicit_legacy_overlay_config_is_not_replaced_by_alias) ... ok
+test_full_journal_is_durable_before_any_user_file_moves (test_deploy.DeployTest.test_full_journal_is_durable_before_any_user_file_moves) ... ok
+test_generated_python_caches_are_never_deployed (test_deploy.DeployTest.test_generated_python_caches_are_never_deployed) ... ok
+test_idempotence_and_rollback_preserve_original (test_deploy.DeployTest.test_idempotence_and_rollback_preserve_original) ... ok
+test_interrupted_rollback_can_resume_without_losing_originals (test_deploy.DeployTest.test_interrupted_rollback_can_resume_without_losing_originals) ... ok
+test_legacy_list_manifest_can_still_restore (test_deploy.DeployTest.test_legacy_list_manifest_can_still_restore) ... ok
+test_malformed_deployment_headers_block_before_replacing_user_files (test_deploy.DeployTest.test_malformed_deployment_headers_block_before_replacing_user_files) ... ok
+test_only_rejects_missing_and_unsafe_selections_before_target_changes (test_deploy.DeployTest.test_only_rejects_missing_and_unsafe_selections_before_target_changes) ... ok
+test_only_selects_exact_config_pair_and_excludes_unrelated_files (test_deploy.DeployTest.test_only_selects_exact_config_pair_and_excludes_unrelated_files) ... ok
+test_partial_deployment_rolls_back_all_originals (test_deploy.DeployTest.test_partial_deployment_rolls_back_all_originals) ... ok
+test_reject_parent_symlink_without_external_write (test_deploy.DeployTest.test_reject_parent_symlink_without_external_write) ... ok
+test_rollback_refuses_changed_destination (test_deploy.DeployTest.test_rollback_refuses_changed_destination) ... ok
+test_rollback_refuses_modified_backup_before_touching_deployed_link (test_deploy.DeployTest.test_rollback_refuses_modified_backup_before_touching_deployed_link) ... ok
+test_superhold_config_alias_shares_edits_and_restores_legacy_file (test_deploy.DeployTest.test_superhold_config_alias_shares_edits_and_restores_legacy_file) ... ok
+test_portable_profiles_precede_oldbook_with_legacy_fallback (test_deploy.WrapperMigrationTest.test_portable_profiles_precede_oldbook_with_legacy_fallback) ... ok
+test_wrapper_reads_superhold_runtime_status_without_a_display (test_deploy.WrapperMigrationTest.test_wrapper_reads_superhold_runtime_status_without_a_display) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 0.201s
+
+OK
+  + [10/18] test_deploy.py
+test_all_checks_are_existing_files_and_ids_are_unique (test_feature_contracts.FeatureImpact.test_all_checks_are_existing_files_and_ids_are_unique) ... ok
+test_deleted_profile_still_has_impact_without_an_existing_file (test_feature_contracts.FeatureImpact.test_deleted_profile_still_has_impact_without_an_existing_file) ... ok
+test_installed_guide_source_is_in_scope_across_project_directories (test_feature_contracts.FeatureImpact.test_installed_guide_source_is_in_scope_across_project_directories) ... ok
+test_mode_binding_change_reviews_keys_and_window_switching_together (test_feature_contracts.FeatureImpact.test_mode_binding_change_reviews_keys_and_window_switching_together) ... ok
+test_path_normalization_keeps_hidden_files_and_rejects_escape (test_feature_contracts.FeatureImpact.test_path_normalization_keeps_hidden_files_and_rejects_escape) ... ok
+test_shared_checks_run_once_and_a_failure_fails_the_review (test_feature_contracts.FeatureImpact.test_shared_checks_run_once_and_a_failure_fails_the_review) ... ok
+test_theme_template_change_reviews_brand_lock_and_caption_contracts (test_feature_contracts.FeatureImpact.test_theme_template_change_reviews_brand_lock_and_caption_contracts) ... ok
+test_unknown_feature_is_rejected_instead_of_running_nothing (test_feature_contracts.FeatureImpact.test_unknown_feature_is_rejected_instead_of_running_nothing) ... ok
+test_unmapped_change_is_reported_without_claiming_coverage (test_feature_contracts.FeatureImpact.test_unmapped_change_is_reported_without_claiming_coverage) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.739s
+
+OK
+  + [11/18] test_feature_contracts.py
+test_invalid_theme_cannot_inject_css (test_overlay_theme.OverlayThemeTests.test_invalid_theme_cannot_inject_css) ... ok
+test_qt_and_gtk_consume_the_same_theme (test_overlay_theme.OverlayThemeTests.test_qt_and_gtk_consume_the_same_theme) ... ok
+test_running_qt_overlay_refreshes_after_palette_edit (test_overlay_theme.OverlayThemeTests.test_running_qt_overlay_refreshes_after_palette_edit) ... ok
+test_theme_switch_updates_surface_and_accent_without_restart (test_overlay_theme.OverlayThemeTests.test_theme_switch_updates_surface_and_accent_without_restart) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.672s
+
+OK
+  + [12/18] test_overlay_theme.py
+test_a_logical_area_is_scaled_up_to_the_photographs_real_pixels (test_ripple.Crop.test_a_logical_area_is_scaled_up_to_the_photographs_real_pixels) ... ok
+test_never_reads_past_the_photograph_even_if_the_scaled_area_would (test_ripple.Crop.test_never_reads_past_the_photograph_even_if_the_scaled_area_would) ... ok
+test_scale_one_is_the_default_and_matches_no_scale_argument (test_ripple.Crop.test_scale_one_is_the_default_and_matches_no_scale_argument) ... ok
+test_takes_the_region_at_scale_one_unchanged (test_ripple.Crop.test_takes_the_region_at_scale_one_unchanged) ... ok
+test_a_late_departure_photograph_is_dropped (test_ripple.DockDeparture.test_a_late_departure_photograph_is_dropped) ... ok
+test_a_reversed_landing_has_no_new_dock_departure (test_ripple.DockDeparture.test_a_reversed_landing_has_no_new_dock_departure) ... ok
+test_disabled_animation_disabled_effect_and_busy_output_do_not_capture (test_ripple.DockDeparture.test_disabled_animation_disabled_effect_and_busy_output_do_not_capture) ... ok
+test_leaving_the_dock_rings_from_the_old_outline_at_departure_time (test_ripple.DockDeparture.test_leaving_the_dock_rings_from_the_old_outline_at_departure_time) ... ok
+test_retargeting_discards_the_pending_departure (test_ripple.DockDeparture.test_retargeting_discards_the_pending_departure) ... ok
+test_returning_to_the_dock_still_waits_for_contact (test_ripple.DockDeparture.test_returning_to_the_dock_still_waits_for_contact) ... ok
+test_right_dock_uses_its_departed_outline_on_an_offset_output (test_ripple.DockDeparture.test_right_dock_uses_its_departed_outline_on_an_offset_output) ... ok
+test_a_right_hand_strip_lands_on_its_left_edge (test_ripple.Origin.test_a_right_hand_strip_lands_on_its_left_edge) ... ok
+test_is_relative_to_the_region_not_the_output (test_ripple.Origin.test_is_relative_to_the_region_not_the_output) ... ok
+test_starts_at_the_middle_of_the_landed_edge (test_ripple.Origin.test_starts_at_the_middle_of_the_landed_edge) ... ok
+test_stays_inside_the_region_even_if_the_strip_does_not (test_ripple.Origin.test_stays_inside_the_region_even_if_the_strip_does_not) ... ok
+test_a_bad_setting_is_an_error_not_a_default (test_ripple.Plan.test_a_bad_setting_is_an_error_not_a_default) ... ok
+test_a_point_source_is_asked_for_in_the_settings (test_ripple.Plan.test_a_point_source_is_asked_for_in_the_settings) ... ok
+test_a_right_hand_band_measures_in_its_width (test_ripple.Plan.test_a_right_hand_band_measures_in_its_width) ... ok
+test_carries_the_outline_the_water_and_the_settings_in_the_bands_units (test_ripple.Plan.test_carries_the_outline_the_water_and_the_settings_in_the_bands_units) ... ok
+test_follows_the_shaders_rung_of_the_power_ladder (test_ripple.Policy.test_follows_the_shaders_rung_of_the_power_ladder) ... ok
+test_never_draws_with_animations_off (test_ripple.Policy.test_never_draws_with_animations_off) ... ok
+test_runs_unplugged_and_sheds_at_battery_low (test_ripple.Policy.test_runs_unplugged_and_sheds_at_battery_low) ... ok
+test_rejects_an_empty_image (test_ripple.PortablePixmap.test_rejects_an_empty_image) ... ok
+test_rejects_anything_but_eight_bit_binary (test_ripple.PortablePixmap.test_rejects_anything_but_eight_bit_binary) ... ok
+test_round_trips_a_bare_header (test_ripple.PortablePixmap.test_round_trips_a_bare_header) ... ok
+test_skips_comments_in_the_header (test_ripple.PortablePixmap.test_skips_comments_in_the_header) ... ok
+test_bottom_edge_takes_a_fraction_of_the_output_from_its_own_side (test_ripple.Region.test_bottom_edge_takes_a_fraction_of_the_output_from_its_own_side) ... ok
+test_fraction_is_clamped_to_something_drawable (test_ripple.Region.test_fraction_is_clamped_to_something_drawable) ... ok
+test_offset_outputs_carry_their_offset_into_the_region (test_ripple.Region.test_offset_outputs_carry_their_offset_into_the_region) ... ok
+test_right_edge_takes_a_fraction_of_the_output_from_its_own_side (test_ripple.Region.test_right_edge_takes_a_fraction_of_the_output_from_its_own_side) ... ok
+test_unknown_edge_is_rejected (test_ripple.Region.test_unknown_edge_is_rejected) ... ok
+test_a_partial_object_keeps_the_rest_at_their_defaults (test_ripple.Settings.test_a_partial_object_keeps_the_rest_at_their_defaults) ... ok
+test_defaults_fill_in_when_nothing_is_set (test_ripple.Settings.test_defaults_fill_in_when_nothing_is_set) ... ok
+test_does_not_touch_what_it_was_given (test_ripple.Settings.test_does_not_touch_what_it_was_given) ... ok
+test_every_limit_is_inclusive_at_both_ends (test_ripple.Settings.test_every_limit_is_inclusive_at_both_ends) ... ok
+test_rejects_anything_outside_the_vocabulary (test_ripple.Settings.test_rejects_anything_outside_the_vocabulary) ... ok
+test_ships_switched_on_and_can_be_switched_off (test_ripple.Settings.test_ships_switched_on_and_can_be_switched_off) ... ok
+test_every_number_the_plan_carries_has_a_uniform (test_ripple.Shader.test_every_number_the_plan_carries_has_a_uniform) ... ok
+test_shares_the_waves_shape_with_its_python_twin (test_ripple.Shader.test_shares_the_waves_shape_with_its_python_twin) ... ok
+test_writes_premultiplied_colour (test_ripple.Shader.test_writes_premultiplied_colour) ... ok
+test_a_point_is_the_middle_of_the_landed_edge_with_no_extent (test_ripple.Source.test_a_point_is_the_middle_of_the_landed_edge_with_no_extent) ... ok
+test_a_right_hand_strip_measures_in_the_bands_width (test_ripple.Source.test_a_right_hand_strip_measures_in_the_bands_width) ... ok
+test_the_bar_is_the_strip_itself_in_units_of_the_bands_thickness (test_ripple.Source.test_the_bar_is_the_strip_itself_in_units_of_the_bands_thickness) ... ok
+test_the_rounding_never_exceeds_the_strips_own_half_thickness (test_ripple.Source.test_the_rounding_never_exceeds_the_strips_own_half_thickness) ... ok
+test_is_the_bands_depth_whichever_edge_it_lies_along (test_ripple.Thickness.test_is_the_bands_depth_whichever_edge_it_lies_along) ... ok
+test_is_held_to_something_drawable_even_if_the_strip_is_outside_the_band (test_ripple.Travel.test_is_held_to_something_drawable_even_if_the_strip_is_outside_the_band) ... ok
+test_is_the_water_between_the_landed_edge_and_the_bands_far_edge (test_ripple.Travel.test_is_the_water_between_the_landed_edge_and_the_bands_far_edge) ... ok
+test_crests_and_troughs_cancel_so_nothing_brightens_overall (test_ripple.Wave.test_crests_and_troughs_cancel_so_nothing_brightens_overall) ... ok
+test_crests_are_spaced_as_asked (test_ripple.Wave.test_crests_are_spaced_as_asked) ... ok
+test_crests_move_outward_with_the_front (test_ripple.Wave.test_crests_move_outward_with_the_front) ... ok
+test_dies_out_before_the_far_edge_of_the_band (test_ripple.Wave.test_dies_out_before_the_far_edge_of_the_band) ... ok
+test_fades_with_age (test_ripple.Wave.test_fades_with_age) ... ok
+test_is_silent_outside_its_lifetime (test_ripple.Wave.test_is_silent_outside_its_lifetime) ... ok
+test_never_exceeds_one (test_ripple.Wave.test_never_exceeds_one) ... ok
+test_nothing_is_drawn_at_the_strike_itself (test_ripple.Wave.test_nothing_is_drawn_at_the_strike_itself) ... ok
+test_reach_scales_how_far_the_front_gets (test_ripple.Wave.test_reach_scales_how_far_the_front_gets) ... ok
+test_the_disturbance_follows_the_front (test_ripple.Wave.test_the_disturbance_follows_the_front) ... ok
+test_the_tilt_is_bounded_by_the_disturbance (test_ripple.Wave.test_the_tilt_is_bounded_by_the_disturbance) ... ok
+test_the_wave_grows_out_of_the_strips_edge (test_ripple.Wave.test_the_wave_grows_out_of_the_strips_edge) ... ok
+test_water_ahead_of_the_front_and_inside_the_strip_is_still (test_ripple.Wave.test_water_ahead_of_the_front_and_inside_the_strip_is_still) ... ok
+test_water_the_wave_has_passed_closes_again (test_ripple.Wave.test_water_the_wave_has_passed_closes_again) ... ok
+
+----------------------------------------------------------------------
+Ran 61 tests in 3.693s
+
+OK
+  + [13/18] test_ripple.py
+test_cold_or_invalid_commands_leave_recovery_to_full_cli (test_ui_command.WarmHandoffTests.test_cold_or_invalid_commands_leave_recovery_to_full_cli) ... ok
+test_down_swipe_reaches_ready_carousel_without_spawning (test_ui_command.WarmHandoffTests.test_down_swipe_reaches_ready_carousel_without_spawning) ... ok
+test_executables_deliver_gestures_with_minimal_python_startup (test_ui_command.WarmHandoffTests.test_executables_deliver_gestures_with_minimal_python_startup) ... ok
+test_showdesktop_protocol_uses_its_existing_session_socket (test_ui_command.WarmHandoffTests.test_showdesktop_protocol_uses_its_existing_session_socket) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.439s
+
+OK
+  + [14/18] test_ui_command.py
+test_accepts_system_ui_but_not_spoofed_name (test_ui_priority.PriorityTests.test_accepts_system_ui_but_not_spoofed_name) ... ok
+test_accepts_versioned_superhold_daemon_only (test_ui_priority.PriorityTests.test_accepts_versioned_superhold_daemon_only) ... ok
+test_boost_requires_reset_before_negative_nice_and_keeps_realtime (test_ui_priority.PriorityTests.test_boost_requires_reset_before_negative_nice_and_keeps_realtime) ... ok
+test_desktop_threads_sit_well_below_zero_and_the_compositor_lowest (test_ui_priority.PriorityTests.test_desktop_threads_sit_well_below_zero_and_the_compositor_lowest) ... ok
+test_failed_reset_never_applies_negative_nice (test_ui_priority.PriorityTests.test_failed_reset_never_applies_negative_nice) ... ok
+test_ignores_other_users_and_non_ui_executables (test_ui_priority.PriorityTests.test_ignores_other_users_and_non_ui_executables) ... ok
+test_only_the_desktops_own_session_groups_are_weighted (test_ui_priority.PriorityTests.test_only_the_desktops_own_session_groups_are_weighted) ... ok
+test_python_is_limited_to_exact_desktop_daemon_path (test_ui_priority.PriorityTests.test_python_is_limited_to_exact_desktop_daemon_path) ... ok
+test_reads_real_self_scheduler_on_musl (test_ui_priority.PriorityTests.test_reads_real_self_scheduler_on_musl) ... ok
+test_session_scope_uses_exact_socket_environment_or_compositor_pid (test_ui_priority.PriorityTests.test_session_scope_uses_exact_socket_environment_or_compositor_pid) ... ok
+test_session_socket_requires_caller_ownership_and_real_peer_credentials (test_ui_priority.PriorityTests.test_session_socket_requires_caller_ownership_and_real_peer_credentials) ... ok
+test_the_compositor_render_thread_goes_round_robin_with_children_reset (test_ui_priority.PriorityTests.test_the_compositor_render_thread_goes_round_robin_with_children_reset) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.277s
+
+OK
+  + [15/18] test_ui_priority.py
+test_request_returns_before_helper_exits_and_reaps_it_afterward (test_ui_priority_request.PriorityRequestTests.test_request_returns_before_helper_exits_and_reaps_it_afterward) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.013s
+
+OK
+  + [16/18] test_ui_priority_request.py
+test_keeper_survives_the_event_loop_and_closes_on_failure (test_ui_startup.ShowdesktopStartupTests.test_keeper_survives_the_event_loop_and_closes_on_failure) ... ok
+test_optional_warmup_failure_still_serves_gestures (test_ui_startup.ShowdesktopStartupTests.test_optional_warmup_failure_still_serves_gestures) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.003s
+
+OK
+  + [17/18] test_ui_startup.py
+test_a_branchless_directory_is_shown_without_empty_brackets (test_window_context.CaptionTests.test_a_branchless_directory_is_shown_without_empty_brackets) ... ok
+test_a_terminal_says_what_is_running_instead_of_its_own_title (test_window_context.CaptionTests.test_a_terminal_says_what_is_running_instead_of_its_own_title) ... ok
+test_an_empty_workspace_still_says_where_it_is (test_window_context.CaptionTests.test_an_empty_workspace_still_says_where_it_is) ... ok
+test_every_other_window_keeps_the_title_it_chose (test_window_context.CaptionTests.test_every_other_window_keeps_the_title_it_chose) ... ok
+test_powerline_is_one_ground_per_segment_and_an_arrow_between (test_window_context.CaptionTests.test_powerline_is_one_ground_per_segment_and_an_arrow_between) ... ok
+test_sway_tabs_reach_the_strip_for_windows_that_are_not_terminals (test_window_context.CaptionTests.test_sway_tabs_reach_the_strip_for_windows_that_are_not_terminals) ... ok
+test_the_repository_says_which_system_which_branch_and_how_it_stands (test_window_context.CaptionTests.test_the_repository_says_which_system_which_branch_and_how_it_stands) ... ok
+test_the_tab_list_is_the_first_thing_the_strip_gives_up (test_window_context.CaptionTests.test_the_tab_list_is_the_first_thing_the_strip_gives_up)
+Narrower and narrower: names, then tabs, then standing, then place. ... ok
+test_the_workspace_identity_drops_the_live_window_hint (test_window_context.CaptionTests.test_the_workspace_identity_drops_the_live_window_hint) ... ok
+test_a_directory_in_no_repository_simply_has_no_branch (test_window_context.ChainTests.test_a_directory_in_no_repository_simply_has_no_branch) ... ok
+test_a_directory_inside_the_kernels_own_filesystems_is_no_answer (test_window_context.ChainTests.test_a_directory_inside_the_kernels_own_filesystems_is_no_answer)
+A browser content process answers cwd with /proc, truthfully and uselessly. ... ok
+test_a_shell_is_scaffolding_until_it_is_the_only_thing_running (test_window_context.ChainTests.test_a_shell_is_scaffolding_until_it_is_the_only_thing_running) ... ok
+test_a_vanished_process_drops_out_rather_than_raising (test_window_context.ChainTests.test_a_vanished_process_drops_out_rather_than_raising) ... ok
+test_git_head_names_the_branch_without_running_git (test_window_context.ChainTests.test_git_head_names_the_branch_without_running_git) ... ok
+test_nobody_says_tmux_client_out_loud (test_window_context.ChainTests.test_nobody_says_tmux_client_out_loud) ... ok
+test_only_terminals_are_walked (test_window_context.ChainTests.test_only_terminals_are_walked) ... ok
+test_the_walk_follows_the_process_the_user_just_started (test_window_context.ChainTests.test_the_walk_follows_the_process_the_user_just_started) ... ok
+test_the_costly_half_is_on_the_power_ladder (test_window_context.LadderTests.test_the_costly_half_is_on_the_power_ladder)
+The chain is plain /proc reads; asking tmux and fossil is not. ... ok
+test_a_flat_battery_sheds_every_answer_that_costs_a_process (test_window_context.RepositoryTests.test_a_flat_battery_sheds_every_answer_that_costs_a_process) ... ok
+test_a_worktree_still_finds_the_branch_through_its_git_file (test_window_context.RepositoryTests.test_a_worktree_still_finds_the_branch_through_its_git_file) ... ok
+test_an_unreadable_fossil_database_drops_the_answer_rather_than_raising (test_window_context.RepositoryTests.test_an_unreadable_fossil_database_drops_the_answer_rather_than_raising) ... ok
+test_fossil_answers_from_its_own_sqlite_without_running_fossil (test_window_context.RepositoryTests.test_fossil_answers_from_its_own_sqlite_without_running_fossil)
+The branch used to cost a fork; it is two indexed reads instead. ... ok
+test_git_reports_dirt_and_divergence_from_one_porcelain_call (test_window_context.RepositoryTests.test_git_reports_dirt_and_divergence_from_one_porcelain_call) ... ok
+test_the_expensive_half_stays_off_the_drawing_thread (test_window_context.RepositoryTests.test_the_expensive_half_stays_off_the_drawing_thread)
+A caption asking for status gets the last answer, not a subprocess. ... ok
+test_unsent_check_ins_only_mean_ahead_where_there_is_a_remote (test_window_context.RepositoryTests.test_unsent_check_ins_only_mean_ahead_where_there_is_a_remote) ... ok
+test_a_long_tab_name_is_shortened_rather_than_left_to_the_ellipsis (test_window_context.TabTests.test_a_long_tab_name_is_shortened_rather_than_left_to_the_ellipsis) ... ok
+test_a_window_that_is_alone_is_not_a_tab_set (test_window_context.TabTests.test_a_window_that_is_alone_is_not_a_tab_set) ... ok
+test_sways_tabbed_containers_are_read_from_the_tree (test_window_context.TabTests.test_sways_tabbed_containers_are_read_from_the_tree) ... <frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdca90>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdde40>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cde7a0>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cde890>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cde980>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdea70>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdeb60>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdec50>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cded40>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cde6b0>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdee30>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdef20>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+<frozen importlib._bootstrap>:459: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7ff9d3cdf010>
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+ok
+test_tabs_say_where_you_are_and_name_only_the_others (test_window_context.TabTests.test_tabs_say_where_you_are_and_name_only_the_others) ... ok
+test_the_innermost_tabbed_container_is_the_one_the_window_is_in (test_window_context.TabTests.test_the_innermost_tabbed_container_is_the_one_the_window_is_in) ... ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 0.095s
+
+OK
+  + [18/18] test_window_context.py

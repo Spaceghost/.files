@@ -1,0 +1,102 @@
+test_a_logical_area_is_scaled_up_to_the_photographs_real_pixels (test_ripple.Crop.test_a_logical_area_is_scaled_up_to_the_photographs_real_pixels) ... ok
+test_never_reads_past_the_photograph_even_if_the_scaled_area_would (test_ripple.Crop.test_never_reads_past_the_photograph_even_if_the_scaled_area_would) ... ok
+test_scale_one_is_the_default_and_matches_no_scale_argument (test_ripple.Crop.test_scale_one_is_the_default_and_matches_no_scale_argument) ... ok
+test_takes_the_region_at_scale_one_unchanged (test_ripple.Crop.test_takes_the_region_at_scale_one_unchanged) ... ok
+test_a_late_departure_photograph_is_dropped (test_ripple.DockDeparture.test_a_late_departure_photograph_is_dropped) ... FAIL
+test_a_reversed_landing_has_no_new_dock_departure (test_ripple.DockDeparture.test_a_reversed_landing_has_no_new_dock_departure) ... ok
+test_disabled_animation_disabled_effect_and_busy_output_do_not_capture (test_ripple.DockDeparture.test_disabled_animation_disabled_effect_and_busy_output_do_not_capture) ... ok
+test_leaving_the_dock_rings_from_the_old_outline_at_departure_time (test_ripple.DockDeparture.test_leaving_the_dock_rings_from_the_old_outline_at_departure_time) ... FAIL
+test_retargeting_discards_the_pending_departure (test_ripple.DockDeparture.test_retargeting_discards_the_pending_departure) ... FAIL
+test_returning_to_the_dock_still_waits_for_contact (test_ripple.DockDeparture.test_returning_to_the_dock_still_waits_for_contact) ... ok
+test_right_dock_uses_its_departed_outline_on_an_offset_output (test_ripple.DockDeparture.test_right_dock_uses_its_departed_outline_on_an_offset_output) ... FAIL
+test_a_right_hand_strip_lands_on_its_left_edge (test_ripple.Origin.test_a_right_hand_strip_lands_on_its_left_edge) ... ok
+test_is_relative_to_the_region_not_the_output (test_ripple.Origin.test_is_relative_to_the_region_not_the_output) ... ok
+test_starts_at_the_middle_of_the_landed_edge (test_ripple.Origin.test_starts_at_the_middle_of_the_landed_edge) ... ok
+test_stays_inside_the_region_even_if_the_strip_does_not (test_ripple.Origin.test_stays_inside_the_region_even_if_the_strip_does_not) ... ok
+test_a_bad_setting_is_an_error_not_a_default (test_ripple.Plan.test_a_bad_setting_is_an_error_not_a_default) ... ok
+test_a_point_source_is_asked_for_in_the_settings (test_ripple.Plan.test_a_point_source_is_asked_for_in_the_settings) ... ok
+test_a_right_hand_band_measures_in_its_width (test_ripple.Plan.test_a_right_hand_band_measures_in_its_width) ... ok
+test_carries_the_outline_the_water_and_the_settings_in_the_bands_units (test_ripple.Plan.test_carries_the_outline_the_water_and_the_settings_in_the_bands_units) ... ok
+test_follows_the_shaders_rung_of_the_power_ladder (test_ripple.Policy.test_follows_the_shaders_rung_of_the_power_ladder) ... ok
+test_never_draws_with_animations_off (test_ripple.Policy.test_never_draws_with_animations_off) ... ok
+test_runs_unplugged_and_sheds_at_battery_low (test_ripple.Policy.test_runs_unplugged_and_sheds_at_battery_low) ... ok
+test_rejects_an_empty_image (test_ripple.PortablePixmap.test_rejects_an_empty_image) ... ok
+test_rejects_anything_but_eight_bit_binary (test_ripple.PortablePixmap.test_rejects_anything_but_eight_bit_binary) ... ok
+test_round_trips_a_bare_header (test_ripple.PortablePixmap.test_round_trips_a_bare_header) ... ok
+test_skips_comments_in_the_header (test_ripple.PortablePixmap.test_skips_comments_in_the_header) ... ok
+test_bottom_edge_takes_a_fraction_of_the_output_from_its_own_side (test_ripple.Region.test_bottom_edge_takes_a_fraction_of_the_output_from_its_own_side) ... ok
+test_fraction_is_clamped_to_something_drawable (test_ripple.Region.test_fraction_is_clamped_to_something_drawable) ... ok
+test_offset_outputs_carry_their_offset_into_the_region (test_ripple.Region.test_offset_outputs_carry_their_offset_into_the_region) ... ok
+test_right_edge_takes_a_fraction_of_the_output_from_its_own_side (test_ripple.Region.test_right_edge_takes_a_fraction_of_the_output_from_its_own_side) ... ok
+test_unknown_edge_is_rejected (test_ripple.Region.test_unknown_edge_is_rejected) ... ok
+test_a_partial_object_keeps_the_rest_at_their_defaults (test_ripple.Settings.test_a_partial_object_keeps_the_rest_at_their_defaults) ... ok
+test_defaults_fill_in_when_nothing_is_set (test_ripple.Settings.test_defaults_fill_in_when_nothing_is_set) ... ok
+test_does_not_touch_what_it_was_given (test_ripple.Settings.test_does_not_touch_what_it_was_given) ... ok
+test_every_limit_is_inclusive_at_both_ends (test_ripple.Settings.test_every_limit_is_inclusive_at_both_ends) ... ok
+test_rejects_anything_outside_the_vocabulary (test_ripple.Settings.test_rejects_anything_outside_the_vocabulary) ... ok
+test_ships_switched_on_and_can_be_switched_off (test_ripple.Settings.test_ships_switched_on_and_can_be_switched_off) ... ok
+test_every_number_the_plan_carries_has_a_uniform (test_ripple.Shader.test_every_number_the_plan_carries_has_a_uniform) ... ok
+test_shares_the_waves_shape_with_its_python_twin (test_ripple.Shader.test_shares_the_waves_shape_with_its_python_twin) ... ok
+test_writes_premultiplied_colour (test_ripple.Shader.test_writes_premultiplied_colour) ... ok
+test_a_point_is_the_middle_of_the_landed_edge_with_no_extent (test_ripple.Source.test_a_point_is_the_middle_of_the_landed_edge_with_no_extent) ... ok
+test_a_right_hand_strip_measures_in_the_bands_width (test_ripple.Source.test_a_right_hand_strip_measures_in_the_bands_width) ... ok
+test_the_bar_is_the_strip_itself_in_units_of_the_bands_thickness (test_ripple.Source.test_the_bar_is_the_strip_itself_in_units_of_the_bands_thickness) ... ok
+test_the_rounding_never_exceeds_the_strips_own_half_thickness (test_ripple.Source.test_the_rounding_never_exceeds_the_strips_own_half_thickness) ... ok
+test_is_the_bands_depth_whichever_edge_it_lies_along (test_ripple.Thickness.test_is_the_bands_depth_whichever_edge_it_lies_along) ... ok
+test_is_held_to_something_drawable_even_if_the_strip_is_outside_the_band (test_ripple.Travel.test_is_held_to_something_drawable_even_if_the_strip_is_outside_the_band) ... ok
+test_is_the_water_between_the_landed_edge_and_the_bands_far_edge (test_ripple.Travel.test_is_the_water_between_the_landed_edge_and_the_bands_far_edge) ... ok
+test_crests_and_troughs_cancel_so_nothing_brightens_overall (test_ripple.Wave.test_crests_and_troughs_cancel_so_nothing_brightens_overall) ... ok
+test_crests_are_spaced_as_asked (test_ripple.Wave.test_crests_are_spaced_as_asked) ... ok
+test_crests_move_outward_with_the_front (test_ripple.Wave.test_crests_move_outward_with_the_front) ... ok
+test_dies_out_before_the_far_edge_of_the_band (test_ripple.Wave.test_dies_out_before_the_far_edge_of_the_band) ... ok
+test_fades_with_age (test_ripple.Wave.test_fades_with_age) ... ok
+test_is_silent_outside_its_lifetime (test_ripple.Wave.test_is_silent_outside_its_lifetime) ... ok
+test_never_exceeds_one (test_ripple.Wave.test_never_exceeds_one) ... ok
+test_nothing_is_drawn_at_the_strike_itself (test_ripple.Wave.test_nothing_is_drawn_at_the_strike_itself) ... ok
+test_reach_scales_how_far_the_front_gets (test_ripple.Wave.test_reach_scales_how_far_the_front_gets) ... ok
+test_the_disturbance_follows_the_front (test_ripple.Wave.test_the_disturbance_follows_the_front) ... ok
+test_the_tilt_is_bounded_by_the_disturbance (test_ripple.Wave.test_the_tilt_is_bounded_by_the_disturbance) ... ok
+test_the_wave_grows_out_of_the_strips_edge (test_ripple.Wave.test_the_wave_grows_out_of_the_strips_edge) ... ok
+test_water_ahead_of_the_front_and_inside_the_strip_is_still (test_ripple.Wave.test_water_ahead_of_the_front_and_inside_the_strip_is_still) ... ok
+test_water_the_wave_has_passed_closes_again (test_ripple.Wave.test_water_the_wave_has_passed_closes_again) ... ok
+
+======================================================================
+FAIL: test_a_late_departure_photograph_is_dropped (test_ripple.DockDeparture.test_a_late_departure_photograph_is_dropped)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ripple.py", line 300, in test_a_late_departure_photograph_is_dropped
+    self.assertEqual(len(self.workers), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_leaving_the_dock_rings_from_the_old_outline_at_departure_time (test_ripple.DockDeparture.test_leaving_the_dock_rings_from_the_old_outline_at_departure_time)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ripple.py", line 280, in test_leaving_the_dock_rings_from_the_old_outline_at_departure_time
+    self.assertEqual(len(self.frames), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_retargeting_discards_the_pending_departure (test_ripple.DockDeparture.test_retargeting_discards_the_pending_departure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ripple.py", line 307, in test_retargeting_discards_the_pending_departure
+    self.assertEqual(len(self.workers), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+======================================================================
+FAIL: test_right_dock_uses_its_departed_outline_on_an_offset_output (test_ripple.DockDeparture.test_right_dock_uses_its_departed_outline_on_an_offset_output)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_ripple.py", line 293, in test_right_dock_uses_its_departed_outline_on_an_offset_output
+    self.assertEqual(len(self.frames), 1)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 0 != 1
+
+----------------------------------------------------------------------
+Ran 61 tests in 2.111s
+
+FAILED (failures=4)

@@ -286,7 +286,12 @@ A strip landing in its band strikes the water. A train of rings leaves the
 strip's own edge and crosses the lower third of the output in under a second,
 refracting a photograph of the screen rather than drawing over it; nothing is
 drawn where the water is still, so the live desktop shows through everywhere
-the wave is not. The `ripple` object in decoration.json switches it off
+the wave is not. Lifting the docked strip away to attach to a floating window
+also sends rings from the docked outline it leaves behind, on both the bottom
+and right edges. This extends the earlier landing-only choice (Jack,
+2026-09-13); taking hold of the window adds no second wave. A flight reversed
+before it reaches the dock does not invent a dock departure. The `ripple`
+object in decoration.json switches it off
 (`enabled`) and sets where the rings leave from (`bar`, the whole outline, or
 `point`), their duration, reach, spacing, strength and shading; the effect
 sits on the power ladder as `landing-ripple`, running unplugged and shedding
@@ -305,6 +310,7 @@ reading, so nothing on the desktop moves for it.
   [preferences](desktop/.config/oldbook/decoration.json).
 - Checks: [decoration tests](tests/test_decoration.py),
   [ripple tests](tests/test_ripple.py),
+  [departure and landing verification](verification/ripple-departure/README.md),
   [settings verifier](tests/verify_decoration_settings.py),
   [interactive strip evidence](verification/decoration-context/).
   The initial contextual-menu work explicitly left some tmux/media actions unprobed.
