@@ -3043,3 +3043,23 @@ observes its watch-mode readiness record. A real subprocess test verifies the
 startup diagnostic is retained with mode 0600. No input was parked on the
 user's live desktop during this check. Existing source-linked launchers pick
 up this repair on the next catbed/lock invocation.
+
+## 2026-09-14 - Catbed Wayland-first package boundary
+
+Added `projects/catbed` with one command interface for the existing Sway
+Wayland desktop guard and Linux boot/shutdown guard. X11 and other platform
+backends are explicitly outside current implementation scope. Desktop start
+requires the current Sway Wayland environment; root system mutations remain
+explicit and never elevate privileges automatically.
+
+Distribution build hooks embed canonical boot, OpenRC, SysRq, fan, and ACPI
+helpers into wheels and source archives. `catbed export-system` extracts those
+resources into a new private directory without installing or activating them.
+This is not yet a self-contained desktop package: runtime migration and a
+packaged system installation/recovery workflow remain required. The service
+resource still names this machine's jack account.
+
+Validation outstanding: package build, rebuilding an extracted source archive,
+resource export, installed-package isolation, and lifecycle regression checks.
+No tests, input grabs, fan changes, service activation, or reboot were performed
+for this package step. Existing installed guards and launchers were not changed.
