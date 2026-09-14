@@ -1,0 +1,106 @@
+{
+  "runs": [
+    {
+      "edge": "bottom",
+      "name": "cold-departure",
+      "began": 15023.474156881,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "visible": null,
+      "after": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15023.510424043,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 0,
+      "draw_count": 0,
+      "first_start_age_ms": null,
+      "first_draw_age_ms": null,
+      "admission_age_ms": null,
+      "shutter_duration_ms": 31.83874000023934,
+      "gl_errors": [],
+      "graphics": []
+    }
+  ],
+  "isolated": true,
+  "synthetic_screenshots": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "bed058eb6a7a17348ff23bc55c39354a52c835b723e2daed75b35f135fbde829",
+    "alpine/desktop/.local/lib/oldbook/ripple.py": "336c0da132002e47a20c736ee1a2759df06dd24d55dca4900596663f37984510"
+  },
+  "installed_helper_resolves_to_source": true
+}

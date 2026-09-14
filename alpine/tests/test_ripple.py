@@ -265,8 +265,10 @@ class DockDeparture(unittest.TestCase):
         return SimpleNamespace(start=lambda started: self.frames.append(
             {'area': area, 'plan': plan, 'started': started, 'size': size}))
 
-    def depart(self):
+    def depart(self, moving=True):
         self.ns['begin_flight'](self.caption, {'mode': 'window'}, self.caption.output_rect)
+        if moving:
+            self.ns['strike'](self.caption)
 
     def finish_capture(self, elapsed=0.04):
         self.clock += elapsed
@@ -284,6 +286,22 @@ class DockDeparture(unittest.TestCase):
         self.assertEqual(frame['started'], 10.0)
         self.assertAlmostEqual(frame['plan']['centre'][1], 278.5 / 300)
         self.assertFalse(self.caption.contact_pending, 'window arrival must not strike again')
+
+    def test_capture_waits_for_actual_departure_after_slow_layout(self):
+        self.depart(moving=False)
+        self.finish_capture()
+        self.assertEqual(self.frames, [], 'layout has not produced a moving frame yet')
+        self.clock = 10.4
+        self.ns['strike'](self.caption)
+        self.assertEqual(len(self.frames), 1)
+        self.assertEqual(self.frames[0]['started'], 10.4)
+
+    def test_later_animation_frames_do_not_extend_capture_deadline(self):
+        self.depart()
+        self.clock = 10.08
+        self.ns['strike'](self.caption)
+        self.finish_capture(elapsed=0.04)
+        self.assertEqual(self.frames, [])
 
     def test_right_dock_uses_its_departed_outline_on_an_offset_output(self):
         self.caption.edge = 'right'

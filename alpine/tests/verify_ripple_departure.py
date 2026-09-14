@@ -8,13 +8,13 @@ No live desktop is captured or configured. Source snapshots stay in /tmp.
 """
 
 import argparse
+import ast
 import ctypes
 import ctypes.util
 import hashlib
 import json
 import os
 from pathlib import Path
-import runpy
 import shutil
 import struct
 import subprocess
@@ -67,6 +67,23 @@ def observe(helper, destination, delay_file):
         return original_tick(widget, tick, *args)
 
     Gtk.Widget.add_tick_callback = add_tick
+    original_warm = ripple.warm
+
+    def warm():
+        result = original_warm()
+        record('warm-complete', numpy_loaded='numpy' in sys.modules)
+        return result
+
+    ripple.warm = warm
+    original_crop = ripple.crop
+
+    def crop(*args, **kwargs):
+        began = time.monotonic()
+        result = original_crop(*args, **kwargs)
+        record('crop-complete', duration_ms=1000 * (time.monotonic() - began))
+        return result
+
+    ripple.crop = crop
     original_capture = ripple.capture
     capture_number = 0
 
@@ -145,7 +162,19 @@ def observe(helper, destination, delay_file):
 
     ripple.Ripple.finish = finish
     sys.argv = [str(helper), 'daemon']
-    runpy.run_path(str(helper), run_name='__main__')
+    def delivery(event, values):
+        approach = values.get('approach', {})
+        landed = approach.get('landed')
+        record(event, age_ms=1000 * (time.monotonic() - landed) if landed else None)
+
+    tree = ast.parse(helper.read_text())
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name in ('present', 'taken'):
+            probe = ast.parse('_ripple_delivery(' + repr(node.name) + ', locals())').body[0]
+            node.body.insert(1, probe)
+    ast.fix_missing_locations(tree)
+    exec(compile(tree, str(helper), 'exec'), dict(
+        __name__='__main__', __file__=str(helper), _ripple_delivery=delivery))
 
 
 def wait(predicate, timeout=10):
@@ -357,10 +386,12 @@ def verify(origin, output, restart_power_off=False):
                 observer = spawn(['python3', str(Path(__file__).resolve()), 'observe',
                                   str(helper), str(trace), str(delay_file)])
                 wait(lambda: snapshot()['captions'], timeout=40)
-                # Pay the daemon's real delayed GL warm-up before measuring.
-                time.sleep(7.5)
+                # Wait for the daemon's real delayed warm-up, rather than
+                # guessing when GTK's startup and timeout dispatch finish.
+                wait(lambda: any(e['kind'] == 'warm-complete'
+                                 for e in events(trace)), timeout=30)
 
-                def transition(name, floating, delayed=False, cold=False):
+                def transition(name, floating, delayed=False):
                     before = snapshot()
                     if delayed:
                         delay_file.touch()
@@ -416,18 +447,17 @@ def verify(origin, output, restart_power_off=False):
                         assert plans[0]['rect'] == before['captions'][0], summary
                     if delayed:
                         assert not starts and not draws and visible is None, summary
-                    elif not cold:
+                    else:
                         assert len(starts) == 1 and draws and visible, summary
                         assert all(e['gl_error'] == 0 for e in draws), summary
                         assert summary['admission_age_ms'] < 100, summary
                         assert all(e['program'] and e['error'] is None
                                    for e in summary['graphics']), summary
 
-                # The first real crop imports NumPy. Keep that cold outcome
-                # visible in the report; subsequent measurements use the same
-                # daemon and its naturally warmed production path.
-                transition('cold-departure', 'enable', cold=True)
-                transition('warmup-landing', 'disable', cold=True)
+                # Startup warm-up must cover the first capture too: no throwaway
+                # departure may be silently sacrificed to lazy imports.
+                transition('cold-departure', 'enable')
+                transition('warmup-landing', 'disable')
                 transition('departure', 'enable')
                 transition('landing', 'disable')
                 transition('departure-late-capture', 'enable', delayed=True)

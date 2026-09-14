@@ -1,5 +1,30 @@
 # Oldbook verification
 
+## The first departure ripple is no longer discarded — 2026-09-13
+
+Jack reported seeing no ripple after the departure change.
+
+- Reproduced two causes. The first live-screen crop took 157ms to load NumPy
+  after a 64ms capture, exceeding the 100ms deadline. Separately, the native
+  right-edge trace showed a photograph ready in about 19ms waiting 409ms while
+  initial layout blocked the first animation frame. The deadline was starting
+  at the mode-change request, before the caption had actually begun moving.
+- Startup warm-up now crops one synthetic pixel as well as preparing graphics.
+  Departure still photographs the old dock early, but starts its clock on the
+  first moving animation frame. Repeated frames do not renew the deadline;
+  genuinely late captures are still dropped. Landing timing is unchanged.
+- Corrected the native verifier: first/cold departures must actually render,
+  and it waits for observed warm-up completion instead of sleeping a guessed
+  interval. The previous verifier explicitly allowed the first departure to
+  produce zero frames, which let the bug through.
+- Two new regressions failed before the clock fix. All 63 ripple tests and
+  304 mapped tests pass (one existing skip). Real isolated GLES renders the
+  first and subsequent departure plus landing on both edges; injected 300ms
+  captures map no ripple. Evidence: `verification/ripple-first-motion/README.md`.
+- Reloaded the live daemon with unchanged settings and removed the temporary
+  timing probes. No live user-triggered transition was recorded during the
+  diagnostic window; the visible-rendering evidence is from the isolated test.
+
 ## Ripple when the caption leaves its dock — 2026-09-13
 
 Jack asked that `ripple.py` also apply when the bar moves away from the bottom.

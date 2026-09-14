@@ -418,7 +418,8 @@
         "alpine/tests/test_ripple.py",
         "alpine/tests/verify_ripple_departure.py",
         "alpine/verification/ripple-water/*",
-        "alpine/verification/ripple-departure/*"
+        "alpine/verification/ripple-departure/*",
+        "alpine/verification/ripple-first-motion/*"
       ],
       "tests": [
         "test_decoration.py",
@@ -432,7 +433,8 @@
       "evidence": [
         "verification/decoration-context/",
         "verification/ripple-water/README.md",
-        "verification/ripple-departure/README.md"
+        "verification/ripple-departure/README.md",
+        "verification/ripple-first-motion/README.md"
       ]
     },
     {

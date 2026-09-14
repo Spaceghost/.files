@@ -601,11 +601,10 @@ def daemon():
                 # first moving frame; a slow capture is dropped by the same
                 # budget as a landing, never by holding up the flight.
                 prepare_strike(self, rect=departure)
-                strike(self)
             self.attachment_mode = placement['mode']
             self.flying = True
-            # A return to the band waits for contact; a departure has already
-            # struck its old dock and must not strike again at the window.
+            # A return to the band waits for contact; a departure strikes on
+            # its first moving frame, never again when it reaches the window.
             # Contact is watched against the way each coordinate sets out.
             self.contact_pending = not attached
             self.approach = None
@@ -640,7 +639,7 @@ def daemon():
             self.flying = False
             if self.attachment_mode == 'window':
                 # Taking hold of the window adds no second wave. Any dock
-                # departure already rang when this flight began.
+                # departure already rang on its first moving frame.
                 self.contact_pending = False
                 abandon_strike(self)
                 return
@@ -790,6 +789,10 @@ def daemon():
                     response=FLIGHT_RESPONSE if self.flying else 0.045,
                     tolerance=FLIGHT_TOLERANCE if self.flying else 0.05,
                     damping=FLIGHT_DAMPING if self.flying else 1.0)
+                if self.flying and self.attachment_mode == 'window' and elapsed > 0:
+                    # Layout can hold up the first frame. Date departure from
+                    # motion, not from the earlier request to change modes.
+                    strike(self)
                 if self.flying and self.attachment_mode != 'window':
                     if not settled:
                         # Nearly home: photograph the band now, so the wave
@@ -1593,7 +1596,8 @@ def daemon():
         approach = approaches.get(output_name(caption))
         if approach is None:
             return
-        approach['landed'] = time.monotonic()
+        if approach['landed'] is None:
+            approach['landed'] = time.monotonic()
         if approach['ready'] is not None:
             approach['present']()
 

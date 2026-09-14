@@ -734,7 +734,7 @@ class Warmth:
 
 
 def warm():
-    """Create the GL context and compile the wave before anything needs them.
+    """Prepare pixel cropping and the GL context before a strike needs them.
 
     The first GLArea in a process pays for the whole graphics context -- four
     tenths of a second on this hardware -- and the first strike is exactly the
@@ -743,9 +743,14 @@ def warm():
     nothing is watching, and holding the window open keeps the context alive
     for the surfaces that follow, which then cost nothing measurable.
 
+    Cropping lazily imports NumPy too. On this machine that first import takes
+    longer than the entire capture admission budget, silently losing the first
+    departure even with warm graphics. Exercise it on one synthetic pixel here.
+
     Nothing is mapped, no layer-shell role is taken and no photograph is read;
     the area is one pixel and is never presented.
     """
+    crop(b'\x00\x00\x00', 0, 1, 1, {'x': 0, 'y': 0, 'width': 1, 'height': 1})
     import gi
     gi.require_version('Gtk', '4.0')
     from gi.repository import Gtk

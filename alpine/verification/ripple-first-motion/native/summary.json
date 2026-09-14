@@ -1,0 +1,1234 @@
+{
+  "runs": [
+    {
+      "edge": "bottom",
+      "name": "cold-departure",
+      "began": 15540.777388486,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 973,
+            "height": 56,
+            "x": 243,
+            "y": 598
+          }
+        ],
+        "ripples": [
+          {
+            "width": 1200,
+            "height": 267,
+            "x": 0,
+            "y": 533
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15540.823824837,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 28,
+      "first_start_age_ms": 44.36448399974324,
+      "first_draw_age_ms": 226.99265499977628,
+      "admission_age_ms": 0.04068300040671602,
+      "shutter_duration_ms": 16.58093399964855,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15540.936261156,
+          "program": 13,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "bottom",
+      "name": "warmup-landing",
+      "began": 15542.398334732,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1197,
+            "height": 34,
+            "x": 2,
+            "y": 763
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 0,
+            "y": 533
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15542.629619936,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 48,
+      "first_start_age_ms": 74.26912600021751,
+      "first_draw_age_ms": 83.98739299991576,
+      "admission_age_ms": 34.03968000020541,
+      "shutter_duration_ms": 31.92187900094723,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15542.703862861,
+          "program": 13,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "bottom",
+      "name": "departure",
+      "began": 15544.016064866,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 1154,
+            "height": 56,
+            "x": 163,
+            "y": 653
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 0,
+            "y": 533
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15544.021147089,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 36,
+      "first_start_age_ms": 44.81348899935256,
+      "first_draw_age_ms": 102.35782000017934,
+      "admission_age_ms": 3.265450000981218,
+      "shutter_duration_ms": 32.05306599920732,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15544.096769493,
+          "program": 13,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "bottom",
+      "name": "landing",
+      "began": 15545.635878976,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1196,
+            "height": 34,
+            "x": 3,
+            "y": 762
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 0,
+            "y": 533
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15545.862130086,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 48,
+      "first_start_age_ms": 84.80204800071078,
+      "first_draw_age_ms": 93.46888400068565,
+      "admission_age_ms": 33.92157800044515,
+      "shutter_duration_ms": 31.67567999844323,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15545.946838892,
+          "program": 13,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "bottom",
+      "name": "departure-late-capture",
+      "began": 15547.257446014,
+      "delayed": true,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1200,
+          "height": 761
+        },
+        "captions": [
+          {
+            "width": 1190,
+            "height": 34,
+            "x": 5,
+            "y": 761
+          }
+        ],
+        "ripples": []
+      },
+      "visible": null,
+      "after": {
+        "window": {
+          "x": 330,
+          "y": 200,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 540,
+            "height": 56,
+            "x": 330,
+            "y": 538
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15547.264562102,
+          "rect": {
+            "x": 5,
+            "y": 761,
+            "width": 1190,
+            "height": 34
+          },
+          "area": {
+            "x": 0,
+            "y": 533,
+            "width": 1200,
+            "height": 267
+          },
+          "edge": "bottom",
+          "plan": {
+            "centre": [
+              2.247191011235955,
+              0.9176029962546817
+            ],
+            "half": [
+              2.202247191011236,
+              0.03745318352059925
+            ],
+            "radius": 0.026217228464419477,
+            "shore": 0.0299625468164794,
+            "travel": 0.8239700374531835,
+            "reach": 1.0,
+            "scale": [
+              4.49438202247191,
+              1.0
+            ],
+            "texel": [
+              0.0008333333333333334,
+              0.003745318352059925
+            ],
+            "spacing": 0.149812734082397,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 0,
+      "draw_count": 0,
+      "first_start_age_ms": null,
+      "first_draw_age_ms": null,
+      "admission_age_ms": null,
+      "shutter_duration_ms": 31.8766999989748,
+      "gl_errors": [],
+      "graphics": []
+    },
+    {
+      "edge": "right",
+      "name": "cold-departure",
+      "began": 15555.804064221,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 790,
+            "x": 1145,
+            "y": 5
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 646,
+            "x": 923,
+            "y": 162
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 800,
+            "y": 0
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 360,
+            "x": 842,
+            "y": 220
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15555.844035693,
+          "rect": {
+            "x": 1145,
+            "y": 5,
+            "width": 50,
+            "height": 790
+          },
+          "area": {
+            "x": 800,
+            "y": 0,
+            "width": 400,
+            "height": 800
+          },
+          "edge": "right",
+          "plan": {
+            "centre": [
+              0.925,
+              1.0
+            ],
+            "half": [
+              0.045,
+              0.9700000000000001
+            ],
+            "radius": 0.0175,
+            "shore": 0.02,
+            "travel": 0.8425,
+            "reach": 1.0,
+            "scale": [
+              1.0,
+              2.0
+            ],
+            "texel": [
+              0.0025,
+              0.00125
+            ],
+            "spacing": 0.1,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 40,
+      "first_start_age_ms": 40.87031900053262,
+      "first_draw_age_ms": 97.55353599939554,
+      "admission_age_ms": 0.04378700032248162,
+      "shutter_duration_ms": 9.410876000401913,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15556.322247662,
+          "program": 14,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "right",
+      "name": "warmup-landing",
+      "began": 15557.421181713,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 360,
+            "x": 842,
+            "y": 220
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 794,
+            "x": 1148,
+            "y": 3
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 800,
+            "y": 0
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 790,
+            "x": 1145,
+            "y": 5
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15557.630377732,
+          "rect": {
+            "x": 1145,
+            "y": 5,
+            "width": 50,
+            "height": 790
+          },
+          "area": {
+            "x": 800,
+            "y": 0,
+            "width": 400,
+            "height": 800
+          },
+          "edge": "right",
+          "plan": {
+            "centre": [
+              0.925,
+              1.0
+            ],
+            "half": [
+              0.045,
+              0.9700000000000001
+            ],
+            "radius": 0.0175,
+            "shore": 0.02,
+            "travel": 0.8425,
+            "reach": 1.0,
+            "scale": [
+              1.0,
+              2.0
+            ],
+            "texel": [
+              0.0025,
+              0.00125
+            ],
+            "spacing": 0.1,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 48,
+      "first_start_age_ms": 50.582366000526235,
+      "first_draw_age_ms": 58.32322100104648,
+      "admission_age_ms": 9.873124001387623,
+      "shutter_duration_ms": 32.20633500131953,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15557.707132851,
+          "program": 14,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "right",
+      "name": "departure",
+      "began": 15559.041760895,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 790,
+            "x": 1145,
+            "y": 5
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 712,
+            "x": 957,
+            "y": 138
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 800,
+            "y": 0
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 360,
+            "x": 842,
+            "y": 220
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15559.04824829,
+          "rect": {
+            "x": 1145,
+            "y": 5,
+            "width": 50,
+            "height": 790
+          },
+          "area": {
+            "x": 800,
+            "y": 0,
+            "width": 400,
+            "height": 800
+          },
+          "edge": "right",
+          "plan": {
+            "centre": [
+              0.925,
+              1.0
+            ],
+            "half": [
+              0.045,
+              0.9700000000000001
+            ],
+            "radius": 0.0175,
+            "shore": 0.02,
+            "travel": 0.8425,
+            "reach": 1.0,
+            "scale": [
+              1.0,
+              2.0
+            ],
+            "texel": [
+              0.0025,
+              0.00125
+            ],
+            "spacing": 0.1,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 36,
+      "first_start_age_ms": 41.886942000928684,
+      "first_draw_age_ms": 96.8065460001526,
+      "admission_age_ms": 1.5242460012814263,
+      "shutter_duration_ms": 32.43629700045858,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15559.14631083,
+          "program": 14,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "right",
+      "name": "landing",
+      "began": 15560.665470142,
+      "delayed": false,
+      "before": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 360,
+            "x": 842,
+            "y": 220
+          }
+        ],
+        "ripples": []
+      },
+      "visible": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 794,
+            "x": 1147,
+            "y": 3
+          }
+        ],
+        "ripples": [
+          {
+            "width": 200,
+            "height": 200,
+            "x": 800,
+            "y": 0
+          }
+        ]
+      },
+      "after": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 790,
+            "x": 1145,
+            "y": 5
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15560.906485176,
+          "rect": {
+            "x": 1145,
+            "y": 5,
+            "width": 50,
+            "height": 790
+          },
+          "area": {
+            "x": 800,
+            "y": 0,
+            "width": 400,
+            "height": 800
+          },
+          "edge": "right",
+          "plan": {
+            "centre": [
+              0.925,
+              1.0
+            ],
+            "half": [
+              0.045,
+              0.9700000000000001
+            ],
+            "radius": 0.0175,
+            "shore": 0.02,
+            "travel": 0.8425,
+            "reach": 1.0,
+            "scale": [
+              1.0,
+              2.0
+            ],
+            "texel": [
+              0.0025,
+              0.00125
+            ],
+            "spacing": 0.1,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 1,
+      "draw_count": 49,
+      "first_start_age_ms": 57.888354000169784,
+      "first_draw_age_ms": 66.72260799859941,
+      "admission_age_ms": 8.120106998831034,
+      "shutter_duration_ms": 32.42017099910299,
+      "gl_errors": [
+        0
+      ],
+      "graphics": [
+        {
+          "kind": "ripple-prepare",
+          "t": 15560.990641149,
+          "program": 14,
+          "error": null,
+          "renderer": "llvmpipe (LLVM 22.1.8, 256 bits)",
+          "version": "OpenGL ES 3.2 Mesa 26.1.6"
+        }
+      ]
+    },
+    {
+      "edge": "right",
+      "name": "departure-late-capture",
+      "began": 15562.282269982,
+      "delayed": true,
+      "before": {
+        "window": {
+          "x": 0,
+          "y": 0,
+          "width": 1145,
+          "height": 800
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 790,
+            "x": 1145,
+            "y": 5
+          }
+        ],
+        "ripples": []
+      },
+      "visible": null,
+      "after": {
+        "window": {
+          "x": 302,
+          "y": 220,
+          "width": 540,
+          "height": 360
+        },
+        "captions": [
+          {
+            "width": 50,
+            "height": 360,
+            "x": 842,
+            "y": 220
+          }
+        ],
+        "ripples": []
+      },
+      "plans": [
+        {
+          "kind": "plan",
+          "t": 15562.32596308,
+          "rect": {
+            "x": 1145,
+            "y": 5,
+            "width": 50,
+            "height": 790
+          },
+          "area": {
+            "x": 800,
+            "y": 0,
+            "width": 400,
+            "height": 800
+          },
+          "edge": "right",
+          "plan": {
+            "centre": [
+              0.925,
+              1.0
+            ],
+            "half": [
+              0.045,
+              0.9700000000000001
+            ],
+            "radius": 0.0175,
+            "shore": 0.02,
+            "travel": 0.8425,
+            "reach": 1.0,
+            "scale": [
+              1.0,
+              2.0
+            ],
+            "texel": [
+              0.0025,
+              0.00125
+            ],
+            "spacing": 0.1,
+            "strength": 14.0,
+            "shade": 0.09,
+            "duration": 0.9
+          }
+        }
+      ],
+      "capture_count": 1,
+      "ripple_count": 0,
+      "draw_count": 0,
+      "first_start_age_ms": null,
+      "first_draw_age_ms": null,
+      "admission_age_ms": null,
+      "shutter_duration_ms": 16.66924500023015,
+      "gl_errors": [],
+      "graphics": []
+    }
+  ],
+  "isolated": true,
+  "synthetic_screenshots": true,
+  "source_sha256": {
+    "alpine/desktop/.local/bin/oldbook-decoration": "d3fafb978164c4ee7a2aad565d41324e9a30bfaa1b1fb216d9139b640101a46c",
+    "alpine/desktop/.local/lib/oldbook/ripple.py": "efa7dcd1d4f6c76373251f72c436c636efd501513c3152f9f8ba32784d51749a"
+  },
+  "installed_helper_resolves_to_source": true,
+  "passed": true
+}
