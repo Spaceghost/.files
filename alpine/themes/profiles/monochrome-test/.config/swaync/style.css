@@ -251,3 +251,16 @@ scale slider:hover { background: #ffffff; }
 .widget-buttons-grid flowboxchild > button:hover { background: #ffffff; color: #ffffff; }
 .widget-buttons-grid flowboxchild > button.toggle:checked { background: #ffffff; color: #000000; }
 .widget-buttons-grid flowboxchild > button.toggle:checked:hover { background: #ffffff; color: #000000; }
+
+/* Keep overflow discoverable and provide a comfortable drag-to-scroll target. */
+.control-center scrollbar.vertical { min-width: 12px; opacity: 1; }
+.control-center scrollbar.vertical slider {
+  min-width: 8px;
+  min-height: 42px;
+  border-radius: 8px;
+  background-color: alpha(currentColor, 0.35);
+}
+.control-center scrollbar.vertical slider:hover,
+.control-center scrollbar.vertical slider:active {
+  background-color: alpha(currentColor, 0.65);
+}
