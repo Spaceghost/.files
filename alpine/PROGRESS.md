@@ -3026,3 +3026,20 @@ now recognizes an exact ancestor-tree match before attempting content merging;
 it retains the remote parent and publishes the new tested Fossil snapshot.
 Both this history-only case and genuinely independent remote file additions
 pass isolated local-Git tests. The publication regression batch passes 19 tests.
+
+## 2026-09-14 - catbed GTK backend startup repair
+
+Reproduced the reported "watch mode requires GTK4 layer-shell" error with
+GTK selecting X11, despite the GTK4 layer-shell package and bindings being
+installed. Catbed now explicitly selects Wayland before GTK initializes and
+reports unsupported displays separately from surface initialization failures.
+Lock-triggered catbed startup preserves stderr/stdout in the private runtime
+oldbook/watch-startup.log instead of discarding the underlying GTK diagnosis.
+
+Validation: 52 watch/backend/lock regression tests pass. The native test uses
+an isolated headless Sway compositor and virtual keyboard, deliberately starts
+with GDK_BACKEND=x11, constructs the layer surface, starts the actual guard and
+observes its watch-mode readiness record. A real subprocess test verifies the
+startup diagnostic is retained with mode 0600. No input was parked on the
+user's live desktop during this check. Existing source-linked launchers pick
+up this repair on the next catbed/lock invocation.

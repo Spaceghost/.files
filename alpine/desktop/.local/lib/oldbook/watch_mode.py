@@ -342,6 +342,10 @@ class Guard:
 
     def __init__(self, palette, on_release, on_keyboard, on_keyboard_lost,
                  on_mapped=None, translucent=True):
+        # Catbed cannot park input through Xwayland. An inherited X11 backend
+        # preference must not make GTK open a display without layer-shell.
+        # Set this before GTK initializes or opens its default display.
+        os.environ['GDK_BACKEND'] = 'wayland'
         from showdesktop import preload_layer_shell
         preload_layer_shell()
         import gi
@@ -364,6 +368,9 @@ class Guard:
         display = Gdk.Display.get_default()
         if display is None:
             raise RuntimeError('watch mode needs a Wayland display')
+        if not Gtk4LayerShell.is_supported():
+            raise RuntimeError('the selected display does not support Wayland layer-shell; '
+                               'start catbed inside the Sway session')
         self.provider = Gtk.CssProvider()
         self.provider.load_from_string(indicator_style(palette, translucent))
         Gtk.StyleContext.add_provider_for_display(display, self.provider,
@@ -380,7 +387,7 @@ class Guard:
         Shell.init_for_window(window)
         if not Shell.is_layer_window(window):
             window.destroy()
-            raise RuntimeError('watch mode requires GTK4 layer-shell')
+            raise RuntimeError('GTK4 layer-shell could not initialize the catbed surface')
         Shell.set_namespace(window, NAMESPACE)
         Shell.set_layer(window, Shell.Layer.OVERLAY)
         Shell.set_keyboard_mode(window, Shell.KeyboardMode.EXCLUSIVE if primary

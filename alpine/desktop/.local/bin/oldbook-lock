@@ -172,9 +172,14 @@ def begin_catbed_mode(runtime):
     if watch_mode.engaged(runtime) is not None:
         return False
     try:
-        child = subprocess.Popen(_watch_command('start'), stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         start_new_session=True)
+        log_path = watch_mode.runtime_directory(runtime) / 'watch-startup.log'
+        descriptor = os.open(log_path, os.O_WRONLY | os.O_CREAT | os.O_APPEND
+                             | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+        with os.fdopen(descriptor, 'a') as log:
+            if os.fstat(log.fileno()).st_size > 65536:
+                os.ftruncate(log.fileno(), 0)
+            child = subprocess.Popen(_watch_command('start'), stdin=subprocess.DEVNULL,
+                                     stdout=log, stderr=log, start_new_session=True)
     except OSError as error:
         print(f'oldbook-lock: catbed mode did not start ({error})', file=sys.stderr)
         return False
