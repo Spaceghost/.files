@@ -66,8 +66,12 @@ An extracted source archive contains those resources and does not need the
 dotfiles checkout to rebuild them. Editable/source-tree execution lacks the
 generated resources, and `export-system` reports that explicitly.
 
-The new build hooks and export command have not yet been validated. Do not
-treat packaged resources as evidence of successful boot or shutdown handoff.
+The source archive and wheel have been built successfully, including building
+the wheel from the extracted source archive. An unpacked-wheel check outside
+the checkout verified resource export, matching helper payloads, permissions,
+and refusal of invalid requests. The host lacks `pip`, so installer-generated
+command wrappers remain untested. These checks are not evidence of successful
+hardware boot or shutdown handoff.
 
 ## Protection boundaries
 
