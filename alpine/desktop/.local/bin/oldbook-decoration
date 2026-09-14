@@ -84,18 +84,26 @@ _RIPPLE_MODULE = {'name': 'ripple', 'module': ripple}
 def _load_ripple_by_path(path):
     if not path.is_file():
         raise FileNotFoundError('no module file: ' + str(path))
-    local_root = (Path.home() / '.local').resolve()
+    local_root = Path.home() / '.local'
     resolved = path.resolve()
     try:
-        resolved.relative_to(local_root)
+        path.relative_to(local_root)
+        if '..' in path.parts:
+            raise ValueError('parent traversal')
     except ValueError as error:
         raise ValueError('ripple module path must stay under ~/.local: ' + str(path)) from error
     name = '_oldbook_ripple_' + hashlib.sha256(str(resolved).encode()).hexdigest()[:12]
-    loader = importlib.util.spec_from_file_location(name, str(resolved))
+    loader = importlib.util.spec_from_file_location(
+        name, str(resolved), submodule_search_locations=[str(resolved.parent)])
     if loader is None or loader.loader is None:
         raise RuntimeError('cannot load custom ripple module: ' + str(path))
     module = importlib.util.module_from_spec(loader)
+    sys.modules[name] = module
     loader.loader.exec_module(module)
+    for member in ('allowed', 'region', 'plan', 'geometry_string', 'capture',
+                   'parse_ppm', 'crop', 'Ripple', 'warm'):
+        if not callable(getattr(module, member, None)):
+            raise ValueError('effect is missing callable ' + member)
     return module
 
 
@@ -115,6 +123,8 @@ def _load_ripple(module_name):
 
 def ripple_module(settings):
     global _RIPPLE_MODULE
+    if not settings.get('ripple', {}).get('enabled', True):
+        return None
     name = 'ripple'
     try:
         name = settings['ripple']['module']
@@ -213,13 +223,28 @@ def components(color, alpha):
     return (red, green, blue, max(0.0, min(1.0, float(alpha))))
 
 
-def appearance():
+def terminal_font():
+    """The terminal's own face and point size, from Foot's configuration."""
     config = configparser.ConfigParser(interpolation=None)
     config.read(CONFIG / 'foot/foot.ini')
     font = config.get('main', 'font', fallback='JetBrainsMono Nerd Font:size=9.5')
-    family = font.split(':', 1)[0].split(',')[0]
     match = re.search(r':size=([0-9.]+)', font)
-    size = float(match[1]) if match else 9.5
+    return font.split(':', 1)[0].split(',')[0], (float(match[1]) if match else 9.5)
+
+
+def glyph_font():
+    """The face the powerline separator is set in, whatever face the caption wears.
+
+    Inter, the design typeface, carries private-use glyphs of its own from
+    U+E000 to U+E0BD, so a separator left to the label's stylesheet comes out
+    as one of Inter's subscript digits. The terminal's Nerd Font has the real
+    shape; the symbols face behind it covers a terminal font that does not.
+    """
+    return terminal_font()[0] + ',Powerline Extra Symbols'
+
+
+def appearance():
+    family, size = terminal_font()
     # Ghost Observatory captions use the theme's design typeface; a theme
     # without one keeps the terminal font. A proportional face needs a point
     # more than the monospace terminal size to read at the same height.
@@ -438,6 +463,7 @@ def daemon():
             self.measured_key = None
             self.character_width = None
             self.powerline = False
+            self.glyph_font = glyph_font()
             self.palette = {}
             self.shown_parts = []
 
@@ -505,11 +531,14 @@ def daemon():
             draw, so one measurement per appearance covers all of them.
             """
             reference = decoration_reserve.REFERENCE
-            self.label.set_use_markup(False)
             if self.edge == 'bottom':
-                self.label.set_text(reference)
+                # Measured as it is drawn: the separator in its own face, so the
+                # band already has room for it before powerline is switched on.
+                self.label.set_markup(
+                    window_context.reference_markup(reference, self.glyph_font))
                 natural = self.box.measure(Gtk.Orientation.VERTICAL, -1)[1]
             else:
+                self.label.set_use_markup(False)
                 self.label.set_text(vertical_title(reference, len(reference)))
                 natural = self.box.measure(Gtk.Orientation.HORIZONTAL, -1)[1]
             self.measured = decoration_reserve.band_thickness(natural)
@@ -521,7 +550,8 @@ def daemon():
             """Set the line once, in whichever form this strip is wearing."""
             self.shown_parts = list(parts)
             if self.powerline and parts:
-                self.label.set_markup(window_context.markup(parts, self.palette))
+                self.label.set_markup(
+                    window_context.markup(parts, self.palette, self.glyph_font))
                 return
             self.label.set_use_markup(False)
             self.label.set_text(window_context.SEPARATOR.join(text for _, text in parts))
@@ -1060,6 +1090,7 @@ def daemon():
                 self.breath_painted = None
             self.palette = colors
             self.powerline = bool(settings['powerline'])
+            self.glyph_font = glyph_font()
             # Attached along the bottom the strip and its window are one shape:
             # square where they meet, rounded only where the pair ends, and the
             # window's clipped corners filled with the caption's own first-row
@@ -1547,7 +1578,7 @@ def daemon():
             rect = caption.motion_target
         settings = load_settings(SETTINGS, STATE / 'position')
         effect = ripple_module(settings)
-        if (not output_rect or not name or rect is None or name in ripples
+        if (effect is None or not output_rect or not name or rect is None or name in ripples
                 or name in approaches or not effect.allowed(animations=caption.animations)):
             return
         # Layer-shell margins are measured from the output, so everything here
@@ -1775,7 +1806,8 @@ def daemon():
     def warm_ripple():
         try:
             effect = ripple_module(load_settings(SETTINGS, STATE / 'position'))
-            ripple_primer['keeper'] = effect.warm()
+            if effect is not None:
+                ripple_primer['keeper'] = effect.warm()
         except Exception as error:
             print('decoration ripple warmup:', error, file=sys.stderr)
         return False

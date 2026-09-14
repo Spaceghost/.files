@@ -1,0 +1,1091 @@
+--- a/include/panel.h
++++ b/include/panel.h
+@@ -0,0 +1,98 @@
++#ifndef _SWAYLOCK_PANEL_H
++#define _SWAYLOCK_PANEL_H
++
++#include <stdbool.h>
++#include <stdint.h>
++#include <time.h>
++#include <cairo/cairo.h>
++
++// A panel is an image, drawn under the indicator, described by a small text
++// file the caller keeps up to date. The locker never runs the caller's code:
++// everything variable arrives as validated numbers and one PNG, so the worst a
++// broken or hostile panel can do is fail to load, and a panel that fails to
++// load is simply not drawn.
++//
++// The state file is `key value` lines, ASCII, at most PANEL_FILE_MAX bytes:
++//
++//   panel 1                 format version; anything else is refused
++//   serial 41               changes whenever anything drawn changes -- the
++//                           image, the size, the gap, the ring -- and nothing
++//                           is re-read or re-drawn while it stands still
++//   stamp 1789102394        CLOCK_REALTIME seconds when this was written
++//   stale 15                ignore this panel once it is older than that
++//   image hearth-a.png      basename beside the state file; no directories
++//   width 620               logical width to draw the image at
++//   height 214              logical height to draw the image at
++//   gap 30                  logical gap between the indicator and the panel
++//   fade 320                cross-fade milliseconds on a serial change; 0 stops
++//                           the animation entirely and repaints once instead
++//   poll 250                milliseconds between checks of this file
++//   ring 0                  0 hides the locker's own arc while the panel is up
++//   place above             above the indicator, or `below` (the default). The
++//                           lock's caption card owns the lower-left corner, so
++//                           a panel of any width belongs above the clock. When
++//                           there is not enough room above, it is placed below
++//                           rather than clipped off the top of the screen.
++//
++// Unknown keys are ignored so a newer writer degrades instead of failing, and
++// every value is clamped to the ranges below before it can reach cairo.
++
++#define PANEL_FILE_MAX 4096
++#define PANEL_IMAGE_BYTES_MAX (4 * 1024 * 1024)
++#define PANEL_IMAGE_PIXELS_MAX (16 * 1024 * 1024)
++#define PANEL_NAME_MAX 64
++#define PANEL_DIR_MAX 512
++#define PANEL_SIZE_MAX 4096
++#define PANEL_GAP_MAX 512
++#define PANEL_FADE_MAX 1000
++#define PANEL_POLL_MIN 100
++#define PANEL_POLL_MAX 5000
++#define PANEL_STALE_MAX 3600
++
++struct swaylock_panel {
++	char *path;                   // the state file, or NULL when disabled
++	char directory[PANEL_DIR_MAX];// the state file's directory; images live here
++
++	bool active;                  // a fresh, valid panel is loaded and drawable
++	bool hide_ring;               // draw no arc or key highlight while it is up
++	bool above;                   // asked to sit above the indicator
++	unsigned long serial;
++	int width, height, gap;       // logical
++	int fade_ms, poll_ms;
++
++	cairo_surface_t *image;       // what to draw now
++	cairo_surface_t *fading_from; // what it replaced, while the fade runs
++	struct timespec changed;      // CLOCK_MONOTONIC when serial last changed
++
++	// Where the panel was last drawn, in buffer pixels, so the caller can
++	// damage the animated region alone.
++	int rect_x, rect_y, rect_width, rect_height;
++	bool rect_valid;
++};
++
++void swaylock_panel_init(struct swaylock_panel *panel, const char *path);
++void swaylock_panel_finish(struct swaylock_panel *panel);
++
++// Re-read and re-judge the state file. True when what would be drawn is now
++// different -- a new serial, or a panel that has just gone stale or invalid --
++// which is the caller's cue to damage and repaint.
++bool swaylock_panel_refresh(struct swaylock_panel *panel);
++
++// True while a cross-fade is still running, and therefore while the surface
++// should keep asking for wl_surface.frame callbacks.
++bool swaylock_panel_animating(const struct swaylock_panel *panel);
++
++int swaylock_panel_poll_ms(const struct swaylock_panel *panel);
++
++// The room the panel needs beneath the indicator, in buffer pixels.
++int swaylock_panel_buffer_width(const struct swaylock_panel *panel, int scale);
++int swaylock_panel_buffer_height(const struct swaylock_panel *panel, int scale);
++
++// The drawing hook. Draws the panel's image centred on centre_x with its top
++// edge at image_top, both in buffer pixels, and records the rectangle it
++// covered so the caller can damage that alone. The gap belongs to the caller,
++// which is the only thing that knows which side of the indicator this is on.
++void swaylock_panel_render(cairo_t *cairo, struct swaylock_panel *panel,
++		int centre_x, int image_top, int scale);
++
++#endif
+--- a/panel.c
++++ b/panel.c
+@@ -0,0 +1,494 @@
++#define _POSIX_C_SOURCE 200809L
++#include <errno.h>
++#include <fcntl.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/stat.h>
++#include <time.h>
++#include <unistd.h>
++#include "log.h"
++#include "panel.h"
++
++// The indicator panel: our own drawing, kept out of the locker's address space.
++//
++// Under ext-session-lock-v1 a locker that dies without unlock_and_destroy does
++// not fail open, it fails stuck -- the compositor stays locked with no password
++// prompt at all until a replacement client takes the lock. So the rule for this
++// file is that nothing here may end the process, and every path that cannot
++// answer must answer "no panel" and let the plain scene stand.
++//
++// That is why the drawing hook takes data rather than code. A dlopen'd renderer
++// is one segfault away from a stuck session and a segfault cannot be caught;
++// a PNG and eleven clamped numbers cannot take the locker down however wrong
++// they are. Everything below is bounded: no allocation driven by the file, no
++// loop whose count comes from the file, no string from the file reaching a
++// format specifier, and no path from the file escaping one directory.
++
++static void panel_drop_images(struct swaylock_panel *panel) {
++	if (panel->image) {
++		cairo_surface_destroy(panel->image);
++		panel->image = NULL;
++	}
++	if (panel->fading_from) {
++		cairo_surface_destroy(panel->fading_from);
++		panel->fading_from = NULL;
++	}
++}
++
++static void panel_deactivate(struct swaylock_panel *panel) {
++	panel_drop_images(panel);
++	panel->active = false;
++	panel->hide_ring = false;
++	panel->above = false;
++	panel->rect_valid = false;
++}
++
++void swaylock_panel_init(struct swaylock_panel *panel, const char *path) {
++	memset(panel, 0, sizeof(*panel));
++	panel->poll_ms = 1000;
++	if (path == NULL || path[0] == '\0') {
++		return;
++	}
++	const char *slash = strrchr(path, '/');
++	if (path[0] != '/' || slash == NULL || slash == path) {
++		swaylock_log(LOG_ERROR,
++				"Ignoring --indicator-panel: an absolute path in a directory is required");
++		return;
++	}
++	size_t dirlen = (size_t)(slash - path);
++	if (dirlen >= sizeof(panel->directory)) {
++		swaylock_log(LOG_ERROR, "Ignoring --indicator-panel: the path is too long");
++		return;
++	}
++	memcpy(panel->directory, path, dirlen);
++	panel->directory[dirlen] = '\0';
++	panel->path = strdup(path);
++	if (panel->path == NULL) {
++		panel->directory[0] = '\0';
++	}
++}
++
++void swaylock_panel_finish(struct swaylock_panel *panel) {
++	panel_drop_images(panel);
++	free(panel->path);
++	panel->path = NULL;
++}
++
++// ---- the state file --------------------------------------------------------
++
++struct panel_fields {
++	unsigned long serial;
++	long stamp;
++	long stale;
++	char image[PANEL_NAME_MAX];
++	long width, height, gap, fade, poll;
++	bool ring, above;
++	bool have_serial, have_stamp, have_image, have_width, have_height;
++};
++
++static bool panel_name_is_safe(const char *name) {
++	if (name[0] == '\0' || name[0] == '.') {
++		return false;   // no dotfiles, and never "." or ".."
++	}
++	for (const char *at = name; *at; ++at) {
++		bool ok = (*at >= 'a' && *at <= 'z') || (*at >= 'A' && *at <= 'Z') ||
++			(*at >= '0' && *at <= '9') || *at == '.' || *at == '-' || *at == '_';
++		if (!ok) {
++			return false;   // no '/', so the name cannot leave the directory
++		}
++	}
++	return true;
++}
++
++static bool panel_parse_long(const char *value, long *out) {
++	if (*value == '\0') {
++		return false;
++	}
++	errno = 0;
++	char *end = NULL;
++	long parsed = strtol(value, &end, 10);
++	if (errno != 0 || end == value || *end != '\0') {
++		return false;
++	}
++	*out = parsed;
++	return true;
++}
++
++static long panel_clamp(long value, long low, long high) {
++	return value < low ? low : (value > high ? high : value);
++}
++
++// One `key value` line. Unknown keys are ignored on purpose: a writer that
++// learns a new field must degrade on an older locker rather than break it.
++static void panel_take(struct panel_fields *fields, const char *key, const char *value) {
++	long number = 0;
++	if (strcmp(key, "serial") == 0) {
++		if (panel_parse_long(value, &number) && number >= 0) {
++			fields->serial = (unsigned long)number;
++			fields->have_serial = true;
++		}
++	} else if (strcmp(key, "stamp") == 0) {
++		if (panel_parse_long(value, &number) && number > 0) {
++			fields->stamp = number;
++			fields->have_stamp = true;
++		}
++	} else if (strcmp(key, "stale") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->stale = panel_clamp(number, 1, PANEL_STALE_MAX);
++		}
++	} else if (strcmp(key, "image") == 0) {
++		size_t length = strlen(value);
++		if (length < sizeof(fields->image) && panel_name_is_safe(value)) {
++			memcpy(fields->image, value, length + 1);
++			fields->have_image = true;
++		}
++	} else if (strcmp(key, "width") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->width = panel_clamp(number, 1, PANEL_SIZE_MAX);
++			fields->have_width = true;
++		}
++	} else if (strcmp(key, "height") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->height = panel_clamp(number, 1, PANEL_SIZE_MAX);
++			fields->have_height = true;
++		}
++	} else if (strcmp(key, "gap") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->gap = panel_clamp(number, 0, PANEL_GAP_MAX);
++		}
++	} else if (strcmp(key, "fade") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->fade = panel_clamp(number, 0, PANEL_FADE_MAX);
++		}
++	} else if (strcmp(key, "poll") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->poll = panel_clamp(number, PANEL_POLL_MIN, PANEL_POLL_MAX);
++		}
++	} else if (strcmp(key, "ring") == 0) {
++		if (panel_parse_long(value, &number)) {
++			fields->ring = number != 0;
++		}
++	} else if (strcmp(key, "place") == 0) {
++		if (strcmp(value, "above") == 0) {
++			fields->above = true;
++		} else if (strcmp(value, "below") == 0) {
++			fields->above = false;
++		}
++	}
++}
++
++// Read the whole file into a bounded buffer, refusing anything that is not a
++// small, private, plain-ASCII regular file belonging to us.
++static bool panel_read(struct swaylock_panel *panel, char *text, size_t limit,
++		struct stat *seen) {
++	int fd = open(panel->path, O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
++	if (fd < 0) {
++		return false;
++	}
++	bool ok = false;
++	size_t total = 0;
++	if (fstat(fd, seen) != 0 || !S_ISREG(seen->st_mode)) {
++		goto done;
++	}
++	if (seen->st_uid != getuid() || (seen->st_mode & (S_IWGRP | S_IWOTH)) != 0) {
++		goto done;   // not ours, or writable by someone else: not a panel
++	}
++	if (seen->st_size < 0 || (uintmax_t)seen->st_size >= (uintmax_t)limit) {
++		goto done;
++	}
++	while (total + 1 < limit) {
++		ssize_t got = read(fd, text + total, limit - 1 - total);
++		if (got < 0) {
++			if (errno == EINTR) {
++				continue;
++			}
++			goto done;
++		}
++		if (got == 0) {
++			break;
++		}
++		total += (size_t)got;
++	}
++	text[total] = '\0';
++	for (size_t at = 0; at < total; ++at) {
++		unsigned char byte = (unsigned char)text[at];
++		if (byte != '\n' && byte != '\t' && (byte < 0x20 || byte > 0x7e)) {
++			goto done;   // ASCII only; nothing here ever needs more
++		}
++	}
++	ok = true;
++done:
++	close(fd);
++	return ok;
++}
++
++static bool panel_parse(char *text, struct panel_fields *fields) {
++	memset(fields, 0, sizeof(*fields));
++	fields->stale = 15;
++	fields->gap = 28;
++	fields->fade = 0;
++	fields->poll = 1000;
++	fields->ring = true;
++	fields->above = false;
++
++	bool versioned = false;
++	char *save = NULL;
++	for (char *line = strtok_r(text, "\n", &save); line != NULL;
++			line = strtok_r(NULL, "\n", &save)) {
++		while (*line == ' ' || *line == '\t') {
++			++line;
++		}
++		if (*line == '\0' || *line == '#') {
++			continue;
++		}
++		char *space = line;
++		while (*space != '\0' && *space != ' ' && *space != '\t') {
++			++space;
++		}
++		if (*space == '\0') {
++			continue;   // a key with no value says nothing
++		}
++		*space = '\0';
++		char *value = space + 1;
++		while (*value == ' ' || *value == '\t') {
++			++value;
++		}
++		size_t length = strlen(value);
++		while (length > 0 && (value[length - 1] == ' ' || value[length - 1] == '\t')) {
++			value[--length] = '\0';
++		}
++		if (strcmp(line, "panel") == 0) {
++			long version = 0;
++			versioned = panel_parse_long(value, &version) && version == 1;
++			if (!versioned) {
++				return false;   // an unknown format is not a panel we can draw
++			}
++			continue;
++		}
++		panel_take(fields, line, value);
++	}
++	return versioned && fields->have_serial && fields->have_stamp &&
++		fields->have_image && fields->have_width && fields->have_height;
++}
++
++static bool panel_is_fresh(const struct panel_fields *fields) {
++	struct timespec now;
++	if (clock_gettime(CLOCK_REALTIME, &now) != 0) {
++		return false;
++	}
++	long age = (long)now.tv_sec - fields->stamp;
++	// A panel from the future is a clock change or a stale file from another
++	// boot; either way it is not evidence of anything happening now.
++	return age >= -5 && age <= fields->stale;
++}
++
++static cairo_surface_t *panel_load_image(const struct swaylock_panel *panel,
++		const char *name) {
++	char path[PANEL_DIR_MAX + PANEL_NAME_MAX + 8];
++	int written = snprintf(path, sizeof(path), "%s/%s", panel->directory, name);
++	if (written < 0 || (size_t)written >= sizeof(path)) {
++		return NULL;
++	}
++	struct stat seen;
++	if (stat(path, &seen) != 0 || !S_ISREG(seen.st_mode) ||
++			seen.st_uid != getuid() ||
++			(seen.st_mode & (S_IWGRP | S_IWOTH)) != 0 ||
++			seen.st_size <= 0 || seen.st_size > PANEL_IMAGE_BYTES_MAX) {
++		return NULL;
++	}
++	// cairo's own PNG reader, not gdk-pixbuf: the writer always produces PNG,
++	// and this keeps the format-sniffing loader stack out of the lock process.
++	cairo_surface_t *image = cairo_image_surface_create_from_png(path);
++	if (image == NULL) {
++		return NULL;
++	}
++	if (cairo_surface_status(image) != CAIRO_STATUS_SUCCESS) {
++		swaylock_log(LOG_DEBUG, "Indicator panel image was not readable");
++		cairo_surface_destroy(image);
++		return NULL;
++	}
++	int width = cairo_image_surface_get_width(image);
++	int height = cairo_image_surface_get_height(image);
++	if (width <= 0 || height <= 0 ||
++			(int64_t)width * (int64_t)height > PANEL_IMAGE_PIXELS_MAX) {
++		cairo_surface_destroy(image);
++		return NULL;
++	}
++	return image;
++}
++
++bool swaylock_panel_refresh(struct swaylock_panel *panel) {
++	if (panel->path == NULL) {
++		return false;
++	}
++
++	char text[PANEL_FILE_MAX];
++	struct stat seen;
++	if (!panel_read(panel, text, sizeof(text), &seen)) {
++		bool was = panel->active;
++		panel_deactivate(panel);
++		return was;
++	}
++
++	struct panel_fields fields;
++	if (!panel_parse(text, &fields)) {
++		bool was = panel->active;
++		panel_deactivate(panel);
++		return was;
++	}
++	panel->poll_ms = (int)fields.poll;
++
++	if (!panel_is_fresh(&fields)) {
++		bool was = panel->active;
++		panel_deactivate(panel);
++		return was;
++	}
++
++	// The writer keeps this file fresh by rewriting its stamp, so "the file
++	// changed" is not the question; "anything drawn changed" is, and the
++	// serial is what answers it. While it stands still nothing is decoded,
++	// nothing is damaged and nothing is repainted.
++	if (panel->active && panel->serial == fields.serial &&
++			panel->width == (int)fields.width &&
++			panel->height == (int)fields.height &&
++			panel->gap == (int)fields.gap &&
++			panel->above == fields.above &&
++			panel->hide_ring == !fields.ring) {
++		panel->fade_ms = (int)fields.fade;
++		return false;
++	}
++
++	cairo_surface_t *image = panel_load_image(panel, fields.image);
++	if (image == NULL) {
++		bool was = panel->active;
++		panel_deactivate(panel);
++		return was;
++	}
++
++	bool replacing = panel->active && panel->serial != fields.serial;
++	if (panel->fading_from) {
++		cairo_surface_destroy(panel->fading_from);
++		panel->fading_from = NULL;
++	}
++	if (replacing && fields.fade > 0) {
++		panel->fading_from = panel->image;   // handed over, not destroyed
++	} else if (panel->image) {
++		cairo_surface_destroy(panel->image);
++	}
++	panel->image = image;
++	panel->serial = fields.serial;
++	panel->width = (int)fields.width;
++	panel->height = (int)fields.height;
++	panel->gap = (int)fields.gap;
++	panel->fade_ms = (int)fields.fade;
++	panel->hide_ring = !fields.ring;
++	panel->above = fields.above;
++	panel->active = true;
++	panel->rect_valid = false;
++	// The fade's phase is a function of this instant and nothing else. It is
++	// never restarted by a repaint, so nothing a person types can move it.
++	if (clock_gettime(CLOCK_MONOTONIC, &panel->changed) != 0) {
++		panel->changed.tv_sec = 0;
++		panel->changed.tv_nsec = 0;
++		panel->fade_ms = 0;
++	}
++	return true;
++}
++
++static double panel_fade_phase(const struct swaylock_panel *panel) {
++	if (!panel->active || panel->fading_from == NULL || panel->fade_ms <= 0) {
++		return 1.0;
++	}
++	struct timespec now;
++	if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
++		return 1.0;
++	}
++	double elapsed = (double)(now.tv_sec - panel->changed.tv_sec) * 1000.0 +
++		(double)(now.tv_nsec - panel->changed.tv_nsec) / 1000000.0;
++	if (!(elapsed > 0.0)) {
++		return 0.0;
++	}
++	double phase = elapsed / (double)panel->fade_ms;
++	return phase >= 1.0 ? 1.0 : phase;
++}
++
++bool swaylock_panel_animating(const struct swaylock_panel *panel) {
++	return panel->active && panel->fading_from != NULL && panel->fade_ms > 0 &&
++		panel_fade_phase(panel) < 1.0;
++}
++
++int swaylock_panel_poll_ms(const struct swaylock_panel *panel) {
++	int wanted = panel->poll_ms;
++	if (wanted < PANEL_POLL_MIN) {
++		wanted = PANEL_POLL_MIN;
++	}
++	if (wanted > PANEL_POLL_MAX) {
++		wanted = PANEL_POLL_MAX;
++	}
++	return wanted;
++}
++
++int swaylock_panel_buffer_width(const struct swaylock_panel *panel, int scale) {
++	return panel->active ? panel->width * scale : 0;
++}
++
++int swaylock_panel_buffer_height(const struct swaylock_panel *panel, int scale) {
++	return panel->active ? (panel->height + panel->gap) * scale : 0;
++}
++
++static void panel_paint(cairo_t *cairo, cairo_surface_t *image,
++		double x, double y, double width, double height, double alpha) {
++	int source_width = cairo_image_surface_get_width(image);
++	int source_height = cairo_image_surface_get_height(image);
++	if (source_width <= 0 || source_height <= 0 || alpha <= 0.0) {
++		return;
++	}
++	cairo_save(cairo);
++	cairo_translate(cairo, x, y);
++	cairo_scale(cairo, width / source_width, height / source_height);
++	cairo_set_source_surface(cairo, image, 0, 0);
++	cairo_pattern_set_filter(cairo_get_source(cairo), CAIRO_FILTER_GOOD);
++	cairo_pattern_set_extend(cairo_get_source(cairo), CAIRO_EXTEND_NONE);
++	cairo_paint_with_alpha(cairo, alpha > 1.0 ? 1.0 : alpha);
++	cairo_restore(cairo);
++}
++
++void swaylock_panel_render(cairo_t *cairo, struct swaylock_panel *panel,
++		int centre_x, int image_top, int scale) {
++	panel->rect_valid = false;
++	if (!panel->active || panel->image == NULL || scale <= 0) {
++		return;
++	}
++	double width = (double)panel->width * scale;
++	double height = (double)panel->height * scale;
++	double x = (double)centre_x - width / 2.0;
++	double y = image_top;
++
++	double phase = panel_fade_phase(panel);
++	if (panel->fading_from != NULL) {
++		if (phase >= 1.0) {
++			cairo_surface_destroy(panel->fading_from);
++			panel->fading_from = NULL;
++		} else {
++			// A cross-fade, not a dissolve to nothing: the outgoing panel is
++			// drawn first at full strength so the strip never flashes dark.
++			panel_paint(cairo, panel->fading_from, x, y, width, height, 1.0);
++		}
++	}
++	panel_paint(cairo, panel->image, x, y, width, height, phase);
++
++	panel->rect_x = (int)x;
++	panel->rect_y = (int)y;
++	panel->rect_width = (int)width + 2;
++	panel->rect_height = (int)height + 2;
++	if (panel->rect_x > 0) {
++		panel->rect_x -= 1;
++	}
++	if (panel->rect_y > 0) {
++		panel->rect_y -= 1;
++	}
++	panel->rect_valid = true;
++}
+--- a/include/swaylock.h
++++ b/include/swaylock.h
+@@ -9,6 +9,7 @@
+ #include "seat.h"
+ #include "effects.h"
+ #include "fade.h"
++#include "panel.h"
+ #include "wlr-layer-shell-unstable-v1-client-protocol.h"
+ 
+ enum auth_state {
+@@ -70,6 +71,7 @@
+ 	bool daemonize;
+ 	bool indicator_idle_visible;
+ 	int ready_fd;
++	char *indicator_panel;
+ 
+ 	bool screenshots;
+ 	struct swaylock_effect *effects;
+@@ -123,8 +125,26 @@
+ 	bool run_display;
+ 	struct ext_session_lock_manager_v1 *ext_session_lock_manager_v1;
+ 	struct ext_session_lock_v1 *ext_session_lock_v1;
++	struct swaylock_panel panel;
+ };
+ 
++// Everything the indicator draws apart from the panel's own cross-fade, so
++// that "nothing else changed" is a fact the renderer can check rather than an
++// assumption. See the damage decision at the end of render_frame().
++struct swaylock_indicator_signature {
++	int auth_state;
++	int failed_attempts;
++	int width, height;
++	unsigned long panel_serial;
++	double highlight_start;
++	bool caps_lock;
++	bool panel_active;
++	char text[64];
++	char line1[64];
++	char line2[64];
++	char layout[64];
++};
++
+ struct swaylock_surface {
+ 	cairo_surface_t *image;
+ 	struct {
+@@ -151,6 +171,8 @@
+ 	bool frame_pending, dirty;
+ 	uint32_t width, height;
+ 	uint32_t indicator_width, indicator_height;
++	struct swaylock_indicator_signature signature;
++	bool signature_valid;
+ 	int32_t scale;
+ 	enum wl_output_subpixel subpixel;
+ 	enum wl_output_transform transform;
+--- a/main.c
++++ b/main.c
+@@ -402,6 +402,14 @@
+ 	wl_callback_destroy(callback);
+ 	surface->frame_pending = false;
+ 
++	// The panel's cross-fade is the one thing on this surface that wants
++	// frames of its own, so it -- and only it -- keeps the wl_surface.frame
++	// chain alive. When the fade finishes the chain stops and the lock settles
++	// to a still frame with no wakeups but the clock's.
++	if (swaylock_panel_animating(&surface->state->panel)) {
++		surface->dirty = true;
++	}
++
+ 	if (surface->dirty) {
+ 		// Schedule a frame in case the surface is damaged again
+ 		struct wl_callback *callback = wl_surface_frame(surface->surface);
+@@ -994,6 +1002,7 @@
+ 		LO_LINE_IDLE_COLOR,
+ 		LO_RING_IDLE_COLOR,
+ 		LO_TEXT_IDLE_COLOR,
++		LO_IND_PANEL,
+ 	};
+ 
+ 	static struct option long_options[] = {
+@@ -1046,6 +1055,7 @@
+ 		{"line-ver-color", required_argument, NULL, LO_LINE_VER_COLOR},
+ 		{"line-wrong-color", required_argument, NULL, LO_LINE_WRONG_COLOR},
+ 		{"ring-color", required_argument, NULL, LO_RING_COLOR},
++		{"indicator-panel", required_argument, NULL, LO_IND_PANEL},
+ 		{"ring-idle-color", required_argument, NULL, LO_RING_IDLE_COLOR},
+ 		{"ring-clear-color", required_argument, NULL, LO_RING_CLEAR_COLOR},
+ 		{"ring-caps-lock-color", required_argument, NULL, LO_RING_CAPS_LOCK_COLOR},
+@@ -1115,6 +1125,8 @@
+ 			"Display the given image, optionally only on the given output.\n"
+ 		"  -S, --screenshots                "
+ 			"Use a screenshots as the background image.\n"
++		"      --indicator-panel <path>     "
++			"Draw the panel this state file describes under the indicator.\n"
+ 		"  -R, --ready-fd <fd>              "
+ 			"Write a newline to <fd> and close it once the session is locked.\n"
+ 		"  -k, --show-keyboard-layout       "
+@@ -1433,6 +1445,12 @@
+ 				state->args.colors.line.idle_set = true;
+ 			}
+ 			break;
++		case LO_IND_PANEL:
++			if (state) {
++				free(state->args.indicator_panel);
++				state->args.indicator_panel = strdup(optarg);
++			}
++			break;
+ 		case LO_RING_IDLE_COLOR:
+ 			if (state) {
+ 				state->args.colors.ring.idle = parse_color(optarg);
+@@ -1831,6 +1849,18 @@
+ 	}
+ }
+ 
++// Notice a new panel and repaint for it. This is the only place that reads the
++// panel's state file, so the renderer only ever draws a panel that has already
++// been validated, and a panel that goes away simply stops being drawn.
++static void panel_poll(void *data) {
++	struct swaylock_state *state = data;
++	if (swaylock_panel_refresh(&state->panel)) {
++		damage_state(state);
++	}
++	loop_add_timer(state->eventloop, swaylock_panel_poll_ms(&state->panel),
++			panel_poll, state);
++}
++
+ static void timer_render(void *data) {
+ 	struct swaylock_state *state = (struct swaylock_state *)data;
+ 	damage_state(state);
+@@ -1894,6 +1924,7 @@
+ 		.show_failed_attempts = false,
+ 		.indicator_idle_visible = false,
+ 		.ready_fd = -1,
++		.indicator_panel = NULL,
+ 
+ 		.screenshots = false,
+ 		.effects = NULL,
+@@ -1942,6 +1973,11 @@
+ 		}
+ 	}
+ 
++	// The panel is built from the settled arguments and from nothing the
++	// compositor or the seat ever says, so a session with no panel configured
++	// runs exactly the code it ran before this option existed.
++	swaylock_panel_init(&state.panel, state.args.indicator_panel);
++
+ 	if (line_mode == LM_INSIDE) {
+ 		state.args.colors.line = state.args.colors.inside;
+ 	} else if (line_mode == LM_RING) {
+@@ -2067,6 +2103,12 @@
+ 	signal(SIGUSR1, do_sigusr);
+ 
+ 	loop_add_timer(state.eventloop, 1000, timer_render, &state);
++
++	if (state.panel.path) {
++		swaylock_panel_refresh(&state.panel);
++		loop_add_timer(state.eventloop, swaylock_panel_poll_ms(&state.panel),
++				panel_poll, &state);
++	}
+ 
+ 	if (state.args.fade_in) {
+ 		loop_add_timer(state.eventloop, state.args.fade_in, end_allow_fade_period, &state);
+--- a/meson.build
++++ b/meson.build
+@@ -112,6 +112,7 @@
+ 	'log.c',
+ 	'loop.c',
+ 	'main.c',
++	'panel.c',
+ 	'password.c',
+ 	'password-buffer.c',
+ 	'pool-buffer.c',
+--- a/render.c
++++ b/render.c
+@@ -1,5 +1,7 @@
+ #include <math.h>
++#include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include <time.h>
+ #include <locale.h>
+ #include <wayland-client.h>
+@@ -17,6 +19,20 @@
+ const float TYPE_INDICATOR_RANGE = M_PI / 3.0f;
+ const float TYPE_INDICATOR_BORDER_THICKNESS = M_PI / 128.0f;
+ 
++// Where the random keypress highlight currently sits. It used to be a static
++// local; it is here so the damage signature below can see it change, because a
++// moved highlight is a reason to repaint the whole indicator rather than only
++// the panel's rectangle.
++static double indicator_highlight_start = 0;
++
++static void signature_text(char *field, size_t size, const char *value) {
++	if (value == NULL) {
++		field[0] = '\0';
++		return;
++	}
++	snprintf(field, size, "%s", value);
++}
++
+ static void set_color_for_state(cairo_t *cairo, struct swaylock_state *state,
+ 		struct swaylock_colorset *colorset) {
+ 	if (state->auth_state == AUTH_STATE_IDLE && colorset->idle_set) {
+@@ -130,6 +146,7 @@
+ 
+ void render_frame(struct swaylock_surface *surface) {
+ 	struct swaylock_state *state = surface->state;
++	struct swaylock_panel *panel = &state->panel;
+ 
+ 	int arc_radius = state->args.radius * surface->scale;
+ 	int arc_thickness = state->args.thickness * surface->scale;
+@@ -140,6 +157,13 @@
+ 	int new_width = buffer_diameter;
+ 	int new_height = buffer_diameter;
+ 
++	// The panel, when there is one, widens the strip to fit and is added to
++	// its height further down, after anything the indicator itself grew.
++	int panel_width = swaylock_panel_buffer_width(panel, surface->scale);
++	if (new_width < panel_width) {
++		new_width = panel_width;
++	}
++
+ 	int subsurf_xpos;
+ 	int subsurf_ypos;
+ 
+@@ -160,6 +184,19 @@
+ 			(state->args.radius + state->args.thickness);
+ 	}
+ 
++	// A panel asking to sit above the indicator grows the strip upwards, which
++	// is the only empty part of this lock screen: the caption card owns the
++	// lower-left corner and a wide panel below the clock would land on it. If
++	// the indicator is too near the top of the output for that, the panel goes
++	// below instead -- half a panel clipped off the screen would be worse than
++	// a panel in the second-best place.
++	int panel_logical = panel->active ? panel->height + panel->gap : 0;
++	bool panel_above = panel->active && panel->above &&
++		subsurf_ypos >= panel_logical;
++	if (panel_above) {
++		subsurf_ypos -= panel_logical;
++	}
++
+ 	wl_subsurface_set_position(surface->subsurface, subsurf_xpos, subsurf_ypos);
+ 
+ 	struct pool_buffer *buffer = get_next_buffer(state->shm,
+@@ -185,6 +222,14 @@
+ 	cairo_paint(cairo);
+ 	cairo_restore(cairo);
+ 
++	// Everything the indicator draws for itself is written as if it owned the
++	// top of this buffer, so a panel above it is one translation rather than a
++	// rewritten geometry.
++	int panel_offset = panel_above ? panel_logical * surface->scale : 0;
++	if (panel_offset) {
++		cairo_translate(cairo, 0, panel_offset);
++	}
++
+ 	float type_indicator_border_thickness =
+ 		TYPE_INDICATOR_BORDER_THICKNESS * surface->scale;
+ 
+@@ -197,54 +242,63 @@
+ 		state->args.show_indicator && (state->auth_state != AUTH_STATE_IDLE ||
+ 			state->args.indicator_idle_visible);
+ 
++	char *text = NULL;
++	char *text_l1 = NULL;
++	char *text_l2 = NULL;
++	const char *layout_text = NULL;
++	// Out here with the pointers, not inside the block below: `text` can point
++	// at it, and the damage signature reads `text` after that block has ended.
++	char attempts[4]; // like i3lock: count no more than 999
++
+ 	if (state->args.indicator ||
+ 			(upstream_show_indicator && state->auth_state != AUTH_STATE_GRACE)) {
+-		// Draw indicator image
+-		cairo_surface_t *image = state->indicator_image;
+-		if (image) {
+-			int height = cairo_image_surface_get_height(image);
+-			int width = cairo_image_surface_get_width(image);
+-			int smallest = MIN(height, width);
+-			double radius = arc_radius - arc_thickness * 0.5;
+-			double scale = radius * 2 / smallest;
+-			double offset = buffer_diameter * 0.5 / scale - smallest * 0.5;
++		// The ring is the locker's own indicator. A panel that says it draws
++		// the indicator area takes it away entirely -- ring, inner circle,
++		// borders and the countable per-keystroke highlight with them -- and
++		// keeps only the clock, the state message and the layout box.
++		if (!panel->hide_ring) {
++			// Draw indicator image
++			cairo_surface_t *image = state->indicator_image;
++			if (image) {
++				int height = cairo_image_surface_get_height(image);
++				int width = cairo_image_surface_get_width(image);
++				int smallest = MIN(height, width);
++				double radius = arc_radius - arc_thickness * 0.5;
++				double scale = radius * 2 / smallest;
++				double offset = buffer_diameter * 0.5 / scale - smallest * 0.5;
+ 
+-			// Create the arc that clips the image
+-			cairo_arc(cairo,
+-					buffer_diameter * 0.5,
+-					buffer_diameter * 0.5,
+-					radius,
++				// Create the arc that clips the image
++				cairo_arc(cairo,
++						buffer_diameter * 0.5,
++						buffer_diameter * 0.5,
++						radius,
++						0, 2 * M_PI);
++				// Scale cairo to make image fit the indicator
++				cairo_scale(cairo, scale, scale);
++				cairo_set_source_surface(cairo, image, offset, offset);
++				// Scale cairo back
++				cairo_scale(cairo, 1 / scale, 1 / scale);
++				cairo_fill(cairo);
++			}
++
++			// Fill inner circle
++			cairo_set_line_width(cairo, 0);
++			cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
++					arc_radius - arc_thickness / 2, 0, 2 * M_PI);
++			set_color_for_state(cairo, state, &state->args.colors.inside);
++			cairo_fill_preserve(cairo);
++			cairo_stroke(cairo);
++
++			// Draw ring
++			cairo_set_line_width(cairo, arc_thickness);
++			cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2, arc_radius,
+ 					0, 2 * M_PI);
+-			// Scale cairo to make image fit the indicator
+-			cairo_scale(cairo, scale, scale);
+-			cairo_set_source_surface(cairo, image, offset, offset);
+-			// Scale cairo back
+-			cairo_scale(cairo, 1 / scale, 1 / scale);
+-			cairo_fill(cairo);
++			set_color_for_state(cairo, state, &state->args.colors.ring);
++			cairo_stroke(cairo);
+ 		}
+ 
+-		// Fill inner circle
+-		cairo_set_line_width(cairo, 0);
+-		cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
+-				arc_radius - arc_thickness / 2, 0, 2 * M_PI);
+-		set_color_for_state(cairo, state, &state->args.colors.inside);
+-		cairo_fill_preserve(cairo);
+-		cairo_stroke(cairo);
+-
+-		// Draw ring
+-		cairo_set_line_width(cairo, arc_thickness);
+-		cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2, arc_radius,
+-				0, 2 * M_PI);
+-		set_color_for_state(cairo, state, &state->args.colors.ring);
+-		cairo_stroke(cairo);
+-
+ 		// Draw a message
+-		char *text = NULL;
+-		char *text_l1 = NULL;
+-		char *text_l2 = NULL;
+-		const char *layout_text = NULL;
+ 		double font_size;
+-		char attempts[4]; // like i3lock: count no more than 999
+ 		set_color_for_state(cairo, state, &state->args.colors.text);
+ 		cairo_select_font_face(cairo, state->args.font,
+ 				CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+@@ -371,14 +425,15 @@
+ 		}
+ 
+ 		// Typing indicator: Highlight random part on keypress
+-		if (state->auth_state == AUTH_STATE_INPUT
+-				|| state->auth_state == AUTH_STATE_BACKSPACE) {
++		if (!panel->hide_ring && (state->auth_state == AUTH_STATE_INPUT
++				|| state->auth_state == AUTH_STATE_BACKSPACE)) {
+ 
+-			static double highlight_start = 0;
++			double highlight_start = indicator_highlight_start;
+ 			if (state->indicator_dirty) {
+ 				highlight_start +=
+ 					(rand() % (int)(M_PI * 100)) / 100.0 + M_PI * 0.5;
+ 				state->indicator_dirty = false;
++				indicator_highlight_start = highlight_start;
+ 			}
+ 
+ 			cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
+@@ -414,14 +469,16 @@
+ 		}
+ 
+ 		// Draw inner + outer border of the circle
+-		set_color_for_state(cairo, state, &state->args.colors.line);
+-		cairo_set_line_width(cairo, 2.0 * surface->scale);
+-		cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
+-				arc_radius - arc_thickness / 2, 0, 2 * M_PI);
+-		cairo_stroke(cairo);
+-		cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
+-				arc_radius + arc_thickness / 2, 0, 2 * M_PI);
+-		cairo_stroke(cairo);
++		if (!panel->hide_ring) {
++			set_color_for_state(cairo, state, &state->args.colors.line);
++			cairo_set_line_width(cairo, 2.0 * surface->scale);
++			cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
++					arc_radius - arc_thickness / 2, 0, 2 * M_PI);
++			cairo_stroke(cairo);
++			cairo_arc(cairo, buffer_width / 2, buffer_diameter / 2,
++					arc_radius + arc_thickness / 2, 0, 2 * M_PI);
++			cairo_stroke(cairo);
++		}
+ 
+ 		// display layout text separately
+ 		if (layout_text) {
+@@ -460,6 +517,20 @@
+ 		}
+ 	}
+ 
++	// The drawing hook. It goes last so that below the indicator it sits under
++	// everything the indicator grew for itself, and it is the only thing here
++	// that animates.
++	if (panel->active) {
++		cairo_identity_matrix(cairo);
++		int image_top = panel_above ? 0
++			: (new_height + panel_offset + panel->gap * surface->scale);
++		swaylock_panel_render(cairo, panel, buffer_width / 2, image_top,
++				surface->scale);
++		new_height += swaylock_panel_buffer_height(panel, surface->scale);
++	} else {
++		panel->rect_valid = false;
++	}
++
+ 	// Ensure buffer size is multiple of buffer scale - required by protocol
+ 	new_height += surface->scale - (new_height % surface->scale);
+ 	new_width += surface->scale - (new_width % surface->scale);
+@@ -472,9 +543,40 @@
+ 		return;
+ 	}
+ 
++	// Everything drawn above except the panel's own cross-fade. Two frames
++	// that agree on all of it differ only inside the panel's rectangle, which
++	// is what makes damaging that rectangle alone correct rather than merely
++	// cheaper; anything else -- a new minute on the clock, a state change, a
++	// moved highlight, a resize -- takes the whole indicator.
++	struct swaylock_indicator_signature signature;
++	memset(&signature, 0, sizeof(signature));
++	signature.auth_state = (int)state->auth_state;
++	signature.failed_attempts = state->failed_attempts;
++	signature.caps_lock = state->xkb.caps_lock;
++	signature.panel_active = panel->active;
++	signature.panel_serial = panel->serial;
++	signature.highlight_start = indicator_highlight_start;
++	signature.width = new_width;
++	signature.height = new_height;
++	signature_text(signature.text, sizeof(signature.text), text);
++	signature_text(signature.line1, sizeof(signature.line1), text_l1);
++	signature_text(signature.line2, sizeof(signature.line2), text_l2);
++	signature_text(signature.layout, sizeof(signature.layout), layout_text);
++
++	bool only_the_panel_moved = panel->active && panel->rect_valid &&
++		surface->signature_valid &&
++		memcmp(&signature, &surface->signature, sizeof(signature)) == 0;
++	memcpy(&surface->signature, &signature, sizeof(signature));
++	surface->signature_valid = true;
++
+ 	wl_surface_set_buffer_scale(surface->child, surface->scale);
+ 	wl_surface_attach(surface->child, buffer->buffer, 0, 0);
+-	wl_surface_damage_buffer(surface->child, 0, 0, INT32_MAX, INT32_MAX);
++	if (only_the_panel_moved) {
++		wl_surface_damage_buffer(surface->child, panel->rect_x, panel->rect_y,
++				panel->rect_width, panel->rect_height);
++	} else {
++		wl_surface_damage_buffer(surface->child, 0, 0, INT32_MAX, INT32_MAX);
++	}
+ 	wl_surface_commit(surface->child);
+ 
+ 	wl_surface_commit(surface->surface);
+--- a/swaylock.1.scd
++++ b/swaylock.1.scd
+@@ -82,6 +82,20 @@
+ 	a background color. If the path potentially contains a ':', prefix it with another
+ 	':' to prevent interpreting part of it as <output>.
+ 
++*--indicator-panel* <path>
++	Draw the panel described by the state file _path_ underneath the
++	indicator. The file is a short list of _key value_ lines naming a PNG
++	beside it, the logical size to draw it at, a serial that changes when the
++	image changes, and a wall-clock stamp; the panel disappears again once
++	that stamp is older than its own _stale_ seconds. Setting _ring 0_ hides
++	swaylock's own arc, its borders and its per-keypress highlight for as long
++	as the panel is up, leaving the clock and the state message.
++
++	Nothing in the file is executed and no library is loaded from it: a
++	missing, unreadable, oversized, malformed, stale or foreign-owned file
++	means no panel is drawn, and the lock screen is exactly the one it would
++	have been without this option.
++
+ *-R, --ready-fd* <fd>
+ 	Write a newline to the file descriptor _fd_ and close it once the
+ 	session is locked. Callers that wait on this notification never trust

@@ -261,7 +261,8 @@ def render_profile(repo, theme):
     reference = repo / 'alpine/themes/profiles/gruvbox-dark'
     baseline = json.loads((repo / 'alpine/themes/gruvbox-dark.json').read_text())['palette']
     paths = {str(p.relative_to(reference)) for p in reference.rglob('*') if p.is_file()
-             and not str(p.relative_to(reference)).startswith(ASSET_PREFIXES)}
+             and not str(p.relative_to(reference)).startswith(
+                 ASSET_PREFIXES + ('.local/share/oldbook/themes/', '.local/share/oldbook/wallpaper'))}
     # Surfaces that carry colour but were never in the reference profile, so a
     # theme switch used to leave them in the previous theme: LXQt's own Qt
     # settings and its selectable palette preset, and the screenshot annotator.
@@ -355,6 +356,10 @@ def render_profile(repo, theme):
         panel['text'] = panel['text'].replace('JetBrainsMono Nerd Font', font)
     files['.config/conky/panels.json'] = json.dumps(document, indent=2) + '\n'
     files[CURSOR_INDEX] = cursor_index(theme)
+    effects = theme.get('effects', {'ripple': {}})
+    if not isinstance(effects, dict) or set(effects) - {'ripple'}:
+        raise ValueError('Theme effects must contain a ripple object')
+    files['.config/oldbook/theme-effects.json'] = json.dumps(effects, indent=2) + '\n'
     return files
 
 

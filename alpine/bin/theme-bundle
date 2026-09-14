@@ -1,0 +1,173 @@
+#!/usr/bin/env python3
+"""Export/import a checked theme ZIP; importing never activates theme code."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path, PurePosixPath
+import shutil
+import stat
+import sys
+import tempfile
+import zipfile
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
+from theme_catalog import has_symlink, load_theme, safe_theme_id
+
+MAX_BYTES = 512 * 1024 * 1024
+MAX_FILES = 12000
+
+
+def safe_name(name):
+    path = PurePosixPath(name)
+    return (bool(name) and not path.is_absolute() and '\\' not in name
+            and all(part not in ('', '.', '..') for part in name.split('/'))
+            and (name == 'theme.json' or name == 'manifest.json'
+                 or name.startswith('profile/')))
+
+
+def export_bundle(repo, identity, output):
+    theme = load_theme(repo, identity)
+    profile = repo / 'alpine/themes/profiles' / identity
+    if not profile.is_dir() or has_symlink(profile, repo):
+        raise ValueError('Theme needs a complete, regular profile before export')
+    payload = {'theme.json': json.dumps(theme, indent=2).encode() + b'\n'}
+    modes = {}
+
+    def include(root, prefix):
+        for path in sorted(root.rglob('*')):
+            if path.is_symlink():
+                raise ValueError('Theme bundles do not follow symlinks: ' + str(path))
+            if path.is_dir() or '__pycache__' in path.parts:
+                continue
+            if not path.is_file():
+                raise ValueError('Theme assets must be regular files')
+            name = prefix + path.relative_to(root).as_posix()
+            if not safe_name(name):
+                raise ValueError('Unsafe theme asset path')
+            payload.setdefault(name, path.read_bytes())
+            modes[name] = path.stat().st_mode & 0o111
+
+    include(profile, 'profile/')
+    gallery = repo / 'alpine/assets/gallery'
+    for sidecar in sorted(gallery.rglob('*.json')):
+        if has_symlink(sidecar, repo):
+            continue
+        try:
+            entry = json.loads(sidecar.read_text())
+            if not isinstance(entry, dict) or entry.get('theme') != identity:
+                continue
+            image = repo / entry.get('file', str(sidecar.with_suffix('.png').relative_to(repo)))
+            if has_symlink(image, repo) or not image.resolve().is_relative_to((repo / 'alpine/assets').resolve()):
+                raise ValueError('Theme gallery image leaves the asset directory')
+            data = image.read_bytes()
+            digest = hashlib.sha256(data).hexdigest()
+            prefix = 'profile/.local/share/oldbook/themes/' + identity + '/wallpapers/' + digest
+            payload[prefix + image.suffix] = data
+            payload[prefix + '.json'] = sidecar.read_bytes()
+            if image.suffix.lower() == '.png':
+                payload.setdefault('profile/.local/share/oldbook/wallpaper.png', data)
+        except (OSError, json.JSONDecodeError):
+            continue
+    icon = theme.get('design', {}).get('icons')
+    if isinstance(icon, str) and '/' not in icon and icon not in ('.', '..'):
+        shared = repo / 'alpine/desktop/.local/share/icons' / icon
+        if shared.is_dir() and not has_symlink(shared, repo):
+            include(shared, 'profile/.local/share/icons/' + icon + '/')
+    effects_name = 'profile/.config/oldbook/theme-effects.json'
+    payload.setdefault(effects_name, json.dumps(theme.get('effects', {'ripple': {}})).encode())
+    effects = json.loads(payload[effects_name])
+    module = effects.get('ripple', {}).get('module', 'ripple')
+    if module != 'ripple' and ('profile/' + module) not in payload:
+        raise ValueError('Custom effect must be a bundled HOME-relative module path')
+    if len(payload) > MAX_FILES or sum(map(len, payload.values())) > MAX_BYTES:
+        raise ValueError('Theme exceeds bundle size limit')
+    manifest = {'version': 1, 'files': {name: hashlib.sha256(data).hexdigest()
+                                      for name, data in payload.items()},
+                'requires': ['Oldbook desktop runtime', 'theme inherited system fonts/icons/cursors']}
+    with zipfile.ZipFile(output, 'x', compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, data in payload.items():
+            info = zipfile.ZipInfo(name)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = (stat.S_IFREG | 0o644 | modes.get(name, 0)) << 16
+            archive.writestr(info, data)
+        archive.writestr('manifest.json', json.dumps(manifest, indent=2))
+    return identity
+
+
+def import_bundle(repo, archive_path):
+    with zipfile.ZipFile(archive_path) as archive:
+        entries = archive.infolist()
+        names = [entry.filename for entry in entries]
+        if (len(entries) > MAX_FILES + 1 or len(set(names)) != len(names)
+                or any(not safe_name(name) for name in names)
+                or sum(entry.file_size for entry in entries) > MAX_BYTES):
+            raise ValueError('Unsafe or oversized theme archive')
+        for entry in entries:
+            mode = entry.external_attr >> 16
+            if stat.S_IFMT(mode) not in (0, stat.S_IFREG):
+                raise ValueError('Links and special files are not theme assets')
+        try:
+            manifest = json.loads(archive.read('manifest.json'))
+            if manifest.get('version') != 1 or set(manifest['files']) != set(names) - {'manifest.json'}:
+                raise ValueError('Invalid bundle manifest')
+            payload = {name: archive.read(name) for name in manifest['files']}
+            if any(hashlib.sha256(data).hexdigest() != manifest['files'][name]
+                   for name, data in payload.items()):
+                raise ValueError('Theme bundle checksum mismatch')
+            theme = json.loads(payload['theme.json'])
+            identity = theme['id']
+            if not safe_theme_id(identity) or not isinstance(theme.get('name'), str) or not isinstance(theme.get('image_style'), str):
+                raise ValueError('Invalid theme descriptor')
+        except (KeyError, TypeError, json.JSONDecodeError) as error:
+            raise ValueError('Invalid theme bundle') from error
+        themes = repo / 'alpine/themes'
+        destination = themes / 'profiles' / identity
+        descriptor = themes / (identity + '.json')
+        if has_symlink(destination, repo) or has_symlink(descriptor, repo):
+            raise ValueError('Theme destination must not follow symlinks')
+        if destination.exists() or descriptor.exists():
+            raise FileExistsError('Theme already exists; import never replaces authored work')
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix='.bundle-', dir=destination.parent) as temporary:
+            staged = Path(temporary) / 'profile'
+            staged.mkdir()
+            for entry in entries:
+                if not entry.filename.startswith('profile/'):
+                    continue
+                target = staged / entry.filename.removeprefix('profile/')
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(payload[entry.filename])
+                target.chmod(0o644 | ((entry.external_attr >> 16) & 0o111))
+            staged.rename(destination)
+            try:
+                with descriptor.open('xb') as stream:
+                    stream.write(payload['theme.json'])
+            except BaseException:
+                shutil.rmtree(destination)
+                raise
+    return identity
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--repo', type=Path, default=REPO)
+    commands = parser.add_subparsers(dest='action', required=True)
+    export = commands.add_parser('export')
+    export.add_argument('theme')
+    export.add_argument('archive', type=Path)
+    incoming = commands.add_parser('import')
+    incoming.add_argument('archive', type=Path)
+    args = parser.parse_args()
+    try:
+        if args.action == 'export':
+            print('Exported', export_bundle(args.repo, args.theme, args.archive))
+        else:
+            print('Imported', import_bundle(args.repo, args.archive), '(not activated)')
+    except (OSError, ValueError, RuntimeError, zipfile.BadZipFile) as error:
+        parser.exit(1, str(error) + '\n')
+
+
+if __name__ == '__main__':
+    main()

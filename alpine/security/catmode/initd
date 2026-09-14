@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+# OpenRC consumes these service variables.
+# shellcheck disable=SC2034
+name="Oldbook catmode boot guard"
+description="Park internal input during Linux boot and hand it to the desktop guard"
+command="/usr/local/sbin/oldbook-catmode"
+command_args="run --user jack"
+command_background=yes
+pidfile="/run/oldbook-catmode.pid"
+output_log="/var/log/oldbook-catmode.log"
+error_log="/var/log/oldbook-catmode.log"
+
+depend() {
+    need localmount
+    use udev
+    after udev-trigger
+    before greetd
+}
+
+stop() {
+    if [ "${RC_RUNLEVEL:-}" = shutdown ]; then
+        "$command" shutdown || return 1
+        # Keep the kernel input inhibition across userspace teardown.
+        start-stop-daemon --stop --pidfile "$pidfile"
+    else
+        start-stop-daemon --stop --pidfile "$pidfile"
+        "$command" recover
+    fi
+}

@@ -333,7 +333,7 @@ class ReservedBandTests(unittest.TestCase):
 
     def test_the_band_is_measured_from_a_reference_line_not_the_live_caption(self):
         reference = self.band.REFERENCE
-        for glyph in ('\ue725', '\ue0b0', '›', '·'):
+        for glyph in ('\ue725', '\ue0b4', '›', '·'):
             self.assertIn(glyph, reference)
         self.assertEqual(self.band.band_thickness(34), 34 + self.band.EDGE_MARGIN)
         # A failed measurement must not hand the compositor a nonsense band.

@@ -34,10 +34,10 @@
     "file": "background.png",
     "width": 1280,
     "height": 800,
-    "bytes": 234597,
+    "bytes": 236988,
     "artwork": "alpine/assets/spaceghost.png",
     "artwork_sha256": "0986082ea55722b0d9199ee820fb2de8328253acb1f8bc45f5d33c9e6cf1d8b6",
-    "sha256": "ceb2b4abcd3f1a56acaa014f831ba5a97bdbcf77a18464fa229bc3a46dce38ed"
+    "sha256": "890c55481c997cdae3ffb55ea3c37c8dcf469c393e42f189213ee0a05f85cef7"
   },
   "pixmaps": [
     "select_c.png",
@@ -50,6 +50,6 @@
     "select_sw.png",
     "select_w.png"
   ],
-  "theme_sha256": "08119ff7fe4adee9c1c2a6165b7a0c4a4591c5e6bb54e77d1d15d4b049ea31b5",
+  "theme_sha256": "ecd360d679df59e7c86bc8243c42d56665c46c480c90fcdc77142a67879d735a",
   "note": "PF2 fonts are compiled here because grub-mkfont is not packaged; the background is small and blurred so GRUB decodes it quickly."
 }

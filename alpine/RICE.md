@@ -565,9 +565,13 @@ repository's standing, then the branch, then the directory. Where you are and
 what you are in never go.
 
 Powerline separators are a setting, default off — `"powerline": true`, or the
-checkbox in the settings editor at Shift+right-click. They are only markup, so
-they cost one layout parse and nothing else, but they read well only while a
-theme keeps its surfaces apart, which is why they are opt-in.
+checkbox in the settings editor at Shift+right-click. On, the caption wears the
+same rounded separator as the prompt and the status bars, opening and closing
+the way those chains do, and the glyph is always set in the terminal's Nerd
+Font whatever face the caption uses: Inter keeps a private-use glyph of its own
+at that codepoint and would put a subscript digit there. They are only markup,
+so they cost one layout parse and nothing else, but they read well only while
+a theme keeps its surfaces apart, which is why they are opt-in.
 
 Everything that costs a process runs on a worker thread while the caption keeps
 the last answer, and all of it sheds on the `window-context-detail` rung, asked

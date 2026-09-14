@@ -16,21 +16,23 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import zipfile
 
 REPO = Path(__file__).resolve().parents[1]
 SOURCE = REPO / 'desktop/.local/share/oldbook/firefox-theme-extension'
+# Firefox only loads an Enterprise-Policy-installed extension unsigned on
+# builds that disable signature enforcement; on a normal release build (this
+# one) it still checks the signature even for a policy install, so the
+# checked-out .xpi has to be the genuine Mozilla-signed artifact -- built once
+# with `web-ext sign` against Jack's own add-on developer credentials, not
+# rebuilt from SOURCE on every install the way an unsigned package would be.
+# SOURCE stays the editable copy background.js/manifest.json are read from;
+# re-signing after a real change is a deliberate, occasional step, not
+# something this installer can do for itself without the API credentials.
+SIGNED_XPI = REPO / 'desktop/.local/share/oldbook/firefox-theme-extension-signed/oldbook-theme.xpi'
 XPI = Path('/usr/local/share/oldbook/firefox-theme/oldbook-theme.xpi')
 POLICIES = Path('/etc/firefox/policies/policies.json')
 HOST_NAME = 'oldbook_theme'
 EXTENSION_ID = 'theme@oldbook.local'
-
-
-def build_xpi(destination):
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(destination, 'w', zipfile.ZIP_DEFLATED) as archive:
-        for name in sorted(os.listdir(SOURCE)):
-            archive.write(SOURCE / name, name)
 
 
 def sha256(path):
@@ -38,14 +40,16 @@ def sha256(path):
 
 
 def install_xpi():
-    with tempfile.TemporaryDirectory() as directory:
-        candidate = Path(directory) / 'oldbook-theme.xpi'
-        build_xpi(candidate)
-        if sha256(candidate) == sha256(XPI):
-            return False
-        subprocess.run(['doas', 'mkdir', '-p', str(XPI.parent)], check=True)
-        subprocess.run(['doas', 'cp', str(candidate), str(XPI)], check=True)
-        subprocess.run(['doas', 'chmod', '644', str(XPI)], check=True)
+    if not SIGNED_XPI.is_file():
+        raise SystemExit(
+            f'{SIGNED_XPI} is missing. Sign the extension in {SOURCE} with '
+            "web-ext sign (Mozilla add-on developer API credentials required) "
+            'and check the result in at that path before installing.')
+    if sha256(SIGNED_XPI) == sha256(XPI):
+        return False
+    subprocess.run(['doas', 'mkdir', '-p', str(XPI.parent)], check=True)
+    subprocess.run(['doas', 'cp', str(SIGNED_XPI), str(XPI)], check=True)
+    subprocess.run(['doas', 'chmod', '644', str(XPI)], check=True)
     return True
 
 

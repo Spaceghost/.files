@@ -1,5 +1,17 @@
 {
   "position": "bottom",
   "opacity": 0.36,
-  "corner_radius": 6
+  "corner_radius": 6,
+  "reserve_band": true,
+  "powerline": false,
+  "agent_status": true,
+  "ripple": {
+    "enabled": true,
+    "source": "bar",
+    "duration": 0.9,
+    "reach": 1.0,
+    "spacing": 40.0,
+    "strength": 14.0,
+    "shade": 0.09
+  }
 }

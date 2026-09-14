@@ -11,7 +11,8 @@
   },
   "patches": [
     "0001-ready-fd.patch",
-    "0002-idle-colors.patch"
+    "0002-idle-colors.patch",
+    "0003-indicator-panel.patch"
   ],
   "packages": [
     {
@@ -38,6 +39,7 @@
   },
   "patches_sha256": {
     "0001-ready-fd.patch": "529d3b5d54a0105e021cde7778504f687a6c79c150d49dfec9d3462c4fa34aba",
-    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381"
+    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381",
+    "0003-indicator-panel.patch": "3896d4da5fe55bbf2f98121a5f3879e7bb66bf3dd923ad9de21127c998d7e5c3"
   }
 }

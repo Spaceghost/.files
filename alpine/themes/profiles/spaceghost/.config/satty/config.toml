@@ -1,0 +1,24 @@
+# Screenshot annotation in the Space Ghost palette. oldbook-screenshot opens each
+# capture here after the flash and shutter; Enter copies and closes, Escape
+# closes, Ctrl+S overwrites the capture with the annotated version.
+[general]
+fullscreen = false
+early-exit = true
+corner-roundness = 12
+initial-tool = "arrow"
+copy-command = "wl-copy"
+annotation-size-factor = 1.0
+save-after-copy = false
+default-hide-toolbars = false
+disable-notifications = true
+actions-on-enter = ["save-to-clipboard", "exit"]
+actions-on-escape = ["exit"]
+actions-on-right-click = ["save-to-clipboard"]
+
+[font]
+family = "Inter"
+style = "Bold"
+
+[color-palette]
+palette = ["#dca7ff", "#ff6f91", "#8fe3b0", "#8ab6ff", "#c48bf0", "#ffb37a"]
+custom = ["#f3e9fa", "#13091f", "#9fe8ff", "#9c74b7", "#b34e6d", "#647fb7"]

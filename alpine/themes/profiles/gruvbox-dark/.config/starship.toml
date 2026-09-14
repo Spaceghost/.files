@@ -1,16 +1,19 @@
 add_newline = false
 # Powerline chain: each module below owns a background chip (bg:X fg:#1d2021,
 # the theme's own darkest ground, already used as the status bar's ground in
-# .tmux.conf and waybar/style.css). The rounded separator (U+E0B4) between
-# chips is colored fg=previous chip's bg, bg=next chip's bg, so the chips read
-# as one continuous ribbon with no gaps -- matching the rounded, pill-shaped
-# module chrome already used in this theme's waybar. git_branch and
-# git_status share one chip (no separator between them) since git_status only
-# ever appends to git_branch's own output. The trailing separator after
-# cmd_duration has no bg, fading the ribbon back to the terminal before the
-# prompt's second line.
-format = "[](fg:#fabd2f)$username[](fg:#fabd2f bg:#8ec07c)$hostname[](fg:#8ec07c bg:#83a598)$directory[](fg:#83a598 bg:#d3869b)${custom.fossil}[](fg:#d3869b bg:#fe8019)$git_branch$git_status[](fg:#fe8019 bg:#b8bb26)$cmd_duration[](fg:#b8bb26)$line_break$character"
-
+# .tmux.conf and waybar/style.css). The rounded separator is U+E0B4, written as
+# the TOML escape \ue0b4: this chain once shipped with the raw glyph, a tool
+# that drops private-use characters emptied every slot, and the prompt drew its
+# chips with nothing between them. Between the chips that are always there --
+# username, hostname, directory -- it is coloured fg=previous chip's bg, bg=next
+# chip's bg, so they read as one continuous ribbon, opened and closed the way
+# .tmux.conf's chips are. The chips that come and go -- the Fossil branch, git,
+# a slow command's duration -- each carry their own opening and closing cap
+# inside a conditional group, so an absent module leaves nothing behind; named
+# in the ribbon itself they left a tail of coloured stubs in every directory
+# that was not a checkout. git_branch and git_status share one chip since
+# git_status only ever appends to git_branch's own output.
+format = "[\ue0b4](fg:#fabd2f)$username[\ue0b4](fg:#fabd2f bg:#8ec07c)$hostname[\ue0b4](fg:#8ec07c bg:#83a598)$directory[\ue0b4](fg:#83a598)([\ue0b4](fg:#d3869b)${custom.fossil}[\ue0b4](fg:#d3869b))([\ue0b4](fg:#fe8019)$git_branch$git_status[\ue0b4](fg:#fe8019))([\ue0b4](fg:#b8bb26)$cmd_duration[\ue0b4](fg:#b8bb26))$line_break$character"
 [username]
 show_always = true
 style_user = "bg:#fabd2f fg:#1d2021 bold"

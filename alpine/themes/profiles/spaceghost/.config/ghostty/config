@@ -1,0 +1,38 @@
+# Space Ghost: generated from this theme's Foot palette by oldbook-theme sync.
+# Edit the Foot colours, then rerun sync; this file is derived.
+copy-on-select = clipboard
+font-family = JetBrainsMono Nerd Font
+font-size = 9.5
+command = /bin/zsh
+window-padding-x = 6
+window-padding-y = 6
+window-decoration = server
+window-theme = dark
+custom-shader = ~/.config/ghostty/shaders/warm-bloom.glsl
+custom-shader = ~/.config/ghostty/shaders/cursor-smear.glsl
+custom-shader-animation = true
+
+background = 13091f
+foreground = f3e9fa
+selection-background = 49315b
+selection-foreground = f5edfb
+background-opacity = 0.88
+cursor-text = 13091f
+cursor-color = dca7ff
+
+palette = 0=#13091f
+palette = 1=#b34e6d
+palette = 2=#679d82
+palette = 3=#9c74b7
+palette = 4=#647fb7
+palette = 5=#8b61ad
+palette = 6=#72a1b7
+palette = 7=#b9a3cc
+palette = 8=#816b91
+palette = 9=#ff6f91
+palette = 10=#8fe3b0
+palette = 11=#dca7ff
+palette = 12=#8ab6ff
+palette = 13=#c48bf0
+palette = 14=#9fe8ff
+palette = 15=#f3e9fa

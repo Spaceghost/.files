@@ -28,6 +28,7 @@ STOCK_SUPERVISOR = 'swaylockd'
 EFFECTS_LOCKER = 'swaylock-effects'
 FIRST_RUN_OPTIONS = {'-R': 1, '--ready-fd': 1, '--fade-in': 1, '--screenshots': 0, '-S': 0}
 MAX_RESTARTS = 5
+# Leave room for locker readiness inside elogind's before-sleep delay.
 CATBED_WARMUP_SECONDS = 1.5
 # elogind here, systemd on the Bazzite replay: one is a fork of the other and
 # takes the same options, so the first of these the host provides is the one.
@@ -163,11 +164,15 @@ def _watch_command(*arguments):
 
 
 def begin_catbed_mode(runtime):
-    """Start catbed mode for the lock and report whether we own this session."""
+    """Enter catbed before locking; only a deliberate release ends the guard."""
+    socket = os.environ.get('SWAYSOCK')
+    if not socket or Path(socket).parent != Path(runtime):
+        print('oldbook-lock: no Sway socket in this runtime for catbed', file=sys.stderr)
+        return False
     if watch_mode.engaged(runtime) is not None:
         return False
     try:
-        subprocess.Popen(_watch_command('start'), stdin=subprocess.DEVNULL,
+        child = subprocess.Popen(_watch_command('start'), stdin=subprocess.DEVNULL,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                          start_new_session=True)
     except OSError as error:
@@ -177,19 +182,11 @@ def begin_catbed_mode(runtime):
     while time.monotonic() < deadline:
         if watch_mode.engaged(runtime) is not None:
             return True
+        if child.poll() is not None:
+            break
         time.sleep(0.05)
     print('oldbook-lock: catbed mode did not report readiness before lock', file=sys.stderr)
     return False
-
-
-def end_catbed_mode():
-    """Stop only the catbed session started by this lock attempt."""
-    try:
-        subprocess.Popen(_watch_command('stop'), stdin=subprocess.DEVNULL,
-                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                         start_new_session=True)
-    except OSError:
-        pass
 
 
 def launch_until_ready(label, build, directory, record, compositor, runtime, timeout):
@@ -261,7 +258,7 @@ def acquire_lock(runtime, command=None, timeout=10):
     private_directory(runtime)
     directory = runtime / 'oldbook-screen-lock'
     private_directory(directory)
-    catbed_active = begin_catbed_mode(runtime)
+    begin_catbed_mode(runtime)
     try:
         compositor = compositor_identity(runtime)
         deadline = time.monotonic() + timeout
@@ -292,8 +289,9 @@ def acquire_lock(runtime, command=None, timeout=10):
                           file=sys.stderr)
             raise RuntimeError('; '.join(failures))
     finally:
-        if catbed_active:
-            end_catbed_mode()
+        # Readiness is not unlock. Catbed also survives unlock, as requested.
+        # Keep the guard even if a locker fails: its release chord still works.
+        pass
 
 
 def strip_first_run_options(argv):
