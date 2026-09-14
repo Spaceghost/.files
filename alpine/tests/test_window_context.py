@@ -342,6 +342,10 @@ class CaptionTests(unittest.TestCase):
             {'workspace': '1: Ghost', 'title': 'Pithos & friends'}, palette)
         self.assertIn('background="#dca7ff"', found)
         self.assertIn(self.context.POWERLINE, found)
+        # It opens with the first ground and closes into nothing, like the
+        # prompt's and the status bars' chains.
+        self.assertTrue(found.startswith('<span foreground="#dca7ff">' + self.context.POWERLINE))
+        self.assertTrue(found.endswith(self.context.POWERLINE + '</span>'))
         # The arrow between two segments leaves one colour and enters the next.
         self.assertIn('<span foreground="#dca7ff" background="#261631">', found)
         # Markup is markup: a title with an ampersand may not break the label.

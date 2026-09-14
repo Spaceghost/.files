@@ -1,0 +1,20 @@
+From /tmp/tmp548tmvx9/remote
+ * branch            live       -> FETCH_HEAD
+ * [new branch]      live       -> github/live
+To /tmp/tmp548tmvx9/remote.git
+   2d371ac..ca5c23f  oldbook-publish/live -> live
+======================================================================
+FAIL: test_every_declared_theme_carries_a_full_sixteen_colour_terminal (test_complete_themes.CompleteThemes.test_every_declared_theme_carries_a_full_sixteen_colour_terminal) (theme='monochrome-test')
+A second theme is what proves the palette is complete rather than
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/jack/.files/alpine/tests/test_complete_themes.py", line 105, in test_every_declared_theme_carries_a_full_sixteen_colour_terminal
+    self.assertEqual(len(set(colors)), 16, colors)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 2 != 16 : ['#000000', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff']
+
+----------------------------------------------------------------------
+Ran 31 tests in 3.957s
+
+FAILED (failures=1)
+Published alpine-oldbook as live: ca5c23f14b6ffcfdf9c9d40e889ee1ff09f9deaa (Fossil export 721f8e18b824b564f4ff100adab1de477e77a3f6)

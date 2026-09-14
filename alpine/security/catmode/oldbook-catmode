@@ -1,0 +1,244 @@
+#!/usr/bin/python3 -I
+"""Root-owned Linux boot guard. Never imports HOME code or records keystrokes."""
+import argparse
+import fcntl
+import json
+import os
+from pathlib import Path
+import pwd
+import select
+import signal
+import struct
+import subprocess
+import time
+
+INPUT = Path('/sys/class/input')
+STATE = Path('/run/oldbook-catmode')
+EVIOCGRAB = 0x40044590
+EVIOCGKEY = 0x80604518
+EVENT = struct.Struct('@llHHi')
+
+
+def quiet_fans():
+    """Reuse the thermal watchdog, always with its stricter closed-lid limit."""
+    helper = Path('/usr/local/sbin/oldbook-fan-hold')
+    try:
+        info = helper.stat()
+        if helper.is_symlink() or info.st_uid != 0 or info.st_mode & 0o022:
+            return None
+        child = subprocess.Popen([str(helper), 'hold', '--regime', 'closed',
+                                  '--deadline', '3'], stdin=subprocess.PIPE,
+                                 stdout=subprocess.DEVNULL)
+        os.set_blocking(child.stdin.fileno(), False)
+        return child
+    except OSError:
+        return None
+
+
+def release_fans(child):
+    if child is not None:
+        child.stdin.close()
+        try:
+            child.wait(timeout=4)
+        except subprocess.TimeoutExpired:
+            child.terminate()
+            child.wait(timeout=2)
+
+
+def protected_name(name):
+    return ('Apple Internal Keyboard' in name or name in
+            ('bcm5974', 'AT Translated Set 2 keyboard', 'Power Button', 'Sleep Button'))
+
+
+def devices(root=INPUT):
+    for device in root.glob('input[0-9]*'):
+        try:
+            if protected_name((device / 'name').read_text().strip()):
+                yield device
+        except OSError:
+            continue
+
+
+def inhibit(enabled, root=INPUT):
+    """The kernel latch survives killprocs; reboot recreates the input devices."""
+    errors = []
+    for device in devices(root):
+        try:
+            (device / 'inhibited').write_text('1' if enabled else '0')
+        except OSError as error:
+            errors.append(str(error))
+    if errors:
+        raise RuntimeError('; '.join(errors))
+
+
+class ReleaseChord:
+    def __init__(self):
+        self.since = None
+        self.armed = False
+        self.keys = frozenset()
+
+    def update(self, down, now):
+        if self.armed:
+            if not down:
+                return True
+            if down <= self.keys:
+                return False
+            self.armed = False
+            self.since = None
+        exact = (1 in down and len(down) == 3
+                 and bool(down & {42, 54}) and bool(down & {125, 126}))
+        if exact:
+            if self.since is None:
+                self.since = now
+            if now - self.since >= 1.0:
+                self.armed = True
+                self.keys = frozenset(down)
+        elif not down and self.armed:
+            return True
+        else:
+            self.since = None
+            self.armed = False
+        return False
+
+
+def watch_ready(uid):
+    """A live, keyboard-proven desktop guard is the only automatic handoff."""
+    path = Path('/run/user') / str(uid) / 'oldbook/watch.json'
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        with os.fdopen(fd) as stream:
+            if os.fstat(stream.fileno()).st_uid != uid:
+                return False
+            record = json.loads(stream.read(8192))
+        process = record['process']
+        proc = Path('/proc') / str(int(process['pid']))
+        fields = (proc / 'stat').read_text().rsplit(')', 1)[1].split()
+        return (record.get('keyboard_proven') is True and record.get('keyboard_held') is True
+                and proc.stat().st_uid == uid and fields[0] not in ('Z', 'X')
+                and process['start_time'] == fields[19]
+                and process['boot_id'] == Path('/proc/sys/kernel/random/boot_id').read_text().strip())
+    except (OSError, ValueError, KeyError, TypeError, IndexError):
+        return False
+
+
+def publish(stage, count):
+    STATE.mkdir(mode=0o755, exist_ok=True)
+    temporary = STATE / 'status.tmp'
+    temporary.write_text(json.dumps({'stage': stage, 'grabbed_devices': count,
+                                     'cooling': 'thermal-watchdog quiet request during boot; automatic after handoff',
+                                     'pid': os.getpid()}) + '\n')
+    temporary.replace(STATE / 'status.json')
+
+
+def run(user):
+    uid = pwd.getpwnam(user).pw_uid
+    inhibit(False)
+    handles = {}
+    chord = ReleaseChord()
+    stopping = False
+    released = False
+    fans = quiet_fans()
+    last_renew = 0.0
+
+    def stop(*_args):
+        nonlocal stopping
+        stopping = True
+
+    for signum in (signal.SIGTERM, signal.SIGINT):
+        signal.signal(signum, stop)
+    publish('waiting-for-input', 0)
+    try:
+        while not stopping:
+            if fans is not None and fans.poll() is None and time.monotonic() - last_renew >= 1:
+                try:
+                    os.write(fans.stdin.fileno(), b'renew\n')
+                except (OSError, BlockingIOError):
+                    release_fans(fans)
+                    fans = None
+                last_renew = time.monotonic()
+            try:
+                shutting_down = Path('/run/openrc/softlevel').read_text().strip() == 'shutdown'
+            except OSError:
+                shutting_down = False
+            if shutting_down:
+                release_fans(fans)
+                fans = None
+                inhibit(True)
+                publish('shutdown-inhibited', len(handles))
+                time.sleep(.1)
+                continue
+            if released:
+                time.sleep(.25)
+                continue
+            for device in devices():
+                for event in device.glob('event*'):
+                    path = '/dev/input/' + event.name
+                    if path in handles:
+                        continue
+                    fd = None
+                    try:
+                        fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC)
+                        fcntl.ioctl(fd, EVIOCGRAB, 1)
+                        handles[path] = fd
+                        publish('boot-guard', len(handles))
+                    except OSError:
+                        if fd is not None:
+                            os.close(fd)
+            if not handles:
+                time.sleep(.1)
+                continue
+            readable, _, _ = select.select(list(handles.values()), [], [], .1)
+            for fd in readable:
+                try:
+                    # Drain events, never forward or persist them. The kernel
+                    # bitmap below also handles SYN_DROPPED and pre-held keys.
+                    os.read(fd, EVENT.size * 64)
+                except BlockingIOError:
+                    pass
+                except OSError:
+                    path = next(path for path, value in handles.items() if value == fd)
+                    os.close(handles.pop(path))
+            down = set()
+            for fd in handles.values():
+                keys = bytearray(96)
+                try:
+                    fcntl.ioctl(fd, EVIOCGKEY, keys, True)
+                    down.update(bit for bit in range(768) if keys[bit // 8] & (1 << (bit % 8)))
+                except OSError:
+                    down.add(-1)  # An unreadable device cannot prove release.
+            deliberate = chord.update(down, time.monotonic())
+            handoff = not down and watch_ready(uid)
+            if deliberate or handoff:
+                for fd in handles.values():
+                    os.close(fd)
+                handles.clear()
+                release_fans(fans)
+                fans = None
+                released = True
+                publish('desktop-guard' if handoff else 'released-by-chord', 0)
+    finally:
+        release_fans(fans)
+        for fd in handles.values():
+            os.close(fd)
+        publish('stopped', 0)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('run', 'shutdown', 'recover', 'status'))
+    parser.add_argument('--user', default='jack')
+    args = parser.parse_args()
+    if args.action == 'status':
+        print((STATE / 'status.json').read_text(), end='')
+        return
+    if os.geteuid() != 0:
+        parser.error('run through the root-owned OpenRC service')
+    if args.action == 'run':
+        run(args.user)
+    else:
+        inhibit(args.action == 'shutdown')
+        publish('shutdown-inhibited' if args.action == 'shutdown' else 'recovered', 0)
+
+
+if __name__ == '__main__':
+    main()

@@ -254,14 +254,42 @@ def publish_locked(checkout, mirror, remote, branch, export_only, only_if_change
     if only_if_changed and read_json(receipt) == identity:
         print(f'Already published {named}: {local}')
         return local
-    run(['git', 'push', '--no-follow-tags', 'github', refspec], mirror)
+    # A prior publication may contain a Git-only merge of legacy history.
+    # Keep Fossil's export ref untouched; publish a separate merge ref so the
+    # next incremental export cannot discard that remote ancestry again.
+    remote_head = run(['git', 'ls-remote', '--heads', 'github', destination],
+                      mirror, capture=True).stdout.split()
+    published_commit = local
+    if remote_head:
+        if len(remote_head) != 2 or remote_head[1] != destination:
+            raise RuntimeError('Unexpected remote branch response')
+        run(['git', 'fetch', '--no-tags', 'github', destination], mirror)
+        remote_commit = run(['git', 'rev-parse', 'FETCH_HEAD'], mirror, capture=True).stdout.strip()
+        ancestor = run(['git', 'merge-base', local, remote_commit], mirror, capture=True).stdout.strip()
+        if ancestor == local:
+            published_commit = remote_commit
+        elif ancestor != remote_commit:
+            merged = run(['git', 'merge-tree', '--write-tree', local, remote_commit],
+                         mirror, capture=True).stdout.splitlines()[0]
+            author = run(['git', 'show', '-s', '--format=%an%n%ae', local],
+                         mirror, capture=True).stdout.splitlines()
+            if len(author) != 2:
+                raise RuntimeError('Cannot determine the Fossil commit author')
+            published_commit = run(['git', '-c', 'user.name=' + author[0],
+                                    '-c', 'user.email=' + author[1],
+                                    'commit-tree', merged, '-p', remote_commit,
+                                    '-p', local, '-m', 'publish: merge Fossil ' + branch],
+                                   mirror, capture=True).stdout.strip()
+    publication_ref = 'refs/heads/oldbook-publish/' + remote_branch
+    run(['git', 'update-ref', publication_ref, published_commit], mirror)
+    run(['git', 'push', '--no-follow-tags', 'github', publication_ref + ':' + destination], mirror)
     published = run(['git', 'ls-remote', '--heads', 'github', destination], mirror,
                     capture=True).stdout.split()
-    if len(published) != 2 or published != [local, destination]:
+    if len(published) != 2 or published != [published_commit, destination]:
         raise RuntimeError('Remote branch changed or could not be verified after push.')
     write_json(receipt, identity)
-    print(f'Published {named}: {local}')
-    return local
+    print(f'Published {named}: {published_commit} (Fossil export {local})')
+    return published_commit
 
 
 def scheduled(checkout, mirror, remote, branch, state, remote_branch=None):

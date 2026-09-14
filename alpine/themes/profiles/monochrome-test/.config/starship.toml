@@ -1,15 +1,27 @@
 add_newline = false
-# Powerline chain, built the same way as every other profile's, but this
-# theme's own palette (monochrome-test.json) only declares two colors:
-# #000000 and #ffffff. So the chain alternates polarity chip to chip instead
-# of cycling hue -- each chip inverts the theme's own background/foreground
-# roles rather than inventing a shade this theme does not have. That keeps
-# every chip boundary visible (the whole point of this theme is making
-# un-themed surfaces obvious) while staying strictly black-and-white. The
-# `[username]` root case inverts the opposite way from the normal user case,
-# since there is no red here to mark it with instead.
-format = "[](fg:#ffffff)$username[](fg:#ffffff bg:#000000)$hostname[](fg:#000000 bg:#ffffff)$directory[](fg:#ffffff bg:#000000)${custom.fossil}[](fg:#000000 bg:#ffffff)$git_branch$git_status[](fg:#ffffff bg:#000000)$cmd_duration[](fg:#000000)$line_break$character"
-
+# Powerline chain, built the same way as every other profile's, but this theme's
+# own palette (monochrome-test.json) only declares two colors: #000000 and
+# #ffffff. So the chain alternates polarity chip to chip instead of cycling hue
+# -- each chip inverts the theme's own background/foreground roles rather than
+# inventing a shade this theme does not have. That keeps every chip boundary
+# visible (the whole point of this theme is making un-themed surfaces obvious)
+# while staying strictly black-and-white. The `[username]` root case inverts the
+# opposite way from the normal user case, since there is no red here to mark it
+# with instead.
+#
+# The rounded separator is U+E0B4, written as the TOML escape \ue0b4: this chain
+# once shipped with the raw glyph, a tool that drops private-use characters
+# emptied every slot, and the prompt drew its chips with nothing between them.
+# Between the chips that are always there -- username, hostname, directory -- it
+# is coloured fg=previous chip's bg, bg=next chip's bg, so they read as one
+# continuous ribbon, opened and closed the way .tmux.conf's chips are. The chips
+# that come and go -- the Fossil branch, git, a slow command's duration -- each
+# carry their own opening and closing cap inside a conditional group, so an
+# absent module leaves nothing behind; named in the ribbon itself they left a
+# tail of coloured stubs in every directory that was not a checkout. git_branch
+# and git_status share one chip since git_status only ever appends to
+# git_branch's own output.
+format = "[\ue0b4](fg:#ffffff)$username[\ue0b4](fg:#ffffff bg:#000000)$hostname[\ue0b4](fg:#000000 bg:#ffffff)$directory[\ue0b4](fg:#ffffff)([\ue0b4](fg:#000000)${custom.fossil}[\ue0b4](fg:#000000))([\ue0b4](fg:#ffffff)$git_branch$git_status[\ue0b4](fg:#ffffff))([\ue0b4](fg:#000000)$cmd_duration[\ue0b4](fg:#000000))$line_break$character"
 [username]
 show_always = true
 style_user = "bg:#ffffff fg:#000000 bold"

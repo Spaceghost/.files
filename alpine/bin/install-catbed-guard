@@ -14,10 +14,13 @@ import argparse
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import time
 
 REPO = Path(__file__).resolve().parents[2]
 FILES = (
+    (REPO / 'alpine/security/catmode/oldbook-catmode', Path('/usr/local/sbin/oldbook-catmode'), 0o755),
+    (REPO / 'alpine/security/catmode/initd', Path('/etc/init.d/oldbook-catmode'), 0o755),
     # Run as root through doas, so it must be a file the desktop user cannot
     # rewrite; catbed_guard refuses to run one that is not root-owned.
     (REPO / 'alpine/bin/catbed-sysrq-hold', Path('/usr/local/sbin/catbed-sysrq-hold'), 0o755),
@@ -66,7 +69,8 @@ def main(argv=None):
             target.write_bytes(source.read_bytes())
         target.chmod(mode)
         os.chown(target, 0, 0)
-    print('Catbed guard files installed; the next lock or catbed mode uses them.')
+    subprocess.run(['rc-update', 'add', 'oldbook-catmode', 'boot'], check=True)
+    print('Catbed guard files installed; boot protection is enabled for the next boot.')
     if backup.exists():
         print('Previous files:', backup)
     return 0

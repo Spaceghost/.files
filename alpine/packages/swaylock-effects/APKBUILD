@@ -4,7 +4,7 @@
 # (the recovery locker for oldbook-lock) is never replaced.
 pkgname=oldbook-swaylock-effects
 pkgver=1.7.0.0
-pkgrel=0
+pkgrel=1
 pkgdesc="Screen locker with blur, compose, clock and readiness notification for the Oldbook lock screen"
 url="https://github.com/jirutka/swaylock-effects"
 arch="all"
@@ -26,6 +26,7 @@ subpackages="$pkgname-doc"
 source="swaylock-effects-$pkgver.tar.gz
 	0001-ready-fd.patch
 	0002-idle-colors.patch
+	0003-indicator-panel.patch
 	"
 builddir="$srcdir/swaylock-effects-$pkgver"
 export SOURCE_DATE_EPOCH=1788850800
@@ -77,4 +78,5 @@ sha512sums="
 6a4ecfd55b0f666b108d1c11a3b32518ec9f91831494f40eb49bb9d463e250ffdec3d353f917afcfbabffce6720f14934d2730ccfcf7fd52d6c931c89fa8d6b2  swaylock-effects-1.7.0.0.tar.gz
 1f08adfce7f31c996acd9050dc2a4cd10d5c78eec6ebf0e1d7853ae9e7a9fbed9b43a19473d4018f95bc67cb49dd490a3d7d83a3a2e0c344a98f40d85f91fea2  0001-ready-fd.patch
 1b2d35c0cb6231e4792b9db9d308986ede279c0042985bc103dde842c8ab67f5afd77ec89e9f7aba1bda807a745edca9c0226e67d97cffb11f4d80869554f9f0  0002-idle-colors.patch
+8337c31c575ae7780bacc41321889a8d0c91f6383ddf1a6053fc071e72b3f007d3fb79224e95a5cae8476f5b0bd977a006e3b908f72ba8255a14b049358c40af  0003-indicator-panel.patch
 "

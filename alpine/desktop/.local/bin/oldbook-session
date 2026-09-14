@@ -72,6 +72,16 @@ if [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
     fi
 fi
 
+# Start once per compositor, before slower audio and desktop services. A reload
+# must not re-arm a guard the user deliberately released.
+catmode_session=$(printf '%s' "${SWAYSOCK:-${WAYLAND_DISPLAY:-default}}" | sha256sum | cut -c1-16)
+if [ ! -f "$session_runtime/catmode-$catmode_session" ]; then
+    if command -v oldbook-watch >/dev/null 2>&1; then
+        start_service watch oldbook-watch start
+        touch "$session_runtime/catmode-$catmode_session"
+    fi
+fi
+
 if ! has_polkit_agent && [ -x /usr/libexec/polkit-gnome-authentication-agent-1 ]; then
     start_service polkit-agent /usr/libexec/polkit-gnome-authentication-agent-1
 fi

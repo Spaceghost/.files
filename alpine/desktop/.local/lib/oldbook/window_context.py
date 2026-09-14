@@ -52,7 +52,10 @@ GLYPHS = {
     'behind': '',    # arrow down: waiting in the repository
     'tabs': '',      # stacked pages: more of the same window
 }
-POWERLINE = ''
+# Rounded, the same separator the prompt and the status bars wear, so the
+# strip reads as one more chain of the same family. Written as an escape:
+# a tool that drops private-use characters once emptied the prompt's slots.
+POWERLINE = '\ue0b4'
 CHAIN = ' › '
 SEPARATOR = ' · '
 # What the caption gives up first as the strip narrows, in order. The workspace
@@ -666,7 +669,7 @@ def caption(record, workspace='', budget=None):
     return SEPARATOR.join(text for _, text in segments(record, workspace, budget))
 
 
-def markup(parts, palette):
+def markup(parts, palette, font=None):
     """Powerline as plain text: one ground per segment, one arrow between them.
 
     A separator drawn in the colour it is leaving over the colour it is entering
@@ -674,6 +677,12 @@ def markup(parts, palette):
     nothing for it beyond parsing the attributes. It is a setting rather than
     the default because it only reads well while neighbouring grounds keep their
     contrast, and a generated theme cannot promise that.
+
+    The chain opens with the first ground and closes into nothing, the way the
+    prompt's and the status bars' chains do. The glyph itself is set in `font`
+    where one is given: the caption's own face may carry a private-use glyph of
+    its own at that codepoint -- Inter does, a subscript digit -- and Pango
+    would take that over a fallback that has the real shape.
     """
     palette = palette or {}
 
@@ -681,18 +690,31 @@ def markup(parts, palette):
         names = ROLE_COLORS.get(role, ROLE_COLORS['chain'])
         return palette.get(names[index], palette.get('foreground', '#ffffff'))
 
-    pieces = []
+    def separator(ground, following=None):
+        attributes = ' foreground=' + quoteattr(ground)
+        if following:
+            attributes += ' background=' + quoteattr(following)
+        if font:
+            attributes += ' font_family=' + quoteattr(font)
+        return '<span{}>{}</span>'.format(attributes, POWERLINE)
+
+    if not parts:
+        return ''
+    pieces = [separator(color(parts[0][0], 0))]
     for position, (role, text) in enumerate(parts):
         ground, ink = color(role, 0), color(role, 1)
         pieces.append('<span background={} foreground={}> {} </span>'.format(
             quoteattr(ground), quoteattr(ink), escape(text)))
         following = parts[position + 1][0] if position + 1 < len(parts) else None
-        arrow = '<span foreground={}{}>{}</span>'.format(
-            quoteattr(ground),
-            ' background=' + quoteattr(color(following, 0)) if following else '',
-            POWERLINE)
-        pieces.append(arrow)
+        pieces.append(separator(ground, color(following, 0) if following else None))
     return ''.join(pieces)
+
+
+def reference_markup(reference, font=None):
+    """A measuring line as the strip will really draw it: separators in their face."""
+    glyph = ('<span font_family={}>{}</span>'.format(quoteattr(font), POWERLINE)
+             if font else POWERLINE)
+    return escape(reference).replace(POWERLINE, glyph)
 
 
 def strip_segments(record, budget=None):
@@ -723,6 +745,6 @@ def strip_caption(record, budget=None):
     return SEPARATOR.join(text for _, text in strip_segments(record, budget))
 
 
-def strip_markup(record, palette, budget=None):
+def strip_markup(record, palette, budget=None, font=None):
     """The same line as powerline segments, for the strip that asked for them."""
-    return markup(strip_segments(record, budget), palette)
+    return markup(strip_segments(record, budget), palette, font)

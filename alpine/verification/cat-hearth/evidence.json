@@ -1,0 +1,165 @@
+{
+  "ember_cells": 28,
+  "flame_steps": 5,
+  "logical_size": [
+    620,
+    150
+  ],
+  "never_drawn_by_a_running_locker": true,
+  "palette": {
+    "accent": "#fabd2f",
+    "accent_secondary": "#fabd2f",
+    "background": "#282828",
+    "background_hard": "#1d2021",
+    "border": "#504945",
+    "foreground": "#ebdbb2",
+    "muted": "#928374",
+    "surface": "#3c3836"
+  },
+  "placement": {
+    "caption_card": "lower left, 560 wide, 252 tall for the current painting",
+    "gap": 14,
+    "indicator_strip_top": 180,
+    "margin_from_screen_top": 16,
+    "needs": 164,
+    "side": "above the indicator"
+  },
+  "rendered_by": "alpine/desktop/.local/lib/oldbook/cat_panel.py",
+  "scale": 2,
+  "scale_floor_celsius": 30.0,
+  "states": {
+    "closed-lid": {
+      "animated": true,
+      "battery": 40.0,
+      "cpu": 52.0,
+      "duty": 0.4,
+      "embers": "15/28",
+      "fans_held": true,
+      "flame": "2/5",
+      "image": "closed-lid.png",
+      "mode": "warming",
+      "scale": {
+        "ease": 65.0,
+        "floor": 30.0,
+        "stop": 72.0,
+        "target": 54.0
+      },
+      "sha256": "2a84e25ddf26e9d20e7fcbb1cae7f3dc4d4f99f6b792e295417982507ec5f957",
+      "skin": 36.5
+    },
+    "coasting": {
+      "animated": true,
+      "battery": 39.0,
+      "cpu": 74.0,
+      "duty": 0.0,
+      "embers": "25/28",
+      "fans_held": false,
+      "flame": "0/5",
+      "image": "coasting.png",
+      "mode": "coasting",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "82f23c65801c147d1a27374ccda640d514a5d03737622df61e31f4022f0e41eb",
+      "skin": 36.0
+    },
+    "countdown": {
+      "animated": true,
+      "battery": 30.0,
+      "cpu": 41.0,
+      "duty": 0.0,
+      "embers": "6/28",
+      "fans_held": false,
+      "flame": "0/5",
+      "image": "countdown.png",
+      "mode": "countdown",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "b201152abe87682f4227bb0a053ed87186c339791dc90d11aac904e8fe340b97",
+      "skin": 28.0
+    },
+    "hot": {
+      "animated": true,
+      "battery": 41.0,
+      "cpu": 68.0,
+      "duty": 0.95,
+      "embers": "21/28",
+      "fans_held": false,
+      "flame": "5/5",
+      "image": "hot.png",
+      "mode": "warming",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "6707baf6fed4bc76d19e913b490aa45b42628319c0691dafa89c65a469c51e8a",
+      "skin": 37.0
+    },
+    "on-battery": {
+      "animated": false,
+      "battery": 30.0,
+      "cpu": 41.0,
+      "duty": 0.0,
+      "embers": "6/28",
+      "fans_held": false,
+      "flame": "0/5",
+      "image": "on-battery.png",
+      "mode": "holding",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "b543a9a721a29ef7ddc527d02041c016b11c8edc6b3cf79766acda297eed0873",
+      "skin": 28.0
+    },
+    "unreadable": {
+      "animated": true,
+      "battery": 30.0,
+      "cpu": 44.0,
+      "duty": 0.0,
+      "embers": "8/28",
+      "fans_held": false,
+      "flame": "0/5",
+      "image": "unreadable.png",
+      "mode": "holding",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "5b0e9e4359d59d0f12709602fa9efbe29a2da08290df6cfd62030aaf85405bdf",
+      "skin": null
+    },
+    "warming": {
+      "animated": true,
+      "battery": 33.0,
+      "cpu": 57.4,
+      "duty": 0.62,
+      "embers": "15/28",
+      "fans_held": true,
+      "flame": "3/5",
+      "image": "warming.png",
+      "mode": "warming",
+      "scale": {
+        "ease": 72.0,
+        "floor": 30.0,
+        "stop": 80.0,
+        "target": 60.0
+      },
+      "sha256": "191078efb48295647ef04ceadb8c2688f7684e5ba41fcff2015ed132b53f7d7a",
+      "skin": 31.0
+    }
+  }
+}

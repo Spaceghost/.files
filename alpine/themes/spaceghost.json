@@ -1,0 +1,36 @@
+{
+  "id": "spaceghost",
+  "name": "Space Ghost",
+  "palette": {
+    "background": "#13091f",
+    "background_hard": "#0c0514",
+    "surface": "#261631",
+    "surface_bright": "#542476",
+    "border": "#49315b",
+    "foreground": "#f3e9fa",
+    "foreground_dim": "#e9d8f5",
+    "subtle": "#b9a3cc",
+    "muted": "#816b91",
+    "accent": "#dca7ff",
+    "red": "#ff6f91",
+    "green": "#8fe3b0",
+    "yellow": "#ffd58a",
+    "blue": "#8ab6ff",
+    "purple": "#c48bf0",
+    "aqua": "#9fe8ff",
+    "orange": "#ffb37a"
+  },
+  "reactive_accent": true,
+  "image_style": "Space Ghost color direction: violet-black and aubergine night grounds (#13091f, #0c0514) with plum shadow (#261631, #49315b), luminous lilac moonlight (#dca7ff), pale orchid light (#f3e9fa), and cool highlights of ice cyan (#9fe8ff), soft gold (#ffd58a) and rose (#ff6f91). Cinematic painterly canvas, deep chiaroscuro lit from a single cold source, luminous focal detail against calm violet negative space. Match a sophisticated cool dark desktop. Let Space Ghost's white suit read as luminous orchid-white and his power bands as ice cyan. Keep the scene funny, beautifully composed and legible at desktop scale. Avoid warm amber grounds, olive green and pure black.",
+  "design": {
+    "font": "Inter",
+    "radius": 22,
+    "spacing": 6,
+    "opacity": 0.88,
+    "bar_position": "top",
+    "widget_edge": "right",
+    "launcher_width": 48,
+    "cursors": "simp1e-cursors-rose-pine",
+    "icons": "Oldbook-Spaceghost"
+  }
+}

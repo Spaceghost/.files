@@ -1,5 +1,6 @@
 {
-  "package": "oldbook-swaylock-effects-1.7.0.0-r0",
+  "package": "oldbook-swaylock-effects-1.7.0.0-r1",
+  "reproducibility_measured_for": "oldbook-swaylock-effects-1.7.0.0-r0",
   "built_utc": "2026-09-08T09:42Z",
   "builds": [
     {
@@ -33,7 +34,22 @@
   ],
   "patches": {
     "0001-ready-fd.patch": "529d3b5d54a0105e021cde7778504f687a6c79c150d49dfec9d3462c4fa34aba",
-    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381"
+    "0002-idle-colors.patch": "08ef2a3ed09f3e15cf4aeed8ddf8a93076ff4578725c0d47e559765e4eef0381",
+    "0003-indicator-panel.patch": "3896d4da5fe55bbf2f98121a5f3879e7bb66bf3dd923ad9de21127c998d7e5c3"
   },
-  "limits": "Package identity and coexistence proof only; the live lock screen was verified headlessly, see alpine/verification/lock-screen/."
+  "limits": "The r1 locker reported readiness and stayed alive with a cat-hearth panel in isolated headless Sway. Physical panel appearance, password entry, GPU hardware behavior and r1 reproducibility remain unverified. See alpine/verification/catmode-recovery/hearth-smoke.json.",
+  "remote_build": {
+    "built_utc": "2026-09-09T02:22Z",
+    "command": "alpine/bin/remote-build build --host bak swaylock-effects",
+    "host": "bak",
+    "image": "alpine:edge",
+    "result": "compiled clean under meson warning_level=2 with werror=true",
+    "apks": {
+      "oldbook-swaylock-effects-1.7.0.0-r1.apk": "d7406dfae6e56169a46afbe0d320e5c763c5ea63ba298fa23a6098f4a1cf6050",
+      "oldbook-swaylock-effects-doc-1.7.0.0-r1.apk": "6936392fba256e50c1f7d9ffb3919e7756661ff6f6e569b79dc77316fe9e9588"
+    },
+    "installed": true,
+    "note": "Exact r1 APKs installed after an isolated headless readiness and panel-liveness smoke test on 2026-09-14. The r0 reproducibility pair has not been repeated for r1.",
+    "builds_run": 4
+  }
 }

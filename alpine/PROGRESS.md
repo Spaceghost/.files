@@ -2963,3 +2963,58 @@ login. No live compositor restart or fresh-machine boot is claimed. Evidence:
   (`~/.local/state/oldbook/ui-priority.json`).
 - Not verified: the feel of a flight under load by eye; a long soak for any
   realtime side effect, which the kernel's 95% throttle bounds in any case.
+
+## 2026-09-14 - recover themes, package effects, and stage catmode
+
+Recovered the pending Space Ghost profiles/icons, Powerline caption fixes,
+Foot damage workaround, signed Firefox extension installer, cat-hearth panel
+patch and evidence. Restored accidentally removed Starship module tables.
+Retained the later plain Waybar design; its obsolete chain tests now assert
+that choice. Normalized the three recovered generated palettes and corrected
+the monochrome test to expect its deliberately two-color palette.
+
+Theme effects now live with each profile in theme-effects.json. Ripple stays
+on by default, can be disabled without imports/warmup/capture, and can load
+bundled replacements with sibling modules/assets through deployed symlinks.
+`alpine/bin/theme-bundle` exports/imports checksummed ZIPs, including owned
+icons and tagged gallery artwork; import is nonactivating and refuses existing
+themes, unsafe paths, links and oversized or modified archives. An example
+Space Ghost bundle is in ~/.local/share/oldbook/theme-bundles/.
+
+Catbed no longer stops at locker readiness or unlock. Session startup launches
+it before audio services, once per compositor. A root-owned OpenRC guard is
+installed and enabled for the next boot, grabs internal input after root/devices
+are available, and hands over only to a live keyboard-proven desktop guard.
+The exact release chord must be held for a second, then all keys released.
+The boot guard reuses the existing thermal fan watchdog with its closed-lid
+58 C release limit and three-second heartbeat; no unguarded fan latch or
+artificial heating was added. Shutdown uses kernel input inhibition to survive
+process teardown. External keyboards and SSH are recovery routes.
+
+Validation: the focused 381-test regression run passed with one skip. The final
+nine recovery/chord tests passed after adding gradual-key-release coverage.
+ShellCheck passes for the changed shell scripts. Publication has a local Git
+integration test proving remote-only work and the Fossil export ref survive a
+non-forced merge. The exact saved r1 locker APK matched its recorded SHA-256,
+reported lock readiness and stayed alive with a panel in isolated headless Sway,
+then was installed with its doc APK. Exact signed APKs are archived in the
+package's artifacts directory. The signed Firefox extension was already current.
+Logs and native smoke evidence: alpine/verification/catmode-recovery/.
+
+Remaining physical checks: a real boot and disk-unlock handoff, held keys during
+handoff, hardware fan behavior, hotplug, interrupted shutdown, real password
+entry and cat-hearth appearance. Firmware, GRUB, encrypted-root input and a
+hardware long-press power cut precede/outside the Linux guard; initramfs input
+protection is not implemented. No reboot or live-session lock was forced.
+
+Recovery: oldbook-watch stop; from an external keyboard or SSH,
+`doas rc-service oldbook-catmode stop` and, after interrupted shutdown,
+`doas /usr/local/sbin/oldbook-catmode recover`. The installer preserves replaced
+root-owned files below /var/backups/alpine-rice/. Cooling returns to automatic
+on the fan helper's thermal refusal, missed heartbeat or caller termination.
+
+The legacy Fossil leaf 7b338c2186 was already represented by GitHub's explicit
+legacy-history merge a824910: its resulting tree matched our pre-lock tree.
+Integrate that already-folded leaf without replaying the obsolete rename again.
+The publisher preserves Git-only remote merge ancestry on a separate publication
+ref; Fossil's export branch stays owned by Fossil. Pushes remain fast-forward.

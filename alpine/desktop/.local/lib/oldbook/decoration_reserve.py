@@ -32,9 +32,10 @@ EDGE_MARGIN = 5
 # band above it would eat the screen over a font the strip cannot really use.
 MINIMUM = 24
 MAXIMUM = 160
-# Ascender, descender, both separators, a Nerd Font branch glyph and a powerline
-# divider: whatever the caption ends up saying, it is no taller than this line.
-REFERENCE = 'Ag › ·     10/24'
+# Ascender, descender, both separators, a Nerd Font branch glyph and the rounded
+# powerline divider the strip draws (window_context.POWERLINE): whatever the
+# caption ends up saying, it is no taller than this line.
+REFERENCE = 'Ag › ·     10/24'
 # Ordinary caption text, for the average character width the budget divides by.
 SAMPLE = 'abcdefghijklmnopqrstuvwxyz0123456789 ·›/~.-'
 # Below this the caption is answering in fragments; ellipsis can take over.

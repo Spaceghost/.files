@@ -32,10 +32,28 @@ case ${1:-deck} in
         exec swaynag -t warning -m 'Leave the Spaceghost session?' -B 'Log out' 'swaymsg exit'
         ;;
     reboot)
-        exec swaynag -t warning -m 'Reboot the Oldbook?' -B 'Reboot' 'loginctl reboot'
+        exec swaynag -t warning -m 'Reboot the Oldbook?' -B 'Reboot' 'oldbook-power reboot-now'
         ;;
     shutdown)
-        exec swaynag -t warning -m 'Power off the Oldbook?' -B 'Shut down' 'loginctl poweroff'
+        exec swaynag -t warning -m 'Power off the Oldbook?' -B 'Shut down' 'oldbook-power shutdown-now'
+        ;;
+    reboot-now|shutdown-now)
+        "$bin/oldbook-lock" || exit 1
+        action=poweroff
+        [ "$1" != reboot-now ] || action=reboot
+        if [ -x /usr/local/sbin/oldbook-catmode ]; then
+            if ! doas -n /usr/local/sbin/oldbook-catmode shutdown; then
+                doas -n /usr/local/sbin/oldbook-catmode recover || true
+                exit 1
+            fi
+        fi
+        if loginctl "$action"; then
+            exit 0
+        fi
+        if [ -x /usr/local/sbin/oldbook-catmode ]; then
+            doas -n /usr/local/sbin/oldbook-catmode recover || true
+        fi
+        exit 1
         ;;
     *)
         printf '%s\n' 'usage: oldbook-power [deck|lock|suspend|logout|reboot|shutdown]' >&2

@@ -23,6 +23,7 @@ SHIPPED = REPO / 'alpine/desktop/.config/oldbook/cat.json'
 sys.path.insert(0, str(LIBRARY))
 import cat_bed           # noqa: E402
 import cat_interactions  # noqa: E402
+import cat_panel         # noqa: E402
 import thermal           # noqa: E402
 
 
@@ -496,9 +497,18 @@ class RefusalTests(unittest.TestCase):
         self.addCleanup(lambda: service.bed and service.bed.stop('test over'))
         return service
 
-    def bed_state(self, service, present=True, lid_shut=False):
+    def bed_state(self, service, present=True, lid_shut=False, armed=True):
+        """One tick of the bed decision, with the countdown already served.
+
+        `armed` skips the twenty-second wait, which has tests of its own in
+        CountdownTests. Every refusal in this class is a refusal whether or not
+        the wait has been served, so re-serving it in each of them would test
+        the clock rather than the gate.
+        """
         document = cat_interactions.load(self.config)
         chosen = cat_interactions.selected(document)
+        if armed and service.arming_since is None:
+            service.arming_since = service.clock() - self.service.ARMING_SECONDS
         return service.bed_tick(document, chosen, present, True, lid_shut)
 
     def test_bed_mode_never_runs_on_battery(self):
@@ -579,6 +589,357 @@ class RefusalTests(unittest.TestCase):
         state = self.bed_state(service, lid_shut=None)
         self.assertEqual(state['regime'], 'closed')
         self.assertFalse(state['running'])
+
+
+class CountdownTests(unittest.TestCase):
+    """No heat is made until the countdown has been served in full.
+
+    The user asked to be told clearly, before it happens, that the machine is
+    about to be run warm. A countdown that counts down to something which has
+    already started would be a decoration; this one is the real wait, and every
+    precondition has to keep holding for the whole of it.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        for name, value in sysfs(self.root).items():
+            os.environ[name] = value
+            self.addCleanup(os.environ.pop, name, None)
+        supply = self.root / 'power'
+        (supply / 'ADP1').mkdir(parents=True)
+        (supply / 'ADP1/type').write_text('Mains\n')
+        (supply / 'ADP1/online').write_text('1\n')
+        os.environ['OLDBOOK_POWER_ROOT'] = str(supply)
+        os.environ['XDG_STATE_HOME'] = str(self.root / 'state')
+        os.environ['XDG_RUNTIME_DIR'] = str(self.root / 'run')
+        (self.root / 'run').mkdir(mode=0o700)
+        for name in ('OLDBOOK_POWER_ROOT', 'XDG_STATE_HOME', 'XDG_RUNTIME_DIR'):
+            self.addCleanup(os.environ.pop, name, None)
+        self.config = self.root / 'cat.json'
+        document = json.loads(SHIPPED.read_text())
+        document['enabled'] = True
+        self.config.write_text(json.dumps(document))
+        self.service = load_service()
+        self.now = 1000.0
+
+    def worker(self):
+        service = self.service.Service(config=self.config, clock=lambda: self.now)
+        self.addCleanup(lambda: service.bed and service.bed.stop('test over'))
+        return service
+
+    def tick(self, service, present=True):
+        document = cat_interactions.load(self.config)
+        return service.bed_tick(document, cat_interactions.selected(document),
+                                present, True, False)
+
+    def pretend_cat(self, service):
+        """A locked session with a cat on it, for the whole-tick tests below.
+
+        The load is replaced by a worker that only waits on its pipe. These
+        tests are about what the daemon decides and what it draws; making this
+        laptop hot to prove it would be both slow and, on this machine, rude.
+        """
+        idle = 'import sys\nfor line in sys.stdin:\n    pass\n'
+        self.addCleanup(setattr, cat_bed, 'WORKER', cat_bed.WORKER)
+        cat_bed.WORKER = idle
+        # No real lid inhibitor either: a whole tick would otherwise leave an
+        # elogind-inhibit behind for every test that ran one.
+        held = self.service.hold_lid
+
+        def fake_hold():
+            read_fd, write_fd = os.pipe()
+            os.close(read_fd)
+            return write_fd
+
+        self.service.hold_lid = fake_hold
+        self.addCleanup(setattr, self.service, 'hold_lid', held)
+        self.addCleanup(lambda: service.lid(False))
+        service.presence.judge = lambda now: {
+            'present': True, 'deciding': True, 'vetoed': False, 'confidence': 1.0,
+            'keys_down': 6, 'patch': True, 'signals': [], 'corroboration': ['patch']}
+        original = self.service.session_locked
+        self.service.session_locked = lambda: True
+        self.addCleanup(setattr, self.service, 'session_locked', original)
+        service.arming_since = service.clock() - self.service.ARMING_SECONDS
+        self.addCleanup(lambda: service.bed and service.bed.stop('test over'))
+
+    def test_nothing_is_started_until_the_wait_has_been_served(self):
+        service = self.worker()
+        state = self.tick(service)
+        self.assertTrue(state['arming'])
+        self.assertFalse(state['running'])
+        self.assertIsNone(service.bed)
+        self.assertEqual(state['arming_seconds'], self.service.ARMING_SECONDS)
+        self.assertAlmostEqual(state['seconds_left'], self.service.ARMING_SECONDS)
+
+        self.now += self.service.ARMING_SECONDS - 1
+        self.assertTrue(self.tick(service)['arming'])
+        self.assertIsNone(service.bed)
+
+        self.now += 2
+        self.assertTrue(self.tick(service)['running'])
+        self.assertIsNotNone(service.bed)
+
+    def test_the_countdown_counts_down(self):
+        service = self.worker()
+        seen = []
+        for _ in range(4):
+            seen.append(self.tick(service)['seconds_left'])
+            self.now += 3
+        self.assertEqual(seen, sorted(seen, reverse=True))
+        self.assertTrue(all(value > 0 for value in seen))
+
+    def test_a_lapse_in_presence_restarts_the_wait_from_the_beginning(self):
+        """Half a countdown is not credit against the next one."""
+        service = self.worker()
+        self.tick(service)
+        self.now += self.service.ARMING_SECONDS - 2
+        self.tick(service)
+        self.assertEqual(self.tick(service, present=False)['refusal'], 'no cat is present')
+        self.assertIsNone(service.arming_since)
+        self.now += 1
+        state = self.tick(service)
+        self.assertTrue(state['arming'])
+        self.assertAlmostEqual(state['seconds_left'], self.service.ARMING_SECONDS)
+
+    def test_a_refusal_during_the_wait_never_leaves_it_part_served(self):
+        service = self.worker()
+        self.tick(service)
+        self.now += 10
+        (self.root / 'power/ADP1/online').write_text('0\n')
+        self.assertEqual(self.tick(service)['refusal'], 'not on mains')
+        (self.root / 'power/ADP1/online').write_text('1\n')
+        self.assertAlmostEqual(self.tick(service)['seconds_left'],
+                               self.service.ARMING_SECONDS)
+
+    def test_the_loop_wakes_faster_only_while_the_countdown_is_running(self):
+        service = self.worker()
+        self.assertEqual(service.wait(), self.service.TICK)
+        self.tick(service)
+        self.assertEqual(service.wait(), self.service.COUNTDOWN_TICK)
+        self.assertLess(self.service.COUNTDOWN_TICK, self.service.TICK)
+
+    def test_a_failure_drawing_the_panel_never_disturbs_the_warming(self):
+        """The picture is the least important thing in this daemon.
+
+        Bed mode holds the fans down on a hot laptop; a traceback out of a
+        cairo call must not be able to interrupt the loop that is watching the
+        ceilings, and it must not leave a stale hearth on the lock screen.
+        """
+        service = self.worker()
+        self.pretend_cat(service)
+        broken, cleared = [], []
+        original, clearer = cat_panel.describe, cat_panel.clear
+        cat_panel.describe = lambda *a, **k: broken.append(1) or (_ for _ in ()).throw(
+            RuntimeError('no cairo today'))
+        cat_panel.clear = lambda *a, **k: cleared.append(1)
+        self.addCleanup(setattr, cat_panel, 'describe', original)
+        self.addCleanup(setattr, cat_panel, 'clear', clearer)
+        record = service.tick(service.clock())
+        self.assertTrue(broken)
+        self.assertTrue(cleared, 'a panel that cannot be drawn is taken down')
+        self.assertTrue(record['bed']['running'], record['bed'])
+        self.assertIn('thermal', record)
+        self.assertTrue(service.panel_complained)
+
+    def test_one_reading_serves_the_controller_and_the_picture_alike(self):
+        service = self.worker()
+        self.pretend_cat(service)
+        seen = []
+        original = thermal.readings
+        thermal.readings = lambda *a, **k: (seen.append(1),
+                                            original(*a, **k))[1]
+        self.addCleanup(setattr, thermal, 'readings', original)
+        record = service.tick(service.clock())
+        self.assertEqual(len(seen), 1, 'the sensors are read exactly once a tick')
+        self.assertEqual(record['thermal']['temperatures'],
+                         record['bed']['temperatures'])
+
+    def test_the_countdown_carries_the_readings_it_was_given(self):
+        """The panel draws from these; nothing downstream reads a sensor again."""
+        service = self.worker()
+        values = {'cpu': 44.0, 'battery': 31.0, 'skin': 29.0}
+        document = cat_interactions.load(self.config)
+        state = service.bed_tick(document, cat_interactions.selected(document),
+                                 True, True, False, values)
+        self.assertEqual(state['temperatures'], values)
+        self.assertEqual(state['regime'], 'open')
+
+
+class HearthTests(unittest.TestCase):
+    """The picture the lock screen shows, and the mapping it claims to draw."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        (self.root / 'run').mkdir(mode=0o700)
+        os.environ['XDG_RUNTIME_DIR'] = str(self.root / 'run')
+        self.addCleanup(os.environ.pop, 'XDG_RUNTIME_DIR', None)
+        self.palette = {'background': '#282828', 'background_hard': '#1d2021',
+                        'surface': '#3c3836', 'foreground': '#ebdbb2',
+                        'muted': '#928374', 'border': '#504945',
+                        'accent': '#fabd2f', 'accent_secondary': '#fabd2f'}
+
+    def record(self, bed, cpu=41.0, battery=30.0, skin=28.0, lid='open', **extra):
+        limits = thermal.regime(lid == 'closed')
+        base = {'present': True, 'locked': True, 'enabled': True, 'lid': lid, 'bed': bed,
+                'thermal': {'regime': 'closed' if lid == 'closed' else 'open',
+                            'temperatures': {'cpu': cpu, 'battery': battery, 'skin': skin},
+                            'ceilings': dict(limits), 'unreadable': []}}
+        base.update(extra)
+        return base
+
+    def warming(self, **kw):
+        return cat_panel.describe(self.record(
+            {'running': True, 'coasting': False, 'duty': 0.5, 'fans_held': True}, **kw))
+
+    def test_the_scale_runs_from_a_stated_floor_to_the_regimes_own_abort_line(self):
+        """The top of the hearth is where the sitting ends, not an idea of hot."""
+        panel = self.warming()
+        self.assertEqual(panel['floor'], cat_panel.SCALE_FLOOR)
+        self.assertEqual(panel['stop'], thermal.REGIMES['open']['abort'])
+        self.assertEqual(panel['ease'], thermal.REGIMES['open']['cpu_ceiling'])
+        self.assertEqual(panel['target'], thermal.REGIMES['open']['cpu_target'])
+        closed = self.warming(lid='closed')
+        self.assertEqual(closed['stop'], thermal.REGIMES['closed']['abort'])
+        self.assertLess(closed['stop'], panel['stop'])
+
+    def test_the_embers_are_the_measured_temperature_on_that_scale(self):
+        self.assertEqual(cat_panel.ember_count(self.warming(cpu=cat_panel.SCALE_FLOOR)), 0)
+        full = self.warming(cpu=thermal.REGIMES['open']['abort'])
+        self.assertEqual(cat_panel.ember_count(full), cat_panel.EMBER_CELLS)
+        middle = self.warming(cpu=(cat_panel.SCALE_FLOOR
+                                   + thermal.REGIMES['open']['abort']) / 2)
+        self.assertEqual(cat_panel.ember_count(middle), cat_panel.EMBER_CELLS // 2)
+        # Past the abort line it is still the abort line: nothing is drawn as
+        # hotter than the temperature at which this feature gives up.
+        self.assertEqual(cat_panel.ember_count(self.warming(cpu=140.0)),
+                         cat_panel.EMBER_CELLS)
+
+    def test_an_unreadable_cpu_lights_nothing_rather_than_reading_as_cold(self):
+        self.assertEqual(cat_panel.ember_count(self.warming(cpu=None)), 0)
+
+    def test_the_flame_is_the_effort_and_dies_while_the_embers_stay_lit(self):
+        hot = cat_panel.describe(self.record(
+            {'running': True, 'coasting': True, 'duty': 0.0}, cpu=70.0))
+        self.assertEqual(cat_panel.flame_blocks(hot), 0)
+        self.assertGreater(cat_panel.ember_count(hot), 0)
+        pushing = cat_panel.describe(self.record(
+            {'running': True, 'coasting': False, 'duty': 1.0}, cpu=70.0))
+        self.assertEqual(cat_panel.flame_blocks(pushing), cat_panel.FLAME_STEPS)
+
+    def test_nothing_is_drawn_without_a_cat_a_lock_and_the_feature_on(self):
+        for change in ({'present': False}, {'locked': False}, {'enabled': False}):
+            with self.subTest(change=change):
+                self.assertIsNone(cat_panel.describe(self.record(
+                    {'running': True, 'duty': 0.5}, **change)))
+        self.assertIsNone(cat_panel.describe({'present': True, 'locked': True,
+                                              'enabled': True, 'bed': {}}))
+
+    def test_no_sensor_is_read_a_second_time(self):
+        """The panel and the controller must never disagree about a temperature."""
+        seen = []
+        original = thermal.readings
+        thermal.readings = lambda *a, **k: seen.append(1) or {'cpu': 1.0}
+        try:
+            panel = cat_panel.describe(self.record(
+                {'running': True, 'duty': 0.5}, cpu=57.0))
+            cat_panel.publish(panel, self.palette, scale=1)
+        finally:
+            thermal.readings = original
+        self.assertEqual(seen, [])
+        self.assertEqual(panel['cpu'], 57.0)
+
+    def test_the_state_file_takes_the_ring_away_while_it_is_up(self):
+        """The ring is the one thing on the lock screen that counts keystrokes."""
+        panel = self.warming()
+        cat_panel.publish(panel, self.palette, scale=1)
+        state = cat_panel.read_state()
+        self.assertEqual(state['ring'], '0')
+        self.assertEqual(state['place'], 'above')
+        self.assertEqual(state['panel'], '1')
+        self.assertEqual(state['image'], cat_panel.IMAGE_NAMES[0])
+        self.assertIn(int(state['stale']), range(1, 60))
+        image = self.root / 'run/oldbook' / state['image']
+        self.assertTrue(image.is_file())
+        self.assertEqual(oct(image.stat().st_mode & 0o777), '0o600')
+
+    def test_the_serial_moves_only_when_the_picture_does(self):
+        first = cat_panel.publish(self.warming(cpu=50.0), self.palette, scale=1)
+        again = cat_panel.publish(self.warming(cpu=50.0), self.palette, scale=1)
+        self.assertEqual(first, again)
+        moved = cat_panel.publish(self.warming(cpu=64.0), self.palette, scale=1)
+        self.assertEqual(moved, first + 1)
+        # And it lands in the other slot, so the locker still has the picture
+        # it is fading away from.
+        self.assertEqual(cat_panel.read_state()['image'], cat_panel.IMAGE_NAMES[1])
+
+    def test_the_stamp_is_refreshed_without_redrawing_anything(self):
+        panel = self.warming(cpu=50.0)
+        cat_panel.publish(panel, self.palette, scale=1, now=1000)
+        image = self.root / 'run/oldbook' / cat_panel.read_state()['image']
+        written = image.stat().st_mtime_ns
+        cat_panel.publish(panel, self.palette, scale=1, now=1200)
+        self.assertEqual(cat_panel.read_state()['stamp'], '1200')
+        self.assertEqual(image.stat().st_mtime_ns, written)
+
+    def test_a_still_panel_is_asked_for_off_mains(self):
+        """The ladder entry this wants is cat-hearth; below mains it stops moving."""
+        self.assertEqual(cat_panel.LADDER_EFFECT, 'cat-hearth')
+        quiet = cat_panel.describe(self.record({'running': False,
+                                                'refusal': 'not on mains'}),
+                                   posture='battery')
+        cat_panel.publish(quiet, self.palette, scale=1)
+        state = cat_panel.read_state()
+        self.assertEqual(state['fade'], '0')
+        self.assertEqual(int(state['poll']), cat_panel.QUIET_POLL_MS)
+        cat_panel.publish(self.warming(), self.palette, scale=1)
+        self.assertEqual(cat_panel.read_state()['fade'], str(cat_panel.MAINS_FADE_MS))
+
+    def test_taking_the_panel_down_is_removing_the_file(self):
+        cat_panel.publish(self.warming(), self.palette, scale=1)
+        self.assertTrue(cat_panel.state_path().is_file())
+        cat_panel.publish(None, self.palette, scale=1)
+        self.assertFalse(cat_panel.state_path().is_file())
+
+    def test_the_switch_is_findable_and_defaults_to_showing(self):
+        self.assertTrue(cat_panel.enabled({'version': 1}))
+        self.assertFalse(cat_panel.enabled({'version': 1, 'panel': False}))
+        os.environ['OLDBOOK_CAT_PANEL'] = '0'
+        self.addCleanup(os.environ.pop, 'OLDBOOK_CAT_PANEL', None)
+        self.assertFalse(cat_panel.enabled({'version': 1}))
+
+    def test_the_picture_carries_no_finer_clock_than_a_second_or_a_degree(self):
+        """A visualisation that tracked tenths would be a timing channel."""
+        base = self.record({'running': True, 'coasting': False, 'duty': 0.5}, cpu=57.1)
+        drift = self.record({'running': True, 'coasting': False, 'duty': 0.5}, cpu=57.4)
+        self.assertEqual(cat_panel.content_key(cat_panel.describe(base)),
+                         cat_panel.content_key(cat_panel.describe(drift)))
+        counting = self.record({'running': False, 'arming': True,
+                                'seconds_left': 6.4, 'arming_seconds': 20.0})
+        later = self.record({'running': False, 'arming': True,
+                             'seconds_left': 6.1, 'arming_seconds': 20.0})
+        self.assertEqual(cat_panel.describe(counting)['countdown'],
+                         cat_panel.describe(later)['countdown'])
+
+    def test_every_state_renders_a_real_image(self):
+        cases = {
+            'countdown': {'running': False, 'arming': True, 'seconds_left': 6.4,
+                          'arming_seconds': 20.0},
+            'warming': {'running': True, 'coasting': False, 'duty': 0.6, 'fans_held': True},
+            'coasting': {'running': True, 'coasting': True, 'duty': 0.0},
+            'holding': {'running': False, 'refusal': 'not on mains'},
+        }
+        for name, bed in cases.items():
+            with self.subTest(state=name):
+                panel = cat_panel.describe(self.record(bed, cpu=57.0))
+                target = self.root / f'{name}.png'
+                cat_panel.render(panel, self.palette, 2, target)
+                self.assertTrue(target.is_file())
+                self.assertGreater(target.stat().st_size, 1000)
 
 
 class ServiceRecordTests(unittest.TestCase):

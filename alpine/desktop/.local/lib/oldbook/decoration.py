@@ -209,7 +209,7 @@ def save_settings(path, values, legacy_position=None):
     return settings
 
 
-def load_settings(path, legacy_position=None):
+def _load_settings(path, legacy_position=None):
     path = Path(path)
     try:
         return validate_settings(json.loads(path.read_text()))
@@ -225,6 +225,28 @@ def load_settings(path, legacy_position=None):
         if position in ('bottom', 'right'):
             return save_settings(path, {'position': position})
     return dict(SETTINGS_DEFAULTS)
+
+
+def load_settings(path, legacy_position=None):
+    """Theme effect choices override shared defaults, without changing geometry."""
+    result = _load_settings(path, legacy_position)
+    theme_path = Path(path).with_name('theme-effects.json')
+    try:
+        theme = json.loads(theme_path.read_text())
+        if not isinstance(theme, dict) or set(theme) - {'ripple'}:
+            raise ValueError('Theme effects must contain a ripple object')
+        values = dict(result['ripple'])
+        # Every theme starts with the standard implementation unless it names one.
+        values.update({'enabled': True, 'module': 'ripple'})
+        values.update(theme.get('ripple', {}))
+        result['ripple'] = ripple.settings(values)
+    except FileNotFoundError:
+        pass
+    except (OSError, ValueError, TypeError) as error:
+        import sys
+        print('decoration: invalid theme effects: ' + str(error), file=sys.stderr)
+        result['ripple'] = {**ripple.DEFAULTS, 'enabled': False}
+    return result
 
 
 def focused_child(node):

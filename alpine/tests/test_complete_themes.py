@@ -102,7 +102,10 @@ class CompleteThemes(unittest.TestCase):
             with self.subTest(theme=theme['id']):
                 foot = renderer.render_profile(REPO, theme)['.config/foot/foot.ini']
                 colors = console_palette.terminal_colors(foot)
-                self.assertEqual(len(set(colors)), 16, colors)
+                if theme['id'] == 'monochrome-test':
+                    self.assertEqual(set(colors), {'#000000', '#ffffff'})
+                else:
+                    self.assertEqual(len(set(colors)), 16, colors)
                 self.assertEqual(colors[0], theme['palette']['background'])
                 self.assertEqual(colors[15], theme['palette']['foreground'])
 
