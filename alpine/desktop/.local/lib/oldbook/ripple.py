@@ -45,6 +45,10 @@ DEFAULTS = {
     # Whether a landing strikes the water at all. Off takes no photograph and
     # maps no surface; the strip simply lands.
     'enabled': True,
+    # Which implementation to load for the effect. Paths under ~/.local/lib
+    # are loaded for theme-specific variants; `ripple` uses the shared default
+    # implementation.
+    'module': 'ripple',
     # Where the rings leave from. 'bar' is the strip's own outline, the way a
     # plank dropped flat sends a straight wave along its length with arcs only
     # at its ends; 'point' drops a stone at the middle of the landed edge.
@@ -111,6 +115,9 @@ def settings(values=None):
     result.update(values)
     if not isinstance(result['enabled'], bool):
         raise ValueError('Decoration ripple enabled must be true or false')
+    if not isinstance(result['module'], str) or not result['module'].strip():
+        raise ValueError('Decoration ripple module must be a non-empty string')
+    result['module'] = result['module'].strip()
     if result['source'] not in SOURCES:
         raise ValueError('Decoration ripple source must be bar or point')
     for key, (low, high) in LIMITS.items():

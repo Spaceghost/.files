@@ -120,7 +120,7 @@ class Travel(unittest.TestCase):
 
 class Settings(unittest.TestCase):
     def test_defaults_fill_in_when_nothing_is_set(self):
-        expected = {key: (value if key in ('source', 'enabled') else float(value))
+        expected = {key: (value if key in ('source', 'module', 'enabled') else float(value))
                     for key, value in ripple.DEFAULTS.items()}
         self.assertEqual(ripple.settings(), expected)
         self.assertEqual(ripple.settings(None), expected)
@@ -141,6 +141,7 @@ class Settings(unittest.TestCase):
         invalid = [
             [], 'bar', {'sharpness': 3}, {'source': 'edge'}, {'source': None},
             {'enabled': 'yes'}, {'enabled': 1}, {'enabled': None},
+            {'module': ''}, {'module': None},
             {'duration': 'long'}, {'duration': True}, {'duration': math.nan},
             {'duration': math.inf}, {'duration': 0.1}, {'duration': 3.1},
             {'reach': 0}, {'reach': 1.5}, {'spacing': 4}, {'spacing': 401},

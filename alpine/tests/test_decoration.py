@@ -246,6 +246,7 @@ class DecorationTests(unittest.TestCase):
             {'corner_radius': -1}, {'corner_radius': 25},
             {'powerline': 'yes'}, {'reserve_band': 1},
             {'ripple': 3}, {'ripple': {'source': 'edge'}}, {'ripple': {'spacing': 'wide'}},
+            {'ripple': {'module': ''}}, {'ripple': {'module': 1}},
         ]
         for values in invalid:
             with self.subTest(values=values), self.assertRaises(ValueError):

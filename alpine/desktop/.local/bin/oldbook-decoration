@@ -2,6 +2,9 @@
 """Interactive floating-window and workspace captions with saved appearance."""
 import argparse
 import configparser
+import hashlib
+import importlib
+import importlib.util
 import fcntl
 import json
 import math
@@ -74,6 +77,60 @@ STRIKE_CONTACT = 1.0
 # would appear mid-band from nothing, so it is dropped instead; Jack: "If the
 # ripple won't be immediate, don't show it at all."
 STRIKE_BUDGET = 0.1
+
+_RIPPLE_MODULE = {'name': 'ripple', 'module': ripple}
+
+
+def _load_ripple_by_path(path):
+    if not path.is_file():
+        raise FileNotFoundError('no module file: ' + str(path))
+    local_root = (Path.home() / '.local').resolve()
+    resolved = path.resolve()
+    try:
+        resolved.relative_to(local_root)
+    except ValueError as error:
+        raise ValueError('ripple module path must stay under ~/.local: ' + str(path)) from error
+    name = '_oldbook_ripple_' + hashlib.sha256(str(resolved).encode()).hexdigest()[:12]
+    loader = importlib.util.spec_from_file_location(name, str(resolved))
+    if loader is None or loader.loader is None:
+        raise RuntimeError('cannot load custom ripple module: ' + str(path))
+    module = importlib.util.module_from_spec(loader)
+    loader.loader.exec_module(module)
+    return module
+
+
+def _load_ripple(module_name):
+    if not isinstance(module_name, str) or not module_name.strip():
+        module_name = 'ripple'
+    module_name = module_name.strip()
+    if module_name == 'ripple':
+        return ripple
+    if '/' in module_name or '\\' in module_name or module_name.endswith('.py'):
+        path = Path(module_name).expanduser()
+        if not path.is_absolute():
+            path = Path.home() / path
+        return _load_ripple_by_path(path)
+    return importlib.import_module(module_name)
+
+
+def ripple_module(settings):
+    global _RIPPLE_MODULE
+    name = 'ripple'
+    try:
+        name = settings['ripple']['module']
+    except (KeyError, TypeError):
+        pass
+    if name == _RIPPLE_MODULE['name']:
+        return _RIPPLE_MODULE['module']
+    try:
+        module = _load_ripple(name)
+    except Exception as error:
+        print('ripple module load failed, using built-in module: ' + type(error).__name__ + ': '
+              + str(error), file=sys.stderr)
+        module = ripple
+        name = 'ripple'
+    _RIPPLE_MODULE = {'name': name, 'module': module}
+    return module
 
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))
 STATE = Path(os.environ.get('XDG_STATE_HOME', str(Path.home() / '.local/state'))) / 'oldbook/decoration'
@@ -1488,21 +1545,22 @@ def daemon():
         name = output_name(caption)
         if rect is None:
             rect = caption.motion_target
+        settings = load_settings(SETTINGS, STATE / 'position')
+        effect = ripple_module(settings)
         if (not output_rect or not name or rect is None or name in ripples
-                or name in approaches or not ripple.allowed(animations=caption.animations)):
+                or name in approaches or not effect.allowed(animations=caption.animations)):
             return
         # Layer-shell margins are measured from the output, so everything here
         # is in the output's own coordinates rather than the compositor's.
         local = {'x': 0, 'y': 0, 'width': output_rect.get('width', 0),
                  'height': output_rect.get('height', 0)}
-        area = ripple.region(local, caption.edge)
         # The wave's shape is read from decoration.json at every strike, so a
         # change there is heard by the next landing rather than the next daemon.
-        settings = load_settings(SETTINGS, STATE / 'position')
+        area = effect.region(local, caption.edge)
         if not settings['ripple']['enabled']:
             return
-        plan = ripple.plan({key: rect[key] for key in ('x', 'y', 'width', 'height')},
-                           area, caption.edge, settings['ripple'], settings['corner_radius'])
+        plan = effect.plan({key: rect[key] for key in ('x', 'y', 'width', 'height')},
+                          area, caption.edge, settings['ripple'], settings['corner_radius'])
         monitor = caption.monitor
         photograph = STATE / ('ripple-' + re.sub(r'[^A-Za-z0-9_-]', '_', name) + '.ppm')
         approach = {'ready': None, 'landed': None}
@@ -1527,7 +1585,7 @@ def daemon():
                 return
             ripples[name] = True
             try:
-                ripple.Ripple(monitor, area, plan, pixels, size,
+                effect.Ripple(monitor, area, plan, pixels, size,
                               on_done=release).start(started=approach['landed'])
             except Exception as error:
                 print('ripple: ' + type(error).__name__ + ': ' + str(error), file=sys.stderr)
@@ -1560,19 +1618,19 @@ def daemon():
                 # the whole panel took roughly 150ms of a 165ms gap between
                 # landing and the first visible frame; capturing just this
                 # region measured at 67ms.
-                geometry = ripple.geometry_string(
+                geometry = effect.geometry_string(
                     output_rect.get('x', 0) + area['x'], output_rect.get('y', 0) + area['y'],
                     area['width'], area['height'])
-                ripple.capture(photograph, geometry=geometry)
+                effect.capture(photograph, geometry=geometry)
                 data = photograph.read_bytes()
-                width, height, offset = ripple.parse_ppm(data)
+                width, height, offset = effect.parse_ppm(data)
                 # grim already cropped to exactly this rectangle at the
                 # output's own scale, so what it captured *is* the region:
                 # crop() only still needs to reconcile grim's physical pixels
                 # against area's logical size, from a zero origin.
                 scale = monitor.get_scale_factor() if monitor is not None else 1
                 local_area = {'x': 0, 'y': 0, 'width': area['width'], 'height': area['height']}
-                pixels, span, thickness = ripple.crop(data, offset, width, height, local_area, scale)
+                pixels, span, thickness = effect.crop(data, offset, width, height, local_area, scale)
             except Exception as error:
                 print('ripple capture: ' + type(error).__name__, file=sys.stderr)
                 GLib.idle_add(failed)
@@ -1716,7 +1774,8 @@ def daemon():
 
     def warm_ripple():
         try:
-            ripple_primer['keeper'] = ripple.warm()
+            effect = ripple_module(load_settings(SETTINGS, STATE / 'position'))
+            ripple_primer['keeper'] = effect.warm()
         except Exception as error:
             print('decoration ripple warmup:', error, file=sys.stderr)
         return False
