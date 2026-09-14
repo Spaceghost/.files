@@ -3088,3 +3088,35 @@ No live desktop input grab, root service activation, fan change, or reboot was
 performed. Desktop dependency consolidation and actual hardware lifecycle
 handoff remain unfinished. Artifacts are under
 `/tmp/catbed-package-validation-dist`, not committed release binaries.
+
+## 2026-09-14 - Notification center Caffeinate and scrolling
+
+Added `oldbook-caffeinate` and a SwayNC toggle with on-open state refresh.
+The helper requests an idle:sleep block inhibitor, confirms acquisition before
+reporting on, and keeps it in a separate process after the panel closes.
+Switching off, losing the Wayland socket, or exiting releases the holder pipe.
+Caffeinate suppresses automatic idle locking and sleep; manual lock remains
+available. No fan policy or Catbed guard state is changed.
+
+The center now fits the screen, notifications expand within that bounded area,
+and every shipped theme has wider visible vertical scrollbars with draggable
+thumbs. This provides scrollbar dragging, not mouse-grabbing notification-card
+contents. Existing wheel/touchpad scrolling uses SwayNC's native scrollers.
+The active configuration and helper link were deployed and SwayNC accepted the
+config/CSS reload. Caffeinate was not activated, and no new tests or visual
+interaction validation were run for this notification-center change.
+
+## 2026-09-14 - Bundled Catbed desktop smoke
+
+Corrected build-helper loading to use an absolute path under the project.
+Both distribution formats now contain the desktop guard, its statically
+identified local Python imports, and theme JSON. The Linux entry point launches
+that bundled guard, not an installed oldbook-watch from PATH.
+
+A rebuilt wheel ran in a private headless Sway session outside the checkout,
+with disposable HOME and PATH excluding the oldbook launchers. It started
+successfully despite inherited GDK_BACKEND=x11, proved keyboard ownership,
+reported status, and stopped with its state record removed. No live keyboard,
+privileged inhibitor, service, or fan control was touched by that smoke check.
+System installation, hardware lifecycle handoff, and the native shootout remain
+unfinished.

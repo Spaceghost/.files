@@ -1,0 +1,152 @@
+#!/usr/bin/env python3
+"""Keep the session awake until switched off; never disable manual locking."""
+
+import argparse
+import fcntl
+import os
+from pathlib import Path
+import shutil
+import signal
+import socket
+import stat
+import subprocess
+import sys
+import time
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
+from catbed_guard import pipe_holder
+
+
+def directory():
+    runtime = os.environ.get('XDG_RUNTIME_DIR')
+    if not runtime:
+        raise RuntimeError('XDG_RUNTIME_DIR is required')
+    path = Path(runtime) / 'oldbook'
+    path.mkdir(mode=0o700, parents=True, exist_ok=True)
+    info = path.lstat()
+    if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077:
+        raise RuntimeError('caffeinate requires an owned, private runtime directory')
+    return path
+
+
+def request(path, command='status'):
+    try:
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client:
+            client.settimeout(0.5)
+            client.connect(str(path / 'caffeinate.sock'))
+            client.sendall(command.encode('ascii'))
+            return client.recv(16) == b'on'
+    except OSError:
+        return False
+
+
+def hold(path):
+    fd = os.open(path / 'caffeinate.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(fd, 'w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return 0
+        inhibitor = next(filter(None, map(shutil.which, ('elogind-inhibit', 'systemd-inhibit'))), None)
+        if inhibitor is None:
+            raise RuntimeError('elogind-inhibit or systemd-inhibit is required')
+        display = os.environ.get('WAYLAND_DISPLAY')
+        if not display:
+            raise RuntimeError('start Caffeinate inside the Wayland session')
+        display_path = Path(os.environ['XDG_RUNTIME_DIR']) / display
+        if not display_path.is_socket():
+            raise RuntimeError('the Wayland display socket is unavailable')
+        # The confirmation is printed only after logind grants the inhibitor.
+        # Closing this pipe releases the hold, including after a process crash.
+        held = pipe_holder([
+            inhibitor, '--what=idle:sleep', '--mode=block', '--who=Oldbook Caffeinate',
+            '--why=Caffeinate enabled in the notification center', '--',
+            'sh', '-c', 'printf "holding\\n"; cat >/dev/null',
+        ], confirm='holding')
+        address = path / 'caffeinate.sock'
+        running = True
+
+        def stop(*_args):
+            nonlocal running
+            running = False
+
+        for signum in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
+            signal.signal(signum, stop)
+        try:
+            address.unlink(missing_ok=True)
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as server:
+                server.bind(str(address))
+                os.chmod(address, 0o600)
+                server.listen(4)
+                server.settimeout(1)
+                while running and display_path.is_socket():
+                    # If the inhibitor subprocess dies, do not report stale on.
+                    os.write(held, b'.')
+                    try:
+                        client, _ = server.accept()
+                    except socket.timeout:
+                        continue
+                    with client:
+                        client.settimeout(0.5)
+                        try:
+                            command = client.recv(16)
+                            if command == b'off':
+                                running = False
+                            client.sendall(b'on' if running else b'off')
+                        except OSError:
+                            pass
+        finally:
+            os.close(held)
+            address.unlink(missing_ok=True)
+    return 0
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('command', choices=('on', 'off', 'toggle', 'set', 'status', '_hold'))
+    command = parser.parse_args().command
+    path = directory()
+    if command == '_hold':
+        return hold(path)
+    active = request(path)
+    if command == 'status':
+        print('true' if active else 'false')
+        return 0
+    if command == 'set':
+        value = os.environ.get('SWAYNC_TOGGLE_STATE')
+        if value not in ('true', 'false'):
+            raise RuntimeError('SWAYNC_TOGGLE_STATE must be true or false')
+        command = 'on' if value == 'true' else 'off'
+    if command == 'toggle':
+        command = 'off' if active else 'on'
+    if command == 'off':
+        request(path, 'off')
+        return 0
+    if active:
+        return 0
+    log_fd = os.open(path / 'caffeinate.log',
+                     os.O_CREAT | os.O_WRONLY | os.O_APPEND | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(log_fd, 'a') as log:
+        child = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '_hold'],
+                                 stdin=subprocess.DEVNULL, stdout=log, stderr=log,
+                                 start_new_session=True)
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        if request(path):
+            return 0
+        if child.poll() is not None:
+            break
+        time.sleep(0.05)
+    if child.poll() is None:
+        child.terminate()
+    raise RuntimeError(f'Caffeinate did not start; see {path / "caffeinate.log"}')
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        print(f'oldbook-caffeinate: {error}', file=sys.stderr)
+        subprocess.run(['notify-send', '-a', 'Caffeinate', '-u', 'normal',
+                        'Caffeinate could not change state', str(error)], check=False)
+        raise SystemExit(1)

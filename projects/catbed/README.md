@@ -8,13 +8,16 @@ hardware thermal protection must remain enabled.
 
 ## Development status
 
-This first package boundary delegates to the existing installed Linux guards.
-It is **not yet a self-contained desktop distribution**. Builds now include
+The distribution now bundles the existing Sway Wayland guard, its local Python
+dependencies, and theme JSON without requiring an installed `oldbook-watch` or
+dotfiles checkout. Native GTK/Wayland dependencies remain system requirements.
+Builds also include
 the existing Linux boot guard, OpenRC service, SysRq helper, thermally guarded
 fan helper, and ACPI power handler. Their canonical sources remain in the
-checkout rather than being maintained twice. The desktop implementation and
-system installation workflow have not yet been consolidated. Finishing that
-work is required, not an optional extension of this deliverable.
+checkout rather than being maintained twice. The privileged system installation
+workflow has not yet been consolidated, so capability reporting still marks the
+overall package as not self-contained. Completing installation and lifecycle
+integration remains required, not an optional extension of this deliverable.
 
 Only the current Sway Wayland backend is in implementation scope. There is no
 X11 fallback, generic Wayland-compositor integration, Windows backend, or macOS
@@ -85,8 +88,8 @@ hardware boot or shutdown handoff.
 
 ## Consolidation still required
 
-- Move the desktop runtime and its palette/layer-shell support into this
-  package without depending on the rest of the desktop dotfiles.
+- Verify the bundled desktop runtime in an isolated Sway session, including
+  its palette and layer-shell dependencies without access to the checkout.
 - Complete explicit system installation and recovery for the bundled helpers,
   without privileged side effects during Python installation.
 - Keep existing `oldbook-*` entry points as compatibility adapters.

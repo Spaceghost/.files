@@ -6,15 +6,16 @@ its actual state. Finding an executable is never evidence that input is held.
 
 import os
 from pathlib import Path
-import shutil
 import stat
+import sys
 
 
 SYSTEM_HELPER = Path("/usr/local/sbin/oldbook-catmode")
 
 
 def desktop_helper():
-    return shutil.which("oldbook-watch")
+    helper = Path(__file__).resolve().parent / "runtime/alpine/desktop/.local/bin/oldbook-watch"
+    return str(helper) if helper.is_file() else None
 
 
 def capabilities():
@@ -22,7 +23,8 @@ def capabilities():
         "platform": "linux",
         "desktop_backend": "sway-wayland",
         "supported": True,
-        "implementation": "existing-guard-adapter",
+        "implementation": "bundled-sway-wayland-guard",
+        "desktop_runtime_bundled": desktop_helper() is not None,
         "self_contained": False,
         "desktop": {
             "helper": desktop_helper(),
@@ -53,10 +55,10 @@ def execute(arguments):
         helper = desktop_helper()
         if helper is None:
             raise RuntimeError(
-                "the existing oldbook-watch runtime is not installed; "
-                "this development package has not yet bundled the desktop guard"
+                "the bundled desktop runtime is missing; "
+                "use a built Catbed distribution rather than an editable source install"
             )
-        command = [helper, arguments.command]
+        command = [sys.executable, helper, arguments.command]
     else:
         info = SYSTEM_HELPER.lstat()
         if not stat.S_ISREG(info.st_mode) or info.st_uid != 0 or info.st_mode & 0o022:

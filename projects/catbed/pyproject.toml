@@ -21,4 +21,4 @@ catbed = "catbed.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-catbed = ["resources/linux/*"]
+catbed = ["resources/linux/*", "runtime/**/*"]

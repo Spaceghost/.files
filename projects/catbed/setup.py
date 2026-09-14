@@ -7,14 +7,15 @@ No installation or service activation happens during a build.
 
 from pathlib import Path
 import json
+import runpy
 import shutil
 
 from setuptools import setup
 from setuptools.command.build_py import build_py
 from setuptools.command.sdist import sdist
 
-
 PROJECT = Path(__file__).resolve().parent
+bundle_desktop = runpy.run_path(str(PROJECT / "desktop_bundle.py"))["bundle_desktop"]
 REPOSITORY = PROJECT.parents[1]
 RESOURCE_PATH = Path("catbed/resources/linux")
 SOURCES = {
@@ -46,12 +47,14 @@ class BuildPackage(build_py):
     def run(self):
         super().run()
         bundle_system(Path(self.build_lib) / RESOURCE_PATH)
+        bundle_desktop(PROJECT, Path(self.build_lib) / "catbed/runtime")
 
 
 class SourcePackage(sdist):
     def make_release_tree(self, base_dir, files):
         super().make_release_tree(base_dir, files)
         bundle_system(Path(base_dir) / "src" / RESOURCE_PATH)
+        bundle_desktop(PROJECT, Path(base_dir) / "src/catbed/runtime")
 
 
 setup(cmdclass={"build_py": BuildPackage, "sdist": SourcePackage})

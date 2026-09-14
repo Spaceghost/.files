@@ -14,7 +14,7 @@
   "notification-icon-size": 48,
   "timeout": 8,
   "timeout-low": 4,
-  "fit-to-screen": false,
+  "fit-to-screen": true,
   "keyboard-shortcuts": false,
   "transition-time": 0,
   "image-visibility": "when-available",
@@ -79,6 +79,12 @@
       "buttons-per-row": 3,
       "actions": [
         {
+          "label": "Caffeinate",
+          "type": "toggle",
+          "command": "~/.local/bin/oldbook-caffeinate set",
+          "update-command": "~/.local/bin/oldbook-caffeinate status"
+        },
+        {
           "label": "\udb80\udf3e  Lock",
           "command": "~/.local/bin/oldbook-lock"
         },
@@ -115,7 +121,7 @@
       ]
     },
     "notifications": {
-      "vexpand": false
+      "vexpand": true
     }
   },
   "layer-shell": true
