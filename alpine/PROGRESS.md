@@ -3063,3 +3063,28 @@ Validation outstanding: package build, rebuilding an extracted source archive,
 resource export, installed-package isolation, and lifecycle regression checks.
 No tests, input grabs, fan changes, service activation, or reboot were performed
 for this package step. Existing installed guards and launchers were not changed.
+
+## 2026-09-14 - Authorized Catbed package and isolated guard validation
+
+`python3 -m build --no-isolation --outdir /tmp/catbed-package-validation-dist
+projects/catbed` successfully built the source archive and a wheel from that
+archive. The unpacked wheel ran outside the checkout with a disposable HOME
+and a PATH excluding the existing desktop launchers. Version/capability output,
+five-resource export, source/wheel/export payload equality, private directory
+and executable file permissions, existing-directory refusal, absent-Wayland
+refusal, and invalid system-option refusal all passed.
+
+The host has no pip module. A pip target installation could not run;
+installer-generated command wrappers remain unverified. No dependency was
+installed into the host to work around that limitation.
+
+Desktop/lock regression command: `PYTHONPATH=alpine/tests python3 -m unittest
+test_watch_backend test_watch_mode test_theme_catmode_recovery test_lock -q`:
+52 tests passed. Boot/inhibitor command: `PYTHONPATH=alpine/tests python3 -m
+unittest test_catmode_boot test_catbed_guard -q`: 32 tests, one skipped.
+Existing unclosed-file and subprocess ResourceWarnings remain visible.
+
+No live desktop input grab, root service activation, fan change, or reboot was
+performed. Desktop dependency consolidation and actual hardware lifecycle
+handoff remain unfinished. Artifacts are under
+`/tmp/catbed-package-validation-dist`, not committed release binaries.
