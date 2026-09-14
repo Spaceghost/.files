@@ -22,11 +22,13 @@ import time
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'lib/oldbook'))
 from overlay_theme import THEMES, read_palette
 import catbed_guard
+import watch_mode
 
 STOCK_SUPERVISOR = 'swaylockd'
 EFFECTS_LOCKER = 'swaylock-effects'
 FIRST_RUN_OPTIONS = {'-R': 1, '--ready-fd': 1, '--fade-in': 1, '--screenshots': 0, '-S': 0}
 MAX_RESTARTS = 5
+CATBED_WARMUP_SECONDS = 1.5
 # elogind here, systemd on the Bazzite replay: one is a fork of the other and
 # takes the same options, so the first of these the host provides is the one.
 
@@ -156,6 +158,40 @@ def hold_parked_input():
     return held
 
 
+def _watch_command(*arguments):
+    return [str(Path(__file__).resolve().parent / 'oldbook-watch'), *arguments]
+
+
+def begin_catbed_mode(runtime):
+    """Start catbed mode for the lock and report whether we own this session."""
+    if watch_mode.engaged(runtime) is not None:
+        return False
+    try:
+        subprocess.Popen(_watch_command('start'), stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    except OSError as error:
+        print(f'oldbook-lock: catbed mode did not start ({error})', file=sys.stderr)
+        return False
+    deadline = time.monotonic() + CATBED_WARMUP_SECONDS
+    while time.monotonic() < deadline:
+        if watch_mode.engaged(runtime) is not None:
+            return True
+        time.sleep(0.05)
+    print('oldbook-lock: catbed mode did not report readiness before lock', file=sys.stderr)
+    return False
+
+
+def end_catbed_mode():
+    """Stop only the catbed session started by this lock attempt."""
+    try:
+        subprocess.Popen(_watch_command('stop'), stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+    except OSError:
+        pass
+
+
 def launch_until_ready(label, build, directory, record, compositor, runtime, timeout):
     # Take the holds before the readiness clock starts: acquiring them can cost
     # a doas round-trip, and that latency belongs to the guard, not to the time
@@ -225,33 +261,39 @@ def acquire_lock(runtime, command=None, timeout=10):
     private_directory(runtime)
     directory = runtime / 'oldbook-screen-lock'
     private_directory(directory)
-    compositor = compositor_identity(runtime)
-    deadline = time.monotonic() + timeout
-    descriptor = os.open(directory / 'acquisition.lock',
-                         os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
-    with os.fdopen(descriptor, 'r+') as guard:
-        while True:
-            try:
-                fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                break
-            except BlockingIOError:
-                if time.monotonic() >= deadline:
-                    raise RuntimeError('Another lock request did not finish readiness in time')
-                time.sleep(0.05)
-        record = directory / 'ready.json'
-        if ready_process(record, compositor):
-            return
-        record.unlink(missing_ok=True)
-        failures = []
-        for label, build in launchers(runtime, command):
-            try:
-                launch_until_ready(label, build, directory, record, compositor, runtime, timeout)
-                cue('lock-engage')
+    catbed_active = begin_catbed_mode(runtime)
+    try:
+        compositor = compositor_identity(runtime)
+        deadline = time.monotonic() + timeout
+        descriptor = os.open(directory / 'acquisition.lock',
+                             os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW | os.O_CLOEXEC, 0o600)
+        with os.fdopen(descriptor, 'r+') as guard:
+            while True:
+                try:
+                    fcntl.flock(guard, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    if time.monotonic() >= deadline:
+                        raise RuntimeError('Another lock request did not finish readiness in time')
+                    time.sleep(0.05)
+            record = directory / 'ready.json'
+            if ready_process(record, compositor):
                 return
-            except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
-                failures.append(f'{label}: {error}')
-                print(f'oldbook-lock: {label} failed ({error}); trying the next locker', file=sys.stderr)
-        raise RuntimeError('; '.join(failures))
+            record.unlink(missing_ok=True)
+            failures = []
+            for label, build in launchers(runtime, command):
+                try:
+                    launch_until_ready(label, build, directory, record, compositor, runtime, timeout)
+                    cue('lock-engage')
+                    return
+                except (RuntimeError, OSError, ValueError, subprocess.SubprocessError) as error:
+                    failures.append(f'{label}: {error}')
+                    print(f'oldbook-lock: {label} failed ({error}); trying the next locker',
+                          file=sys.stderr)
+            raise RuntimeError('; '.join(failures))
+    finally:
+        if catbed_active:
+            end_catbed_mode()
 
 
 def strip_first_run_options(argv):
