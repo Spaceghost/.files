@@ -1,5 +1,41 @@
 # Oldbook verification
 
+## Catbed administers bak through Incus — 2026-09-13
+
+Jack requested the Incus client on catbed with broad permissions on bak.
+
+- Installed Alpine `incus-client=7.0.1-r1` as the CLI for `jack`; bak is the
+  default remote at `https://bak.bishop-bearded.ts.net:8443`, initially using
+  project `default`. Both client and server report Incus 7.0.1.
+- Generated catbed's own TLS identity, named `catbed-jack` in bak's trust store,
+  with `restricted: false` and no project allowlist. The private key remains
+  on catbed at mode 0600. Bak's certificate was pinned from its public
+  `server.crt` over the established SSH connection before registering the
+  remote. Existing certificates and their restrictions are preserved.
+- Verified trusted TLS access, all 17 projects and 52 instances, and an
+  administrative write by creating then deleting one temporary empty project.
+  No running instances or listener/firewall settings were changed.
+- The package operation added 39 packages and preserved all 1,143 existing
+  package identities. Alpine's client dependencies include LXC and dnsmasq;
+  their services remain disabled, and no local Incus daemon was installed.
+- Archived a scoped 100-APK supplement, including Incus's 58-package runtime
+  closure and all 39 additions with their dependencies. Exported every artifact
+  from Fossil into an empty cache; SHA-256, signatures and identities verified,
+  and an isolated offline dependency solve passed. The 30 mapped package
+  recovery tests passed. See `packages/incus-client/README.md` and supplement
+  lock `packages/locks/c0155382d40b84878872.json`.
+- Existing workstation recovery gap: before installation, the old full lock
+  already differed by 22 additions and 4 package identities; 942 current APK
+  filenames were absent from Fossil UV when surveyed during the attempted full
+  snapshot. That snapshot was stopped after preserving partial UV additions.
+  `packages/current-lock` is unchanged; refreshing and verifying the entire
+  workstation archive remains unfinished. The Incus supplement is independently
+  complete and is not a replacement for the full workstation lock.
+- Evidence: `verification/incus-bak/connection-verification.json`. Setup,
+  commands and exact certificate revocation are documented in
+  `docs/superpowers/decisions/2026-09-13-catbed-incus-client.md` at the repo root.
+
+
 # The bar no longer freezes on reload — 2026-09-13
 
 Jack: "The swaybar is broken!"

@@ -1,0 +1,33 @@
+{
+  "verified_at": "2026-09-13T17:06:54-07:00",
+  "client_package": {
+    "name": "incus-client",
+    "version": "7.0.1-r1",
+    "architecture": "x86_64",
+    "apk_identity": "Q1Dm6WwXnVMi9u1pXvXaYzArW/FFA="
+  },
+  "server": "bak",
+  "server_version": "7.0.1",
+  "remote": "bak",
+  "default_remote": "bak",
+  "default_project": "default",
+  "address": "https://bak.bishop-bearded.ts.net:8443",
+  "auth": "trusted",
+  "auth_user_method": "tls",
+  "trust": {
+    "name": "catbed-jack",
+    "fingerprint": "9c56d1c7517953a6846ab9f36fcb45b8fa6a816a70065c560c1f569012cd137c",
+    "restricted": false,
+    "projects": []
+  },
+  "server_fingerprint": "99836a113633c97272be9031d9ee405f78cc959a072df2edfa7d2641eba7ed8e",
+  "visible_projects": 17,
+  "visible_instances": 52,
+  "administrative_write": {
+    "project": "catbed-access-check-d23a9177cf13",
+    "created": true,
+    "deleted": true
+  },
+  "private_key_mode": "0o600",
+  "server_certificate_bootstrap": "Copied from /var/lib/incus/server.crt over established Tailscale SSH before adding the remote"
+}

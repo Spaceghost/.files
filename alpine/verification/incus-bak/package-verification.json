@@ -1,0 +1,370 @@
+{
+  "schema": 1,
+  "verified_at": "2026-09-14T00:17:42.788426+00:00",
+  "host": "catbed",
+  "client": {
+    "apk_identity": "Q1Dm6WwXnVMi9u1pXvXaYzArW/FFA=",
+    "arch": "x86_64",
+    "artifact": "sha256/9cefee43d7ca25366f0dae5f86a8a2e231188d9710076c43be559b78eb82e578/incus-client-7.0.1-r1.apk",
+    "artifact_arch": "x86_64",
+    "filename": "incus-client-7.0.1-r1.apk",
+    "name": "incus-client",
+    "sha256": "9cefee43d7ca25366f0dae5f86a8a2e231188d9710076c43be559b78eb82e578",
+    "version": "7.0.1-r1"
+  },
+  "package_installation": {
+    "added_count": 39,
+    "preserved_preexisting_count": 1143,
+    "after_count": 1182,
+    "changed_packages": [],
+    "removed_packages": [],
+    "added_packages": [
+      {
+        "name": "acl",
+        "version": "2.3.2-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1A5R4Aczu+PxZO1Ovnw5hH1/QXls="
+      },
+      {
+        "name": "agetty",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1XCDd5QEygTc0ybjEWYVuvgZ6Ibg="
+      },
+      {
+        "name": "cfdisk",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1whQz9pkADW22w0rCSZ3yndWaZCo="
+      },
+      {
+        "name": "dmesg",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1enTGGszd9T1t1oG4O2spi38b9hI="
+      },
+      {
+        "name": "dnsmasq",
+        "version": "2.93-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1wDXJesuMQJbD5CLHKAyvCYpYLJk="
+      },
+      {
+        "name": "dnsmasq-common",
+        "version": "2.93-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1bQW2FRtrrM/LXPyD8POK8ZK+PGU="
+      },
+      {
+        "name": "dnsmasq-openrc",
+        "version": "2.93-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1aqf1IW/diJCJxB0PL7q/WjxGL2Y="
+      },
+      {
+        "name": "findmnt",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1Ty1X83YQmlu7wRHBZqR/9DkyJws="
+      },
+      {
+        "name": "flock",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1CHDKJjfZAaS0k/N1ROojdPm2M+g="
+      },
+      {
+        "name": "fstrim",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1wdF2628m5IufP7BoXfS9XTSXTcw="
+      },
+      {
+        "name": "hexdump",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1j6vQhxgnI8jARi1ws5+Xk4VTfiQ="
+      },
+      {
+        "name": "incus-client",
+        "version": "7.0.1-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1Dm6WwXnVMi9u1pXvXaYzArW/FFA="
+      },
+      {
+        "name": "libxxhash",
+        "version": "0.8.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1ecPLeKFToiv4HzRLzXJScO97kWc="
+      },
+      {
+        "name": "logger",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1phZJ0FXOzIwPNHdbnuarnaFaFbg="
+      },
+      {
+        "name": "losetup",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1l19ma48UNiRofgV2EZkQ1zJJ8Q8="
+      },
+      {
+        "name": "lsblk",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1KqioOLoSRE0wGujBaTpq5uyKnHU="
+      },
+      {
+        "name": "lscpu",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1CikOzbn642X0w4d3Pia2SoqD/5g="
+      },
+      {
+        "name": "lxc",
+        "version": "7.0.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1xeTVKQr9e/wp4gcrtZsg+acz/r8="
+      },
+      {
+        "name": "lxc-libs",
+        "version": "7.0.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q11l0rR9TQYxR5ui84zxP5pyawdv0="
+      },
+      {
+        "name": "lxc-lvm",
+        "version": "7.0.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1BScOaY6prMlRyTpjrUyh09Ubz8Q="
+      },
+      {
+        "name": "lxc-openrc",
+        "version": "7.0.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1ZlD/jfjfY/R4GJyxHb25nj+S9cc="
+      },
+      {
+        "name": "lzo",
+        "version": "2.10-r5",
+        "arch": "x86_64",
+        "apk_identity": "Q1ddr4Fd+jVMoUd5U5OZ6kJycH5nU="
+      },
+      {
+        "name": "mcookie",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q19DaACnOxulIvyDUuRSfq4j2h9b8="
+      },
+      {
+        "name": "mount",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1nmXCCuFH+N1tOiFRMsA7JTSKfYM="
+      },
+      {
+        "name": "netcat-openbsd",
+        "version": "1.234.1-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1pAGU6M4jxwaSDzvySeK0kUNzVxU="
+      },
+      {
+        "name": "partx",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1a0rnZ/epo1T7oKzf730FWyfZx64="
+      },
+      {
+        "name": "rsync",
+        "version": "3.5.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1yHF9b6Wjpu7nat10fAMcn8CB02c="
+      },
+      {
+        "name": "rsync-openrc",
+        "version": "3.5.0-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q1EbVfX4LimXRMekgtX+XMmqT1Cyo="
+      },
+      {
+        "name": "rsync-zsh-completion",
+        "version": "5.9-r7",
+        "arch": "x86_64",
+        "apk_identity": "Q1N6ePLWGBlkrafJD1ZtgG0cNpo5k="
+      },
+      {
+        "name": "setpriv",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q126UxFgIyZ1Gq+PVxG+GFlMVy9SY="
+      },
+      {
+        "name": "sfdisk",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q12OIhimCtZA3DuAmIxHcZGpmq+98="
+      },
+      {
+        "name": "shadow-libs",
+        "version": "4.18.0-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1j1yS5eBaI7Vb7fGstSGgxRGjtlw="
+      },
+      {
+        "name": "shadow-subids",
+        "version": "4.18.0-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1ZMakAHDErEd0gyT7Rjgksf5yxwU="
+      },
+      {
+        "name": "squashfs-tools",
+        "version": "4.7.5-r0",
+        "arch": "x86_64",
+        "apk_identity": "Q14CJvRvzjLu77ioeaERtCi7ReScc="
+      },
+      {
+        "name": "umount",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1Ttbu+UIkX8+pvnZjWxLTUp2fuzg="
+      },
+      {
+        "name": "util-linux",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1WIQ5B+15n2gUC/vqV5pdKK4ovp0="
+      },
+      {
+        "name": "util-linux-openrc",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1rX70/pF1ot7IgXlT6iElyuAt95Y="
+      },
+      {
+        "name": "uuidgen",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q18bMWA55WSh8/Mjlryy8RieseLk4="
+      },
+      {
+        "name": "wipefs",
+        "version": "2.42.3-r1",
+        "arch": "x86_64",
+        "apk_identity": "Q1d/xzRDRNf4es9n8GFdDlaCtGHp8="
+      }
+    ]
+  },
+  "services": {
+    "before_after_match_after_removing_elapsed_uptime_only": true,
+    "new_disabled_services": [
+      "dnsmasq",
+      "lxc",
+      "rsyncd"
+    ],
+    "incus_daemon_installed": false,
+    "services_started_by_setup": []
+  },
+  "archive": {
+    "supplement_lock": "alpine/packages/locks/c0155382d40b84878872.json",
+    "package_count": 100,
+    "incus_runtime_package_count": 58,
+    "signed_apk_bytes": 22105388,
+    "all_artifacts_stored_in_local_fossil_uv": true,
+    "verified_from_initially_empty_export_cache": true,
+    "export_cache": "~/.local/state/incus-bak-setup/uv-verified-apks",
+    "checks": [
+      "Full-file SHA256 of all 100 APKs exported from Fossil UV",
+      "APK signatures verified using public keys recorded in the supplement",
+      "Names, versions, native or noarch artifact architectures and APK control identities matched installed state",
+      "Offline native APK dependency solve succeeded in an isolated empty package database, selecting exactly 100 packages"
+    ],
+    "offline_solve_command": "apk --root <isolated empty database> --arch x86_64 --keys-dir <lock public keys> --repositories-file /dev/null --no-network add --simulate <100 exported APKs>",
+    "payload_restore_executed": false
+  },
+  "feature_checks": {
+    "command": "alpine/bin/check-features alpine/packages/current-lock --run",
+    "tests_passed": 30,
+    "suites": {
+      "test_fossil_bootstrap.py": 5,
+      "test_package_archive.py": 21,
+      "test_source_archive.py": 4
+    },
+    "same_suites_mapped_for_supplement_paths": true
+  },
+  "full_workstation_snapshot": {
+    "completed": false,
+    "previous_current_lock_preserved": "alpine/packages/locks/01ffe0826b41138f957d.json",
+    "previous_lock_package_count": 1121,
+    "preexisting_packages_added_since_previous_lock": 22,
+    "preexisting_identity_changes_since_previous_lock": [
+      {
+        "before": {
+          "name": "oldbook-waybar-art",
+          "version": "1.0.0-r9",
+          "arch": "x86_64",
+          "apk_identity": "Q1jUHKE8y3Lf4FWmn5SpSovYmMQ0w="
+        },
+        "installed_before_incus_setup": {
+          "name": "oldbook-waybar-art",
+          "version": "1.0.0-r13",
+          "arch": "x86_64",
+          "apk_identity": "Q1Md+K184bwQhI+Ws8WPQVxeU6r7s="
+        }
+      },
+      {
+        "before": {
+          "name": "swayfx",
+          "version": "0.6-r3",
+          "arch": "x86_64",
+          "apk_identity": "Q1zN/toDujKMCvJy5sc79TKjYjMI0="
+        },
+        "installed_before_incus_setup": {
+          "name": "swayfx",
+          "version": "0.6-r4",
+          "arch": "x86_64",
+          "apk_identity": "Q1RTVjODlxTskj8cwAjyGyJBukPpU="
+        }
+      },
+      {
+        "before": {
+          "name": "waybar",
+          "version": "0.15.0-r3",
+          "arch": "x86_64",
+          "apk_identity": "Q1DPyRa1+bYsgv8JCwBZ/r6kIcKkE="
+        },
+        "installed_before_incus_setup": {
+          "name": "waybar",
+          "version": "0.15.0-r5",
+          "arch": "x86_64",
+          "apk_identity": "Q1YXOCaouMj3yKLpCyQXs2kGq9sg8="
+        }
+      },
+      {
+        "before": {
+          "name": "waybar-openrc",
+          "version": "0.15.0-r3",
+          "arch": "x86_64",
+          "apk_identity": "Q1nV8MyZK78/dM3R9Bjzc6U1oHBkw="
+        },
+        "installed_before_incus_setup": {
+          "name": "waybar-openrc",
+          "version": "0.15.0-r4",
+          "arch": "noarch",
+          "apk_identity": "Q1xs7SCXnL9hEpwxS3hZyqh9KPpAM="
+        }
+      }
+    ],
+    "unarchived_current_package_filenames_observed_during_retry": 942,
+    "observation_timing": "After partial full-snapshot archival and before the supplement; this is not the original missing-artifact count",
+    "first_attempt_failure": "Fossil reported database is locked while adding the flatpak APK",
+    "retry_result": "Stopped with SIGINT after 250 of 1182 packages to avoid expanding client setup into repairing unrelated archive history",
+    "partial_uv_additions_retained": true
+  },
+  "limits": [
+    "Full workstation archive recovery remains incomplete independently of this client supplement",
+    "Isolated payload unpacking, maintainer scripts and fresh hardware boot were not tested",
+    "The supplement world is intentionally scoped to incus-client and must not replace the host world through package-archive install-host"
+  ],
+  "local_logs": "~/.local/state/incus-bak-setup"
+}

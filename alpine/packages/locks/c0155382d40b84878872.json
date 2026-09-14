@@ -1,0 +1,1037 @@
+{
+  "alpine_release": "3.25.0_alpha20260805",
+  "arch": "x86_64",
+  "keys": [
+    {
+      "content": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1yHJxQgsHQREclQu4Ohe\nqxTxd1tHcNnvnQTu/UrTky8wWvgXT+jpveroeWWnzmsYlDI93eLI2ORakxb3gA2O\nQ0Ry4ws8vhaxLQGC74uQR5+/yYrLuTKydFzuPaS1dK19qJPXB8GMdmFOijnXX4SA\njixuHLe1WW7kZVtjL7nufvpXkWBGjsfrvskdNA/5MfxAeBbqPgaq0QMEfxMAn6/R\nL5kNepi/Vr4S39Xvf2DzWkTLEK8pcnjNkt9/aafhWqFVW7m3HCAII6h/qlQNQKSo\nGuH34Q8GsFG30izUENV9avY7hSLq7nggsvknlNBZtFUcmGoQrtx3FmyYsIC8/R+B\nywIDAQAB\n-----END PUBLIC KEY-----\n",
+      "name": "alpine-devel@lists.alpinelinux.org-4a6a0840.rsa.pub",
+      "sha256": "9c102bcc376af1498d549b77bdbfa815ae86faa1d2d82f040e616b18ef2df2d4"
+    },
+    {
+      "content": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwlzMkl7b5PBdfMzGdCT0\ncGloRr5xGgVmsdq5EtJvFkFAiN8Ac9MCFy/vAFmS8/7ZaGOXoCDWbYVLTLOO2qtX\nyHRl+7fJVh2N6qrDDFPmdgCi8NaE+3rITWXGrrQ1spJ0B6HIzTDNEjRKnD4xyg4j\ng01FMcJTU6E+V2JBY45CKN9dWr1JDM/nei/Pf0byBJlMp/mSSfjodykmz4Oe13xB\nCa1WTwgFykKYthoLGYrmo+LKIGpMoeEbY1kuUe04UiDe47l6Oggwnl+8XD1MeRWY\nsWgj8sF4dTcSfCMavK4zHRFFQbGp/YFJ/Ww6U9lA3Vq0wyEI6MCMQnoSMFwrbgZw\nwwIDAQAB\n-----END PUBLIC KEY-----\n",
+      "name": "alpine-devel@lists.alpinelinux.org-5261cecb.rsa.pub",
+      "sha256": "12f899e55a7691225603d6fb3324940fc51cd7f133e7ead788663c2b7eecb00c"
+    },
+    {
+      "content": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAutQkua2CAig4VFSJ7v54\nALyu/J1WB3oni7qwCZD3veURw7HxpNAj9hR+S5N/pNeZgubQvJWyaPuQDm7PTs1+\ntFGiYNfAsiibX6Rv0wci3M+z2XEVAeR9Vzg6v4qoofDyoTbovn2LztaNEjTkB+oK\ntlvpNhg1zhou0jDVYFniEXvzjckxswHVb8cT0OMTKHALyLPrPOJzVtM9C1ew2Nnc\n3848xLiApMu3NBk0JqfcS3Bo5Y2b1FRVBvdt+2gFoKZix1MnZdAEZ8xQzL/a0YS5\nHd0wj5+EEKHfOd3A75uPa/WQmA+o0cBFfrzm69QDcSJSwGpzWrD1ScH3AK8nWvoj\nv7e9gukK/9yl1b4fQQ00vttwJPSgm9EnfPHLAtgXkRloI27H6/PuLoNvSAMQwuCD\nhQRlyGLPBETKkHeodfLoULjhDi1K2gKJTMhtbnUcAA7nEphkMhPWkBpgFdrH+5z4\nLxy+3ek0cqcI7K68EtrffU8jtUj9LFTUC8dERaIBs7NgQ/LfDbDfGh9g6qVj1hZl\nk9aaIPTm/xsi8v3u+0qaq7KzIBc9s59JOoA8TlpOaYdVgSQhHHLBaahOuAigH+VI\nisbC9vmqsThF2QdDtQt37keuqoda2E6sL7PUvIyVXDRfwX7uMDjlzTxHTymvq2Ck\nhtBqojBnThmjJQFgZXocHG8CAwEAAQ==\n-----END PUBLIC KEY-----\n",
+      "name": "alpine-devel@lists.alpinelinux.org-6165ee59.rsa.pub",
+      "sha256": "207e4696d3c05f7cb05966aee557307151f1f00217af4143c1bcaf33b8df733f"
+    },
+    {
+      "content": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA4Oh2r3CXDJgXHuIriXqI\ni4GVuqLFR+fMrOOXYoApRfiPlC/CKxH8dNAZooexzWkyU2eT6RL0wVKQ102b8Wuo\n3uRGXsbAU4Y0TrTs350RwehOK4Arf0k6QFpnzn9HdBJzvdidmkUcgDmNgn90I8hB\nXYzypfiF+p7aoDWEEtrKlqpDq8/1MecsWiCal0Me/zQtwaXsMHWMKRQqznrVIcd9\npV9HTZL2ag0QrIPef6yHw+eS+seFWzutsSXhbJtJtxZ2TN7l3Fm9QANSTRcZwdm4\nAahD7gjg6pPhJtMHOtUxZmKP3DgcJ3L/LoY7Y5qin0iOC2Sg7dvaV5nt8ffkODm2\nBxIgBVWCPy5DcfZLZsKIgkFdQGX0alPIneWDiKgI9L2mqa+K6Q1bNsSXnU2FvGnY\nuH22DpwUl+JDLaaEF6ezFO4ACOpCP+fuc7kF2xlvRpK9I5eOe0cjd4zZPKu2YjNT\nYIRtVb3lIjN2DrRaLiHMEtB9X/+GsJb5YMnrnEqm7TnWD0h84anMueFCVGMyyyMI\njsXtg1b76OvOJvmOKGGTgpgnn2M4m+OFewG2U4OduWwm7aox5na5uXYc0ChQ0y63\ncHopXoVF47nelZQ0nRP7CgwqUntKKj+uXG5OJWMktiQZu65Xc3nM1IK4ZvGKinXX\nFw23oelgb3ze+Q6pApzMrS0CAwEAAQ==\n-----END PUBLIC KEY-----\n",
+      "name": "jack-6a9e83bd.rsa.pub",
+      "sha256": "320fc4876bd089417ed9d145074013f4000f2586bf499176853c412261122e94"
+    },
+    {
+      "content": "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAwompwme4kzYwbQ7GdDa6\ncR2JSI0Ww0Lukqc/65CHdJ+Ehdy2926Y8ZoT8KS1PZ9GHYEgA3jvUcH6gt4qWrHb\nnglcthvBSN7WMTMc2uFooby+TwxGsjDF4qK/XLirtd+IVqNQuVIZjFgfwfBgWIzg\nWM2Hr2aQuE4Us4aUtbdzjZYRjXHVbGgA/wjF344OYE+wtFSdCB7tqAWL83NlBgph\ncaE3HeUCyeici7u+PAmdwXhBa0B8fY3wkat1Xh73UvxutW9cqEcCwG1GmQwQKgLn\nYK6wdPgdaGI4sOmJXlU7QEXsLmNjxmKR6t7qLTJ9IYGL77uzk9Sn2Qru/RXw2vSp\n2sMYD5VrJN1i+KIktnsF+7izuF+xBY4vGUXJ24x3uzxHEQHY7RqqjMSWUK3iIfl4\nr4tHLDMwNlPJB2LFZ+m3SL0t2qFurqRJi4anqYXADtTlUEdOVU5V9kKEKOlTy6+E\nCBRg7Wrt8UNLOK4/zu+S8dccWrOzQIpWkm6NrKxtiLVHOy+ChuYseznbvEFOtAjH\nECRcS6jMOAsSZTDFbd0HglotM+1xknjXWc9vKDVSk3GuMEsPYLpPBrwgE45LZ9D8\nD2YN+zlrPnRstbCxdeKg77ZMvLRyqrpPKNv1Sh+GwHlX2mShJS7qX5rqnD1qhJgX\nkHSJ4RraR97ZoluTpQIx0FUCAwEAAQ==\n-----END PUBLIC KEY-----\n",
+      "name": "support@1password.com-61ddfc31.rsa.pub",
+      "sha256": "0e88171d9f8b7630763f70cbf69f2a01b4ba8ea1d8e79487f59c162db255eb84"
+    }
+  ],
+  "packages": [
+    {
+      "apk_identity": "Q1A5R4Aczu+PxZO1Ovnw5hH1/QXls=",
+      "arch": "x86_64",
+      "artifact": "sha256/df13ae5c3c844220174cbf0366157322a892e7da63302c5c34ecdaa6001e6034/acl-2.3.2-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "acl-2.3.2-r1.apk",
+      "name": "acl",
+      "sha256": "df13ae5c3c844220174cbf0366157322a892e7da63302c5c34ecdaa6001e6034",
+      "version": "2.3.2-r1"
+    },
+    {
+      "apk_identity": "Q1FpLXBxdmnHU/UpCbwW+oe2bNthc=",
+      "arch": "x86_64",
+      "artifact": "sha256/656c5b548deb4b25380abc94c4cc7804409a3e56b8cc0cf6fd1f29d18fd9e0b8/acl-libs-2.3.2-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "acl-libs-2.3.2-r1.apk",
+      "name": "acl-libs",
+      "sha256": "656c5b548deb4b25380abc94c4cc7804409a3e56b8cc0cf6fd1f29d18fd9e0b8",
+      "version": "2.3.2-r1"
+    },
+    {
+      "apk_identity": "Q1XCDd5QEygTc0ybjEWYVuvgZ6Ibg=",
+      "arch": "x86_64",
+      "artifact": "sha256/e5866ee9fe80c57589ff88f11cea50400060c28b516bdeb1d8ea11f4654ba8c6/agetty-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "agetty-2.42.3-r1.apk",
+      "name": "agetty",
+      "sha256": "e5866ee9fe80c57589ff88f11cea50400060c28b516bdeb1d8ea11f4654ba8c6",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1rUgxqYhGkQ+4fqEAb0V6gr4JyOY=",
+      "arch": "x86_64",
+      "artifact": "sha256/cf76177dd7233c64ae6e07590121e93ee93cf9c510f026f253a13d86bd397a12/attr-2.5.2-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "attr-2.5.2-r2.apk",
+      "name": "attr",
+      "sha256": "cf76177dd7233c64ae6e07590121e93ee93cf9c510f026f253a13d86bd397a12",
+      "version": "2.5.2-r2"
+    },
+    {
+      "apk_identity": "Q1TxbN8aPT3v7ntAoG0b1LsmiWITM=",
+      "arch": "x86_64",
+      "artifact": "sha256/0238a501545d18c0bafd1cedab02fc1fd3ede960180eccca441b02c60de2aab6/blkid-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "blkid-2.42.3-r1.apk",
+      "name": "blkid",
+      "sha256": "0238a501545d18c0bafd1cedab02fc1fd3ede960180eccca441b02c60de2aab6",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1twhmFkJdbviKXghyd4fI8wuQ8jc=",
+      "arch": "x86_64",
+      "artifact": "sha256/a01bc7646b58a1386e052580397ca421aed38885da848e6fbf9bcf79a8f1b000/busybox-1.38.0-r4.apk",
+      "artifact_arch": "x86_64",
+      "filename": "busybox-1.38.0-r4.apk",
+      "name": "busybox",
+      "sha256": "a01bc7646b58a1386e052580397ca421aed38885da848e6fbf9bcf79a8f1b000",
+      "version": "1.38.0-r4"
+    },
+    {
+      "apk_identity": "Q1AKzExIYCecp/vBqRndu0plEJkjI=",
+      "arch": "x86_64",
+      "artifact": "sha256/5bedd8ca1b7e6e51b9ffe787244a9bdea09613d46ab6c8dd47596257db0e5bd7/busybox-binsh-1.38.0-r4.apk",
+      "artifact_arch": "noarch",
+      "filename": "busybox-binsh-1.38.0-r4.apk",
+      "name": "busybox-binsh",
+      "sha256": "5bedd8ca1b7e6e51b9ffe787244a9bdea09613d46ab6c8dd47596257db0e5bd7",
+      "version": "1.38.0-r4"
+    },
+    {
+      "apk_identity": "Q10Dd03fb2uxbxKsCrmDaRV8cBrNY=",
+      "arch": "x86_64",
+      "artifact": "sha256/bb9d4717dc1cbfd0ce27450e9a4464ed3ff928388043f0d5cddc66a49aae7ed0/ca-certificates-20260611-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "ca-certificates-20260611-r0.apk",
+      "name": "ca-certificates",
+      "sha256": "bb9d4717dc1cbfd0ce27450e9a4464ed3ff928388043f0d5cddc66a49aae7ed0",
+      "version": "20260611-r0"
+    },
+    {
+      "apk_identity": "Q1whQz9pkADW22w0rCSZ3yndWaZCo=",
+      "arch": "x86_64",
+      "artifact": "sha256/9ebe6757fffff0be44d1d641abdb2e53c394ee971ef1cda4a60997b420b9d4e0/cfdisk-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "cfdisk-2.42.3-r1.apk",
+      "name": "cfdisk",
+      "sha256": "9ebe6757fffff0be44d1d641abdb2e53c394ee971ef1cda4a60997b420b9d4e0",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1e9dUaKXncLVzy3p6cJ/OK/EKzTI=",
+      "arch": "x86_64",
+      "artifact": "sha256/0f666e8592b7a8692d7ec1fcff8b4564982cdf11062ae3acf3aac93e85999b48/dbus-1.16.2-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "dbus-1.16.2-r3.apk",
+      "name": "dbus",
+      "sha256": "0f666e8592b7a8692d7ec1fcff8b4564982cdf11062ae3acf3aac93e85999b48",
+      "version": "1.16.2-r3"
+    },
+    {
+      "apk_identity": "Q150jGbQKxUko25Yb7cF741ES6LhE=",
+      "arch": "x86_64",
+      "artifact": "sha256/2285206ff2b5743fb20c0992bff99f45c7b09e05a5d0c1044e9e03986250517f/dbus-daemon-launch-helper-1.16.2-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "dbus-daemon-launch-helper-1.16.2-r3.apk",
+      "name": "dbus-daemon-launch-helper",
+      "sha256": "2285206ff2b5743fb20c0992bff99f45c7b09e05a5d0c1044e9e03986250517f",
+      "version": "1.16.2-r3"
+    },
+    {
+      "apk_identity": "Q1dLXe+xzdeer7pq6L3KkuH/PqUYc=",
+      "arch": "x86_64",
+      "artifact": "sha256/fb47fea668d2989334752b4ae78dcffbd304af8802a4680e56c2d922e9cb5150/dbus-libs-1.16.2-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "dbus-libs-1.16.2-r3.apk",
+      "name": "dbus-libs",
+      "sha256": "fb47fea668d2989334752b4ae78dcffbd304af8802a4680e56c2d922e9cb5150",
+      "version": "1.16.2-r3"
+    },
+    {
+      "apk_identity": "Q12+DLkLHKI9WZMbSvont+dTuWhBU=",
+      "arch": "x86_64",
+      "artifact": "sha256/9aeba2e40e2bd95095efc354585c1cc61b89a4e94e40ad9b9a21aebdcf3696ff/device-mapper-event-libs-2.03.35-r6.apk",
+      "artifact_arch": "x86_64",
+      "filename": "device-mapper-event-libs-2.03.35-r6.apk",
+      "name": "device-mapper-event-libs",
+      "sha256": "9aeba2e40e2bd95095efc354585c1cc61b89a4e94e40ad9b9a21aebdcf3696ff",
+      "version": "2.03.35-r6"
+    },
+    {
+      "apk_identity": "Q1sQ1L48l75PBElsS96GioxOYP+SU=",
+      "arch": "x86_64",
+      "artifact": "sha256/b8fd395525101151536bffe8b7b1554e314283c9a9507e22d953dfc455f3c738/device-mapper-libs-2.03.35-r6.apk",
+      "artifact_arch": "x86_64",
+      "filename": "device-mapper-libs-2.03.35-r6.apk",
+      "name": "device-mapper-libs",
+      "sha256": "b8fd395525101151536bffe8b7b1554e314283c9a9507e22d953dfc455f3c738",
+      "version": "2.03.35-r6"
+    },
+    {
+      "apk_identity": "Q1enTGGszd9T1t1oG4O2spi38b9hI=",
+      "arch": "x86_64",
+      "artifact": "sha256/6c12dd2605cb7459bf1fa5eae3bd1704ad18ba564299751e9be794032ea05bbb/dmesg-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "dmesg-2.42.3-r1.apk",
+      "name": "dmesg",
+      "sha256": "6c12dd2605cb7459bf1fa5eae3bd1704ad18ba564299751e9be794032ea05bbb",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1wDXJesuMQJbD5CLHKAyvCYpYLJk=",
+      "arch": "x86_64",
+      "artifact": "sha256/d6b7689bcbef02089259db388b341c3b40f7c47e7d0fa0ebe02a5de288e4bbea/dnsmasq-2.93-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "dnsmasq-2.93-r0.apk",
+      "name": "dnsmasq",
+      "sha256": "d6b7689bcbef02089259db388b341c3b40f7c47e7d0fa0ebe02a5de288e4bbea",
+      "version": "2.93-r0"
+    },
+    {
+      "apk_identity": "Q1bQW2FRtrrM/LXPyD8POK8ZK+PGU=",
+      "arch": "x86_64",
+      "artifact": "sha256/ec51c54a63086ecc1585b7e6090492df72bccad32f0e498378f7a03d024e4834/dnsmasq-common-2.93-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "dnsmasq-common-2.93-r0.apk",
+      "name": "dnsmasq-common",
+      "sha256": "ec51c54a63086ecc1585b7e6090492df72bccad32f0e498378f7a03d024e4834",
+      "version": "2.93-r0"
+    },
+    {
+      "apk_identity": "Q1aqf1IW/diJCJxB0PL7q/WjxGL2Y=",
+      "arch": "x86_64",
+      "artifact": "sha256/2289e8f17fb8e15ec0fabf8dc6664678fb1c6b18741fa106eda1bfdde756d60d/dnsmasq-openrc-2.93-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "dnsmasq-openrc-2.93-r0.apk",
+      "name": "dnsmasq-openrc",
+      "sha256": "2289e8f17fb8e15ec0fabf8dc6664678fb1c6b18741fa106eda1bfdde756d60d",
+      "version": "2.93-r0"
+    },
+    {
+      "apk_identity": "Q1Ty1X83YQmlu7wRHBZqR/9DkyJws=",
+      "arch": "x86_64",
+      "artifact": "sha256/c926919c938a59ff838694dc30a8cedb24df93a38efcda319fc91a97a66eb0ca/findmnt-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "findmnt-2.42.3-r1.apk",
+      "name": "findmnt",
+      "sha256": "c926919c938a59ff838694dc30a8cedb24df93a38efcda319fc91a97a66eb0ca",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1CHDKJjfZAaS0k/N1ROojdPm2M+g=",
+      "arch": "x86_64",
+      "artifact": "sha256/cb84cdb8a9f44886d87826d97366539ca3da8940479c132cf7a87bea1b1865ad/flock-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "flock-2.42.3-r1.apk",
+      "name": "flock",
+      "sha256": "cb84cdb8a9f44886d87826d97366539ca3da8940479c132cf7a87bea1b1865ad",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1wdF2628m5IufP7BoXfS9XTSXTcw=",
+      "arch": "x86_64",
+      "artifact": "sha256/98c78f2b27e775d9caf9d50f3f36d84874eb7452f6dfa149793f31d03e6702b6/fstrim-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "fstrim-2.42.3-r1.apk",
+      "name": "fstrim",
+      "sha256": "98c78f2b27e775d9caf9d50f3f36d84874eb7452f6dfa149793f31d03e6702b6",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1SNJqy8LRTMaB33q1PZvKmITaolY=",
+      "arch": "x86_64",
+      "artifact": "sha256/216365c2f789f6e0ddd11bc852b0fcb2fd721c3430f2659fc56244650f67ab25/gmp-6.3.0-r4.apk",
+      "artifact_arch": "x86_64",
+      "filename": "gmp-6.3.0-r4.apk",
+      "name": "gmp",
+      "sha256": "216365c2f789f6e0ddd11bc852b0fcb2fd721c3430f2659fc56244650f67ab25",
+      "version": "6.3.0-r4"
+    },
+    {
+      "apk_identity": "Q1j6vQhxgnI8jARi1ws5+Xk4VTfiQ=",
+      "arch": "x86_64",
+      "artifact": "sha256/b4f2455100506e8e4dec7474cab019a8a34fa226e07c43fcfa9e7edd1941b4a0/hexdump-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "hexdump-2.42.3-r1.apk",
+      "name": "hexdump",
+      "sha256": "b4f2455100506e8e4dec7474cab019a8a34fa226e07c43fcfa9e7edd1941b4a0",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1Dm6WwXnVMi9u1pXvXaYzArW/FFA=",
+      "arch": "x86_64",
+      "artifact": "sha256/9cefee43d7ca25366f0dae5f86a8a2e231188d9710076c43be559b78eb82e578/incus-client-7.0.1-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "incus-client-7.0.1-r1.apk",
+      "name": "incus-client",
+      "sha256": "9cefee43d7ca25366f0dae5f86a8a2e231188d9710076c43be559b78eb82e578",
+      "version": "7.0.1-r1"
+    },
+    {
+      "apk_identity": "Q1leD7Yd1Suhllw9LvpQmcmPa2HxM=",
+      "arch": "x86_64",
+      "artifact": "sha256/df4f1c37da95d010789f3086387119a2139ca744d15715dd5c54aae16a283e53/iproute2-7.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "iproute2-7.1.0-r0.apk",
+      "name": "iproute2",
+      "sha256": "df4f1c37da95d010789f3086387119a2139ca744d15715dd5c54aae16a283e53",
+      "version": "7.1.0-r0"
+    },
+    {
+      "apk_identity": "Q1DGNqwTFZIYonm+A29DRmfk6k1mM=",
+      "arch": "x86_64",
+      "artifact": "sha256/7119eba29620ae427e1fedf077464a30e950209fee16ac4616b18f44a30ad189/iproute2-minimal-7.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "iproute2-minimal-7.1.0-r0.apk",
+      "name": "iproute2-minimal",
+      "sha256": "7119eba29620ae427e1fedf077464a30e950209fee16ac4616b18f44a30ad189",
+      "version": "7.1.0-r0"
+    },
+    {
+      "apk_identity": "Q1UKkRksibMWaAmGncMc+JVgrUmmU=",
+      "arch": "x86_64",
+      "artifact": "sha256/79e836be986d14c19171f173c8659a98c1dedf6425658003f16c316c62e6ac16/iproute2-ss-7.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "iproute2-ss-7.1.0-r0.apk",
+      "name": "iproute2-ss",
+      "sha256": "79e836be986d14c19171f173c8659a98c1dedf6425658003f16c316c62e6ac16",
+      "version": "7.1.0-r0"
+    },
+    {
+      "apk_identity": "Q1sulqQm5oFVmpEEAwWNvPl3HsBDM=",
+      "arch": "x86_64",
+      "artifact": "sha256/9a3cbd2639a893eb3056dc198ca2a56be6df187e523b89878629de665f57dcff/iproute2-tc-7.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "iproute2-tc-7.1.0-r0.apk",
+      "name": "iproute2-tc",
+      "sha256": "9a3cbd2639a893eb3056dc198ca2a56be6df187e523b89878629de665f57dcff",
+      "version": "7.1.0-r0"
+    },
+    {
+      "apk_identity": "Q1XrFa4xx/YrUXU1U2HcsP+g77VqY=",
+      "arch": "x86_64",
+      "artifact": "sha256/cfe4ec8ea9b2136bb0c61770c36d2b635b606f2ac2039837a4866003a980d397/jansson-2.15.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "jansson-2.15.0-r0.apk",
+      "name": "jansson",
+      "sha256": "cfe4ec8ea9b2136bb0c61770c36d2b635b606f2ac2039837a4866003a980d397",
+      "version": "2.15.0-r0"
+    },
+    {
+      "apk_identity": "Q1gUcL2ulldOofRRKRaZo/BIm1Y+Y=",
+      "arch": "x86_64",
+      "artifact": "sha256/ecd866132b28a8885415f2a8d07bcbc38fc9e446af489ec80e882b9b05b26539/libaio-0.3.113-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libaio-0.3.113-r3.apk",
+      "name": "libaio",
+      "sha256": "ecd866132b28a8885415f2a8d07bcbc38fc9e446af489ec80e882b9b05b26539",
+      "version": "0.3.113-r3"
+    },
+    {
+      "apk_identity": "Q1YfC5m72EEKx/CODwrkSea3pjuaI=",
+      "arch": "x86_64",
+      "artifact": "sha256/0a051567443d79f973d9638e38d8c575d383de0d928b147e3eead68748f68d12/libattr-2.5.2-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libattr-2.5.2-r2.apk",
+      "name": "libattr",
+      "sha256": "0a051567443d79f973d9638e38d8c575d383de0d928b147e3eead68748f68d12",
+      "version": "2.5.2-r2"
+    },
+    {
+      "apk_identity": "Q1PoShePJzM/5M9xuYnwRgLcECR20=",
+      "arch": "x86_64",
+      "artifact": "sha256/7bd1e4de14b489712c506823a0bbb0f252486424f7cd2b07f2e7409686515ef3/libblkid-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libblkid-2.42.3-r1.apk",
+      "name": "libblkid",
+      "sha256": "7bd1e4de14b489712c506823a0bbb0f252486424f7cd2b07f2e7409686515ef3",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1zoeEfjtuIAiTdfwr183BPBIPbWw=",
+      "arch": "x86_64",
+      "artifact": "sha256/1a5f292088dc2430ae12362333b1e4e1c87143897ba895638469ab67eee3e72a/libbsd-0.12.2-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libbsd-0.12.2-r0.apk",
+      "name": "libbsd",
+      "sha256": "1a5f292088dc2430ae12362333b1e4e1c87143897ba895638469ab67eee3e72a",
+      "version": "0.12.2-r0"
+    },
+    {
+      "apk_identity": "Q1MMrc0/aH80x6YWQrUUBv8ReHBTI=",
+      "arch": "x86_64",
+      "artifact": "sha256/186e17e22d5348711f33791001472d80a059f73c17c3a9af0c07b12cc0271f77/libcap-ng-0.8.5-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libcap-ng-0.8.5-r2.apk",
+      "name": "libcap-ng",
+      "sha256": "186e17e22d5348711f33791001472d80a059f73c17c3a9af0c07b12cc0271f77",
+      "version": "0.8.5-r2"
+    },
+    {
+      "apk_identity": "Q1if52syP7y29ImrxF6SJkJdw1RUA=",
+      "arch": "x86_64",
+      "artifact": "sha256/f67812721ccf42fa8840438f3c66f8ca17caf9c46dbc6773a292ef32f4c9b884/libcap2-2.78-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libcap2-2.78-r0.apk",
+      "name": "libcap2",
+      "sha256": "f67812721ccf42fa8840438f3c66f8ca17caf9c46dbc6773a292ef32f4c9b884",
+      "version": "2.78-r0"
+    },
+    {
+      "apk_identity": "Q1LEJmvYC3zwYGvipQLhp855OutZQ=",
+      "arch": "x86_64",
+      "artifact": "sha256/6df29513698d30c2da1b742b796d404c6d59c246f3ff1d3fcbf36c103c14c0e9/libcrypto3-3.5.8-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libcrypto3-3.5.8-r0.apk",
+      "name": "libcrypto3",
+      "sha256": "6df29513698d30c2da1b742b796d404c6d59c246f3ff1d3fcbf36c103c14c0e9",
+      "version": "3.5.8-r0"
+    },
+    {
+      "apk_identity": "Q1QR4VMFQ34+gFSmn48btMVN1A6GA=",
+      "arch": "x86_64",
+      "artifact": "sha256/285cc8268c2426030be8d5a47bcc6f695e14af22fc94733927fcebf47ce1b838/libeconf-0.8.4-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libeconf-0.8.4-r0.apk",
+      "name": "libeconf",
+      "sha256": "285cc8268c2426030be8d5a47bcc6f695e14af22fc94733927fcebf47ce1b838",
+      "version": "0.8.4-r0"
+    },
+    {
+      "apk_identity": "Q1fbTFIm9GZ5AJZ+6hTa9o9ir3Wpc=",
+      "arch": "x86_64",
+      "artifact": "sha256/89b7d57b10325371cd4045571bcc6228bd25588b911a1042616348fba9d3bdac/libelf-0.195-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libelf-0.195-r0.apk",
+      "name": "libelf",
+      "sha256": "89b7d57b10325371cd4045571bcc6228bd25588b911a1042616348fba9d3bdac",
+      "version": "0.195-r0"
+    },
+    {
+      "apk_identity": "Q1Is2RNto8etr+iUuBpWrnaeLd4jk=",
+      "arch": "x86_64",
+      "artifact": "sha256/d86d853c94b9776ec8f68cc121f0e7b2d8a1e2fd691b65fe94d8c7d96d202dc0/libexpat-2.8.4-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libexpat-2.8.4-r0.apk",
+      "name": "libexpat",
+      "sha256": "d86d853c94b9776ec8f68cc121f0e7b2d8a1e2fd691b65fe94d8c7d96d202dc0",
+      "version": "2.8.4-r0"
+    },
+    {
+      "apk_identity": "Q1Zoypj33C+FxYnIm5AzPB1fo5WtA=",
+      "arch": "x86_64",
+      "artifact": "sha256/096251ee226bec7b2a0cb68da357173d320b60c53e84b5dfc8ca5ae61d49a424/libfdisk-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libfdisk-2.42.3-r1.apk",
+      "name": "libfdisk",
+      "sha256": "096251ee226bec7b2a0cb68da357173d320b60c53e84b5dfc8ca5ae61d49a424",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q12+rPMVHBwMs6p6AP+lN5ZjRCTIY=",
+      "arch": "x86_64",
+      "artifact": "sha256/01c9609197de10519ceb204a09d1efa54baad145f65bf00ba0908086692ca3fe/libgcc-15.2.0-r9.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libgcc-15.2.0-r9.apk",
+      "name": "libgcc",
+      "sha256": "01c9609197de10519ceb204a09d1efa54baad145f65bf00ba0908086692ca3fe",
+      "version": "15.2.0-r9"
+    },
+    {
+      "apk_identity": "Q19i9KroLWRNYbcERjeT/UBTmnykw=",
+      "arch": "x86_64",
+      "artifact": "sha256/7d4b5bf0733f058acf5921a5d0ffff8f425cfa67e09df65614c6f862570d0a89/libintl-1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libintl-1.0-r0.apk",
+      "name": "libintl",
+      "sha256": "7d4b5bf0733f058acf5921a5d0ffff8f425cfa67e09df65614c6f862570d0a89",
+      "version": "1.0-r0"
+    },
+    {
+      "apk_identity": "Q1NHil8cK7mbjgH+nwTRdcKuhuC/M=",
+      "arch": "x86_64",
+      "artifact": "sha256/f6d68d072fcefc8edd4ffe3afc341ca391f8a9a209130628fb065d98b18a2792/libmd-1.2.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libmd-1.2.0-r0.apk",
+      "name": "libmd",
+      "sha256": "f6d68d072fcefc8edd4ffe3afc341ca391f8a9a209130628fb065d98b18a2792",
+      "version": "1.2.0-r0"
+    },
+    {
+      "apk_identity": "Q1NqDyLUl7k8ND7qAmQORX5Vax9/o=",
+      "arch": "x86_64",
+      "artifact": "sha256/70b71934b17903ed806b27728a7a15da84ae57f1c0c0f76b508890258ae83c09/libmnl-1.0.5-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libmnl-1.0.5-r2.apk",
+      "name": "libmnl",
+      "sha256": "70b71934b17903ed806b27728a7a15da84ae57f1c0c0f76b508890258ae83c09",
+      "version": "1.0.5-r2"
+    },
+    {
+      "apk_identity": "Q1YyOsbdgaBeqZfPQEgWptf+PTjCc=",
+      "arch": "x86_64",
+      "artifact": "sha256/fafdb072676f45203415a79e3e8206f5f81d6844165d538d88853e3cffba0200/libmount-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libmount-2.42.3-r1.apk",
+      "name": "libmount",
+      "sha256": "fafdb072676f45203415a79e3e8206f5f81d6844165d538d88853e3cffba0200",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1WJbJhwrN2aYhPbQuy/uqaH1xrUM=",
+      "arch": "x86_64",
+      "artifact": "sha256/9a938483f12531f4ae1604e4c22c4d71d6e197f17b03d00bf0093628e2ab0e95/libncursesw-6.6_p20260822-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libncursesw-6.6_p20260822-r0.apk",
+      "name": "libncursesw",
+      "sha256": "9a938483f12531f4ae1604e4c22c4d71d6e197f17b03d00bf0093628e2ab0e95",
+      "version": "6.6_p20260822-r0"
+    },
+    {
+      "apk_identity": "Q1U04jR0c26NZoO1Ia6NPRfH/eZT0=",
+      "arch": "x86_64",
+      "artifact": "sha256/c8d09876f39aeeede09274f6f1de7bfbc668035de73184711c719a9fe5e06e55/libnftnl-1.3.2-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libnftnl-1.3.2-r0.apk",
+      "name": "libnftnl",
+      "sha256": "c8d09876f39aeeede09274f6f1de7bfbc668035de73184711c719a9fe5e06e55",
+      "version": "1.3.2-r0"
+    },
+    {
+      "apk_identity": "Q1zulkjV2K323+9Cl68t13YfhtWXk=",
+      "arch": "x86_64",
+      "artifact": "sha256/bc574d796120b6e88ad515eb503f78fef246f488ff859b8c1484df097c534bc8/libseccomp-2.6.0-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libseccomp-2.6.0-r2.apk",
+      "name": "libseccomp",
+      "sha256": "bc574d796120b6e88ad515eb503f78fef246f488ff859b8c1484df097c534bc8",
+      "version": "2.6.0-r2"
+    },
+    {
+      "apk_identity": "Q18W2HGpy5zWbczsoZniGjZ8iWtxQ=",
+      "arch": "x86_64",
+      "artifact": "sha256/b991ba3f15244747d4ba392a37906deb8967558d9197c9794ce506725ce9a95f/libselinux-3.11-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libselinux-3.11-r0.apk",
+      "name": "libselinux",
+      "sha256": "b991ba3f15244747d4ba392a37906deb8967558d9197c9794ce506725ce9a95f",
+      "version": "3.11-r0"
+    },
+    {
+      "apk_identity": "Q1mTl8JA9vhNZeRxlo63ovWYCscFM=",
+      "arch": "x86_64",
+      "artifact": "sha256/32ec2587330ef4974085ef78d50204f87d66da2b4592f6680ffe89217ae75a44/libsmartcols-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libsmartcols-2.42.3-r1.apk",
+      "name": "libsmartcols",
+      "sha256": "32ec2587330ef4974085ef78d50204f87d66da2b4592f6680ffe89217ae75a44",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q12l1C0xgD0m0Ft9Tvg5SSNkp4Vvk=",
+      "arch": "x86_64",
+      "artifact": "sha256/18f3012aa4c0836ef09d38ac63d1d2f0f6dfd53ea06066bb0d599ad63b3baa05/libuuid-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libuuid-2.42.3-r1.apk",
+      "name": "libuuid",
+      "sha256": "18f3012aa4c0836ef09d38ac63d1d2f0f6dfd53ea06066bb0d599ad63b3baa05",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1a1f7T4ou53nYoM6teSzbPWfVzjw=",
+      "arch": "x86_64",
+      "artifact": "sha256/a31146ffc9b18572e1ef66575ef4f0ccf4073439bc495cb8a20b1d20e1032d8c/libxtables-1.8.13-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libxtables-1.8.13-r0.apk",
+      "name": "libxtables",
+      "sha256": "a31146ffc9b18572e1ef66575ef4f0ccf4073439bc495cb8a20b1d20e1032d8c",
+      "version": "1.8.13-r0"
+    },
+    {
+      "apk_identity": "Q1ecPLeKFToiv4HzRLzXJScO97kWc=",
+      "arch": "x86_64",
+      "artifact": "sha256/a28cab76815d27319f1b3edd97e0a0eb8cc90eb1d17236b3f897400f54cd1183/libxxhash-0.8.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "libxxhash-0.8.3-r1.apk",
+      "name": "libxxhash",
+      "sha256": "a28cab76815d27319f1b3edd97e0a0eb8cc90eb1d17236b3f897400f54cd1183",
+      "version": "0.8.3-r1"
+    },
+    {
+      "apk_identity": "Q1gpi32xMhEGwfkFqHqAfvXC0GV9c=",
+      "arch": "x86_64",
+      "artifact": "sha256/fa8b1cd14dcf881760b3dbbf01d5d63a0886e37e16680fa6a91cad02434528a0/linux-pam-1.7.1-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "linux-pam-1.7.1-r3.apk",
+      "name": "linux-pam",
+      "sha256": "fa8b1cd14dcf881760b3dbbf01d5d63a0886e37e16680fa6a91cad02434528a0",
+      "version": "1.7.1-r3"
+    },
+    {
+      "apk_identity": "Q1phZJ0FXOzIwPNHdbnuarnaFaFbg=",
+      "arch": "x86_64",
+      "artifact": "sha256/3a98a8697bb57b475851c7ca0cf7c8f5999226a81af6d3345bae41c56edc87d4/logger-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "logger-2.42.3-r1.apk",
+      "name": "logger",
+      "sha256": "3a98a8697bb57b475851c7ca0cf7c8f5999226a81af6d3345bae41c56edc87d4",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1l19ma48UNiRofgV2EZkQ1zJJ8Q8=",
+      "arch": "x86_64",
+      "artifact": "sha256/639a6397176081092bb18a03530339d200c90f04d732d14257a9787106615f39/losetup-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "losetup-2.42.3-r1.apk",
+      "name": "losetup",
+      "sha256": "639a6397176081092bb18a03530339d200c90f04d732d14257a9787106615f39",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1KqioOLoSRE0wGujBaTpq5uyKnHU=",
+      "arch": "x86_64",
+      "artifact": "sha256/318abb0189d6d277d5967962a391a9b119840bb5ba09b14c7bd0144647dd4b4e/lsblk-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lsblk-2.42.3-r1.apk",
+      "name": "lsblk",
+      "sha256": "318abb0189d6d277d5967962a391a9b119840bb5ba09b14c7bd0144647dd4b4e",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1CikOzbn642X0w4d3Pia2SoqD/5g=",
+      "arch": "x86_64",
+      "artifact": "sha256/ca6d1d624fbe40729f9c46482a8a7dae1b692c48b7da0f939161654c48e49309/lscpu-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lscpu-2.42.3-r1.apk",
+      "name": "lscpu",
+      "sha256": "ca6d1d624fbe40729f9c46482a8a7dae1b692c48b7da0f939161654c48e49309",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1vo+GcJmF6g1SdsN5JWQ9z47VTTE=",
+      "arch": "x86_64",
+      "artifact": "sha256/07efbde9aac12daa1a92c2385a2e6ee660fe3b5e000def2fc88cb12296555ba9/lvm2-2.03.35-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lvm2-2.03.35-r2.apk",
+      "name": "lvm2",
+      "sha256": "07efbde9aac12daa1a92c2385a2e6ee660fe3b5e000def2fc88cb12296555ba9",
+      "version": "2.03.35-r2"
+    },
+    {
+      "apk_identity": "Q1eONYOfsId6RuaOv/CvSuiQCdzR4=",
+      "arch": "x86_64",
+      "artifact": "sha256/515333e0022f11cfca6a7136e1821d288ac7df9987d0d584297299685a6c5522/lvm2-libs-2.03.35-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lvm2-libs-2.03.35-r2.apk",
+      "name": "lvm2-libs",
+      "sha256": "515333e0022f11cfca6a7136e1821d288ac7df9987d0d584297299685a6c5522",
+      "version": "2.03.35-r2"
+    },
+    {
+      "apk_identity": "Q1xeTVKQr9e/wp4gcrtZsg+acz/r8=",
+      "arch": "x86_64",
+      "artifact": "sha256/d73b07336b44eeb67a22b3b63e6456c4cc9d46517b683dcd216d36e04db0fcc4/lxc-7.0.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lxc-7.0.0-r0.apk",
+      "name": "lxc",
+      "sha256": "d73b07336b44eeb67a22b3b63e6456c4cc9d46517b683dcd216d36e04db0fcc4",
+      "version": "7.0.0-r0"
+    },
+    {
+      "apk_identity": "Q11l0rR9TQYxR5ui84zxP5pyawdv0=",
+      "arch": "x86_64",
+      "artifact": "sha256/30afbb740e9504af8aaee1424128c19f27c8f883495c1845671a77db53d9d73f/lxc-libs-7.0.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lxc-libs-7.0.0-r0.apk",
+      "name": "lxc-libs",
+      "sha256": "30afbb740e9504af8aaee1424128c19f27c8f883495c1845671a77db53d9d73f",
+      "version": "7.0.0-r0"
+    },
+    {
+      "apk_identity": "Q1BScOaY6prMlRyTpjrUyh09Ubz8Q=",
+      "arch": "x86_64",
+      "artifact": "sha256/681b7a77e798c4252c5a5093c94184a58c560fab6c26b29543f116408a2cb915/lxc-lvm-7.0.0-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "lxc-lvm-7.0.0-r0.apk",
+      "name": "lxc-lvm",
+      "sha256": "681b7a77e798c4252c5a5093c94184a58c560fab6c26b29543f116408a2cb915",
+      "version": "7.0.0-r0"
+    },
+    {
+      "apk_identity": "Q1ZlD/jfjfY/R4GJyxHb25nj+S9cc=",
+      "arch": "x86_64",
+      "artifact": "sha256/44000fb1af4bd37f2302689c7aebe5770a8ad369469e19e3f21995bb0e38ba0b/lxc-openrc-7.0.0-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "lxc-openrc-7.0.0-r0.apk",
+      "name": "lxc-openrc",
+      "sha256": "44000fb1af4bd37f2302689c7aebe5770a8ad369469e19e3f21995bb0e38ba0b",
+      "version": "7.0.0-r0"
+    },
+    {
+      "apk_identity": "Q1rQ4N4dAIFFeH+QOR3IUw1ewbiWE=",
+      "arch": "x86_64",
+      "artifact": "sha256/b726e9e6399219631d35cf23ddfbeab29e31cb93d64d0dad628a33246a1d7890/lz4-libs-1.10.0-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lz4-libs-1.10.0-r1.apk",
+      "name": "lz4-libs",
+      "sha256": "b726e9e6399219631d35cf23ddfbeab29e31cb93d64d0dad628a33246a1d7890",
+      "version": "1.10.0-r1"
+    },
+    {
+      "apk_identity": "Q1ddr4Fd+jVMoUd5U5OZ6kJycH5nU=",
+      "arch": "x86_64",
+      "artifact": "sha256/0ee1cf241decf3621f9ffc215aab7d523ee6e15e55e0fce264a1c92f6e95fc78/lzo-2.10-r5.apk",
+      "artifact_arch": "x86_64",
+      "filename": "lzo-2.10-r5.apk",
+      "name": "lzo",
+      "sha256": "0ee1cf241decf3621f9ffc215aab7d523ee6e15e55e0fce264a1c92f6e95fc78",
+      "version": "2.10-r5"
+    },
+    {
+      "apk_identity": "Q19DaACnOxulIvyDUuRSfq4j2h9b8=",
+      "arch": "x86_64",
+      "artifact": "sha256/f2172dbacd86cb0ee5021fdb8fddeb4f2e25018a0994fa59bc3a6cf271cd0c41/mcookie-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "mcookie-2.42.3-r1.apk",
+      "name": "mcookie",
+      "sha256": "f2172dbacd86cb0ee5021fdb8fddeb4f2e25018a0994fa59bc3a6cf271cd0c41",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1nmXCCuFH+N1tOiFRMsA7JTSKfYM=",
+      "arch": "x86_64",
+      "artifact": "sha256/35082524222e1a8a49ba474bca7a58a5089ffd971eea7597f8d46e9ace55d9ae/mount-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "mount-2.42.3-r1.apk",
+      "name": "mount",
+      "sha256": "35082524222e1a8a49ba474bca7a58a5089ffd971eea7597f8d46e9ace55d9ae",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1TdMQx9raFQOOI/cBAUDhzD3PWgk=",
+      "arch": "x86_64",
+      "artifact": "sha256/aa6385e63418704cc6540ee7a9fc3e24f904fdbbae27c10ddfe7ff8a35877f64/musl-1.2.6-r3.apk",
+      "artifact_arch": "x86_64",
+      "filename": "musl-1.2.6-r3.apk",
+      "name": "musl",
+      "sha256": "aa6385e63418704cc6540ee7a9fc3e24f904fdbbae27c10ddfe7ff8a35877f64",
+      "version": "1.2.6-r3"
+    },
+    {
+      "apk_identity": "Q1PU4OMSXFVjTbjVE5Wyc5Jj3tmHc=",
+      "arch": "x86_64",
+      "artifact": "sha256/1537300d1003353e0202ef57eebb2c0ab933d804a4b4f82d0fafb747b4b60586/musl-fts-1.2.7-r7.apk",
+      "artifact_arch": "x86_64",
+      "filename": "musl-fts-1.2.7-r7.apk",
+      "name": "musl-fts",
+      "sha256": "1537300d1003353e0202ef57eebb2c0ab933d804a4b4f82d0fafb747b4b60586",
+      "version": "1.2.7-r7"
+    },
+    {
+      "apk_identity": "Q1uI8Gf+9DNjKvYvAg+Keu4dBoLZc=",
+      "arch": "x86_64",
+      "artifact": "sha256/33a94cf057abff31ca199bd472cf72c2b497cf9fde9c81e87cff8c88a0fb33a2/ncurses-terminfo-base-6.6_p20260822-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "ncurses-terminfo-base-6.6_p20260822-r0.apk",
+      "name": "ncurses-terminfo-base",
+      "sha256": "33a94cf057abff31ca199bd472cf72c2b497cf9fde9c81e87cff8c88a0fb33a2",
+      "version": "6.6_p20260822-r0"
+    },
+    {
+      "apk_identity": "Q1pAGU6M4jxwaSDzvySeK0kUNzVxU=",
+      "arch": "x86_64",
+      "artifact": "sha256/10d4878f00160984c805d41364045dfc0ea7fc6cda4b1e8e74c4368cd08b9dbc/netcat-openbsd-1.234.1-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "netcat-openbsd-1.234.1-r0.apk",
+      "name": "netcat-openbsd",
+      "sha256": "10d4878f00160984c805d41364045dfc0ea7fc6cda4b1e8e74c4368cd08b9dbc",
+      "version": "1.234.1-r0"
+    },
+    {
+      "apk_identity": "Q1wlGMeoTRG620poVU0BpNP0OxfP8=",
+      "arch": "x86_64",
+      "artifact": "sha256/af15da13c7aa0f4b57dd737aca7cbfee345a3adf0f84c2d36879b7d210e9c389/nftables-1.1.7-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "nftables-1.1.7-r0.apk",
+      "name": "nftables",
+      "sha256": "af15da13c7aa0f4b57dd737aca7cbfee345a3adf0f84c2d36879b7d210e9c389",
+      "version": "1.1.7-r0"
+    },
+    {
+      "apk_identity": "Q1a0rnZ/epo1T7oKzf730FWyfZx64=",
+      "arch": "x86_64",
+      "artifact": "sha256/4058f0dc51d5f814abb23ce03ce2612452e1e986296a3bcbaa79c5a0d23d08e8/partx-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "partx-2.42.3-r1.apk",
+      "name": "partx",
+      "sha256": "4058f0dc51d5f814abb23ce03ce2612452e1e986296a3bcbaa79c5a0d23d08e8",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1AerD9CjR/Hb1WMIaze7PO4ethSU=",
+      "arch": "x86_64",
+      "artifact": "sha256/ea3d68de3c85f110c0887b2c0d4490718dfc0e685cb750373f4c0a925966d028/pcre2-10.48-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "pcre2-10.48-r0.apk",
+      "name": "pcre2",
+      "sha256": "ea3d68de3c85f110c0887b2c0d4490718dfc0e685cb750373f4c0a925966d028",
+      "version": "10.48-r0"
+    },
+    {
+      "apk_identity": "Q1bzpXKKjnQLZM8+Zdh+6zaJISW9o=",
+      "arch": "x86_64",
+      "artifact": "sha256/0871a43dd8578def4bf514876f042617a2101d1006505b41d8a9ac3789ca7d99/popt-1.19-r4.apk",
+      "artifact_arch": "x86_64",
+      "filename": "popt-1.19-r4.apk",
+      "name": "popt",
+      "sha256": "0871a43dd8578def4bf514876f042617a2101d1006505b41d8a9ac3789ca7d99",
+      "version": "1.19-r4"
+    },
+    {
+      "apk_identity": "Q1vkhXGViu0Rh/9cQPKCM/YkGCyiU=",
+      "arch": "x86_64",
+      "artifact": "sha256/a0facde0de1a476438b099ffd85393aef0a2c1e0966dd6017941d44361803aed/readline-8.3.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "readline-8.3.3-r1.apk",
+      "name": "readline",
+      "sha256": "a0facde0de1a476438b099ffd85393aef0a2c1e0966dd6017941d44361803aed",
+      "version": "8.3.3-r1"
+    },
+    {
+      "apk_identity": "Q1yHF9b6Wjpu7nat10fAMcn8CB02c=",
+      "arch": "x86_64",
+      "artifact": "sha256/8b40732040fcd180af9c29cf25bc3271264820898c3f34ce0ebb74a77a1651d8/rsync-3.5.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "rsync-3.5.0-r0.apk",
+      "name": "rsync",
+      "sha256": "8b40732040fcd180af9c29cf25bc3271264820898c3f34ce0ebb74a77a1651d8",
+      "version": "3.5.0-r0"
+    },
+    {
+      "apk_identity": "Q1EbVfX4LimXRMekgtX+XMmqT1Cyo=",
+      "arch": "x86_64",
+      "artifact": "sha256/c80d67305599de8242d3753ea965cf35503d25aa446bdb01e2630e3c50190eea/rsync-openrc-3.5.0-r0.apk",
+      "artifact_arch": "noarch",
+      "filename": "rsync-openrc-3.5.0-r0.apk",
+      "name": "rsync-openrc",
+      "sha256": "c80d67305599de8242d3753ea965cf35503d25aa446bdb01e2630e3c50190eea",
+      "version": "3.5.0-r0"
+    },
+    {
+      "apk_identity": "Q1N6ePLWGBlkrafJD1ZtgG0cNpo5k=",
+      "arch": "x86_64",
+      "artifact": "sha256/c7c6736bea9aa078cc950f5a22f97f4347d620ea59197a96e68db47f30876986/rsync-zsh-completion-5.9-r7.apk",
+      "artifact_arch": "noarch",
+      "filename": "rsync-zsh-completion-5.9-r7.apk",
+      "name": "rsync-zsh-completion",
+      "sha256": "c7c6736bea9aa078cc950f5a22f97f4347d620ea59197a96e68db47f30876986",
+      "version": "5.9-r7"
+    },
+    {
+      "apk_identity": "Q1ZxRfq02oiDmEzKL+Di2rnWA4jDw=",
+      "arch": "x86_64",
+      "artifact": "sha256/3fbec4ed70de5cfd1232939325ad5989e754b1397b573cac08c30454907fd172/runuser-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "runuser-2.42.3-r1.apk",
+      "name": "runuser",
+      "sha256": "3fbec4ed70de5cfd1232939325ad5989e754b1397b573cac08c30454907fd172",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1QYRSQi/MLTQ4PxaB9jeAtwKYsBY=",
+      "arch": "x86_64",
+      "artifact": "sha256/3cf3f5bcd048ceaafe3153600169b44f23f0a4ac25d419059ca0ada0b6c2cbe4/setarch-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "setarch-2.42.3-r1.apk",
+      "name": "setarch",
+      "sha256": "3cf3f5bcd048ceaafe3153600169b44f23f0a4ac25d419059ca0ada0b6c2cbe4",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q126UxFgIyZ1Gq+PVxG+GFlMVy9SY=",
+      "arch": "x86_64",
+      "artifact": "sha256/584e76a208e0478e512876e9774bcba0d8c5c4617e13d3a26b80117f812b149d/setpriv-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "setpriv-2.42.3-r1.apk",
+      "name": "setpriv",
+      "sha256": "584e76a208e0478e512876e9774bcba0d8c5c4617e13d3a26b80117f812b149d",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q12OIhimCtZA3DuAmIxHcZGpmq+98=",
+      "arch": "x86_64",
+      "artifact": "sha256/f38bd09c5b296166dfd30e277ddc3b03d3aa4e3d50ec538c5acf2b139aaf0ae8/sfdisk-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "sfdisk-2.42.3-r1.apk",
+      "name": "sfdisk",
+      "sha256": "f38bd09c5b296166dfd30e277ddc3b03d3aa4e3d50ec538c5acf2b139aaf0ae8",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1j1yS5eBaI7Vb7fGstSGgxRGjtlw=",
+      "arch": "x86_64",
+      "artifact": "sha256/1dd8145abdc10661d8950082eb2d4222cebaa7c7e57473c02786d3bc29c61410/shadow-libs-4.18.0-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "shadow-libs-4.18.0-r1.apk",
+      "name": "shadow-libs",
+      "sha256": "1dd8145abdc10661d8950082eb2d4222cebaa7c7e57473c02786d3bc29c61410",
+      "version": "4.18.0-r1"
+    },
+    {
+      "apk_identity": "Q1ZMakAHDErEd0gyT7Rjgksf5yxwU=",
+      "arch": "x86_64",
+      "artifact": "sha256/8ba081056ec045f1290597c4d8d0dd3cece4f9d37d92e52cdc0f30a64e1ab2b5/shadow-subids-4.18.0-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "shadow-subids-4.18.0-r1.apk",
+      "name": "shadow-subids",
+      "sha256": "8ba081056ec045f1290597c4d8d0dd3cece4f9d37d92e52cdc0f30a64e1ab2b5",
+      "version": "4.18.0-r1"
+    },
+    {
+      "apk_identity": "Q1F7I3qDm1mBrAavBr/kAdtZfz4So=",
+      "arch": "x86_64",
+      "artifact": "sha256/ec0d603af89c8027919f4e6b19370c0db4461a817c09f7cc8a1688cf16a84948/skalibs-libs-2.15.1.0-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "skalibs-libs-2.15.1.0-r0.apk",
+      "name": "skalibs-libs",
+      "sha256": "ec0d603af89c8027919f4e6b19370c0db4461a817c09f7cc8a1688cf16a84948",
+      "version": "2.15.1.0-r0"
+    },
+    {
+      "apk_identity": "Q14CJvRvzjLu77ioeaERtCi7ReScc=",
+      "arch": "x86_64",
+      "artifact": "sha256/a267a4eafd78492c98978bb8d919f6047444cde0e938d3e7ea0383cf2b5e4fd0/squashfs-tools-4.7.5-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "squashfs-tools-4.7.5-r0.apk",
+      "name": "squashfs-tools",
+      "sha256": "a267a4eafd78492c98978bb8d919f6047444cde0e938d3e7ea0383cf2b5e4fd0",
+      "version": "4.7.5-r0"
+    },
+    {
+      "apk_identity": "Q1V7pz9avmjRnCUDRoJpt/UM3eSs8=",
+      "arch": "x86_64",
+      "artifact": "sha256/d7137210645838526cff2d08eea4c6beecb855ba63d2765af1f97ed2485cbb15/tar-1.35-r5.apk",
+      "artifact_arch": "x86_64",
+      "filename": "tar-1.35-r5.apk",
+      "name": "tar",
+      "sha256": "d7137210645838526cff2d08eea4c6beecb855ba63d2765af1f97ed2485cbb15",
+      "version": "1.35-r5"
+    },
+    {
+      "apk_identity": "Q1Ttbu+UIkX8+pvnZjWxLTUp2fuzg=",
+      "arch": "x86_64",
+      "artifact": "sha256/d412e1a02fe9130b8b377276c694fe0bc8331660c4c31999cf43ae66293ca8d3/umount-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "umount-2.42.3-r1.apk",
+      "name": "umount",
+      "sha256": "d412e1a02fe9130b8b377276c694fe0bc8331660c4c31999cf43ae66293ca8d3",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1WIQ5B+15n2gUC/vqV5pdKK4ovp0=",
+      "arch": "x86_64",
+      "artifact": "sha256/b8d0e778eba32511491b89dd6007ede511bcbf1b01726156dd8f97555dd358cb/util-linux-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "util-linux-2.42.3-r1.apk",
+      "name": "util-linux",
+      "sha256": "b8d0e778eba32511491b89dd6007ede511bcbf1b01726156dd8f97555dd358cb",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1SP3Mel6suzVrO/zYkSdE3mAougw=",
+      "arch": "x86_64",
+      "artifact": "sha256/f9411dfe518e7dd2653c831d57d6cbef80ba128051ec0142eb3d0ebad63585c3/util-linux-misc-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "util-linux-misc-2.42.3-r1.apk",
+      "name": "util-linux-misc",
+      "sha256": "f9411dfe518e7dd2653c831d57d6cbef80ba128051ec0142eb3d0ebad63585c3",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1rX70/pF1ot7IgXlT6iElyuAt95Y=",
+      "arch": "x86_64",
+      "artifact": "sha256/802254a9be09f0e2e1fe1c6a2aad1832362fe0ca4ab826c603589c7f88c892f0/util-linux-openrc-2.42.3-r1.apk",
+      "artifact_arch": "noarch",
+      "filename": "util-linux-openrc-2.42.3-r1.apk",
+      "name": "util-linux-openrc",
+      "sha256": "802254a9be09f0e2e1fe1c6a2aad1832362fe0ca4ab826c603589c7f88c892f0",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1xskHkwwHobsKujT5aFV4JgObpk4=",
+      "arch": "x86_64",
+      "artifact": "sha256/353a12cf0ad7a0faed9977b2ff0389e6c6a5881cf2ce8847a308c0a05bc3a131/utmps-libs-0.1.3.4-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "utmps-libs-0.1.3.4-r0.apk",
+      "name": "utmps-libs",
+      "sha256": "353a12cf0ad7a0faed9977b2ff0389e6c6a5881cf2ce8847a308c0a05bc3a131",
+      "version": "0.1.3.4-r0"
+    },
+    {
+      "apk_identity": "Q18bMWA55WSh8/Mjlryy8RieseLk4=",
+      "arch": "x86_64",
+      "artifact": "sha256/83692803cf986f8484e4f2f04cf013b671cbffb4a53dfa1784e1db84dd84db44/uuidgen-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "uuidgen-2.42.3-r1.apk",
+      "name": "uuidgen",
+      "sha256": "83692803cf986f8484e4f2f04cf013b671cbffb4a53dfa1784e1db84dd84db44",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1d/xzRDRNf4es9n8GFdDlaCtGHp8=",
+      "arch": "x86_64",
+      "artifact": "sha256/6adb9022d2e929cf07cff54bc598eca06e076f93ad425743ed71e94edec6d844/wipefs-2.42.3-r1.apk",
+      "artifact_arch": "x86_64",
+      "filename": "wipefs-2.42.3-r1.apk",
+      "name": "wipefs",
+      "sha256": "6adb9022d2e929cf07cff54bc598eca06e076f93ad425743ed71e94edec6d844",
+      "version": "2.42.3-r1"
+    },
+    {
+      "apk_identity": "Q1tq9xR6bqCkmq8xV/sTbbWypz8TI=",
+      "arch": "x86_64",
+      "artifact": "sha256/256af685293170294ec5fb2d56a9d68261998bc77710ea69af3dccf902b75cc0/xz-5.8.3-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "xz-5.8.3-r0.apk",
+      "name": "xz",
+      "sha256": "256af685293170294ec5fb2d56a9d68261998bc77710ea69af3dccf902b75cc0",
+      "version": "5.8.3-r0"
+    },
+    {
+      "apk_identity": "Q1TJLFvgxb70BOk8iA66kDepsUc0c=",
+      "arch": "x86_64",
+      "artifact": "sha256/95162110d7b67e3e2fd243fa4a43f75170a9c4839c47f86bb5e34340a6dfe930/xz-libs-5.8.3-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "xz-libs-5.8.3-r0.apk",
+      "name": "xz-libs",
+      "sha256": "95162110d7b67e3e2fd243fa4a43f75170a9c4839c47f86bb5e34340a6dfe930",
+      "version": "5.8.3-r0"
+    },
+    {
+      "apk_identity": "Q1Fnp3Gzp9QyRr1djWc2TJHFDGQjY=",
+      "arch": "x86_64",
+      "artifact": "sha256/6e5dd88eb04341f673a40977a2d36bbe825ac772edddd2951192dcff76b9c49e/zlib-1.3.2-r0.apk",
+      "artifact_arch": "x86_64",
+      "filename": "zlib-1.3.2-r0.apk",
+      "name": "zlib",
+      "sha256": "6e5dd88eb04341f673a40977a2d36bbe825ac772edddd2951192dcff76b9c49e",
+      "version": "1.3.2-r0"
+    },
+    {
+      "apk_identity": "Q1Q6xE6pxGs0C6Mdj3/hBGny1CI/Q=",
+      "arch": "x86_64",
+      "artifact": "sha256/5025e2207b44a131f1b2262761187d88500829c2171d566d37a1225246fe542e/zstd-libs-1.5.7-r2.apk",
+      "artifact_arch": "x86_64",
+      "filename": "zstd-libs-1.5.7-r2.apk",
+      "name": "zstd-libs",
+      "sha256": "5025e2207b44a131f1b2262761187d88500829c2171d566d37a1225246fe542e",
+      "version": "1.5.7-r2"
+    }
+  ],
+  "repositories": "#/media/usb/apks\nhttps://dl-cdn.alpinelinux.org/alpine/edge/main\nhttps://dl-cdn.alpinelinux.org/alpine/edge/community\n@testing https://dl-cdn.alpinelinux.org/alpine/edge/testing\n@1password https://downloads.1password.com/linux/alpinelinux/stable/\n@personal /var/lib/cascadia/repositories/apk/edge/personal\n",
+  "schema": 2,
+  "scope": "incus-client-runtime-and-install-additions",
+  "world": "incus-client=7.0.1-r1\n"
+}
