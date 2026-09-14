@@ -3025,4 +3025,4 @@ but the two legacy merge bases manufactured rename conflicts. The publisher
 now recognizes an exact ancestor-tree match before attempting content merging;
 it retains the remote parent and publishes the new tested Fossil snapshot.
 Both this history-only case and genuinely independent remote file additions
-pass isolated local-Git tests. The publication regression batch passes 21 tests.
+pass isolated local-Git tests. The publication regression batch passes 19 tests.
