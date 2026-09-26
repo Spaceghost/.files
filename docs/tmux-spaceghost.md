@@ -117,3 +117,7 @@ tmux set-option -g status-right '%H:%M'
 `B` and `N` create session/window-specific choices. To inherit the global
 defaults again, use `tmux set-option -u status` and
 `tmux set-option -wu pane-border-status` in the affected session/window.
+
+## FFXIV and Moonlight
+
+See [the FFXIV integration guide](tmux-ffxiv.md) for persistent shared sessions, game profiles, and keyboard focus controls.

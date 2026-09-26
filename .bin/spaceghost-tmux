@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Attach a desktop or FFXIV view to the same persistent tmux windows."""
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--view", choices=("desktop", "alienware", "fedora"), default="desktop")
+    parser.add_argument("--session", default="0", help="Canonical session (default: 0)")
+    parser.add_argument("--socket-name", default="default", help="tmux -L socket name")
+    parser.add_argument("--prepare", action="store_true", help="Prepare the view without attaching")
+    parser.add_argument("--client", help="Explicit client when switching from a tmux binding")
+    args = parser.parse_args()
+    for value in (args.session, args.socket_name):
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
+            parser.error("session and socket names may contain only letters, digits, _ and -")
+    command = ["tmux", "-L", args.socket_name]
+
+    def run(*argv, check=True):
+        return subprocess.run(command + list(argv), text=True, capture_output=True, check=check)
+
+    def exists(name):
+        return run("has-session", "-t", "=" + name, check=False).returncode == 0
+
+    def info(name, fmt):
+        return run("display-message", "-p", "-t", "=" + name + ":", fmt).stdout.strip()
+
+    if not exists(args.session):
+        result = run("new-session", "-d", "-s", args.session, check=False)
+        if result.returncode and not exists(args.session):
+            raise RuntimeError(result.stderr.strip())
+    target = args.session
+    if args.view != "desktop":
+        target = "ffxiv-" + args.view + "-" + args.session
+        if not exists(target):
+            # new-session -t accepts a group/session name, not target-session's '=' prefix.
+            result = run("new-session", "-d", "-E", "-t", args.session,
+                         "-s", target, check=False)
+            if result.returncode and not exists(target):
+                raise RuntimeError(result.stderr.strip())
+        source_group = info(args.session, "#{session_group}")
+        if not source_group or info(target, "#{session_group}") != source_group:
+            raise RuntimeError(f"{target} already exists outside the requested session group; left untouched")
+        run("set-option", "-t", "=" + target + ":", "@spaceghost-surface", "FFXIV / " + args.view.upper())
+        run("set-option", "-t", "=" + target + ":", "status", "on")
+        run("set-option", "-t", "=" + target + ":", "destroy-unattached", "off")
+        run("set-option", "-t", "=" + target + ":", "status-left",
+            "#[bg=#b4a1ff,fg=#0b0d16,bold] FFXIV "
+            "#[bg=#161a2b,fg=#e8edf7,nobold] " + args.view.upper() + " / bak #[bg=#0b0d16] ")
+    if args.prepare:
+        print(json.dumps({"session": target, "source": args.session, "view": args.view,
+                          "socket": args.socket_name}))
+        return
+    # A call from within tmux changes views instead of nesting another client.
+    current_socket = os.environ.get("TMUX", "").split(",", 1)[0]
+    target_socket = info(target, "#{socket_path}")
+    if current_socket and current_socket == target_socket:
+        client = ["-c", args.client] if args.client else []
+        os.execvp("tmux", command + ["switch-client", *client, "-t", "=" + target])
+    if current_socket:
+        raise RuntimeError("Already inside another tmux server; detach before attaching this server")
+    # Preserve the desktop's environment when an SSH/game client attaches.
+    os.execvp("tmux", command + ["attach-session", "-E", "-t", "=" + target])
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (RuntimeError, OSError, subprocess.CalledProcessError) as error:
+        detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) and error.stderr else str(error)
+        print("spaceghost-tmux: " + detail, file=sys.stderr)
+        sys.exit(1)
