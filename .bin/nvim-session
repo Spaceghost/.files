@@ -14,6 +14,11 @@ elif [ -n "${XDG_RUNTIME_DIR:-}" ]; then sock="$XDG_RUNTIME_DIR/nvim-spaceghost.
 else sock="/tmp/nvim-spaceghost-$(id -u).sock"
 fi
 export SPACEGHOST_NVIM_SOCK="$sock"
+# mosh/ssh logins may lack the user-systemd environment; recover it when the runtime dir exists.
+if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d "/run/user/$(id -u)" ]; then XDG_RUNTIME_DIR="/run/user/$(id -u)"; export XDG_RUNTIME_DIR; fi
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "$XDG_RUNTIME_DIR/bus" ]; then
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"; export DBUS_SESSION_BUS_ADDRESS
+fi
 # Services start with a bare PATH; find nvim wherever the installer put it.
 PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 export PATH
@@ -25,8 +30,14 @@ have_systemd() {
 }
 
 start() {
+    alive && return 0
     if have_systemd && [ -f "$HOME/.config/systemd/user/spaceghost-nvim.service" ]; then
-        systemctl --user start spaceghost-nvim.service
+        # Active but not answering means the socket file was removed under it: rebind.
+        if systemctl --user is-active -q spaceghost-nvim.service; then
+            systemctl --user restart spaceghost-nvim.service
+        else
+            systemctl --user start spaceghost-nvim.service
+        fi
     else
         # No service manager for this user: detach from the terminal and this ssh session.
         rm -f "$sock"
@@ -44,7 +55,10 @@ case "${1:-ensure}" in
     sock) echo "$sock" ;;
     status) if alive; then echo "alive $sock"; else echo "down $sock"; exit 1; fi ;;
     ensure) alive || start; echo "$sock" ;;
-    run) rm -f "$sock"; exec nvim --headless --listen "$sock" ;;
+    run)
+        # Never bind over a live server; wait for it instead of starting a twin.
+        while alive; do sleep 5; done
+        rm -f "$sock"; exec nvim --headless --listen "$sock" ;;
     stop)
         if have_systemd && systemctl --user is-active -q spaceghost-nvim.service; then
             systemctl --user stop spaceghost-nvim.service

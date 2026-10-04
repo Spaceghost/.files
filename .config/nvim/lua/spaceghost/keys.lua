@@ -1,9 +1,16 @@
--- Ctrl-\ prefix: multiplexer controls usable from normal and terminal mode.
+-- Prefix keys: multiplexer controls usable from normal and terminal mode.
+-- Ctrl-\ everywhere; Ctrl-Space in terminals that report it as a key (kitty
+-- keyboard protocol: Ghostty, foot, kitty, Alacritty, WezTerm). Override with
+-- vim.g.spaceghost_prefixes = { '<C-\\>', '<C-Space>', '<C-b>' } before setup.
 local M = {}
 local shell = require('spaceghost.shell')
 
+M.prefixes = vim.g.spaceghost_prefixes or { '<C-\\>', '<C-Space>' }
+
 local function map(lhs, rhs, desc, modes)
-  vim.keymap.set(modes or { 'n', 't' }, '<C-\\>' .. lhs, rhs, { silent = true, desc = desc })
+  for _, prefix in ipairs(M.prefixes) do
+    vim.keymap.set(modes or { 'n', 't' }, prefix .. lhs, rhs, { silent = true, desc = desc })
+  end
 end
 
 function M.zoom()
@@ -81,7 +88,13 @@ function M.setup()
     local text = vim.fn.getreg('"')
     if text ~= '' then vim.api.nvim_chan_send(vim.bo.channel, text) end
   end, 'Paste register into shell', { 't' })
-  map('<C-\\>', '<C-\\>', 'Send literal Ctrl-\\', { 't' })
+  -- Prefix twice sends the prefix itself to the program in the pane.
+  for _, prefix in ipairs(M.prefixes) do
+    vim.keymap.set('t', prefix .. prefix, prefix, { desc = 'Send literal ' .. prefix })
+  end
+  vim.keymap.set({ 'n', 't' }, '<C-]>', function()
+    if vim.b.spaceghost_attach then shell.remote_keys(nil, 'toggle') end
+  end, { desc = 'Toggle sending the prefix to the attached machine' })
   -- Terminal copy mode: y yanks and returns to the shell prompt.
   vim.keymap.set('n', '<Esc>', function()
     if vim.bo.buftype == 'terminal' and (vim.b.spaceghost_shell or vim.b.spaceghost_float) then vim.cmd.startinsert() end

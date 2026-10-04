@@ -74,7 +74,7 @@ end
 function M.field_guide()
   local native = require('spaceghost.native')
   M.menu('flight manual', {
-    { note = 'PREFIX: Ctrl-\\     /    Ctrl-\\ Ctrl-\\ sends it through' },
+    { note = 'PREFIX: Ctrl-\\ or Ctrl-Space   /   prefix twice sends it through' },
     { sep = true },
     { note = 'Space      command deck     ?  F1   field guide' },
     { note = 'c          new tab shell    s / v   split below / right' },
@@ -85,7 +85,7 @@ function M.field_guide()
     { note = '`          scratch shell    g       git observatory' },
     { note = '[          copy mode        ]       paste into shell' },
     { note = 'e          edit a file      ,       rename tab' },
-    { note = 'a          attach machine   Alt-\\   leave an attach pane' },
+    { note = 'a          attach machine   Ctrl-]  prefix to remote on/off' },
     { note = 'r          reload config    Ctrl-n  leave terminal mode' },
     { sep = true },
     { note = 'NOW selected   NEW unread   LIVE shell   EDIT file   EXIT dead' },

@@ -115,6 +115,9 @@ function M.statusline()
       .. (vim.bo[buf].readonly and hl('SpaceghostStatusAlert', ' RO') or '')
   end
   parts[#parts + 1] = what
+  if vim.b[buf].spaceghost_remote_keys then
+    parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostModeVisual', ' REMOTE KEYS / ^] back ')
+  end
   parts[#parts + 1] = hl('StatusLine', ' / ') .. hl('SpaceghostStatusCwd', short)
   local branch = git_branch(cwd)
   if branch ~= '' then parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostStatusBranch', ' ' .. branch) end

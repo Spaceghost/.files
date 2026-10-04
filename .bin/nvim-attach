@@ -24,10 +24,11 @@ host="${1:-}"
 
 # Inside the cockpit already: open the attach as a pane of this Neovim instead of
 # nesting a client in the current shell. Spaceghost.shell.attach runs us again with --here.
-if [ -n "${NVIM:-}" ] && [ "$here" = 0 ]; then
+if [ -n "${NVIM:-}" ] && [ "$here" = 0 ] && nvim --server "$NVIM" --remote-expr '1' </dev/null >/dev/null 2>&1; then
     nvim --server "$NVIM" --remote-expr "v:lua.Spaceghost.shell.attach('$(printf '%s' "$host" | sed "s/'/''/g")')" </dev/null >/dev/null
     exit $?
 fi
+unset NVIM   # a stale $NVIM from a dead editor must not confuse the client
 
 if [ -z "$host" ]; then
     if sock="$(nvim-session ensure 2>/dev/null)"; then

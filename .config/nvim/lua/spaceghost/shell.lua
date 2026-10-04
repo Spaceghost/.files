@@ -135,7 +135,8 @@ end
 
 -- ── Attach to another machine's session in a pane ─────────────────────────────
 -- Runs `nvim-attach --here HOST` (mosh or ssh UI client) inside a terminal split.
--- Ctrl-\ in that pane goes to the remote cockpit; Alt-\ steps back out here.
+-- The prefix stays local by default; Ctrl-] toggles REMOTE KEYS, where the prefix
+-- goes to the attached cockpit instead (prefix twice always sends it through).
 function M.attach(host, open)
   if not host or host == '' then return M.open(open or 'belowright vnew') end
   local buf = M.open(open or 'belowright vnew', {
@@ -144,9 +145,24 @@ function M.attach(host, open)
   })
   vim.b[buf].spaceghost_attach = host
   vim.b[buf].term_title = host
-  vim.keymap.set('t', '<C-\\>', '<C-\\>', { buffer = buf, nowait = true, desc = 'Prefix goes to ' .. host })
-  vim.keymap.set('t', '<M-\\>', '<C-\\><C-n>', { buffer = buf, nowait = true, desc = 'Back to the local cockpit' })
   return buf
+end
+
+function M.remote_keys(buf, state)
+  buf = buf or vim.api.nvim_get_current_buf()
+  if not vim.b[buf].spaceghost_attach then return end
+  local on = state == 'toggle' and not vim.b[buf].spaceghost_remote_keys or state == true
+  local prefixes = require('spaceghost.keys').prefixes
+  for _, prefix in ipairs(prefixes) do
+    if on then
+      vim.keymap.set('t', prefix, prefix, { buffer = buf, nowait = true, desc = 'Prefix goes to ' .. vim.b[buf].spaceghost_attach })
+    else
+      pcall(vim.keymap.del, 't', prefix, { buffer = buf })
+    end
+  end
+  vim.b[buf].spaceghost_remote_keys = on
+  vim.cmd.startinsert()
+  pcall(vim.cmd.redrawstatus)
 end
 
 -- ── Remote edit: used by ~/.bin/nvim-remote via --remote-expr ─────────────────

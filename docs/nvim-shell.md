@@ -23,9 +23,13 @@ shell, add the same block to `~/.bashrc` (see "Install").
   and fonts; no UDP needed). mosh cannot forward sockets, hence the split.
 * **Attach in a pane**: from a shell inside the cockpit, `a HOST` (or
   `Ctrl-\ a`, `:Attach HOST [vnew|new|tabnew]`, deck entry) opens HOST's
-  cockpit in a vertical split labelled `@HOST`. In that pane `Ctrl-\` goes to
-  the remote cockpit; `Alt-\` steps back to the local one. `:detach` inside
-  closes the pane.
+  cockpit in a vertical split labelled `@HOST`. The prefix keeps controlling
+  the local cockpit; `Ctrl-]` toggles REMOTE KEYS (shown in the statusline)
+  so the prefix drives the remote one instead. `:detach` inside closes the
+  pane.
+* `Ctrl-Space` is only seen by terminals that speak the kitty keyboard
+  protocol (Ghostty, foot, kitty, Alacritty, WezTerm); older terminals send
+  NUL, which Neovim drops, so use `Ctrl-\` there.
 * Only the instance started by `nvim-session` (`--listen`) owns the shared
   socket; a plain `nvim` never claims it.
 * `nvim-session status|stop|sock` on any machine. `spaceghost-install`
@@ -55,7 +59,7 @@ shell, add the same block to `~/.bashrc` (see "Install").
 * **Colorscheme** `spaceghost` matches `.tmux.conf` and the terminal themes;
   terminal palette colors are set so TUIs inside the shell match too.
 
-## Keys (prefix `Ctrl-\`)
+## Keys (prefix `Ctrl-\` or `Ctrl-Space`)
 
 | key | action | key | action |
 | --- | --- | --- | --- |
@@ -67,10 +71,10 @@ shell, add the same block to `~/.bashrc` (see "Install").
 | `z` / `=` | zoom / balance | `x` | close pane |
 | `` ` `` | scratch terminal (toggle) | `g` | git observatory |
 | `~` | btop / htop | `e` | edit a file |
-| `a` | attach a machine in a split | `Alt-\` | leave an attach pane |
+| `a` | attach a machine in a split | `Ctrl-]` | send the prefix to the remote pane on/off |
 | `[` | copy mode (`Esc` returns) | `]` | paste `"` register into shell |
 | `,` | rename tab | `r` | reload configuration |
-| `Ctrl-\` | send a literal Ctrl-\ | `Ctrl-n` | leave terminal mode |
+| prefix | send the prefix itself | `Ctrl-n` | leave terminal mode |
 
 `:Shell [tabnew|vnew|new]` opens a shell from the command line.
 
