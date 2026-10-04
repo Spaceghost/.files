@@ -1,0 +1,62 @@
+#!/bin/sh
+# nvim-remote: an $EDITOR that reuses the running Neovim instead of nesting one.
+# Inside a Neovim :terminal, $NVIM names the host. Elsewhere (tmux panes, other
+# terminals) the shared socket from ~/.config/nvim/init.lua is tried. With no
+# reachable instance it simply runs nvim.
+#
+#   nvim-remote [+LINE] [--] FILE...     open and wait until each buffer closes
+#   nvim-remote                          open a scratch buffer and wait
+set -eu
+
+sock="${SPACEGHOST_NVIM_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/nvim-spaceghost.sock}"
+target=""
+alive() { nvim --server "$1" --remote-expr '1' >/dev/null 2>&1; }
+if [ -n "${NVIM:-}" ] && alive "$NVIM"; then
+    target="$NVIM"
+elif [ -S "$sock" ] && alive "$sock"; then
+    target="$sock"
+fi
+[ -n "$target" ] || exec nvim "$@"
+
+line=""
+case "${1:-}" in
+    +[0-9]*) line="${1#+}"; shift ;;
+esac
+[ "${1:-}" = "--" ] && shift
+
+vimquote() { printf '%s' "$1" | sed "s/'/''/g"; }
+tmp="$(mktemp -d "${TMPDIR:-/tmp}/nvim-remote.XXXXXX")"
+trap 'rm -rf "$tmp"' EXIT INT TERM
+pending=""
+open_one() {
+    path="$1"
+    case "$path" in
+        '' | /*) ;;
+        *) path="$PWD/$path" ;;
+    esac
+    done_file="$tmp/$(printf '%s' "$path" | cksum | cut -d' ' -f1)"
+    : > "$done_file"
+    nvim --server "$target" --remote-expr \
+        "v:lua.Spaceghost.edit('$(vimquote "$path")', '$(vimquote "$done_file")', '${line}')" \
+        >/dev/null
+    pending="$pending $done_file"
+}
+if [ $# -eq 0 ]; then
+    open_one ""
+else
+    for f in "$@"; do open_one "$f"; done
+fi
+
+# Wait until every buffer has been closed in the host; stop if the host dies.
+tick=0
+while :; do
+    remaining=0
+    for d in $pending; do [ -e "$d" ] && remaining=1; done
+    [ "$remaining" -eq 0 ] && break
+    tick=$((tick + 1))
+    if [ $((tick % 20)) -eq 0 ] && ! alive "$target"; then
+        echo "nvim-remote: host Neovim is gone" >&2
+        exit 1
+    fi
+    sleep 0.1
+done
