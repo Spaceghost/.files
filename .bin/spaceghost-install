@@ -92,6 +92,15 @@ if [ -n "$need" ]; then
     fi
 fi
 command -v nvim >/dev/null 2>&1 || { log "nvim still missing; stopping"; exit 1; }
+# mosh: roaming attach between machines. Package managers only; never built here.
+if ! command -v mosh-server >/dev/null 2>&1; then
+    if command -v apk >/dev/null 2>&1 && command -v sudo >/dev/null 2>&1; then sudo -n apk add --no-progress mosh || log "apk add mosh failed"
+    elif command -v brew >/dev/null 2>&1; then brew install -q mosh || log "brew install mosh failed"
+    elif command -v rpm-ostree >/dev/null 2>&1; then log "mosh missing: sudo rpm-ostree install mosh (needs a reboot)"
+    elif command -v apt-get >/dev/null 2>&1 && command -v sudo >/dev/null 2>&1; then sudo -n apt-get install -y -q mosh || log "apt-get install mosh failed"
+    else log "mosh missing; nvim-attach HOST will use ssh forwarding"
+    fi
+fi
 log "$(nvim --version | head -1) at $(command -v nvim); zsh: $(command -v zsh || echo 'none (bash fallback)')"
 
 # ── 5. native helpers ─────────────────────────────────────────────────────────

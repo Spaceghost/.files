@@ -1,12 +1,19 @@
 #!/bin/sh
-# nvim-attach [HOST]: attach a Neovim UI to the persistent session on this
-# machine, or on HOST over ssh (the socket is forwarded; the UI runs locally).
+# nvim-attach [--ssh] [HOST]: attach a Neovim UI to the persistent session on
+# this machine, or on HOST.
+#   * With mosh on both ends (default): `mosh HOST -- nvim-attach`, so the UI runs
+#     on HOST inside a roaming, latency-hiding mosh session. Survives sleep, Wi-Fi
+#     changes and IP moves; reconnects by itself.
+#   * --ssh (or no mosh): forward HOST's socket over ssh and run the UI locally.
+#     Needed when you want this machine's clipboard/fonts, or UDP is blocked.
 # Detach with :detach (or close the terminal); the session keeps running.
 # With no session reachable and no HOST, falls back to a plain `nvim`.
 set -eu
 
 PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 export PATH
+use_ssh=0
+if [ "${1:-}" = "--ssh" ]; then use_ssh=1; shift; fi
 host="${1:-}"
 
 if [ -z "$host" ]; then
@@ -17,7 +24,14 @@ if [ -z "$host" ]; then
     exec nvim
 fi
 
-# Remote: the session's own ~/.bin/nvim-session reports (and starts) its socket.
+# Remote over mosh: the UI runs on HOST; mosh keeps the connection alive for us.
+if [ "$use_ssh" = 0 ] && [ -z "${SPACEGHOST_NO_MOSH:-}" ] && command -v mosh >/dev/null 2>&1 \
+    && ssh -o BatchMode=yes "$host" 'command -v mosh-server' >/dev/null 2>&1; then
+    # shellcheck disable=SC2016  # expands on the remote side
+    exec mosh "$host" -- sh -c 'exec "$HOME/.bin/nvim-attach"'
+fi
+
+# Remote over ssh: the session's own ~/.bin/nvim-session reports (and starts) its socket.
 remote_sock="$(ssh -o BatchMode=yes "$host" 'exec "$HOME/.bin/nvim-session" ensure')"
 [ -n "$remote_sock" ] || { echo "nvim-attach: $host has no nvim-session" >&2; exit 1; }
 local_dir="${XDG_RUNTIME_DIR:-/tmp}/nvim-attach"

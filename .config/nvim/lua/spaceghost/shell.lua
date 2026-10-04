@@ -3,7 +3,16 @@ local M = {}
 local uv = vim.uv or vim.loop
 local native = require('spaceghost.native')
 
-M.shell_cmd = { 'sh', '-c', 'exec zsh || exec fish || exec bash' }
+-- First login shell that exists on this machine; `exec a || exec b` in sh exits
+-- on the first failure, so pick here instead.
+local function pick_shell()
+  for _, name in ipairs({ 'zsh', 'fish', 'bash', 'sh' }) do
+    local path = vim.fn.exepath(name)
+    if path ~= '' then return { path } end
+  end
+  return { vim.o.shell }
+end
+M.shell_cmd = pick_shell()
 M.sock = vim.env.SPACEGHOST_NVIM_SOCK
   or (vim.env.XDG_RUNTIME_DIR and (vim.env.XDG_RUNTIME_DIR .. '/nvim-spaceghost.sock'))
   or ('/tmp/nvim-spaceghost-' .. tostring(uv.getuid()) .. '.sock')

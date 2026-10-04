@@ -29,4 +29,5 @@ brew "readline"
 brew "expect"
 brew "sqlite"
 brew "tcl-tk"
-
+brew "mosh"
+brew "neovim"
