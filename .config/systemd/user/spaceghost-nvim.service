@@ -5,7 +5,7 @@ Documentation=file:%h/.files/docs/nvim-shell.md
 [Service]
 Type=simple
 ExecStart=%h/.bin/nvim-session run
-Restart=on-failure
+Restart=always
 RestartSec=1
 KillMode=mixed
 TimeoutStopSec=10

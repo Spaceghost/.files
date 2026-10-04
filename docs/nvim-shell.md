@@ -6,6 +6,24 @@ already inside Neovim or tmux, so zsh remains `$SHELL` while Neovim is what you
 see. `SPACEGHOST_PLAIN_SHELL=1 zsh` gives one plain shell. On a bash login
 shell, add the same block to `~/.bashrc` (see "Install").
 
+## Sessions: one per machine, attach from anywhere
+
+* `nvim-session` keeps one headless Neovim per machine on the shared socket.
+  With user systemd it is the `spaceghost-nvim` user service (lingering,
+  `Restart=always`, so `exit`/`:qa` just gives you a fresh session); without
+  it (Alpine/bak) the login hook starts it with `setsid` on first attach.
+* Every interactive terminal runs `nvim-attach`, which joins that session as
+  a UI (`nvim --remote-ui`). Two terminals show the same tabs and shells.
+* **Detach**: `:detach`, or close the terminal. Shells and jobs keep running.
+  **Reattach**: open a terminal. `SPACEGHOST_PLAIN_SHELL=1 bash` skips it.
+* **Remote**: `nvim-attach HOST` (alias `a HOST`). With mosh on both ends it
+  runs `mosh HOST -- nvim-attach`, so the UI lives on HOST and the link
+  survives sleep, roaming and IP changes. `nvim-attach --ssh HOST` instead
+  forwards HOST's socket over ssh and runs the UI locally (local clipboard
+  and fonts; no UDP needed). mosh cannot forward sockets, hence the split.
+* `nvim-session status|stop|sock` on any machine. `spaceghost-install`
+  sets a machine up end to end (see Install).
+
 ## One instance
 
 * The first instance listens on `$XDG_RUNTIME_DIR/nvim-spaceghost.sock`
@@ -62,13 +80,22 @@ which backend is active.
 ## Install
 
 ```sh
-gh repo clone Spaceghost/.files ~/.files
-ln -sfn ~/.files/.zshrc ~/.zshrc; ln -sfn ~/.files/.zshenv ~/.zshenv; ln -sfn ~/.files/.bin ~/.bin
-ln -sfn ~/.files/.config/nvim ~/.config/nvim
-ln -sfn ~/.files/.config/ghostty/config ~/.config/ghostty/config
-ln -sfn ~/.files/.config/ghostty/themes ~/.config/ghostty/themes
-~/.bin/spaceghost-native toolchain && ~/.bin/spaceghost-native   # optional
+curl -fsSL https://raw.githubusercontent.com/Spaceghost/.files/base/.bin/spaceghost-install | sh
+# or, with the repo already present:  ~/.files/.bin/spaceghost-install [--native]
 ```
+
+The installer is idempotent: it clones or updates the repo (into
+`~/.spaceghost` when `~/.files` already holds another repository, as on
+fedora), links `~/.bin`, `~/.config/nvim`, the zsh files and any terminal
+configs whose emulator is installed, hooks `~/.bashrc`/`~/.profile` through
+`.bash_spaceghost`, installs Neovim and zsh when missing (apk with sudo on
+Alpine; the stable tarball into `~/.local/nvim` elsewhere), installs mosh
+where a package manager allows, enables the session service and starts it.
+`--native` also installs the Nelua/zig toolchain and builds the helpers.
+
+Machines so far: alienware (Bazzite, brew nvim 0.12.5, nelua backend),
+fedora (Sway Atomic, tarball nvim 0.12.5, bash, Lua backend), bak (Alpine,
+apk nvim 0.12.2 + zsh, no user systemd, Lua backend).
 
 Terminal themes for foot, kitty and Alacritty live beside the Ghostty one in
 `.config/`; see `docs/terminals.md`.

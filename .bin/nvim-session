@@ -45,6 +45,11 @@ case "${1:-ensure}" in
     status) if alive; then echo "alive $sock"; else echo "down $sock"; exit 1; fi ;;
     ensure) alive || start; echo "$sock" ;;
     run) rm -f "$sock"; exec nvim --headless --listen "$sock" ;;
-    stop) alive && nvim --server "$sock" --remote-send '<C-\><C-n>:qa!<CR>' </dev/null >/dev/null 2>&1 || true ;;
+    stop)
+        if have_systemd && systemctl --user is-active -q spaceghost-nvim.service; then
+            systemctl --user stop spaceghost-nvim.service
+        elif alive; then
+            nvim --server "$sock" --remote-send '<C-\><C-n>:qa!<CR>' </dev/null >/dev/null 2>&1 || true
+        fi ;;
     *) echo "usage: nvim-session [ensure|run|status|stop|sock]" >&2; exit 2 ;;
 esac
