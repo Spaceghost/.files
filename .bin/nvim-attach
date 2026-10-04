@@ -12,9 +12,22 @@ set -eu
 
 PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
 export PATH
-use_ssh=0
-if [ "${1:-}" = "--ssh" ]; then use_ssh=1; shift; fi
+use_ssh=0; here=0
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --ssh) use_ssh=1; shift ;;
+        --here) here=1; shift ;;   # run the client in this terminal even inside Neovim
+        *) break ;;
+    esac
+done
 host="${1:-}"
+
+# Inside the cockpit already: open the attach as a pane of this Neovim instead of
+# nesting a client in the current shell. Spaceghost.shell.attach runs us again with --here.
+if [ -n "${NVIM:-}" ] && [ "$here" = 0 ]; then
+    nvim --server "$NVIM" --remote-expr "v:lua.Spaceghost.shell.attach('$(printf '%s' "$host" | sed "s/'/''/g")')" </dev/null >/dev/null
+    exit $?
+fi
 
 if [ -z "$host" ]; then
     if sock="$(nvim-session ensure 2>/dev/null)"; then
@@ -28,7 +41,7 @@ fi
 if [ "$use_ssh" = 0 ] && [ -z "${SPACEGHOST_NO_MOSH:-}" ] && command -v mosh >/dev/null 2>&1 \
     && ssh -o BatchMode=yes "$host" 'command -v mosh-server' >/dev/null 2>&1; then
     # shellcheck disable=SC2016  # expands on the remote side
-    exec mosh "$host" -- sh -c 'exec "$HOME/.bin/nvim-attach"'
+    exec mosh "$host" -- sh -c 'exec "$HOME/.bin/nvim-attach" --here'
 fi
 
 # Remote over ssh: the session's own ~/.bin/nvim-session reports (and starts) its socket.

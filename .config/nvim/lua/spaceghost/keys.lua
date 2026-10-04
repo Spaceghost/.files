@@ -38,6 +38,14 @@ function M.edit_prompt()
   end)
 end
 
+function M.attach_prompt()
+  vim.ui.input({ prompt = 'Attach to host: ', default = vim.g.spaceghost_last_host or '' }, function(host)
+    if not host or host == '' then return end
+    vim.g.spaceghost_last_host = host
+    shell.attach(host)
+  end)
+end
+
 function M.setup()
   local deck = require('spaceghost.deck')
   map('c', function() shell.open('tabnew') end, 'New tab shell')
@@ -45,6 +53,7 @@ function M.setup()
   map('v', function() shell.open('belowright vnew') end, 'Split shell right')
   map('x', M.close_pane, 'Close pane')
   map('e', M.edit_prompt, 'Edit a file')
+  map('a', M.attach_prompt, 'Attach to a machine in a split')
   for _, k in ipairs({ 'h', 'j', 'k', 'l' }) do
     map(k, '<C-\\><C-n><C-w>' .. k, 'Focus pane ' .. k)
   end

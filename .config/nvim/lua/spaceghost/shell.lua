@@ -49,6 +49,7 @@ function M.is_shell(buf) return vim.bo[buf].buftype == 'terminal' end
 
 -- Human label for a buffer: terminal title without user@host, else file name.
 function M.label(buf)
+  if vim.b[buf].spaceghost_attach then return '@' .. vim.b[buf].spaceghost_attach end
   if vim.bo[buf].buftype == 'terminal' then
     local title = vim.b[buf].term_title or ''
     title = title:gsub('^[%w%.%-_]+@[%w%.%-_]+:%s*', '')
@@ -141,6 +142,22 @@ function M.float(cmd, opts)
   if key then floats[key] = { buf = buf, win = win } end
   vim.cmd.startinsert()
   return buf, win
+end
+
+-- ── Attach to another machine's session in a pane ─────────────────────────────
+-- Runs `nvim-attach --here HOST` (mosh or ssh UI client) inside a terminal split.
+-- Ctrl-\ in that pane goes to the remote cockpit; Alt-\ steps back out here.
+function M.attach(host, open)
+  if not host or host == '' then return M.open(open or 'belowright vnew') end
+  local buf = M.open(open or 'belowright vnew', {
+    cmd = { vim.fn.expand('~/.bin/nvim-attach'), '--here', host },
+    cwd = vim.env.HOME,
+  })
+  vim.b[buf].spaceghost_attach = host
+  vim.b[buf].term_title = host
+  vim.keymap.set('t', '<C-\\>', '<C-\\>', { buffer = buf, nowait = true, desc = 'Prefix goes to ' .. host })
+  vim.keymap.set('t', '<M-\\>', '<C-\\><C-n>', { buffer = buf, nowait = true, desc = 'Back to the local cockpit' })
+  return buf
 end
 
 -- ── Remote edit: used by ~/.bin/nvim-remote via --remote-expr ─────────────────
@@ -239,6 +256,10 @@ function M.setup()
   vim.api.nvim_create_user_command('Shell', function(opts)
     M.open(opts.args ~= '' and opts.args or 'belowright new')
   end, { nargs = '?', desc = 'Open a shell: :Shell [tabnew|vnew|new]' })
+  vim.api.nvim_create_user_command('Attach', function(opts)
+    local host, open = opts.fargs[1], opts.fargs[2]
+    M.attach(host, open and ({ tabnew = 'tabnew', new = 'belowright new', vnew = 'belowright vnew' })[open] or open)
+  end, { nargs = '+', desc = 'Attach to HOST in a pane: :Attach HOST [vnew|new|tabnew]' })
 end
 
 return M
