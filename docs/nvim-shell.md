@@ -21,6 +21,13 @@ shell, add the same block to `~/.bashrc` (see "Install").
   survives sleep, roaming and IP changes. `nvim-attach --ssh HOST` instead
   forwards HOST's socket over ssh and runs the UI locally (local clipboard
   and fonts; no UDP needed). mosh cannot forward sockets, hence the split.
+* **Attach in a pane**: from a shell inside the cockpit, `a HOST` (or
+  `Ctrl-\ a`, `:Attach HOST [vnew|new|tabnew]`, deck entry) opens HOST's
+  cockpit in a vertical split labelled `@HOST`. In that pane `Ctrl-\` goes to
+  the remote cockpit; `Alt-\` steps back to the local one. `:detach` inside
+  closes the pane.
+* Only the instance started by `nvim-session` (`--listen`) owns the shared
+  socket; a plain `nvim` never claims it.
 * `nvim-session status|stop|sock` on any machine. `spaceghost-install`
   sets a machine up end to end (see Install).
 
@@ -60,6 +67,7 @@ shell, add the same block to `~/.bashrc` (see "Install").
 | `z` / `=` | zoom / balance | `x` | close pane |
 | `` ` `` | scratch terminal (toggle) | `g` | git observatory |
 | `~` | btop / htop | `e` | edit a file |
+| `a` | attach a machine in a split | `Alt-\` | leave an attach pane |
 | `[` | copy mode (`Esc` returns) | `]` | paste `"` register into shell |
 | `,` | rename tab | `r` | reload configuration |
 | `Ctrl-\` | send a literal Ctrl-\ | `Ctrl-n` | leave terminal mode |

@@ -17,23 +17,12 @@ M.sock = vim.env.SPACEGHOST_NVIM_SOCK
   or (vim.env.XDG_RUNTIME_DIR and (vim.env.XDG_RUNTIME_DIR .. '/nvim-spaceghost.sock'))
   or ('/tmp/nvim-spaceghost-' .. tostring(uv.getuid()) .. '.sock')
 
--- ── Server: the first instance owns the shared socket ─────────────────────────
-local function socket_alive(path)
-  local ok, chan = pcall(vim.fn.sockconnect, 'pipe', path, { rpc = true })
-  if ok and chan > 0 then pcall(vim.fn.chanclose, chan); return true end
-  return false
-end
-
+-- ── Server: only the instance started on the shared socket owns it ───────────
+-- nvim-session runs `nvim --headless --listen <sock>`. A plain `nvim` never
+-- claims the socket, so a restart of the service cannot race with a terminal.
 function M.claim_server()
-  if vim.env.NVIM then return false end
-  if vim.tbl_contains(vim.fn.serverlist(), M.sock) then M.is_server = true; return true end
-  if uv.fs_stat(M.sock) then
-    if socket_alive(M.sock) then return false end
-    os.remove(M.sock)
-  end
-  local ok = pcall(vim.fn.serverstart, M.sock)
-  M.is_server = ok
-  return ok
+  M.is_server = vim.tbl_contains(vim.fn.serverlist(), M.sock)
+  return M.is_server
 end
 
 -- ── Terminal cwd / title / activity bookkeeping ───────────────────────────────
