@@ -10,7 +10,7 @@ set -eu
 
 sock="${SPACEGHOST_NVIM_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/nvim-spaceghost.sock}"
 target=""
-alive() { nvim --server "$1" --remote-expr '1' >/dev/null 2>&1; }
+alive() { nvim --server "$1" --remote-expr '1' </dev/null >/dev/null 2>&1; }
 if [ -n "${NVIM:-}" ] && alive "$NVIM"; then
     target="$NVIM"
 elif [ -S "$sock" ] && alive "$sock"; then
@@ -38,7 +38,7 @@ open_one() {
     : > "$done_file"
     nvim --server "$target" --remote-expr \
         "v:lua.Spaceghost.edit('$(vimquote "$path")', '$(vimquote "$done_file")', '${line}')" \
-        >/dev/null
+        </dev/null >/dev/null
     pending="$pending $done_file"
 }
 if [ $# -eq 0 ]; then
