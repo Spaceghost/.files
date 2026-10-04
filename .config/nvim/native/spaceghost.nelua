@@ -1,0 +1,148 @@
+-- Spaceghost native helpers for the Neovim shell cockpit.
+-- Compiled with `spaceghost-native` (nelua --shared-lib --cc "zig cc") and loaded
+-- through LuaJIT FFI from lua/spaceghost/native.lua. Every function has a pure Lua
+-- fallback there; this module only makes the HUD cheaper to refresh.
+require 'string'
+require 'io'
+require 'os'
+
+-- Telemetry snapshot read from procfs/sysfs. Fields are -1 when unavailable.
+global Telemetry: type <codename 'spaceghost_telemetry_t'> = @record{
+  load1: float64,
+  load5: float64,
+  load15: float64,
+  mem_total_kb: int64,
+  mem_avail_kb: int64,
+  battery_pct: int32,
+  battery_charging: boolean,
+  uptime_s: int64,
+}
+
+local function read_file(path: string): (boolean, string)
+  local file: filestream = io.open(path, 'r')
+  if not file:isopen() then return false, '' end
+  local content: string, err: string = file:read('a')
+  file:close()
+  return #err == 0, content
+end
+
+local function first_line(content: string): string
+  local nl: isize = content:find('\n', 1, true)
+  if nl == 0 then return content end
+  return content:sub(1, nl - 1)
+end
+
+local function meminfo_field(content: string, key: string): int64
+  local pattern: string = key .. ':%s*(%d+)'
+  local ok: boolean, caps: sequence(string) = content:matchview(pattern, 1)
+  if not ok or #caps == 0 then return -1 end
+  return tointeger(caps[1])
+end
+
+local function read_battery(t: *Telemetry)
+  local names: [4]string = {'BAT0', 'BAT1', 'macsmc-battery', 'battery'}
+  for i = 0, 3 do
+    local base: string = '/sys/class/power_supply/' .. names[i]
+    local ok: boolean, cap: string = read_file(base .. '/capacity')
+    if ok then
+      t.battery_pct = (@int32)(tointeger(first_line(cap)))
+      local _: boolean, status: string = read_file(base .. '/status')
+      t.battery_charging = first_line(status) == 'Charging'
+      return
+    end
+  end
+end
+
+-- Fill a Telemetry record. Returns false when procfs is unreadable.
+global function spaceghost_telemetry(t: *Telemetry): boolean <cexport, codename 'spaceghost_telemetry'>
+  t.load1 = -1; t.load5 = -1; t.load15 = -1
+  t.mem_total_kb = -1; t.mem_avail_kb = -1
+  t.battery_pct = -1; t.battery_charging = false
+  t.uptime_s = -1
+  local ok: boolean, loadavg: string = read_file('/proc/loadavg')
+  if not ok then return false end
+  do
+    local matched: boolean, caps: sequence(string) =
+      loadavg:matchview('^(%S+)%s+(%S+)%s+(%S+)', 1)
+    if matched and #caps == 3 then
+      t.load1 = tonumber(caps[1]); t.load5 = tonumber(caps[2]); t.load15 = tonumber(caps[3])
+    end
+  end
+  local mok: boolean, meminfo: string = read_file('/proc/meminfo')
+  if mok then
+    t.mem_total_kb = meminfo_field(meminfo, 'MemTotal')
+    t.mem_avail_kb = meminfo_field(meminfo, 'MemAvailable')
+  end
+  local uok: boolean, uptime: string = read_file('/proc/uptime')
+  if uok then
+    local matched: boolean, caps: sequence(string) = uptime:matchview('^(%d+)', 1)
+    if matched and #caps == 1 then t.uptime_s = tointeger(caps[1]) end
+  end
+  read_battery(t)
+  return true
+end
+
+-- Decode an OSC 7 "file://host/path" sequence into `out` (percent-decoded).
+-- Returns the path length, 0 when the sequence is not OSC 7.
+global function spaceghost_osc7_path(seq: cstring, out: *[0]cchar, cap: usize): usize <cexport, codename 'spaceghost_osc7_path'>
+  local s: string = seq
+  local prefix: string = '\27]7;file://'
+  if s:sub(1, #prefix) ~= prefix then return 0 end
+  local rest: string = s:sub(#prefix + 1)
+  -- strip the terminator (BEL or ST) and the host component
+  local stop: isize = rest:find('\7', 1, true)
+  if stop ~= 0 then rest = rest:sub(1, stop - 1) end
+  stop = rest:find('\27\\', 1, true)
+  if stop ~= 0 then rest = rest:sub(1, stop - 1) end
+  local slash: isize = rest:find('/', 1, true)
+  if slash == 0 then return 0 end
+  local path: string = rest:sub(slash)
+  local n: usize = 0
+  local i: isize = 1
+  while i <= #path and n + 1 < cap do
+    local c: byte = path:byte(i)
+    if c == '%'_b and i + 2 <= #path then
+      local hex: string = path:sub(i + 1, i + 2)
+      local v: integer = tointeger(hex, 16)
+      c = (@byte)(v)
+      i = i + 3
+    else
+      i = i + 1
+    end
+    out[n] = (@cchar)(c)
+    n = n + 1
+  end
+  out[n] = 0
+  return n
+end
+
+-- Shorten a path like fish: /home/jack/.files/.config -> ~/.f/.c/nvim (keeps the last part).
+global function spaceghost_short_path(path: cstring, home: cstring, out: *[0]cchar, cap: usize): usize <cexport, codename 'spaceghost_short_path'>
+  local p: string = path
+  local h: string = home
+  if #h > 0 and p:sub(1, #h) == h then p = '~' .. p:sub(#h + 1) end
+  local parts: sequence(string) = {}
+  for piece in p:gmatch('[^/]+') do parts:push(piece) end
+  local result: string = ''
+  if p:sub(1, 1) == '/' then result = '/' end
+  for i = 1, #parts do
+    local piece: string = parts[i]
+    if i < #parts then
+      local keep: isize = 1
+      if piece:sub(1, 1) == '.' then keep = 2 end
+      result = result .. piece:sub(1, keep) .. '/'
+    else
+      result = result .. piece
+    end
+  end
+  local n: usize = #result
+  if n + 1 > cap then n = cap - 1 end
+  for i = 0, < (@isize)(n) do out[i] = (@cchar)(result:byte(i + 1)) end
+  out[n] = 0
+  return n
+end
+
+-- Version tag so the Lua side can refuse a stale build.
+global function spaceghost_abi(): int32 <cexport, codename 'spaceghost_abi'>
+  return 1
+end

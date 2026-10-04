@@ -1,0 +1,34 @@
+# S P A C E G H O S T  /  G H O S T T Y
+# The shell is Neovim (see ~/.zshrc / ~/.config/nvim); Ghostty only draws it.
+theme = spaceghost
+
+font-family = Fira Code
+font-family = Symbols Nerd Font Mono
+font-size = 15
+font-feature = calt
+font-feature = ss01
+adjust-cell-height = 10%
+window-padding-x = 12
+window-padding-y = 10
+window-padding-balance = true
+background-opacity = 0.92
+background-blur = true
+unfocused-split-opacity = 0.9
+
+cursor-style = bar
+cursor-style-blink = false
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+clipboard-paste-protection = true
+link-url = true
+
+# Neovim owns tabs, splits and the title; keep Ghostty's chrome quiet.
+window-decoration = auto
+gtk-titlebar = false
+confirm-close-surface = false
+shell-integration = detect
+shell-integration-features = no-cursor,sudo,title
+# Ghostty tabs stay reachable but out of the way of Ctrl-\ and Ctrl-a.
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+n=new_window
+keybind = ctrl+shift+enter=toggle_fullscreen

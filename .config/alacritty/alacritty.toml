@@ -1,0 +1,52 @@
+# S P A C E G H O S T  /  A L A C R I T T Y
+# The shell is Neovim (see ~/.zshrc); Alacritty only draws it.
+[window]
+padding = { x = 12, y = 10 }
+dynamic_padding = true
+opacity = 0.92
+decorations = "None"
+
+[scrolling]
+history = 0
+
+[font]
+normal = { family = "Fira Code" }
+size = 15
+
+[cursor]
+style = { shape = "Beam", blinking = "Never" }
+
+[selection]
+save_to_clipboard = true
+
+[colors.primary]
+background = "#0b0d16"
+foreground = "#e8edf7"
+
+[colors.cursor]
+cursor = "#79efc2"
+text = "#0b0d16"
+
+[colors.selection]
+background = "#b4a1ff"
+text = "#0b0d16"
+
+[colors.normal]
+black = "#161a2b"
+red = "#ff7597"
+green = "#79efc2"
+yellow = "#f3c969"
+blue = "#7fb7ff"
+magenta = "#b4a1ff"
+cyan = "#7fe3f0"
+white = "#e8edf7"
+
+[colors.bright]
+black = "#5a6280"
+red = "#ff9ab5"
+green = "#a6f5d8"
+yellow = "#f8dc96"
+blue = "#a9cfff"
+magenta = "#cfc4ff"
+cyan = "#aeeef6"
+white = "#ffffff"

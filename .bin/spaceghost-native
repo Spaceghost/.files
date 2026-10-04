@@ -1,0 +1,76 @@
+#!/bin/sh
+# spaceghost-native: build the Neovim native helpers written in Nelua with zig cc.
+#
+#   spaceghost-native            build  ~/.local/share/nvim/spaceghost/libspaceghost.so
+#   spaceghost-native toolchain  install/refresh the latest zig master + nelua
+#   spaceghost-native clean      remove the built library
+#
+# Toolchain lives under ~/.local/spaceghost (zig master tarball from ziglang.org,
+# nelua-lang built from git with zig cc). Nothing is installed system wide.
+set -eu
+
+root="${SPACEGHOST_TOOLCHAIN:-$HOME/.local/spaceghost}"
+out_dir="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/spaceghost"
+src_dir="$(cd "$(dirname "$0")/.." && pwd)/.config/nvim/native"
+zig_dir="$root/zig"
+nelua_dir="$root/nelua"
+PATH="$zig_dir:$nelua_dir:$PATH"
+export PATH
+
+log() { printf 'spaceghost-native: %s\n' "$*" >&2; }
+
+arch() {
+    case "$(uname -m)" in
+        x86_64) echo x86_64 ;;
+        aarch64 | arm64) echo aarch64 ;;
+        *) log "unsupported arch $(uname -m)"; exit 1 ;;
+    esac
+}
+
+install_zig() {
+    index="$(curl -fsSL https://ziglang.org/download/index.json)"
+    key="$(arch)-linux"
+    url="$(printf '%s' "$index" | python3 -c 'import json,sys; print(json.load(sys.stdin)["master"][sys.argv[1]]["tarball"])' "$key")"
+    sum="$(printf '%s' "$index" | python3 -c 'import json,sys; print(json.load(sys.stdin)["master"][sys.argv[1]]["shasum"])' "$key")"
+    version="$(printf '%s' "$index" | python3 -c 'import json,sys; print(json.load(sys.stdin)["master"]["version"])')"
+    if [ -x "$zig_dir/zig" ] && [ "$("$zig_dir/zig" version)" = "$version" ]; then
+        log "zig $version already installed"; return
+    fi
+    log "installing zig $version"
+    tmp="$(mktemp -d)"
+    curl -fsSL "$url" -o "$tmp/zig.tar.xz"
+    echo "$sum  $tmp/zig.tar.xz" | sha256sum -c - >/dev/null
+    mkdir -p "$root"; rm -rf "$zig_dir.new"
+    mkdir -p "$zig_dir.new"
+    tar -xJf "$tmp/zig.tar.xz" -C "$zig_dir.new" --strip-components=1
+    rm -rf "$zig_dir"; mv "$zig_dir.new" "$zig_dir"; rm -rf "$tmp"
+}
+
+install_nelua() {
+    mkdir -p "$root"
+    if [ -d "$nelua_dir/.git" ]; then
+        git -C "$nelua_dir" pull -q --ff-only
+    else
+        git clone -q --depth 1 https://github.com/edubart/nelua-lang "$nelua_dir"
+    fi
+    log "building nelua with zig cc"
+    make -s -C "$nelua_dir" CC="zig cc" >/dev/null
+}
+
+build() {
+    command -v zig >/dev/null || { log "zig missing; run: spaceghost-native toolchain"; exit 1; }
+    command -v nelua >/dev/null || { log "nelua missing; run: spaceghost-native toolchain"; exit 1; }
+    mkdir -p "$out_dir"
+    log "nelua $(nelua --version | head -1) / zig $(zig version)"
+    nelua --shared-lib --cc "zig cc" --release \
+        --cache-dir "$out_dir/cache" \
+        -o "$out_dir/libspaceghost.so" "$src_dir/spaceghost.nelua"
+    log "built $out_dir/libspaceghost.so"
+}
+
+case "${1:-build}" in
+    toolchain) install_zig; install_nelua ;;
+    build) build ;;
+    clean) rm -rf "$out_dir" ;;
+    *) log "usage: spaceghost-native [build|toolchain|clean]"; exit 2 ;;
+esac
