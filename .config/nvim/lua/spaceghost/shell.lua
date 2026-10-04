@@ -5,7 +5,8 @@ local native = require('spaceghost.native')
 
 M.shell_cmd = { 'sh', '-c', 'exec zsh || exec fish || exec bash' }
 M.sock = vim.env.SPACEGHOST_NVIM_SOCK
-  or ((vim.env.XDG_RUNTIME_DIR or '/tmp') .. '/nvim-spaceghost.sock')
+  or (vim.env.XDG_RUNTIME_DIR and (vim.env.XDG_RUNTIME_DIR .. '/nvim-spaceghost.sock'))
+  or ('/tmp/nvim-spaceghost-' .. tostring(uv.getuid()) .. '.sock')
 
 -- ── Server: the first instance owns the shared socket ─────────────────────────
 local function socket_alive(path)
@@ -16,6 +17,7 @@ end
 
 function M.claim_server()
   if vim.env.NVIM then return false end
+  if vim.tbl_contains(vim.fn.serverlist(), M.sock) then M.is_server = true; return true end
   if uv.fs_stat(M.sock) then
     if socket_alive(M.sock) then return false end
     os.remove(M.sock)

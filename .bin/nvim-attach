@@ -1,0 +1,36 @@
+#!/bin/sh
+# nvim-attach [HOST]: attach a Neovim UI to the persistent session on this
+# machine, or on HOST over ssh (the socket is forwarded; the UI runs locally).
+# Detach with :detach (or close the terminal); the session keeps running.
+# With no session reachable and no HOST, falls back to a plain `nvim`.
+set -eu
+
+PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH
+host="${1:-}"
+
+if [ -z "$host" ]; then
+    if sock="$(nvim-session ensure 2>/dev/null)"; then
+        exec nvim --server "$sock" --remote-ui
+    fi
+    echo "nvim-attach: no local session; starting a plain nvim" >&2
+    exec nvim
+fi
+
+# Remote: the session's own ~/.bin/nvim-session reports (and starts) its socket.
+remote_sock="$(ssh -o BatchMode=yes "$host" 'exec "$HOME/.bin/nvim-session" ensure')"
+[ -n "$remote_sock" ] || { echo "nvim-attach: $host has no nvim-session" >&2; exit 1; }
+local_dir="${XDG_RUNTIME_DIR:-/tmp}/nvim-attach"
+mkdir -p "$local_dir"
+local_sock="$local_dir/$(printf '%s' "$host" | tr -c 'A-Za-z0-9_.-' '_').sock"
+rm -f "$local_sock"
+ssh -o BatchMode=yes -o ExitOnForwardFailure=yes -o StreamLocalBindUnlink=yes -N -f \
+    -L "$local_sock:$remote_sock" "$host"
+cleanup() { pkill -f -- "-L $local_sock:" 2>/dev/null || true; rm -f "$local_sock"; }
+trap cleanup EXIT INT TERM
+tries=0
+until [ -S "$local_sock" ]; do
+    tries=$((tries + 1)); [ "$tries" -lt 50 ] || { echo "nvim-attach: forward to $host failed" >&2; exit 1; }
+    sleep 0.1
+done
+nvim --server "$local_sock" --remote-ui

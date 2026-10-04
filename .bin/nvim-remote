@@ -8,7 +8,10 @@
 #   nvim-remote                          open a scratch buffer and wait
 set -eu
 
-sock="${SPACEGHOST_NVIM_SOCK:-${XDG_RUNTIME_DIR:-/tmp}/nvim-spaceghost.sock}"
+if [ -n "${SPACEGHOST_NVIM_SOCK:-}" ]; then sock="$SPACEGHOST_NVIM_SOCK"
+elif [ -n "${XDG_RUNTIME_DIR:-}" ]; then sock="$XDG_RUNTIME_DIR/nvim-spaceghost.sock"
+else sock="/tmp/nvim-spaceghost-$(id -u).sock"
+fi
 target=""
 alive() { nvim --server "$1" --remote-expr '1' </dev/null >/dev/null 2>&1; }
 if [ -n "${NVIM:-}" ] && alive "$NVIM"; then

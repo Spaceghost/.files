@@ -1,0 +1,116 @@
+#!/bin/sh
+# spaceghost-install: make this machine a Spaceghost cockpit. Idempotent.
+#   * clone or update Spaceghost/.files (into ~/.files, or ~/.spaceghost when
+#     ~/.files already holds a different repository)
+#   * link ~/.bin, ~/.config/nvim, zsh files, terminal configs that apply
+#   * hook ~/.bashrc and ~/.profile so interactive terminals attach to Neovim
+#   * install Neovim (+ zsh) when missing: apk with sudo on Alpine, the stable
+#     release tarball into ~/.local/nvim elsewhere
+#   * enable the persistent session (systemd user unit, or setsid on login)
+#   * build the Nelua helpers when the toolchain is present (or --native to install it)
+#   * start the session now
+# Environment: SPACEGHOST_REPO (default https://github.com/Spaceghost/.files.git)
+set -eu
+
+repo="${SPACEGHOST_REPO:-https://github.com/Spaceghost/.files.git}"
+want_native=0
+for arg in "$@"; do case "$arg" in --native) want_native=1 ;; esac; done
+log() { printf 'spaceghost-install: %s\n' "$*" >&2; }
+
+# ── 1. repository ─────────────────────────────────────────────────────────────
+is_ours() { git -C "$1" remote get-url origin 2>/dev/null | grep -qiE 'Spaceghost/\.files(\.git)?$'; }
+if [ -d "$HOME/.files/.git" ] && is_ours "$HOME/.files"; then files="$HOME/.files"
+elif [ -d "$HOME/.spaceghost/.git" ] && is_ours "$HOME/.spaceghost"; then files="$HOME/.spaceghost"
+elif [ -e "$HOME/.files" ]; then files="$HOME/.spaceghost"; log "$HOME/.files is another repository; using $files"
+else files="$HOME/.files"
+fi
+if [ -d "$files/.git" ]; then
+    git -C "$files" pull -q --ff-only || log "pull failed; continuing with the checkout as is"
+else
+    git clone -q "$repo" "$files"
+fi
+log "dotfiles at $files ($(git -C "$files" log --oneline -1))"
+
+# ── 2. links ──────────────────────────────────────────────────────────────────
+link() { # link TARGET LINK
+    if [ -e "$2" ] && [ ! -L "$2" ]; then log "keeping existing $2 (not a link)"; return; fi
+    ln -sfn "$1" "$2"
+}
+mkdir -p "$HOME/.config"
+link "$files/.bin" "$HOME/.bin"
+link "$files/.config/nvim" "$HOME/.config/nvim"
+link "$files/.zshrc" "$HOME/.zshrc"
+link "$files/.zshenv" "$HOME/.zshenv"
+mkdir -p "$HOME/.config/systemd/user"
+link "$files/.config/systemd/user/spaceghost-nvim.service" "$HOME/.config/systemd/user/spaceghost-nvim.service"
+for term in ghostty foot kitty alacritty; do
+    command -v "$term" >/dev/null 2>&1 || continue
+    case "$term" in
+        ghostty)
+            mkdir -p "$HOME/.config/ghostty"
+            link "$files/.config/ghostty/config" "$HOME/.config/ghostty/config"
+            link "$files/.config/ghostty/themes" "$HOME/.config/ghostty/themes" ;;
+        *) [ -e "$HOME/.config/$term" ] || ln -sfn "$files/.config/$term" "$HOME/.config/$term" ;;
+    esac
+done
+
+# ── 3. shell hooks ────────────────────────────────────────────────────────────
+hook_line=". \"\$HOME/$(basename "$files")/.bash_spaceghost\""
+for rc in "$HOME/.bashrc" "$HOME/.profile"; do
+    [ -e "$rc" ] || { [ "$rc" = "$HOME/.profile" ] && [ -e "$HOME/.bash_profile" ] && continue; touch "$rc"; }
+    grep -qF '.bash_spaceghost' "$rc" || printf '\n# Spaceghost cockpit (Spaceghost/.files)\n%s\n' "$hook_line" >> "$rc"
+done
+# Replace the older inline block from the first install, if present.
+if grep -q 'Spaceghost/.files: Neovim is the shell and multiplexer' "$HOME/.bashrc" 2>/dev/null; then
+    python3 - "$HOME/.bashrc" <<'PY' 2>/dev/null || true
+import re, sys
+p = sys.argv[1]; s = open(p).read()
+s = re.sub(r'\n# Spaceghost/\.files: Neovim is the shell and multiplexer.*?\nfi\n', '\n', s, flags=re.S)
+open(p, 'w').write(s)
+PY
+fi
+
+# ── 4. neovim + zsh ───────────────────────────────────────────────────────────
+PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:$PATH"; export PATH
+need=""
+command -v nvim >/dev/null 2>&1 || need="neovim"
+command -v zsh >/dev/null 2>&1 || need="$need zsh"
+if [ -n "$need" ]; then
+    if command -v apk >/dev/null 2>&1 && command -v sudo >/dev/null 2>&1; then
+        log "apk add $need"
+        # shellcheck disable=SC2086
+        sudo -n apk add --no-progress $need || log "apk add failed (sudo?)"
+    elif [ "${need%% *}" = "neovim" ]; then
+        arch="$(uname -m)"; [ "$arch" = "aarch64" ] && arch="arm64"
+        url="https://github.com/neovim/neovim/releases/download/stable/nvim-linux-$arch.tar.gz"
+        log "installing Neovim stable to ~/.local/nvim"
+        tmp="$(mktemp -d)"
+        curl -fsSL "$url" -o "$tmp/nvim.tar.gz"
+        rm -rf "$HOME/.local/nvim.new"; mkdir -p "$HOME/.local/nvim.new"
+        tar -xzf "$tmp/nvim.tar.gz" -C "$HOME/.local/nvim.new" --strip-components=1
+        rm -rf "$HOME/.local/nvim"; mv "$HOME/.local/nvim.new" "$HOME/.local/nvim"; rm -rf "$tmp"
+    fi
+fi
+command -v nvim >/dev/null 2>&1 || { log "nvim still missing; stopping"; exit 1; }
+log "$(nvim --version | head -1) at $(command -v nvim); zsh: $(command -v zsh || echo 'none (bash fallback)')"
+
+# ── 5. native helpers ─────────────────────────────────────────────────────────
+if [ "$want_native" = 1 ]; then "$HOME/.bin/spaceghost-native" toolchain; fi
+if [ -x "$HOME/.local/spaceghost/zig/zig" ] && [ -x "$HOME/.local/spaceghost/nelua/nelua" ]; then
+    "$HOME/.bin/spaceghost-native" || log "native build failed; Lua fallback stays active"
+else
+    log "no nelua/zig toolchain; Lua fallback (run: spaceghost-native toolchain)"
+fi
+
+# ── 6. session ────────────────────────────────────────────────────────────────
+if [ -d /run/systemd/system ] && systemctl --user show-environment >/dev/null 2>&1; then
+    systemctl --user daemon-reload
+    systemctl --user enable -q spaceghost-nvim.service
+    systemctl --user restart spaceghost-nvim.service
+    log "systemd user service spaceghost-nvim enabled ($(loginctl show-user "$(id -un)" -p Linger --value 2>/dev/null | sed 's/^/linger=/'))"
+else
+    log "no user systemd; the session starts on demand from the login hook (setsid)"
+fi
+sock="$("$HOME/.bin/nvim-session" ensure)"
+log "session alive at $sock"
+log "done. new terminals attach to Neovim; SPACEGHOST_PLAIN_SHELL=1 skips it; :detach leaves it running"

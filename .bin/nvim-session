@@ -1,0 +1,50 @@
+#!/bin/sh
+# nvim-session: the persistent Neovim session on this machine (the multiplexer
+# server). Clients attach with `nvim-attach`; the shell hook does so automatically.
+#
+#   nvim-session ensure   start it unless its socket already answers (default)
+#   nvim-session run      run it in the foreground (used by the systemd unit)
+#   nvim-session status   print "alive <sock>" or "down <sock>"; exit 1 when down
+#   nvim-session stop     ask it to quit
+#   nvim-session sock     print the socket path
+set -eu
+
+if [ -n "${SPACEGHOST_NVIM_SOCK:-}" ]; then sock="$SPACEGHOST_NVIM_SOCK"
+elif [ -n "${XDG_RUNTIME_DIR:-}" ]; then sock="$XDG_RUNTIME_DIR/nvim-spaceghost.sock"
+else sock="/tmp/nvim-spaceghost-$(id -u).sock"
+fi
+export SPACEGHOST_NVIM_SOCK="$sock"
+# Services start with a bare PATH; find nvim wherever the installer put it.
+PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+export PATH
+
+alive() { nvim --server "$sock" --remote-expr '1' </dev/null >/dev/null 2>&1; }
+have_systemd() {
+    [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1 \
+        && systemctl --user show-environment >/dev/null 2>&1
+}
+
+start() {
+    if have_systemd && [ -f "$HOME/.config/systemd/user/spaceghost-nvim.service" ]; then
+        systemctl --user start spaceghost-nvim.service
+    else
+        # No service manager for this user: detach from the terminal and this ssh session.
+        rm -f "$sock"
+        setsid -f nvim --headless --listen "$sock" </dev/null >/dev/null 2>&1
+    fi
+    tries=0
+    until alive; do
+        tries=$((tries + 1))
+        [ "$tries" -lt 50 ] || { echo "nvim-session: $sock did not come up" >&2; exit 1; }
+        sleep 0.1
+    done
+}
+
+case "${1:-ensure}" in
+    sock) echo "$sock" ;;
+    status) if alive; then echo "alive $sock"; else echo "down $sock"; exit 1; fi ;;
+    ensure) alive || start; echo "$sock" ;;
+    run) rm -f "$sock"; exec nvim --headless --listen "$sock" ;;
+    stop) alive && nvim --server "$sock" --remote-send '<C-\><C-n>:qa!<CR>' </dev/null >/dev/null 2>&1 || true ;;
+    *) echo "usage: nvim-session [ensure|run|status|stop|sock]" >&2; exit 2 ;;
+esac

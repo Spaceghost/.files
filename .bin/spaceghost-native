@@ -11,7 +11,7 @@ set -eu
 
 root="${SPACEGHOST_TOOLCHAIN:-$HOME/.local/spaceghost}"
 out_dir="${XDG_DATA_HOME:-$HOME/.local/share}/nvim/spaceghost"
-src_dir="$(cd "$(dirname "$0")/.." && pwd)/.config/nvim/native"
+src_dir="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)/.config/nvim/native"
 zig_dir="$root/zig"
 nelua_dir="$root/nelua"
 PATH="$zig_dir:$nelua_dir:$PATH"
