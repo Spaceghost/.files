@@ -4,6 +4,7 @@ local shell = require('spaceghost.shell')
 
 -- items: { { key = 'c', label = 'New tab shell', action = fn }, { sep = true }, { note = '...' } }
 function M.menu(title, items)
+  vim.cmd.stopinsert()
   local lines, maxw = {}, #title + 4
   for _, it in ipairs(items) do
     local line
@@ -76,17 +77,23 @@ function M.field_guide()
   M.menu('flight manual', {
     { note = 'PREFIX: Ctrl-\\ or Ctrl-Space   /   prefix twice sends it through' },
     { sep = true },
+    { note = 'F2         find any pane    /       search tab, host or directory' },
+    { note = 'Alt-arrows focus pane       Alt-[ / Alt-]  previous / next tab' },
+    { note = 'Alt-1..9   jump to tab      Ctrl-PgUp/PgDn previous / next tab' },
+    { note = 'Alt-o      previous pane across tabs    F4 command deck' },
+    { sep = true },
     { note = 'Space      command deck     ?  F1   field guide' },
     { note = 'c          new tab shell    s / v   split below / right' },
     { note = 'h j k l    focus pane       H J K L resize pane' },
     { note = 'n / p      next/prev tab    1-9     jump to tab' },
-    { note = 'Tab        last pane        w       tabs + panes' },
+    { note = 'Tab        previous pane across tabs    w  find any pane' },
     { note = 'z / =      zoom / balance   x       close pane' },
     { note = '`          scratch shell    g       git observatory' },
     { note = '[          copy mode        ]       paste into shell' },
     { note = 'e          edit a file      ,       rename tab' },
-    { note = 'a          attach machine   Ctrl-]  prefix to remote on/off' },
-    { note = 'r          reload config    Ctrl-n  leave terminal mode' },
+    { note = 'a          attach machine   Ctrl-]  all navigation local/remote' },
+    { note = 'Choose a host in F2 to enter its tabs and panes' },
+    { note = 'r          reload config    Ctrl-\\ Ctrl-n  leave terminal mode' },
     { sep = true },
     { note = 'NOW selected   NEW unread   LIVE shell   EDIT file   EXIT dead' },
     { note = 'native: ' .. native.backend .. (native.error and (' (' .. native.error .. ')') or '') },
@@ -96,26 +103,66 @@ function M.field_guide()
 end
 
 function M.choose_window()
-  local items = {}
-  local keys = '123456789abcdfhijklmoprstuvy'
-  local n = 0
+  vim.cmd.stopinsert()
+  local origin = vim.api.nvim_get_current_win()
+  local entries, lines, selected = {}, {}, 1
+  local function clean(value) return (value:gsub('[%c]', ' ')) end
   for ti, tab in ipairs(vim.api.nvim_list_tabpages()) do
-    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
-      n = n + 1
-      local key = keys:sub(n, n)
-      if key == '' then break end
-      local buf = vim.api.nvim_win_get_buf(win)
-      items[#items + 1] = {
-        key = key,
-        label = string.format('tab %d  %s%s', ti, shell.label(buf), vim.b[buf].spaceghost_new and '  NEW' or ''),
-        action = function()
-          vim.api.nvim_set_current_tabpage(tab)
-          vim.api.nvim_set_current_win(win)
-        end,
-      }
+    local pane = 0
+    for _, target in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+      if vim.api.nvim_win_get_config(target).relative == '' then
+        pane = pane + 1
+        local buf = vim.api.nvim_win_get_buf(target)
+        local host = vim.b[buf].spaceghost_attach
+        local kind = host and 'remote' or (shell.is_shell(buf) and 'shell' or 'file')
+        local title = vim.t[tab].spaceghost_name or ''
+        if title ~= '' then title = ' / ' .. title end
+        entries[#entries + 1] = target
+        lines[#lines + 1] = clean(string.format('%s tab %d%s | pane %d | %s | %s | %s%s',
+          target == origin and '>' or ' ', ti, title, pane, kind, shell.label(buf),
+          vim.fn.fnamemodify(shell.cwd(buf), ':~'), vim.b[buf].spaceghost_new and '  NEW' or ''))
+        if target == origin then selected = #entries end
+      end
     end
   end
-  M.menu('tabs + panes', items)
+  if #entries == 0 then return end
+  local buf = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  vim.bo[buf].modifiable = false
+  vim.bo[buf].bufhidden = 'wipe'
+  local width = math.max(1, math.min(110, vim.o.columns - 4))
+  local height = math.max(1, math.min(#entries, vim.o.lines - vim.o.cmdheight - 4))
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = 'editor', width = width, height = height,
+    row = math.max(0, math.floor((vim.o.lines - height - 2) / 2)),
+    col = math.max(0, math.floor((vim.o.columns - width) / 2)),
+    style = 'minimal', border = 'rounded', title = ' Tabs / panes / hosts ',
+    footer = ' / search   n/N match   Enter focus/enter host   Esc cancel ',
+  })
+  vim.wo[win].cursorline = true
+  vim.wo[win].wrap = false
+  vim.api.nvim_win_set_cursor(win, { selected, 0 })
+  vim.cmd.stopinsert()
+  local function close()
+    if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end
+  end
+  local function select_pane()
+    local target = entries[vim.api.nvim_win_get_cursor(win)[1]]
+    close()
+    if vim.api.nvim_win_is_valid(target) then
+      vim.api.nvim_set_current_win(target)
+      shell.navigate_remote()
+    end
+  end
+  for _, key in ipairs({ '<CR>', '<Space>' }) do
+    vim.keymap.set('n', key, select_pane, { buffer = buf, nowait = true })
+  end
+  for _, key in ipairs({ '<Esc>', 'q', '<C-c>', '<F2>' }) do
+    vim.keymap.set('n', key, close, { buffer = buf, nowait = true })
+  end
+  vim.keymap.set('n', '<Tab>', 'j', { buffer = buf })
+  vim.keymap.set('n', '<S-Tab>', 'k', { buffer = buf })
+  vim.api.nvim_create_autocmd('WinLeave', { buffer = buf, once = true, callback = close })
 end
 
 function M.rename_tab()

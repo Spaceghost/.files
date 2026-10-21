@@ -135,8 +135,8 @@ end
 
 -- ── Attach to another machine's session in a pane ─────────────────────────────
 -- Runs `nvim-attach --here HOST` (mosh or ssh UI client) inside a terminal split.
--- The prefix stays local by default; Ctrl-] toggles REMOTE KEYS, where the prefix
--- goes to the attached cockpit instead (prefix twice always sends it through).
+-- Navigation stays local by default; Ctrl-] toggles REMOTE KEYS, sending the
+-- prefix and direct shortcuts to the attached cockpit. Ctrl-] stays local.
 function M.attach(host, open)
   if not host or host == '' then return M.open(open or 'belowright vnew') end
   local buf = M.open(open or 'belowright vnew', {
@@ -148,21 +148,31 @@ function M.attach(host, open)
   return buf
 end
 
-function M.remote_keys(buf, state)
+function M.remote_keys(buf, state, preserve_mode)
   buf = buf or vim.api.nvim_get_current_buf()
   if not vim.b[buf].spaceghost_attach then return end
   local on = state == 'toggle' and not vim.b[buf].spaceghost_remote_keys or state == true
-  local prefixes = require('spaceghost.keys').prefixes
-  for _, prefix in ipairs(prefixes) do
+  local keys = require('spaceghost.keys')
+  local forwarded = vim.list_extend(vim.deepcopy(keys.prefixes), keys.direct_keys)
+  for _, key in ipairs(forwarded) do
     if on then
-      vim.keymap.set('t', prefix, prefix, { buffer = buf, nowait = true, desc = 'Prefix goes to ' .. vim.b[buf].spaceghost_attach })
+      vim.keymap.set('t', key, key, { buffer = buf, nowait = true, desc = 'Send to ' .. vim.b[buf].spaceghost_attach })
     else
-      pcall(vim.keymap.del, 't', prefix, { buffer = buf })
+      pcall(vim.keymap.del, 't', key, { buffer = buf })
     end
   end
   vim.b[buf].spaceghost_remote_keys = on
-  vim.cmd.startinsert()
+  if not preserve_mode and buf == vim.api.nvim_get_current_buf() then vim.cmd.startinsert() end
   pcall(vim.cmd.redrawstatus)
+end
+
+-- Entering a host from the local picker opens that host's own picker. This
+-- uses the prefix protocol, so it also works with an older remote config.
+function M.navigate_remote(buf)
+  buf = buf or vim.api.nvim_get_current_buf()
+  if not vim.b[buf].spaceghost_attach then return end
+  M.remote_keys(buf, true)
+  vim.api.nvim_chan_send(vim.bo[buf].channel, '\028w')
 end
 
 -- ── Remote edit: used by ~/.bin/nvim-remote via --remote-expr ─────────────────

@@ -116,7 +116,7 @@ function M.statusline()
   end
   parts[#parts + 1] = what
   if vim.b[buf].spaceghost_remote_keys then
-    parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostModeVisual', ' REMOTE KEYS / ^] back ')
+    parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostModeVisual', ' REMOTE @' .. vim.b[buf].spaceghost_attach .. ' / ^] local ')
   end
   parts[#parts + 1] = hl('StatusLine', ' / ') .. hl('SpaceghostStatusCwd', short)
   local branch = git_branch(cwd)
@@ -139,10 +139,11 @@ function M.statusline()
     right[#right + 1] = (vim.bo[buf].filetype ~= '' and vim.bo[buf].filetype or 'text')
     right[#right + 1] = hl('SpaceghostStatusCwd', '%l') .. hl('StatusLine', ':%c  %P')
   else
+    right[#right + 1] = 'TAB ' .. hl('SpaceghostStatusCwd', vim.fn.tabpagenr() .. '/' .. vim.fn.tabpagenr('$')) .. hl('StatusLine', '')
     right[#right + 1] = 'PANE ' .. hl('SpaceghostStatusCwd', vim.fn.winnr() .. '/' .. vim.fn.winnr('$')) .. hl('StatusLine', '')
   end
   if shell.is_server then right[#right + 1] = hl('SpaceghostStatusBranch', 'SRV') .. hl('StatusLine', '') end
-  right[#right + 1] = hl('SpaceghostStatusBranch', '^\\ SPACE') .. hl('StatusLine', width >= 110 and ' / deck ' or ' ')
+  right[#right + 1] = hl('SpaceghostStatusBranch', 'F2 panes') .. hl('StatusLine', width >= 110 and ' / F4 menu ' or ' ')
   parts[#parts + 1] = hl('StatusLine', table.concat(right, '  '))
   return table.concat(parts)
 end
@@ -153,6 +154,9 @@ function M.title()
 end
 
 function M.setup()
+  -- Commands temporarily overlay the last row; shells keep it the rest of the
+  -- time. Leave columns/lines and PTY resizing to Neovim's smallest attached UI.
+  vim.o.cmdheight = 0
   vim.o.showtabline = 2
   vim.o.laststatus = 3
   vim.o.showmode = false

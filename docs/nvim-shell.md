@@ -24,8 +24,9 @@ shell, add the same block to `~/.bashrc` (see "Install").
 * **Attach in a pane**: from a shell inside the cockpit, `a HOST` (or
   `Ctrl-\ a`, `:Attach HOST [vnew|new|tabnew]`, deck entry) opens HOST's
   cockpit in a vertical split labelled `@HOST`. The prefix keeps controlling
-  the local cockpit; `Ctrl-]` toggles REMOTE KEYS (shown in the statusline)
-  so the prefix drives the remote one instead. `:detach` inside closes the
+  the local cockpit; `Ctrl-]` toggles REMOTE KEYS (shown with the host in the
+  statusline) so the prefix and navigation shortcuts drive the remote one
+  instead. `:detach` inside closes the
   pane.
 * `Ctrl-Space` is only seen by terminals that speak the kitty keyboard
   protocol (Ghostty, foot, kitty, Alacritty, WezTerm); older terminals send
@@ -59,6 +60,53 @@ shell, add the same block to `~/.bashrc` (see "Install").
 * **Colorscheme** `spaceghost` matches `.tmux.conf` and the terminal themes;
   terminal palette colors are set so TUIs inside the shell match too.
 
+## Navigate without a prefix
+
+These keys work while typing in a shell and while editing a file:
+
+| key | action |
+| --- | --- |
+| `F2` | Find any pane across all tabs, including attached hosts |
+| `Alt-Left/Down/Up/Right` | Focus the pane in that direction |
+| `Ctrl-PageUp` / `Ctrl-PageDown`, or `Alt-[` / `Alt-]` | Previous / next tab, wrapping at the ends |
+| `Alt-1` through `Alt-9` | Jump directly to a tab |
+| `Alt-o` | Toggle back to the previous pane, even in another tab |
+| `F1` / `F4` | Field guide / command deck |
+
+In the `F2` picker, each row shows the tab number and custom name, pane
+number, shell/file/remote type, host or title, directory, and unread output.
+The current pane is marked `>` and selected initially. Use `j`/`k`, arrows,
+or Tab/Shift-Tab to move; Enter focuses the selection. Type `/bak` to find
+an attached host, `/project` for a directory or title, or `/tab 3` for a tab.
+Use `n`/`N` for more matches. Escape cancels search; Escape again closes the
+picker. `q` also closes it. The list scrolls and has no pane-count limit.
+Returning to a shell puts it back in terminal input mode.
+
+Choosing a remote host in the picker enters that host's own tabs and panes
+picker and enables REMOTE KEYS. This works through the live attached UI;
+it does not need a second SSH connection or a cached list of remote tabs.
+The local picker lists local panes and host entries; each host's picker
+lists the tabs and panes inside that session.
+
+In an attached host pane, `Ctrl-]` switches between LOCAL and REMOTE KEYS.
+In REMOTE KEYS, `F1`/`F2`/`F4`, Alt-arrows, Alt-tab shortcuts, Alt-1..9,
+Alt-o, Ctrl-PageUp/Down, and the prefix all go to that host. The statusline
+shows `REMOTE @HOST / ^] local`. Press `Ctrl-]` to return to local controls.
+Routing is per host pane and survives a configuration reload. You can still
+send a single prefix to a host by pressing the prefix twice in local mode.
+If your terminal emulator intercepts an Alt or Ctrl-Page key, use the
+prefix equivalents below. The statusline shows the current tab and pane
+numbers and reminds you of `F2` and `F4`.
+
+## Pane sizing with multiple clients
+
+Neovim uses the minimum attached client width and height as the shared canvas.
+Shells fill their panes within that canvas and grow again when the smaller
+client resizes or detaches. There is no fixed 80×24 limit. The tab bar and
+shared status bar use one row each; the command line appears only when needed
+(`cmdheight=0`). Splits divide the remaining area. No automatic maximization
+or pane balancing changes your layout.
+
 ## Keys (prefix `Ctrl-\` or `Ctrl-Space`)
 
 | key | action | key | action |
@@ -67,16 +115,24 @@ shell, add the same block to `~/.bashrc` (see "Install").
 | `c` | new tab shell | `s` / `v` | split shell below / right |
 | `h j k l` | focus pane | `H J K L` | resize pane |
 | `n` / `p` | next / previous tab | `1`-`9` | jump to tab |
-| `Tab` | last pane | `w` | tabs + panes picker |
+| `Tab` | previous pane across tabs | `w` | searchable tabs + panes + hosts picker |
 | `z` / `=` | zoom / balance | `x` | close pane |
 | `` ` `` | scratch terminal (toggle) | `g` | git observatory |
 | `~` | btop / htop | `e` | edit a file |
-| `a` | attach a machine in a split | `Ctrl-]` | send the prefix to the remote pane on/off |
+| `a` | attach a machine in a split | `Ctrl-]` | toggle all navigation between local and remote |
 | `[` | copy mode (`Esc` returns) | `]` | paste `"` register into shell |
 | `,` | rename tab | `r` | reload configuration |
-| prefix | send the prefix itself | `Ctrl-n` | leave terminal mode |
+| prefix | send the prefix itself | `Ctrl-n` | leave terminal mode (`Ctrl-\ Ctrl-n`) |
 
 `:Shell [tabnew|vnew|new]` opens a shell from the command line.
+
+Navigation regression checks from the repository root (isolated Neovim
+instances; the nested check runs a real remote UI inside a terminal):
+
+```sh
+nvim --headless -u NONE -l tests/nvim-navigation.lua
+nvim --headless -u NONE -l tests/nvim-nested.lua
+```
 
 ## Native helpers (Nelua + zig cc)
 
