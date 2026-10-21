@@ -154,9 +154,19 @@ function M.remote_keys(buf, state, preserve_mode)
   local on = state == 'toggle' and not vim.b[buf].spaceghost_remote_keys or state == true
   local keys = require('spaceghost.keys')
   local forwarded = vim.list_extend(vim.deepcopy(keys.prefixes), keys.direct_keys)
+  -- A complete global prefix mapping can win when both keys are already in
+  -- typeahead, even with a buffer-local nowait mapping for the bare prefix.
+  vim.list_extend(forwarded, keys.prefixed_keys)
   for _, key in ipairs(forwarded) do
     if on then
-      vim.keymap.set('t', key, key, { buffer = buf, nowait = true, desc = 'Send to ' .. vim.b[buf].spaceghost_attach })
+      local rhs = key
+      local bytes = vim.keycode(key)
+      if not bytes:find('\128', 1, true) then
+        -- Ctrl-\ is also Neovim's terminal escape: send the control byte
+        -- directly so this layer does not consume the remote prefix.
+        rhs = function() vim.api.nvim_chan_send(vim.bo[buf].channel, bytes) end
+      end
+      vim.keymap.set('t', key, rhs, { buffer = buf, nowait = true, desc = 'Send to ' .. vim.b[buf].spaceghost_attach })
     else
       pcall(vim.keymap.del, 't', key, { buffer = buf })
     end

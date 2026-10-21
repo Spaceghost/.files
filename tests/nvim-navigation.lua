@@ -111,9 +111,9 @@ test('direct shortcuts and picker work from running terminal input', function()
       cmd = {'sh', '-c', 'while IFS= read -r line; do printf "received:%s\\n" "$line"; done'}
     })]])
     local right = lua('return vim.api.nvim_get_current_win()')
-    input('<M-Left>')
+    input([[<C-\>h]])
     wait_for('return vim.api.nvim_get_current_win() ~= ' .. right .. " and vim.api.nvim_get_mode().mode == 't'")
-    input('<M-Right>')
+    input([[<C-\>l]])
     wait_for('return vim.api.nvim_get_current_win() == ' .. right .. " and vim.api.nvim_get_mode().mode == 't'")
     input('<F4>')
     wait_for("return vim.bo.buftype == 'nofile' and vim.api.nvim_get_mode().mode == 'n'")
@@ -125,6 +125,44 @@ test('direct shortcuts and picker work from running terminal input', function()
     wait_for("return vim.fn.tabpagenr() == 1 and vim.api.nvim_get_mode().mode == 't'")
     input([[<C-\>n]])
     wait_for("return vim.fn.tabpagenr() == 2 and vim.api.nvim_get_mode().mode == 't'")
+  end)
+  vim.fn.jobstop(child)
+  assert(ok, err)
+end)
+
+test('Alt arrows reach terminal apps after upgrading a running config', function()
+  local child = vim.fn.jobstart({ vim.v.progpath, '--embed', '--headless', '-u', 'NONE' }, { rpc = true })
+  local function lua(code, ...) return vim.rpcrequest(child, 'nvim_exec_lua', code, { ... }) end
+  local ok, err = pcall(function()
+    lua([[
+      vim.opt.runtimepath:prepend(...)
+      vim.g.spaceghost_no_shell = true
+      local shell = require('spaceghost.shell')
+      local keys = require('spaceghost.keys')
+      shell.setup()
+      -- Reproduce the previous config's binding before reloading setup.
+      vim.keymap.set({'n', 't'}, '<M-Up>', function() keys.focus_pane('k') end)
+      keys.setup()
+      shell.open(nil, {cmd = {'sh', '-c', 'cat'}})
+      shell.open('belowright new', {cmd = {'python3', '-u', '-c', [=[
+import os, tty
+tty.setraw(0)
+os.write(1, b'KEYS-READY\r\n')
+while True:
+    data = os.read(0, 64)
+    os.write(1, b'KEY:' + data.hex().encode() + b'\r\n')
+]=]}})
+    ]], vim.fn.getcwd() .. '/.config/nvim')
+    local win = lua('return vim.api.nvim_get_current_win()')
+    local function received(text)
+      return lua("return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\\n'):find(..., 1, true) ~= nil", text)
+    end
+    assert(vim.wait(2000, function() return received('KEYS-READY') end, 10), 'key reader did not start')
+    for _, key in ipairs({ {'Up', '1b5b313b3341'}, {'Down', '1b5b313b3342'}, {'Left', '1b5b313b3344'}, {'Right', '1b5b313b3343'} }) do
+      vim.rpcrequest(child, 'nvim_input', '<M-' .. key[1] .. '>')
+      assert(vim.wait(2000, function() return received('KEY:' .. key[2]) end, 10), 'Alt-' .. key[1] .. ' was intercepted')
+      assert(lua('return vim.api.nvim_get_current_win()') == win, 'Alt-arrow changed pane')
+    end
   end)
   vim.fn.jobstop(child)
   assert(ok, err)

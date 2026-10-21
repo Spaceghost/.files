@@ -67,7 +67,7 @@ These keys work while typing in a shell and while editing a file:
 | key | action |
 | --- | --- |
 | `F2` | Find any pane across all tabs, including attached hosts |
-| `Alt-Left/Down/Up/Right` | Focus the pane in that direction |
+| `Alt-Left/Down/Up/Right` | Passed through to the terminal application |
 | `Ctrl-PageUp` / `Ctrl-PageDown`, or `Alt-[` / `Alt-]` | Previous / next tab, wrapping at the ends |
 | `Alt-1` through `Alt-9` | Jump directly to a tab |
 | `Alt-o` | Toggle back to the previous pane, even in another tab |
@@ -89,11 +89,14 @@ The local picker lists local panes and host entries; each host's picker
 lists the tabs and panes inside that session.
 
 In an attached host pane, `Ctrl-]` switches between LOCAL and REMOTE KEYS.
-In REMOTE KEYS, `F1`/`F2`/`F4`, Alt-arrows, Alt-tab shortcuts, Alt-1..9,
+In REMOTE KEYS, `F1`/`F2`/`F4`, Alt-tab shortcuts, Alt-1..9,
 Alt-o, Ctrl-PageUp/Down, and the prefix all go to that host. The statusline
 shows `REMOTE @HOST / ^] local`. Press `Ctrl-]` to return to local controls.
 Routing is per host pane and survives a configuration reload. You can still
 send a single prefix to a host by pressing the prefix twice in local mode.
+Alt-arrows always pass through to terminal applications, including inside
+a nested remote session. To focus a pane, use the prefix followed by
+`h`/`j`/`k`/`l`.
 If your terminal emulator intercepts an Alt or Ctrl-Page key, use the
 prefix equivalents below. The statusline shows the current tab and pane
 numbers and reminds you of `F2` and `F4`.

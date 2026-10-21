@@ -64,9 +64,9 @@ test('remote mode routes tab shortcuts and F2 through the PTY', function()
   wait_for(inner, "return vim.fn.tabpagenr() == 2 and vim.api.nvim_get_mode().mode == 't'")
   lua(inner, "Spaceghost.shell.open('belowright vnew', {cmd = {'sh', '-c', 'cat'}})")
   local right = lua(inner, 'return vim.api.nvim_get_current_win()')
-  input(outer, '<M-Left>')
+  input(outer, [[<C-\>h]])
   wait_for(inner, 'return vim.api.nvim_get_current_win() ~= ' .. right)
-  input(outer, '<M-Right>')
+  input(outer, [[<C-\>l]])
   wait_for(inner, 'return vim.api.nvim_get_current_win() == ' .. right)
   input(outer, '<F4>')
   wait_for(inner, "return vim.bo.buftype == 'nofile' and vim.api.nvim_get_mode().mode == 'n'")
@@ -104,6 +104,25 @@ test('local picker opens the selected hosts own tab picker', function()
   input(outer, '<C-]>')
   input(outer, '<M-1>')
   wait_for(outer, "return vim.fn.tabpagenr() == 1 and vim.api.nvim_get_mode().mode == 't'")
+end)
+
+test('Alt-Up reaches an app inside the nested session', function()
+  lua(outer, 'vim.api.nvim_set_current_win(...); Spaceghost.shell.remote_keys(nil, true)', host_win)
+  lua(inner, [[
+    Spaceghost.shell.open('belowright new', {cmd = {'python3', '-u', '-c', [=[
+import os, tty
+tty.setraw(0)
+os.write(1, b'KEYS-READY\r\n')
+while True:
+    data = os.read(0, 64)
+    os.write(1, b'KEY:' + data.hex().encode() + b'\r\n')
+]=]}})
+  ]])
+  wait_for(inner, [[return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'):find('KEYS-READY', 1, true) ~= nil]])
+  local win = lua(inner, 'return vim.api.nvim_get_current_win()')
+  input(outer, '<M-Up>')
+  wait_for(inner, [[return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'):find('KEY:1b5b313b3341', 1, true) ~= nil]])
+  assert(lua(inner, 'return vim.api.nvim_get_current_win()') == win, 'remote pane changed')
 end)
 
 for i = #children, 1, -1 do vim.fn.jobstop(children[i]) end

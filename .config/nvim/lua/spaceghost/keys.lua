@@ -7,10 +7,13 @@ local shell = require('spaceghost.shell')
 
 M.prefixes = vim.g.spaceghost_prefixes or { '<C-\\>', '<C-Space>' }
 M.direct_keys = {}
+M.prefixed_keys = {}
 
 local function map(lhs, rhs, desc, modes)
   for _, prefix in ipairs(M.prefixes) do
-    vim.keymap.set(modes or { 'n', 't' }, prefix .. lhs, rhs, { silent = true, desc = desc })
+    local key = prefix .. lhs
+    vim.keymap.set(modes or { 'n', 't' }, key, rhs, { silent = true, desc = desc })
+    M.prefixed_keys[#M.prefixed_keys + 1] = key
   end
 end
 
@@ -89,6 +92,7 @@ end
 function M.setup()
   local deck = require('spaceghost.deck')
   M.direct_keys = {}
+  M.prefixed_keys = {}
   local group = vim.api.nvim_create_augroup('SpaceghostNavigation', { clear = true })
   vim.api.nvim_create_autocmd('WinEnter', { group = group, callback = remember_pane })
   remember_pane()
@@ -100,6 +104,15 @@ function M.setup()
   map('a', M.attach_prompt, 'Attach to a machine in a split')
   for _, k in ipairs({ 'h', 'j', 'k', 'l' }) do
     map(k, function() M.focus_pane(k) end, 'Focus pane ' .. k)
+  end
+  for _, key in ipairs({ 'Left', 'Down', 'Up', 'Right' }) do
+    -- Remove the old Alt-arrow bindings when upgrading a running session.
+    -- These keys belong to terminal programs, including Codex and readline.
+    local alt = '<M-' .. key .. '>'
+    for _, mode in ipairs({ 'n', 't' }) do pcall(vim.keymap.del, mode, alt) end
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if vim.b[buf].spaceghost_attach then pcall(vim.keymap.del, 't', alt, { buffer = buf }) end
+    end
   end
   map('H', '<C-\\><C-n>5<C-w><', 'Resize left')
   map('J', '<C-\\><C-n>3<C-w>-', 'Resize down')
@@ -135,9 +148,6 @@ function M.setup()
     { '<M-]>', function() M.focus_tab(1) end, 'Next tab' },
     { '<M-o>', M.previous_pane, 'Previous pane (across tabs)' },
   }
-  for key, direction in pairs({ Left = 'h', Down = 'j', Up = 'k', Right = 'l' }) do
-    direct[#direct + 1] = { '<M-' .. key .. '>', function() M.focus_pane(direction) end, 'Focus pane ' .. direction }
-  end
   for _, binding in ipairs(direct) do
     vim.keymap.set({ 'n', 't' }, binding[1], binding[2], { silent = true, desc = binding[3] })
     M.direct_keys[#M.direct_keys + 1] = binding[1]
@@ -155,6 +165,7 @@ function M.setup()
   -- Prefix twice sends the prefix itself to the program in the pane.
   for _, prefix in ipairs(M.prefixes) do
     vim.keymap.set('t', prefix .. prefix, prefix, { desc = 'Send literal ' .. prefix })
+    M.prefixed_keys[#M.prefixed_keys + 1] = prefix .. prefix
   end
   vim.keymap.set({ 'n', 't' }, '<C-]>', function()
     if vim.b.spaceghost_attach then shell.remote_keys(nil, 'toggle') end
