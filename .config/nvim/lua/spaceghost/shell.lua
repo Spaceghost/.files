@@ -36,6 +36,29 @@ end
 
 function M.is_shell(buf) return vim.bo[buf].buftype == 'terminal' end
 
+-- Repaint Neovim and ask the terminal application to repaint through its
+-- usual resize signal. No control characters are sent to the application.
+function M.redraw()
+  local buf = vim.api.nvim_get_current_buf()
+  if M.is_shell(buf) then
+    local channel = vim.bo[buf].channel
+    if channel > 0 and vim.fn.jobwait({ channel }, 0)[1] == -1 then
+      local width, height = 0, 0
+      -- Match Neovim's terminal sizing when the buffer has multiple views.
+      for _, win in ipairs(vim.fn.win_findbuf(buf)) do
+        local info = vim.fn.getwininfo(win)[1]
+        width = math.max(width, info.width - info.textoff)
+        height = math.max(height, info.height)
+      end
+      if width > 0 and height > 0 then
+        vim.fn.jobresize(channel, width > 1 and width - 1 or 2, height)
+        vim.fn.jobresize(channel, width, height)
+      end
+    end
+  end
+  vim.cmd('mode')
+end
+
 -- Human label for a buffer: terminal title without user@host, else file name.
 function M.label(buf)
   if vim.b[buf].spaceghost_attach then return '@' .. vim.b[buf].spaceghost_attach end
@@ -281,6 +304,7 @@ function M.setup()
   vim.api.nvim_create_user_command('Shell', function(opts)
     M.open(opts.args ~= '' and opts.args or 'belowright new')
   end, { nargs = '?', desc = 'Open a shell: :Shell [tabnew|vnew|new]' })
+  vim.api.nvim_create_user_command('TermRedraw', M.redraw, { desc = 'Redraw the pane and its terminal application' })
   vim.api.nvim_create_user_command('Attach', function(opts)
     local host, open = opts.fargs[1], opts.fargs[2]
     M.attach(host, open and ({ tabnew = 'tabnew', new = 'belowright new', vnew = 'belowright vnew' })[open] or open)

@@ -64,6 +64,12 @@ end
 function M.close_pane()
   local buf = vim.api.nvim_get_current_buf()
   if vim.bo[buf].buftype == 'terminal' then
+    -- Multiple panes can display one terminal job. Remove only this view;
+    -- deleting the shared buffer would stop the job and clear every view.
+    if #vim.fn.win_findbuf(buf) > 1 then
+      vim.api.nvim_win_close(0, false)
+      return
+    end
     if vim.b[buf].spaceghost_shell_root and #vim.api.nvim_list_wins() == 1 then
       vim.cmd('quitall')
       return
@@ -100,6 +106,7 @@ function M.setup()
   map('s', function() shell.open('belowright new') end, 'Split shell below')
   map('v', function() shell.open('belowright vnew') end, 'Split shell right')
   map('x', M.close_pane, 'Close pane')
+  map('d', shell.redraw, 'Redraw pane')
   map('e', M.edit_prompt, 'Edit a file')
   map('a', M.attach_prompt, 'Attach to a machine in a split')
   for _, k in ipairs({ 'h', 'j', 'k', 'l' }) do

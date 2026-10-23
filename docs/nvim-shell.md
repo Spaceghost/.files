@@ -75,6 +75,7 @@ These keys work while typing in a shell and while editing a file:
 
 In the `F2` picker, each row shows the tab number and custom name, pane
 number, shell/file/remote type, host or title, directory, and unread output.
+`SHARED N` marks multiple panes displaying the same buffer.
 The current pane is marked `>` and selected initially. Use `j`/`k`, arrows,
 or Tab/Shift-Tab to move; Enter focuses the selection. Type `/bak` to find
 an attached host, `/project` for a directory or title, or `/tab 3` for a tab.
@@ -110,6 +111,23 @@ shared status bar use one row each; the command line appears only when needed
 (`cmdheight=0`). Splits divide the remaining area. No automatic maximization
 or pane balancing changes your layout.
 
+## Redraw a terminal or remove a duplicate pane
+
+Press `F4`, release it, then press `d` to redraw the focused pane. This
+refreshes Neovim and asks the terminal program to redraw at its current
+size. It does not send Ctrl-L or other input to the program. The prefix
+followed by `d`, or `:TermRedraw`, does the same thing.
+
+Press `F2`, select an unwanted duplicate pane, then press `x`. This removes
+the selected view without entering its host, and keeps its shell and other
+views running. The picker refuses to remove a pane that has no duplicate.
+
+`F4`, then `x` also closes the focused pane. If another pane shows the same
+terminal buffer, only the duplicate view closes. Closing the last view of
+a terminal through `F4 x` still stops that terminal, so use `:detach` to
+leave a session running. `Ctrl-]` returns host navigation to local control
+when the statusline shows `REMOTE @HOST`.
+
 ## Keys (prefix `Ctrl-\` or `Ctrl-Space`)
 
 | key | action | key | action |
@@ -120,6 +138,7 @@ or pane balancing changes your layout.
 | `n` / `p` | next / previous tab | `1`-`9` | jump to tab |
 | `Tab` | previous pane across tabs | `w` | searchable tabs + panes + hosts picker |
 | `z` / `=` | zoom / balance | `x` | close pane |
+| `d` | redraw pane and its terminal | | |
 | `` ` `` | scratch terminal (toggle) | `g` | git observatory |
 | `~` | btop / htop | `e` | edit a file |
 | `a` | attach a machine in a split | `Ctrl-]` | toggle all navigation between local and remote |

@@ -223,6 +223,84 @@ with open(sys.argv[1], 'rb', buffering=0) as pty:
   assert(ok, err)
 end)
 
+test('closing a duplicate pane preserves its shared terminal and job', function()
+  local buf = shell.open('tabnew', { cmd = { 'sh', '-c', 'cat' } })
+  local keep = vim.api.nvim_get_current_win()
+  local channel = vim.bo[buf].channel
+  local pid = vim.fn.jobpid(channel)
+  vim.cmd.vsplit()
+  local duplicate = vim.api.nvim_get_current_win()
+  keys.close_pane()
+  assert(not vim.api.nvim_win_is_valid(duplicate), 'duplicate view stayed open')
+  assert(vim.api.nvim_win_is_valid(keep) and vim.api.nvim_win_get_buf(keep) == buf, 'other view was removed')
+  assert(vim.api.nvim_buf_is_valid(buf), 'shared terminal was deleted')
+  assert(vim.fn.jobwait({ channel }, 0)[1] == -1 and vim.fn.jobpid(channel) == pid, 'shared job was stopped')
+end)
+
+test('picker removes a duplicate host view and refuses a unique pane', function()
+  local buf = shell.open('tabnew', { cmd = { 'sh', '-c', 'cat' } })
+  local keep = vim.api.nvim_get_current_win()
+  local channel = vim.bo[buf].channel
+  vim.b[buf].spaceghost_attach = 'test-host'
+  vim.cmd.vsplit()
+  local duplicate = vim.api.nvim_get_current_win()
+  local deck = require('spaceghost.deck')
+  deck.choose_window()
+  vim.api.nvim_feedkeys('x', 'xt', false)
+  assert(not vim.api.nvim_win_is_valid(duplicate), 'picker did not remove duplicate')
+  assert(vim.api.nvim_win_is_valid(keep) and vim.api.nvim_win_get_buf(keep) == buf, 'original host view changed')
+  assert(vim.fn.jobwait({ channel }, 0)[1] == -1, 'host UI was stopped')
+  assert(not vim.b[buf].spaceghost_remote_keys, 'picker entered the host')
+  deck.choose_window()
+  vim.api.nvim_feedkeys('x', 'xt', false)
+  assert(vim.api.nvim_win_is_valid(keep) and vim.api.nvim_buf_is_valid(buf), 'unique pane was removed')
+  assert(vim.fn.jobwait({ channel }, 0)[1] == -1, 'unique terminal was stopped')
+  vim.api.nvim_feedkeys(vim.keycode('<Esc>'), 'xt', false)
+end)
+
+test('redraw menu refreshes a terminal without sending input or losing its size', function()
+  local child = vim.fn.jobstart({ vim.v.progpath, '--embed', '--headless', '-u', 'NONE' }, { rpc = true })
+  local function lua(code, ...) return vim.rpcrequest(child, 'nvim_exec_lua', code, { ... }) end
+  local function input(key) vim.rpcrequest(child, 'nvim_input', key) end
+  local function wait_for(code)
+    assert(vim.wait(2000, function() return lua(code) end, 10), 'timed out: ' .. code)
+  end
+  local ok, err = pcall(function()
+    lua([[
+      vim.opt.runtimepath:prepend(...)
+      vim.g.spaceghost_no_shell = true
+      local shell = require('spaceghost.shell')
+      shell.setup()
+      require('spaceghost.keys').setup()
+      shell.open(nil, {cmd = {'python3', '-u', '-c', [=[
+import os, signal, tty
+tty.setraw(0)
+def redraw(signum, frame):
+    size = os.get_terminal_size(0)
+    os.write(1, ('RESIZED:%dx%d\r\n' % (size.columns, size.lines)).encode())
+signal.signal(signal.SIGWINCH, redraw)
+os.write(1, b'REDRAW-READY\r\n')
+while True:
+    os.write(1, b'INPUT:' + os.read(0, 64).hex().encode() + b'\r\n')
+]=]}})
+    ]], vim.fn.getcwd() .. '/.config/nvim')
+    wait_for([[return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'):find('REDRAW-READY', 1, true) ~= nil]])
+    local channel = lua('return vim.bo.channel')
+    local pid = lua('return vim.fn.jobpid(vim.bo.channel)')
+    local size = lua('return {vim.api.nvim_win_get_width(0), vim.api.nvim_win_get_height(0)}')
+    input('<F4>')
+    wait_for("return vim.bo.buftype == 'nofile' and vim.api.nvim_get_mode().mode == 'n'")
+    input('d')
+    wait_for("return vim.bo.buftype == 'terminal' and vim.api.nvim_get_mode().mode == 't'")
+    local expected = 'RESIZED:' .. size[1] .. 'x' .. size[2]
+    wait_for("return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\\n'):find('" .. expected .. "', 1, true) ~= nil")
+    assert(lua('return vim.bo.channel') == channel and lua('return vim.fn.jobpid(vim.bo.channel)') == pid, 'job changed')
+    assert(not lua([[return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\n'):find('INPUT:', 1, true) ~= nil]]), 'redraw sent input to the application')
+  end)
+  vim.fn.jobstop(child)
+  assert(ok, err)
+end)
+
 test('shell fills a pane that previously displayed a file', function()
   vim.cmd('tabonly!')
   vim.wo.foldcolumn = '2'

@@ -58,6 +58,7 @@ function M.command_deck()
     { key = 'a', label = 'Attach to a machine in a split…', action = K.attach_prompt },
     { key = 'z', label = 'Zoom / unzoom pane', action = K.zoom },
     { key = '=', label = 'Balance panes', action = function() vim.cmd('wincmd =') end },
+    { key = 'd', label = 'Redraw pane', action = shell.redraw },
     { key = 'x', label = 'Close pane', action = K.close_pane },
     { sep = true },
     { key = 'w', label = 'Tabs + panes', action = M.choose_window },
@@ -82,6 +83,8 @@ function M.field_guide()
     { note = 'Alt-1..9   jump to tab      Ctrl-PgUp/PgDn previous / next tab' },
     { note = 'Alt-o      previous pane across tabs    F4 command deck' },
     { note = 'Alt-arrows pass through to terminal programs' },
+    { note = 'F4 then d: redraw pane    F4 then x: close pane' },
+    { note = 'F2 then x: remove selected duplicate view (keep its shell)' },
     { sep = true },
     { note = 'Space      command deck     ?  F1   field guide' },
     { note = 'c          new tab shell    s / v   split below / right' },
@@ -89,6 +92,7 @@ function M.field_guide()
     { note = 'n / p      next/prev tab    1-9     jump to tab' },
     { note = 'Tab        previous pane across tabs    w  find any pane' },
     { note = 'z / =      zoom / balance   x       close pane' },
+    { note = 'd          redraw pane (duplicate views share one shell)' },
     { note = '`          scratch shell    g       git observatory' },
     { note = '[          copy mode        ]       paste into shell' },
     { note = 'e          edit a file      ,       rename tab' },
@@ -119,9 +123,11 @@ function M.choose_window()
         local title = vim.t[tab].spaceghost_name or ''
         if title ~= '' then title = ' / ' .. title end
         entries[#entries + 1] = target
-        lines[#lines + 1] = clean(string.format('%s tab %d%s | pane %d | %s | %s | %s%s',
+        local views = #vim.fn.win_findbuf(buf)
+        lines[#lines + 1] = clean(string.format('%s tab %d%s | pane %d | %s | %s | %s%s%s',
           target == origin and '>' or ' ', ti, title, pane, kind, shell.label(buf),
-          vim.fn.fnamemodify(shell.cwd(buf), ':~'), vim.b[buf].spaceghost_new and '  NEW' or ''))
+          vim.fn.fnamemodify(shell.cwd(buf), ':~'), views > 1 and ('  SHARED ' .. views) or '',
+          vim.b[buf].spaceghost_new and '  NEW' or ''))
         if target == origin then selected = #entries end
       end
     end
@@ -138,7 +144,7 @@ function M.choose_window()
     row = math.max(0, math.floor((vim.o.lines - height - 2) / 2)),
     col = math.max(0, math.floor((vim.o.columns - width) / 2)),
     style = 'minimal', border = 'rounded', title = ' Tabs / panes / hosts ',
-    footer = ' / search   n/N match   Enter focus/enter host   Esc cancel ',
+    footer = ' / search  j/k move  Enter focus/host  x remove duplicate  Esc cancel ',
   })
   vim.wo[win].cursorline = true
   vim.wo[win].wrap = false
@@ -158,6 +164,17 @@ function M.choose_window()
   for _, key in ipairs({ '<CR>', '<Space>' }) do
     vim.keymap.set('n', key, select_pane, { buffer = buf, nowait = true })
   end
+  vim.keymap.set('n', 'x', function()
+    local target = entries[vim.api.nvim_win_get_cursor(win)[1]]
+    if not vim.api.nvim_win_is_valid(target) then return end
+    local target_buf = vim.api.nvim_win_get_buf(target)
+    if #vim.fn.win_findbuf(target_buf) < 2 then
+      vim.notify('Only one view of this pane is open.')
+      return
+    end
+    close()
+    vim.api.nvim_win_close(target, false)
+  end, { buffer = buf, nowait = true, desc = 'Remove a duplicate view, keeping its terminal running' })
   for _, key in ipairs({ '<Esc>', 'q', '<C-c>', '<F2>' }) do
     vim.keymap.set('n', key, close, { buffer = buf, nowait = true })
   end
