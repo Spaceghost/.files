@@ -1,5 +1,10 @@
 # Spaceghost desktop overlay
 
+> **Rebuilding the complete laptop? Use
+> [`../../RECOVERY.md`](../../RECOVERY.md), not this component guide.** It
+> restores the verified Fossil database, exact packages, private state, and
+> captured unfinished work in the required order.
+
 This is the deployable HOME overlay for the Oldbook Alpine desktop. It is designed for the MacBookPro11,5 internal `eDP-1` display at 2880×1800 and scale 2: Gruvbox Dark charcoal surfaces, cream text, and warm amber highlights with Space Ghost artwork. It contains no wallpaper, credential, network profile, or machine secret.
 
 `~/.local/share/oldbook/wallpaper.png` is an activation contract. The deployment unit places the approved `alpine/assets/spaceghost.png` at that path. Sway uses it initially; the gallery updates the shared painting. The lock helper prefers `current-wallpaper.png`, then this fallback image, then the active theme's solid background. Its ring, text and authentication states follow the same palette.

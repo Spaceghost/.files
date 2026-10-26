@@ -1,5 +1,9 @@
 # Catbed
 
+> **Rebuilding the workstation? Begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This page documents one component,
+> not full recovery of packages, private state, and unfinished work.
+
 One command interface for deliberate input parking, targeting the existing
 Sway Wayland session on Linux first. Catbed is a cat guard, not an
 authentication lock. It cannot guarantee

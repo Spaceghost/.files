@@ -1,5 +1,9 @@
 # Compatibility path
 
+> **Rebuilding the workstation? Begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This compatibility component is
+> not a complete recovery procedure.
+
 This directory preserves the earlier source command and Python import path
 under the old name. Nothing is developed here.
 

@@ -1,5 +1,9 @@
 # Superhold
 
+> **Rebuilding the workstation? Begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This portable component is not the
+> complete Alpine recovery path.
+
 > This is the portable Qt project, and it is **not** the guide running on this
 > machine — that one is `../superhold-guide/`, a separate GTK codebase. See
 > [`../README.md`](../README.md) before changing either.
