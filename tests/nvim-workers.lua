@@ -3,7 +3,7 @@ vim.opt.rtp:prepend(vim.fn.getcwd() .. '/.config/nvim')
 local sessions, starts, requests = {}, {}, {}
 local Client = {}
 function Client:_send_request(method, params, cb) requests[#requests+1] = {method=method,params=params,cb=cb} end
-function Client:create_session(h, cb, cwd) self:_send_request('session/new',{cwd=cwd(),mcpServers={}},cb) end
+function Client:create_session(h, cb, cwd) self:_send_request('session/new',{cwd=cwd(vim.fn.getcwd()),mcpServers={}},cb) end
 function Client:load_session(id,cwd,servers,h,cb) self:_send_request('session/load',{cwd=cwd,mcpServers=servers},cb) end
 function Client:__handle_session_update(p) self.forwarded=p end
 local client = setmetatable({}, {__index=Client})
@@ -30,6 +30,7 @@ package.loaded['agentic.session_registry']=Registry
 package.loaded['agentic.session_manager']=Manager
 package.loaded['agentic.acp.acp_client']=Client
 package.loaded['agentic.utils.hooks']={invoke=function() end}
+package.loaded['agentic.config']={acp_configs={session_cwd=function(cwd) return cwd end}}
 package.loaded['spaceghost.worker_bus']={descriptor=function(id) return {name=id} end,revoke=function() end}
 local W=require('spaceghost.workers'); W.setup(); W.attach()
 local a=W.new({cwd='/var/home/jack',task='first',background=true})
@@ -176,5 +177,25 @@ for i=1,101 do
 end
 assert(#upgrade_worker.inbox==100 and upgrade_worker.unread==100,'evicted messages left unreachable unread counts')
 print('PASS inbox reads track inspected messages and exclude evicted unread entries')
+upgrade_worker.inbox={{id='legacy-read',text='Previously inspected'}}
+upgrade_worker.unread=0; upgrade_worker._inbox_version=nil
+W.attach()
+assert(W.peer(a.id,upgrade_worker.id,'new after upgrade'))
+W.read(upgrade_worker.id,{'legacy-read'})
+assert(upgrade_worker.unread==1,'reading legacy history consumed a new unread message')
+print('PASS inbox migration preserves new unread entries when old history is inspected')
+local current_cwd=vim.fn.getcwd()
+local callback_session=Registry.create(nil,{kind='new',cwd=function(cwd) return cwd..'/child' end})
+callback_session.start()
+assert(requests[#requests].params.cwd==current_cwd..'/child','session cwd callback did not receive the current directory')
+package.loaded['agentic.config'].acp_configs.session_cwd=function() return '/var/tmp' end
+local fallback_session=Registry.create(nil,{kind='new',cwd=function() return 'relative/path' end})
+fallback_session.start()
+assert(requests[#requests].params.cwd=='/var/tmp','invalid per-session cwd bypassed configured absolute fallback')
+package.loaded['agentic.config'].acp_configs.session_cwd=function() error('invalid config callback') end
+local default_session=Registry.create(nil,{kind='new',cwd=function() return '' end})
+default_session.start()
+assert(requests[#requests].params.cwd==current_cwd,'invalid callbacks removed the current-directory fallback')
+print('PASS session cwd callbacks retain upstream arguments and validated absolute fallbacks')
 print('worker lifecycle tests passed')
 vim.cmd('qa!')

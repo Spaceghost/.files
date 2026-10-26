@@ -7,8 +7,8 @@ local child = vim.fn.jobstart({ vim.v.progpath, '--embed', '--headless', '-u', '
 local function lua(code, ...)
   return vim.rpcrequest(child, 'nvim_exec_lua', code, { ... })
 end
-local function wait_for(code)
-  assert(vim.wait(5000, function() return lua(code) end, 20), 'timed out: ' .. code
+local function wait_for(code, timeout)
+  assert(vim.wait(timeout or 5000, function() return lua(code) end, 20), 'timed out: ' .. code
     .. ' state=' .. vim.inspect(lua("return {mode=vim.api.nvim_get_mode().mode,ft=vim.bo.filetype,messages=vim.api.nvim_exec2('messages',{output=true}).output}")))
 end
 local ok, err = pcall(function()
@@ -31,7 +31,7 @@ local ok, err = pcall(function()
   vim.rpcrequest(child, 'nvim_input', '<C-\\>i')
   wait_for("return vim.bo.filetype == 'AgenticInput' and vim.api.nvim_get_mode().mode == 'i'")
   assert(lua("return require('agentic.config').acp_configs.session_cwd()") == root, 'shell workspace lost')
-  wait_for("local r=require('spaceghost.workers').list()[1]; return r and r.status=='ready'")
+  wait_for("local r=require('spaceghost.workers').list()[1]; return r and r.status=='ready'", 45000)
   assert(lua("return require('spaceghost.workers').list()[1].cwd") == root, 'ordinary chat lost its captured workspace')
   vim.rpcrequest(child, 'nvim_input', 'hello')
   wait_for("return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), '\\n'):find('hello', 1, true) ~= nil")

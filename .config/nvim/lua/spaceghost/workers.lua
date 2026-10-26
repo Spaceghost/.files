@@ -7,6 +7,7 @@ if not S then
 end
 S.api = M
 local LIMIT = { queue = 32, inbox = 100, events = 100, text = 16384, hops = 8, tools = 128, children = 64 }
+local WRAPPER_VERSION = 3
 local function clean(s, max) return tostring(s or ''):gsub('[%z\1-\8\11\12\14-\31\127]', ''):sub(1, max or 512) end
 local function notify(quiet)
   for _, cb in pairs(S.subscribers) do pcall(cb, quiet and 'tick' or 'change') end
@@ -40,7 +41,7 @@ local function record(cwd, name)
   local r = { id = id, name = clean(name or ('Worker ' .. S.next_id), 120), cwd = cwd,
     status = 'starting', activity = 'Starting session', started_at = os.time(), last_at = os.time(),
     plan = {}, usage = {}, changed_files = {}, tools = {}, children = {}, inbox = {}, queue = {},
-    unread = 0, bridge = false, events = {}, _workspace_captured = cwd ~= nil }
+    unread = 0, bridge = false, events = {}, _workspace_captured = cwd ~= nil, _inbox_version = 1 }
   S.records[id] = r; S.order[#S.order + 1] = id
   return r
 end
@@ -48,6 +49,22 @@ local function session(r)
   local reg = package.loaded['agentic.session_registry']
   local s = r and reg and reg.get(r.session_key)
   if s and not s._destroyed and s == r._session then return s end
+end
+local function migrate_inbox(r)
+  if r._inbox_version==1 then return end
+  -- The old implementation only stored a count and could clear it on chat
+  -- open. Preserve that count as the newest unread suffix; older entries must
+  -- not consume future unread counts when first inspected after an upgrade.
+  local remaining=math.max(0,math.min(r.unread or 0,#r.inbox))
+  local unread=0
+  for i=#r.inbox,1,-1 do
+    local message=r.inbox[i]
+    if not message.read_at then
+      if remaining>0 then remaining=remaining-1; unread=unread+1
+      else message.read_at=0 end
+    end
+  end
+  r.unread=unread; r._inbox_version=1
 end
 local function adopt(s, r)
   r = r or S.records[s._spaceghost_worker_id]
@@ -61,6 +78,7 @@ local function adopt(s, r)
     r._workspace_captured=r.bridge==true
     if not r._workspace_captured then r.cwd=nil end
   end
+  migrate_inbox(r)
   s._spaceghost_worker_id = r.id; r._session = s; r.session_key = s.session_key
   -- The request callback can precede Agentic's scheduled complete_start callback.
   r.session_id = s.session_id or r.session_id
@@ -76,7 +94,7 @@ local function wrap(tbl, key, factory)
   local current = tbl[key]
   if type(current) ~= 'function' then error('Unsupported Agentic version: missing ' .. key) end
   local installed=S.wrappers[current]
-  if type(installed)=='table' and installed.version==2 then return end
+  if type(installed)=='table' and installed.version==WRAPPER_VERSION then return end
   if type(installed)=='table' then
     current=installed.original
   elseif installed then
@@ -93,7 +111,7 @@ local function wrap(tbl, key, factory)
     current=original
   end
   local wrapped = factory(current)
-  S.wrappers[wrapped] = {version=2,original=current}; tbl[key] = wrapped
+  S.wrappers[wrapped] = {version=WRAPPER_VERSION,original=current}; tbl[key] = wrapped
 end
 function M.state() return S end
 function M.get(id) return S.records[id] end
@@ -190,6 +208,7 @@ local function enqueue(r, text, opts)
   if type(text) ~= 'string' or text:match('^%s*$') then return nil, 'Message must contain text' end
   if #text > LIMIT.text then return nil, 'Message exceeds 16384 bytes' end
   if not r or not session(r) then return nil, 'Unknown or destroyed worker' end
+  migrate_inbox(r)
   local s=session(r)
   if r._fatal or s._connection_error or s._session_creation_failed then return nil, 'Worker is unavailable' end
   if r.status=='failed' and s.session_id then r.status='ready'; r.error=nil end
@@ -215,6 +234,7 @@ function M.send(id, text, opts) return enqueue(S.records[id], text, opts or {}) 
 function M.read(id, message_ids)
   local r=S.records[id]
   if not r then return nil,'Unknown worker' end
+  migrate_inbox(r)
   local wanted={}
   for _,message_id in ipairs(message_ids or {}) do wanted[message_id]=true end
   local count=0
@@ -433,8 +453,14 @@ function M.attach()
       local r=adopt(self,S.creating)
       -- Resolve once, before when_ready can resume in another tab/workspace.
       if not S.creating then
-        local ok,cwd=pcall(function() return spec.cwd and spec.cwd() or require('agentic.config').acp_configs.session_cwd() end)
-        if ok and type(cwd)=='string' then r.cwd=cwd; r._workspace_captured=true end
+        local current_cwd=vim.fn.getcwd()
+        local function resolve(callback)
+          if type(callback)~='function' then return end
+          local ok,cwd=pcall(callback,current_cwd)
+          if ok and type(cwd)=='string' and cwd~='' and vim.fn.isabsolutepath(cwd)==1 then return cwd end
+        end
+        r.cwd=resolve(spec.cwd) or resolve(require('agentic.config').acp_configs.session_cwd) or current_cwd
+        r._workspace_captured=true
       end
       local handlers,err=original(self,spec,...)
       if handlers then
