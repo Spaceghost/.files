@@ -1,5 +1,9 @@
 # Root-installed system files
 
+> **For a complete rebuild, begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** Do not extract old root or machine
+> identities over a fresh host before following its staged restore procedure.
+
 Everything under `alpine/system/` is versioned source for files that live
 outside HOME. Each has an idempotent installer in `alpine/bin/` that compares
 exact content before replacing anything and moves the previous file to

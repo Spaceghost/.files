@@ -1,5 +1,9 @@
 # Which shortcut guide is which
 
+> **Rebuilding the workstation? Begin with
+> [`../RECOVERY.md`](../RECOVERY.md).** The project pages below are component
+> documentation and do not restore the machine.
+
 Three directories here contain a program called Superhold, and only one of them
 is the program that runs on this machine. They are separate codebases with
 different module names, different toolkits and different configuration files,

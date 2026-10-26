@@ -1,5 +1,9 @@
 # Restore the archived Alpine workstation
 
+> **Start with [`../../RECOVERY.md`](../../RECOVERY.md) for a complete machine
+> rebuild.** This document is the package-layer reference used by that ordered
+> recovery procedure.
+
 Start with an installed, bootable **Alpine edge x86_64** system, a normal user
 with `doas` access, and working `python3` and `fossil` commands. Install those
 bootstrap tools before going offline. Disk partitioning, encryption, firmware,

@@ -1,5 +1,9 @@
 # Ghost Gallery
 
+> **Rebuilding the laptop? Start with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This page covers gallery behavior,
+> not the encrypted private state and exact package/Fossil restoration.
+
 All workspaces share one desktop image and one rotation timer. The desktop
 changes artwork every 20 minutes. The Waybar art icon shows the
 current painting and its story: click for the gallery picker, scroll to browse,

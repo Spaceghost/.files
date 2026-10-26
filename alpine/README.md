@@ -1,5 +1,10 @@
 # Space Ghost / Oldbook
 
+> **Rebuilding this laptop? Stop here and follow
+> [`../RECOVERY.md`](../RECOVERY.md) first.** A Git checkout alone omits the
+> encrypted private state, exact Fossil/APK archive, and captured unfinished
+> work required for a faithful recovery.
+
 A Gruvbox Dark Alpine edge desktop, maintained in Fossil. Warm charcoal and
 cream surfaces use amber accents with no window outlines. SwayFX adds soft blur,
 restrained corners and shadows; Waybar is a contextual control deck. The gallery

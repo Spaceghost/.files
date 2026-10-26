@@ -1,5 +1,9 @@
 # forge
 
+> **For a laptop rebuild, begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This page covers only the remote
+> development forge, not complete workstation recovery.
+
 A CUE-declared plan for an isolated Incus project on `bak`: a Fossil server
 for the `~/.files` mirror, plus ephemeral per-session checkout sandboxes, so
 concurrent Claude sessions stop sharing this laptop's live checkout directly.

@@ -1,5 +1,9 @@
 # Superhold
 
+> **Rebuilding the workstation? Begin with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This page covers the shortcut
+> guide component only.
+
 > This is the guide that runs on this machine. Two other directories in
 > `projects/` also contain a program called Superhold and neither of them is
 > what the keyboard reaches; see [`../README.md`](../README.md), which also

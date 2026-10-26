@@ -1,5 +1,9 @@
 # Oldbook profile for Bazzite Sway
 
+> **Rebuilding the original Alpine laptop? Follow
+> [`../RECOVERY.md`](../RECOVERY.md).** This Bazzite profile is a partial replay,
+> not a complete machine recovery path.
+
 This profile replays the portable desktop pieces from `alpine/desktop` onto a
 Bazzite HOME. It uses an explicit allowlist, Bazzite systemd user services and
 the existing `alpine/bin/deploy-home` journal. Alpine APKs, OpenRC services,

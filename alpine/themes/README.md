@@ -1,5 +1,9 @@
 # Gruvbox Dark × Space Ghost
 
+> **Rebuilding the laptop? Start with
+> [`../../RECOVERY.md`](../../RECOVERY.md).** This page restores themes only;
+> the recovery guide restores the complete verified workstation first.
+
 ## Complete desktop themes
 
 Every theme includes a desktop design and application profile. Run
