@@ -109,6 +109,9 @@ function M.setup()
   map('d', shell.redraw, 'Redraw pane')
   map('e', M.edit_prompt, 'Edit a file')
   map('a', M.attach_prompt, 'Attach to a machine in a split')
+  map('i', function() require('spaceghost.agent').run('toggle') end, 'Native Codex chat', { 'n', 'i', 'v' })
+  map('i', '<C-\\><C-n><Cmd>Codex<CR>', 'Native Codex chat', { 't' })
+  map('I', function() require('spaceghost.agent').run('add_selection_or_file_to_context') end, 'Add file or selection to Codex', { 'n', 'v' })
   for _, k in ipairs({ 'h', 'j', 'k', 'l' }) do
     map(k, function() M.focus_pane(k) end, 'Focus pane ' .. k)
   end

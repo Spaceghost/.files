@@ -156,6 +156,59 @@ nvim --headless -u NONE -l tests/nvim-navigation.lua
 nvim --headless -u NONE -l tests/nvim-nested.lua
 ```
 
+Agentic checks after installing its dependencies (the last sends one small
+prompt using the existing Codex login):
+
+```sh
+nvim --headless -u NONE -l tests/nvim-agentic-terminal.lua
+nvim --headless -u NONE -l tests/nvim-agentic.lua --live
+```
+
+## Native Codex application (Agentic)
+
+`Ctrl-\ i` opens Agentic: native Neovim chat, input, file context, tool activity,
+permission buttons, and split diff previews, using the existing Codex ChatGPT
+login on this machine. `Ctrl-Space i` also works in supported terminals.
+The chat follows the Spaceghost violet/mint theme. It is not a terminal wrapper.
+
+1. In a shell, `cd` to the project; in an editor, open a project file.
+2. Press `Ctrl-\ i`, type a prompt, and press `Ctrl-s` to send.
+3. Follow permission prompts to review edits; `]c` / `[c` navigate preview hunks.
+
+In normal mode, Enter also sends; in insert mode, Enter inserts a newline.
+`q` in normal mode hides the chat while the session keeps running.
+`Ctrl-\ I` in a file adds it, or adds the visual selection when one is active.
+Type `@` in the prompt for workspace file completion; `/` lists agent commands.
+
+`F4 i` opens the Codex menu: toggle (`i`), new session here (`n`), live sessions
+(`s`), restore saved sessions (`r`), rotate layout (`l`). Existing sessions keep
+their workspace; use New session after changing projects. New sessions start
+in the originating file's directory or shell's OSC 7 directory. On a remote
+pane, switch to REMOTE KEYS with `Ctrl-]` first to run Codex on that host.
+
+Commands: `:Codex`, `:CodexNew`, `:CodexSessions`, `:CodexRestore`, `:CodexAdd`,
+`:CodexDiagnostics`, `:CodexLayout`, `:CodexMenu`.
+Within Agentic, `\m` chooses a model, `\o` opens agent options, `\t` chooses
+reasoning effort, and Shift-Tab changes agent mode. The initial mode is Workspace
+access (workspace writes, with permission requests for additional access).
+
+Install or repair on any configured host:
+
+```sh
+~/.bin/spaceghost-agentic-install
+# Reload the running cockpit: F4 r
+```
+
+Requires git, Node.js 20.19+ (or 22.12+), npm, Neovim 0.11+, and a Codex login
+(`codex login`). The installer pins Agentic's commit and installs the maintained
+`@agentclientprotocol/codex-acp` adapter from the committed npm lockfile. Its
+compatible bundled Codex shares `~/.codex` authentication/configuration and
+leaves the standalone Codex CLI intact. No credentials are stored in this repo.
+Dependencies live under Neovim's data directory, never install at startup, and
+only load when opening the UI. To update, change `agentic/plugin-revision` or
+`agentic/package.json`, regenerate the lockfile in that directory, and rerun
+the installer on each host.
+
 ## Native helpers (Nelua + zig cc)
 
 `.config/nvim/native/spaceghost.nelua` implements the telemetry sampler,

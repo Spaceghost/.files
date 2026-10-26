@@ -1,0 +1,30 @@
+#!/bin/sh
+# Install the pinned native Codex frontend without touching the CLI or login.
+set -eu
+PATH="$HOME/.local/bin:/home/linuxbrew/.linuxbrew/bin:/opt/homebrew/bin:$PATH"
+export PATH
+mkdir -p "${XDG_CACHE_HOME:-$HOME/.cache}/spaceghost-agentic/tmp"
+TMPDIR="${XDG_CACHE_HOME:-$HOME/.cache}/spaceghost-agentic/tmp"
+export TMPDIR
+config="${XDG_CONFIG_HOME:-$HOME/.config}/nvim/agentic"
+data="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"
+plugin="$data/site/pack/spaceghost/opt/agentic.nvim"
+adapter="$data/spaceghost/agentic"
+for tool in git node npm; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "Missing $tool; install it and rerun spaceghost-agentic-install" >&2; exit 1; }
+done
+revision="$(cat "$config/plugin-revision")"
+mkdir -p "$(dirname "$plugin")" "$adapter"
+if [ ! -d "$plugin/.git" ]; then
+    git clone --quiet https://github.com/carlos-algms/agentic.nvim.git "$plugin"
+fi
+if [ -n "$(git -C "$plugin" status --porcelain)" ]; then
+    echo "Keeping modified plugin checkout at $plugin; resolve its edits before installing." >&2
+    exit 1
+fi
+git -C "$plugin" cat-file -e "$revision^{commit}" 2>/dev/null || git -C "$plugin" fetch --quiet origin "$revision"
+git -C "$plugin" checkout --quiet --detach "$revision"
+cp "$config/package.json" "$config/package-lock.json" "$adapter/"
+(cd "$adapter" && npm ci --no-audit --no-fund)
+"$adapter/node_modules/.bin/codex-acp" --version
+printf 'Agentic installed at %s (%s)\nReload Neovim with F4 r; open Codex with Ctrl-\\ i.\n' "$plugin" "$revision"
