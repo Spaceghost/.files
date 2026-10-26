@@ -42,14 +42,13 @@ swaymsg reload
 | Feedback pill and screenshot shutter | `desktop/.local/bin/oldbook-osd`, `oldbook-screenshot`, `desktop/.config/satty/config.toml` |
 | Lock screen scene and locker | `desktop/.local/bin/oldbook-lock`, `desktop/.local/lib/oldbook/lock_scene.py` |
 | Power deck tiles | `desktop/.config/wlogout/`, `desktop/.local/bin/oldbook-power` |
-| Wallpaper crossfade | `desktop/.local/bin/oldbook-background`, `desktop/.local/lib/oldbook/background_fade.py` |
 | Terminal splash and Ghostty shaders | `desktop/.config/fastfetch/`, `desktop/.config/ghostty/shaders/` |
 | Boot console palette, getty banner, banner initramfs | `system/boot/`, `system/mkinitfs/`, `bin/install-boot-console` |
 | Sun, moon, night light, nocturnes | `~/.config/oldbook/location.json`, `desktop/.local/lib/oldbook/astro.py`, `nocturne.py` |
 | Keyboard glow modes | `desktop/.local/bin/oldbook-keyboard-backlight`, `desktop/.config/sway/local.d/keyboard-backlight.conf` |
 | Window and workspace animations | `desktop/.config/swayfx/animations.conf`, `packages/swayfx/window-animations.patch` |
 | Launchpad and Mission Control | `desktop/.local/lib/oldbook/grid_layout.py`, `grid_overlay.py`, `launchpad.py`, `mission_control.py` |
-| Desktop breath and the idle gallery | `desktop/.local/lib/oldbook/air.py`, `desktop/.local/bin/oldbook-screensaver`, `~/.config/oldbook/breath.json` |
+| Caption breath | `desktop/.local/lib/oldbook/air.py`, `~/.config/oldbook/breath.json` |
 | Accent elected from the painting | `desktop/.local/lib/oldbook/painting_palette.py`, `desktop/.local/bin/oldbook-palette` |
 | Track card and workspace peek | `desktop/.local/bin/oldbook-osd`, `packages/waybar-art/help.c` |
 | Cursors and sound cues | `bin/build-cursor-theme`, `bin/build-sound-theme`, `~/.config/oldbook/sound.json` |
@@ -73,7 +72,7 @@ effects from a config reload. `OLDBOOK_STOCK_SWAY=1 sway` is the fallback.
   trigger is also configurable in [Hold to Help](../projects/hold-to-help/README.md).
 - **Super+Shift+D:** Ghost command deck; the panel's Ghost badge opens it too.
 - **Super+G:** painting picker with thumbnails. **Super+Ctrl+Left/Right:** previous/next
-  painting, crossfaded; `oldbook-wallpaper next --from X,Y` reveals from a point.
+  painting. The automatic gallery changes once per hour.
 - **Super+Shift+P:** pause/resume rotation. **Super+Shift+N:** notifications.
 - **Super+Escape:** lock; the desktop dissolves into the current painting with the
   clock, caption and Scripture. **Super+F:** fullscreen toggle; leave fullscreen to see the panel.

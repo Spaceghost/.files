@@ -105,6 +105,5 @@ and run `oldbook-shortcuts daemon` to restore it. Deployment uses the normal
 `deploy-home` recovery journal; its recorded backup can be rolled back with
 `alpine/bin/deploy-home --target "$HOME" --rollback BACKUP_DIRECTORY`.
 
-Design, validation and outstanding physical checks are recorded in
-`docs/superpowers/specs/2026-09-07-contextual-shortcuts.md`,
+Validation and outstanding physical checks are recorded in
 `alpine/verification/contextual-shortcuts.json` and `alpine/PROGRESS.md`.

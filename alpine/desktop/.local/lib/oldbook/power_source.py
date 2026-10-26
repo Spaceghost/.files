@@ -36,7 +36,6 @@ LADDER = {
     'ghost-wander': 'battery',
     'landing-ripple': 'battery',
     'keyboard-breath': 'battery',
-    'wallpaper-crossfade': 'battery',
     'window-animations': 'battery',
     'window-ghosts': 'battery',
     'letterpress': 'battery-low',

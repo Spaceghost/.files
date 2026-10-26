@@ -20,8 +20,7 @@ Two local patches are applied on top of the pinned upstream tarball:
 - `0003-indicator-panel.patch` adds `--indicator-panel <path>`: a drawing hook
   for the indicator area, repaints driven by the `wl_surface.frame` callback
   while something is animating, and damage limited to the panel's own
-  rectangle. It is stage 1 of `docs/superpowers/specs/2026-09-09-lock-client.md`
-  and its first consumer is the cat hearth (`cat_panel.py`), which is the only
+  rectangle. Its first consumer is the cat hearth (`cat_panel.py`), which is the only
   thing that can show a locked session that the machine is deliberately warming
   itself: a session lock surface covers everything, so nothing but the locker
   can draw above it.

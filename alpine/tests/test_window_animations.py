@@ -18,6 +18,7 @@ import unittest
 REPO = Path(__file__).resolve().parents[2]
 LAUNCHER = REPO / 'alpine/desktop/.local/bin/oldbook-sway'
 ANIMATIONS = REPO / 'alpine/desktop/.config/swayfx/animations.conf'
+DROPDOWN = REPO / 'alpine/desktop/.config/sway/local.d/dropdown.conf'
 RECIPE = REPO / 'alpine/packages/swayfx'
 
 # Every command the animations file may use, with the value bounds the
@@ -28,6 +29,8 @@ DURATION_COMMANDS = (
     'animation_close_ms',
     'animation_move_ms',
     'animation_workspace_ms',
+    'animation_dropdown_ms',
+    'animation_dropdown_close_ms',
 )
 
 
@@ -47,16 +50,25 @@ class AnimationsConfigTests(unittest.TestCase):
     def setUp(self):
         self.settings = settings(ANIMATIONS.read_text())
 
-    def test_animations_are_switched_off(self):
-        """Jack: "The whole part where windows are moving when I alt-<something>
-        between workspaces and windows and such must be fixed now and forever."
-        The workspace slide and window move animations were exactly that
-        motion, so this is off for good, not a duration to tune down."""
-        self.assertEqual(self.settings.get('animations'), 'disable')
+    def test_animations_are_enabled_for_native_dropdown_motion(self):
+        self.assertEqual(self.settings.get('animations'), 'enable')
 
     def test_workspace_style_is_a_supported_word(self):
         self.assertIn(self.settings.get('animation_workspace_style'),
                       {'slide', 'fade', 'both'})
+
+    def test_cross_workspace_window_handoff_is_a_fade_not_a_slide(self):
+        self.assertEqual(self.settings.get('animation_workspace_style'), 'fade')
+
+    def test_top_dropdown_rules_cover_both_persistent_terminals(self):
+        self.assertEqual(self.settings.get('animation_dropdown_mark'),
+                         'oldbook-dropdown')
+        rules = DROPDOWN.read_text()
+        self.assertIn('com[.]oldbook[.](dropdown|monitor)', rules)
+        self.assertIn('mark --add oldbook-dropdown', rules)
+
+    def test_top_dropdowns_have_square_top_and_soft_bottom_corners(self):
+        self.assertEqual(self.settings.get('animation_dropdown_corner_radius'), '14')
 
     def test_durations_are_within_the_compositor_bounds(self):
         for command in DURATION_COMMANDS:
@@ -68,9 +80,10 @@ class AnimationsConfigTests(unittest.TestCase):
                 self.assertLessEqual(value, 5000)
 
     def test_motion_stays_brief_enough_to_feel_immediate(self):
-        for command in ('animation_open_ms', 'animation_close_ms', 'animation_move_ms'):
+        for command in ('animation_open_ms', 'animation_close_ms', 'animation_move_ms',
+                        'animation_dropdown_ms', 'animation_dropdown_close_ms'):
             with self.subTest(command=command):
-                self.assertLessEqual(float(self.settings[command]), 400)
+                self.assertLessEqual(float(self.settings.get(command, 'inf')), 400)
         # The whole screen travels on a workspace switch, so it is allowed more
         # time than a single window, but not so much that it feels slow.
         self.assertLessEqual(float(self.settings['animation_workspace_ms']), 600)
@@ -83,9 +96,9 @@ class AnimationsConfigTests(unittest.TestCase):
     def test_file_carries_no_effects_that_stock_sway_shares(self):
         # effects.conf is included by the running session; keeping the two
         # apart is what stops an older binary from meeting these commands.
-        text = ANIMATIONS.read_text()
+        commands = settings(ANIMATIONS.read_text())
         for stray in ('blur', 'corner_radius', 'shadows', 'layer_effects'):
-            self.assertNotIn(stray, text)
+            self.assertNotIn(stray, commands)
 
 
 class LauncherProbeTests(unittest.TestCase):
@@ -219,20 +232,27 @@ class RecipeTests(unittest.TestCase):
             'include/sway/animation_manager.h',
             'include/sway/commands.h',
             'include/sway/config.h',
+            'include/sway/desktop/transaction.h',
             'include/sway/tree/container.h',
             'include/sway/tree/workspace.h',
             'sway/animation_manager.c',
             'sway/commands.c',
             'sway/commands/animations.c',
             'sway/config.c',
+            'sway/desktop/output.c',
             'sway/desktop/transaction.c',
             'sway/meson.build',
             'sway/sway.5.scd',
+            'sway/tree/container.c',
+            'sway/tree/root.c',
         })
 
     def test_every_config_command_is_documented(self):
         manual = (RECIPE / 'window-animations.patch').read_text()
-        for command in DURATION_COMMANDS + ('animations', 'animation_workspace_style'):
+        for command in DURATION_COMMANDS + (
+                'animations', 'animation_dropdown_mark',
+                'animation_dropdown_corner_radius', 'animation_workspace_style',
+                'dropdown'):
             with self.subTest(command=command):
                 self.assertIn(command, manual)
 

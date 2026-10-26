@@ -120,7 +120,7 @@ class RowTests(DeckTestCase):
     def test_the_deck_keeps_every_action_the_rice_catalogue_names(self):
         labels = ' '.join(label for label, _ in self.rows())
         for promised in ('Applications', 'Expo', 'Switch window', 'Bottom decoration',
-                         'Artwork gallery', 'YouTube', 'Video background', 'Ghostty',
+                         'Artwork gallery', 'YouTube', 'Ghostty',
                          'Reactor', 'Transmissions', 'Sound studio', 'Keyboard glow',
                          'Night light', 'Ambient screen', 'Sound cues', 'Now transmitting',
                          'Application firewall', 'Notifications', 'Edit the Ghost Planet',

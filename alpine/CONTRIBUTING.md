@@ -9,7 +9,6 @@ Preserve the existing `~/.files/AGENTS.md` and follow its repository instruction
 Historical dotfiles remain at the checkout root. Alpine-specific configuration
 belongs in `alpine/desktop/`, security services in `alpine/security/`, package
 recipes and locks in `alpine/packages/`, and artwork in `alpine/assets/`.
-Implementation plans and design decisions live in `docs/superpowers/`.
 
 ## Build, Test, and Development Commands
 

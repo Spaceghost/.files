@@ -1,7 +1,7 @@
 {
   "font": "Inter:size=9",
   "update_interval": 60,
-  "gap": 3,
+  "gap": 6,
   "panels": [
     {
       "id": "masthead",
@@ -10,8 +10,18 @@
       "priority": 100,
       "prefer": "top",
       "width": 372,
-      "height": 100,
+      "height": 120,
       "text": "${font Inter:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet \u00b7 Coast to Coast\n${execpi 300 ~/.local/bin/oldbook-astro panel}"
+    },
+    {
+      "id": "remote-watch",
+      "title": "Remote Watch",
+      "enabled": true,
+      "priority": 99,
+      "prefer": "right",
+      "width": 500,
+      "height": 404,
+      "text": "${execpi 60 ~/.local/bin/oldbook-remote-access conky}"
     },
     {
       "id": "scripture",
@@ -21,7 +31,17 @@
       "prefer": "top-right",
       "width": 420,
       "height": 204,
-      "text": "${color1}\udb80\udcba SCRIPTURE${color2} ${hr 1}\n${execpi 60 ~/.local/bin/oldbook-scripture panel --width 52}"
+      "text": "${color1}\udb80\udcba SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
+    },
+    {
+      "id": "rice",
+      "title": "New rice",
+      "enabled": true,
+      "priority": 56,
+      "prefer": "right",
+      "width": 420,
+      "height": 250,
+      "text": "${color1}\udb80\udfea NEW RICE${color2} ${hr 1}\n${execpi 300 ~/.local/bin/oldbook-rice panel --width 50}"
     },
     {
       "id": "power",

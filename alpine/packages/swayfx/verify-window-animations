@@ -94,7 +94,7 @@ def reddish_box(path):
     pixels = pixbuf.get_pixels()
     width, height = pixbuf.get_width(), pixbuf.get_height()
 
-    left, right, hits, sampled = width, -1, 0, 0
+    left, right, top, bottom, hits, sampled = width, -1, height, -1, 0, 0
     for y in range(0, height, 4):
         base = y * rowstride
         for x in range(0, width, 4):
@@ -105,10 +105,50 @@ def reddish_box(path):
                 hits += 1
                 left = min(left, x)
                 right = max(right, x)
+                top = min(top, y)
+                bottom = max(bottom, y)
     return {
         'reddish_fraction': hits / sampled,
         'box_width': (right - left) if right >= 0 else 0,
+        'left': left if right >= 0 else None,
+        'right': right if right >= 0 else None,
+        'top': top if bottom >= 0 else None,
+        'bottom': bottom if bottom >= 0 else None,
     }
+
+
+def red_edge_insets(path):
+    """Red inset at the top-left and bottom-left of the settled dropdown."""
+    import gi
+    gi.require_version('GdkPixbuf', '2.0')
+    from gi.repository import GdkPixbuf
+
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(str(path))
+    channels = pixbuf.get_n_channels()
+    rowstride = pixbuf.get_rowstride()
+    pixels = pixbuf.get_pixels()
+
+    bounds = reddish_box(path)
+    x, y = bounds['left'], bounds['top']
+    width = bounds['right'] - bounds['left'] + 1
+    height = bounds['bottom'] - bounds['top'] + 1
+
+    def inset(row):
+        base = row * rowstride
+        for column in range(x, x + width):
+            offset = base + column * channels
+            red, green, blue = pixels[offset], pixels[offset + 1], pixels[offset + 2]
+            if red > 60 and red > green + 20 and red > blue + 20:
+                return column - x
+        return width
+
+    return {'top_left': inset(y + 4), 'bottom_left': inset(y + height - 5)}
+
+
+def walk_tree(node):
+    yield node
+    for child in node.get('nodes', []) + node.get('floating_nodes', []):
+        yield from walk_tree(child)
 
 
 class Session:
@@ -316,6 +356,59 @@ def main():
             finally:
                 session.stop()
 
+        # -------------------------------- native Quake scratchpad dropdown
+        with tempfile.TemporaryDirectory(prefix='swayfx-anim-dropdown-') as temporary:
+            dropdown_extra = f'''animation_dropdown_ms {SLOW_MS}
+animation_dropdown_close_ms {SLOW_MS}
+animation_dropdown_mark oldbook-dropdown
+animation_dropdown_corner_radius 40
+for_window [app_id="foot"] floating enable, border none, mark --add oldbook-dropdown, resize set 1000 px 360 px, move absolute position 140 px 0 px, move scratchpad
+'''
+            session = Session(binary, Path(temporary),
+                              config_for('fade', SLOW_MS, extra=dropdown_extra), log).start()
+            try:
+                session.terminal('cc241d')
+                session.wait_for(lambda: '"app_id": "foot"' in session.msg('-t', 'get_tree'))
+                session.wait_for(lambda: '"scratchpad_state": "fresh"' in
+                                 session.msg('-t', 'get_tree'))
+
+                session.msg('[app_id="foot"]', 'scratchpad show')
+                reveal = []
+                for index in range(9):
+                    path = output / 'frames' / f'dropdown-reveal-{index:02d}.png'
+                    session.grab(path)
+                    reveal.append(reddish_box(path))
+                    time.sleep(0.12)
+                time.sleep(SLOW_MS / 1000)
+
+                session.msg('[app_id="foot"]', 'dropdown toggle')
+                dismiss = []
+                for index in range(9):
+                    path = output / 'frames' / f'dropdown-dismiss-{index:02d}.png'
+                    session.grab(path)
+                    dismiss.append(reddish_box(path))
+                    time.sleep(0.12)
+
+                # Toggle again before dismissal completes: the same scene node
+                # must reverse from its current frame and settle visibly.
+                session.msg('[app_id="foot"]', 'dropdown toggle')
+                reverse = []
+                for index in range(9):
+                    path = output / 'frames' / f'dropdown-reverse-{index:02d}.png'
+                    session.grab(path)
+                    reverse.append(reddish_box(path))
+                    time.sleep(0.12)
+                time.sleep(SLOW_MS / 1000 + 0.2)
+                corner_path = output / 'frames' / 'dropdown-corners.png'
+                session.grab(corner_path)
+                results['dropdown'] = {
+                    'reveal': reveal, 'dismiss': dismiss, 'reverse': reverse,
+                    'corners': red_edge_insets(corner_path),
+                    'tree_after_reverse': json.loads(session.msg('-t', 'get_tree')),
+                }
+            finally:
+                session.stop()
+
     # ------------------------------------------------------------- verdicts
     checks = {}
 
@@ -356,6 +449,24 @@ def main():
         settled > WIDTH * 0.5
         and any(0 < w < settled * 0.95 for w in open_widths))
     checks['idle costs no measurable cpu'] = results['idle_cpu_percent'] < 1.0
+
+    def bottoms(frames):
+        return [frame['bottom'] for frame in frames if frame['bottom'] is not None]
+
+    reveal_bottoms = bottoms(results['dropdown']['reveal'])
+    dismiss_bottoms = bottoms(results['dropdown']['dismiss'])
+    reverse_bottoms = bottoms(results['dropdown']['reverse'])
+    checks['dropdown reveals downward from the top edge'] = (
+        len(reveal_bottoms) >= 2 and reveal_bottoms[-1] > reveal_bottoms[0])
+    checks['dropdown dismisses upward'] = (
+        len(dismiss_bottoms) >= 2 and dismiss_bottoms[-1] < dismiss_bottoms[0])
+    checks['dropdown reverses without being parked'] = (
+        len(reverse_bottoms) >= 2 and reverse_bottoms[-1] > reverse_bottoms[0]
+        and any(node.get('app_id') == 'foot' and node.get('visible')
+                for node in walk_tree(results['dropdown']['tree_after_reverse'])))
+    checks['dropdown top is square and bottom is rounded'] = (
+        results['dropdown']['corners']['top_left'] <= 6
+        and results['dropdown']['corners']['bottom_left'] >= 10)
 
     evidence = {
         'status': 'passed' if all(checks.values()) else 'failed',

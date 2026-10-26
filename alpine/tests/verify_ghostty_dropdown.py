@@ -136,10 +136,11 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         cold = toggle()
         node, workspace = wait(find)
         assert node['app_id'] == 'com.oldbook.dropdown' and node['visible']
+        assert 'oldbook-dropdown' in node['marks'], node['marks']
         assert node['sticky'], 'a shown console must be stuck to the output'
         first_id, first_pid = (node['id'], node['pid'])
         rect = node['rect']
-        assert rect == dict(x=43, y=39, width=1354, height=468), rect
+        assert rect == dict(x=0, y=39, width=1440, height=468), rect
         assert node['window_rect']['y'] == 0, node['window_rect']
         hidden_time = toggle()
         hidden, where = find()
@@ -228,7 +229,7 @@ with tempfile.TemporaryDirectory(prefix='ghostty-dropdown-') as tmp:
         ipc('command', 'output HEADLESS-1 pos 1440 100')
         toggle()
         offset, _ = find()
-        assert offset['rect'] == dict(x=1483, y=139, width=1354, height=468), offset['rect']
+        assert offset['rect'] == dict(x=1440, y=139, width=1440, height=468), offset['rect']
         command('wtype', '-d', '20', '-s', '100', 'exit', '-s', '200', '-k', 'Return', '-s', '200')
         wait(lambda: not find())
         reopened_time = toggle()

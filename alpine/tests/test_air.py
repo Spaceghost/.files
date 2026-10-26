@@ -17,12 +17,10 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 LIB = ROOT / 'desktop/.local/lib/oldbook'
 KEYBOARD = ROOT / 'desktop/.local/bin/oldbook-keyboard-backlight'
-SCREENSAVER = ROOT / 'desktop/.local/bin/oldbook-screensaver'
 
 import sys
 sys.path.insert(0, str(LIB))
 import air  # noqa: E402
-import background_fade as fade  # noqa: E402
 
 
 def load_keyboard():
@@ -206,109 +204,6 @@ class PreferenceTests(unittest.TestCase):
     def test_a_partial_file_fills_in_the_defaults(self):
         self.path.write_text(json.dumps({'wallpaper': False}))
         self.assertEqual(air.read_preferences(self.path), {'wallpaper': False, 'caption': True})
-
-
-class DriftTests(unittest.TestCase):
-    def test_a_segment_begins_on_the_untouched_painting(self):
-        self.assertEqual(fade.ken_burns(0.0, 1.06, (1.0, 0.35), 1440, 900),
-                         (1.0, 0.0, 0.0))
-
-    def test_the_pan_always_stays_inside_the_room_the_zoom_opens(self):
-        for step in range(0, 101):
-            scale, dx, dy = fade.ken_burns(step / 100, 1.06, (1.0, -1.0), 1440, 900)
-            self.assertGreaterEqual(scale, 1.0)
-            self.assertLessEqual(abs(dx), (scale - 1.0) / 2 * 1440 + 1e-9)
-            self.assertLessEqual(abs(dy), (scale - 1.0) / 2 * 900 + 1e-9)
-
-    def test_the_drift_reaches_its_zoom_and_stops_there(self):
-        scale, _, _ = fade.ken_burns(1.0, 1.06, (1.0, 0.0), 1440, 900)
-        self.assertAlmostEqual(scale, 1.06)
-
-    def test_zooming_out_is_refused_because_it_would_show_an_edge(self):
-        with self.assertRaises(ValueError):
-            fade.ken_burns(0.5, 0.9, (1.0, 0.0), 1440, 900)
-
-    def test_directions_alternate_so_two_paintings_never_move_alike(self):
-        self.assertGreaterEqual(len(fade.DRIFT_DIRECTIONS), 2)
-        first, second = fade.DRIFT_DIRECTIONS[0], fade.DRIFT_DIRECTIONS[1]
-        self.assertLess(first[0] * second[0], 0)
-
-    def test_the_glide_back_lands_exactly_at_rest(self):
-        self.assertEqual(fade.blend_transform((1.06, 40.0, 9.0), (1.0, 0.0, 0.0), 1.0),
-                         (1.0, 0.0, 0.0))
-        middle = fade.blend_transform((1.06, 40.0, 9.0), (1.0, 0.0, 0.0), 0.5)
-        self.assertLess(middle[0], 1.06)
-        self.assertGreater(middle[0], 1.0)
-
-
-class ScreensaverProtocolTests(unittest.TestCase):
-    def parse(self, **fields):
-        message = {'action': 'screensaver', 'id': 'token'}
-        message.update(fields)
-        return fade.parse_request(json.dumps(message).encode())
-
-    def test_defaults_fill_in(self):
-        parsed = self.parse(enable=True, paths=['/a.png'])
-        self.assertEqual(parsed['hold_ms'], fade.SCREENSAVER_HOLD_MS)
-        self.assertEqual(parsed['fade_ms'], fade.SCREENSAVER_FADE_MS)
-        self.assertEqual(parsed['zoom'], fade.SCREENSAVER_ZOOM)
-        self.assertTrue(parsed['enable'])
-
-    def test_stopping_needs_no_list(self):
-        self.assertEqual(self.parse(enable=False)['paths'], [])
-
-    def test_relative_paths_are_refused(self):
-        with self.assertRaises(ValueError):
-            self.parse(enable=True, paths=['gallery/one.png'])
-
-    def test_an_unbounded_list_is_refused(self):
-        with self.assertRaises(ValueError):
-            self.parse(enable=True, paths=['/x.png'] * (fade.MAX_SCREENSAVER_PATHS + 1))
-
-    def test_absurd_timings_are_clamped(self):
-        parsed = self.parse(enable=True, paths=[], hold_ms=1, zoom=9.0)
-        self.assertGreaterEqual(parsed['hold_ms'], 2000)
-        self.assertLessEqual(parsed['zoom'], 1.5)
-
-    def test_the_encoder_round_trips(self):
-        parsed = fade.parse_request(fade.encode_screensaver(True, ['/a.png'], hold_ms=5000))
-        self.assertEqual(parsed['paths'], ['/a.png'])
-        self.assertEqual(parsed['hold_ms'], 5000)
-
-
-class ScreensaverSelectionTests(unittest.TestCase):
-    def setUp(self):
-        self.module = runpy.run_path(str(SCREENSAVER), run_name='screensaver_test')
-
-    def entries(self):
-        return [{'id': 'a', 'path': '/gallery/a.png', 'rotate': True},
-                {'id': 'b', 'path': '/gallery/b.png', 'rotate': True},
-                {'id': 'c', 'path': '/gallery/c.png', 'rotate': False},
-                {'id': 'd', 'path': '/gallery/d.png'}]
-
-    def test_only_rotating_paintings_are_offered(self):
-        paths = self.module['candidates'](self.entries(), rng=_FixedShuffle())
-        self.assertEqual(sorted(paths), ['/gallery/a.png', '/gallery/b.png', '/gallery/d.png'])
-
-    def test_the_painting_on_screen_is_not_repeated_first(self):
-        paths = self.module['candidates'](self.entries(), current='/gallery/a.png',
-                                          rng=_FixedShuffle())
-        self.assertNotIn('/gallery/a.png', paths)
-
-    def test_a_collection_with_nothing_rotating_still_drifts(self):
-        entries = [dict(entry, rotate=False) for entry in self.entries()]
-        self.assertTrue(self.module['candidates'](entries, rng=_FixedShuffle()))
-
-    def test_the_list_stays_bounded(self):
-        entries = [{'id': str(index), 'path': f'/gallery/{index}.png'} for index in range(200)]
-        paths = self.module['candidates'](entries, rng=_FixedShuffle())
-        self.assertLessEqual(len(paths), fade.MAX_SCREENSAVER_PATHS)
-
-
-class _FixedShuffle:
-    @staticmethod
-    def shuffle(items):
-        items.sort()
 
 
 class PublishedBreathTests(unittest.TestCase):

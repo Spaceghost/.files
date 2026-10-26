@@ -1,0 +1,23 @@
+#!/sbin/openrc-run
+
+description="Oldbook remote-access policy and session observer"
+command=/usr/local/sbin/oldbook-remote-access
+command_args="watch"
+command_background=true
+pidfile=/run/oldbook-remote-access.pid
+output_log=/var/log/oldbook-remote-access.log
+error_log=/var/log/oldbook-remote-access.log
+start_stop_daemon_args="--make-pidfile"
+
+depend() {
+    need tailscale oldbook-firewall
+    use logger
+    after networking
+}
+
+start_pre() {
+    checkpath --directory --owner root:root --mode 0755 /var/lib/oldbook-remote-access
+    checkpath --file --owner root:root --mode 0600 /var/log/oldbook-remote-access.log
+    # A stale allowance is never trusted across an observer restart.
+    /usr/sbin/nft flush chain inet oldbook remote_access
+}

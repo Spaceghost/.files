@@ -64,12 +64,22 @@ location is ever inferred. Without the file the line is simply empty. Copy
 [desktop README](README.md) for the night light and nocturne preference that
 share the file.
 
+The dedicated `REMOTE WATCH` card makes remote access obvious: Off, Tailnet, or
+Tailnet + LAN; current network trust; and every active or recently ended SSH
+session in the rolling last 24 hours. It names the remote identity/device,
+source, authentication method or enrolled-key label/fingerprint, duration, and
+at most four privacy-safe executable names. It shows up to 12 sessions, then a
+`+ N MORE` summary. Raw command lines, environment, working directories and
+terminal contents are never displayed.
+
 ## Content and refresh policy
 
 Conky is reserved for slow information: date, Scripture, battery charge/status,
 gallery notes, rotating text and future configured email. CPU, memory, processes,
 storage, network and temperature telemetry belong in Waybar. Do not restore the
-historical reactor, memory, storage or transmission cards.
+historical reactor, memory, storage or transmission cards. `REMOTE WATCH` is the
+narrow security exception: it is a slow remote-session ledger, not live network
+throughput telemetry.
 
 `conky_policy.py` filters telemetry variables when loading the templates, before
 wallpaper-cache lookup, and clamps panel and interval-command refreshes to

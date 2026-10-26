@@ -719,7 +719,6 @@ def deck(section="main", record=None):
         (row("󰸉", "Artwork gallery", "Super+G"), lambda: launch([BIN / "oldbook-wallpaper", "pick"])),
         (row("󰸌", f"Theme · {state['theme'] or 'the catalogue is unreadable'}"), theme),
         (row("↓", "Bottom decoration", "Super+Ctrl+B"), lambda: launch([BIN / "oldbook-decoration", "bottom"])),
-        (row("▷", "Video background · choose or stop"), lambda: launch([BIN / "oldbook-video-background", "picker"])),
         (row("▶", "YouTube · desktop player & PiP"), lambda: launch([BIN / "oldbook-youtube", "menu"])),
         (row("󰽪", "The rice, catalogued · what there is to look at"), rice),
         (rule("THE LIGHT"), None),

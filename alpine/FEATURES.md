@@ -82,6 +82,11 @@ reading. The file name is fixed because `custom:oldbook` in the user's settings
 resolves against it; selecting the theme is the user's line to write, and the
 switch reports whether it is selected rather than editing their settings file.
 
+Firefox follows through the signed Oldbook Theme extension and its native
+messaging host. A theme switch is sent immediately, and the host periodically
+reasserts the selected palette while Firefox is open so a missed message or a
+later browser-side theme change catches up without another desktop switch.
+
 Every built-in and generated theme is a complete desktop design: palette,
 typography, geometry, spacing, window treatment, launcher, widgets, application
 styling and matching artwork. Switching must apply it across the desktop.
@@ -94,10 +99,12 @@ application failures must be visible instead of reporting an unqualified success
 
 - Implementation: [oldbook-theme](desktop/.local/bin/oldbook-theme),
   [desktop_theme.py](wallpapers/desktop_theme.py), [profiles](themes/profiles/),
-  [cursor generator](bin/build-cursor-theme).
+  [cursor generator](bin/build-cursor-theme),
+  [Firefox native host](desktop/.local/bin/oldbook-firefox-theme-host).
 - Checks: [complete themes](tests/test_complete_themes.py),
   [theme switch](tests/test_theme_switch.py), [theme picker](tests/test_theme_picker.py),
   [application refresh](tests/test_application_theme_refresh.py),
+  [Firefox theme](tests/test_firefox_theme.py),
   [cursor theme](tests/test_cursor_theme.py) with
   [drawn frames and a session load](verification/animated-cursors/README.md),
   [boot chain](tests/test_boot_chain_completeness.py), [session edges](tests/test_theme_boundary.py),
@@ -779,8 +786,7 @@ custom-ID tmux terminals. Do not reintroduce a plugin manager to restore control
 
 - Implementation: [shared tmux config](desktop/.config/tmux/oldbook.conf),
   [app identity](desktop/.local/lib/oldbook/app_identity.py).
-- Checks: [app identity](tests/test_app_identity.py), [agent switcher](tests/test_agent_switcher.py),
-  [tmux title decision](../docs/superpowers/decisions/2026-09-07-tmux-decoration-titles.md).
+- Checks: [app identity](tests/test_app_identity.py) and [agent switcher](tests/test_agent_switcher.py).
   Existing tmux panes retain their previous scrollback limit until recreated.
 
 ### SESSION-OWNERSHIP
@@ -788,18 +794,17 @@ custom-ID tmux terminals. Do not reintroduce a plugin manager to restore control
 Use the OpenRC/Wayland session and one owner per compositor session for desktop
 helpers. Reloads must not stack bars, notification services, media services,
 shortcut guides or animation daemons. Preserve the configured physical output,
-audio/backlight/screenshot controls and stock-Sway recovery route. No automatic
-video background or inferred location/night-light policy: the night light runs
+audio/backlight/screenshot controls and stock-Sway recovery route. No inferred
+location/night-light policy: the night light runs
 only while an explicit `~/.config/oldbook/location.json` exists, and a user stop
 persists across reloads. AI attention indicates
 only attributable, unvisited targets; ordinary or retained notices do not light
 Caps Lock, and clearing one target must not clear the others.
 
-- Implementation: [session](desktop/.local/bin/oldbook-session),
-  [notification LED](desktop/.local/bin/oldbook-notification-led),
-  [video helper](desktop/.local/bin/oldbook-video-background).
+- Implementation: [session](desktop/.local/bin/oldbook-session) and
+  [notification LED](desktop/.local/bin/oldbook-notification-led).
 - Checks: [session](tests/test_session.py), [notification stream](tests/test_ai_notification_stream.py),
-  [LED](tests/test_notification_led.py), [video](tests/test_video_background.py).
+  and [LED](tests/test_notification_led.py).
   A reload test is not a fresh-login, suspend/resume or hardware-hotplug test.
 
 ### WATCH-MODE
@@ -828,9 +833,8 @@ any chord Sway answers is one a settled cat can produce. Its block is not
 empty, though: Sway creates a mode only from a line inside its block, and an
 empty block is no mode and so no catbed mode, so the block carries one `set`
 line, which binds nothing. While it is up the guard holds what the lock holds
-(CATBED-GUARD). This supersedes the 2026-09-09
-decision that the cat watcher engages and releases the guard for her; see
-[the decision](../docs/superpowers/decisions/2026-09-13-catbed-mode-is-the-users.md).
+(CATBED-GUARD). This supersedes the earlier behavior where the cat watcher
+engaged and released the guard for her.
 Recovery from a wedged guard is `oldbook-watch stop` from a terminal, or
 killing it. Getting stuck is still the failure that matters: the mode is
 entered only after the compositor proves it sent `wl_keyboard.enter`, restored
@@ -912,9 +916,8 @@ compositor session. Permission and missing-device errors remain notifications.
   [screenshot](desktop/.local/bin/oldbook-screenshot),
   [Satty profile](desktop/.config/satty/config.toml).
 - Checks: [feedback tests](tests/test_osd.py), [shutter tests](tests/test_screenshot_shutter.py);
-  `oldbook-osd preview` renders the pill without a display. Live capture evidence is recorded in
-  [the design note](../docs/superpowers/specs/2026-09-08-osd.md); a headless
-  render does not prove physical frame timing or the compositor blur.
+  `oldbook-osd preview` renders the pill without a display. A headless render
+  does not prove physical frame timing or the compositor blur.
 
 ## Gallery and durable reading content
 
@@ -1095,30 +1098,6 @@ AI output is not deterministic.
 - Checks: [wallpapers](tests/test_wallpapers.py), [checkpoints](tests/test_wallpaper_checkpoint.py),
   [fresh scenes](tests/test_fresh_scenes.py), [retries](tests/test_generation_retries.py).
 
-### ARTWORK-CROSSFADE
-
-Painting changes crossfade on the frame clock (0.8 s for a deliberate change,
-1.6 s for the timer, an optional radial reveal from a screen position) through
-the background-layer daemon; Sway's own background is only the fallback and is
-never refreshed after a fade. The daemon starts on what swaybg shows, re-creates
-its surface when a respawned swaybg covers it, restores desktop cards it
-displaced, and exits with the session. Manual browsing, the pause state and the
-shared painting link are unchanged.
-The painting also follows the keyboard's breath, swelling from 1.000 to 1.006
-at rest and up to 1.018 at full lungs and settling exactly back; the swell only
-ever enlarges, so no edge can show. While the session is idle the daemon drifts
-slowly across each painting and crossfades to the next, then glides back to rest
-and to the painting it interrupted; the gallery's saved selection, deadline and
-pause switch are never written by that path. `~/.config/oldbook/breath.json`
-switches the swell and the caption pulse off.
-
-- Implementation: [oldbook-background](desktop/.local/bin/oldbook-background),
-  [fade model](desktop/.local/lib/oldbook/background_fade.py),
-  [gallery apply](desktop/.local/bin/oldbook-wallpaper), [session](desktop/.local/bin/oldbook-session).
-- Checks: [daemon tests](tests/test_background.py), [gallery hooks](tests/test_background_gallery.py),
-  [headless crossfade evidence](verification/background-crossfade/README.md).
-  Headless proof is not physical frame pacing; hotplug and a fresh login are unobserved.
-
 ### CONKY-READING
 
 Conky is a quiet reading display, not telemetry. Preserve disabled-card choices,
@@ -1268,12 +1247,33 @@ seconds to discover that nothing happened is the idle cost this desktop refuses
 to pay. The spawned side does the slow work, because a captive-portal check is a
 real network request and the bar has three seconds to draw.
 
-Every network is held at a posture -- home ground, trusted, or public air --
+Every network is held at a posture -- Home, Friend-trusted, or Untrusted --
 defaulting to the careful one for anything unrecognised, and the posture decides
 whether the hardware address is randomised for that network. Whether the driver
 honours that is a separate question this machine cannot answer in advance:
 brcmfmac is a FullMAC part and may refuse, in which case the refusal is reported
 rather than swallowed.
+
+### Remote access and Incoming Transmissions
+
+The separate glyph between Wi-Fi and Next art opens a persistent three-state
+control: Off, Tailnet only, or Tailnet + LAN. Tailnet access uses Tailscale SSH;
+LAN access uses OpenSSH and a firewall allowance restricted to the current
+encrypted interface and subnet. LAN is fail-closed unless a root-owned registry
+matches the saved Wi-Fi profile, SSID, security mode and approved BSSID at Home
+or Friend-trusted level. Unknown, changed, open and explicitly Untrusted
+networks force Tailnet only without changing the desired LAN mode for a safe
+return home.
+
+Incoming Transmissions can classify the current network, enroll a public key
+from the clipboard, recognize keys added by `ssh-copy-id`, and disable the LAN
+password only while at least one key remains. Its reports include tailnet fleet
+posture, unexpected non-loopback listeners, Tailscale Serve/Funnel state and a
+Recovery Beacon. The desktop `REMOTE WATCH` card retains active and ended SSH
+sessions for exactly 24 hours, displaying up to 12 with identity, source,
+authentication/key fingerprint and sanitized executable names. The observer
+never publishes arguments, environment values, working directories or terminal
+contents. Authentication-failure warnings are deduplicated and rate-limited.
 
 A hotspot is possible but constrained by the radio, not by preference. The
 kernel permits one managed and one AP interface at `#channels <= 1`, so an access
@@ -1430,8 +1430,7 @@ HOME overlay and private history/credentials/radio policy. Preserve standalone
 component recovery and the stock-Sway fallback. Do not present a payload-only
 disposable-root installation as a verified fresh hardware boot.
 
-- Implementation/evidence: [Cascadia package decision](../docs/superpowers/decisions/2026-09-07-personal-desktop-package.md)
-  and the linked Cascadia checkout/release inputs.
+- Implementation/evidence: the linked Cascadia checkout/release inputs.
 - Limits: public Pages/production signing, maintainer-script activation and fresh
   hardware boot remain separate from the recorded signed offline payload proof.
 
@@ -1484,10 +1483,8 @@ here reboots, switches VTs or loads a font into a live console.
   [generated palette](system/boot/console-palette.json), [boot menu](bin/build-grub-theme),
   [rescue banner](system/boot/issue.template), [banner initramfs](system/mkinitfs/).
 - Checks: [boot console tests](tests/test_boot_console.py),
-  [session boundary tests](tests/test_theme_boundary.py),
-  [boot chain completeness tests](tests/test_boot_chain_completeness.py),
-  [boot console record](../docs/superpowers/specs/2026-09-08-boot-console.md),
-  [LUKS prompt record](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
+  [session boundary tests](tests/test_theme_boundary.py) and
+  [boot chain completeness tests](tests/test_boot_chain_completeness.py).
   A generated grub.cfg and a listed initramfs are not a boot: the visual result
   stays unverified until the next physical boot.
 

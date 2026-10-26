@@ -9,7 +9,7 @@ export XCURSOR_THEME=Oldbook-Ghost
 export XCURSOR_SIZE=24
 # Final output cutouts; 0 opts out on the next compositor start.
 export SPACEGHOST_SCREEN_CORNER_RADIUS="${SPACEGHOST_SCREEN_CORNER_RADIUS:-20}"
-# Window and workspace animations need the patched SwayFX r4 or later. An older
+# Window, workspace, and drop-down animations need patched SwayFX r5 or later. An older
 # binary rejects the commands and would refuse the whole configuration, so probe
 # the installed compositor once and start from a generated session file that
 # pulls the settings in only when they actually parse. The versioned

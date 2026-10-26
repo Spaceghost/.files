@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""YouTube review player: workspace-one background, PiP, and launcher controls."""
+"""YouTube review player: PiP and launcher controls."""
 import fcntl
 import json
 import os
 from pathlib import Path
 import runpy
 import select
-import shlex
 import shutil
 import signal
 import socket
@@ -90,6 +89,7 @@ def serve():
             return
         saved = IPC['read_json'](STATE / 'queue.json', {})
         queue = Queue(saved)
+        queue.data['mode'] = 'pip'
         # Saved progress is resumed deliberately from the launcher after login.
         queue.data['enabled'] = False
         child = None
@@ -155,7 +155,7 @@ def serve():
                                     if not entries or len(entries) > 500:
                                         raise ValueError('Expected 1–500 videos')
                                     queue = Queue({'entries': entries, 'enabled': True})
-                                elif action in ('pip', 'desktop'):
+                                elif action == 'pip':
                                     stop_player()
                                     queue.data.update(mode=action, enabled=True)
                                 elif action == 'pause':
@@ -192,14 +192,9 @@ def serve():
                                        'pause=' + ('yes' if queue.data['paused'] else 'no')]
                             source = queue.current()['url']
                             options += library.playback_options(source)
-                            if desired == 'pip':
-                                command = ['mpv', '--vo=gpu', '--gpu-context=wayland', '--gpu-sw=yes',
-                                           '--wayland-app-id=oldbook-youtube', '--title=Oldbook YouTube',
-                                           *['--' + option for option in options], '--', source]
-                            else:
-                                command = ['mpvpaper', '--layer', 'bottom', '--mpv-options',
-                                           shlex.join(options + ['osc=no', 'input-default-bindings=no']),
-                                           desired, source]
+                            command = ['mpv', '--vo=gpu', '--gpu-context=wayland', '--gpu-sw=yes',
+                                       '--wayland-app-id=oldbook-youtube', '--title=Oldbook YouTube',
+                                       *['--' + option for option in options], '--', source]
                             with (STATE / 'playback.log').open('a') as log:
                                 child = subprocess.Popen(command, stdout=log, stderr=log, start_new_session=True)
                             target = desired
@@ -360,7 +355,7 @@ def menu():
               'Open a YouTube video or playlist…': 'open', 'Save a named playlist…': 'add',
               'Resume saved queue': 'resume',
               'Play / pause': 'pause', 'PiP · floating across desktops': 'pip',
-              'Pin behind apps on desktop 1': 'desktop', 'Rewatch this video': 'rewatch',
+              'Rewatch this video': 'rewatch',
               'Keep & next': 'keep', 'Remove from local queue & next': 'remove', 'Stop player': 'stop'}
     playlists = IPC['read_json'](PLAYLISTS, {})
     for name, url in playlists.items():

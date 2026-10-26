@@ -1,0 +1,616 @@
+#!/usr/bin/python3 -I
+"""Root-owned remote-access controller for Tailscale SSH and trusted LAN SSH."""
+from __future__ import annotations
+
+from contextlib import contextmanager
+import fcntl
+import ipaddress
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import time
+
+
+SOURCE_LIBRARY = Path(__file__).resolve().parents[1] / "security"
+INSTALLED_LIBRARY = Path("/usr/local/lib/oldbook")
+sys.path.insert(0, str(SOURCE_LIBRARY if (SOURCE_LIBRARY / "remote_access.py").is_file()
+                       else INSTALLED_LIBRARY))
+import remote_access as policy  # noqa: E402
+
+
+ACCOUNT = "jack"
+LABEL = re.compile(r"[A-Za-z0-9][A-Za-z0-9 ._@+-]{0,47}\Z")
+
+
+class Paths:
+    def __init__(self, base=Path("/var/lib/oldbook-remote-access")):
+        base = Path(base)
+        self.base = base
+        self.config = base / "config.json"
+        self.snapshot = base / "status.json"
+        self.sessions = base / "sessions.json"
+        self.lock = base / "operation.lock"
+        if str(base) == "/var/lib/oldbook-remote-access":
+            self.authorized_keys = Path("/etc/oldbook/remote-access/authorized_keys")
+            self.sshd_config = Path("/etc/ssh/sshd_config.d/90-oldbook-remote-access.conf")
+        else:
+            self.authorized_keys = base / "authorized_keys"
+            self.sshd_config = base / "sshd.conf"
+
+
+def default_state():
+    return {"version": 1, "desired": "tailnet", "password": True,
+            "account": ACCOUNT, "networks": {}, "keys": []}
+
+
+@contextmanager
+def operation_lock(path):
+    """Serialize the observer and UI so OpenRC/firewall transitions cannot race."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(path, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        os.fchmod(descriptor, 0o600)
+        fcntl.flock(descriptor, fcntl.LOCK_EX)
+        yield
+    finally:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+        os.close(descriptor)
+
+
+class System:
+    def run(self, arguments, *, required=True, input_text=None):
+        result = subprocess.run(arguments, input=input_text, capture_output=True,
+                                text=True, check=False)
+        if required and result.returncode != 0:
+            detail = (result.stderr or result.stdout or "command failed").strip()
+            raise RuntimeError(f"{' '.join(arguments)}: {detail}")
+        return result
+
+    def current_network(self):
+        interfaces = [node.name for node in Path("/sys/class/net").iterdir()
+                      if (node / "wireless").is_dir()]
+        for interface in sorted(interfaces):
+            result = self.run(["/sbin/wpa_cli", "-i", interface, "status"],
+                              required=False)
+            values = {}
+            for line in result.stdout.splitlines():
+                key, separator, value = line.partition("=")
+                if separator:
+                    values[key] = value
+            if values.get("wpa_state") != "COMPLETED":
+                continue
+            addresses = self.run(["/sbin/ip", "-j", "address", "show", "dev", interface])
+            subnets = []
+            for device in json.loads(addresses.stdout):
+                for address in device.get("addr_info", []):
+                    if address.get("scope") != "global":
+                        continue
+                    try:
+                        subnet = ipaddress.ip_interface(
+                            f"{address['local']}/{address['prefixlen']}").network
+                    except (KeyError, ValueError):
+                        continue
+                    if subnet.prefixlen:
+                        subnets.append(str(subnet))
+            key_mgmt = values.get("key_mgmt", "")
+            security = "Open" if key_mgmt in ("", "NONE") else key_mgmt
+            return {"uuid": values.get("uuid", ""), "ssid": values.get("ssid", ""),
+                    "bssid": values.get("bssid", "").lower(), "security": security,
+                    "interface": interface, "subnets": sorted(set(subnets))}
+        return {"uuid": "", "ssid": "", "bssid": "", "security": "",
+                "interface": "", "subnets": []}
+
+    def remove_lan(self):
+        self.run(["/usr/sbin/nft", "-f", "-"],
+                 input_text="flush chain inet oldbook remote_access\n")
+
+    def stop_sshd(self):
+        self.run(["/sbin/rc-update", "del", "sshd", "default"], required=False)
+        status = self.run(["/sbin/rc-service", "sshd", "status"], required=False)
+        if status.returncode == 0:
+            self.run(["/sbin/rc-service", "sshd", "stop"])
+        # Alpine deliberately preserves accepted sessions on an ordinary
+        # service stop. A trust downgrade must close those LAN sessions too;
+        # Tailscale SSH children are owned by tailscaled and are unaffected.
+        for node in Path("/proc").glob("[0-9]*"):
+            try:
+                if (node / "comm").read_text().strip().startswith("sshd-session"):
+                    os.kill(int(node.name), signal.SIGTERM)
+            except (OSError, ValueError):
+                continue
+
+    def set_tailnet(self, enabled):
+        argument = "--ssh" if enabled else "--ssh=false"
+        self.run(["/usr/bin/tailscale", "set", argument])
+
+    def validate_sshd(self):
+        self.run(["/usr/sbin/sshd", "-t"])
+
+    def start_sshd(self):
+        self.run(["/sbin/rc-update", "del", "sshd", "default"], required=False)
+        status = self.run(["/sbin/rc-service", "sshd", "status"], required=False)
+        action = "reload" if status.returncode == 0 else "start"
+        self.run(["/sbin/rc-service", "sshd", action])
+
+    def add_lan(self, interface, subnets):
+        fragment = policy.firewall_fragment(interface, subnets)
+        commands = ["flush chain inet oldbook remote_access"]
+        for line in fragment.splitlines():
+            rule = line.strip()
+            if rule:
+                commands.append("add rule inet oldbook remote_access " + rule)
+        self.run(["/usr/sbin/nft", "-f", "-"], input_text="\n".join(commands) + "\n")
+
+    @staticmethod
+    def _install(path, text, mode):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+        try:
+            temporary.write_text(text)
+            os.chmod(temporary, mode)
+            os.chown(temporary, 0, 0)
+            temporary.replace(path)
+        finally:
+            try:
+                temporary.unlink()
+            except FileNotFoundError:
+                pass
+
+    def install_sshd_config(self, text):
+        self._install(Path("/etc/ssh/sshd_config.d/90-oldbook-remote-access.conf"), text, 0o600)
+
+    def install_authorized_keys(self, text):
+        self._install(Path("/etc/oldbook/remote-access/authorized_keys"), text, 0o600)
+
+    def fingerprint(self, kind, payload):
+        result = self.run(["/usr/bin/ssh-keygen", "-lf", "-"],
+                          input_text=f"{kind} {payload}\n")
+        fields = result.stdout.split()
+        if len(fields) < 2 or not fields[1].startswith("SHA256:"):
+            raise RuntimeError("ssh-keygen returned no SHA256 fingerprint")
+        return fields[1]
+
+    def external_keys(self, account):
+        try:
+            home = Path(__import__("pwd").getpwnam(account).pw_dir)
+            lines = (home / ".ssh/authorized_keys").read_text().splitlines()
+        except (KeyError, OSError):
+            return []
+        keys = []
+        for line in lines:
+            fields = line.strip().split()
+            positions = [index for index, value in enumerate(fields)
+                         if value in policy.PUBLIC_KEY_TYPES]
+            if not positions:
+                continue
+            index = positions[0]
+            if index + 1 >= len(fields):
+                continue
+            try:
+                kind, payload = policy.validate_public_key(
+                    f"{fields[index]} {fields[index + 1]}")
+                fingerprint = self.fingerprint(kind, payload)
+            except (ValueError, RuntimeError):
+                continue
+            comment = " ".join(fields[index + 2:]).strip()
+            keys.append({"label": comment[:48] or "ssh-copy-id key", "kind": kind,
+                         "fingerprint": fingerprint, "managed": False})
+        return keys
+
+    def observed(self):
+        prefs = self.run(["/usr/bin/tailscale", "debug", "prefs"], required=False)
+        try:
+            tailnet = bool(json.loads(prefs.stdout).get("RunSSH"))
+        except (ValueError, AttributeError):
+            tailnet = False
+        sshd = self.run(["/sbin/rc-service", "sshd", "status"],
+                        required=False).returncode == 0
+        rules = self.run(["/usr/sbin/nft", "list", "chain", "inet", "oldbook",
+                          "remote_access"], required=False)
+        lan = rules.returncode == 0 and "Oldbook trusted LAN SSH" in rules.stdout
+        return {"tailnet": tailnet, "sshd": sshd, "lan": lan}
+
+    def _tailnet(self):
+        result = self.run(["/usr/bin/tailscale", "status", "--json"], required=False)
+        try:
+            document = json.loads(result.stdout)
+        except (ValueError, AttributeError):
+            document = {}
+        return policy.summarize_tailnet(document)
+
+    @staticmethod
+    def _boot_time():
+        try:
+            for line in Path("/proc/stat").read_text().splitlines():
+                if line.startswith("btime "):
+                    return float(line.split()[1])
+        except OSError:
+            pass
+        return time.time() - time.monotonic()
+
+    def _ssh_processes(self):
+        boot = self._boot_time()
+        ticks = os.sysconf("SC_CLK_TCK")
+        rows = []
+        for node in Path("/proc").glob("[0-9]*"):
+            try:
+                environment = {}
+                for field in (node / "environ").read_bytes().split(b"\0"):
+                    key, separator, value = field.partition(b"=")
+                    if separator:
+                        environment[key.decode("utf-8", "replace")] = value.decode(
+                            "utf-8", "replace")
+                connection = environment.get("SSH_CONNECTION", "")
+                if not connection:
+                    client = environment.get("SSH_CLIENT", "").split()
+                    if len(client) == 3:
+                        connection = f"{client[0]} {client[1]} 0.0.0.0 {client[2]}"
+                if len(connection.split()) != 4:
+                    continue
+                stat = (node / "stat").read_text()
+                tail = stat[stat.rfind(")") + 2:].split()
+                status = (node / "status").read_text()
+                uid_line = next(line for line in status.splitlines() if line.startswith("Uid:"))
+                uid = int(uid_line.split()[1])
+                try:
+                    account = __import__("pwd").getpwuid(uid).pw_name
+                except KeyError:
+                    account = str(uid)
+                rows.append({"pid": int(node.name), "ppid": int(tail[1]),
+                             "started": boot + int(tail[19]) / ticks,
+                             "comm": (node / "comm").read_text().strip(),
+                             "account": account, "connection": connection})
+            except (OSError, ValueError, IndexError, StopIteration):
+                continue
+        return rows
+
+    @staticmethod
+    def _recent_log(path=Path("/var/log/messages"), limit=5000):
+        try:
+            with path.open("rb") as stream:
+                stream.seek(0, os.SEEK_END)
+                size = stream.tell()
+                stream.seek(max(0, size - 1024 * 1024))
+                return stream.read().decode("utf-8", "replace").splitlines()[-limit:]
+        except OSError:
+            return []
+
+    def _authentication(self):
+        accepted = re.compile(
+            r"Accepted (publickey|password|keyboard-interactive(?:/pam)?) for \S+ "
+            r"from ([^ ]+) port ([0-9]+)(?: .*? (SHA256:[A-Za-z0-9+/]+))?")
+        events = {}
+        for line in self._recent_log():
+            match = accepted.search(line)
+            if not match:
+                continue
+            method = match.group(1)
+            if method.startswith("keyboard-interactive"):
+                method = "keyboard-interactive"
+            events[(match.group(2), match.group(3))] = {
+                "method": "key" if method == "publickey" else method,
+                "fingerprint": match.group(4) or "",
+            }
+        return events
+
+    def _authentication_failures(self):
+        failed = re.compile(
+            r"Failed (password|publickey|keyboard-interactive(?:/pam)?) for "
+            r"(?:(?:invalid user) )?(\S+) from ([^ ]+) port ([0-9]+)")
+        events = []
+        seen = set()
+        for line in self._recent_log():
+            match = failed.search(line)
+            if not match:
+                continue
+            method = match.group(1)
+            if method.startswith("keyboard-interactive"):
+                method = "keyboard-interactive"
+            if method == "publickey":
+                method = "key"
+            identity = "\0".join(match.groups())
+            identifier = "failure-" + hashlib.sha256(identity.encode()).hexdigest()[:20]
+            if identifier in seen:
+                continue
+            seen.add(identifier)
+            events.append({"id": identifier, "method": method,
+                           "account": match.group(2)[:32],
+                           "source": match.group(3)[:64]})
+        return events
+
+    def _listeners(self):
+        result = self.run(["/sbin/ss", "-H", "-ltnp"], required=False)
+        rows = []
+        for line in result.stdout.splitlines():
+            fields = line.split()
+            if len(fields) < 4:
+                continue
+            local = fields[3]
+            match = re.match(r"(?:\[([^]]+)\]|(.+)):([0-9]+)$", local)
+            if not match:
+                continue
+            process = re.search(r'\(\("([^"]+)"', line)
+            rows.append({"address": match.group(1) or match.group(2),
+                         "port": int(match.group(3)),
+                         "process": process.group(1) if process else "unknown"})
+        return rows
+
+    def _serve_state(self, kind):
+        result = self.run(["/usr/bin/tailscale", kind, "status", "--json"], required=False)
+        try:
+            return bool(json.loads(result.stdout))
+        except (ValueError, TypeError):
+            return False
+
+    @staticmethod
+    def _mtime(path):
+        try:
+            return path.stat().st_mtime
+        except OSError:
+            return None
+
+    def remote_data(self, _state):
+        fleet = self._tailnet()
+        return {
+            "processes": self._ssh_processes(),
+            "authentication": self._authentication(),
+            "auth_failures": self._authentication_failures(),
+            "fleet": fleet,
+            "listeners": self._listeners(),
+            "serve": self._serve_state("serve"),
+            "funnel": self._serve_state("funnel"),
+            "recovery": {
+                "off_machine_backup": False,
+                "repository_db": self._mtime(Path("/home/jack/.local/share/fossil/files.fossil")),
+                "package_archive": self._mtime(
+                    Path("/home/jack/.local/state/alpine-rice/verify-archive.log")),
+            },
+        }
+
+
+class Controller:
+    def __init__(self, paths=None, system=None):
+        self.paths = paths or Paths()
+        self.system = system or System()
+
+    def state(self):
+        try:
+            value = json.loads(self.paths.config.read_text())
+        except (OSError, ValueError):
+            value = default_state()
+        if not isinstance(value, dict) or value.get("version") != 1:
+            return default_state()
+        state = default_state()
+        state.update({key: value[key] for key in state if key in value})
+        if state["desired"] not in policy.VALID_MODES:
+            state["desired"] = "tailnet"
+        if not isinstance(state["networks"], dict):
+            state["networks"] = {}
+        if not isinstance(state["keys"], list):
+            state["keys"] = []
+        return state
+
+    def save(self, state):
+        policy.atomic_json(self.paths.config, state, mode=0o600)
+
+    def _authorized_keys(self, state):
+        rows = []
+        for key in state["keys"]:
+            label = re.sub(r"[^A-Za-z0-9._@+-]+", "-", key["label"]).strip("-") or "key"
+            rows.append(f"{key['kind']} {key['payload']} oldbook:{label}")
+        return "\n".join(rows) + ("\n" if rows else "")
+
+    def _keys(self, state):
+        managed = [dict(key, managed=True) for key in state["keys"]]
+        seen = {key["fingerprint"] for key in managed}
+        external = [key for key in self.system.external_keys(state["account"])
+                    if key.get("fingerprint") not in seen]
+        return managed + external
+
+    def _sync_files(self, state):
+        config = policy.sshd_config(
+            state["account"], state["password"], str(self.paths.authorized_keys))
+        self.system.install_authorized_keys(self._authorized_keys(state))
+        self.system.install_sshd_config(config)
+
+    def context(self, state=None):
+        state = state or self.state()
+        network = self.system.current_network()
+        context = dict(network)
+        context["trust"] = policy.network_trust(network, state["networks"])
+        context["password"] = bool(state["password"])
+        context["keys"] = len(self._keys(state))
+        return context
+
+    def _publish(self, state, context, result):
+        observed = self.system.observed()
+        expected = {"tailnet": result["effective"] != "off",
+                    "sshd": result["effective"] == "lan",
+                    "lan": result["effective"] == "lan"}
+        degraded = any(observed.get(key) != value for key, value in expected.items())
+        snapshot = {
+            "version": 1, "updated": int(time.time()),
+            "desired": state["desired"], "mode": result["effective"],
+            "reason": result.get("reason", ""), "trust": context["trust"],
+            "network": {key: context.get(key, "") for key in
+                        ("ssid", "bssid", "security", "interface", "subnets")},
+            "password": bool(state["password"]),
+            "keys": [{field: key[field] for field in
+                      ("label", "fingerprint", "kind", "managed")}
+                     for key in self._keys(state)],
+            "observed": observed, "degraded": degraded,
+        }
+        try:
+            prior_sessions = json.loads(self.paths.sessions.read_text())
+            if not isinstance(prior_sessions, list):
+                prior_sessions = []
+        except (OSError, ValueError):
+            prior_sessions = []
+        if hasattr(self.system, "remote_data"):
+            remote = self.system.remote_data(state)
+            fleet = remote.get("fleet") or {"online": 0, "total": 0,
+                                             "peers": [], "addresses": {}}
+            key_labels = {key["fingerprint"]: key["label"] for key in self._keys(state)}
+            live = policy.sessions_from_processes(
+                remote.get("processes", []), fleet.get("addresses", {}),
+                remote.get("authentication", {}), key_labels)
+            sessions = policy.merge_sessions(prior_sessions, live, time.time())
+            policy.atomic_json(self.paths.sessions, sessions, mode=0o600)
+            snapshot["sessions"] = sessions
+            snapshot["auth_failures"] = remote.get("auth_failures") or []
+            snapshot["fleet"] = {key: fleet.get(key) for key in
+                                 ("online", "total", "peers")}
+            snapshot["hatches"] = policy.classify_hatches(
+                remote.get("listeners", []), snapshot,
+                remote.get("serve", False), remote.get("funnel", False))
+            recovery = dict(remote.get("recovery") or {})
+            if degraded:
+                recovery["state"] = "DEGRADED"
+            elif result["effective"] == "off":
+                recovery["state"] = "LOCAL ONLY"
+            elif not recovery.get("off_machine_backup"):
+                recovery["state"] = "AT RISK"
+            else:
+                recovery["state"] = "READY"
+            recovery["route"] = result["effective"]
+            recovery["keys"] = len(self._keys(state))
+            recovery["gap"] = ("No scheduled off-machine private Fossil backup."
+                               if not recovery.get("off_machine_backup") else "")
+            snapshot["recovery"] = recovery
+        else:
+            snapshot["sessions"] = prior_sessions
+        policy.atomic_json(self.paths.snapshot, snapshot, mode=0o644)
+        return snapshot
+
+    def reconcile(self):
+        state = self.state()
+        self.save(state)
+        self._sync_files(state)
+        context = self.context(state)
+        result = policy.apply_mode(self.system, state["desired"], context)
+        return self._publish(state, context, result)
+
+    def set_mode(self, mode):
+        if mode not in policy.VALID_MODES:
+            raise ValueError("Mode must be off, tailnet, or lan.")
+        state = self.state()
+        if mode == "lan":
+            reason = policy._lan_reason(self.context(state))
+            if reason:
+                self.reconcile()
+                raise ValueError("LAN mode requires a trusted encrypted network and a key or password. " + reason)
+        state["desired"] = mode
+        self.save(state)
+        return self.reconcile()
+
+    def set_trust(self, trust):
+        state = self.state()
+        network = self.system.current_network()
+        state["networks"] = policy.remember_network_trust(state["networks"], network, trust)
+        if trust == "untrusted" and state["desired"] == "lan":
+            state["desired"] = "tailnet"
+        self.save(state)
+        return self.reconcile()
+
+    def set_password(self, enabled):
+        state = self.state()
+        if not enabled and not self._keys(state):
+            raise ValueError("Enroll at least one public key before disabling the LAN password.")
+        state["password"] = bool(enabled)
+        self.save(state)
+        return self.reconcile()
+
+    def add_key(self, label, value):
+        label = " ".join(str(label).split())
+        if not LABEL.fullmatch(label):
+            raise ValueError("Key labels must be 1–48 ordinary characters.")
+        kind, payload = policy.validate_public_key(value)
+        fingerprint = self.system.fingerprint(kind, payload)
+        state = self.state()
+        key = {"label": label, "kind": kind, "payload": payload,
+               "fingerprint": fingerprint}
+        state["keys"] = [row for row in state["keys"]
+                         if row.get("fingerprint") != fingerprint] + [key]
+        self._sync_files(state)
+        self.save(state)
+        self.reconcile()
+        return {"label": label, "kind": kind, "fingerprint": fingerprint}
+
+    def remove_key(self, fingerprint):
+        state = self.state()
+        remaining = [key for key in state["keys"]
+                     if key.get("fingerprint") != fingerprint]
+        if len(remaining) == len(state["keys"]):
+            raise ValueError("No enrolled key has that fingerprint.")
+        external = self.system.external_keys(state["account"])
+        if not remaining and not external and not state["password"]:
+            raise ValueError("Enable the LAN password before removing the final key.")
+        state["keys"] = remaining
+        self._sync_files(state)
+        self.save(state)
+        return self.reconcile()
+
+
+def output(value):
+    print(json.dumps(value, ensure_ascii=False, sort_keys=True))
+
+
+def main(argv):
+    if not argv:
+        raise SystemExit("usage: oldbook-remote-access COMMAND")
+    command, arguments = argv[0], argv[1:]
+    paths = Paths()
+    if command == "status" and not arguments:
+        try:
+            print(paths.snapshot.read_text(), end="")
+            return 0
+        except OSError as error:
+            print(f"oldbook-remote-access: {error}", file=sys.stderr)
+            return 1
+    if os.geteuid() != 0:
+        raise SystemExit("oldbook-remote-access mutations must run as root")
+    controller = Controller(paths, System())
+    try:
+        if command == "watch" and not arguments:
+            while True:
+                try:
+                    with operation_lock(paths.lock):
+                        controller.reconcile()
+                except Exception as error:  # service keeps the safe prior fence
+                    print(f"oldbook-remote-access: {error}", file=sys.stderr, flush=True)
+                time.sleep(3)
+        else:
+            with operation_lock(paths.lock):
+                if command == "reconcile" and not arguments:
+                    value = controller.reconcile()
+                elif command == "mode" and len(arguments) == 1:
+                    value = controller.set_mode(arguments[0])
+                elif command == "trust" and len(arguments) == 1:
+                    value = controller.set_trust(arguments[0])
+                elif command == "password" and arguments in (["on"], ["off"]):
+                    value = controller.set_password(arguments[0] == "on")
+                elif command == "key-add" and not arguments:
+                    lines = sys.stdin.read().splitlines()
+                    if len(lines) < 2:
+                        raise ValueError(
+                            "key-add needs a label line followed by one public key")
+                    value = controller.add_key(lines[0], "\n".join(lines[1:]))
+                elif command == "key-remove" and not arguments:
+                    value = controller.remove_key(sys.stdin.read().strip())
+                else:
+                    raise ValueError("unknown command or arguments")
+    except (ValueError, RuntimeError, OSError) as error:
+        print(f"oldbook-remote-access: {error}", file=sys.stderr)
+        return 1
+    output(value)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

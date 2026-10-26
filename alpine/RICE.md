@@ -1,13 +1,11 @@
 # The rice, catalogued
 
 Everything on this desktop that exists to be looked at, in one place: the
-SwayFX glass, the control deck, the gallery and its crossfade, the reading
+SwayFX glass, the control deck, the still-image gallery, the reading
 cards, the lock screen, the boot console, the keyboard glow, the terminals.
 Each entry says what it looks like, how to trigger it, where to tweak it, how
 to switch it off, and where the evidence lives. Paths are relative to
-`alpine/`; design notes for the two 2026-09-08 rounds are under
-[`../docs/superpowers/specs/`](../docs/superpowers/specs/) and the behaviour
-contracts live in [FEATURES.md](FEATURES.md).
+`alpine/`; behaviour contracts live in [FEATURES.md](FEATURES.md).
 
 Three words recur in the evidence notes. **Live** means seen on the physical
 2880×1800 panel. **Headless** means rendered in a private SwayFX session with
@@ -30,7 +28,7 @@ in both, or run `oldbook-theme sync` after editing the desktop copy.
 | `Super+Enter`, `Super+D` | Ghostty with the Space Ghost splash; the application launcher |
 | Hold `Super` for half a second | Contextual shortcut guide (Hold to Help); release or press a key to dismiss |
 | `Super+Shift+D`, click the Ghost badge | The command deck |
-| `Super+G` | Painting picker with thumbnails; `Super+Ctrl+Left/Right` previous/next painting, crossfaded |
+| `Super+G` | Painting picker with thumbnails; `Super+Ctrl+Left/Right` previous/next painting |
 | `Super+Shift+P` | Pause or resume the twenty-minute rotation |
 | `Super+Shift+G` | Desktop reading cards off and on |
 | `Super+/`, `Super+Shift+/` | Scripture search in the desktop bar, Bible only or every collection |
@@ -248,7 +246,7 @@ hourglass, and a missing thumbnail falls back to the gallery glyph. It is the
 native module in `packages/waybar-art/art.c` (package `oldbook-waybar-art`
 r10), fed by `oldbook-wallpaper status --thumbnail-height` and a debounced
 watch on `current-wallpaper.png`. Tweak `#custom-art` in `style.css`; roll back
-by reinstalling the archived r9 APK (see the [spec](../docs/superpowers/specs/2026-09-08-thumbnails.md)).
+by reinstalling the archived r9 APK.
 Evidence: headless states in [verification/gallery-thumbnails/badge.png](verification/gallery-thumbnails/badge.png),
 confirmed live on the panel.
 
@@ -307,58 +305,13 @@ carries hard reverence limits. Every PNG lives under `assets/gallery/` with a
 sidecar recording prompt, hash and provenance. The [gallery guide](wallpapers/README.md)
 has the whole workflow. Evidence of the pipeline lives beside each painting.
 
-**Rotation.** All workspaces share one painting and one twenty-minute timer;
+**Rotation.** All workspaces share one painting and one one-hour timer;
 `Super+Shift+P` or the badge's middle click pause it. Timer choices mix the
 active theme's collection with unthemed art; manual browsing reaches every
 collection. Tweak `wallpapers/gallery.json`.
 
-**Crossfade.** `oldbook-background` owns a surface on the background layer,
-above Sway's swaybg, and eases between paintings on the frame clock: 1.6 s
-for the timer, 0.8 s for a deliberate change, and `--from X,Y` on `next`,
-`prev`, `select` or `refresh` reveals the new painting from that point with a
-soft radial edge. It starts on the image swaybg is showing so logins and
-reloads fade instead of cutting, re-creates its surface when a respawned
-swaybg covers it, and asks the desktop cards to return on top. Off:
-`oldbook-background quit` returns the gallery to plain cuts until the next
-login; remove its block from `oldbook-session` to keep it off. Evidence:
-seven headless frames in [verification/background-crossfade/](verification/background-crossfade/README.md);
-one live `next`/`prev` faded on the panel; physical frame pacing is unmeasured.
-
-![Crossfade caught part-way in a private SwayFX session](verification/background-crossfade/04-fade-part-way.png)
-
-**The desktop breath.** While the keyboard is in a breathing mode, the painting
-breathes with it. The keyboard's single worker publishes its lung state to
-`$XDG_RUNTIME_DIR/oldbook/air.json` twenty times a second, with a closing
-record when it stops; `oldbook-background` swells the picture from 1.000 to
-1.006 at rest and up to 1.018 once your typing has filled the lungs, composing
-the swell into any running crossfade and settling back to exactly the untouched
-image. In breathe-on-air mode the caption strip's amber wash pulses with the
-same number, quantised to twenty-four steps so a 60 Hz breath costs a few
-stylesheet updates a second. Both readers stat the file and release the frame
-clock the moment nothing moves. Shared logic:
-`desktop/.local/lib/oldbook/air.py`. Off: `~/.config/oldbook/breath.json`, or
-**Desktop breath** in the command deck; either half can be stopped alone.
-Evidence: [verification/desktop-breath/](verification/desktop-breath/README.md),
-where the headless session measured 1.000, 1.018, 1.006 and 1.000 exactly. A
-synthetic record made the live painting swell and settle, but the keyboard
-light was off throughout, so the real breath driving the picture is unwatched.
-
-![The painting at rest and at full lungs](verification/desktop-breath/02-full-lungs.png)
-
-**The idle gallery.** Four minutes idle and the desktop becomes a slideshow:
-`oldbook-screensaver` hands the background daemon a shuffled list of
-rotation-eligible paintings, and it drifts about 1.06 of zoom across each one
-for thirty seconds before crossfading to the next, the pan always a fraction of
-the room the zoom opens so no edge can show. Any activity glides it back to
-rest and to the painting it interrupted. The shared painting link, the saved
-selection, the deadline and the pause switch are never written, so it runs even
-while rotation is paused. Off: drop the `timeout 240` clause from the swayidle
-line in `oldbook-session`. Evidence:
-[verification/gallery-screensaver/](verification/gallery-screensaver/README.md);
-a two-second live run drifted and restored, but a real four-minute idle has not
-been watched.
-
-![The gallery drifting mid-screensaver](verification/gallery-screensaver/02-drifting.png)
+**Static painting.** Sway displays the selected painting directly. It does not
+pan, zoom, breathe, drift, crossfade, or turn into an idle slideshow.
 
 **Picker thumbnails.** `Super+G` lists every painting with a rounded thumbnail
 beside its title on 40-pixel rows, then the gallery actions. Fuzzel resolves
@@ -402,10 +355,6 @@ Logic: `desktop/.local/lib/oldbook/nocturne.py`. Off: remove the location
 file. Evidence: seeded weighting in `tests/test_astro.py`; a full night of live
 rotation has not been watched.
 
-**Video background.** `oldbook-video-background FILE` plays a muted loop
-beneath windows with mpvpaper; the command deck offers a picker and a stop.
-Nothing starts automatically.
-
 ## Desktop reading cards
 
 Transparent Conky cards are seated on the calm parts of each painting by
@@ -420,7 +369,8 @@ and `desktop/.config/conky/panels.json` (both copies) defines them. The
 **Masthead.** The weekday in bold, the date, "Ghost Planet · Coast to Coast",
 and since 2026-09-08 a sun-and-moon line: sunrise and sunset glyphs and times,
 the moon's phase glyph, name and lit fraction, refreshed every five minutes by
-`oldbook-astro panel` from an explicit location file. Evidence:
+`oldbook-astro panel` from an explicit location file. Remote access now has its
+own `REMOTE WATCH` card rather than overloading the masthead. Evidence:
 [verification/sun-and-moon/masthead-headless.png](verification/sun-and-moon/masthead-headless.png)
 (headless); the card was refitted live but not photographed.
 
@@ -757,8 +707,7 @@ also in the command deck's Keyboard glow menu):
   at the saved peak in the dark, off in daylight, a smooth log-scale curve in
   between, retargeting only when the smoothed reading moves and fading over
   1.2 s so nothing jumps. The same sensor is the subject of an upstream pull
-  request adding an `applesmc` backend to wluma (details in the
-  [ambient spec](../docs/superpowers/specs/2026-09-08-ambient-glow.md)).
+  request adding an `applesmc` backend to wluma.
 - `Alt+Shift+F6`, **breathe on air**: the breath starts shallow and slow at
   about seven seconds a cycle, every keystroke adds a sip of air that deepens
   and quickens it towards three, and idle lungs leak back over about twenty
@@ -1075,13 +1024,13 @@ green-to-orange gradient. Files under `desktop/.config/btop/` and
 Evidence: [launcher-themes](verification/launcher-themes/gruvbox.png).
 
 **Command deck.** `Super+Shift+D` or the Ghost badge: applications, Expo,
-window switch, decoration placement, the gallery, YouTube and the video
-background, Ghostty, the reactor, transmissions, the sound studio, the
+window switch, decoration placement, the gallery, YouTube, Ghostty, the
+reactor, transmissions, the sound studio, the
 keyboard glow menu, **Night light**, the firewall, notifications, the Fossil
 checkout, the session menu and help. Script: `desktop/.local/bin/oldbook-control`.
 
 **YouTube.** A launcher entry searches and plays through yt-dlp and mpv as a
-floating picture-in-picture or pinned behind the desktop. Evidence:
+floating picture-in-picture. Evidence:
 [youtube](verification/youtube/pip-mode.png).
 
 **Agent picker.** `Super+N`: the best Codex and the best Claude lead the
@@ -1170,8 +1119,7 @@ the [system guide](system/README.md) has the commands.
 that prints a Gruvbox masthead before the LUKS prompt; `/boot/initramfs-lts`
 and the default entry are untouched. Press an arrow during the one-second menu
 to try it; `--remove-ghost` withdraws it; rerun the installer after a kernel
-upgrade. **Next boot:** never booted. Design and adoption steps:
-[luks-prompt spec](../docs/superpowers/specs/2026-09-08-luks-prompt.md).
+upgrade. **Next boot:** never booted.
 
 ## The theme reaches past the session
 

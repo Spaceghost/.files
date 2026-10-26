@@ -79,7 +79,7 @@
       "buttons-per-row": 3,
       "actions": [
         {
-          "label": "Caffeinate",
+          "label": "\u2615  Caffeinate",
           "type": "toggle",
           "command": "~/.local/bin/oldbook-caffeinate set",
           "update-command": "~/.local/bin/oldbook-caffeinate status"
@@ -95,6 +95,10 @@
         {
           "label": "\udb82\udd28  Wi-Fi",
           "command": "~/.local/bin/oldbook-wifi menu"
+        },
+        {
+          "label": "\udb80\udcc0  Remote access",
+          "command": "~/.local/bin/oldbook-remote-access menu"
         },
         {
           "label": "\udb83\ude09  Next art",
