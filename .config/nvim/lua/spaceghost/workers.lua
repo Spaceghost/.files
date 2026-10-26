@@ -75,9 +75,25 @@ end
 local function wrap(tbl, key, factory)
   local current = tbl[key]
   if type(current) ~= 'function' then error('Unsupported Agentic version: missing ' .. key) end
-  if S.wrappers[current] then return end
+  local installed=S.wrappers[current]
+  if type(installed)=='table' and installed.version==2 then return end
+  if type(installed)=='table' then
+    current=installed.original
+  elseif installed then
+    -- The first release retained only a boolean. Recover its named original
+    -- upvalue once so upgrading an active editor replaces, rather than nests,
+    -- request/callback wrappers. All first-release factories used this name.
+    local original
+    for i=1,100 do
+      local name,value=debug.getupvalue(current,i)
+      if not name then break end
+      if name=='original' and type(value)=='function' then original=value; break end
+    end
+    assert(original,'Cannot upgrade legacy worker wrapper: '..key)
+    current=original
+  end
   local wrapped = factory(current)
-  S.wrappers[wrapped] = true; tbl[key] = wrapped
+  S.wrappers[wrapped] = {version=2,original=current}; tbl[key] = wrapped
 end
 function M.state() return S end
 function M.get(id) return S.records[id] end

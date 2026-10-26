@@ -114,7 +114,7 @@ end)
 test('hidden narrow detail does no work proportional to large peer bodies', function()
   local r = complete_record()
   ui.action('<Tab>')
-  r.inbox = { { id = 'large-message', from = 'w1', status = 'queued', text = string.rep('large body ', 1400) } }
+  r.inbox = { { id = 'large-message', from = 'w1', status = 'queued', text = string.rep('界', 5000) } }
   local original, count = vim.fn.strdisplaywidth, 0
   vim.fn.strdisplaywidth = function(value) count = count + 1; return original(value) end
   local ok, err = pcall(ui.render)
@@ -122,7 +122,7 @@ test('hidden narrow detail does no work proportional to large peer bodies', func
   assert(ok, err)
   assert(count < 2000, 'hidden detail wrapped the entire peer body (' .. count .. ' width checks)')
   ui.action('i')
-  assert(text():find('large body', 1, true), 'inbox jump must reveal the complete body')
+  assert(text():find('界界', 1, true), 'inbox jump must reveal the complete body')
   count = 0
   vim.fn.strdisplaywidth = function(value) count = count + 1; return original(value) end
   ok, err = pcall(ui.render)

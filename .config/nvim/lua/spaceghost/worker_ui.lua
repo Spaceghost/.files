@@ -62,14 +62,19 @@ local function wrapped(text, width)
   text = tostring(text or ''):gsub('\r\n', '\n'):gsub('[%z\1-\9\11-\31\127]', ' '):gsub('\194[\128-\159]', ' ')
   local lines = {}
   for paragraph in (text .. '\n'):gmatch('(.-)\n') do
-    local line, cells = '', 0
-    for ch in paragraph:gmatch('[%z\1-\127\194-\244][\128-\191]*') do
-      local size = vim.fn.strdisplaywidth(ch)
-      if cells + size > width and line ~= '' then lines[#lines + 1] = line; line, cells = '', 0 end
-      if size > width then ch, size = '?', 1 end
-      line, cells = line .. ch, cells + size
+    if paragraph ~= '' and not paragraph:find('[\128-\255]') then
+      -- Printable ASCII has one cell per byte; avoid a Vim call per character.
+      for i = 1, #paragraph, width do lines[#lines + 1] = paragraph:sub(i, i + width - 1) end
+    else
+      local line, cells = '', 0
+      for ch in paragraph:gmatch('[%z\1-\127\194-\244][\128-\191]*') do
+        local size = vim.fn.strdisplaywidth(ch)
+        if cells + size > width and line ~= '' then lines[#lines + 1] = line; line, cells = '', 0 end
+        if size > width then ch, size = '?', 1 end
+        line, cells = line .. ch, cells + size
+      end
+      lines[#lines + 1] = line
     end
-    lines[#lines + 1] = line
   end
   return lines
 end

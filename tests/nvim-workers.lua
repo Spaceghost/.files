@@ -152,5 +152,17 @@ migrated.cwd='/unproven/old/editor/cwd'; migrated._workspace_captured=nil
 W.attach()
 assert(migrated.cwd==nil,'reload retained a workspace invented by the previous tracker')
 print('PASS native startup, restore replay, installed edit hooks and honest migration workspace')
+local legacy_wrapper=Client._send_request
+W.state().wrappers[legacy_wrapper]=true
+package.loaded['spaceghost.workers']=nil; W=require('spaceghost.workers'); W.attach()
+assert(Client._send_request~=legacy_wrapper,'live reload did not upgrade legacy wrapper behavior')
+local upgraded=Client._send_request; W.attach()
+assert(Client._send_request==upgraded,'live upgrade stacked another wrapper')
+local upgrade_worker=assert(W.new({cwd='/var/tmp',background=true}))
+starts[#starts].start()
+assert(#requests[#requests].params.mcpServers==1,'live wrapper upgrade duplicated MCP injection')
+requests[#requests].cb({sessionId='wrapper-upgrade'})
+assert(upgrade_worker.status=='ready','upgraded wrapper lost readiness callback')
+print('PASS live wrapper upgrades replace behavior without stacking requests')
 print('worker lifecycle tests passed')
 vim.cmd('qa!')
