@@ -11,17 +11,7 @@
       "prefer": "top",
       "width": 372,
       "height": 120,
-      "text": "${font Inter:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet \u00b7 Coast to Coast\n${execpi 300 ~/.local/bin/oldbook-astro panel}"
-    },
-    {
-      "id": "remote-watch",
-      "title": "Remote Watch",
-      "enabled": true,
-      "priority": 99,
-      "prefer": "right",
-      "width": 500,
-      "height": 404,
-      "text": "${execpi 60 ~/.local/bin/oldbook-remote-access conky}"
+      "text": "${font Inter:bold:size=20}${color1}${time %A}${font}\n${color}${time %d %B %Y}\n${color2}Ghost Planet · Coast to Coast\n${execpi 300 ~/.local/bin/oldbook-astro panel}"
     },
     {
       "id": "scripture",
@@ -31,7 +21,7 @@
       "prefer": "top-right",
       "width": 420,
       "height": 204,
-      "text": "${color1}\udb80\udcba SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
+      "text": "${color1}󰂺 SCRIPTURE${color2} ${hr 1}\n${execpi 3600 ~/.local/bin/oldbook-scripture panel --width 52}"
     },
     {
       "id": "rice",
@@ -41,7 +31,7 @@
       "prefer": "right",
       "width": 420,
       "height": 250,
-      "text": "${color1}\udb80\udfea NEW RICE${color2} ${hr 1}\n${execpi 300 ~/.local/bin/oldbook-rice panel --width 50}"
+      "text": "${color1}󰏪 NEW RICE${color2} ${hr 1}\n${execpi 300 ~/.local/bin/oldbook-rice panel --width 50}"
     },
     {
       "id": "power",
@@ -51,7 +41,7 @@
       "prefer": "right",
       "width": 286,
       "height": 80,
-      "text": "${color1}\udb80\udc79 POWER${color2} ${hr 1}\n${color}batt ${color6}${battery_bar 5,150 {{battery}}}${color} ${battery_percent {{battery}}}%\n${color2}${battery {{battery}}}${alignr}${color2}${battery_time {{battery}}}"
+      "text": "${color1}󰁹 POWER${color2} ${hr 1}\n${color}batt ${color6}${battery_bar 5,150 {{battery}}}${color} ${battery_percent {{battery}}}%\n${color2}${battery {{battery}}}${alignr}${color2}${battery_time {{battery}}}"
     },
     {
       "id": "gallery",
@@ -61,7 +51,7 @@
       "prefer": "bottom",
       "width": 360,
       "height": 112,
-      "text": "${color1}\udb83\ude09 GHOST GALLERY${color2} ${hr 1}\n${color}${execi 120 {{bin}} gallery-text}"
+      "text": "${color1}󰸉 GHOST GALLERY${color2} ${hr 1}\n${color}${execi 120 {{bin}} gallery-text}"
     },
     {
       "id": "ghost",
@@ -71,7 +61,7 @@
       "prefer": "bottom-right",
       "width": 360,
       "height": 140,
-      "text": "${color1}\udb80\udea0 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
+      "text": "${color1}󰊠 COAST TO COAST${color2} ${hr 1}\n${color2}${execi 240 ~/.local/bin/oldbook-journal show}"
     },
     {
       "id": "witness",
@@ -81,7 +71,17 @@
       "prefer": "right",
       "width": 400,
       "height": 152,
-      "text": "${color1}\udb80\ude7e WITNESS${color2} ${hr 1}\n${execpi 300 {{scripture}} witness --width 50}"
+      "text": "${color1}󰉾 WITNESS${color2} ${hr 1}\n${execpi 300 {{scripture}} witness --width 50}"
+    },
+    {
+      "id": "remote-watch",
+      "title": "Remote Watch",
+      "enabled": true,
+      "priority": 1,
+      "prefer": "right",
+      "width": 500,
+      "height": 404,
+      "text": "${execpi 60 ~/.local/bin/oldbook-remote-access conky}"
     }
   ]
 }
