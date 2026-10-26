@@ -5,6 +5,7 @@ local shell = require('spaceghost.shell')
 -- items: { { key = 'c', label = 'New tab shell', action = fn }, { sep = true }, { note = '...' } }
 function M.menu(title, items)
   vim.cmd.stopinsert()
+  local origin = vim.api.nvim_get_current_win()
   local lines, maxw = {}, #title + 4
   for _, it in ipairs(items) do
     local line
@@ -36,7 +37,14 @@ function M.menu(title, items)
     end
   end
   local function close() if vim.api.nvim_win_is_valid(win) then vim.api.nvim_win_close(win, true) end end
-  local function run(it) close(); vim.schedule(it.action) end
+  local function run(it)
+    close()
+    vim.schedule(function()
+      if not vim.api.nvim_win_is_valid(origin) then return end
+      vim.api.nvim_set_current_win(origin)
+      it.action()
+    end)
+  end
   for _, it in ipairs(items) do
     if it.key then vim.keymap.set('n', it.key, function() run(it) end, { buffer = buf, nowait = true }) end
   end
@@ -57,6 +65,7 @@ function M.command_deck()
     { key = 'e', label = 'Edit a file…', action = K.edit_prompt },
     { key = 'a', label = 'Attach to a machine in a split…', action = K.attach_prompt },
     { key = 'i', label = 'Codex / Agentic…', action = function() require('spaceghost.agent').menu() end },
+    { key = 'o', label = 'Codex workers / activity + inbox', action = function() require('spaceghost.worker_ui').open() end },
     { key = 'z', label = 'Zoom / unzoom pane', action = K.zoom },
     { key = '=', label = 'Balance panes', action = function() vim.cmd('wincmd =') end },
     { key = 'd', label = 'Redraw pane', action = shell.redraw },
@@ -100,6 +109,9 @@ function M.field_guide()
     { note = 'a          attach machine   Ctrl-]  all navigation local/remote' },
     { note = 'i          native Codex      I       add file/selection to Codex' },
     { note = 'F4 i       Codex sessions, restore and layout controls' },
+    { note = 'o / F4 o   worker cockpit: n new, Enter chat, p prompt, s stop' },
+    { note = 'Workers: j/k select, Tab detail, r rename, a delegate, m peer' },
+    { note = 'N choose workspace, d dismiss finished worker, q hide cockpit' },
     { note = 'Choose a host in F2 to enter its tabs and panes' },
     { note = 'r          reload config    Ctrl-\\ Ctrl-n  leave terminal mode' },
     { sep = true },

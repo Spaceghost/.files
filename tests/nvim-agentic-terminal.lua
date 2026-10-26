@@ -8,7 +8,8 @@ local function lua(code, ...)
   return vim.rpcrequest(child, 'nvim_exec_lua', code, { ... })
 end
 local function wait_for(code)
-  assert(vim.wait(45000, function() return lua(code) end, 20), 'timed out: ' .. code)
+  assert(vim.wait(5000, function() return lua(code) end, 20), 'timed out: ' .. code
+    .. ' state=' .. vim.inspect(lua("return {mode=vim.api.nvim_get_mode().mode,ft=vim.bo.filetype,messages=vim.api.nvim_exec2('messages',{output=true}).output}")))
 end
 local ok, err = pcall(function()
   lua([[
@@ -21,6 +22,12 @@ local ok, err = pcall(function()
     require('spaceghost.shell').open(nil, { cmd = { 'cat' }, cwd = root })
   ]], config, root)
   wait_for("return vim.api.nvim_get_mode().mode == 't'")
+  vim.rpcrequest(child, 'nvim_input', '<C-\\>o')
+  wait_for("return vim.bo.filetype == 'spaceghost-workers' and vim.api.nvim_get_mode().mode == 'n'")
+  assert(lua("return _G.__spaceghost_worker_ui.cwd") == root, 'dashboard lost terminal workspace')
+  vim.rpcrequest(child, 'nvim_input', 'q')
+  wait_for("return vim.api.nvim_get_mode().mode == 't'")
+  print('PASS worker dashboard prefix opens from terminal and returns to shell input')
   vim.rpcrequest(child, 'nvim_input', '<C-\\>i')
   wait_for("return vim.bo.filetype == 'AgenticInput' and vim.api.nvim_get_mode().mode == 'i'")
   assert(lua("return require('agentic.config').acp_configs.session_cwd()") == root, 'shell workspace lost')

@@ -4,6 +4,7 @@ local shell = require('spaceghost.shell')
 local native = require('spaceghost.native')
 
 local function hl(group, text) return '%#' .. group .. '#' .. text end
+local function literal(text) return tostring(text):gsub('[%c]', ' '):gsub('%%', '%%%%') end
 
 -- ── Tabline: one entry per tab, tmux window-list style ────────────────────────
 local function tab_label(tab)
@@ -33,13 +34,14 @@ function M.tabline()
   local width = vim.o.columns
   local badge = width >= 160 and ' S P A C E G H O S T ' or (width >= 100 and ' SPACEGHOST ' or ' SG ')
   parts[#parts + 1] = hl('SpaceghostBadge', badge)
-  parts[#parts + 1] = hl('SpaceghostSurface', ' ' .. vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ':t') .. ' ')
+  parts[#parts + 1] = hl('SpaceghostSurface', ' ' .. literal(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ':t')) .. ' ')
   parts[#parts + 1] = hl('TabLineFill', ' ')
   local current = vim.api.nvim_get_current_tabpage()
   local maxlen = width >= 180 and 26 or 14
   for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
     local label = tab_label(tab)
-    if #label > maxlen then label = label:sub(1, maxlen - 1) .. '…' end
+    if vim.fn.strchars(label) > maxlen then label = vim.fn.strcharpart(label, 0, maxlen - 1) .. '…' end
+    label = literal(label)
     local st = tab_state(tab)
     if tab == current then
       local extra = st.panes > 1 and (' +' .. st.panes) or ''
@@ -82,7 +84,9 @@ local function git_branch(cwd)
       value = (res.stdout or ''):gsub('%s+$', ''):gsub('[^%w%._/:-]', '?'):sub(1, 24)
     end
     branch_cache[cwd] = { at = (vim.uv or vim.loop).now(), value = value, pending = false }
-    vim.schedule(function() pcall(vim.cmd.redrawstatus) end)
+    vim.schedule(function()
+      if #vim.api.nvim_list_uis() > 0 then pcall(vim.cmd.redrawstatus) end
+    end)
   end)
   return branch_cache[cwd].value
 end
@@ -107,22 +111,24 @@ function M.statusline()
   if vim.bo[buf].buftype == 'terminal' then
     local title = (vim.b[buf].term_title or ''):gsub('^[%w%.%-_]+@[%w%.%-_]+:%s*', '')
     if title == '' or title:match('^[~/]') then title = 'shell' end
-    what = hl('SpaceghostStatusAccent', ' ' .. title:sub(1, 40))
+    what = hl('SpaceghostStatusAccent', ' ' .. literal(title:sub(1, 40)))
   else
     local name = vim.api.nvim_buf_get_name(buf)
     name = name == '' and '[scratch]' or vim.fn.fnamemodify(name, ':~:.')
-    what = hl('SpaceghostStatusAccent', ' ' .. name) .. (vim.bo[buf].modified and hl('SpaceghostStatusWarn', ' +') or '')
+    what = hl('SpaceghostStatusAccent', ' ' .. literal(name)) .. (vim.bo[buf].modified and hl('SpaceghostStatusWarn', ' +') or '')
       .. (vim.bo[buf].readonly and hl('SpaceghostStatusAlert', ' RO') or '')
   end
   parts[#parts + 1] = what
   if vim.b[buf].spaceghost_remote_keys then
     parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostModeVisual', ' REMOTE @' .. vim.b[buf].spaceghost_attach .. ' / ^] local ')
   end
-  parts[#parts + 1] = hl('StatusLine', ' / ') .. hl('SpaceghostStatusCwd', short)
+  parts[#parts + 1] = hl('StatusLine', ' / ') .. hl('SpaceghostStatusCwd', literal(short))
   local branch = git_branch(cwd)
   if branch ~= '' then parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostStatusBranch', ' ' .. branch) end
   parts[#parts + 1] = '%='
   local right = {}
+  local worker_ui = package.loaded['spaceghost.worker_ui']
+  if worker_ui then right[#right + 1] = worker_ui.statusline() .. hl('StatusLine', '') end
   local t = width >= 120 and telemetry() or nil
   if t then
     if t.load1 >= 0 then right[#right + 1] = 'LOAD ' .. hl('SpaceghostStatusCwd', string.format('%.2f', t.load1)) .. hl('StatusLine', '') end
@@ -167,10 +173,18 @@ function M.setup()
   vim.o.statusline = '%!v:lua.Spaceghost.ui.statusline()'
   vim.o.fillchars = 'horiz:─,horizup:┴,horizdown:┬,vert:│,vertleft:┤,vertright:├,verthoriz:┼,eob: ,fold: '
   -- Clock and telemetry refresh.
+  local old_timer = rawget(_G, 'spaceghost_hud_timer')
+  if old_timer and not old_timer:is_closing() then old_timer:stop(); old_timer:close() end
   local timer = (vim.uv or vim.loop).new_timer()
+  _G.spaceghost_hud_timer = timer
   timer:start(15000, 15000, vim.schedule_wrap(function()
+    if #vim.api.nvim_list_uis() == 0 then return end
     pcall(vim.cmd.redrawtabline); pcall(vim.cmd.redrawstatus)
   end))
+  local group = vim.api.nvim_create_augroup('SpaceghostHUD', { clear = true })
+  vim.api.nvim_create_autocmd('VimLeavePre', { group = group, callback = function()
+    if not timer:is_closing() then timer:stop(); timer:close() end
+  end })
 end
 
 return M

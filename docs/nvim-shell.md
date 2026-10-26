@@ -209,6 +209,69 @@ only load when opening the UI. To update, change `agentic/plugin-revision` or
 `agentic/package.json`, regenerate the lockfile in that directory, and rerun
 the installer on each host.
 
+## Codex workers: tabs, live progress, and peer messages
+
+Press `Ctrl-\ o` or `F4 o` for the worker dashboard (`:CodexWorkers`). The
+overview follows every tracked session, including workers hidden in other tabs.
+Cards show activity, elapsed turn time, measured plan progress and attention
+states. The detail pane adds model, context use, tool/file counts, recent events,
+inbox and delegated children. The global statusline shows active/waiting/done
+counts while you edit. Unicode spinners and activity sweeps use the Spaceghost
+palette; percentages appear only when Codex provides the underlying measurement.
+
+1. Press `n` and enter a task to create a named worker in its own tab. `N` first
+   asks for a different workspace; otherwise it uses the originating file,
+   shell or worker workspace. `:CodexNew` also creates a separate worker tab.
+2. Use `j`/`k` to select a worker and Enter to focus its chat tab. Reordering or
+   closing tabs preserves worker identity; reopen the view from the dashboard.
+3. Press `p` to send a follow-up, `r` to rename, or `s` to stop the current turn.
+   Busy and approval-waiting workers queue follow-ups until ready. Stopping waits
+   for cancellation to finish before allowing a new turn.
+4. Press `m` to message another worker from the selected worker, or `a` to ask
+   the selected parent to delegate a task. Child activity appears beneath its
+   parent; child interaction goes through that parent's chat.
+
+In narrow terminals, Tab switches between the list and selected-worker detail.
+`[` and `]` scroll the detail pane. `q` hides the dashboard while workers keep
+running. `d` dismisses an idle/finished worker card without destroying its
+conversation. Approvals retain Agentic's existing interactive buttons: select
+a worker marked **NEEDS YOU** and open its chat to resolve them.
+
+Every new/restored tracked session receives a **Lua MCP peer bridge** with
+`workers_list`, `workers_status`, `workers_send`, and `workers_inbox`. Ask a worker
+to coordinate with its peers; it can discover their names, IDs, tasks and
+workspaces, exchange questions/results, and read its own inbox. Busy recipients
+receive messages in order. Inbox/list results paginate, long inbox messages have
+continuation offsets, and sends return delivery receipts. Messages carry sender
+and reply identities; bounded reply chains prevent accidental endless replies.
+
+Peer communication stays within one running Neovim instance: this machine and
+bak each have their own group. Existing active sessions are adopted without
+restarting; sessions started before the bridge was installed show **Bridge
+unavailable** until a new or restored session supplies the tools. Permissions
+for MCP calls remain visible and are not automatically bypassed.
+
+All new implementation and tests are Lua. The bridge uses `vim.uv` pipes and a
+private per-instance Unix socket, with authenticated worker identities and no
+additional service or dependency. Its temporary files use the user cache, so
+bak's full `/tmp` does not block it. Logs, queues and frame sizes are bounded;
+the dashboard virtualizes worker cards, coalesces redraws and uses one shared
+activity scheduler. Hidden chats pause animation, and configuration reloads
+retain sessions while replacing subscriptions rather than stacking timers.
+
+Disable motion with `:lua vim.g.spaceghost_worker_motion = false`; set it to
+`true` to restore animations. Status changes still appear with motion disabled.
+
+Verification from `.files` (the last test makes small live Codex requests):
+
+```sh
+nvim --headless -u NONE -l tests/nvim-workers.lua
+nvim --headless -u NONE -l tests/nvim-worker-ui.lua
+nvim --headless -u NONE -l tests/nvim-worker-bus.lua
+nvim --headless -u NONE -l tests/nvim-worker-chat.lua
+nvim --headless -u NONE -l tests/nvim-workers-live.lua --live --delegated
+```
+
 ## Native helpers (Nelua + zig cc)
 
 `.config/nvim/native/spaceghost.nelua` implements the telemetry sampler,

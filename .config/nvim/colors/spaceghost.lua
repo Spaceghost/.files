@@ -198,5 +198,17 @@ local groups = {
   SpaceghostMenuKey = { fg = p.mint, bold = true },
   SpaceghostMenuHint = { fg = p.muted, italic = true },
   SpaceghostMenuSel = { fg = p.bg0, bg = p.violet, bold = true },
+  WorkerNormal = { fg = p.fg, bg = p.bg0 },
+  WorkerText = { fg = p.fg, bg = p.bg0 },
+  WorkerBorder = { fg = p.violet, bg = p.bg0 },
+  WorkerTitle = { fg = p.violet, bg = p.bg0, bold = true },
+  WorkerAccent = { fg = p.blue, bg = p.bg0, bold = true },
+  WorkerSelected = { fg = p.mint, bg = p.bg2, bold = true },
+  WorkerMuted = { fg = p.muted, bg = p.bg0 },
+  WorkerProgress = { fg = p.mint, bg = p.bg0 },
+  WorkerWaiting = { fg = p.amber, bg = p.bg0, bold = true },
+  WorkerFailed = { fg = p.alert, bg = p.bg0, bold = true },
+  WorkerDone = { fg = p.mint, bg = p.bg0 },
+  WorkerKey = { fg = p.cyan, bg = p.bg0 },
 }
 for group, spec in pairs(groups) do hi(group, spec) end
