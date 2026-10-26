@@ -227,10 +227,12 @@ function M.rebuild_native()
 end
 
 function M.reload()
+  local config = Spaceghost and Spaceghost.config_file or vim.env.MYVIMRC
+  if not config or config == '' then config = vim.fn.stdpath('config') .. '/init.lua' end
   for name in pairs(package.loaded) do
     if name:match('^spaceghost') then package.loaded[name] = nil end
   end
-  vim.cmd.source(vim.env.MYVIMRC)
+  vim.cmd.source(config)
   vim.notify('SPACEGHOST / systems reloaded')
 end
 

@@ -39,6 +39,7 @@ if vim.fn.has('nvim-0.10') == 1 then vim.o.smoothscroll = true end
 vim.cmd.colorscheme('spaceghost')
 
 _G.Spaceghost = {
+  config_file = vim.fn.fnamemodify(debug.getinfo(1, 'S').source:sub(2), ':p'),
   native = require('spaceghost.native'),
   shell = require('spaceghost.shell'),
   ui = require('spaceghost.ui'),
