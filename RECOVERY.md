@@ -10,6 +10,7 @@ The verified snapshot described here is:
 - private release: `Spaceghost/oldbook-recovery`, tag
   `catbed-2026-10-26-36cea2db`;
 - Fossil branch/check-in: `alpine-oldbook` / `36cea2db`;
+- recovery documentation update: `recovery-docs.bundle`;
 - public mirror branch: `Spaceghost/.files:alpine-oldbook-live`;
 - package lock: `alpine/packages/locks/321d9e0702cf3368824f.json`;
 - package closure: 1,186 signature- and identity-verified APKs;
@@ -116,14 +117,18 @@ The destination database and checkout must not already exist:
 install -d -m 700 "$HOME/.local/share/fossil"
 install -m 600 recovery-assets/files.fossil \
   "$HOME/.local/share/fossil/files.fossil"
+fossil bundle import recovery-assets/recovery-docs.bundle --publish \
+  -R "$HOME/.local/share/fossil/files.fossil"
 mkdir "$HOME/.files"
 cd "$HOME/.files"
 fossil open "$HOME/.local/share/fossil/files.fossil" alpine-oldbook
 fossil info
 ```
 
-Confirm that `fossil info` names check-in `36cea2db` or a documented descendant
-on `alpine-oldbook` before changing the host.
+The small bundle advances the recovered database from the immutable snapshot to
+the documentation-only descendant that added this guide and the README recovery
+links. Confirm that `fossil info` names a descendant of `36cea2db` on
+`alpine-oldbook` before changing the host.
 
 ## 5. Preview, then rebuild the machine
 
