@@ -38,6 +38,9 @@ class PanelStatusTests(unittest.TestCase):
                 card = next(panel for panel in panels if panel['id'] == 'remote-watch')
                 self.assertIn('oldbook-remote-access conky', card['text'])
                 self.assertGreaterEqual(card['height'], 390)
+                self.assertEqual(panels[-1]['id'], 'remote-watch')
+                self.assertLess(card['priority'], min(
+                    panel['priority'] for panel in panels if panel['id'] != 'remote-watch'))
                 masthead = next(panel for panel in panels if panel['id'] == 'masthead')
                 self.assertNotIn('oldbook-panel-status ssh-desktop', masthead['text'])
 

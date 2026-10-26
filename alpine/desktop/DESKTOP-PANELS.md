@@ -72,6 +72,10 @@ at most four privacy-safe executable names. It shows up to 12 sessions, then a
 `+ N MORE` summary. Raw command lines, environment, working directories and
 terminal contents are never displayed.
 
+`REMOTE WATCH` is deliberately last in the placement order. The ordinary
+information cards choose their regions first; the remote ledger uses remaining
+space and never displaces them, across every theme.
+
 ## Content and refresh policy
 
 Conky is reserved for slow information: date, Scripture, battery charge/status,

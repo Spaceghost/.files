@@ -1274,6 +1274,9 @@ sessions for exactly 24 hours, displaying up to 12 with identity, source,
 authentication/key fingerprint and sanitized executable names. The observer
 never publishes arguments, environment values, working directories or terminal
 contents. Authentication-failure warnings are deduplicated and rate-limited.
+The remote ledger is useful context, not the desktop's headline: Conky places
+every regular information card first and gives `REMOTE WATCH` only the space
+left afterward. Theme switching and regeneration preserve that last priority.
 
 A hotspot is possible but constrained by the radio, not by preference. The
 kernel permits one managed and one AP interface at `#channels <= 1`, so an access

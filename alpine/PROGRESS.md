@@ -3201,5 +3201,7 @@ The same heartbeat detects closed pipes so abandoned native-host processes exit.
 
 Focused Firefox theme tests cover initial delivery, immediate change delivery,
 periodic catch-up and atomic state publication. The live state and selected
-descriptor both resolve to Gruvbox Dark; live browser confirmation is recorded
-separately after replacing the already-running native hosts.
+descriptor both resolve to Gruvbox Dark. Replacing the already-running native
+hosts made the open Firefox reconnect without a browser restart; `/proc` write
+counters increased again after one catch-up interval, proving the live host sent
+the unchanged Gruvbox palette a second time. Browser pixels were not sampled.
