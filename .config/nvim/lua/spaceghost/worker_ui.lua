@@ -81,13 +81,13 @@ end
 local function detail(r, width, offset, limit)
   if detail_cache.record ~= r or detail_cache.width ~= width then detail_cache = { record = r, width = width, rows = {} } end
   local out, sections, retained, count, field = {}, {}, {}, 0, 0
-  local function add(text, group)
+  local function add(text, group, message_id)
     field = field + 1
     local cached = detail_cache.rows[field]
     if not cached or cached.text ~= text then cached = { text = text, lines = wrapped(text, width) } end
     retained[field] = cached
     for i = math.max(1, offset - count + 1), math.min(#cached.lines, offset + limit - count) do
-      out[count + i] = { cached.lines[i], group or 'WorkerText' }
+      out[count + i] = { cached.lines[i], group or 'WorkerText', message_id }
     end
     count = count + #cached.lines
   end
@@ -138,8 +138,8 @@ local function detail(r, width, offset, limit)
   for _, m in ipairs(inbox) do
     local sender = m.from and workers.get(m.from)
     local name = clean(m.from_name or (sender and sender.name) or m.from or m.sender or 'peer')
-    add(clean(m.id or 'ID unavailable') .. ' · ' .. name .. (m.from and ' (' .. clean(m.from) .. ')' or '') .. ' [' .. clean(m.status or 'received') .. ']', 'WorkerMuted')
-    add(name .. ': ' .. (m.text or m.message or ''), 'WorkerText')
+    add(clean(m.id or 'ID unavailable') .. ' · ' .. name .. (m.from and ' (' .. clean(m.from) .. ')' or '') .. ' [' .. clean(m.status or 'received') .. ']', 'WorkerMuted', m.id)
+    add(name .. ': ' .. (m.text or m.message or ''), 'WorkerText', m.id)
   end
   if #inbox == 0 then add('No peer messages', 'WorkerMuted') end
   sections.c = count
@@ -197,10 +197,14 @@ function M.render()
     S.detail_sections = sections
   end
   if #list == 0 then left = right end
+  local inspected, seen = {}, {}
   for i = 1, body do
     local l = (not wide and (S.detail or S.help) and right[i + S.detail_offset] or left[i]) or { '', 'WorkerText' }
     local r = right[i + S.detail_offset] or { '', 'WorkerText' }
     row(l[1], l[2], wide and r[1] or nil, r[2], wide and lw or nil)
+    if not S.help and (wide or S.detail) and r[3] and not seen[r[3]] then
+      seen[r[3]] = true; inspected[#inspected + 1] = r[3]
+    end
   end
   row(string.rep('─', w), 'WorkerBorder')
   row(' ? help  j/k select  Enter chat  n new  q close', 'WorkerKey')
@@ -210,6 +214,9 @@ function M.render()
   api.nvim_buf_clear_namespace(S.buf, ns, 0, -1)
   for _, m in ipairs(marks) do if m.finish > m.col then api.nvim_buf_set_extmark(S.buf, ns, m.row, m.col, { end_col = m.finish, hl_group = m.group }) end end
   vim.bo[S.buf].modifiable = false
+  -- Read changes use the existing scheduled/coalesced subscription; never redraw
+  -- recursively here. Older engine adapters may not yet expose read tracking.
+  if #inspected > 0 and type(workers.read) == 'function' then workers.read(S.selected, inspected) end
 end
 local function notify(err) if err then vim.notify(clean(err), vim.log.levels.WARN) end end
 local function input(prompt, default, limit, fn)

@@ -150,6 +150,45 @@ test('adopted sessions report unavailable workspace instead of an invented origi
   r.cwd = cwd; ui.render()
   assert(content:find('Workspace  unavailable (session predates tracking)', 1, true), 'unknown session origin needs an explicit unavailable label')
 end)
+local function readable_inbox()
+  local r = complete_record()
+  r.plan, r.inbox = {}, {}
+  for i = 1, 3 do
+    r.inbox[i] = { id = 'seen-' .. i, from = 'w1', status = i == 2 and 'cancelled' or 'queued', text = string.rep('Full body line\n', 20) }
+  end
+  ui.action('g')
+  return r
+end
+test('read requests include only inbox entries intersecting the visible viewport', function()
+  readable_inbox()
+  local reads = {}
+  engine.read = function(id, ids) reads[#reads + 1] = { id, ids }; return 0 end
+  ui.render(); assert(#reads == 0, 'offscreen inbox entries must remain unread')
+  ui.action('i')
+  assert(#reads > 0 and reads[#reads][1] == 'w80' and vim.deep_equal(reads[#reads][2], { 'seen-1' }), 'only the first visible inbox message should be inspected')
+  ui.action(']')
+  assert(not text():find('seen-1', 1, true), 'fixture should scroll the message header offscreen')
+  assert(vim.deep_equal(reads[#reads][2], { 'seen-1' }), 'visible message body must count even without its header')
+  ui.action('G')
+  assert(vim.deep_equal(reads[#reads][2], { 'seen-3' }), 'scrolling must inspect only the final visible message')
+  engine.read = nil
+end)
+test('hidden narrow detail and help never inspect messages; read notifications coalesce', function()
+  readable_inbox(); ui.action('<Tab>')
+  local reads, depth, maximum = 0, 0, 0
+  engine.read = function()
+    reads, depth = reads + 1, depth + 1; maximum = math.max(maximum, depth)
+    if reads == 1 then subscribers['worker-ui']('change'); subscribers['worker-ui']('change') end
+    depth = depth - 1
+    return reads == 1 and 1 or 0
+  end
+  ui.render(); ui.action('?'); ui.action('G'); assert(reads == 0, 'hidden detail and help must not mark messages read')
+  ui.action('?'); ui.action('i'); vim.wait(10)
+  assert(reads > 0 and reads <= 3 and maximum == 1 and not state().pending, 'read changes must schedule one coalesced redraw without recursive rendering')
+  ui.action('<Tab>'); local before = reads; ui.action('<CR>')
+  assert(reads == before, 'opening chat must not inspect the hidden inbox')
+  engine.read = nil; ui.open(); ui.action('g')
+end)
 test('controls target stable identity and bound prompt input', function()
   answer('Follow up'); ui.action('p'); assert(calls[#calls][1] == 'send' and calls[#calls][2] == 'w80')
   answer(string.rep('a', 12001)); local count = #calls; ui.action('p'); assert(#calls == count)

@@ -164,5 +164,17 @@ assert(#requests[#requests].params.mcpServers==1,'live wrapper upgrade duplicate
 requests[#requests].cb({sessionId='wrapper-upgrade'})
 assert(upgrade_worker.status=='ready','upgraded wrapper lost readiness callback')
 print('PASS live wrapper upgrades replace behavior without stacking requests')
+local first_read=assert(W.peer(a.id,upgrade_worker.id,'first unread'))
+assert(W.peer(a.id,upgrade_worker.id,'second unread'))
+W.open(upgrade_worker.id)
+assert(upgrade_worker.unread==2,'opening chat marked undisplayed inbox messages read')
+assert(W.read(upgrade_worker.id,{first_read.id})==1 and upgrade_worker.unread==1,'visible-message read count is incorrect')
+assert(W.read(upgrade_worker.id,{first_read.id,'missing'})==0 and upgrade_worker.unread==1,'duplicate reads changed unread count')
+for i=1,101 do
+ starts[#starts].is_generating=false; W.tick()
+ assert(W.peer(a.id,upgrade_worker.id,'retained '..i))
+end
+assert(#upgrade_worker.inbox==100 and upgrade_worker.unread==100,'evicted messages left unreachable unread counts')
+print('PASS inbox reads track inspected messages and exclude evicted unread entries')
 print('worker lifecycle tests passed')
 vim.cmd('qa!')

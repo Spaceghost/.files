@@ -235,7 +235,8 @@ In narrow terminals, Tab switches between the list and selected-worker detail.
 `[` and `]` scroll the detail pane; `g`/`G` jump to its ends. Press `P` for the
 full plan, `i` for the inbox, `c` for delegated children, or `?` for the complete
 control reference. Long peer messages wrap in full, with message IDs, sender
-names and delivery states. `q` hides the dashboard while workers keep
+names and delivery states. Only inbox entries visible in the dashboard are
+marked read; opening chat preserves unread queued messages. `q` hides the dashboard while workers keep
 running. `d` dismisses an idle/finished worker card without destroying its
 conversation. Approvals retain Agentic's existing interactive buttons: select
 a worker marked **NEEDS YOU** and open its chat to resolve them.
@@ -251,7 +252,9 @@ and reply identities; bounded reply chains prevent accidental endless replies.
 Peer communication stays within one running Neovim instance: this machine and
 bak each have their own group. Existing active sessions are adopted without
 restarting; sessions started before the bridge was installed show **Bridge
-unavailable** until a new or restored session supplies the tools. Permissions
+unavailable** until a new or restored session supplies the tools. An unrecorded
+original workspace is explicitly shown as unavailable; new sessions retain
+their captured workspace. Permissions
 for MCP calls remain visible and are not automatically bypassed.
 
 All new implementation and tests are Lua. The bridge uses `vim.uv` pipes and a

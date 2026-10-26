@@ -201,13 +201,31 @@ local function enqueue(r, text, opts)
   if m.from then
     local sender = S.records[m.from]
     m.prompt = ('[Worker message %s from %s (%s); hop %d; reply_to %s]\n%s'):format(m.id, m.from, clean(sender.name,120), m.hops, m.reply_to or 'none', text)
-    r.inbox[#r.inbox+1] = m; if #r.inbox > LIMIT.inbox then table.remove(r.inbox,1) end
+    r.inbox[#r.inbox+1] = m
+    if #r.inbox > LIMIT.inbox then
+      local evicted=table.remove(r.inbox,1)
+      if not evicted.read_at then r.unread=math.max(0,r.unread-1) end
+    end
     r.unread = r.unread + 1
   end
   r.queue[#r.queue+1] = m; event(r, 'Message queued' .. (m.from and (' from ' .. m.from) or ''), 'message')
   arm(); return m
 end
 function M.send(id, text, opts) return enqueue(S.records[id], text, opts or {}) end
+function M.read(id, message_ids)
+  local r=S.records[id]
+  if not r then return nil,'Unknown worker' end
+  local wanted={}
+  for _,message_id in ipairs(message_ids or {}) do wanted[message_id]=true end
+  local count=0
+  for _,message in ipairs(r.inbox) do
+    if wanted[message.id] and not message.read_at then
+      message.read_at=os.time(); count=count+1
+    end
+  end
+  if count>0 then r.unread=math.max(0,r.unread-count); notify() end
+  return count
+end
 function M.peer(from, to, text, opts)
   opts = opts or {}
   if not S.records[from] or not session(S.records[from]) then return nil, 'Unknown sender' end
@@ -235,7 +253,7 @@ function M.open(id)
   -- A widget already visible in a different tab must be focused there.
   local tab = s.widget:get_visible_tab_id() or r.tab
   if not tab or not vim.api.nvim_tabpage_is_valid(tab) then vim.cmd('tabnew'); tab = vim.api.nvim_get_current_tabpage() end
-  vim.api.nvim_set_current_tabpage(tab); r.tab = tab; r.unread = 0
+  vim.api.nvim_set_current_tabpage(tab); r.tab = tab
   vim.t[tab].spaceghost_name=r.name
   require('agentic.session_registry').show_session(r.session_key, { auto_add_to_context = false })
   notify(); return r
