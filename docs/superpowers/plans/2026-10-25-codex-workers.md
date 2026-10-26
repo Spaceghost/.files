@@ -43,7 +43,7 @@ Record: id,name,cwd,session_key,session_id,tab,status,activity,started_at,finish
 ## Task 4: integration, review and rollout
 
 - [x] Compose all modules, enhance chat headers, document controls and peer tool use, and run real multiworker/message/child activity checks and existing navigation regressions.
-- [ ] Independent code review; fix significant issues with regressions. Verify running cockpit reload, commit/push, fast-forward bak preserving its edits, run checks there and reload without restarting jobs.
+- [x] Independent code review; fix significant issues with regressions. Verify running cockpit reload, commit/push, fast-forward bak preserving its edits, run checks there and reload without restarting jobs.
 
 ## Review focus
 
@@ -58,3 +58,4 @@ Simultaneous callbacks misbinding workspace/identity; duplicate prompt delivery 
 - Integration fixes: defer/coalesce redraws and skip detached/headless redraws; replace the HUD timer on reload; escape worker/model text in tabline/winbar; cancel pending terminal insert mode on dashboard entry. Each has a reproducing integration check.
 - Full detail navigation retains every reported plan step, inbox message and delegated child, with cached Unicode wrapping and viewport-only rendering. A 40-worker lifecycle harness exercises tab reordering, closure, reopening and prompt routing; the public CodexNew command is covered against real installed Agentic sessions.
 - bak passed real peer messaging and delegated child tracking. SSH verification caught absent MYVIMRC; reload now uses the actual source config path and the remote reload regression passes.
+- Rollout complete: both running Neovim instances reloaded with terminal channels unchanged (six local tabs, two bak tabs at verification). Full inbox/detail/read tracking, legacy wrapper migration and ordinary native chat startup verified. Existing bak diff/status matches the pre-rollout snapshot; all implementation is pushed to base.
