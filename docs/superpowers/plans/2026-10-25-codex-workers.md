@@ -17,7 +17,7 @@
 
 ## Shared interfaces
 
-`spaceghost.workers`: setup(), attach(), list()->records[], get(id)->record|nil, new({task?,name?,cwd?,background?})->record, open(id), send(id,text,opts?)->message|nil,error, peer(from,to,text,opts?)->message|nil,error, stop(id), rename(id,name), dismiss(id), summary()->counts, subscribe(key,callback), tick(), state().
+`spaceghost.workers`: setup(), attach(), list()->records[], get(id)->record|nil, new({task?,name?,cwd?,background?})->record, open(id), send(id,text,opts?)->message|nil,error, peer(from,to,text,opts?)->message|nil,error, read(id,message_ids)->newly_read_count|nil,error, stop(id), rename(id,name), dismiss(id), summary()->counts, subscribe(key,callback), tick(), state().
 
 Record: id,name,cwd,session_key,session_id,tab,status,activity,started_at,finished_at,last_at,plan(entries array),usage({used,size}),model,changed_files(path-keyed set),tools(id-keyed map),children(id-keyed map),inbox(array),queue(array),unread,bridge,events(array of {at,text,kind}),error. All times are os.time() seconds. Unknown fields may be nil. Status: starting/ready/thinking/working/waiting/stopping/done/failed. summary: total,running,waiting,done,failed,unread.
 
@@ -59,3 +59,5 @@ Simultaneous callbacks misbinding workspace/identity; duplicate prompt delivery 
 - Full detail navigation retains every reported plan step, inbox message and delegated child, with cached Unicode wrapping and viewport-only rendering. A 40-worker lifecycle harness exercises tab reordering, closure, reopening and prompt routing; the public CodexNew command is covered against real installed Agentic sessions.
 - bak passed real peer messaging and delegated child tracking. SSH verification caught absent MYVIMRC; reload now uses the actual source config path and the remote reload regression passes.
 - Rollout complete: both running Neovim instances reloaded with terminal channels unchanged (six local tabs, two bak tabs at verification). Full inbox/detail/read tracking, legacy wrapper migration and ordinary native chat startup verified. Existing bak diff/status matches the pre-rollout snapshot; all implementation is pushed to base.
+- Final independent review approved spec compliance and code quality with no critical or important findings. Follow-up regressions cover legacy inbox migration and Agentic's cwd callback arguments and absolute-path fallbacks. All seven offline checks pass on Fedora and Alpine; real parallel sessions, peer discovery/delivery and delegated-child telemetry pass on both hosts.
+- Final live upgrade uses wrapper revision 3 on both hosts. Four local terminal channels and three bak terminal channels retain their original job IDs and remain running. bak's tracked diff and three unrelated untracked files retain their pre-rollout SHA-256 values.
