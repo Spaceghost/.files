@@ -232,7 +232,10 @@ palette; percentages appear only when Codex provides the underlying measurement.
    parent; child interaction goes through that parent's chat.
 
 In narrow terminals, Tab switches between the list and selected-worker detail.
-`[` and `]` scroll the detail pane. `q` hides the dashboard while workers keep
+`[` and `]` scroll the detail pane; `g`/`G` jump to its ends. Press `P` for the
+full plan, `i` for the inbox, `c` for delegated children, or `?` for the complete
+control reference. Long peer messages wrap in full, with message IDs, sender
+names and delivery states. `q` hides the dashboard while workers keep
 running. `d` dismisses an idle/finished worker card without destroying its
 conversation. Approvals retain Agentic's existing interactive buttons: select
 a worker marked **NEEDS YOU** and open its chat to resolve them.

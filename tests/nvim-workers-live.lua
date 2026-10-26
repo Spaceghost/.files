@@ -58,6 +58,21 @@ local ok, err = pcall(function()
   vim.cmd('tabmove $')
   W.open(b.id)
   assert(vim.api.nvim_get_current_tabpage() == b.tab, 'tab reorder broke routing')
+  -- The public new-session command must preserve the selected worker's view.
+  local previous_tab, previous_key = b.tab, b.session_key
+  vim.cmd.CodexNew()
+  local fresh_tab = vim.api.nvim_get_current_tabpage()
+  assert(fresh_tab ~= previous_tab, 'CodexNew reused the existing worker tab')
+  local fresh
+  for _, record in ipairs(W.list()) do
+    if record.tab == fresh_tab then fresh = record end
+  end
+  assert(fresh and fresh.cwd == b.cwd, 'CodexNew lost the originating worker workspace')
+  wait_for('new command session', function() return fresh.session_id ~= nil end)
+  assert(require('agentic.session_registry').get(previous_key), 'CodexNew destroyed the previous worker')
+  W.open(b.id)
+  assert(vim.api.nvim_get_current_tabpage() == previous_tab, 'CodexNew detached the previous worker view')
+  print('PASS CodexNew preserves existing worker and opens a separate workspace-bound tab')
   local old = a.id
   require('spaceghost.deck').reload()
   require('spaceghost.agent').load()

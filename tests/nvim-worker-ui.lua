@@ -43,6 +43,113 @@ test('narrow view toggles detail and scrolls inbox and children', function()
   assert(text():find('Peer: An update', 1, true)); assert(text():find('Review helper', 1, true))
   for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do assert(vim.fn.strdisplaywidth(line) <= 61) end
 end)
+local function complete_record()
+  local r = records[80]
+  r.plan, r.inbox, r.children = {}, {}, {}
+  for i = 1, 8 do
+    r.plan[i] = { content = 'Reported step ' .. i, status = i == 1 and 'complete' or 'pending' }
+    r.children['child-' .. i] = { id = 'child-' .. i, name = 'Helper ' .. i, status = 'working' }
+  end
+  for i = 1, 5 do
+    r.inbox[i] = { id = 'message-' .. i, from = 'w1', text = 'Peer result ' .. i, status = i == 1 and 'queued' or 'delivered' }
+  end
+  state().detail_offset = 0
+  ui.render()
+  return r
+end
+local function all_detail()
+  local pages = { text() }
+  for _ = 1, 200 do
+    local before = state().detail_offset
+    ui.action(']'); pages[#pages + 1] = text()
+    if state().detail_offset == before then return table.concat(pages, '\n') end
+  end
+  error('Detail scrolling did not reach the end')
+end
+test('detail scrolling reaches every reported plan step', function()
+  complete_record()
+  local content = all_detail()
+  for i = 1, 8 do assert(content:find('Reported step ' .. i, 1, true), 'missing plan step ' .. i) end
+end)
+test('detail scrolling reaches every inbox message with identity and delivery state', function()
+  complete_record()
+  local content = all_detail()
+  for i = 1, 5 do assert(content:find('message-' .. i, 1, true), 'missing message ID ' .. i); assert(content:find('Peer result ' .. i, 1, true), 'missing message body ' .. i) end
+  assert(content:find('Worker 1 (w1)', 1, true), 'sender name and stable identity must be visible')
+  assert(content:find('[queued]', 1, true) and content:find('[delivered]', 1, true), 'delivery states must be visible')
+end)
+test('detail scrolling reaches every child in stable ID order', function()
+  complete_record()
+  local content = all_detail()
+  for i = 1, 8 do assert(content:find('Helper ' .. i, 1, true), 'missing child ' .. i) end
+  ui.action('c')
+  local page = text()
+  assert(page:find('child-1', 1, true) and page:find('child-8', 1, true), 'child identities must be readable')
+  assert(page:find('Helper 1', 1, true) < page:find('Helper 8', 1, true), 'children must sort by stable identity')
+end)
+test('long peer messages wrap full content without exposing terminal controls', function()
+  local r = complete_record()
+  r.inbox = { { id = 'long-message', from = 'w1', status = 'delivered', text = 'FIRST ' .. string.rep('界 source ', 30) .. '\nSECOND\tline\27[31m\0 LAST' } }
+  state().detail_offset = 0; ui.render()
+  local content = all_detail()
+  assert(content:find('FIRST', 1, true) and content:find('SECOND', 1, true) and content:find('LAST', 1, true), 'all message paragraphs must remain readable')
+  assert(not content:find('\27', 1, true) and not content:find('\0', 1, true), 'message controls must be sanitized')
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do assert(vim.fn.strdisplaywidth(line) <= 61) end
+  assert(#vim.api.nvim_buf_get_lines(0, 0, -1, false) <= 19, 'render only the visible viewport')
+end)
+test('section jumps and help expose native navigation in narrow layouts', function()
+  complete_record()
+  ui.action('i'); assert(text():find('INBOX /', 1, true), 'i must jump to the inbox')
+  ui.action('P'); assert(text():find('PLAN ', 1, true), 'P must jump to the plan')
+  ui.action('G'); assert(text():find('Helper 8', 1, true), 'G must reach the last detail row')
+  ui.action('g'); assert(text():find('SELECTED / Worker 80', 1, true), 'g must return to the selected header')
+  assert(text():find('? help', 1, true), 'narrow footer must advertise help')
+  ui.action('?')
+  local help = all_detail()
+  for _, control in ipairs({ 'P plan', 'i inbox', 'c children', 'g/G', 'j/k', 'Enter chat', 'm peer', 'q close' }) do assert(help:find(control, 1, true), 'missing help for ' .. control) end
+  ui.action('?'); ui.action('j'); assert(state().selected == 'w80', 'selection remains on the last worker')
+  ui.action('k'); assert(state().selected == 'w79' and state().detail_offset == 0, 'selection changes reset detail scrolling')
+  ui.action('j')
+end)
+test('hidden narrow detail does no work proportional to large peer bodies', function()
+  local r = complete_record()
+  ui.action('<Tab>')
+  r.inbox = { { id = 'large-message', from = 'w1', status = 'queued', text = string.rep('large body ', 1400) } }
+  local original, count = vim.fn.strdisplaywidth, 0
+  vim.fn.strdisplaywidth = function(value) count = count + 1; return original(value) end
+  local ok, err = pcall(ui.render)
+  vim.fn.strdisplaywidth = original
+  assert(ok, err)
+  assert(count < 2000, 'hidden detail wrapped the entire peer body (' .. count .. ' width checks)')
+  ui.action('i')
+  assert(text():find('large body', 1, true), 'inbox jump must reveal the complete body')
+  count = 0
+  vim.fn.strdisplaywidth = function(value) count = count + 1; return original(value) end
+  ok, err = pcall(ui.render)
+  vim.fn.strdisplaywidth = original
+  assert(ok, err)
+  assert(count < 2000, 'unchanged visible detail must reuse wrapped content')
+  r.inbox[1].status = 'delivered'; ui.render()
+  assert(text():find('[delivered]', 1, true), 'delivery state changes must invalidate cached metadata')
+end)
+test('resized detail keeps complete peer content and sanitizes C1 controls', function()
+  local r = complete_record()
+  r.inbox = { { id = 'resize-message', from = 'w1', status = 'delivered', text = 'START ' .. string.rep('界 résumé ', 30) .. '\nFINISH\194\155' } }
+  ui.close(); vim.o.columns = 36; ui.open(); ui.action('i')
+  local content = all_detail()
+  assert(content:find('START', 1, true) and content:find('FINISH', 1, true), 'resizing must preserve all message content')
+  assert(not content:find('\194\155', 1, true), 'C1 controls must not enter dashboard rows')
+  for _, line in ipairs(vim.api.nvim_buf_get_lines(0, 0, -1, false)) do assert(vim.fn.strdisplaywidth(line) <= 32, 'resized line exceeds the window width') end
+  ui.close(); vim.o.columns = 65; ui.open()
+end)
+test('adopted sessions report unavailable workspace instead of an invented origin', function()
+  local r = records[80]
+  local cwd = r.cwd
+  r.cwd = nil; ui.action('g')
+  local content = text()
+  r.cwd = cwd; ui.render()
+  assert(content:find('Workspace  unavailable (session predates tracking)', 1, true), 'unknown session origin needs an explicit unavailable label')
+end)
 test('controls target stable identity and bound prompt input', function()
   answer('Follow up'); ui.action('p'); assert(calls[#calls][1] == 'send' and calls[#calls][2] == 'w80')
   answer(string.rep('a', 12001)); local count = #calls; ui.action('p'); assert(#calls == count)

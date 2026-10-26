@@ -17,7 +17,11 @@ function Registry.create(_,spec)
  sessions[s.session_key]=s; starts[#starts+1]=s
  function s:on_session_ready(cb,fail) self.ready=cb; self.fail=fail end
  local h=s:prepare_start(spec); s.handlers=h
- s.start=function() client:create_session(h,function(r) s.session_id=r.sessionId; s.ready(s) end,spec.cwd) end
+ s.start=function()
+  local complete=function(r) s.session_id=r.sessionId or spec.session_id; s.ready(s) end
+  if spec.kind=='load' then client:load_session(spec.session_id,spec.cwd(),{},h,complete)
+  else client:create_session(h,complete,spec.cwd) end
+ end
  return s
 end
 function Registry.show_session() end
@@ -96,5 +100,57 @@ sessions[b.session_key]=nil; W.tick(); assert(b.status=='failed' and not W.send(
 local timer=W.state().timer
 package.loaded['spaceghost.workers']=nil; W=require('spaceghost.workers'); W.setup(); W.attach()
 assert(W.state().timer==timer,'one persistent lifecycle timer')
+-- Catch routing that accidentally depends on tab numbers under a large workspace.
+local many={}
+for i=1,40 do
+ local worker=assert(W.new({cwd='/var/tmp',name='Stress '..i,task='task '..i,background=true}))
+ local manager=starts[#starts]
+ manager.start(); requests[#requests].cb({sessionId='stress-'..i})
+ many[i]={worker=worker,manager=manager}
+end
+for i,item in ipairs(many) do
+ local worker,manager=item.worker,item.manager
+ assert(manager.prompts[1]=='task '..i,'initial prompt crossed workers')
+ vim.api.nvim_set_current_tabpage(worker.tab); vim.cmd('tabmove 0')
+ if i%3==0 then vim.cmd('tabclose') end
+ assert(W.send(worker.id,'followup '..i))
+ manager.is_generating=false
+end
+W.tick()
+for i,item in ipairs(many) do
+ assert(item.manager.prompts[2]=='followup '..i,'followup crossed workers after tab changes')
+ if i%3==0 then
+  assert(item.worker.tab==nil,'closed stress tab retained a stale handle')
+  assert(W.open(item.worker.id))
+  assert(vim.api.nvim_tabpage_is_valid(item.worker.tab),'closed worker view did not reopen')
+ end
+end
+print('PASS 40 workers preserve prompt routing through tab reordering, closure and reopening')
+W._hook('on_file_edit',{session_key=a.session_key,filepath='/var/tmp/edited.lua'})
+assert(a.changed_files['/var/tmp/edited.lua'],'installed Agentic filepath hook was ignored')
+-- Ordinary chat/restore entry points bypass workers.new and must still reconcile.
+W.state().timer:stop(); W.state().timer:close(); W.state().timer=nil
+local native=Registry.create(nil,{kind='new',cwd=function() return '/var/tmp' end})
+local native_worker=W.get(native._spaceghost_worker_id)
+assert(W.state().timer,'ordinary Agentic creation did not start lifecycle reconciliation')
+native.start(); requests[#requests].cb({sessionId='native-entry'})
+assert(native_worker.status=='ready','ordinary Agentic session remained starting after readiness')
+local restored=Registry.create(nil,{kind='load',session_id='restore-history',cwd=function() return '/var/tmp' end})
+local restored_worker=W.get(restored._spaceghost_worker_id)
+restored.start()
+client:__handle_session_update({sessionId='restore-history',update={sessionUpdate='plan',entries={{content='Saved plan',status='completed'}}}})
+client:__handle_session_update({sessionId='restore-history',update={sessionUpdate='tool_call',toolCallId='saved-tool',title='Saved tool',status='completed'}})
+assert(restored_worker.plan[1] and restored_worker.tools['saved-tool'],'restore replay before load response was lost')
+assert(restored_worker.status=='starting','historical tool replay made an idle restore look active')
+requests[#requests].cb({})
+assert(restored_worker.status=='ready','restored session remained starting after readiness')
+local legacy={session_key='legacy',session_id='legacy-session',widget={get_visible_tab_id=function() return nil end}}
+sessions.legacy=legacy; W.attach()
+assert(W.get(legacy._spaceghost_worker_id).cwd==nil,'migration invented a workspace for an existing session')
+local migrated=W.get(legacy._spaceghost_worker_id)
+migrated.cwd='/unproven/old/editor/cwd'; migrated._workspace_captured=nil
+W.attach()
+assert(migrated.cwd==nil,'reload retained a workspace invented by the previous tracker')
+print('PASS native startup, restore replay, installed edit hooks and honest migration workspace')
 print('worker lifecycle tests passed')
 vim.cmd('qa!')

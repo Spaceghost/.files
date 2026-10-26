@@ -7,7 +7,7 @@ local S = rawget(_G, '__spaceghost_worker_ui') or { selected = nil, offset = 1, 
 _G.__spaceghost_worker_ui = S
 local busy = { starting = true, thinking = true, working = true, stopping = true }
 local frames = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' }
-local function clean(v) return tostring(v or ''):gsub('[%c]', ' ') end
+local function clean(v) return tostring(v or ''):gsub('[%c]', ' '):gsub('\194[\128-\159]', ' ') end
 local function fit(v, width)
   v = clean(v)
   if width <= 0 then return '' end
@@ -55,23 +55,63 @@ local function records()
   if not S.selected or not workers.get(S.selected) then S.selected = list[index] and list[index].id end
   return list, index
 end
-local function detail(r, width)
-  local out = {}
-  local function add(text, group) out[#out + 1] = { fit(text, width), group or 'WorkerText' } end
-  if not r then add('YOUR NEXT WORKER STARTS HERE', 'WorkerTitle'); add(''); add('n  Create an independent Codex session'); add('N  Choose another workspace'); add(''); add('Each session keeps its own tab and inbox.'); return out end
+-- Cache wrapping for the selected worker only. A full inbox can contain 1.6 MB;
+-- animation ticks must only copy the visible rows, not rewrap every message.
+local detail_cache = {}
+local function wrapped(text, width)
+  text = tostring(text or ''):gsub('\r\n', '\n'):gsub('[%z\1-\9\11-\31\127]', ' '):gsub('\194[\128-\159]', ' ')
+  local lines = {}
+  for paragraph in (text .. '\n'):gmatch('(.-)\n') do
+    local line, cells = '', 0
+    for ch in paragraph:gmatch('[%z\1-\127\194-\244][\128-\191]*') do
+      local size = vim.fn.strdisplaywidth(ch)
+      if cells + size > width and line ~= '' then lines[#lines + 1] = line; line, cells = '', 0 end
+      if size > width then ch, size = '?', 1 end
+      line, cells = line .. ch, cells + size
+    end
+    lines[#lines + 1] = line
+  end
+  return lines
+end
+local function detail(r, width, offset, limit)
+  if detail_cache.record ~= r or detail_cache.width ~= width then detail_cache = { record = r, width = width, rows = {} } end
+  local out, sections, retained, count, field = {}, {}, {}, 0, 0
+  local function add(text, group)
+    field = field + 1
+    local cached = detail_cache.rows[field]
+    if not cached or cached.text ~= text then cached = { text = text, lines = wrapped(text, width) } end
+    retained[field] = cached
+    for i = math.max(1, offset - count + 1), math.min(#cached.lines, offset + limit - count) do
+      out[count + i] = { cached.lines[i], group or 'WorkerText' }
+    end
+    count = count + #cached.lines
+  end
+  local function finish() detail_cache.rows = retained; return out, count, sections end
+  if S.help then
+    add('WORKER CONTROLS', 'WorkerTitle')
+    for _, line in ipairs({
+      'j/k select worker', 'Enter chat / permissions', 'n new worker', 'N choose workspace',
+      'p prompt (queued while busy)', 'r rename', 's stop current turn', 'a delegate through parent',
+      'm peer message', 'd dismiss completed worker', 'Tab toggle narrow detail',
+      '[/] scroll detail / help', 'g/G first / last detail row', 'P plan', 'i inbox', 'c children',
+      '? help / return to detail', 'q close dashboard', 'Esc close dashboard',
+    }) do add(line, 'WorkerKey') end
+    return finish()
+  end
+  if not r then add('YOUR NEXT WORKER STARTS HERE', 'WorkerTitle'); add(''); add('n  Create an independent Codex session'); add('N  Choose another workspace'); add(''); add('Each session keeps its own tab and inbox.'); return finish() end
   add('SELECTED / ' .. r.name, 'WorkerTitle')
   add(glyph(r) .. ' ' .. label(r) .. '  ·  ' .. elapsed(r), tone(r))
-  add('Workspace  ' .. clean(r.cwd), 'WorkerMuted')
+  add('Workspace  ' .. clean(r.cwd or 'unavailable (session predates tracking)'), 'WorkerMuted')
   add('Identity   ' .. r.id, 'WorkerMuted')
   add('Model      ' .. (r.model or 'unavailable'), 'WorkerMuted')
   add('Bridge     ' .. (r.bridge and 'available' or 'unavailable'), 'WorkerMuted')
   add('')
   local done, total = plan(r)
+  sections.P = count
   add('PLAN  ' .. (total > 0 and done .. '/' .. total .. ' complete' or 'unavailable'), 'WorkerTitle')
   add(bar(total > 0 and done or nil, total, math.min(30, width)), 'WorkerProgress')
   for _, p in ipairs(r.plan or {}) do
-    if #out >= 13 then break end
-    add('  ' .. ((p.status == 'completed' or p.status == 'done') and '✓ ' or '· ') .. clean(p.content or p.text or p.title), 'WorkerMuted')
+    add('  ' .. ((p.status == 'completed' or p.status == 'complete' or p.status == 'done') and '✓ ' or '· ') .. (p.content or p.text or p.title or ''), 'WorkerMuted')
   end
   local u = r.usage or {}
   add('CONTEXT  ' .. (u.used and u.size and u.size > 0 and math.floor(u.used / u.size * 100) .. '% used' or 'unavailable'), 'WorkerTitle')
@@ -87,22 +127,27 @@ local function detail(r, width)
     local e = events[i]; add(os.date('%H:%M', e.at or os.time()) .. '  ' .. clean(e.text), 'WorkerMuted')
   end
   if r.error then add('ERROR  ' .. clean(r.error), 'WorkerFailed') end
+  sections.i = count
   add('INBOX / ' .. (r.unread or 0) .. ' unread', 'WorkerTitle')
   local inbox = r.inbox or {}
-  for i = math.max(1, #inbox - 2), #inbox do
-    local m = inbox[i]
+  for _, m in ipairs(inbox) do
     local sender = m.from and workers.get(m.from)
-    add(clean(m.from_name or (sender and sender.name) or m.from or m.sender or 'peer') .. ': ' .. clean(m.text or m.message) .. ' [' .. clean(m.status or 'received') .. ']', 'WorkerMuted')
+    local name = clean(m.from_name or (sender and sender.name) or m.from or m.sender or 'peer')
+    add(clean(m.id or 'ID unavailable') .. ' · ' .. name .. (m.from and ' (' .. clean(m.from) .. ')' or '') .. ' [' .. clean(m.status or 'received') .. ']', 'WorkerMuted')
+    add(name .. ': ' .. (m.text or m.message or ''), 'WorkerText')
   end
   if #inbox == 0 then add('No peer messages', 'WorkerMuted') end
+  sections.c = count
   add('DELEGATED / interact through parent', 'WorkerTitle')
-  local count = 0
-  for _, child in pairs(r.children or {}) do
-    if count >= 4 then break end
-    add(glyph(child) .. ' ' .. clean(child.name or child.id or 'child') .. '  ' .. clean(child.status or child.activity), 'WorkerMuted'); count = count + 1
+  local children = {}
+  for id, child in pairs(r.children or {}) do children[#children + 1] = { id = clean(child.id or id), record = child } end
+  table.sort(children, function(a, b) return a.id < b.id end)
+  for _, entry in ipairs(children) do
+    local child = entry.record
+    add(glyph(child) .. ' ' .. clean(child.name or entry.id) .. ' (' .. entry.id .. ')  ' .. clean(child.status or child.activity), 'WorkerMuted')
   end
-  if count == 0 then add('No reported child activity', 'WorkerMuted') end
-  return out
+  if #children == 0 then add('No reported child activity', 'WorkerMuted') end
+  return finish()
 end
 function M.render()
   if not visible() then return end
@@ -138,17 +183,23 @@ function M.render()
     add('  ' .. elapsed(r) .. ' · ' .. clean(r.activity or r.cwd) .. ((r.unread or 0) > 0 and ' · inbox ' .. r.unread or ''), 'WorkerMuted')
     add('', 'WorkerText')
   end
-  local right = detail(workers.get(S.selected), wide and w - lw - 3 or w)
-  S.detail_offset = math.max(0, math.min(S.detail_offset or 0, math.max(0, #right - body)))
+  local offset = S.detail_offset or 0
+  local right, total, sections = {}, 0, {}
+  if wide or S.detail or S.help or #list == 0 then
+    right, total, sections = detail(workers.get(S.selected), wide and w - lw - 3 or w, offset, body)
+    S.detail_offset = math.max(0, math.min(offset, math.max(0, total - body)))
+    if S.detail_offset ~= offset then right, total, sections = detail(workers.get(S.selected), wide and w - lw - 3 or w, S.detail_offset, body) end
+    S.detail_sections = sections
+  end
   if #list == 0 then left = right end
   for i = 1, body do
-    local l = (not wide and S.detail and right[i + S.detail_offset] or left[i]) or { '', 'WorkerText' }
+    local l = (not wide and (S.detail or S.help) and right[i + S.detail_offset] or left[i]) or { '', 'WorkerText' }
     local r = right[i + S.detail_offset] or { '', 'WorkerText' }
     row(l[1], l[2], wide and r[1] or nil, r[2], wide and lw or nil)
   end
   row(string.rep('─', w), 'WorkerBorder')
-  row(' n new  N workspace  Enter chat  p prompt  r rename  s stop', 'WorkerKey')
-  row(' a delegate  m peer  d dismiss  Tab detail  [/] scroll  q close', 'WorkerKey')
+  row(' ? help  j/k select  Enter chat  n new  q close', 'WorkerKey')
+  row(' P plan  i inbox  c children  [/] scroll  g/G ends  Tab detail', 'WorkerKey')
   vim.bo[S.buf].modifiable = true
   api.nvim_buf_set_lines(S.buf, 0, -1, false, lines)
   api.nvim_buf_clear_namespace(S.buf, ns, 0, -1)
@@ -174,7 +225,18 @@ function M.action(key)
     local list, i = records(); i = math.max(1, math.min(#list, i + (key == 'j' and 1 or -1)))
     S.selected = list[i] and list[i].id; S.detail_offset = 0; M.render(); return
   end
-  if key == '[' or key == ']' then S.detail_offset = math.max(0, (S.detail_offset or 0) + (key == ']' and 5 or -5)); M.render(); return end
+  if key == '?' then S.help = not S.help; S.detail_offset = 0; M.render(); return end
+  if key == 'g' or key == 'G' or key == '[' or key == ']' or key == 'P' or key == 'i' or key == 'c' then
+    S.detail = true
+    if key == 'g' then S.detail_offset = 0
+    elseif key == 'G' then S.detail_offset = math.huge
+    elseif key == '[' or key == ']' then S.detail_offset = math.max(0, (S.detail_offset or 0) + (key == ']' and 5 or -5))
+    else
+      S.help = false; M.render()
+      S.detail_offset = (S.detail_sections or {})[key] or 0
+    end
+    M.render(); return
+  end
   if key == '<Tab>' then S.detail = not S.detail; M.render(); return end
   if key == 'n' or key == 'N' then
     local cwd = S.cwd
@@ -224,7 +286,7 @@ function M.open()
   S.win = api.nvim_open_win(S.buf, true, geometry())
   vim.wo[S.win].winhighlight = 'Normal:WorkerNormal,FloatBorder:WorkerBorder,FloatTitle:WorkerTitle'
   vim.wo[S.win].wrap = false; vim.wo[S.win].cursorline = false
-  for _, key in ipairs({ 'n', 'N', '<CR>', 'p', 'r', 's', 'a', 'd', 'm', 'j', 'k', '[', ']', '<Tab>', 'q' }) do
+  for _, key in ipairs({ 'n', 'N', '<CR>', 'p', 'r', 's', 'a', 'd', 'm', 'j', 'k', '[', ']', '<Tab>', 'q', '?', 'g', 'G', 'P', 'i', 'c' }) do
     vim.keymap.set('n', key, function() M.action(key) end, { buffer = S.buf, nowait = true, silent = true })
   end
   vim.keymap.set('n', '<Esc>', M.close, { buffer = S.buf, nowait = true })

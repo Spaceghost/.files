@@ -40,7 +40,7 @@ local function record(cwd, name)
   local r = { id = id, name = clean(name or ('Worker ' .. S.next_id), 120), cwd = cwd,
     status = 'starting', activity = 'Starting session', started_at = os.time(), last_at = os.time(),
     plan = {}, usage = {}, changed_files = {}, tools = {}, children = {}, inbox = {}, queue = {},
-    unread = 0, bridge = false, events = {} }
+    unread = 0, bridge = false, events = {}, _workspace_captured = cwd ~= nil }
   S.records[id] = r; S.order[#S.order + 1] = id
   return r
 end
@@ -52,8 +52,14 @@ end
 local function adopt(s, r)
   r = r or S.records[s._spaceghost_worker_id]
   if not r then
-    local cwd = vim.fn.getcwd()
-    r = record(cwd, s.chat_history and s.chat_history.title or s.title)
+    -- Agentic does not retain the origin of sessions created before tracking.
+    r = record(nil, s.chat_history and s.chat_history.title or s.title)
+  end
+  if r._workspace_captured==nil then
+    -- Upgrade the live store: only bridge-enabled starts prove the old tracker
+    -- captured a workspace at its request seam. Migrated sessions did not.
+    r._workspace_captured=r.bridge==true
+    if not r._workspace_captured then r.cwd=nil end
   end
   s._spaceghost_worker_id = r.id; r._session = s; r.session_key = s.session_key
   -- The request callback can precede Agentic's scheduled complete_start callback.
@@ -259,13 +265,6 @@ function M.new(opts)
   S.creating = nil
   if not ok or not s then r.status='failed'; r.error=clean(s or 'Session creation failed'); event(r,r.error,'error'); return r end
   adopt(s,r)
-  s:on_session_ready(function()
-    if S.records[r.id] ~= r or session(r) ~= s then return end
-    r.session_id=s.session_id; r.status='ready'; event(r,'Session ready','ready'); S.api.tick()
-  end, function()
-    if S.records[r.id] ~= r then return end
-    r.status='failed'; r.error='Session startup failed'; event(r,r.error,'error')
-  end)
   require('agentic.session_registry').show_session(r.session_key,{ auto_add_to_context=false })
   if opts.task and opts.task ~= '' then M.send(r.id,opts.task) end
   if opts.background and vim.api.nvim_tabpage_is_valid(origin) then vim.api.nvim_set_current_tabpage(origin) end
@@ -340,6 +339,7 @@ function M._raw(client, params)
     r.session_title=clean(u.title,120)
   end
   if r._stopping then r.status='stopping'; r.activity='Stopping turn' end
+  if r._replaying then r.status='starting'; r.activity='Restoring session' end
 end
 function M._hook(name, data)
   local r=lookup(data or {}); if not r then return end
@@ -356,7 +356,7 @@ function M._hook(name, data)
   elseif name=='on_request_permission' then
     if not r._stopping then r.status='waiting'; r.activity='Approval requested'; event(r,r.activity,'permission') end
   elseif name=='on_file_edit' then
-    local path=data.file_path or data.path; if path then changed_file(r,path) end
+    local path=data.filepath or data.file_path or data.path; if path then changed_file(r,path) end
   elseif name=='on_create_session_response' then
     local response=data.response or {}; r.model=response.models and response.models.currentModelId or r.model
   end
@@ -400,10 +400,25 @@ function M.attach()
       -- Resolve once, before when_ready can resume in another tab/workspace.
       if not S.creating then
         local ok,cwd=pcall(function() return spec.cwd and spec.cwd() or require('agentic.config').acp_configs.session_cwd() end)
-        if ok and type(cwd)=='string' then r.cwd=cwd end
+        if ok and type(cwd)=='string' then r.cwd=cwd; r._workspace_captured=true end
       end
       local handlers,err=original(self,spec,...)
-      if handlers then handlers._spaceghost_worker_id=r.id end
+      if handlers then
+        handlers._spaceghost_worker_id=r.id
+        if spec.kind=='load' then
+          r.session_id=spec.session_id; r._replaying=true; r.activity='Restoring session'
+        end
+        self:on_session_ready(function()
+          if S.records[r.id]~=r or session(r)~=self then return end
+          r.session_id=self.session_id; r._replaying=nil; r.status='ready'
+          event(r,'Session ready','ready'); S.api.tick()
+        end,function()
+          if S.records[r.id]~=r then return end
+          r._replaying=nil; r._fatal=true; r.status='failed'; r.error='Session startup failed'
+          clear_queue(r,'failed'); event(r,r.error,'error')
+        end)
+        arm()
+      end
       return handlers,err
     end
   end)
@@ -421,6 +436,8 @@ function M.attach()
   end)
   wrap(Client,'load_session',function(original)
     return function(self,id,cwd,servers,handlers,callback)
+      local r=S.records[handlers._spaceghost_worker_id]
+      if r then r.session_id=id; r._replaying=true end
       return contextual(original,self,handlers._spaceghost_worker_id,id,cwd,servers,handlers,callback)
     end
   end)
