@@ -1,6 +1,11 @@
 # This independent table survives OpenSnitch shutdown. Never add queue bypass.
 # OpenSnitch must use OPENSNITCH_EXTERNAL_OUTPUT_QUEUE=1 to avoid double prompts.
 table inet oldbook {
+    # The remote-access controller may replace only this regular chain. It
+    # cannot flush the permanent input policy or create a second base hook.
+    chain remote_access {
+    }
+
     chain input {
         type filter hook input priority -5; policy drop;
         iifname "lo" accept
@@ -11,6 +16,7 @@ table inet oldbook {
         ip protocol icmp icmp type { destination-unreachable, time-exceeded, parameter-problem } accept
         meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem } accept
         ip6 hoplimit 255 icmpv6 type { nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert } accept
+        tcp dport 22 jump remote_access
     }
 
     chain forward {

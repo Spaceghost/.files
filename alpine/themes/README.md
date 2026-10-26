@@ -246,9 +246,8 @@ oldbook-palette clear    # back to the theme's declared accent
 ```
 
 A descriptor turns the whole thing off with `"reactive_accent": false`; an
-absent key means enabled. Details and evidence:
-[the design note](../../docs/superpowers/specs/2026-09-08-reactive-palette.md)
-and [verification/reactive-palette](../verification/reactive-palette/README.md).
+absent key means enabled. Evidence:
+[verification/reactive-palette](../verification/reactive-palette/README.md).
 
 ## Preserve and rebuild
 

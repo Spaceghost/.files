@@ -31,11 +31,15 @@
  
 --- a/include/sway/commands.h
 +++ b/include/sway/commands.h
-@@ -109,7 +109,13 @@
+@@ -109,7 +109,17 @@
  sway_cmd cmd_exec_process;
  
  sway_cmd cmd_allow_tearing;
 +sway_cmd cmd_animation_close_ms;
++sway_cmd cmd_animation_dropdown_close_ms;
++sway_cmd cmd_animation_dropdown_corner_radius;
++sway_cmd cmd_animation_dropdown_mark;
++sway_cmd cmd_animation_dropdown_ms;
  sway_cmd cmd_animation_duration_ms;
 +sway_cmd cmd_animation_move_ms;
 +sway_cmd cmd_animation_open_ms;
@@ -45,9 +49,17 @@
  sway_cmd cmd_assign;
  sway_cmd cmd_bar;
  sway_cmd cmd_bindcode;
+@@ -143,6 +153,7 @@
+ sway_cmd cmd_dim_inactive;
+ sway_cmd cmd_dim_inactive_colors_unfocused;
+ sway_cmd cmd_dim_inactive_colors_urgent;
++sway_cmd cmd_dropdown;
+ sway_cmd cmd_exec;
+ sway_cmd cmd_exec_always;
+ sway_cmd cmd_exit;
 --- a/include/sway/config.h
 +++ b/include/sway/config.h
-@@ -489,8 +489,20 @@
+@@ -489,8 +489,24 @@
  /**
   * The configuration struct. The result of loading a config file.
   */
@@ -62,15 +74,44 @@
  	float animation_duration_ms;
 +	float animation_open_ms;
 +	float animation_close_ms;
++	float animation_dropdown_ms;
++	float animation_dropdown_close_ms;
++	char *animation_dropdown_mark;
++	int animation_dropdown_corner_radius;
 +	float animation_move_ms;
 +	float animation_workspace_ms;
 +	enum sway_animation_workspace_style animation_workspace_style;
  	int corner_radius;
  	bool smart_corner_radius;
  
+--- a/include/sway/desktop/transaction.h
++++ b/include/sway/desktop/transaction.h
+@@ -23,6 +23,7 @@
+  */
+ 
+ struct sway_transaction_instruction;
++struct sway_container;
+ struct sway_view;
+ 
+ /**
+@@ -36,6 +37,8 @@
+  * client-initiated change has already taken effect.
+  */
+ void transaction_commit_dirty_client(void);
++
++void container_dropdown_toggle(struct sway_container *con);
+ 
+ /**
+  * Notify the transaction system that a view is ready for the new layout.
 --- a/include/sway/tree/container.h
 +++ b/include/sway/tree/container.h
-@@ -173,6 +173,12 @@
+@@ -174,9 +174,18 @@
+ 		int current_height;
+ 		int current_content_width; // needed for output.c
+ 		int current_content_height; // needed for output.c
++		bool dropdown_reveal;
++		bool dropdown_hiding;
++		int dropdown_base_y;
  
  		bool seat_is_resizing;
  		bool seat_is_moving_float;
@@ -83,6 +124,14 @@
  	} animation_state;
  
  	list_t *marks; // char *
+@@ -404,5 +413,7 @@
+ bool container_has_shadow(struct sway_container *con);
+ 
+ bool container_has_corner_radius(struct sway_container *con);
++bool container_is_dropdown(struct sway_container *con);
++struct fx_corner_radii container_corner_radii(struct sway_container *con);
+ 
+ #endif
 --- a/include/sway/tree/workspace.h
 +++ b/include/sway/tree/workspace.h
 @@ -59,6 +59,11 @@
@@ -210,11 +259,15 @@
  	return lerp(from, to, animation->multiplier);
 --- a/sway/commands.c
 +++ b/sway/commands.c
-@@ -42,7 +42,13 @@
+@@ -42,7 +42,17 @@
  
  /* Keep alphabetized */
  static const struct cmd_handler handlers[] = {
 +	{ "animation_close_ms", cmd_animation_close_ms },
++	{ "animation_dropdown_close_ms", cmd_animation_dropdown_close_ms },
++	{ "animation_dropdown_corner_radius", cmd_animation_dropdown_corner_radius },
++	{ "animation_dropdown_mark", cmd_animation_dropdown_mark },
++	{ "animation_dropdown_ms", cmd_animation_dropdown_ms },
  	{ "animation_duration_ms", cmd_animation_duration_ms },
 +	{ "animation_move_ms", cmd_animation_move_ms },
 +	{ "animation_open_ms", cmd_animation_open_ms },
@@ -224,14 +277,25 @@
  	{ "assign", cmd_assign },
  	{ "bar", cmd_bar },
  	{ "bindcode", cmd_bindcode },
---- /dev/null
+@@ -71,6 +81,7 @@
+ 	{ "dim_inactive", cmd_dim_inactive },
+ 	{ "dim_inactive_colors.unfocused", cmd_dim_inactive_colors_unfocused },
+ 	{ "dim_inactive_colors.urgent", cmd_dim_inactive_colors_urgent },
++	{ "dropdown", cmd_dropdown },
+ 	{ "exec", cmd_exec },
+ 	{ "exec_always", cmd_exec_always },
+ 	{ "floating_maximum_size", cmd_floating_maximum_size },
+--- a/sway/commands/animations.c
 +++ b/sway/commands/animations.c
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,148 @@
 +#include <stdlib.h>
 +#include <strings.h>
 +#include "sway/animation_manager.h"
 +#include "sway/commands.h"
 +#include "sway/config.h"
++#include "sway/desktop/transaction.h"
++#include "sway/tree/container.h"
++#include "sway/tree/root.h"
 +#include "util.h"
 +
 +// Shared bounds check: no one wants a window to take longer than five seconds
@@ -284,6 +348,62 @@
 +	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
 +}
 +
++struct cmd_results *cmd_animation_dropdown_ms(int argc, char **argv) {
++	struct cmd_results *error = parse_duration(argc, argv,
++		"animation_dropdown_ms", &config->animation_dropdown_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_dropdown_close_ms(int argc, char **argv) {
++	struct cmd_results *error = parse_duration(argc, argv,
++		"animation_dropdown_close_ms", &config->animation_dropdown_close_ms);
++	return error ? error : cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_dropdown_mark(int argc, char **argv) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, "animation_dropdown_mark", EXPECTED_EQUAL_TO, 1))) {
++		return error;
++	}
++	free(config->animation_dropdown_mark);
++	config->animation_dropdown_mark = strdup(argv[0]);
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_animation_dropdown_corner_radius(int argc, char **argv) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, "animation_dropdown_corner_radius", EXPECTED_EQUAL_TO, 1))) {
++		return error;
++	}
++	char *end = NULL;
++	long value = strtol(argv[0], &end, 10);
++	if (*end || value < 0 || value > 1000) {
++		return cmd_results_new(CMD_INVALID,
++			"animation_dropdown_corner_radius must be between 0 and 1000");
++	}
++	config->animation_dropdown_corner_radius = value;
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
++
++struct cmd_results *cmd_dropdown(int argc, char **argv) {
++	struct cmd_results *error = NULL;
++	if ((error = checkarg(argc, "dropdown", EXPECTED_EQUAL_TO, 1))) {
++		return error;
++	}
++	struct sway_container *con = config->handler_context.container;
++	if (!con || !container_is_dropdown(con) || strcasecmp(argv[0], "toggle") != 0) {
++		return cmd_results_new(CMD_INVALID,
++			"Expected 'dropdown toggle' for a configured dropdown container");
++	}
++	if (container_is_scratchpad_hidden(con)) {
++		con->is_sticky = true;
++		root_scratchpad_show(con);
++	} else {
++		container_dropdown_toggle(con);
++	}
++	return cmd_results_new(CMD_SUCCESS, NULL);
++}
++
 +struct cmd_results *cmd_animation_move_ms(int argc, char **argv) {
 +	struct cmd_results *error =
 +		parse_duration(argc, argv, "animation_move_ms", &config->animation_move_ms);
@@ -318,7 +438,15 @@
 +}
 --- a/sway/config.c
 +++ b/sway/config.c
-@@ -351,7 +351,13 @@
+@@ -183,6 +183,7 @@
+ 	free(config->font);
+ 	free(config->swaybg_command);
+ 	free(config->swaynag_command);
++	free(config->animation_dropdown_mark);
+ 	free((char *)config->current_config_path);
+ 	free((char *)config->current_config);
+ 	keysym_translation_state_destroy(config->keysym_translation_state);
+@@ -352,7 +353,17 @@
  	color_to_rgba(config->border_colors.background, 0xFFFFFFFF);
  
  	// SwayFX defaults
@@ -326,12 +454,44 @@
  	config->animation_duration_ms = 0.0f;
 +	config->animation_open_ms = 0.0f;
 +	config->animation_close_ms = 0.0f;
++	config->animation_dropdown_ms = 0.0f;
++	config->animation_dropdown_close_ms = 0.0f;
++	config->animation_dropdown_mark = NULL;
++	config->animation_dropdown_corner_radius = 0;
 +	config->animation_move_ms = 0.0f;
 +	config->animation_workspace_ms = 0.0f;
 +	config->animation_workspace_style = ANIMATION_WORKSPACE_SLIDE;
  
  	config->corner_radius = 0;
  	config->smart_corner_radius = false;
+--- a/sway/desktop/output.c
++++ b/sway/desktop/output.c
+@@ -280,6 +280,7 @@
+ 	}
+ 	int corner_radius = closest_con && container_has_corner_radius(closest_con) ?
+ 		closest_con->corner_radius : 0;
++	struct fx_corner_radii container_corners = container_corner_radii(closest_con);
+ 	struct fx_corner_radii content_corners =
+ 		container_has_bottom_titlebar(closest_con, true) ?
+ 		corner_radii_top(corner_radius) : corner_radii_bottom(corner_radius);
+@@ -326,7 +327,7 @@
+ 
+ 		bool is_subsurface = surface && surface->surface && wlr_subsurface_try_from_wlr_surface(surface->surface);
+ 		wlr_scene_buffer_set_corner_radii(buffer, has_titlebar && !is_subsurface ?
+-			content_corners : corner_radii_all(corner_radius));
++			content_corners : container_corners);
+ 		
+ 		if (is_subsurface) {
+ 			return;
+@@ -343,7 +344,7 @@
+ 		wlr_scene_blur_set_strength(blur, opacity);
+ 		wlr_scene_node_set_enabled(node, closest_con->blur_enabled);
+ 		wlr_scene_blur_set_corner_radii(blur, has_titlebar ?
+-			content_corners : corner_radii_all(corner_radius));
++			content_corners : container_corners);
+ 	}
+ }
+ 
 --- a/sway/desktop/transaction.c
 +++ b/sway/desktop/transaction.c
 @@ -1,5 +1,6 @@
@@ -432,7 +592,61 @@
  /* Compensate for scene-graph reparenting by computing the drift between
   * the last tracked global coordinates and the actual current global position,
   * then applying that delta to the local scene node position
-@@ -184,7 +269,9 @@
+@@ -145,6 +230,53 @@
+ 	con->animation_state.from_y = con->scene_tree->node.y + global_delta_y;
+ }
+ 
++static void dropdown_hide_complete_callback(void *data) {
++	struct sway_container *con = data;
++	con->animation_state.dropdown_hiding = false;
++	root_scratchpad_hide(con);
++	transaction_commit_dirty();
++}
++
++void container_dropdown_toggle(struct sway_container *con) {
++	if (!con || !container_is_dropdown(con) || !con->pending.workspace) {
++		return;
++	}
++	int current_y = get_animated_value(con->animation_state.from_y,
++		con->animation_state.to_y, &con->animation_state.animation);
++	int base_y = con->animation_state.dropdown_hiding
++		? con->animation_state.dropdown_base_y : con->animation_state.to_y;
++	int width = con->animation_state.current_width;
++	int height = con->animation_state.current_height;
++	finish_animation(&con->animation_state.animation);
++	con->animation_state.from_x = con->animation_state.to_x;
++	con->animation_state.to_x = con->animation_state.to_x;
++	con->animation_state.from_y = current_y;
++	con->animation_state.from_width = width;
++	con->animation_state.to_width = width;
++	con->animation_state.from_height = height;
++	con->animation_state.to_height = height;
++	con->animation_state.from_alpha = 1.0f;
++	con->animation_state.to_alpha = 1.0f;
++
++	if (con->animation_state.dropdown_hiding) {
++		con->animation_state.dropdown_hiding = false;
++		con->is_sticky = true;
++		con->animation_state.to_y = base_y;
++		add_animation_duration(&con->animation_state.animation,
++			animation_kind_duration(config->animation_dropdown_ms),
++			anim_update_callback, NULL);
++	} else {
++		con->animation_state.dropdown_base_y = base_y;
++		con->animation_state.dropdown_hiding = true;
++		con->is_sticky = false;
++		con->animation_state.to_y = base_y - height;
++		add_animation_duration(&con->animation_state.animation,
++			animation_kind_duration(config->animation_dropdown_close_ms),
++			anim_update_callback, dropdown_hide_complete_callback);
++	}
++	start_animations();
++}
++
+ static void transaction_destroy(struct sway_transaction *transaction) {
+ 	// Free instructions
+ 	for (int i = 0; i < transaction->instructions->length; ++i) {
+@@ -184,7 +316,9 @@
  						(con->animation_state.from_height * (1.0f - POPIN_FACTOR)) / 2.0f;
  					con->animation_state.to_width = con->animation_state.from_width * POPIN_FACTOR;
  					con->animation_state.to_height = con->animation_state.from_height * POPIN_FACTOR;
@@ -443,11 +657,40 @@
  				} else {
  					container_destroy(node->sway_container);
  				}
-@@ -729,7 +816,10 @@
+@@ -702,7 +836,7 @@
+ 			wlr_scene_rect_set_corner_radii(
+ 				con->dim_rect,
+ 				has_titlebar ? (bottom_titlebar ? corner_radii_top(con->corner_radius) :
+-					corner_radii_bottom(con->corner_radius)) : corner_radii_all(con->corner_radius)
++					corner_radii_bottom(con->corner_radius)) : container_corner_radii(con)
+ 			);
+ 		}
+ 
+@@ -740,7 +874,30 @@
  
  static void arrange_container(struct sway_container *con,
  		int width, int height, int x, int y, bool title_bar, int gaps) {
 -	if (!config->animation_duration_ms || !con->view
++	if (con->animation_state.dropdown_reveal && container_is_dropdown(con)) {
++		con->animation_state.dropdown_reveal = false;
++		finish_animation(&con->animation_state.animation);
++		con->animation_state.from_x = x;
++		con->animation_state.to_x = x;
++		con->animation_state.from_y = y - height;
++		con->animation_state.to_y = y;
++		con->animation_state.dropdown_base_y = y;
++		con->animation_state.from_width = width;
++		con->animation_state.to_width = width;
++		con->animation_state.from_height = height;
++		con->animation_state.to_height = height;
++		con->animation_state.from_alpha = 1.0f;
++		con->animation_state.to_alpha = 1.0f;
++		_arrange_container(con, width, height, x, y - height, title_bar, gaps);
++		add_animation_duration(&con->animation_state.animation,
++			animation_kind_duration(config->animation_dropdown_ms),
++			anim_update_callback, NULL);
++		return;
++	}
 +	bool opening = con->animation_state.from_x == -1;
 +	float geometry_duration = animation_kind_duration(opening
 +		? config->animation_open_ms : config->animation_move_ms);
@@ -455,7 +698,7 @@
  			|| con->animation_state.seat_is_resizing
  			|| con->animation_state.seat_is_moving_float) {
  		finish_animation(&con->animation_state.animation);
-@@ -756,13 +846,15 @@
+@@ -767,13 +924,15 @@
  	con->animation_state.to_alpha = 1.0f;
  
  	// open animation — pop-in: grow from center while fading in
@@ -473,7 +716,7 @@
  	} else {
  		// move animation
  		snap_animation_position(con);
-@@ -770,7 +862,9 @@
+@@ -781,7 +940,9 @@
  		con->animation_state.from_height = con->animation_state.current_height;
  		con->animation_state.from_alpha = get_animated_value(con->animation_state.from_alpha,
  			con->animation_state.to_alpha, &con->animation_state.animation);
@@ -484,7 +727,7 @@
  	}
  
  	// arrange at starting state to "win" position race between animation start and the reparent
-@@ -887,33 +981,61 @@
+@@ -898,33 +1059,61 @@
  	struct sway_workspace *new_active = output->current.active_workspace;
  	struct sway_workspace *old_active = output->prev_active_workspace;
  
@@ -569,7 +812,20 @@
  	'commands/bar.c',
 --- a/sway/sway.5.scd
 +++ b/sway/sway.5.scd
-@@ -420,7 +420,36 @@
+@@ -339,6 +339,12 @@
+ 	Shows a window from the scratchpad. Repeatedly using this command will
+ 	cycle through the windows in the scratchpad.
+ 
++*dropdown* toggle
++	Shows or hides the marked drop-down container using its dedicated vertical
++	reveal animation. This command requires a container criterion and an
++	*animation_dropdown_mark* configured below. Repeating it while the drop-down
++	is moving reverses the animation without restarting it.
++
+ *shortcuts_inhibitor* enable|disable
+ 	Enables or disables the ability of clients to inhibit keyboard
+ 	shortcuts for a window. This is primarily useful for virtualization and
+@@ -420,7 +426,52 @@
  
  animation_duration_ms <value>
  	Determines the duration of the animation applied to opening and closing
@@ -594,6 +850,22 @@
 +	Duration of the animation that glides a window to a new position or size
 +	when the layout changes. 0 (the default) uses *animation_duration_ms*.
 +
++animation_dropdown_ms <value>
++	Duration of the downward reveal for a marked drop-down window. 0 (the
++	default) uses *animation_duration_ms*.
++
++animation_dropdown_close_ms <value>
++	Duration of the upward dismissal for a marked drop-down window. 0 (the
++	default) uses *animation_duration_ms*.
++
++*animation_dropdown_mark* <mark>
++	Identifies drop-down containers by a Sway mark. Containers with this mark use
++	the dedicated vertical reveal, dismiss, and reversal behavior.
++
++animation_dropdown_corner_radius <value>
++	Rounds only the bottom corners of a marked drop-down window by this many
++	pixels. Its top corners remain square against the screen edge.
++
 +animation_workspace_ms <value>
 +	Duration of the workspace switch animation. 0 (the default) uses
 +	*animation_duration_ms*.
@@ -607,3 +879,47 @@
  
  *assign* <criteria> [→] [workspace] [number] <workspace>
  	Assigns windows matching _criteria_ (see *CRITERIA* for details) to
+--- a/sway/tree/container.c
++++ b/sway/tree/container.c
+@@ -2050,10 +2050,23 @@
+ }
+ 
+ bool container_has_shadow(struct sway_container *con) {
+-	return con->shadow_enabled
++	return !container_is_dropdown(con) && con->shadow_enabled
+ 		&& (con->current.border != B_CSD || config->shadows_on_csd_enabled);
+ }
+ 
++bool container_is_dropdown(struct sway_container *con) {
++	return con && config->animation_dropdown_mark &&
++		container_has_mark(con, config->animation_dropdown_mark);
++}
++
++struct fx_corner_radii container_corner_radii(struct sway_container *con) {
++	if (container_is_dropdown(con)) {
++		return corner_radii_bottom(config->animation_dropdown_corner_radius);
++	}
++	int radius = con && container_has_corner_radius(con) ? con->corner_radius : 0;
++	return corner_radii_all(radius);
++}
++
+ bool container_has_corner_radius(struct sway_container *con) {
+ 	if (!con) {
+ 		return false;
+@@ -2067,4 +2080,3 @@
+ 			!(config->smart_corner_radius && con->current.workspace->current_gaps.top == 0)) &&
+ 			con->corner_radius;
+ }
+-
+--- a/sway/tree/root.c
++++ b/sway/tree/root.c
+@@ -186,6 +186,9 @@
+ 		return;
+ 	}
+ 	struct sway_workspace *old_ws = con->pending.workspace;
++	if (!old_ws && container_is_dropdown(con)) {
++		con->animation_state.dropdown_reveal = true;
++	}
+ 
+ 	// If the current con or any of its parents are in fullscreen mode, we
+ 	// first need to disable it before showing the scratchpad con.

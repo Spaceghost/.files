@@ -56,7 +56,7 @@ window#waybar { background: transparent; color: #f3e9fa; }
 /* Optional transmission meter beside the music controls; silent frames collapse it. */
 #custom-cava { color: #9fe8ff; padding: 0 6px; margin: 0 2px; font-size: 10px; }
 #custom-cava.silent { padding: 0; margin: 0; }
-#cpu, #memory, #temperature, #disk, #custom-link, #custom-radio, #custom-firewall,
+#cpu, #memory, #temperature, #disk, #custom-link, #custom-ssh, #custom-radio, #custom-firewall,
 #pulseaudio, #battery, #backlight, #idle_inhibitor, #custom-notifications, #clock, #tray {
     padding: 0 8px;
     margin: 4px 0;
@@ -68,6 +68,10 @@ window#waybar { background: transparent; color: #f3e9fa; }
 #temperature.critical { color: #ff6f91; background: #2b132b; }
 #custom-link { color: #8ab6ff; }
 #custom-link.offline, #custom-radio.blocked { color: #816b91; }
+#custom-ssh.disabled { color: #816b91; }
+#custom-ssh.tailnet { color: #8ab6ff; }
+#custom-ssh.lan { color: #8fe3b0; background: rgba(143, 227, 176, 0.12); }
+#custom-ssh.warning { color: #dca7ff; }
 #custom-radio { color: #9fe8ff; }
 #custom-firewall.staged { color: #dca7ff; }
 #custom-firewall.running { color: #8fe3b0; }
@@ -83,7 +87,7 @@ window#waybar { background: transparent; color: #f3e9fa; }
 #custom-notifications { color: #c48bf0; padding: 0 9px; }
 #clock { background: rgba(73, 49, 91, 0.72); color: #f3e9fa; padding: 0 11px; margin-left: 3px; }
 #tray { margin-right: 2px; padding: 0 5px; }
-#cpu:hover, #memory:hover, #custom-link:hover, #custom-radio:hover, #custom-firewall:hover,
+#cpu:hover, #memory:hover, #custom-link:hover, #custom-ssh:hover, #custom-radio:hover, #custom-firewall:hover,
 #pulseaudio:hover, #battery:hover, #backlight:hover, #custom-notifications:hover, #clock:hover {
     background: rgba(129, 107, 145, 0.22);
 }

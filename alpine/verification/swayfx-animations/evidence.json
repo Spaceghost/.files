@@ -1,7 +1,7 @@
 {
   "status": "passed",
-  "binary": "/home/jack/.claude/jobs/6e85b1d3/tmp/animations/extract/usr/bin/swayfx",
-  "binary_sha256": "b8cef3c864cc92cd4e37f1868cff36a95e5c0a03478aff87fe0d454ba729eed4",
+  "binary": "/usr/bin/swayfx",
+  "binary_sha256": "c861b8d1ff07aca0f82cb8d167a22ec850e3479498ab462cf744e19d97eeb695",
   "renderer": "pixman (software); blur and shadows are not exercised headlessly",
   "output_mode": "1280x720",
   "animation_duration_ms": 2000,
@@ -14,52 +14,56 @@
     "disabled switches instantly": true,
     "disabled settles on the new workspace": true,
     "window open grows into place": true,
-    "idle costs no measurable cpu": true
+    "idle costs no measurable cpu": true,
+    "dropdown reveals downward from the top edge": true,
+    "dropdown dismisses upward": true,
+    "dropdown reverses without being parked": true,
+    "dropdown top is square and bottom is rounded": true
   },
   "idle_cpu_percent": 0.0,
   "frame_profiles": {
     "slide": [
       {
-        "red_fraction": 0.9747222222222223,
-        "green_fraction": 0.024722222222222222,
-        "red_mean_x": 622.1764747791393,
-        "green_mean_x": 1261.9775280898875
+        "red_fraction": 0.9528472222222222,
+        "green_fraction": 0.04666666666666667,
+        "red_mean_x": 608.1764448655346,
+        "green_mean_x": 1247.9285714285713
       },
       {
-        "red_fraction": 0.6340972222222222,
-        "green_fraction": 0.36541666666666667,
-        "red_mean_x": 404.1757748329865,
-        "green_mean_x": 1043.9133409350056
+        "red_fraction": 0.49659722222222225,
+        "green_fraction": 0.5028472222222222,
+        "red_mean_x": 316.1752202489162,
+        "green_mean_x": 955.9563596188372
       },
       {
-        "red_fraction": 0.3809722222222222,
-        "green_fraction": 0.6184722222222222,
-        "red_mean_x": 242.17444403937296,
-        "green_mean_x": 881.9562092971031
+        "red_fraction": 0.19972222222222222,
+        "green_fraction": 0.7997916666666667,
+        "red_mean_x": 126.17141863699582,
+        "green_mean_x": 765.912129894938
       },
       {
-        "red_fraction": 0.2090972222222222,
-        "green_fraction": 0.7904166666666667,
-        "red_mean_x": 132.171703752906,
-        "green_mean_x": 771.9121419785627
-      },
-      {
-        "red_fraction": 0.09659722222222222,
-        "green_fraction": 0.9028472222222222,
-        "red_mean_x": 60.164629762760605,
-        "green_mean_x": 699.9560033843551
-      },
-      {
-        "red_fraction": 0.030972222222222224,
-        "green_fraction": 0.9684722222222222,
-        "red_mean_x": 18.13677130044843,
-        "green_mean_x": 657.9561164491611
+        "red_fraction": 0.03722222222222222,
+        "green_fraction": 0.9622222222222222,
+        "red_mean_x": 22.14365671641791,
+        "green_mean_x": 661.9559757505774
       },
       {
         "red_fraction": 0.006024305555555555,
-        "green_fraction": 0.9934548611111111,
+        "green_fraction": 0.9935069444444444,
         "red_mean_x": 2.0288184438040346,
-        "green_mean_x": 641.9670412246824
+        "green_mean_x": 641.9340160067102
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
+      },
+      {
+        "red_fraction": 0.0,
+        "green_fraction": 0.99953125,
+        "red_mean_x": null,
+        "green_mean_x": 638.0772931756205
       }
     ],
     "fade": [
@@ -77,15 +81,15 @@
       },
       {
         "red_fraction": 0.0,
-        "green_fraction": 0.0,
+        "green_fraction": 0.99953125,
         "red_mean_x": null,
-        "green_mean_x": null
+        "green_mean_x": 638.0772931756205
       },
       {
         "red_fraction": 0.0,
-        "green_fraction": 0.0,
+        "green_fraction": 0.99953125,
         "red_mean_x": null,
-        "green_mean_x": null
+        "green_mean_x": 638.0772931756205
       },
       {
         "red_fraction": 0.0,
@@ -136,61 +140,695 @@
     "open": [
       {
         "reddish_fraction": 0.0,
-        "box_width": 0
+        "box_width": 0,
+        "left": null,
+        "right": null,
+        "top": null,
+        "bottom": null
       },
       {
-        "reddish_fraction": 0.0,
-        "box_width": 0
+        "reddish_fraction": 0.7125,
+        "box_width": 1076,
+        "left": 100,
+        "right": 1176,
+        "top": 56,
+        "bottom": 660
       },
       {
-        "reddish_fraction": 0.7224479166666666,
-        "box_width": 1084
+        "reddish_fraction": 0.7734895833333333,
+        "box_width": 1124,
+        "left": 76,
+        "right": 1200,
+        "top": 44,
+        "bottom": 672
       },
       {
-        "reddish_fraction": 0.7529166666666667,
-        "box_width": 1108
-      },
-      {
-        "reddish_fraction": 0.7888368055555556,
-        "box_width": 1132
-      },
-      {
-        "reddish_fraction": 0.8155729166666666,
-        "box_width": 1156
-      },
-      {
-        "reddish_fraction": 0.8471875,
-        "box_width": 1172
-      },
-      {
-        "reddish_fraction": 0.86109375,
-        "box_width": 1184
+        "reddish_fraction": 0.8313368055555556,
+        "box_width": 1164,
+        "left": 56,
+        "right": 1220,
+        "top": 32,
+        "bottom": 684
       },
       {
         "reddish_fraction": 0.8802083333333334,
-        "box_width": 1196
+        "box_width": 1196,
+        "left": 40,
+        "right": 1236,
+        "top": 24,
+        "bottom": 696
       },
       {
-        "reddish_fraction": 0.9024479166666667,
-        "box_width": 1212
+        "reddish_fraction": 0.91375,
+        "box_width": 1220,
+        "left": 28,
+        "right": 1248,
+        "top": 16,
+        "bottom": 700
       },
       {
-        "reddish_fraction": 0.9250173611111111,
-        "box_width": 1228
+        "reddish_fraction": 0.9478645833333333,
+        "box_width": 1244,
+        "left": 16,
+        "right": 1260,
+        "top": 12,
+        "bottom": 708
       },
       {
-        "reddish_fraction": 0.9364583333333333,
-        "box_width": 1236
+        "reddish_fraction": 0.96796875,
+        "box_width": 1256,
+        "left": 12,
+        "right": 1268,
+        "top": 8,
+        "bottom": 712
       },
       {
-        "reddish_fraction": 0.9532291666666667,
-        "box_width": 1244
+        "reddish_fraction": 0.988125,
+        "box_width": 1268,
+        "left": 4,
+        "right": 1272,
+        "top": 4,
+        "bottom": 716
       },
       {
-        "reddish_fraction": 0.9593923611111111,
-        "box_width": 1252
+        "reddish_fraction": 0.9912326388888889,
+        "box_width": 1272,
+        "left": 4,
+        "right": 1276,
+        "top": 4,
+        "bottom": 716
+      },
+      {
+        "reddish_fraction": 0.9996527777777777,
+        "box_width": 1276,
+        "left": 0,
+        "right": 1276,
+        "top": 0,
+        "bottom": 716
+      },
+      {
+        "reddish_fraction": 0.9996527777777777,
+        "box_width": 1276,
+        "left": 0,
+        "right": 1276,
+        "top": 0,
+        "bottom": 716
+      },
+      {
+        "reddish_fraction": 0.9996527777777777,
+        "box_width": 1276,
+        "left": 0,
+        "right": 1276,
+        "top": 0,
+        "bottom": 716
+      },
+      {
+        "reddish_fraction": 0.9996527777777777,
+        "box_width": 1276,
+        "left": 0,
+        "right": 1276,
+        "top": 0,
+        "bottom": 716
       }
-    ]
+    ],
+    "dropdown": {
+      "reveal": [
+        {
+          "reddish_fraction": 0.011423611111111112,
+          "box_width": 672,
+          "left": 152,
+          "right": 824,
+          "top": 0,
+          "bottom": 12
+        },
+        {
+          "reddish_fraction": 0.22598958333333333,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 296
+        },
+        {
+          "reddish_fraction": 0.34055555555555556,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 448
+        },
+        {
+          "reddish_fraction": 0.37081597222222223,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 488
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        }
+      ],
+      "dismiss": [
+        {
+          "reddish_fraction": 0.35572916666666665,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 468
+        },
+        {
+          "reddish_fraction": 0.13822916666666665,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 180
+        },
+        {
+          "reddish_fraction": 0.03253472222222222,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 40
+        },
+        {
+          "reddish_fraction": 0.002829861111111111,
+          "box_width": 648,
+          "left": 164,
+          "right": 812,
+          "top": 0,
+          "bottom": 0
+        },
+        {
+          "reddish_fraction": 0.0,
+          "box_width": 0,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null
+        },
+        {
+          "reddish_fraction": 0.0,
+          "box_width": 0,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null
+        },
+        {
+          "reddish_fraction": 0.0,
+          "box_width": 0,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null
+        },
+        {
+          "reddish_fraction": 0.0,
+          "box_width": 0,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null
+        },
+        {
+          "reddish_fraction": 0.0,
+          "box_width": 0,
+          "left": null,
+          "right": null,
+          "top": null,
+          "bottom": null
+        }
+      ],
+      "reverse": [
+        {
+          "reddish_fraction": 0.020364583333333332,
+          "box_width": 688,
+          "left": 144,
+          "right": 832,
+          "top": 0,
+          "bottom": 24
+        },
+        {
+          "reddish_fraction": 0.22598958333333333,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 296
+        },
+        {
+          "reddish_fraction": 0.33458333333333334,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 440
+        },
+        {
+          "reddish_fraction": 0.3679340277777778,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 484
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        },
+        {
+          "reddish_fraction": 0.37375,
+          "box_width": 692,
+          "left": 140,
+          "right": 832,
+          "top": 0,
+          "bottom": 492
+        }
+      ],
+      "corners": {
+        "top_left": 1,
+        "bottom_left": 19
+      },
+      "tree_after_reverse": {
+        "id": 1,
+        "type": "root",
+        "orientation": "horizontal",
+        "percent": null,
+        "urgent": false,
+        "marks": [],
+        "focused": false,
+        "layout": "splith",
+        "border": "none",
+        "current_border_width": 0,
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 1280,
+          "height": 720
+        },
+        "deco_rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "window_rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "geometry": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "name": "root",
+        "window": null,
+        "nodes": [
+          {
+            "id": 2147483647,
+            "type": "output",
+            "orientation": "horizontal",
+            "percent": null,
+            "urgent": false,
+            "marks": [],
+            "focused": false,
+            "layout": "output",
+            "border": "none",
+            "current_border_width": 0,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 720
+            },
+            "deco_rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "window_rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "geometry": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "name": "__i3",
+            "window": null,
+            "nodes": [
+              {
+                "id": 2147483646,
+                "type": "workspace",
+                "orientation": "horizontal",
+                "percent": null,
+                "urgent": false,
+                "marks": [],
+                "focused": false,
+                "layout": "splith",
+                "border": "none",
+                "current_border_width": 0,
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                },
+                "deco_rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "window_rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "geometry": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "name": "__i3_scratch",
+                "window": null,
+                "nodes": [],
+                "floating_nodes": [],
+                "focus": [
+                  5
+                ],
+                "fullscreen_mode": 1,
+                "sticky": false,
+                "floating": null,
+                "scratchpad_state": null
+              }
+            ],
+            "floating_nodes": [],
+            "focus": [
+              2147483646
+            ],
+            "fullscreen_mode": 0,
+            "sticky": false,
+            "floating": null,
+            "scratchpad_state": null
+          },
+          {
+            "id": 3,
+            "type": "output",
+            "orientation": "none",
+            "percent": 1.0,
+            "urgent": false,
+            "marks": [],
+            "focused": false,
+            "layout": "output",
+            "border": "none",
+            "current_border_width": 0,
+            "rect": {
+              "x": 0,
+              "y": 0,
+              "width": 1280,
+              "height": 720
+            },
+            "deco_rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "window_rect": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "geometry": {
+              "x": 0,
+              "y": 0,
+              "width": 0,
+              "height": 0
+            },
+            "name": "HEADLESS-1",
+            "window": null,
+            "nodes": [
+              {
+                "id": 4,
+                "type": "workspace",
+                "orientation": "horizontal",
+                "percent": null,
+                "urgent": false,
+                "marks": [],
+                "focused": false,
+                "layout": "splith",
+                "border": "none",
+                "current_border_width": 0,
+                "rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1280,
+                  "height": 720
+                },
+                "deco_rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "window_rect": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "geometry": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 0,
+                  "height": 0
+                },
+                "name": "1",
+                "window": null,
+                "nodes": [],
+                "floating_nodes": [
+                  {
+                    "id": 5,
+                    "type": "floating_con",
+                    "orientation": "none",
+                    "percent": 0.37307291666666664,
+                    "urgent": false,
+                    "marks": [
+                      "oldbook-dropdown"
+                    ],
+                    "focused": true,
+                    "layout": "none",
+                    "border": "none",
+                    "current_border_width": 2,
+                    "rect": {
+                      "x": 140,
+                      "y": 0,
+                      "width": 696,
+                      "height": 494
+                    },
+                    "deco_rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 0,
+                      "height": 0
+                    },
+                    "window_rect": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 696,
+                      "height": 494
+                    },
+                    "geometry": {
+                      "x": 0,
+                      "y": 0,
+                      "width": 696,
+                      "height": 494
+                    },
+                    "name": "foot",
+                    "window": null,
+                    "nodes": [],
+                    "floating_nodes": [],
+                    "focus": [],
+                    "fullscreen_mode": 0,
+                    "sticky": true,
+                    "floating": "user_on",
+                    "scratchpad_state": "fresh",
+                    "pid": 14016,
+                    "app_id": "foot",
+                    "foreign_toplevel_identifier": "abb50e149dfe82072d67663c4e6784f4",
+                    "visible": true,
+                    "max_render_time": 0,
+                    "allow_tearing": false,
+                    "shell": "xdg_shell",
+                    "inhibit_idle": false,
+                    "sandbox_engine": null,
+                    "sandbox_app_id": null,
+                    "sandbox_instance_id": null,
+                    "tag": null,
+                    "idle_inhibitors": {
+                      "user": "none",
+                      "application": "none"
+                    }
+                  }
+                ],
+                "focus": [
+                  5
+                ],
+                "fullscreen_mode": 1,
+                "sticky": false,
+                "floating": null,
+                "scratchpad_state": null,
+                "num": 1,
+                "output": "HEADLESS-1",
+                "representation": "H[]"
+              }
+            ],
+            "floating_nodes": [],
+            "focus": [
+              4
+            ],
+            "fullscreen_mode": 0,
+            "sticky": false,
+            "floating": null,
+            "scratchpad_state": null,
+            "primary": false,
+            "make": "Unknown",
+            "model": "Unknown",
+            "serial": "Unknown",
+            "modes": [],
+            "features": {
+              "adaptive_sync": false,
+              "hdr": false
+            },
+            "non_desktop": false,
+            "active": true,
+            "dpms": true,
+            "power": true,
+            "scale": 1.0,
+            "scale_filter": "nearest",
+            "transform": "normal",
+            "adaptive_sync_status": "disabled",
+            "layer_shell_surfaces": [
+              {
+                "namespace": "wallpaper",
+                "layer": "background",
+                "extent": {
+                  "width": 1280,
+                  "height": 720,
+                  "x": 0,
+                  "y": 0
+                },
+                "effects": {
+                  "blur": false,
+                  "blur_xray": false,
+                  "blur_ignore_transparent": false,
+                  "shadows": false,
+                  "corner_radius": 0
+                }
+              }
+            ],
+            "current_workspace": "1",
+            "current_mode": {
+              "width": 1280,
+              "height": 720,
+              "refresh": 0
+            },
+            "max_render_time": 0,
+            "allow_tearing": false,
+            "hdr": false
+          }
+        ],
+        "floating_nodes": [],
+        "focus": [
+          3
+        ],
+        "fullscreen_mode": 0,
+        "sticky": false,
+        "floating": null,
+        "scratchpad_state": null
+      }
+    }
   },
   "limits": [
     "A headless software renderer proves ordering and geometry, not the physical frame rate or the compositor blur.",

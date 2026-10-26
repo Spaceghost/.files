@@ -3140,3 +3140,66 @@ Pending: physical password-entry/lock-unlock confirmation, evaluated adaptive
 quieting, useful job configuration, and deployment of the changed root fan helper.
 The early keyboard helper and camera privacy pipeline remain separate unfinished
 work. No claim of pre-encryption boot coverage or cat-only capture is made.
+
+## 2026-10-26 - SSH toolbar package archive pending
+
+Installed the coherent OpenSSH 10.6_p1-r1 client/server set and OpenRC service
+support. The daemon remains stopped and absent from the default runlevel until
+the dedicated toolbar key is clicked. The root-owned toggle helper and exact
+doas rule are installed.
+
+The required APK snapshot could not be completed because this host already has
+`moonlight-qt=6.1.0-r0` pinned in `/etc/apk/world`, while the repository now
+offers only 6.2.0-r0. No 6.1.0-r0 APK exists in the current archive or Fossil
+UV store, so `package-archive snapshot` cannot reconstruct the complete closure.
+The new OpenSSH and sdl2_ttf APKs are cached locally; resolve and archive the
+pre-existing Moonlight pin before treating the new package closure as complete.
+
+## 2026-10-26 - Incoming Transmissions remote access deployed
+
+Replaced the binary OpenSSH toolbar switch with a separate persistent remote
+access controller and UI. The Waybar glyph and SwayNC Remote access action have
+no Wi-Fi shift-click gesture. Incoming Transmissions now offers Off, Tailnet
+only, and Tailnet + LAN; Home, Friend-trusted, and Untrusted network posture;
+clipboard public-key enrollment plus `ssh-copy-id` discovery; and a LAN password
+switch that cannot be disabled before a key exists or lose its final key while
+disabled.
+
+The root observer is installed and boot-enabled. It keeps Tailscale SSH and LAN
+OpenSSH separate, records trust against profile UUID, SSID, encryption and
+approved BSSID, closes LAN before every transition, validates sshd before
+starting it, and opens only the current interface/subnets in a dedicated nftables
+chain. The current `shmecklebuckit` network was classified Friend-trusted from
+the live control and is running Tailnet + LAN with no degraded state or
+unexpected hatch. OpenSSH itself remains absent from the default runlevel.
+
+Added the REMOTE WATCH desktop card and reports for active and ended sessions in
+the rolling last 24 hours, capped at 12 rows plus `+ N MORE`. Published session
+data is limited to account, tailnet node identity or LAN address, auth/key label
+and fingerprint, times, and at most four executable names; argv, environment,
+working directories and terminal content are excluded. Connection/disconnection
+notices and deduplicated five-minute authentication-failure warnings are wired.
+Fleet, listener/Serve/Funnel and Recovery Beacon views are live; the beacon
+correctly reports the missing scheduled off-machine private Fossil backup.
+
+All 104 focused/pinned remote/Wi-Fi tests passed. nftables check mode, OpenSSH
+syntax/effective policy, Sway validation, JSON parsing, Python compilation,
+ShellCheck and disposable HOME deployment passed. Live screenshots are in
+`verification/remote-access/`. A whole-suite run was stopped after encountering
+unrelated existing failures in generated-theme hex casing, Bazzite replay and
+Catbed thermal tests. A second machine is still required for an honest inbound
+Tailscale SSH session-row test, and tailnet ACL/check-mode administration remains
+external to this checkout.
+
+## 2026-10-26 - Firefox theme catch-up
+
+Firefox's native theme bridge now sends the active palette immediately on a
+state change and reasserts it every five seconds while the browser connection
+is alive. This repairs a browser that missed the one change notification or had
+its dynamic theme replaced afterward, without requiring another theme switch.
+The same heartbeat detects closed pipes so abandoned native-host processes exit.
+
+Focused Firefox theme tests cover initial delivery, immediate change delivery,
+periodic catch-up and atomic state publication. The live state and selected
+descriptor both resolve to Gruvbox Dark; live browser confirmation is recorded
+separately after replacing the already-running native hosts.

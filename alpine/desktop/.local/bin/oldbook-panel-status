@@ -228,7 +228,9 @@ def notifications():
 
 
 if __name__ == "__main__":
-    actions = {"network": network, "radio": radio, "firewall": firewall, "notifications": notifications}
+    actions = {"network": network, "radio": radio, "firewall": firewall,
+               "notifications": notifications}
     if len(sys.argv) != 2 or sys.argv[1] not in actions:
-        raise SystemExit("usage: oldbook-panel-status {network|radio|firewall|notifications}")
+        raise SystemExit("usage: oldbook-panel-status "
+                         "{network|radio|firewall|notifications}")
     actions[sys.argv[1]]()

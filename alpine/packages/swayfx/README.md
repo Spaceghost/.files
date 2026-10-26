@@ -126,25 +126,35 @@ Upstream: [SwayFX 0.6](https://github.com/wlrfx/swayfx/releases/tag/0.6),
 
 ## Window and workspace animations
 
-Revision r4 adds `window-animations.patch`. SwayFX 0.6 already grew windows in
+Revision r5 extends `window-animations.patch`. SwayFX 0.6 already grew windows in
 as they opened, shrank them as they closed and tweened layout moves; the patch
-adds what was missing. Workspaces now **slide** horizontally instead of only
-crossfading, the arriving one entering from the side its number lies on, and
-each kind of animation gets its own duration:
+adds what was missing. Workspaces can slide or crossfade, each kind of animation
+gets its own duration, and marked scratchpad terminals gain a Quake-style
+downward reveal with a reversible upward dismissal:
 
 ```
 animations enable|disable|toggle
 animation_open_ms <value>
 animation_close_ms <value>
 animation_move_ms <value>
+animation_dropdown_ms <value>
+animation_dropdown_close_ms <value>
+animation_dropdown_mark <mark>
+animation_dropdown_corner_radius <pixels>
 animation_workspace_ms <value>
 animation_workspace_style slide|fade|both
+dropdown toggle
 ```
 
 Every duration falls back to `animation_duration_ms` while it is zero, and
 `animations disable` stops all motion without losing the configured values. A
 disabled animation schedules nothing and requests no frame; with animations on
 and nothing moving the compositor measured 0.0% of a core.
+
+The dropdown mark also selects asymmetric decoration: its top corners are
+square against the screen edge, only its bottom corners are rounded, and its
+shadow is suppressed. Repeating `dropdown toggle` in flight reverses the same
+motion instead of snapping or queuing another transition.
 
 Only this patched build accepts these commands, so the desktop keeps them in
 `desktop/.config/swayfx/animations.conf`, which nothing includes by default.
@@ -163,7 +173,7 @@ workspace and a green one on the next, then reads the captured frames: a slide
 shows both colours separated across the output, a fade mixes them in place and a
 disabled switch shows only one. See
 [the evidence](../../verification/swayfx-animations/README.md) and
-[the design note](../../../docs/superpowers/specs/2026-09-08-animations.md).
+[the r5 design](../../../docs/superpowers/specs/2026-10-26-quake-dropdown-motion-design.md).
 
 ## Physical screen corners
 

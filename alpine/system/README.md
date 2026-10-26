@@ -71,7 +71,7 @@ additional GRUB entry derived from the stock entry (managed block in
 `/etc/grub.d/40_custom`). The stock entry stays first and default;
 `/boot/initramfs-lts` is never replaced. Select the entry from the one-second
 GRUB menu to test it. Rerun the installer after a kernel upgrade so the ghost
-archive matches the new modules. See `docs/superpowers/specs/2026-09-08-luks-prompt.md`.
+archive matches the new modules.
 
 ## Boot menu theme
 
@@ -87,9 +87,8 @@ falls back to the Gruvbox shades. `alpine/bin/build-grub-theme` regenerates it
 the GRUB key rewriter. The installer copies the theme to
 `/boot/grub/themes/ghost-planet`, sets a three-second menu and hands the
 graphics mode to the kernel so the console palette above still applies.
-`--skip-theme` leaves it alone, `--remove-theme` withdraws it. See
-`docs/superpowers/specs/2026-09-08-grub-theme.md` and the rendered preview in
-`alpine/verification/grub-theme/`.
+`--skip-theme` leaves it alone, `--remove-theme` withdraws it. See the rendered
+preview in `alpine/verification/grub-theme/`.
 
 Nothing here reboots, switches VTs or loads a font into a live console. The
 visual result is only observable at the next boot.

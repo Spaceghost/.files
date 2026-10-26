@@ -14,6 +14,7 @@ import subprocess
 import time
 
 APP_ID = 'com.oldbook.dropdown'
+DROPDOWN_MARK = 'oldbook-dropdown'
 PROFILES = {
     'terminal': (APP_ID, 'Drop-down terminal', []),
     'monitor': ('com.oldbook.monitor', 'System monitor', ['btop']),
@@ -21,26 +22,33 @@ PROFILES = {
 
 
 def geometry(output, workspace):
-    """Dock below the bar using Sway's actual reserved workspace area."""
+    """Fill the usable top edge below the bar like a console drawer."""
     rect = output['rect']
     usable = workspace['rect']
-    # The workspace inset also includes gaps; retain that small breathing room.
-    y = max(rect['y'], usable['y'])
-    width = round(rect['width'] * .94)
+    x = usable['x']
+    y = usable['y']
+    width = usable['width']
     height = min(round(rect['height'] * .52), rect['y'] + rect['height'] - y)
-    x = rect['x'] + (rect['width'] - width) // 2
     return x, y, width, height
 
 
-def ipc(kind, command=None):
+def ipc(kind, command=None, require_success=True):
     args = ['swaymsg', '-r', '-t', kind]
     if command:
         args.append(command)
-    result = subprocess.run(args, check=True, capture_output=True, text=True, timeout=3)
+    result = subprocess.run(args, check=(kind != 'command' or require_success),
+                            capture_output=True, text=True, timeout=3)
     data = json.loads(result.stdout)
-    if kind == 'command' and any(not entry.get('success') for entry in data):
+    if (kind == 'command' and require_success and
+            any(not entry.get('success') for entry in data)):
         raise RuntimeError(str(data))
     return data
+
+
+def native_toggle(command):
+    """Try the r5 native drawer command; let an r4 session fall back cleanly."""
+    result = ipc('command', command, require_success=False)
+    return bool(result) and all(entry.get('success') for entry in result)
 
 
 def terminal(node, workspace=None, app_id=APP_ID):
@@ -92,9 +100,18 @@ def toggle(profile='terminal'):
                 found = found[0], '__i3_scratch'
         node, workspace = found
         criteria = f'[con_id={node["id"]}]'
+        # Ghostty publishes its requested app_id after the view first maps, so
+        # Sway may miss the for_window mark. Sway marks are globally unique, so
+        # assigning it here also hands native drawer control from one console
+        # to whichever console is being toggled now.
+        if DROPDOWN_MARK not in node.get('marks', []):
+            ipc('command', criteria + f' mark --add {DROPDOWN_MARK}')
         focused_workspace = next(item for item in ipc('get_workspaces')
                                  if item.get('focused'))
         if workspace != '__i3_scratch':
+            if (workspace == focused_workspace['name'] and
+                    native_toggle(criteria + ' dropdown toggle')):
+                return
             # Release the workspace before hiding, so a hidden window never
             # carries a stale flag back out of the scratchpad.
             ipc('command', criteria + ' sticky disable, move scratchpad')
@@ -107,9 +124,12 @@ def toggle(profile='terminal'):
         # Sticky keeps a shown window on the workspace being looked at: switching
         # workspaces carries it along instead of stranding it behind, so it stays
         # summonable everywhere and pins no workspace open by sitting on it.
-        ipc('command', criteria + f' scratchpad show, sticky enable, '
-            f'resize set {width} px {height} px, '
-            f'move absolute position {x} px {y} px, focus')
+        show = criteria + f' dropdown toggle, sticky enable, '
+        layout = (f'resize set {width} px {height} px, '
+                  f'move absolute position {x} px {y} px, focus')
+        if native_toggle(show + layout):
+            return
+        ipc('command', criteria + ' scratchpad show, sticky enable, ' + layout)
 
 
 if __name__ == '__main__':

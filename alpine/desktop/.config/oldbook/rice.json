@@ -288,14 +288,6 @@
             "detail": "It takes about a third of a second, so a pointer merely crossing the bar never opens it."
         },
         {
-            "id": "artwork-reveal",
-            "title": "The next painting grows from your click",
-            "date": "2026-09-08",
-            "summary": "The crossfade to the next painting expands out of the exact point you clicked on the artwork badge.",
-            "trigger": "Right-click the artwork badge in the bar",
-            "detail": "Left-click picks a painting, middle-click pauses rotation, and the wheel browses the collection."
-        },
-        {
             "id": "reactive-palette",
             "title": "The painting elects the accent",
             "date": "2026-09-08",
@@ -351,14 +343,6 @@
             "summary": "A card slides in at the bottom right for four seconds when a genuinely new track starts.",
             "trigger": "Skip a track in Pithos",
             "detail": "Album art, title and artist. A pause and resume of the same track does not bring it back."
-        },
-        {
-            "id": "painting-crossfade",
-            "title": "Paintings crossfade",
-            "date": "2026-09-08",
-            "summary": "The wallpaper eases from one painting to the next instead of cutting, even at login and reload.",
-            "trigger": "Super+Ctrl+Right for the next painting.",
-            "detail": "1.6 seconds for the timer, 0.8 for a deliberate change. oldbook-background quit returns plain cuts until the next login."
         },
         {
             "id": "lock-screen",
@@ -743,14 +727,6 @@
             "detail": "It never takes focus, and releasing or pressing a key dismisses it. Sections read outward from the focused window and can be arranged in ~/.config/superhold/config.json."
         },
         {
-            "id": "video-background",
-            "title": "Video backgrounds",
-            "date": "2026-09-07",
-            "summary": "A muted video can loop beneath the windows in place of the painting, started only by hand.",
-            "trigger": "Open the command deck and choose a video background.",
-            "detail": "oldbook-video-background FILE plays one and oldbook-video-background stop ends it."
-        },
-        {
             "id": "focus-follows-pointer",
             "title": "Focus follows the pointer",
             "date": "2026-09-07",
@@ -792,7 +768,7 @@
             "id": "space-ghost-gallery",
             "title": "The Space Ghost gallery",
             "date": "2026-09-07",
-            "summary": "Space Ghost and Zorak dropped into paintings, rotating every twenty minutes on every workspace.",
+            "summary": "Space Ghost and Zorak dropped into paintings, rotating once an hour.",
             "trigger": "Super+G to pick a painting, Super+Shift+P to pause the rotation.",
             "detail": "On the artwork badge, left-click opens the gallery, right-click moves on, middle-click pauses and the wheel browses; Super+click generates a painting and Shift+click edits the prompts."
         },

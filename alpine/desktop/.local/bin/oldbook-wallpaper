@@ -20,7 +20,6 @@ sys.path.insert(0, str(REPO / 'alpine/wallpapers'))
 from theme_catalog import available_themes, has_symlink, load_theme, safe_theme_id
 sys.path.insert(0, str(REPO / 'alpine/desktop/.local/lib/oldbook'))
 from workspace_defaults import choose_artwork
-import background_fade as fade
 from nocturne import nocturne_preference
 import thumbnails
 
@@ -148,29 +147,6 @@ def sway_socket():
     raise RuntimeError('No owned active physical Sway session found')
 
 
-def fade_duration(action):
-    """The timer eases across slowly; a deliberate change answers quickly."""
-    return fade.ROTATION_DURATION_MS if action == 'tick' else None
-
-
-def crossfade_to(path, origin=None, duration=None):
-    """True when this session's background daemon accepted the change.
-
-    A brief wait catches an image the daemon cannot decode; a fade that is
-    still running (or waiting for a powered-off display) is already accepted.
-    """
-    try:
-        reply = fade.crossfade(path, duration, origin, ack_timeout=2.0, settle_timeout=1.0)
-    except OSError:
-        return False
-    if reply is None:
-        return False
-    if not reply.get('ok'):
-        print('oldbook-wallpaper: crossfade refused: ' + str(reply.get('error')), file=sys.stderr)
-        return False
-    return True
-
-
 def sound_cue(name):
     """The gallery announces itself quietly; a missing player changes nothing."""
     try:
@@ -181,24 +157,20 @@ def sound_cue(name):
         pass
 
 
-def apply(entry, origin=None, duration=None):
+def apply(entry):
     socket = sway_socket()
     CURRENT.parent.mkdir(parents=True, exist_ok=True)
     temporary = CURRENT.with_name(CURRENT.name + f'.{os.getpid()}.tmp')
     temporary.unlink(missing_ok=True)
     temporary.symlink_to(entry['path'])
-    # The crossfade daemon owns the visible painting while it answers. Sway's
-    # own background stays the fallback only: each `output bg` respawns swaybg
-    # above the daemon's surface, so it is not refreshed after a fade.
-    if not crossfade_to(entry['path'], origin, duration):
-        # JSON quoting matches Sway's double-quoted string escaping, no shell involved.
-        command = 'output * bg ' + json.dumps(entry['path']) + ' fill'
-        response = subprocess.run(['swaymsg', '-s', socket, '-r', command],
-                                  capture_output=True, text=True, timeout=5)
-        results = json.loads(response.stdout)
-        if response.returncode or not results or not all(item.get('success') for item in results):
-            temporary.unlink(missing_ok=True)
-            raise RuntimeError('Sway rejected wallpaper command')
+    # JSON quoting matches Sway's double-quoted string escaping, no shell involved.
+    command = 'output * bg ' + json.dumps(entry['path']) + ' fill'
+    response = subprocess.run(['swaymsg', '-s', socket, '-r', command],
+                              capture_output=True, text=True, timeout=5)
+    results = json.loads(response.stdout)
+    if response.returncode or not results or not all(item.get('success') for item in results):
+        temporary.unlink(missing_ok=True)
+        raise RuntimeError('Sway rejected wallpaper command')
     temporary.replace(CURRENT)
     relayout_panels()
     refresh_accent()
@@ -383,7 +355,7 @@ def current_theme_id():
         return 'none'
 
 
-def update(action, selected=None, origin=None):
+def update(action, selected=None):
     STATE.mkdir(parents=True, exist_ok=True)
     with (STATE / 'state.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -441,7 +413,7 @@ def update(action, selected=None, origin=None):
                                             state.get('id'), 1, occupied)
                 index = next(i for i, entry in enumerate(entries) if entry['id'] == chosen)
             entry = entries[index]
-            socket = apply(entry, origin, fade_duration(action))
+            socket = apply(entry)
             # The twenty-minute timer turns pages in silence; a deliberate change chimes.
             if action not in ('tick', 'refresh'):
                 sound_cue('painting-change')
@@ -805,13 +777,7 @@ def main():
     parser.add_argument('--theme', default='active', help='For generate: active, none, or a theme ID.')
     parser.add_argument('--thumbnail-height', type=int, metavar='PIXELS',
                         help='For status: also report a cached thumbnail of this height.')
-    parser.add_argument('--from', dest='origin', metavar='X,Y',
-                        help='For next/prev/select/refresh: reveal the painting from this '
-                             'logical output position instead of a plain crossfade.')
     args = parser.parse_args()
-    origin = fade.parse_origin(args.origin) if args.origin else None
-    if origin is not None and args.action not in ('next', 'prev', 'select', 'refresh'):
-        parser.error('--from only applies to next, prev, select and refresh')
     if (args.action == 'select') != (args.artwork_id is not None):
         parser.error('select requires an artwork ID; other actions take no ID')
     if args.theme != 'active' and args.action != 'generate':
@@ -835,7 +801,7 @@ def main():
     elif args.action == 'delete':
         return delete_current(confirm=False)
     else:
-        update(args.action, args.artwork_id, origin)
+        update(args.action, args.artwork_id)
 
 
 if __name__ == '__main__':

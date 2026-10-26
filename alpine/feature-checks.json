@@ -8,6 +8,7 @@
         "alpine/wallpapers/desktop_theme.py",
         "alpine/wallpapers/theme_catalog.py",
         "alpine/desktop/.local/bin/oldbook-theme",
+        "alpine/desktop/.local/bin/oldbook-firefox-theme-host",
         "alpine/desktop/.local/bin/oldbook-gtk-settings",
         "alpine/desktop/.local/lib/oldbook/overlay_theme.py",
         "alpine/desktop/.config/gtk-*/*",
@@ -28,6 +29,7 @@
       ],
       "tests": [
         "test_application_theme_refresh.py",
+        "test_firefox_theme.py",
         "test_complete_themes.py",
         "test_lxqt_theme.py",
         "test_overlay_theme.py",
@@ -541,7 +543,6 @@
         "alpine/desktop/.local/bin/oldbook-showdesktop",
         "alpine/desktop/.local/bin/oldbook-strata",
         "alpine/desktop/.local/bin/oldbook-sun-light",
-        "alpine/desktop/.local/bin/oldbook-video-background",
         "alpine/desktop/.local/lib/oldbook/carousel.py",
         "alpine/desktop/.local/lib/oldbook/showdesktop.py",
         "alpine/desktop/.local/lib/oldbook/ui_command.py",
@@ -557,7 +558,6 @@
         "test_session.py",
         "test_showdesktop_lifecycle.py",
         "test_strata.py",
-        "test_video_background.py",
         "test_ui_priority.py",
         "test_ui_command.py",
         "test_ui_priority_request.py",
@@ -860,29 +860,6 @@
       "evidence": []
     },
     {
-      "id": "ARTWORK-CROSSFADE",
-      "paths": [
-        "alpine/desktop/.local/bin/oldbook-background",
-        "alpine/desktop/.local/lib/oldbook/background_fade.py",
-        "alpine/desktop/.local/bin/oldbook-wallpaper",
-        "alpine/desktop/.local/bin/oldbook-session",
-        "alpine/tests/verify_background_crossfade.py",
-        "alpine/desktop/.local/lib/oldbook/air.py",
-        "alpine/desktop/.local/bin/oldbook-screensaver",
-        "alpine/tests/verify_desktop_breath.py"
-      ],
-      "tests": [
-        "test_background.py",
-        "test_background_gallery.py",
-        "test_air.py"
-      ],
-      "evidence": [
-        "verification/background-crossfade/",
-        "verification/desktop-breath/",
-        "verification/gallery-screensaver/"
-      ]
-    },
-    {
       "id": "BAZZITE-REPLAY",
       "paths": [
         "bazzite/*",
@@ -927,8 +904,7 @@
       "paths": [
         "alpine/packages/*",
         "alpine/FEATURES.md",
-        "alpine/AGENTS.md",
-        "docs/superpowers/decisions/2026-09-07-personal-desktop-package.md"
+        "alpine/AGENTS.md"
       ],
       "tests": [],
       "evidence": []
@@ -986,14 +962,30 @@
         "alpine/desktop/.local/lib/oldbook/wifi_hotspot.py",
         "alpine/desktop/.local/bin/oldbook-wifi",
         "alpine/desktop/.local/bin/oldbook-panel-status",
+        "alpine/bin/oldbook-remote-access",
+        "alpine/security/remote_access.py",
+        "alpine/security/remote-access/oldbook-remote-access.initd",
+        "alpine/security/firewall/oldbook.nft",
+        "alpine/bin/install-desktop-system",
+        "alpine/packages/world",
         "alpine/desktop/.local/bin/oldbook-network",
         "alpine/desktop/.config/waybar/config.jsonc",
         "alpine/desktop/.config/swaync/config.json",
-        "alpine/tests/test_wifi.py"
+        "alpine/desktop/.local/bin/oldbook-remote-access",
+        "alpine/desktop/.config/conky/panels.json",
+        "alpine/tests/test_wifi.py",
+        "alpine/tests/test_remote_access.py",
+        "alpine/tests/test_remote_access_controller.py",
+        "alpine/tests/test_remote_access_ui.py",
+        "alpine/tests/test_remote_access_wiring.py"
       ],
       "tests": [
         "test_wifi.py",
-        "test_panel_status.py"
+        "test_panel_status.py",
+        "test_remote_access.py",
+        "test_remote_access_controller.py",
+        "test_remote_access_ui.py",
+        "test_remote_access_wiring.py"
       ],
       "evidence": []
     },

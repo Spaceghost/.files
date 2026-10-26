@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+# shellcheck disable=SC2034
+name="Early keyboard breathing"
+description="Breathe the Apple keyboard before and after the desktop session"
+command="/usr/local/sbin/oldbook-keyboard-breathe"
+command_args="--runtime-dir /run/user/1000"
+command_background=yes
+pidfile="/run/oldbook-keyboard-breathe.pid"
+output_log="/var/log/oldbook-keyboard-breathe.log"
+error_log="/var/log/oldbook-keyboard-breathe.log"
+
+depend() {
+    need sysfs
+    after devfs
+    before udev-trigger greetd
+}
+
+start_pre() {
+    # If the driver is not ready yet, the native worker waits for its LED.
+    modprobe applesmc || true
+}

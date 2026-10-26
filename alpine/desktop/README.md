@@ -10,12 +10,7 @@ All workspaces now share the same painting and gallery timer. Foot uses 78%
 opacity with 4-pixel padding; Sway keeps Ghost Observatory gaps of 6 inner and
 7 outer pixels around 22-pixel window corners. Ghostty is
 also installed with matching colors and opacity: launch `ghostty` or select it
-in the command deck. To play a muted, looping video behind transparent windows,
-run `oldbook-video-background ~/Videos/example.webm`, or choose **Video background**
-in the command deck. `oldbook-video-background stop` reveals the shared painting.
-The video picker accepts local files and explicit HTTPS URLs. No video starts
-automatically. See the [video guide](../packages/mpvpaper/README.md) and
-[Ghostty notes](../packages/ghostty/README.md).
+in the command deck. See the [Ghostty notes](../packages/ghostty/README.md).
 
 Waybar's middle section holds music controls between the left and right desktop
 controls. Window titles live in the decoration at the bottom edge. When a floating
@@ -74,6 +69,8 @@ The configured display mode is the native internal panel. Do not copy it to an e
 | Hold `Super` alone for half a second | Show contextual shortcuts; release or press another key to dismiss. Scroll the guide without taking keyboard focus. |
 | `Super+Escape` | Lock: the desktop dissolves into the blurred current painting with the clock, the painting's caption and the hour's Scripture; swaylock-effects under the helper's supervisor, stock `swaylockd` as the fallback |
 | `Super+Shift+E` or click the battery | Power deck over the blurred desktop: lock, suspend, log out, reboot, shut down (keys `l` `u` `e` `r` `s`, Escape closes). Suspend locks first; log out, reboot and shut down ask on a Gruvbox swaynag bar |
+| Click the remote-access glyph between Wi-Fi and Next art | Open the separate Incoming Transmissions control: Off, Tailnet only, or Tailnet + LAN. The setting persists; LAN is available only on a root-recorded Home or Friend-trusted encrypted network. |
+| Incoming Transmissions → Remote access | Set network trust, enroll LAN public keys, disable the LAN password once a key exists, and inspect 24-hour activity, tailnet fleet, listeners, and recovery posture. |
 | `Print`, `Shift+Print`, `Ctrl+Print` | Full display, selected region, focused-window screenshot; a cream flash and shutter click follow the capture |
 | Volume and microphone keys | PipeWire `wpctl`, with a PulseAudio-compatible fallback; the new level shows on the bottom-centre pill |
 | Brightness keys | Kernel backlight steps shown on the same pill, with a clear notification if the seat lacks write permission |
@@ -111,7 +108,7 @@ filters them away, and selecting one simply draws the deck again.
 | Group | Rows |
 | --- | --- |
 | The ship | Applications, Expo, switch window, Ghostty, notifications |
-| The look | Artwork gallery, **Theme**, bottom decoration, video background, YouTube, **the rice catalogue** |
+| The look | Artwork gallery, **Theme**, bottom decoration, YouTube, **the rice catalogue** |
 | The light | Keyboard glow, ambient screen, night light, caption breath |
 | The sound | Sound studio, sound cues, now transmitting |
 | The machine | **Power posture**, reactor, **watch mode**, **bed mode**, transmissions, firewall |
@@ -233,8 +230,7 @@ locked package snapshot. It watches new desktop notification calls without
 intercepting delivery or recording notification contents. Browser alerts need
 site attribution; the current SwayNC path provides none, so generic
 Firefox/Chromium notices are ignored. The browser and website must actually emit
-a desktop notification with a validated origin hint. CLI setup and supported
-signals are described in the AI attention notes under `docs/superpowers/specs/`.
+a desktop notification with a validated origin hint.
 `brightnessctl` supplies the udev rule granting group `input` write access to LED
 brightness, and the desktop user must belong to that group (Jack already does).
 It never changes key state to control the light. Diagnostics go to
@@ -256,13 +252,6 @@ itself holds still: `air.py` forces the `wallpaper` half of
 `~/.config/oldbook/breath.json` off at every read and write, and no switch on
 the desktop can raise it. The caption's half is a real choice, in that file or
 with **Caption breath** in the command deck.
-
-Four minutes idle, the paintings take over: `oldbook-screensaver start` (run by
-`oldbook-idle screensaver` from swayidle) drifts slowly across the current
-painting and crossfades to the next every thirty seconds. Any activity, or the
-dim stage at 270 seconds, glides it back to rest and to the painting it
-interrupted. It never changes the saved painting, the rotation deadline or the
-pause switch, so it runs even while rotation is paused.
 
 The overlay does not infer a geographic location. Sun and moon features start only when you create `~/.config/oldbook/location.json` yourself (copy `location.example.json` beside it: `name`, `latitude`, `longitude`, `timezone`). With that file present, `oldbook-session` starts `oldbook-sun-light run`, which execs `wlsunset` with the configured coordinates so the display warms after the computed sunset; `oldbook-sun-light toggle` (also **Night light** in the command deck) switches it off and on, and a stop stays in force across Sway reloads. The same file feeds the masthead's sunrise/sunset/moon line (`oldbook-astro panel`, see [desktop panels](DESKTOP-PANELS.md)) and the gallery's night preference for nocturnes ([gallery guide](../wallpapers/README.md)). All of it is computed offline; without the file the night light stays off and the line stays empty. A manual `wlsunset` schedule in `~/.config/sway/local.d/` remains possible instead.
 

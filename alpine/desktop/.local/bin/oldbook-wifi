@@ -33,7 +33,7 @@ ON, OFF = "◉", "◌"
 PICKED, UNPICKED = "●", "○"
 KEY_COLUMN = 52
 TRUST_GLYPH = {"home": "\U000f02dc", "trusted": "\U000f0565", "public": "\U000f01e7"}
-TRUST_WORD = {"home": "home ground", "trusted": "trusted", "public": "public air"}
+TRUST_WORD = {"home": "Home", "trusted": "Friend-trusted", "public": "Untrusted"}
 
 
 def run(arguments, **kwargs):

@@ -3,11 +3,11 @@
 
 Firefox starts this process the moment a themed window calls
 `runtime.connectNative` and keeps its stdin/stdout pipes open for as long as
-that connection lives, killing it on disconnect. That is the whole contract:
-watch `firefox_theme.state_path()` and write a fresh native-messaging frame
-whenever its mtime moves. The first iteration always sends, since `last` starts
-at a value the real mtime can never equal, so a freshly connected window gets
-today's theme immediately rather than waiting for the next switch.
+that connection lives. Watch `firefox_theme.state_path()` and write a fresh
+native-messaging frame whenever it changes. Reassert the palette periodically
+as well: a browser can miss one message or have its dynamic theme replaced
+afterward, and must catch up without another desktop theme switch. The periodic
+write also discovers a closed browser pipe so an orphaned host exits.
 """
 import json
 import os
@@ -18,6 +18,9 @@ import time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.realpath(__file__)), '../lib/oldbook'))
 from firefox_theme import current_message, state_path
 
+CATCH_UP_SECONDS = 5
+POLL_SECONDS = 1
+
 
 def send(message):
     body = json.dumps(message).encode()
@@ -26,18 +29,36 @@ def send(message):
     sys.stdout.buffer.flush()
 
 
-def main():
-    path = state_path()
-    last = None
+def file_signature(path):
+    try:
+        status = path.stat()
+    except OSError:
+        return None
+    return status.st_mtime_ns, status.st_size, status.st_ino
+
+
+def relay(path=None, send_message=send, now=time.monotonic, wait=time.sleep):
+    """Relay changes immediately and periodically repair a stale browser."""
+    path = path or state_path()
+    last_signature = object()
+    last_sent = None
     while True:
-        try:
-            mtime = path.stat().st_mtime
-        except OSError:
-            mtime = None
-        if mtime != last:
-            last = mtime
-            send(current_message())
-        time.sleep(1)
+        signature = file_signature(path)
+        timestamp = now()
+        if (signature != last_signature or last_sent is None
+                or timestamp - last_sent >= CATCH_UP_SECONDS):
+            send_message(current_message())
+            last_signature = signature
+            last_sent = timestamp
+        wait(POLL_SECONDS)
+
+
+def main():
+    try:
+        relay()
+    except (BrokenPipeError, ConnectionResetError):
+        return 0
+    return 0
 
 
 if __name__ == '__main__':

@@ -165,6 +165,7 @@
       },
       "modules": [
         "custom/link",
+        "custom/ssh",
         "custom/radio",
         "custom/firewall"
       ]
@@ -177,6 +178,13 @@
       "on-click-right": "foot --title=\"Transmission Status\" -e ~/.local/bin/oldbook-wifi report",
       "on-click-middle": "foot --title=\"Air Survey\" -e ~/.local/bin/oldbook-wifi survey",
       "max-length": 14
+    },
+    "custom/ssh": {
+      "exec": "~/.local/bin/oldbook-remote-access waybar",
+      "return-type": "json",
+      "interval": 3,
+      "on-click": "~/.local/bin/oldbook-remote-access menu",
+      "on-click-right": "foot --title=\"Remote Watch\" -e ~/.local/bin/oldbook-remote-access report"
     },
     "custom/radio": {
       "exec": "~/.local/bin/oldbook-panel-status radio",

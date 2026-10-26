@@ -29,6 +29,20 @@ class CompleteThemes(unittest.TestCase):
                     self.assertIn(name, files)
                 bar = json.loads(files['.config/waybar/config.jsonc'])[0]
                 self.assertEqual(bar['mpris']['on-click-middle'], '~/.local/bin/oldbook-pithos middle')
+                transmission = bar['group/transmission']['modules']
+                self.assertEqual(transmission[:3],
+                                 ['custom/link', 'custom/ssh', 'custom/radio'])
+                self.assertEqual(bar['custom/ssh']['on-click'],
+                                 '~/.local/bin/oldbook-remote-access menu')
+                self.assertEqual(bar['custom/ssh']['exec'],
+                                 '~/.local/bin/oldbook-remote-access waybar')
+                panels = json.loads(files['.config/conky/panels.json'])['panels']
+                remote = next(panel for panel in panels if panel['id'] == 'remote-watch')
+                self.assertIn('oldbook-remote-access conky', remote['text'])
+                waybar_style = files['.config/waybar/style.css']
+                self.assertIn('#custom-ssh.lan', waybar_style)
+                self.assertIn('#custom-ssh.tailnet', waybar_style)
+                self.assertIn('#custom-ssh.disabled', waybar_style)
 
     def test_claude_code_carries_the_whole_palette_and_its_own_light_or_dark(self):
         renderer = importlib.import_module('desktop_theme')
