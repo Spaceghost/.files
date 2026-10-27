@@ -43,11 +43,19 @@ link "$files/.zshrc" "$HOME/.zshrc"
 link "$files/.zshenv" "$HOME/.zshenv"
 link "$files/.ashrc" "$HOME/.ashrc"
 link "$files/.config/starship.toml" "$HOME/.config/starship.toml"
-mkdir -p "$HOME/.config/fish" "$HOME/.config/nushell/generated" "$HOME/.atuin/themes"
+mkdir -p "$HOME/.config/fish" "$HOME/.config/nushell/generated" "$HOME/.atuin/themes" "$HOME/.config/atuin"
 link "$files/.config/fish/config.fish" "$HOME/.config/fish/config.fish"
 link "$files/.config/nushell/config.nu" "$HOME/.config/nushell/config.nu"
 link "$files/.config/atuin/config.toml" "$HOME/.atuin/config.toml"
 link "$files/.config/atuin/themes/spaceghost.toml" "$HOME/.atuin/themes/spaceghost.toml"
+# Atuin can prefer the XDG config path. Keep any existing config recoverable.
+if [ -f "$HOME/.config/atuin/config.toml" ] && [ ! -L "$HOME/.config/atuin/config.toml" ]; then
+    backup="$HOME/.config/atuin/config.toml.pre-spaceghost"
+    if [ -e "$backup" ]; then backup="$backup.$(date +%s)"; fi
+    mv "$HOME/.config/atuin/config.toml" "$backup"
+    log "saved existing Atuin config at $backup"
+fi
+link "$files/.config/atuin/config.toml" "$HOME/.config/atuin/config.toml"
 mkdir -p "$HOME/.config/systemd/user"
 link "$files/.config/systemd/user/spaceghost-nvim.service" "$HOME/.config/systemd/user/spaceghost-nvim.service"
 for term in ghostty foot kitty alacritty; do
