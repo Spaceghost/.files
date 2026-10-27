@@ -1,6 +1,16 @@
 # Shared interactive aliases for POSIX sh, ash, bash, and zsh.
-if [ -z "${TMPDIR:-}" ] && [ -d "$HOME/.cache/spaceghost/tmp" ]; then
-    TMPDIR="$HOME/.cache/spaceghost/tmp"; export TMPDIR
+if [ -z "${TMPDIR:-}" ]; then
+    for spaceghost_tmp in /srv/ai/tmp "$HOME/.cache/spaceghost/tmp"; do
+        if [ -d "$spaceghost_tmp" ] && [ -w "$spaceghost_tmp" ]; then
+            TMPDIR="$spaceghost_tmp"; export TMPDIR
+            break
+        fi
+    done
+    unset spaceghost_tmp
+fi
+if [ "${TMPDIR:-}" = /srv/ai/tmp ]; then
+    AI_WORKSPACE_ROOT=/srv/ai; TMP="$TMPDIR"; TEMP="$TMPDIR"
+    export AI_WORKSPACE_ROOT TMP TEMP
 fi
 alias e='nvim-remote'
 alias v='nvim-remote'

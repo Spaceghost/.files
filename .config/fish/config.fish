@@ -1,12 +1,24 @@
 # Spaceghost shell: same commands and colors as the Neovim cockpit.
 fish_add_path --path $HOME/.bin $HOME/.local/bin $HOME/.local/nvim/bin
-if not set -q TMPDIR; and test -d $HOME/.cache/spaceghost/tmp
-    set -gx TMPDIR $HOME/.cache/spaceghost/tmp
+if not set -q TMPDIR
+    for spaceghost_tmp in /srv/ai/tmp $HOME/.cache/spaceghost/tmp
+        if test -d $spaceghost_tmp; and test -w $spaceghost_tmp
+            set -gx TMPDIR $spaceghost_tmp
+            break
+        end
+    end
+end
+if test "$TMPDIR" = /srv/ai/tmp
+    set -gx AI_WORKSPACE_ROOT /srv/ai
+    set -gx TMP $TMPDIR
+    set -gx TEMP $TMPDIR
 end
 set -gx EDITOR $HOME/.bin/nvim-remote
 set -gx VISUAL $EDITOR
 set -gx ENV $HOME/.ashrc
 set -gx FZF_DEFAULT_OPTS '--height=45% --layout=reverse --border=rounded --prompt=❯ --pointer=▶ --marker=✓ --color=fg:#e8edf7,bg:#0b0d16,hl:#b4a1ff,fg+:#e8edf7,bg+:#2b3148,hl+:#79efc2,info:#8992ad,prompt:#79efc2,pointer:#b4a1ff,marker:#f3c969,border:#5a6280'
+set -gx FZF_CTRL_T_OPTS "--walker-skip .git,node_modules,target --preview 'spaceghost-preview {}' --preview-window 'right,55%,border-left' --bind 'ctrl-/:change-preview-window(down|hidden|right)'"
+set -gx FZF_ALT_C_OPTS $FZF_CTRL_T_OPTS
 
 if status is-interactive
 if test -t 0; and test -t 1; and not set -q NVIM; and not set -q TMUX; and not set -q SPACEGHOST_PLAIN_SHELL

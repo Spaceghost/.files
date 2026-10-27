@@ -13,8 +13,18 @@ $env.EDITOR = $"($env.HOME)/.bin/nvim-remote"
 $env.VISUAL = $env.EDITOR
 $env.ENV = $"($env.HOME)/.ashrc"
 let private_tmp = $"($env.HOME)/.cache/spaceghost/tmp"
-if ('TMPDIR' not-in $env) and ($private_tmp | path exists) { $env.TMPDIR = $private_tmp }
+if 'TMPDIR' not-in $env {
+    if ('/srv/ai/tmp' | path exists) { $env.TMPDIR = '/srv/ai/tmp' }
+    else if ($private_tmp | path exists) { $env.TMPDIR = $private_tmp }
+}
+if ('TMPDIR' in $env) and ($env.TMPDIR == '/srv/ai/tmp') {
+    $env.AI_WORKSPACE_ROOT = '/srv/ai'
+    $env.TMP = $env.TMPDIR
+    $env.TEMP = $env.TMPDIR
+}
 $env.FZF_DEFAULT_OPTS = '--height=45% --layout=reverse --border=rounded --prompt=❯ --pointer=▶ --marker=✓ --color=fg:#e8edf7,bg:#0b0d16,hl:#b4a1ff,fg+:#e8edf7,bg+:#2b3148,hl+:#79efc2,info:#8992ad,prompt:#79efc2,pointer:#b4a1ff,marker:#f3c969,border:#5a6280'
+$env.FZF_CTRL_T_OPTS = "--walker-skip .git,node_modules,target --preview 'spaceghost-preview {}' --preview-window 'right,55%,border-left' --bind 'ctrl-/:change-preview-window(down|hidden|right)'"
+$env.FZF_ALT_C_OPTS = $env.FZF_CTRL_T_OPTS
 
 $env.config.show_banner = false
 $env.config.table.mode = 'rounded'

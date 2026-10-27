@@ -1,0 +1,18 @@
+#!/bin/sh
+# File and directory preview for fzf's Ctrl-T and Alt-C widgets.
+path=${1:-.}
+if [ -d "$path" ]; then
+    if command -v eza >/dev/null 2>&1; then
+        eza -la --color=always --icons=always --group-directories-first -- "$path" 2>/dev/null | head -100
+    else
+        # This is a human-facing directory preview.
+        # shellcheck disable=SC2012
+        ls -la -- "$path" 2>/dev/null | head -100
+    fi
+elif [ -f "$path" ]; then
+    if command -v bat >/dev/null 2>&1; then
+        bat --color=always --style=numbers --line-range=:200 -- "$path"
+    else
+        sed -n '1,200p' -- "$path"
+    fi
+fi

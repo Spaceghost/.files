@@ -16,10 +16,16 @@ structured `ls`; its `l`/`la`/`ll` use eza when present.
 
 Starship and Atuin use the Spaceghost violet/mint/amber palette. Optional tools
 are detected at startup, so the shells still open if a package is missing.
+Fzf's `Ctrl-T` and `Alt-C` pickers use a colored file/directory preview; press
+`Ctrl-/` to move or hide the preview. The shared `spaceghost-preview` command
+uses bat and eza when installed. Nushell also loads fzf's key bindings from its
+generated autoload script (with a compatibility rewrite for older Nu releases).
 Nushell's generated Starship, zoxide, and Atuin integration files live under
 `~/.config/nushell/generated/`; `spaceghost-install` refreshes them. The
-source-controlled Atuin config is linked to `~/.atuin/config.toml`; an existing
-custom config is preserved by the installer.
+source-controlled Atuin config is linked to both `~/.atuin/config.toml` and
+`~/.config/atuin/config.toml`; an existing XDG config is backed up by the installer.
+When `/srv/ai/tmp` exists, shells use that ZFS-backed directory for temporary
+files. Else they use `~/.cache/spaceghost/tmp` when available.
 
 On this workstation, install the optional packages with `brew bundle --file
 ~/.files/Brewfile`. On Alpine, install `fish nushell atuin starship zoxide eza
@@ -31,7 +37,10 @@ Starship prompt, and the `ocodex` argument forwarding.
 
 The modular approach follows examples from
 [John Stegeman's fish/Tide/Atuin dotfiles](https://github.com/johnstegeman/dotfiles)
-and [chiptoma's zsh modules](https://github.com/chiptoma/dotfiles-zsh).
+and [chiptoma's zsh modules](https://github.com/chiptoma/dotfiles-zsh), plus
+[kursataknc's Ghostty/Nushell setup](https://github.com/kursataknc/dotfiles)
+and [jsoyer's cross-tool theme index](https://github.com/jsoyer/dotfiles/blob/main/dot_config/CONFIGURATION_INDEX.md).
 Integration syntax follows [Atuin](https://docs.atuin.sh/main/guide/installation/),
 [Starship](https://starship.rs/config/), and
-[Nushell](https://www.nushell.sh/book/configuration.html) documentation.
+[Nushell](https://www.nushell.sh/book/configuration.html) documentation;
+the preview widgets follow [fzf's shell integration](https://github.com/junegunn/fzf#key-bindings-for-command-line).

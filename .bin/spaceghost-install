@@ -37,7 +37,8 @@ link() { # link TARGET LINK
     ln -sfn "$1" "$2"
 }
 mkdir -p "$HOME/.config"
-mkdir -p -m 700 "$HOME/.cache/spaceghost/tmp"
+mkdir -p "$HOME/.cache/spaceghost/tmp"
+chmod 700 "$HOME/.cache/spaceghost/tmp"
 link "$files/.bin" "$HOME/.bin"
 link "$files/.config/nvim" "$HOME/.config/nvim"
 link "$files/.zshrc" "$HOME/.zshrc"
@@ -119,6 +120,17 @@ if command -v nu >/dev/null 2>&1; then
     fi
     if command -v atuin >/dev/null 2>&1; then
         atuin init nu > "$HOME/.config/nushell/generated/atuin.nu"
+    fi
+    if command -v fzf >/dev/null 2>&1 && fzf --nushell >/dev/null 2>&1; then
+        mkdir -p "$HOME/.config/nushell/autoload"
+        nu_version="$(nu --version)"
+        nu_major="${nu_version%%.*}"
+        nu_minor="${nu_version#*.}"; nu_minor="${nu_minor%%.*}"
+        if [ "$nu_major" = 0 ] && [ "$nu_minor" -lt 114 ]; then
+            fzf --nushell | sed -e 's/get -o /get -i /g' -e 's/str lowercase/str downcase/g' > "$HOME/.config/nushell/autoload/_fzf_integration.nu"
+        else
+            fzf --nushell > "$HOME/.config/nushell/autoload/_fzf_integration.nu"
+        fi
     fi
 fi
 # mosh: roaming attach between machines. Package managers only; never built here.
