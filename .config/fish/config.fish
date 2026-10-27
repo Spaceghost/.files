@@ -1,5 +1,8 @@
 # Spaceghost shell: same commands and colors as the Neovim cockpit.
 fish_add_path --path $HOME/.bin $HOME/.local/bin $HOME/.local/nvim/bin
+if not set -q TMPDIR; and test -d $HOME/.cache/spaceghost/tmp
+    set -gx TMPDIR $HOME/.cache/spaceghost/tmp
+end
 set -gx EDITOR $HOME/.bin/nvim-remote
 set -gx VISUAL $EDITOR
 set -gx ENV $HOME/.ashrc

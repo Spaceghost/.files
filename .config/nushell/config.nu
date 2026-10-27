@@ -12,6 +12,8 @@ $env.PATH = ($env.PATH | where $it != $bin | prepend $bin)
 $env.EDITOR = $"($env.HOME)/.bin/nvim-remote"
 $env.VISUAL = $env.EDITOR
 $env.ENV = $"($env.HOME)/.ashrc"
+let private_tmp = $"($env.HOME)/.cache/spaceghost/tmp"
+if ('TMPDIR' not-in $env) and ($private_tmp | path exists) { $env.TMPDIR = $private_tmp }
 $env.FZF_DEFAULT_OPTS = '--height=45% --layout=reverse --border=rounded --prompt=❯ --pointer=▶ --marker=✓ --color=fg:#e8edf7,bg:#0b0d16,hl:#b4a1ff,fg+:#e8edf7,bg+:#2b3148,hl+:#79efc2,info:#8992ad,prompt:#79efc2,pointer:#b4a1ff,marker:#f3c969,border:#5a6280'
 
 $env.config.show_banner = false

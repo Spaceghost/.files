@@ -37,6 +37,7 @@ link() { # link TARGET LINK
     ln -sfn "$1" "$2"
 }
 mkdir -p "$HOME/.config"
+mkdir -p -m 700 "$HOME/.cache/spaceghost/tmp"
 link "$files/.bin" "$HOME/.bin"
 link "$files/.config/nvim" "$HOME/.config/nvim"
 link "$files/.zshrc" "$HOME/.zshrc"

@@ -1,4 +1,7 @@
 # Shared interactive aliases for POSIX sh, ash, bash, and zsh.
+if [ -z "${TMPDIR:-}" ] && [ -d "$HOME/.cache/spaceghost/tmp" ]; then
+    TMPDIR="$HOME/.cache/spaceghost/tmp"; export TMPDIR
+fi
 alias e='nvim-remote'
 alias v='nvim-remote'
 alias a='nvim-attach'
