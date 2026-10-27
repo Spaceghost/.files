@@ -320,4 +320,20 @@ test('shell fills a pane that previously displayed a file', function()
   assert(vim.wo.winbar == '', 'file winbar shrinks the terminal')
 end)
 
+test('existing terminal windows lose line numbers on reload and entry', function()
+  vim.cmd('tabonly!')
+  shell.open('tabnew', { cmd = { 'sh', '-c', 'cat' } })
+  vim.wo.number = true
+  vim.wo.relativenumber = true
+  vim.bo.scrollback = 10000
+  shell.setup()
+  assert(not vim.wo.number and not vim.wo.relativenumber, 'reload kept terminal numbers')
+  assert(vim.bo.scrollback == 20000, 'reload kept short terminal scrollback')
+  vim.wo.number = true
+  vim.wo.relativenumber = true
+  vim.cmd.tabprevious()
+  vim.cmd.tabnext()
+  assert(not vim.wo.number and not vim.wo.relativenumber, 'entering terminal kept numbers')
+end)
+
 vim.cmd(failures > 0 and 'cquit 1' or 'qa!')

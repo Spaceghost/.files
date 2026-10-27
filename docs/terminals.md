@@ -1,9 +1,12 @@
 # Terminals
 
-Every terminal does the same job here: draw Neovim. The shell hook in `.zshrc`
-(or `~/.bashrc`) starts Neovim, Neovim owns tabs, splits, titles and `$EDITOR`.
+Every terminal does the same job here: draw Neovim. The startup hooks for zsh,
+Bash, ash, fish, and Nushell attach interactive login shells to Neovim; Neovim
+owns tabs, splits, titles and `$EDITOR`.
 Each config therefore keeps the emulator's own chrome and keybindings minimal
 and ships the Spaceghost palette so TUIs inside the shell match the HUD.
+Shell prompts, history, aliases, and optional tools are documented in
+[`shells.md`](shells.md).
 
 | terminal | config | notes |
 | --- | --- | --- |

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Same Codex launch in zsh, bash, ash, fish, Nushell, and scripts.
+exec codex --search --dangerously-bypass-approvals-and-sandbox -s danger-full-access "$@"

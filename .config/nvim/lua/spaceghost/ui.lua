@@ -29,6 +29,25 @@ local function tab_state(tab)
   return { new = has_new, term = has_term, dead = dead, panes = #wins }
 end
 
+function M.tab_click(index, clicks, button)
+  local tab = vim.api.nvim_list_tabpages()[index]
+  if not tab then return end
+  if button == 'm' then
+    vim.cmd(index .. 'tabclose')
+  elseif button == 'l' then
+    vim.api.nvim_set_current_tabpage(tab)
+    if clicks >= 2 then shell.open('tabnew') end
+  end
+end
+
+function M.plus_click(_, _, button)
+  if button == 'l' then shell.open('$tabnew') end
+end
+
+function M.empty_click(_, clicks, button)
+  if button == 'l' and clicks >= 2 then shell.open('$tabnew') end
+end
+
 function M.tabline()
   local parts = {}
   local width = vim.o.columns
@@ -38,23 +57,30 @@ function M.tabline()
   parts[#parts + 1] = hl('TabLineFill', ' ')
   local current = vim.api.nvim_get_current_tabpage()
   local maxlen = width >= 180 and 26 or 14
-  for i, tab in ipairs(vim.api.nvim_list_tabpages()) do
+  local tabs = vim.api.nvim_list_tabpages()
+  for i, tab in ipairs(tabs) do
     local label = tab_label(tab)
     if vim.fn.strchars(label) > maxlen then label = vim.fn.strcharpart(label, 0, maxlen - 1) .. '…' end
     label = literal(label)
     local st = tab_state(tab)
     if tab == current then
       local extra = st.panes > 1 and (' +' .. st.panes) or ''
-      parts[#parts + 1] = '%' .. i .. 'T' .. hl('SpaceghostTabSel', ' ' .. i .. ' / ' .. label .. '  NOW' .. extra .. ' ') .. '%T'
+      parts[#parts + 1] = '%' .. i .. '@v:lua.Spaceghost.ui.tab_click@'
+        .. hl('SpaceghostTabSel', ' ' .. i .. ' / ' .. label .. '  NOW' .. extra .. ' ') .. '%X'
     else
       local group = st.new and 'SpaceghostTabNew' or 'SpaceghostTab'
       local state = st.dead and hl('SpaceghostStateExit', 'EXIT')
         or (st.new and hl('SpaceghostStateNew', 'NEW') or hl('SpaceghostStateLive', st.term and 'LIVE' or 'EDIT'))
-      parts[#parts + 1] = '%' .. i .. 'T' .. hl(group, ' ' .. i .. ' ' .. label .. ' ') .. state .. hl(group, ' ') .. '%T'
+      parts[#parts + 1] = '%' .. i .. '@v:lua.Spaceghost.ui.tab_click@'
+        .. hl(group, ' ' .. i .. ' ' .. label .. ' ') .. state .. hl(group, ' ') .. '%X'
     end
     parts[#parts + 1] = hl('TabLineFill', ' ')
   end
-  parts[#parts + 1] = '%=' .. hl('SpaceghostMuted', '')
+  if #tabs >= 2 then
+    parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', ' + ') .. '%X'
+  end
+  parts[#parts + 1] = '%@v:lua.Spaceghost.ui.empty_click@%=' .. hl('TabLineFill', ' ') .. '%X'
+    .. hl('SpaceghostMuted', '')
   if width >= 150 then parts[#parts + 1] = hl('SpaceghostMuted', vim.fn.hostname() .. ' / ') end
   parts[#parts + 1] = hl('TabLine', os.date(width >= 180 and '%H:%M %a %d %b ' or '%H:%M '))
   return table.concat(parts)
@@ -102,7 +128,10 @@ end
 
 function M.statusline()
   local buf = vim.api.nvim_get_current_buf()
-  local m = modes[vim.api.nvim_get_mode().mode] or modes[vim.api.nvim_get_mode().mode:sub(1, 1)] or { '?', 'SpaceghostModeNormal' }
+  local mode = vim.api.nvim_get_mode().mode
+  local copying = vim.bo[buf].buftype == 'terminal' and (mode == 'n' or mode == 'nt')
+  local m = copying and { 'COPY', 'SpaceghostModeVisual' }
+    or modes[mode] or modes[mode:sub(1, 1)] or { '?', 'SpaceghostModeNormal' }
   local width = vim.o.columns
   local parts = { hl(m[2], ' ' .. m[1] .. ' ') }
   local cwd = shell.cwd(buf)
@@ -149,7 +178,12 @@ function M.statusline()
     right[#right + 1] = 'PANE ' .. hl('SpaceghostStatusCwd', vim.fn.winnr() .. '/' .. vim.fn.winnr('$')) .. hl('StatusLine', '')
   end
   if shell.is_server then right[#right + 1] = hl('SpaceghostStatusBranch', 'SRV') .. hl('StatusLine', '') end
-  right[#right + 1] = hl('SpaceghostStatusBranch', 'F2 panes') .. hl('StatusLine', width >= 110 and ' / F4 menu ' or ' ')
+  if copying then
+    right[#right + 1] = hl('SpaceghostStatusBranch', width >= 110 and '^\\ u prompt / v select / i shell' or 'i shell')
+      .. hl('StatusLine', ' ')
+  else
+    right[#right + 1] = hl('SpaceghostStatusBranch', 'F2 panes') .. hl('StatusLine', width >= 110 and ' / F4 menu ' or ' ')
+  end
   parts[#parts + 1] = hl('StatusLine', table.concat(right, '  '))
   return table.concat(parts)
 end

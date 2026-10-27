@@ -1,0 +1,3 @@
+#!/bin/sh
+# Keep the existing oclaude shortcut available in every shell.
+exec claude --allow-dangerously-skip-permissions "$@"

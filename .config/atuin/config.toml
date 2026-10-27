@@ -1,0 +1,11 @@
+# Local-first, compact history search for the Spaceghost cockpit.
+auto_sync = false
+search_mode = 'fuzzy'
+filter_mode = 'global'
+style = 'compact'
+inline_height = 18
+show_preview = true
+enter_accept = true
+
+[theme]
+name = 'spaceghost'

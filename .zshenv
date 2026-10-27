@@ -4,6 +4,9 @@
 
 # Edit inside the running Neovim (see ~/.config/nvim/init.lua, ~/.bin/nvim-remote).
 case ":$PATH:" in *":$HOME/.bin:"*) ;; *) export PATH="$HOME/.bin:$PATH" ;; esac
+[[ -d $HOME/.local/bin && ":$PATH:" != *":$HOME/.local/bin:"* ]] && export PATH="$HOME/.local/bin:$PATH"
 [[ -d $HOME/.local/nvim/bin && ":$PATH:" != *":$HOME/.local/nvim/bin:"* ]] && export PATH="$HOME/.local/nvim/bin:$PATH"
 export EDITOR="$HOME/.bin/nvim-remote"
 export VISUAL="$EDITOR"
+export ENV="$HOME/.ashrc"
+[[ -r $HOME/.files/.config/spaceghost/theme.sh ]] && source "$HOME/.files/.config/spaceghost/theme.sh"

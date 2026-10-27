@@ -2,6 +2,7 @@
 local M = {}
 local uv = vim.uv or vim.loop
 local native = require('spaceghost.native')
+local prompt_ns = vim.api.nvim_create_namespace('spaceghost.shell.prompts')
 
 -- First login shell that exists on this machine; `exec a || exec b` in sh exits
 -- on the first failure, so pick here instead.
@@ -35,6 +36,23 @@ function M.cwd(buf)
 end
 
 function M.is_shell(buf) return vim.bo[buf].buftype == 'terminal' end
+
+function M.previous_prompt()
+  local buf = vim.api.nvim_get_current_buf()
+  if vim.bo[buf].buftype ~= 'terminal' then return end
+  vim.cmd.stopinsert()
+  vim.schedule(function()
+    if not vim.api.nvim_buf_is_valid(buf) or vim.api.nvim_get_current_buf() ~= buf then return end
+    local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+    local marks = vim.api.nvim_buf_get_extmarks(buf, prompt_ns, { 0, 0 }, { row, 0 }, {})
+    for i = #marks, 1, -1 do
+      if marks[i][2] < row then
+        vim.api.nvim_win_set_cursor(0, { marks[i][2] + 1, 0 })
+        return
+      end
+    end
+  end)
+end
 
 -- Repaint Neovim and ask the terminal application to repaint through its
 -- usual resize signal. No control characters are sent to the application.
@@ -230,12 +248,25 @@ function M.edit(path, done, line)
 end
 
 -- ── Autocommands ──────────────────────────────────────────────────────────────
+local function hide_terminal_numbers(win)
+  vim.wo[win].number = false
+  vim.wo[win].relativenumber = false
+end
+
 function M.setup()
   local remote = vim.fn.expand('~/.bin/nvim-remote')
   if uv.fs_stat(remote) then vim.env.EDITOR = remote; vim.env.VISUAL = remote end
   vim.env.SPACEGHOST_NVIM_SOCK = M.sock
 
   local group = vim.api.nvim_create_augroup('SpaceghostShell', { clear = true })
+  -- Reload also needs to fix terminal windows that were already open.
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    local buf = vim.api.nvim_win_get_buf(win)
+    if vim.bo[buf].buftype == 'terminal' then
+      vim.bo[buf].scrollback = 20000
+      hide_terminal_numbers(win)
+    end
+  end
 
   vim.api.nvim_create_autocmd('VimEnter', {
     group = group,
@@ -252,8 +283,8 @@ function M.setup()
   vim.api.nvim_create_autocmd('TermOpen', {
     group = group,
     callback = function(ev)
-      vim.wo.number = false
-      vim.wo.relativenumber = false
+      vim.bo[ev.buf].scrollback = 20000
+      hide_terminal_numbers(0)
       vim.wo.signcolumn = 'no'
       vim.wo.cursorline = false
       watch_activity(ev.buf)
@@ -266,6 +297,9 @@ function M.setup()
     callback = function(ev)
       local seq = type(ev.data) == 'table' and ev.data.sequence or ev.data
       if type(seq) ~= 'string' then return end
+      if seq:match('^\27%]133;A') and ev.data.cursor then
+        vim.api.nvim_buf_set_extmark(ev.buf, prompt_ns, ev.data.cursor[1] - 1, 0, {})
+      end
       local path = native.osc7_path(seq)
       if path then
         vim.b[ev.buf].spaceghost_cwd = path
@@ -278,6 +312,7 @@ function M.setup()
     group = group,
     callback = function(ev)
       if vim.bo[ev.buf].buftype ~= 'terminal' then return end
+      hide_terminal_numbers(0)
       if vim.b[ev.buf].spaceghost_new then
         vim.b[ev.buf].spaceghost_new = false
         vim.schedule(function() pcall(vim.cmd.redrawtabline) end)

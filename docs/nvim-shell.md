@@ -52,11 +52,18 @@ shell, add the same block to `~/.bashrc` (see "Install").
 * **Tabline** = tmux window list: `N / name  NOW` for the current tab, `LIVE`
   for a running shell, `NEW` when a hidden shell printed output, `EXIT` for a
   dead one, `EDIT` for a file tab. Tabs are named from the shell's OSC 0 title
-  (the running command, else the cwd); `Ctrl-\ ,` renames.
+  (the running command, else the cwd); `Ctrl-\ ,` renames. Click a tab to focus
+  it, double-click it to open a shell tab directly after it, or middle-click to
+  close it. When two or more tabs are open, click `+` to add a shell at the far
+  right. Double-click the empty tabline space before the host and clock to add
+  a shell at the far right.
 * **Statusline** (global): mode, shell title or file, cwd (fish-style
   shortened), git branch, LOAD / MEM / BAT telemetry, pane index, `SRV`.
-* **Shell integration**: `.zshrc` emits OSC 7 (cwd) and OSC 0 (title) so new
-  splits open in the focused shell's directory and the HUD tracks it.
+* **Shell integration**: `.zshrc` emits OSC 7 (cwd), OSC 0 (title), and OSC 133
+  (prompt positions). New splits inherit the focused shell's directory. In a
+  shell, press `Ctrl-\ u` to jump to the previous prompt in copy mode; select
+  with `v`, yank with `y`, and press `i` to return to shell input. Terminal
+  buffers retain 20,000 lines of scrollback without line-number gutters.
 * **Colorscheme** `spaceghost` matches `.tmux.conf` and the terminal themes;
   terminal palette colors are set so TUIs inside the shell match too.
 
@@ -139,6 +146,7 @@ when the statusline shows `REMOTE @HOST`.
 | `Tab` | previous pane across tabs | `w` | searchable tabs + panes + hosts picker |
 | `z` / `=` | zoom / balance | `x` | close pane |
 | `d` | redraw pane and its terminal | | |
+| `u` | previous shell prompt and copy mode | | |
 | `` ` `` | scratch terminal (toggle) | `g` | git observatory |
 | `~` | btop / htop | `e` | edit a file |
 | `a` | attach a machine in a split | `Ctrl-]` | toggle all navigation between local and remote |
@@ -153,6 +161,8 @@ instances; the nested check runs a real remote UI inside a terminal):
 
 ```sh
 nvim --headless -u NONE -l tests/nvim-navigation.lua
+nvim --headless -u NONE -l tests/nvim-tabline.lua
+nvim --headless -u NONE -l tests/nvim-terminal-ux.lua
 nvim --headless -u NONE -l tests/nvim-nested.lua
 ```
 

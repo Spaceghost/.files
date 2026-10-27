@@ -132,6 +132,7 @@ function M.setup()
   map('L', '<C-\\><C-n>5<C-w>>', 'Resize right')
   map('n', function() M.focus_tab(1) end, 'Next tab')
   map('p', function() M.focus_tab(-1) end, 'Previous tab')
+  map('u', shell.previous_prompt, 'Previous shell prompt', { 't' })
   for i = 1, 9 do
     local function jump()
       local tab = vim.api.nvim_list_tabpages()[i]
