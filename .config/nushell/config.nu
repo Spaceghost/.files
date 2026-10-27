@@ -2,13 +2,13 @@
 let bin = $"($env.HOME)/.bin"
 let local_bin = $"($env.HOME)/.local/bin"
 let nvim_bin = $"($env.HOME)/.local/nvim/bin"
-if $bin not-in $env.PATH { $env.PATH = ($env.PATH | prepend $bin) }
 if ($local_bin | path exists) and $local_bin not-in $env.PATH {
     $env.PATH = ($env.PATH | prepend $local_bin)
 }
 if ($nvim_bin | path exists) and $nvim_bin not-in $env.PATH {
     $env.PATH = ($env.PATH | prepend $nvim_bin)
 }
+$env.PATH = ($env.PATH | where $it != $bin | prepend $bin)
 $env.EDITOR = $"($env.HOME)/.bin/nvim-remote"
 $env.VISUAL = $env.EDITOR
 $env.ENV = $"($env.HOME)/.ashrc"
