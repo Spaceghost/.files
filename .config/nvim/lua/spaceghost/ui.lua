@@ -76,9 +76,7 @@ function M.tabline()
     end
     parts[#parts + 1] = hl('TabLineFill', ' ')
   end
-  if #tabs >= 2 then
-    parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', ' + ') .. '%X'
-  end
+  parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', '  ') .. '%X'
   parts[#parts + 1] = '%@v:lua.Spaceghost.ui.empty_click@%=' .. hl('TabLineFill', ' ') .. '%X'
     .. hl('SpaceghostMuted', '')
   if width >= 150 then parts[#parts + 1] = hl('SpaceghostMuted', vim.fn.hostname() .. ' / ') end

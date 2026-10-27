@@ -54,7 +54,7 @@ shell, add the same block to `~/.bashrc` (see "Install").
   dead one, `EDIT` for a file tab. Tabs are named from the shell's OSC 0 title
   (the running command, else the cwd); `Ctrl-\ ,` renames. Click a tab to focus
   it, double-click it to open a shell tab directly after it, or middle-click to
-  close it. When two or more tabs are open, click `+` to add a shell at the far
+  close it. Click the terminal icon (``), visible even with one tab, to add a shell at the far
   right. Double-click the empty tabline space before the host and clock to add
   a shell at the far right.
 * **Statusline** (global): mode, shell title or file, cwd (fish-style

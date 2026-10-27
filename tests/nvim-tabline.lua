@@ -11,14 +11,20 @@ local function reset(count)
 end
 
 reset(1)
-assert(not ui.tabline():find('ui.plus_click', 1, true), 'plus appears with one tab')
+local single = ui.tabline()
+assert(single:find('ui.plus_click', 1, true), 'new-shell button missing with one tab')
+local single_rendered = vim.api.nvim_eval_statusline(single, { use_tabline = true, maxwidth = 200 }).str
+assert(single_rendered:find('', 1, true), 'terminal icon missing with one tab')
+ui.plus_click(0, 1, 'l', ' ')
+assert(#tabs() == 2 and vim.api.nvim_get_current_tabpage() == tabs()[2]
+  and vim.bo.buftype == 'terminal', 'single-tab button did not open a shell on the right')
 reset(2)
 local line = ui.tabline()
 assert(line:find('ui.tab_click', 1, true), 'tabs have no click handler')
-assert(line:find('ui.plus_click', 1, true), 'plus missing with two tabs')
+assert(line:find('ui.plus_click', 1, true), 'new-shell button missing with two tabs')
 assert(line:find('ui.empty_click', 1, true), 'empty area has no click handler')
 local rendered = vim.api.nvim_eval_statusline(line, { use_tabline = true, maxwidth = 200 }).str
-assert(rendered:find('+', 1, true), 'plus is not visible')
+assert(rendered:find('', 1, true), 'terminal icon is not visible')
 
 reset(3)
 local originals = tabs()
