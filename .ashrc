@@ -1,4 +1,3 @@
 # Interactive ash sessions. ~/.profile exports ENV so ash loads this file.
-[ -r "$HOME/.files/.config/spaceghost/aliases.sh" ] && . "$HOME/.files/.config/spaceghost/aliases.sh"
-[ -r "$HOME/.files/.config/spaceghost/theme.sh" ] && . "$HOME/.files/.config/spaceghost/theme.sh"
+[ -r "$HOME/.files/.bash_spaceghost" ] && . "$HOME/.files/.bash_spaceghost"
 PS1='✦ \w ❯ '
