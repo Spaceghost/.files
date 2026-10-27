@@ -15,7 +15,7 @@ $env.ENV = $"($env.HOME)/.ashrc"
 let private_tmp = $"($env.HOME)/.cache/spaceghost/tmp"
 if 'TMPDIR' not-in $env {
     if ('/srv/ai/tmp' | path exists) { $env.TMPDIR = '/srv/ai/tmp' }
-    else if ($private_tmp | path exists) { $env.TMPDIR = $private_tmp }
+    if ('TMPDIR' not-in $env) and ($private_tmp | path exists) { $env.TMPDIR = $private_tmp }
 }
 if ('TMPDIR' in $env) and ($env.TMPDIR == '/srv/ai/tmp') {
     $env.AI_WORKSPACE_ROOT = '/srv/ai'
