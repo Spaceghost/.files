@@ -1,0 +1,10 @@
+[Unit]
+Description=Sync Spaceghost .files every two minutes
+
+[Timer]
+OnBootSec=1min
+OnUnitInactiveSec=2min
+Unit=spaceghost-sync.service
+
+[Install]
+WantedBy=timers.target

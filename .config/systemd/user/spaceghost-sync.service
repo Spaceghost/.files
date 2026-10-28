@@ -1,0 +1,8 @@
+[Unit]
+Description=Sync committed Spaceghost .files changes
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.bin/spaceghost-sync run
+TimeoutStartSec=90
