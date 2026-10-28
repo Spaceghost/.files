@@ -1,0 +1,90 @@
+#!/bin/sh
+set -eu
+
+checkout=${OLDBOOK_CHECKOUT:-"$HOME/.files"}
+migration="$checkout/guix/migration"
+expected_lock=321d9e0702cf3368824f42b67822adff376373f4bb4209bb331898fb16226128
+expected_guix_lock=a39763a9ea503b106be7d4042a930dfb5c7318525dcd8e319b1cbb9a75666af2
+expected_current_lock=alpine/packages/locks/a39763a9ea503b106be7.json
+expected_theme_commit=3d0d0b212ea3af7c23caa0dba827b2bd874850bb
+theme_checkout=${OLDBOOK_THEMES_CHECKOUT:-"$HOME/src/oldbook-themes"}
+
+failures=0
+
+pass() {
+    printf 'PASS  %s\n' "$1"
+}
+
+fail() {
+    printf 'FAIL  %s\n' "$1" >&2
+    failures=$((failures + 1))
+}
+
+if sha256sum -c "$migration/patched-binaries.sha256" >/dev/null 2>&1; then
+    pass "patched desktop binaries match the migration manifest"
+else
+    sha256sum -c "$migration/patched-binaries.sha256" || true
+    fail "patched desktop binary drift"
+fi
+
+while IFS= read -r package; do
+    if apk list --installed 2>/dev/null | grep -q "^$package "; then
+        pass "Alpine package $package"
+    else
+        fail "missing Alpine package $package"
+    fi
+done < "$migration/apk-packages.txt"
+
+lock="$checkout/alpine/packages/locks/321d9e0702cf3368824f.json"
+if [ -f "$lock" ] && [ "$(sha256sum "$lock" | awk '{print $1}')" = "$expected_lock" ]; then
+    pass "exact Alpine recovery lock"
+else
+    fail "exact Alpine recovery lock is missing or changed"
+fi
+
+if apk info -e guix >/dev/null 2>&1; then
+    guix_lock="$checkout/alpine/packages/locks/a39763a9ea503b106be7.json"
+    if [ -f "$guix_lock" ] &&
+       [ "$(sha256sum "$guix_lock" | awk '{print $1}')" = "$expected_guix_lock" ] &&
+       [ "$(cat "$checkout/alpine/packages/current-lock")" = "$expected_current_lock" ]; then
+        pass "exact post-install Alpine and Guix recovery lock"
+    else
+        fail "post-install Alpine and Guix recovery lock is missing or changed"
+    fi
+fi
+
+if [ -x "$checkout/alpine/bin/package-archive" ] &&
+   "$checkout/alpine/bin/package-archive" \
+       --cache "$HOME/.local/share/oldbook/apks" verify >/dev/null 2>&1; then
+    pass "archived Alpine package closure"
+else
+    fail "archived Alpine package closure does not verify"
+fi
+
+if [ -d "$theme_checkout/.git" ] &&
+   [ "$(git -C "$theme_checkout" rev-parse HEAD 2>/dev/null || true)" = "$expected_theme_commit" ] &&
+   [ -z "$(git -C "$theme_checkout" status --porcelain 2>/dev/null || true)" ]; then
+    pass "published Oldbook theme repository"
+else
+    fail "Oldbook theme checkout is missing, dirty, or at another commit"
+fi
+
+backup_current="$HOME/.local/state/oldbook/guix-migration/CURRENT"
+if [ -r "$backup_current" ]; then
+    backup_dir=$(cat "$backup_current")
+    if [ -d "$backup_dir" ] &&
+       (cd "$backup_dir" && sha256sum -c artifacts.sha256 >/dev/null 2>&1); then
+        pass "private pre-migration user and Fossil backups"
+    else
+        fail "private pre-migration backup verification"
+    fi
+else
+    fail "private pre-migration backup pointer"
+fi
+
+if [ "$failures" -ne 0 ]; then
+    printf '%s\n' "$failures migration prerequisite(s) failed" >&2
+    exit 1
+fi
+
+printf '%s\n' 'Current Alpine desktop is recoverable and safe for the next staged Guix step.'

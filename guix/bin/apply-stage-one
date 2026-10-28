@@ -1,0 +1,24 @@
+#!/bin/sh
+set -eu
+
+checkout=${OLDBOOK_CHECKOUT:-"$HOME/.files"}
+profile="$HOME/.guix-extra-profiles/oldbook-migration/oldbook-migration"
+
+"$checkout/guix/bin/audit-current"
+
+# Alpine's package is the reversible bootstrap.  Do not run `guix pull` here:
+# channel updates and patched packages belong on the remote builders.
+doas apk add guix
+doas rc-service guix-daemon start
+doas rc-update add guix-daemon default
+
+mkdir -p "${profile%/*}"
+guix build guile jq ripgrep --dry-run
+guix package \
+    --profile="$profile" \
+    --manifest="$checkout/guix/migration/profile.scm"
+
+"$checkout/guix/bin/audit-current"
+
+printf '%s\n' "Stage one profile: $profile"
+printf '%s\n' 'It was not added to PATH; the Alpine desktop remains active.'
