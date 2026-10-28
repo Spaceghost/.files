@@ -83,7 +83,7 @@ def status(once=False):
         ])
         # Keep the essentials visible on a keyboard-only device.
         thermal = f' {temperature:.0f}°' if temperature is not None else ''
-        text = f'RAM {memory["available"]/1024:.0f}M'
+        text = f'{memory["available"]/1024:.0f}M'
         print(json.dumps({'text': text, 'tooltip': tooltip, 'class': state}), flush=True)
         if once:
             return
