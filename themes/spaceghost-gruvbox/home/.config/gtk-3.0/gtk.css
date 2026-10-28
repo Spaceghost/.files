@@ -1,0 +1,7 @@
+/* Gruvbox Dark, with readable cream text on the small panel. */
+@define-color theme_fg_color #ebdbb2;
+@define-color theme_text_color #fbf1c7;
+@define-color theme_selected_bg_color #d79921;
+@define-color theme_selected_fg_color #282828;
+window, dialog, entry, textview, label { color: #ebdbb2; }
+selection, *:selected { background-color: #d79921; color: #282828; }

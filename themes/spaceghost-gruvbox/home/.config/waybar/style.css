@@ -1,0 +1,98 @@
+/* Spaceghost: Gruvbox, local glyphs, compact targets for the 480px SPI panel. */
+@define-color base #1d2021;
+@define-color surface #282828;
+@define-color raised #3c3836;
+@define-color muted #928374;
+@define-color text #ebdbb2;
+@define-color gold #fabd2f;
+@define-color aqua #8ec07c;
+@define-color blue #83a598;
+@define-color red #fb4934;
+* {
+    font-family: "DejaVu Sans Mono";
+    font-size: 11px;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    text-shadow: none;
+    box-shadow: none;
+}
+window#waybar {
+    background: @base;
+    color: @text;
+    border-radius: 5px;
+    border-bottom: 1px solid #665c54;
+}
+.modules-left, .modules-right { margin: 2px 3px; }
+#custom-apps {
+    color: transparent;
+    background-color: @raised;
+    background-image: url("ghost.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 21px 21px;
+    font-size: 19px;
+    font-weight: bold;
+    padding: 0 5px;
+    min-width: 18px;
+    margin-right: 3px;
+    border-radius: 3px;
+}
+#workspaces { background: @surface; border-radius: 3px; }
+#workspaces button {
+    color: @text;
+    padding: 0 3px;
+    min-width: 10px;
+    border-bottom: 2px solid transparent;
+}
+#workspaces button.persistent { color: @muted; }
+#workspaces button.focused {
+    background: #d79921;
+    color: @base;
+    border-radius: 3px 3px 0 0;
+    border-bottom-color: @gold;
+    font-weight: bold;
+}
+#workspaces button.urgent { background: @red; color: @base; }
+#workspaces button:hover { background: #504945; color: #fbf1c7; }
+#mode { color: @gold; padding: 0 3px; }
+#custom-system, #custom-wifi, #custom-battery, #clock, #custom-panel {
+    background: @surface;
+    border-radius: 3px;
+    padding: 0 5px;
+}
+#custom-system { color: @blue; }
+#custom-system.warning { color: @gold; }
+#custom-system.critical { color: @red; }
+#custom-wifi { color: @aqua; }
+#custom-wifi.disconnected, #custom-wifi.disabled { color: @red; }
+#custom-wifi.linked { color: @gold; }
+#custom-battery { color: #b8bb26; }
+#custom-battery.estimated { border-bottom: 2px solid #98971a; }
+#custom-battery.plugged { color: @aqua; border-bottom-color: @aqua; }
+#custom-battery.charging { color: @aqua; }
+#custom-battery.warning { color: @gold; border-bottom-color: @gold; font-weight: bold; }
+#custom-battery.critical { color: #fbf1c7; background: #9d0006; border-bottom-color: @red; font-weight: bold; }
+#custom-battery.unavailable { color: @muted; }
+#clock { color: @gold; font-weight: bold; background: @raised; }
+#custom-panel { color: @gold; font-size: 10px; padding: 0 5px; }
+#custom-apps:hover { background-color: #504945; }
+#custom-system:hover, #custom-wifi:hover, #clock:hover, #custom-panel:hover {
+    background: @raised;
+    color: #fbf1c7;
+}
+tooltip {
+    background: @base;
+    border: 1px solid #665c54;
+    border-radius: 5px;
+}
+tooltip label { color: @text; padding: 7px; }
+
+/* Media appears only when a player publishes a session. */
+#mpris { color: @aqua; padding: 0 4px; }
+#mpris.paused { color: @muted; }
+#mpris:hover { color: #fbf1c7; }
+
+#custom-wifi.weak, #custom-wifi.disconnected { color: @red; }
+#custom-wifi.fair, #custom-wifi.linked { color: @gold; }
+#custom-wifi.strong { color: @aqua; }

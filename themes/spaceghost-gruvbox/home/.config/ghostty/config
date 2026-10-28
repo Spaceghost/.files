@@ -1,0 +1,39 @@
+# Spaceghost / Sharkdeck — warm, compact, native Wayland terminal.
+theme = Spaceghost Gruvbox
+font-family = DejaVu Sans Mono
+font-size = 9
+command = /bin/bash
+window-padding-x = 4
+window-padding-y = 4
+window-padding-balance = true
+window-decoration = false
+window-theme = dark
+gtk-titlebar = false
+gtk-single-instance = detect
+linux-cgroup = never
+background-opacity = 1
+cursor-style = block
+cursor-style-blink = false
+mouse-hide-while-typing = true
+copy-on-select = clipboard
+scrollback-limit-bytes = 10000000
+shell-integration = detect
+confirm-close-surface = true
+# Familiar shortcuts shared with Foot.
+keybind = ctrl+shift+c=copy_to_clipboard
+keybind = ctrl+shift+v=paste_from_clipboard
+keybind = ctrl+shift+f=start_search
+keybind = ctrl+equal=increase_font_size:1
+keybind = ctrl+plus=increase_font_size:1
+keybind = ctrl+minus=decrease_font_size:1
+keybind = ctrl+0=reset_font_size
+keybind = shift+page_up=scroll_page_up
+keybind = shift+page_down=scroll_page_down
+keybind = ctrl+shift+comma=reload_config
+# Split panes for a keyboard-first desktop.
+keybind = ctrl+shift+o=new_split:right
+keybind = ctrl+shift+e=new_split:down
+keybind = ctrl+alt+left=goto_split:left
+keybind = ctrl+alt+right=goto_split:right
+keybind = ctrl+alt+up=goto_split:top
+keybind = ctrl+alt+down=goto_split:bottom

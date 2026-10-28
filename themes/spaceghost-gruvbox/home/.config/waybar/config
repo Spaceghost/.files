@@ -1,0 +1,95 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 28,
+  "spacing": 2,
+  "margin-top": 2,
+  "margin-left": 3,
+  "margin-right": 3,
+  "exclusive": true,
+  "fixed-center": false,
+  "reload_style_on_change": true,
+  "modules-left": [
+    "custom/apps",
+    "sway/workspaces",
+    "sway/mode"
+  ],
+  "modules-right": [
+    "custom/system",
+    "custom/wifi",
+    "clock"
+  ],
+  "custom/apps": {
+    "format": " ",
+    "tooltip-format": "<b>SPACEGHOST \u00b7 CONTROL DECK</b>\nSuper+Ctrl+P: all controls\nRight click: applications",
+    "on-click": "python3 ~/.config/waybar/panel.py menu",
+    "on-click-right": "fuzzel"
+  },
+  "sway/workspaces": {
+    "disable-scroll": true,
+    "format": "{index}",
+    "current-only": false,
+    "disable-auto-back-and-forth": true,
+    "persistent-workspaces": {
+      "1": [],
+      "2": [],
+      "3": []
+    },
+    "tooltip": false
+  },
+  "sway/mode": {
+    "format": "{}",
+    "tooltip": false
+  },
+  "custom/system": {
+    "exec": "python3 -u ~/.config/waybar/panel.py status",
+    "return-type": "json",
+    "restart-interval": 5,
+    "on-click": "foot -e htop",
+    "on-click-right": "foot -e python3 ~/.config/waybar/panel.py system",
+    "exec-on-event": false
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%d %b}",
+    "interval": 60,
+    "tooltip-format": "<b>{:%A, %d %B %Y}</b>\n\n<tt><small>{calendar}</small></tt>\nClick: time / date \u00b7 Right click: quick actions",
+    "on-click-right": "python3 ~/.config/waybar/panel.py menu",
+    "calendar": {
+      "mode": "month",
+      "format": {
+        "months": "<span color='#fabd2f'><b>{}</b></span>",
+        "weekdays": "<span color='#8ec07c'>{}</span>",
+        "today": "<span color='#fabd2f'><b>[{}]</b></span>"
+      }
+    }
+  },
+  "custom/panel": {
+    "format": "Super+P",
+    "tooltip-format": "<b>Super+P \u00b7 Quick actions</b>\nType to filter \u00b7 Enter to run \u00b7 Escape to close",
+    "on-click": "python3 ~/.config/waybar/panel.py menu",
+    "on-click-right": "foot -e python3 ~/.config/waybar/panel.py system"
+  },
+  "modules-center": [
+    "mpris"
+  ],
+  "mpris": {
+    "format": "{status_icon} {dynamic}",
+    "format-paused": "{status_icon} {dynamic}",
+    "status-icons": {
+      "playing": "\u25b6",
+      "paused": "\u2161",
+      "stopped": "\u25a0"
+    },
+    "max-length": 9,
+    "dynamic-len": 7,
+    "tooltip-format": "<b>{title}</b>\n{artist}\nClick: play / pause\nMedia controls are also in the control deck."
+  },
+  "custom/wifi": {
+    "exec": "python3 ~/.config/waybar/wifi.py",
+    "return-type": "json",
+    "interval": 5,
+    "on-click": "foot -e python3 ~/.config/waybar/panel.py network",
+    "tooltip": true
+  }
+}

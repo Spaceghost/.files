@@ -1,0 +1,33 @@
+#!/usr/bin/python3
+"""Start exactly one bar without passing lifetime locks to its child scripts."""
+import fcntl
+import hashlib
+import os
+from pathlib import Path
+import signal
+import sys
+import time
+
+restart = '--restart' in sys.argv
+args = [v for v in sys.argv[1:] if v != '--restart'] or ['-b','bar-0']
+identity = os.environ.get('SWAYSOCK','') + ' '.join(args)
+name = hashlib.sha256(identity.encode()).hexdigest()[:12]
+base = Path(os.environ['XDG_RUNTIME_DIR']) / ('spaceghost-bar-' + name)
+lock = open(str(base)+'.launch','w')
+fcntl.flock(lock,fcntl.LOCK_EX)
+pidfile = Path(str(base)+'.pid')
+try:
+    pid = int(pidfile.read_text())
+    live = Path(f'/proc/{pid}/comm').read_text().strip() == 'waybar'
+except (OSError,ValueError):
+    live = False
+if live and not restart:
+    sys.exit(0)
+if live:
+    os.kill(pid,signal.SIGTERM)
+    for _ in range(40):
+        if not Path(f'/proc/{pid}').exists(): break
+        time.sleep(.05)
+pidfile.write_text(str(os.getpid()))
+# Python's close-on-exec default releases this transaction lock at exec.
+os.execvp('waybar',['waybar',*args])

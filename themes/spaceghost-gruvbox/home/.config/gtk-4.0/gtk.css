@@ -1,0 +1,28 @@
+/* Spaceghost: Gruvbox Dark for GTK 4/libadwaita applications. */
+@define-color window_bg_color #282828;
+@define-color window_fg_color #ebdbb2;
+@define-color view_bg_color #1d2021;
+@define-color view_fg_color #ebdbb2;
+@define-color headerbar_bg_color #3c3836;
+@define-color headerbar_fg_color #fbf1c7;
+@define-color card_bg_color #3c3836;
+@define-color card_fg_color #ebdbb2;
+@define-color dialog_bg_color #282828;
+@define-color dialog_fg_color #ebdbb2;
+@define-color popover_bg_color #3c3836;
+@define-color popover_fg_color #ebdbb2;
+@define-color sidebar_bg_color #1d2021;
+@define-color sidebar_fg_color #ebdbb2;
+@define-color accent_bg_color #d79921;
+@define-color accent_fg_color #282828;
+@define-color accent_color #fabd2f;
+@define-color success_color #b8bb26;
+@define-color warning_color #fabd2f;
+@define-color error_color #fb4934;
+@define-color destructive_bg_color #cc241d;
+@define-color destructive_fg_color #fbf1c7;
+window, popover, dialog { background-color: @window_bg_color; color: @window_fg_color; }
+entry, textview, listview { background-color: @view_bg_color; color: @view_fg_color; }
+button { background-color: #3c3836; color: #ebdbb2; }
+button:hover { background-color: #504945; }
+selection { background-color: #d79921; color: #282828; }
