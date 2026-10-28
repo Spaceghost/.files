@@ -3,7 +3,8 @@ local M = {}
 local shell = require('spaceghost.shell')
 
 -- items: { { key = 'c', label = 'New tab shell', action = fn }, { sep = true }, { note = '...' } }
-function M.menu(title, items)
+function M.menu(title, items, opts)
+  opts = opts or {}
   vim.cmd.stopinsert()
   local origin = vim.api.nvim_get_current_win()
   local lines, maxw = {}, #title + 4
@@ -21,9 +22,12 @@ function M.menu(title, items)
   vim.bo[buf].bufhidden = 'wipe'
   local cols, rows = vim.o.columns, vim.o.lines - vim.o.cmdheight - 2
   local w, h = math.min(maxw, cols - 4), math.min(#lines, rows - 2)
+  local row = opts.row or math.floor((rows - h) / 2)
+  local col = opts.col or math.floor((cols - w) / 2)
   local win = vim.api.nvim_open_win(buf, true, {
     relative = 'editor', width = w, height = h,
-    row = math.floor((rows - h) / 2), col = math.floor((cols - w) / 2),
+    row = math.max(0, math.min(row, rows - h)),
+    col = math.max(0, math.min(col, cols - w)),
     style = 'minimal', border = 'rounded', title = ' SPACEGHOST / ' .. title .. ' ', title_pos = 'center',
   })
   vim.wo[win].winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle,CursorLine:SpaceghostMenuSel'
@@ -52,6 +56,13 @@ function M.menu(title, items)
     local it = items[vim.api.nvim_win_get_cursor(win)[1]]
     if it and it.action then run(it) end
   end, { buffer = buf, nowait = true })
+  if opts.mouse then
+    vim.keymap.set('n', '<LeftRelease>', function()
+      if vim.fn.getmousepos().winid ~= win then return end
+      local it = items[vim.api.nvim_win_get_cursor(win)[1]]
+      if it and it.action then run(it) end
+    end, { buffer = buf, nowait = true })
+  end
   for _, k in ipairs({ 'q', '<Esc>', '<C-c>' }) do vim.keymap.set('n', k, close, { buffer = buf, nowait = true }) end
   vim.api.nvim_create_autocmd('WinLeave', { buffer = buf, once = true, callback = close })
 end

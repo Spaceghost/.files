@@ -87,11 +87,11 @@ function M.edit_prompt()
   end)
 end
 
-function M.attach_prompt()
+function M.attach_prompt(open)
   vim.ui.input({ prompt = 'Attach to host: ', default = vim.g.spaceghost_last_host or '' }, function(host)
     if not host or host == '' then return end
     vim.g.spaceghost_last_host = host
-    shell.attach(host)
+    shell.attach(host, open)
   end)
 end
 

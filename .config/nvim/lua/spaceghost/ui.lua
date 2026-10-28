@@ -40,8 +40,58 @@ function M.tab_click(index, clicks, button)
   end
 end
 
+local plus_hold
+
+local function stop_plus_hold()
+  if plus_hold and plus_hold.timer then
+    plus_hold.timer:stop()
+    plus_hold.timer:close()
+  end
+  plus_hold = nil
+end
+
+local function plus_menu()
+  local deck = require('spaceghost.deck')
+  local keys = require('spaceghost.keys')
+  local items = {
+    { key = 'c', label = 'Local shell tab', action = function() shell.open('$tabnew') end },
+    { sep = true },
+  }
+  local current_host = vim.fn.hostname():lower():match('^[^.]+')
+  for _, host in ipairs({ 'bak', 'fedora', 'alienware' }) do
+    if host ~= current_host then
+      items[#items + 1] = {
+        key = host:sub(1, 1), label = host,
+        action = function() shell.attach(host, 'tabnew') end,
+      }
+    end
+  end
+  vim.list_extend(items, {
+    { key = 'o', label = 'Other host…', action = function() keys.attach_prompt('tabnew') end },
+    { sep = true },
+    { key = 'v', label = 'Split shell right', action = function() shell.open('belowright vnew') end },
+  })
+  deck.menu('new tab', items, { row = 1, col = M.plus_col or 0, mouse = true })
+end
+
 function M.plus_click(_, _, button)
-  if button == 'l' then shell.open('$tabnew') end
+  if button == 'r' then
+    stop_plus_hold()
+    plus_menu()
+  elseif button == 'l' then
+    stop_plus_hold()
+    local timer = (vim.uv or vim.loop).new_timer()
+    local hold = { timer = timer, opened = false }
+    plus_hold = hold
+    timer:start(450, 0, vim.schedule_wrap(function()
+      if plus_hold ~= hold then return end
+      hold.opened = true
+      timer:stop()
+      timer:close()
+      hold.timer = nil
+      plus_menu()
+    end))
+  end
 end
 
 function M.empty_click(_, clicks, button)
@@ -76,6 +126,7 @@ function M.tabline()
     end
     parts[#parts + 1] = hl('TabLineFill', ' ')
   end
+  M.plus_col = vim.api.nvim_eval_statusline(table.concat(parts), { use_tabline = true }).width
   parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', '  ') .. '%X'
   parts[#parts + 1] = '%@v:lua.Spaceghost.ui.empty_click@%=' .. hl('TabLineFill', ' ') .. '%X'
     .. hl('SpaceghostMuted', '')
@@ -192,6 +243,15 @@ function M.title()
 end
 
 function M.setup()
+  stop_plus_hold()
+  local ns = vim.api.nvim_create_namespace('spaceghost-plus-hold')
+  local release = vim.keycode('<LeftRelease>')
+  vim.on_key(function(key)
+    if key ~= release or not plus_hold then return end
+    local open_tab = not plus_hold.opened
+    stop_plus_hold()
+    if open_tab then vim.schedule(function() shell.open('$tabnew') end) end
+  end, ns)
   -- Commands temporarily overlay the last row; shells keep it the rest of the
   -- time. Leave columns/lines and PTY resizing to Neovim's smallest attached UI.
   vim.o.cmdheight = 0
