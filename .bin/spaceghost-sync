@@ -30,6 +30,17 @@ reload_nvim() {
     log 'reloaded Neovim configuration'
 }
 
+reload_systemd() {
+    [ "${SPACEGHOST_SYNC_NO_RELOAD:-0}" = 1 ] && return 0
+    command -v systemctl >/dev/null 2>&1 || return 0
+    systemctl --user show-environment >/dev/null 2>&1 || return 0
+    if ! systemctl --user daemon-reload >> "$logfile" 2>&1; then
+        log 'user systemd reload failed; will retry next sync'
+        return 1
+    fi
+    log 'reloaded user systemd units'
+}
+
 run_sync() {
     [ -d "$repo/.git" ] || { log "repository missing: $repo"; return 1; }
     exec 9> "$state/lock"
@@ -82,6 +93,12 @@ run_sync() {
         git -C "$repo" diff --name-only "$previous" "$new" -- .config/nvim | grep -q .;
     }; then
         reload_nvim || return 1
+    fi
+    if [ -z "$previous" ] || {
+        git -C "$repo" cat-file -e "$previous^{commit}" 2>/dev/null &&
+        git -C "$repo" diff --name-only "$previous" "$new" -- .config/systemd/user | grep -q .;
+    }; then
+        reload_systemd || return 1
     fi
     printf '%s\n' "$new" > "$state/last-head.tmp.$$"
     mv "$state/last-head.tmp.$$" "$state/last-head"
