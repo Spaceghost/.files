@@ -36,7 +36,7 @@ else:
         shutil.copy2(hook, backup/'hook')
     if 'ctrl_interface=' not in source:
         source = 'ctrl_interface=/run/wpa_supplicant\n'+source
-    if '# Spaceghost 5GHz preferences' not in source:
+    if 'id_str="spaceghost-prefer-5ghz"' not in source:
         blocks = re.findall(r'(?m)^network\s*=\s*\{[^}]*\}', source)
         preferred = []
         for block in blocks:

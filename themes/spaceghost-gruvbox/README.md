@@ -85,3 +85,26 @@ unsupported clock, voltage, transmit-power or thermal-limit changes are included
 The detected AXP313a PMIC has no battery charger and `/sys/class/power_supply`
 is empty. The external battery charger must be identified before any charge-rate
 change is possible. No battery charge-current setting was changed.
+
+## Switch Wi-Fi from the launcher
+
+Press **Super+D**, type **wifi**, and open **Wi-Fi Networks**. Choose a saved
+network (✓), a nearby network (+), or refresh the scan. The current connection
+is marked ●. New WPA/WPA2 personal networks use a masked password prompt;
+open networks ask before connecting. Failed joins restore the previous profile.
+Enterprise, WEP, OWE and WPA3-only networks require advanced system setup.
+
+The picker uses Fuzzel and `wpa_cli` with existing control-socket access, or
+existing passwordless `doas`/`sudo` access. It adds no privilege rules. On Alpine
+it asks the existing udhcpc process to release/renew its lease after a switch.
+Successful selections are saved in the local WPA configuration and preferred at
+next boot. Other enabled profiles remain available as fallback. Passwords are
+converted to WPA keys in memory and passed through stdin, never command-line
+arguments; credentials remain in the system WPA configuration, outside `.files`.
+Keep `~/.local/bin` in your session PATH so the launcher can find the command.
+
+Run the picker checks with:
+
+```sh
+python3 -m unittest discover -s ~/.files/themes/spaceghost-gruvbox/tests -v
+```

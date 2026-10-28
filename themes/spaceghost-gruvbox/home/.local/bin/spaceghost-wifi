@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+"""Compact Fuzzel network picker for wpa_supplicant and Alpine udhcpc."""
+import fcntl
+import hashlib
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import time
+
+
+def ssid_bytes(value):
+    out = bytearray()
+    while value:
+        if re.match(r'^\\x[0-9a-fA-F]{2}', value):
+            out.append(int(value[2:4], 16)); value = value[4:]
+        elif value.startswith('\\') and len(value) > 1:
+            out.extend({'n': b'\n', 'r': b'\r', 't': b'\t', 'e': b'\x1b'}.get(value[1], value[1].encode())); value = value[2:]
+        else:
+            out.extend(value[0].encode()); value = value[1:]
+    return bytes(out)
+
+
+def display_ssid(value):
+    return ''.join(c if c.isprintable() else ' ' for c in value.decode('utf-8', errors='replace'))
+
+
+def networks(scan, saved):
+    entries = {}
+    for line in saved.splitlines()[1:]:
+        parts = line.split('\t')
+        if len(parts) < 4 or not parts[0].isdigit():
+            continue
+        ssid = ssid_bytes(parts[1])
+        entry = entries.setdefault(ssid, {'ssid': ssid, 'ids': [], 'current': None, 'signal': -100, 'frequencies': set(), 'flags': ''})
+        entry['ids'].append(int(parts[0]))
+        if '[CURRENT]' in parts[3]:
+            entry['current'] = int(parts[0])
+    for line in scan.splitlines()[1:]:
+        parts = line.split('\t', 4)
+        if len(parts) != 5 or not parts[4]:
+            continue
+        try:
+            frequency, signal = int(parts[1]), int(parts[2])
+        except ValueError:
+            continue
+        ssid = ssid_bytes(parts[4])
+        entry = entries.setdefault(ssid, {'ssid': ssid, 'ids': [], 'current': None, 'signal': -100, 'frequencies': set(), 'flags': ''})
+        entry['frequencies'].add(frequency)
+        if signal >= entry['signal']:
+            entry.update(signal=signal, flags=parts[3])
+    return sorted(entries.values(), key=lambda e: (e['current'] is None, not bool(e['ids']), -e['signal'], e['ssid']))
+
+
+def psk(password, ssid):
+    encoded = password.encode()
+    if not 8 <= len(encoded) <= 63:
+        raise ValueError('Password must be 8–63 bytes.')
+    return hashlib.pbkdf2_hmac('sha1', encoded, ssid, 4096, 32).hex()
+
+
+def values(status):
+    return dict(line.split('=', 1) for line in status.splitlines() if '=' in line)
+
+
+class Radio:
+    def __init__(self):
+        self.interface = next((p.name for p in sorted(Path('/sys/class/net').glob('*')) if (p/'wireless').exists()), None)
+        if not self.interface:
+            raise RuntimeError('No Wi-Fi adapter found.')
+        for prefix in [[], ['doas', '-n'], ['sudo', '-n']]:
+            if prefix and not shutil.which(prefix[0]):
+                continue
+            self.prefix = prefix
+            if self.command('ping', check=False) == 'PONG':
+                break
+        else:
+            raise RuntimeError('Cannot access Wi-Fi. Enable the wpa_supplicant control socket and grant network access.')
+
+    def command(self, command, *args, secret=False, check=True):
+        argv = self.prefix + ['wpa_cli', '-i', self.interface]
+        if secret:
+            # Interactive stdin keeps key material out of process arguments and logs.
+            result = subprocess.run(argv, input=' '.join([command, *map(str, args)])+'\nquit\n', capture_output=True, text=True, timeout=8)
+            answer = 'OK' if 'OK' in result.stdout.splitlines() else 'FAIL'
+        else:
+            result = subprocess.run(argv+[command, *map(str, args)], capture_output=True, text=True, timeout=8)
+            answer = result.stdout.strip()
+        if check and (result.returncode or answer.startswith(('FAIL', 'UNKNOWN')) or not answer):
+            raise RuntimeError('Wi-Fi operation failed: '+command)
+        return answer
+
+
+def activate(radio, network_id, enabled, created=False, timeout=25):
+    previous = values(radio.command('status')).get('id')
+    succeeded = False
+    try:
+        radio.command('select_network', network_id)
+        deadline = time.monotonic()+timeout
+        while time.monotonic() < deadline:
+            status = values(radio.command('status'))
+            if status.get('id') == str(network_id) and status.get('wpa_state') == 'COMPLETED':
+                succeeded = True
+                return True
+            time.sleep(.5)
+        return False
+    finally:
+        if not succeeded:
+            if created:
+                radio.command('remove_network', network_id, check=False)
+            if previous is not None:
+                radio.command('select_network', previous, check=False)
+            else:
+                radio.command('disconnect', check=False)
+        for ident in enabled:
+            radio.command('enable_network', ident, check=False)
+
+
+def choose(lines, prompt='Wi-Fi > ', password=False, message=None):
+    argv = ['fuzzel', '--dmenu', '--prompt', prompt, '--width', '38', '--lines', '5', '--no-sort']
+    if password:
+        argv += ['--password', '--lines', '0']
+    else:
+        argv += ['--only-match', '--index']
+    if message:
+        argv += ['--mesg', message]
+    result = subprocess.run(argv, input='\n'.join(lines), capture_output=True, text=True)
+    if result.returncode:
+        return None
+    return result.stdout.rstrip('\n')
+
+
+def notice(message):
+    choose(['OK'], message=message)
+
+
+def renew_address(radio):
+    pidfile = Path('/run')/('udhcpc.'+radio.interface+'.pid')
+    if not pidfile.exists():
+        return 'Connected. Your network service must provide an IP address.'
+    pid = pidfile.read_text().strip()
+    if not pid.isdigit():
+        return 'Connected; DHCP PID is invalid.'
+    command = (Path('/proc')/pid/'cmdline').read_bytes().split(b'\0')
+    if not command or Path(os.fsdecode(command[0])).name != 'udhcpc' or radio.interface.encode() not in command:
+        return 'Connected; DHCP process could not be verified.'
+    prefix = radio.prefix
+    if not prefix and os.geteuid() != 0:
+        prefix = ['doas', '-n'] if shutil.which('doas') else ['sudo', '-n']
+    for sig in ['-USR2', '-USR1']:
+        subprocess.run(prefix+['kill', sig, pid], check=True, capture_output=True)
+        if sig == '-USR2':
+            time.sleep(.5)
+    return 'Connected. IP address is being renewed.'
+
+
+def run():
+    radio = Radio()
+    if '--list' in sys.argv:
+        for entry in networks(radio.command('scan_results'), radio.command('list_networks')):
+            print(display_ssid(entry['ssid']))
+        return
+    while True:
+        radio.command('scan', check=False)
+        time.sleep(3)
+        saved = radio.command('list_networks')
+        entries = networks(radio.command('scan_results'), saved)
+        labels = []
+        for entry in entries:
+            mark = '●' if entry['current'] is not None else '✓' if entry['ids'] else '+'
+            band = '5G' if any(f >= 5000 for f in entry['frequencies']) else '2G' if entry['frequencies'] else 'saved'
+            labels.append(f'{mark} {display_ssid(entry["ssid"])}  {band}')
+        selected = choose(labels+['↻ Refresh networks'], message='● Connected   ✓ Saved   + Join')
+        if selected is None:
+            return
+        if not selected.isdigit():
+            return
+        if int(selected) == len(entries):
+            continue
+        entry = entries[int(selected)]
+        if entry['current'] is not None:
+            notice('Already connected to '+display_ssid(entry['ssid']))
+            return
+        enabled = [int(parts[0]) for line in saved.splitlines()[1:] if len(parts := line.split('\t')) >= 4 and '[DISABLED]' not in parts[3]]
+        created = False
+        if entry['ids']:
+            candidates = []
+            for ident in entry['ids']:
+                frequencies = radio.command('get_network', ident, 'freq_list', check=False)
+                allowed = set(map(int, frequencies.split())) if frequencies and all(x.isdigit() for x in frequencies.split()) else set()
+                if not allowed or allowed & entry['frequencies']:
+                    priority = radio.command('get_network', ident, 'priority')
+                    candidates.append((int(priority), ident))
+            if not candidates:
+                notice('Saved profile does not match the visible radio band.')
+                return
+            ident = max(candidates)[1]
+        else:
+            flags = entry['flags']
+            if 'EAP' in flags or 'WEP' in flags or ('SAE' in flags and 'PSK' not in flags) or 'OWE' in flags:
+                notice('This network needs advanced authentication; configure it with your system Wi-Fi tools.')
+                return
+            key = None
+            if 'PSK' in flags:
+                password = choose([], prompt='Password > ', password=True, message=display_ssid(entry['ssid']))
+                if password is None:
+                    return
+                key = psk(password, entry['ssid'])
+                del password
+            elif choose(['Connect', 'Cancel'], message='Join open network '+display_ssid(entry['ssid'])+'?') != '0':
+                return
+            ident = int(radio.command('add_network'))
+            created = True
+            try:
+                radio.command('set_network', ident, 'ssid', entry['ssid'].hex())
+                radio.command('set_network', ident, 'key_mgmt', 'WPA-PSK' if key else 'NONE')
+                if key:
+                    radio.command('set_network', ident, 'psk', key, secret=True)
+                    del key
+            except Exception:
+                radio.command('remove_network', ident, check=False)
+                raise
+        if not activate(radio, ident, enabled, created):
+            notice('Could not join. Returning to your previous connection; check the password and try again.')
+            return
+        priorities = [int(radio.command('get_network', n, 'priority')) for n in enabled if n != ident]
+        radio.command('set_network', ident, 'priority', max(priorities, default=0)+1)
+        message = renew_address(radio)
+        radio.command('set', 'update_config', '1')
+        if radio.command('save_config', check=False) != 'OK':
+            message += ' Could not save this network for next boot.'
+        notice(message)
+        return
+
+
+def main():
+    runtime = Path(os.environ.get('XDG_RUNTIME_DIR', '/tmp'))
+    with (runtime/'spaceghost-wifi-menu.lock').open('w') as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        try:
+            run()
+        except (RuntimeError, ValueError, OSError, subprocess.SubprocessError):
+            notice('Wi-Fi setup failed. Check Wi-Fi service access or the password, then try again.')
+
+
+if __name__ == '__main__':
+    main()

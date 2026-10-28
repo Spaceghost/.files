@@ -52,7 +52,7 @@ def install(rel, source=None, content=None, binary=None):
         dest.write_text(content)
 
 for source in sorted((root/'home').rglob('*')):
-    if source.is_file():
+    if source.is_file() and "__pycache__" not in source.parts:
         rel = str(source.relative_to(root/'home'))
         if rel == '.config/waybar/style.css':
             content = source.read_text().replace('url("ghost.png")', 'url("'+str(target/'.config/waybar/ghost.png')+'")')
