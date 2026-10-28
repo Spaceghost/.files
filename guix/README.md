@@ -9,9 +9,12 @@ absolute Python, Sway, Foot, btop, Neovim and doas identities used by the
 existing recovery and live-refresh checks while their packages remain in the
 Guix store.
 
-The configuration is deliberately not applied from Alpine.  Installing Guix
-System replaces the operating system and boot configuration; test it from Guix
-installation media and preserve the Alpine recovery image first.
+The complete system configuration is deliberately not applied from Alpine.
+Installing Guix System replaces the operating system and boot configuration;
+test it from Guix installation media and preserve the Alpine recovery image
+first.  The foreign-distro, piecewise migration is documented in
+`migration/README.md` and keeps every patched desktop component under Alpine
+ownership until an equivalent Guix package passes the migration audit.
 
 ## Evaluate and install
 
