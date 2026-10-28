@@ -50,7 +50,7 @@
     "exec-on-event": false
   },
   "clock": {
-    "format": "{:%H:%M %Z}",
+    "format": "{:%H:%M}",
     "format-alt": "{:%d %b}",
     "interval": 60,
     "tooltip-format": "<b>{:%A, %d %B %Y \u00b7 %H:%M %Z}</b>\n\n<tt><small>{calendar}</small></tt>\nClick: time / date \u00b7 Right click: quick actions",
