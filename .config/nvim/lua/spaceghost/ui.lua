@@ -2,6 +2,8 @@
 local M = {}
 local shell = require('spaceghost.shell')
 local native = require('spaceghost.native')
+local detached_tabs = rawget(_G, 'spaceghost_detached_tabs') or {}
+_G.spaceghost_detached_tabs = detached_tabs
 
 local function hl(group, text) return '%#' .. group .. '#' .. text end
 local function literal(text) return tostring(text):gsub('[%c]', ' '):gsub('%%', '%%%%') end
@@ -34,10 +36,83 @@ function M.tab_click(index, clicks, button)
   if not tab then return end
   if button == 'm' then
     vim.cmd(index .. 'tabclose')
+  elseif button == 'r' then
+    M.tab_menu(tab)
   elseif button == 'l' then
     vim.api.nvim_set_current_tabpage(tab)
     if clicks >= 2 then shell.open('tabnew') end
   end
+end
+
+local function tab_buffers(tab)
+  local buffers, seen = {}, {}
+  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(tab)) do
+    if vim.api.nvim_win_get_config(win).relative == '' then
+      local buf = vim.api.nvim_win_get_buf(win)
+      if not seen[buf] then buffers[#buffers + 1], seen[buf] = buf, true end
+    end
+  end
+  return buffers
+end
+
+function M.detach_tab(tab)
+  if not vim.api.nvim_tabpage_is_valid(tab) then return end
+  local entry = { label = tab_label(tab), buffers = tab_buffers(tab) }
+  if #vim.api.nvim_list_tabpages() == 1 then shell.open('$tabnew') end
+  vim.cmd(vim.api.nvim_tabpage_get_number(tab) .. 'tabclose')
+  detached_tabs[#detached_tabs + 1] = entry
+end
+
+function M.close_tab(tab)
+  if not vim.api.nvim_tabpage_is_valid(tab) then return end
+  local buffers = tab_buffers(tab)
+  if #vim.api.nvim_list_tabpages() == 1 then shell.open('$tabnew') end
+  vim.cmd(vim.api.nvim_tabpage_get_number(tab) .. 'tabclose')
+  for _, buf in ipairs(buffers) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == 'terminal'
+        and #vim.fn.win_findbuf(buf) == 0 then
+      vim.api.nvim_buf_delete(buf, { force = true })
+    end
+  end
+end
+
+function M.reopen_detached()
+  local available = {}
+  for _, entry in ipairs(detached_tabs) do
+    for _, buf in ipairs(entry.buffers) do
+      if vim.api.nvim_buf_is_valid(buf) then
+        available[#available + 1] = entry
+        break
+      end
+    end
+  end
+  if #available == 0 then vim.notify('No detached tabs to reopen'); return end
+  vim.ui.select(available, {
+    prompt = 'Reopen detached tab:',
+    format_item = function(entry) return entry.label end,
+  }, function(entry)
+    if not entry then return end
+    for i, candidate in ipairs(detached_tabs) do
+      if candidate == entry then table.remove(detached_tabs, i); break end
+    end
+    local first = true
+    for _, buf in ipairs(entry.buffers) do
+      if vim.api.nvim_buf_is_valid(buf) then
+        if first then vim.cmd.tabnew(); first = false else vim.cmd('belowright vnew') end
+        vim.api.nvim_win_set_buf(0, buf)
+      end
+    end
+  end)
+end
+
+function M.tab_menu(tab)
+  local deck = require('spaceghost.deck')
+  deck.menu('tab / ' .. tab_label(tab), {
+    { key = 'd', label = 'Detach tab / keep shells', action = function() M.detach_tab(tab) end },
+    { key = 'x', label = 'Close tab / stop shells', action = function() M.close_tab(tab) end },
+    { sep = true },
+    { key = 'r', label = 'Reopen detached tab…', action = M.reopen_detached },
+  }, { row = 1, col = math.max(0, vim.fn.getmousepos().screencol - 1), mouse = true })
 end
 
 local plus_hold
@@ -69,6 +144,7 @@ local function plus_menu()
   vim.list_extend(items, {
     { key = 'o', label = 'Other host…', action = function() keys.attach_prompt('tabnew') end },
     { sep = true },
+    { key = 'r', label = 'Reopen detached tab…', action = M.reopen_detached },
     { key = 'v', label = 'Split shell right', action = function() shell.open('belowright vnew') end },
   })
   deck.menu('new tab', items, { row = 1, col = M.plus_col or 0, mouse = true })
@@ -92,6 +168,13 @@ function M.plus_click(_, _, button)
       plus_menu()
     end))
   end
+end
+
+function M.plus_release()
+  if not plus_hold then return end
+  local open_tab = not plus_hold.opened
+  stop_plus_hold()
+  if open_tab then vim.schedule(function() shell.open('$tabnew') end) end
 end
 
 function M.empty_click(_, clicks, button)
@@ -248,9 +331,7 @@ function M.setup()
   local release = vim.keycode('<LeftRelease>')
   vim.on_key(function(key)
     if key ~= release or not plus_hold then return end
-    local open_tab = not plus_hold.opened
-    stop_plus_hold()
-    if open_tab then vim.schedule(function() shell.open('$tabnew') end) end
+    M.plus_release()
   end, ns)
   -- Commands temporarily overlay the last row; shells keep it the rest of the
   -- time. Leave columns/lines and PTY resizing to Neovim's smallest attached UI.

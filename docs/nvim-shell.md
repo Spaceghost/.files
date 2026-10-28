@@ -53,10 +53,13 @@ shell, add the same block to `~/.bashrc` (see "Install").
   for a running shell, `NEW` when a hidden shell printed output, `EXIT` for a
   dead one, `EDIT` for a file tab. Tabs are named from the shell's OSC 0 title
   (the running command, else the cwd); `Ctrl-\ ,` renames. Click a tab to focus
-  it, double-click it to open a shell tab directly after it, or middle-click to
-  close it. Click the terminal icon (``), visible even with one tab, to add a shell at the far
-  right. Double-click the empty tabline space before the host and clock to add
-  a shell at the far right.
+  it, double-click it to open a shell tab directly after it, or right-click for
+  Detach tab (hide it and keep its shells), Close tab (stop unshared shells),
+  and Reopen detached tab. Middle-click closes the tab view. Click the terminal
+  icon (``), visible even with one tab, to add a local shell at the far right;
+  hold or right-click it for local, remote host, and detached-tab options.
+  The host list omits the current machine. Double-click the empty tabline space
+  before the host and clock to add a shell at the far right.
 * **Statusline** (global): mode, shell title or file, cwd (fish-style
   shortened), git branch, LOAD / MEM / BAT telemetry, pane index, `SRV`.
 * **Shell integration**: `.zshrc` emits OSC 7 (cwd), OSC 0 (title), and OSC 133
