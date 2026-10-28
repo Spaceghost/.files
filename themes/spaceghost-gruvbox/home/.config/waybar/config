@@ -50,10 +50,10 @@
     "exec-on-event": false
   },
   "clock": {
-    "format": "{:%H:%M}",
+    "format": "{:%H:%M %Z}",
     "format-alt": "{:%d %b}",
     "interval": 60,
-    "tooltip-format": "<b>{:%A, %d %B %Y}</b>\n\n<tt><small>{calendar}</small></tt>\nClick: time / date \u00b7 Right click: quick actions",
+    "tooltip-format": "<b>{:%A, %d %B %Y \u00b7 %H:%M %Z}</b>\n\n<tt><small>{calendar}</small></tt>\nClick: time / date \u00b7 Right click: quick actions",
     "on-click-right": "python3 ~/.config/waybar/panel.py menu",
     "calendar": {
       "mode": "month",
@@ -62,7 +62,8 @@
         "weekdays": "<span color='#8ec07c'>{}</span>",
         "today": "<span color='#fabd2f'><b>[{}]</b></span>"
       }
-    }
+    },
+    "timezone": "America/Los_Angeles"
   },
   "custom/panel": {
     "format": "Super+P",
