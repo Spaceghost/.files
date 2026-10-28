@@ -85,6 +85,11 @@ vim.ui.select = select
 assert(#vim.fn.win_findbuf(target_buf) > 0, 'detached tab did not reopen')
 ui.close_tab(vim.api.nvim_get_current_tabpage())
 assert(not vim.api.nvim_buf_is_valid(target_buf), 'close tab did not stop its shell')
+local root_buf = Spaceghost.shell.open('$tabnew', { root = true })
+ui.close_tab(vim.api.nvim_get_current_tabpage())
+vim.wait(50)
+assert(#tabs() > 0 and not vim.api.nvim_buf_is_valid(root_buf),
+  'closing a root-shell tab closed the session')
 
 print('PASS tabline menus, host list, detach, close and new-shell placement')
 vim.cmd('qa!')

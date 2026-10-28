@@ -71,6 +71,8 @@ function M.close_tab(tab)
   for _, buf in ipairs(buffers) do
     if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].buftype == 'terminal'
         and #vim.fn.win_findbuf(buf) == 0 then
+      -- Closing a tab must not make the root shell's TermClose quit the session.
+      vim.b[buf].spaceghost_shell_root = false
       vim.api.nvim_buf_delete(buf, { force = true })
     end
   end
