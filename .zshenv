@@ -21,4 +21,9 @@ fi
 export EDITOR="$HOME/.bin/nvim-remote"
 export VISUAL="$EDITOR"
 export ENV="$HOME/.ashrc"
-[[ -r $HOME/.files/.config/spaceghost/theme.sh ]] && source "$HOME/.files/.config/spaceghost/theme.sh"
+for spaceghost_dir in "$HOME/.files" "$HOME/.spaceghost"; do
+    [[ -r $spaceghost_dir/.config/spaceghost/theme.sh ]] || continue
+    source "$spaceghost_dir/.config/spaceghost/theme.sh"
+    break
+done
+unset spaceghost_dir

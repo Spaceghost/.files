@@ -1,3 +1,8 @@
 # Interactive ash sessions. ~/.profile exports ENV so ash loads this file.
-[ -r "$HOME/.files/.bash_spaceghost" ] && . "$HOME/.files/.bash_spaceghost"
+for spaceghost_dir in "$HOME/.files" "$HOME/.spaceghost"; do
+    [ -r "$spaceghost_dir/.bash_spaceghost" ] || continue
+    . "$spaceghost_dir/.bash_spaceghost"
+    break
+done
+unset spaceghost_dir
 PS1='✦ \w ❯ '

@@ -136,7 +136,11 @@ function M.setup()
   for i = 1, 9 do
     local function jump()
       local tab = vim.api.nvim_list_tabpages()[i]
-      if tab then vim.api.nvim_set_current_tabpage(tab) end
+      if tab then
+        vim.api.nvim_set_current_tabpage(tab)
+      else
+        shell.open('$tabnew')
+      end
     end
     map(tostring(i), jump, 'Tab ' .. i)
     local key = '<M-' .. i .. '>'

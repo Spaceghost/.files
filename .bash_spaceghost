@@ -8,8 +8,13 @@ PATH="$HOME/.bin:$PATH"
 export PATH
 EDITOR="$HOME/.bin/nvim-remote"; VISUAL="$EDITOR"; export EDITOR VISUAL
 ENV="$HOME/.ashrc"; export ENV
-[ -r "$HOME/.files/.config/spaceghost/theme.sh" ] && . "$HOME/.files/.config/spaceghost/theme.sh"
-[ -r "$HOME/.files/.config/spaceghost/aliases.sh" ] && . "$HOME/.files/.config/spaceghost/aliases.sh"
+for spaceghost_dir in "$HOME/.files" "$HOME/.spaceghost"; do
+    [ -r "$spaceghost_dir/.config/spaceghost/aliases.sh" ] || continue
+    . "$spaceghost_dir/.config/spaceghost/theme.sh"
+    . "$spaceghost_dir/.config/spaceghost/aliases.sh"
+    break
+done
+unset spaceghost_dir
 # Interactive, on a terminal, not already inside Neovim or tmux: attach to the session.
 case "$-" in *i*)
     if [ -t 0 ] && [ -t 1 ] && [ -z "${NVIM:-}" ] && [ -z "${TMUX:-}" ] && [ -z "${SPACEGHOST_PLAIN_SHELL:-}" ] \

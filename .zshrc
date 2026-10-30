@@ -45,7 +45,12 @@ add-zsh-hook precmd spaceghost_precmd
 add-zsh-hook preexec spaceghost_preexec
 
 # ── Cockpit commands and optional tools ────────────────────────────────────────
-[[ -r $HOME/.files/.config/spaceghost/aliases.sh ]] && source "$HOME/.files/.config/spaceghost/aliases.sh"
+for spaceghost_dir in "$HOME/.files" "$HOME/.spaceghost"; do
+    [[ -r $spaceghost_dir/.config/spaceghost/aliases.sh ]] || continue
+    source "$spaceghost_dir/.config/spaceghost/aliases.sh"
+    break
+done
+unset spaceghost_dir
 [[ -z $ENV ]] && export ENV="$HOME/.ashrc"
 
 if (( $+commands[zoxide] )); then eval "$(zoxide init zsh)"; fi

@@ -156,7 +156,8 @@ fi
 if [ -d /run/systemd/system ] && systemctl --user show-environment >/dev/null 2>&1; then
     systemctl --user daemon-reload
     systemctl --user enable -q spaceghost-nvim.service
-    systemctl --user restart spaceghost-nvim.service
+    # Keep existing terminal jobs alive; reload the configuration in Neovim.
+    systemctl --user start spaceghost-nvim.service
     log "systemd user service spaceghost-nvim enabled ($(loginctl show-user "$(id -un)" -p Linger --value 2>/dev/null | sed 's/^/linger=/'))"
 else
     log "no user systemd; the session starts on demand from the login hook (setsid)"

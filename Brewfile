@@ -1,6 +1,3 @@
-tap "homebrew/bundle"
-tap "homebrew/core"
-
 # Base
 brew "tmux"
 brew "zsh"
@@ -13,7 +10,7 @@ brew "rclone"
 
 # Utilities
 brew "htop"
-brew "neofetch"
+brew "fastfetch"
 brew "ripgrep"
 brew "fzf"
 brew "atuin"
