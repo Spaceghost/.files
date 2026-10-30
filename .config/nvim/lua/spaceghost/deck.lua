@@ -30,6 +30,8 @@ function M.menu(title, items, opts)
     col = math.max(0, math.min(col, cols - w)),
     style = 'minimal', border = 'rounded', title = ' SPACEGHOST / ' .. title .. ' ', title_pos = 'center',
   })
+  -- Terminal mouse clicks can carry insert mode into the newly focused float.
+  vim.cmd.stopinsert()
   vim.wo[win].winhighlight = 'Normal:NormalFloat,FloatBorder:FloatBorder,FloatTitle:FloatTitle,CursorLine:SpaceghostMenuSel'
   vim.wo[win].cursorline = true
   local ns = vim.api.nvim_create_namespace('spaceghost-menu')
@@ -105,6 +107,7 @@ function M.field_guide()
     { note = 'Alt-o      previous pane across tabs    F4 command deck' },
     { note = 'Alt-arrows pass through to terminal programs' },
     { note = 'F4 then d: redraw pane    F4 then x: close pane' },
+    { note = 'F5         detach narrow UI to restore full width' },
     { note = 'F2 then x: remove selected duplicate view (keep its shell)' },
     { sep = true },
     { note = 'Space      command deck     ?  F1   field guide' },

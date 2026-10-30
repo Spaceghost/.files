@@ -21,7 +21,7 @@
   ],
   "custom/apps": {
     "format": " ",
-    "tooltip-format": "<b>SPACEGHOST \u00b7 CONTROL DECK</b>\nSuper+Ctrl+P: all controls\nRight click: applications",
+    "tooltip-format": "<b>👻 \u00b7 CONTROL DECK</b>\nSuper+Ctrl+P: all controls\nRight click: applications",
     "on-click": "python3 ~/.config/waybar/panel.py menu",
     "on-click-right": "fuzzel"
   },

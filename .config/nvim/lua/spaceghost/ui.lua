@@ -214,7 +214,7 @@ end
 function M.tabline()
   local parts = {}
   local width = vim.o.columns
-  local badge = width >= 160 and ' S P A C E G H O S T ' or (width >= 100 and ' SPACEGHOST ' or ' SG ')
+  local badge = ' 👻 '
   parts[#parts + 1] = hl('SpaceghostBadge', badge)
   parts[#parts + 1] = hl('SpaceghostSurface', ' ' .. literal(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ':t')) .. ' ')
   parts[#parts + 1] = hl('TabLineFill', ' ')
@@ -350,7 +350,7 @@ function M.statusline()
     right[#right + 1] = hl('SpaceghostStatusBranch', width >= 110 and '^\\ u prompt / v select / i shell' or 'i shell')
       .. hl('StatusLine', ' ')
   else
-    right[#right + 1] = hl('SpaceghostStatusBranch', 'F2 panes') .. hl('StatusLine', width >= 110 and ' / F4 menu ' or ' ')
+    right[#right + 1] = hl('SpaceghostStatusBranch', 'F2 panes') .. hl('StatusLine', width >= 110 and ' / F4 menu / F5 width ' or ' ')
   end
   parts[#parts + 1] = hl('StatusLine', table.concat(right, '  '))
   return table.concat(parts)

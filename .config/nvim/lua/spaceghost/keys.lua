@@ -95,10 +95,33 @@ function M.attach_prompt(open)
   end)
 end
 
+function M.fix_width()
+  local socket = vim.v.servername
+  if socket == '' then
+    vim.notify('No shared Neovim session socket', vim.log.levels.WARN)
+    return
+  end
+  vim.fn.jobstart({ vim.fn.expand('~/.bin/nvim-width-fix'), socket }, {
+    stdout_buffered = true,
+    on_stdout = function(_, lines)
+      for _, line in ipairs(lines) do
+        if line ~= '' then vim.notify(line) end
+      end
+    end,
+    on_stderr = function(_, lines)
+      for _, line in ipairs(lines) do
+        if line ~= '' then vim.notify(line, vim.log.levels.ERROR) end
+      end
+    end,
+  })
+end
+
 function M.setup()
   local deck = require('spaceghost.deck')
   M.direct_keys = {}
   M.prefixed_keys = {}
+  -- Remove the temporary F3 menu binding from sessions reloaded in place.
+  for _, mode in ipairs({ 'n', 't' }) do pcall(vim.keymap.del, mode, '<F3>') end
   local group = vim.api.nvim_create_augroup('SpaceghostNavigation', { clear = true })
   vim.api.nvim_create_autocmd('WinEnter', { group = group, callback = remember_pane })
   remember_pane()
@@ -159,6 +182,7 @@ function M.setup()
     { '<F1>', deck.field_guide, 'Field guide' },
     { '<F2>', deck.choose_window, 'Find any tab, pane or host' },
     { '<F4>', deck.command_deck, 'Command deck' },
+    { '<F5>', M.fix_width, 'Restore full width' },
     { '<C-PageUp>', function() M.focus_tab(-1) end, 'Previous tab' },
     { '<C-PageDown>', function() M.focus_tab(1) end, 'Next tab' },
     { '<M-[>', function() M.focus_tab(-1) end, 'Previous tab' },
