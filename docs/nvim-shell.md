@@ -53,7 +53,8 @@ shell, add the same block to `~/.bashrc` (see "Install").
   for a running shell, `NEW` when a hidden shell printed output, `EXIT` for a
   dead one, `EDIT` for a file tab. Tabs are named from the shell's OSC 0 title
   (the running command, else the cwd); `Ctrl-\ ,` renames. Click a tab to focus
-  it, double-click it to open a shell tab directly after it, or right-click for
+  it, drag it left or right to reorder, double-click it to open a shell tab
+  directly after it, or right-click for
   Detach tab (hide it and keep its shells), Close tab (stop unshared shells),
   and Reopen detached tab. Middle-click closes the tab view. Click the terminal
   icon (``), visible even with one tab, to add a local shell at the far right;

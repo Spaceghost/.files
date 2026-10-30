@@ -7,6 +7,32 @@ _G.spaceghost_detached_tabs = detached_tabs
 
 local function hl(group, text) return '%#' .. group .. '#' .. text end
 local function literal(text) return tostring(text):gsub('[%c]', ' '):gsub('%%', '%%%%') end
+local dragged_tab
+local tab_columns = {}
+
+local function drag_tab()
+  local tab = dragged_tab
+  if not tab or not vim.api.nvim_tabpage_is_valid(tab) then return end
+  local mouse = vim.fn.getmousepos()
+  if mouse.screenrow ~= 1 then return end
+  local target
+  for i, span in ipairs(tab_columns) do
+    if mouse.screencol >= span.first and mouse.screencol <= span.last then
+      target = i
+      break
+    end
+  end
+  if not target then return end
+  -- on_key runs before mouse processing; defer mutations until it finishes.
+  vim.schedule(function()
+    if not vim.api.nvim_tabpage_is_valid(tab) then return end
+    local from = vim.api.nvim_tabpage_get_number(tab)
+    if from == target then return end
+    vim.api.nvim_set_current_tabpage(tab)
+    vim.cmd('tabmove ' .. (target > from and target or target - 1))
+    vim.cmd.redrawtabline()
+  end)
+end
 
 -- ── Tabline: one entry per tab, tmux window-list style ────────────────────────
 local function tab_label(tab)
@@ -32,6 +58,7 @@ local function tab_state(tab)
 end
 
 function M.tab_click(index, clicks, button)
+  dragged_tab = nil
   local tab = vim.api.nvim_list_tabpages()[index]
   if not tab then return end
   if button == 'm' then
@@ -40,6 +67,7 @@ function M.tab_click(index, clicks, button)
     M.tab_menu(tab)
   elseif button == 'l' then
     vim.api.nvim_set_current_tabpage(tab)
+    if clicks == 1 then dragged_tab = tab end
     if clicks >= 2 then shell.open('tabnew') end
   end
 end
@@ -193,7 +221,10 @@ function M.tabline()
   local current = vim.api.nvim_get_current_tabpage()
   local maxlen = width >= 180 and 26 or 14
   local tabs = vim.api.nvim_list_tabpages()
+  tab_columns = {}
+  local column = vim.api.nvim_eval_statusline(table.concat(parts), { use_tabline = true }).width + 1
   for i, tab in ipairs(tabs) do
+    local start_part = #parts + 1
     local label = tab_label(tab)
     if vim.fn.strchars(label) > maxlen then label = vim.fn.strcharpart(label, 0, maxlen - 1) .. '…' end
     label = literal(label)
@@ -210,6 +241,9 @@ function M.tabline()
         .. hl(group, ' ' .. i .. ' ' .. label .. ' ') .. state .. hl(group, ' ') .. '%X'
     end
     parts[#parts + 1] = hl('TabLineFill', ' ')
+    local length = vim.api.nvim_eval_statusline(table.concat(parts, '', start_part), { use_tabline = true }).width
+    tab_columns[i] = { first = column, last = column + length - 1 }
+    column = column + length
   end
   M.plus_col = vim.api.nvim_eval_statusline(table.concat(parts), { use_tabline = true }).width
   parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', '  ') .. '%X'
@@ -329,11 +363,16 @@ end
 
 function M.setup()
   stop_plus_hold()
+  dragged_tab = nil
   local ns = vim.api.nvim_create_namespace('spaceghost-plus-hold')
   local release = vim.keycode('<LeftRelease>')
+  local drag = vim.keycode('<LeftDrag>')
   vim.on_key(function(key)
-    if key ~= release or not plus_hold then return end
-    M.plus_release()
+    if key == drag then drag_tab() end
+    if key == release then
+      dragged_tab = nil
+      M.plus_release()
+    end
   end, ns)
   -- Commands temporarily overlay the last row; shells keep it the rest of the
   -- time. Leave columns/lines and PTY resizing to Neovim's smallest attached UI.
