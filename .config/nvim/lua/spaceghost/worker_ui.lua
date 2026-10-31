@@ -311,8 +311,21 @@ function M.open()
 end
 function M.statusline()
   local c = workers.summary()
-  if (c.total or 0) == 0 then return '' end
-  return '%#SpaceghostStatusBranch# CX ' .. (c.running or 0) .. ' active %#SpaceghostStatusWarn#' .. (c.waiting or 0) .. ' wait %#SpaceghostStatusCwd#' .. (c.done or 0) .. ' done' .. ((c.failed or 0) > 0 and ' %#SpaceghostStatusAlert#' .. c.failed .. ' failed' or '') .. ((c.unread or 0) > 0 and ' %#SpaceghostStatusWarn#' .. c.unread .. ' inbox' or '') .. ' '
+  local out = '%#SpaceghostStatusBranch# CX ' .. (c.running or 0) .. ' active'
+  if (c.waiting or 0) > 0 then out = out .. ' %#SpaceghostStatusWarn#' .. c.waiting .. ' wait' end
+  if (c.failed or 0) > 0 then out = out .. ' %#SpaceghostStatusAlert#' .. c.failed .. ' failed' end
+  if (c.unread or 0) > 0 then out = out .. ' %#SpaceghostStatusWarn#' .. c.unread .. ' inbox' end
+  local latest
+  for _, r in ipairs(workers.list()) do
+    if busy[r.status] or r.status == 'waiting' then
+      if not latest or (r.last_at or 0) > (latest.last_at or 0) then latest = r end
+    end
+  end
+  if latest and vim.o.columns >= 140 then
+    local activity = fit(latest.name .. ': ' .. (latest.activity or latest.status), 30):gsub('%%', '%%%%')
+    out = out .. ' %#SpaceghostStatusCwd#' .. activity
+  end
+  return out .. ' '
 end
 function M.setup()
   -- Clean up a clock left by an earlier configuration version during live reload.

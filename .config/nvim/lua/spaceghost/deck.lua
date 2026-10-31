@@ -71,6 +71,7 @@ end
 
 function M.command_deck()
   local K = require('spaceghost.keys')
+  local build = require('spaceghost.build')
   M.menu('command deck', {
     { key = 'c', label = 'New tab shell', action = function() shell.open('tabnew') end },
     { key = 's', label = 'Split shell below', action = function() shell.open('belowright new') end },
@@ -83,6 +84,9 @@ function M.command_deck()
     { key = '=', label = 'Balance panes', action = function() vim.cmd('wincmd =') end },
     { key = 'd', label = 'Redraw pane', action = shell.redraw },
     { key = 'x', label = 'Close pane', action = K.close_pane },
+    { key = 'b', label = 'Run tracked build…', action = build.prompt },
+    { key = 'L', label = 'Build log', action = build.log },
+    { key = 'S', label = 'Stop tracked build', action = build.stop },
     { sep = true },
     { key = 'w', label = 'Tabs + panes', action = M.choose_window },
     { key = ',', label = 'Rename tab', action = M.rename_tab },
@@ -108,6 +112,7 @@ function M.field_guide()
     { note = 'Alt-arrows pass through to terminal programs' },
     { note = 'F4 then d: redraw pane    F4 then x: close pane' },
     { note = 'F5         detach narrow UI to restore full width' },
+    { note = 'F4 then b: tracked build    L: build log    S: stop build' },
     { note = 'F2 then x: remove selected duplicate view (keep its shell)' },
     { sep = true },
     { note = 'Space      command deck     ?  F1   field guide' },

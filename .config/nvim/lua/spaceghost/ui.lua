@@ -18,7 +18,7 @@ local function drag_tab()
   local target
   for i, span in ipairs(tab_columns) do
     if mouse.screencol >= span.first and mouse.screencol <= span.last then
-      target = i
+      target = span.index
       break
     end
   end
@@ -211,46 +211,99 @@ function M.empty_click(_, clicks, button)
   if button == 'l' and clicks >= 2 then shell.open('$tabnew') end
 end
 
-function M.tabline()
-  local parts = {}
-  local width = vim.o.columns
-  local badge = ' 👻 '
-  parts[#parts + 1] = hl('SpaceghostBadge', badge)
-  parts[#parts + 1] = hl('SpaceghostSurface', ' ' .. literal(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ':t')) .. ' ')
-  parts[#parts + 1] = hl('TabLineFill', ' ')
-  local current = vim.api.nvim_get_current_tabpage()
-  local maxlen = width >= 180 and 26 or 14
-  local tabs = vim.api.nvim_list_tabpages()
-  tab_columns = {}
-  local column = vim.api.nvim_eval_statusline(table.concat(parts), { use_tabline = true }).width + 1
-  for i, tab in ipairs(tabs) do
-    local start_part = #parts + 1
-    local label = tab_label(tab)
-    if vim.fn.strchars(label) > maxlen then label = vim.fn.strcharpart(label, 0, maxlen - 1) .. '…' end
-    label = literal(label)
-    local st = tab_state(tab)
-    if tab == current then
-      local extra = st.panes > 1 and (' +' .. st.panes) or ''
-      parts[#parts + 1] = '%' .. i .. '@v:lua.Spaceghost.ui.tab_click@'
-        .. hl('SpaceghostTabSel', ' ' .. i .. ' / ' .. label .. '  NOW' .. extra .. ' ') .. '%X'
-    else
-      local group = st.new and 'SpaceghostTabNew' or 'SpaceghostTab'
-      local state = st.dead and hl('SpaceghostStateExit', 'EXIT')
-        or (st.new and hl('SpaceghostStateNew', 'NEW') or hl('SpaceghostStateLive', st.term and 'LIVE' or 'EDIT'))
-      parts[#parts + 1] = '%' .. i .. '@v:lua.Spaceghost.ui.tab_click@'
-        .. hl(group, ' ' .. i .. ' ' .. label .. ' ') .. state .. hl(group, ' ') .. '%X'
-    end
-    parts[#parts + 1] = hl('TabLineFill', ' ')
-    local length = vim.api.nvim_eval_statusline(table.concat(parts, '', start_part), { use_tabline = true }).width
-    tab_columns[i] = { first = column, last = column + length - 1 }
-    column = column + length
+-- Limit by screen cells, including wide Unicode labels.
+local function fit_label(text, limit)
+  text = tostring(text):gsub('[%c]', ' ')
+  if vim.fn.strdisplaywidth(text) <= limit then return text end
+  local result = ''
+  for char in text:gmatch('[%z\1-\127\194-\244][\128-\191]*') do
+    if vim.fn.strdisplaywidth(result .. char .. '…') > limit then break end
+    result = result .. char
   end
-  M.plus_col = vim.api.nvim_eval_statusline(table.concat(parts), { use_tabline = true }).width
-  parts[#parts + 1] = '%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', '  ') .. '%X'
-  parts[#parts + 1] = '%@v:lua.Spaceghost.ui.empty_click@%=' .. hl('TabLineFill', ' ') .. '%X'
-    .. hl('SpaceghostMuted', '')
-  if width >= 150 then parts[#parts + 1] = hl('SpaceghostMuted', vim.fn.hostname() .. ' / ') end
-  parts[#parts + 1] = hl('TabLine', os.date(width >= 180 and '%H:%M %a %d %b ' or '%H:%M '))
+  return result .. '…'
+end
+
+function M.tabline()
+  local width = vim.o.columns
+  local function cells(text)
+    return vim.api.nvim_eval_statusline(text, { use_tabline = true }).width
+  end
+  local prefix, suffix = '', ''
+  if width >= 50 then
+    prefix = hl('SpaceghostBadge', ' 👻 ')
+      .. hl('SpaceghostSurface', ' ' .. literal(fit_label(vim.fn.fnamemodify(vim.fn.getcwd(-1, -1), ':t'), math.min(18, math.floor(width / 5)))) .. ' ')
+      .. hl('TabLineFill', ' ')
+    suffix = hl('TabLine', os.date(width >= 180 and '%H:%M %a %d %b ' or '%H:%M '))
+    if width >= 150 then suffix = hl('SpaceghostMuted', literal(vim.fn.hostname()) .. ' / ') .. suffix end
+  end
+  local plus = width >= 30 and ('%@v:lua.Spaceghost.ui.plus_click@' .. hl('SpaceghostTab', '  ') .. '%X') or ''
+  local arrow_width = width >= 30 and 4 or 0
+  local available = width - cells(prefix) - cells(suffix) - cells(plus)
+  local current = vim.api.nvim_get_current_tabpage()
+  local tabs = vim.api.nvim_list_tabpages()
+  local active = vim.api.nvim_tabpage_get_number(current)
+  local entries, lengths = {}, {}
+  local function render(maxlen, compact)
+    local total = 0
+    for i, tab in ipairs(tabs) do
+      local label = literal(fit_label(tab_label(tab), maxlen))
+      local st = tab_state(tab)
+      local group = tab == current and 'SpaceghostTabSel' or (st.new and 'SpaceghostTabNew' or 'SpaceghostTab')
+      local text
+      if compact then
+        text = hl(group, ' ' .. i .. ' ' .. label .. (st.new and tab ~= current and ' •' or '') .. ' ')
+      elseif tab == current then
+        local extra = st.panes > 1 and (' +' .. st.panes) or ''
+        text = hl(group, ' ' .. i .. ' / ' .. label .. '  NOW' .. extra .. ' ')
+      else
+        local state = st.dead and hl('SpaceghostStateExit', 'EXIT')
+          or (st.new and hl('SpaceghostStateNew', 'NEW') or hl('SpaceghostStateLive', st.term and 'LIVE' or 'EDIT'))
+        text = hl(group, ' ' .. i .. ' ' .. label .. ' ') .. state .. hl(group, ' ')
+      end
+      entries[i] = '%' .. i .. '@v:lua.Spaceghost.ui.tab_click@' .. text .. '%X' .. hl('TabLineFill', ' ')
+      lengths[i] = cells(entries[i])
+      total = total + lengths[i]
+    end
+    return total
+  end
+  local total = render(width >= 180 and 26 or 14, false)
+  if total > available then
+    render(math.max(1, math.min(14, math.max(6, math.floor(available / #tabs) - 4), available - 13)), true)
+  end
+  -- Grow a contiguous range around the active tab. Reserve actual arrow widths
+  -- so Neovim never applies its own truncation to the tabline.
+  local first, last, used = active, active, lengths[active]
+  local function range_width(left, right, size)
+    return size + (left > 1 and arrow_width or 0) + (right < #tabs and arrow_width or 0)
+  end
+  while true do
+    local left = first > 1 and range_width(first - 1, last, used + lengths[first - 1]) <= available
+    local right = last < #tabs and range_width(first, last + 1, used + lengths[last + 1]) <= available
+    if not left and not right then break end
+    if left and (not right or active - first <= last - active) then
+      first = first - 1
+      used = used + lengths[first]
+    else
+      last = last + 1
+      used = used + lengths[last]
+    end
+  end
+  local parts = { prefix }
+  local function arrow(index, label)
+    return '%' .. index .. '@v:lua.Spaceghost.ui.tab_click@' .. hl('SpaceghostTab', label) .. '%X'
+  end
+  if first > 1 and arrow_width > 0 then parts[#parts + 1] = arrow(first - 1, ' ‹  ') end
+  tab_columns = {}
+  local column = cells(table.concat(parts)) + 1
+  for i = first, last do
+    parts[#parts + 1] = entries[i]
+    tab_columns[#tab_columns + 1] = { index = i, first = column, last = column + lengths[i] - 1 }
+    column = column + lengths[i]
+  end
+  if last < #tabs and arrow_width > 0 then parts[#parts + 1] = arrow(last + 1, '  › ') end
+  M.plus_col = cells(table.concat(parts))
+  parts[#parts + 1] = plus
+  parts[#parts + 1] = '%@v:lua.Spaceghost.ui.empty_click@%=' .. hl('TabLineFill', '') .. '%X' .. suffix
   return table.concat(parts)
 end
 
@@ -324,6 +377,7 @@ function M.statusline()
   if branch ~= '' then parts[#parts + 1] = hl('StatusLine', ' ') .. hl('SpaceghostStatusBranch', ' ' .. branch) end
   parts[#parts + 1] = '%='
   local right = {}
+  right[#right + 1] = require('spaceghost.build').statusline()
   local worker_ui = package.loaded['spaceghost.worker_ui']
   if worker_ui then right[#right + 1] = worker_ui.statusline() .. hl('StatusLine', '') end
   local t = width >= 120 and telemetry() or nil
