@@ -48,6 +48,7 @@ _G.Spaceghost = {
   agent = require('spaceghost.agent'),
   worker_ui = require('spaceghost.worker_ui'),
   build = require('spaceghost.build'),
+  sync = require('spaceghost.sync'),
 }
 -- ~/.bin/nvim-remote calls v:lua.Spaceghost.edit(path, done, line)
 Spaceghost.edit = Spaceghost.shell.edit
@@ -59,6 +60,7 @@ Spaceghost.keys.setup()
 Spaceghost.agent.setup()
 Spaceghost.worker_ui.setup()
 Spaceghost.build.setup()
+Spaceghost.sync.setup()
 
 -- Treesitter highlighting for buffers whose parser is installed; silent otherwise.
 vim.api.nvim_create_autocmd('FileType', {

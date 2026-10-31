@@ -108,7 +108,7 @@ install_sync() {
         done
         systemctl --user daemon-reload
         systemctl --user enable spaceghost-sync.timer
-        systemctl --user restart spaceghost-sync.timer
+        systemctl --user restart --no-block spaceghost-sync.timer
         log 'installed user timer (every two minutes)'
     else
         file=$state/crontab.install

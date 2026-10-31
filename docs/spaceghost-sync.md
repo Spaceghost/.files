@@ -6,6 +6,10 @@ commits if another host published first. Alienware and Fedora use a user
 systemd calendar timer; Bak uses cron. The calendar timer catches up after
 suspend and keeps its next run scheduled across configuration reloads. Installation enables the schedule and immediately
 runs the worker; no terminal, confirmation, or login is required afterward.
+The persistent Neovim server also runs the worker every two minutes as a backup
+when the service manager is unavailable or stops scheduling jobs. The worker's
+lock prevents simultaneous syncs. Reloading Neovim replaces this timer while
+preserving an in-flight sync; closing a client does not stop the server timer.
 
 Committed changes reload existing applications automatically:
 
