@@ -254,6 +254,7 @@ local function hide_terminal_numbers(win)
 end
 
 function M.setup()
+  M.claim_server()
   local remote = vim.fn.expand('~/.bin/nvim-remote')
   if uv.fs_stat(remote) then vim.env.EDITOR = remote; vim.env.VISUAL = remote end
   vim.env.SPACEGHOST_NVIM_SOCK = M.sock
@@ -321,14 +322,27 @@ function M.setup()
     end,
   })
 
-  -- A finished shell closes its buffer; the root shell closes Neovim.
+  -- A finished shell closes only its own views. The startup shell may quit a
+  -- standalone instance only when no other work remains; it never owns the
+  -- lifetime of the shared server or of shells opened after it.
   vim.api.nvim_create_autocmd('TermClose', {
     group = group,
     callback = function(ev)
       if not vim.b[ev.buf].spaceghost_shell then return end
       local root = vim.b[ev.buf].spaceghost_shell_root
       vim.schedule(function()
-        if root and pcall(vim.cmd, 'quitall') then return end
+        local other_work = #vim.api.nvim_list_wins() > 1
+        for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+          if buf ~= ev.buf and vim.bo[buf].buflisted
+              and (vim.bo[buf].buftype == 'terminal' or vim.bo[buf].modified
+                or vim.api.nvim_buf_get_name(buf) ~= '') then
+            other_work = true
+          end
+        end
+        if root and not M.is_server and not other_work and pcall(vim.cmd, 'quitall') then return end
+        for _, win in ipairs(vim.fn.win_findbuf(ev.buf)) do
+          if #vim.api.nvim_list_wins() > 1 then pcall(vim.api.nvim_win_close, win, false) end
+        end
         if vim.api.nvim_buf_is_valid(ev.buf) then
           pcall(vim.api.nvim_buf_delete, ev.buf, { force = true })
         end

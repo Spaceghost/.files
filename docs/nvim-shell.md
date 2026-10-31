@@ -1,7 +1,8 @@
 # Neovim as shell and multiplexer
 
-`nvim` with no arguments opens a `:terminal` running zsh and quits when that
-shell exits. `.zshrc` `exec`s it from any interactive terminal that is not
+`nvim` with no arguments opens a `:terminal` running zsh. Exiting that first
+shell closes its pane; a standalone instance quits only if no other work
+remains. The shared server stays alive. `.zshrc` `exec`s it from any interactive terminal that is not
 already inside Neovim or tmux, so zsh remains `$SHELL` while Neovim is what you
 see. `SPACEGHOST_PLAIN_SHELL=1 zsh` gives one plain shell. On a bash login
 shell, add the same block to `~/.bashrc` (see "Install").

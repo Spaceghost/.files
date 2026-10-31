@@ -70,10 +70,6 @@ function M.close_pane()
       vim.api.nvim_win_close(0, false)
       return
     end
-    if vim.b[buf].spaceghost_shell_root and #vim.api.nvim_list_wins() == 1 then
-      vim.cmd('quitall')
-      return
-    end
     pcall(vim.api.nvim_buf_delete, buf, { force = true })
   else
     pcall(vim.cmd, 'close')
