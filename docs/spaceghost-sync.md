@@ -3,7 +3,8 @@
 `spaceghost-sync` checks `origin/base` every two minutes. It fast-forwards
 incoming commits, pushes commits made on this host, and rebases clean local
 commits if another host published first. Alienware and Fedora use a user
-systemd timer; Bak uses cron. Installation enables the schedule and immediately
+systemd calendar timer; Bak uses cron. The calendar timer catches up after
+suspend and keeps its next run scheduled across configuration reloads. Installation enables the schedule and immediately
 runs the worker; no terminal, confirmation, or login is required afterward.
 
 Committed changes reload existing applications automatically:

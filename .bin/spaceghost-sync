@@ -10,7 +10,10 @@ logfile=$state/sync.log
 PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 export PATH
 GIT_TERMINAL_PROMPT=0
-export GIT_TERMINAL_PROMPT
+GIT_ASKPASS=/bin/false
+SSH_ASKPASS=/bin/false
+GCM_INTERACTIVE=Never
+export GIT_TERMINAL_PROMPT GIT_ASKPASS SSH_ASKPASS GCM_INTERACTIVE
 
 log() {
     printf '%s %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*" >> "$logfile"
@@ -104,7 +107,8 @@ install_sync() {
             ln -sfn "$repo/.config/systemd/user/$name" "$dest"
         done
         systemctl --user daemon-reload
-        systemctl --user enable --now spaceghost-sync.timer
+        systemctl --user enable spaceghost-sync.timer
+        systemctl --user restart spaceghost-sync.timer
         log 'installed user timer (every two minutes)'
     else
         file=$state/crontab.install

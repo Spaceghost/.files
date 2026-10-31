@@ -63,25 +63,25 @@ reload_tmux() {
     [ -f "$repo/.tmux.conf" ] || return 0
     for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$uid"/* "${XDG_RUNTIME_DIR:-/nonexistent}"/tmux*/*; do
         [ -S "$sock" ] || continue
-        tmux -S "$sock" list-sessions >/dev/null 2>&1 || continue
-        tmux -S "$sock" source-file "$repo/.tmux.conf" || return 1
+        timeout 5 tmux -S "$sock" list-sessions >/dev/null 2>&1 || continue
+        timeout 25 tmux -S "$sock" source-file "$repo/.tmux.conf" || return 1
         log "reloaded tmux at $sock"
     done
 }
 reload_ghostty() {
     command -v gdbus >/dev/null 2>&1 || return 0
     # NameHasOwner avoids launching Ghostty when no instance is running.
-    owner=$(gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+    owner=$(timeout 5 gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
         --method org.freedesktop.DBus.NameHasOwner com.mitchellh.ghostty 2>/dev/null) || return 0
     case "$owner" in *true*) ;; *) return 0 ;; esac
-    gdbus call --session --dest com.mitchellh.ghostty --object-path /com/mitchellh/ghostty \
+    timeout 10 gdbus call --session --dest com.mitchellh.ghostty --object-path /com/mitchellh/ghostty \
         --method org.gtk.Actions.Activate reload-config '[]' '{}' >/dev/null || return 1
     log 'reloaded Ghostty configuration'
 }
 reload_systemd() {
     command -v systemctl >/dev/null 2>&1 || return 0
-    systemctl --user show-environment >/dev/null 2>&1 || return 0
-    systemctl --user daemon-reload || return 1
+    timeout 5 systemctl --user show-environment >/dev/null 2>&1 || return 0
+    timeout 10 systemctl --user daemon-reload || return 1
     log 'reloaded user systemd units'
 }
 failed=0

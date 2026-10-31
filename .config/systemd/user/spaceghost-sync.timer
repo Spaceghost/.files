@@ -2,8 +2,10 @@
 Description=Sync Spaceghost .files every two minutes
 
 [Timer]
-OnBootSec=1min
-OnUnitInactiveSec=2min
+OnCalendar=*-*-* *:0/2:00
+Persistent=true
+RandomizedDelaySec=10
+AccuracySec=1s
 Unit=spaceghost-sync.service
 
 [Install]
