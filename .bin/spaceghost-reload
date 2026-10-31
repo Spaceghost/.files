@@ -1,0 +1,101 @@
+#!/bin/sh
+# Apply committed .files changes to existing apps without sending keystrokes or
+# restarting sessions. A failed app keeps its own revision pending for retry.
+# Reload functions below are dispatched by application name.
+# shellcheck disable=SC2329
+set -eu
+repo=${SPACEGHOST_SYNC_REPO:-"$HOME/.files"}
+state=${SPACEGHOST_SYNC_STATE:-"${XDG_STATE_HOME:-$HOME/.local/state}/spaceghost-sync"}
+mkdir -p "$state"
+PATH="$HOME/.local/nvim/bin:$HOME/.bin:/home/linuxbrew/.linuxbrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+uid=$(id -u)
+if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d "/run/user/$uid" ]; then
+    XDG_RUNTIME_DIR="/run/user/$uid"; export XDG_RUNTIME_DIR
+fi
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "${XDG_RUNTIME_DIR:-/nonexistent}/bus" ]; then
+    DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"; export DBUS_SESSION_BUS_ADDRESS
+fi
+head=$(git -C "$repo" rev-parse HEAD)
+log() { printf '%s spaceghost-reload: %s\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$*"; }
+changed() {
+    previous=$(cat "$state/reloaded-$1" 2>/dev/null || true)
+    shift
+    [ "$previous" = "$head" ] && return 1
+    [ -n "$previous" ] || return 0
+    git -C "$repo" cat-file -e "$previous^{commit}" 2>/dev/null || return 0
+    [ -n "$(git -C "$repo" diff --name-only "$previous" "$head" -- "$@")" ]
+}
+mark() {
+    printf '%s\n' "$head" > "$state/reloaded-$1.tmp.$$"
+    mv "$state/reloaded-$1.tmp.$$" "$state/reloaded-$1"
+}
+nvim_sockets() {
+    if [ -x "$HOME/.bin/nvim-session" ]; then "$HOME/.bin/nvim-session" sock; fi
+    for sock in "${NVIM:-}" "${SPACEGHOST_NVIM_SOCK:-}" \
+        "${XDG_RUNTIME_DIR:-/nonexistent}"/nvim* /tmp/nvim-spaceghost-"$uid".sock \
+        /tmp/nvim."$uid"/*/nvim.*; do
+        [ -S "$sock" ] && printf '%s\n' "$sock"
+    done
+    return 0
+}
+reload_nvim() {
+    command -v nvim >/dev/null 2>&1 || return 0
+    nvim_sockets | sort -u | while IFS= read -r sock; do
+        [ -S "$sock" ] || continue
+        # Ignore stale sockets and editors using a different configuration.
+        if managed=$(timeout 8 nvim --server "$sock" --remote-expr \
+            "luaeval(\"type(Spaceghost) == 'table' and type(Spaceghost.deck) == 'table' and 1 or 0\")" </dev/null 2>/dev/null); then
+            :
+        else
+            case $? in 124|137) log "Neovim timed out at $sock; retrying"; exit 1 ;; esac
+            continue
+        fi
+        [ "$managed" = 1 ] || continue
+        result=$(timeout 15 nvim --server "$sock" --remote-expr \
+            "luaeval(\"(function() local ok, err = pcall(Spaceghost.deck.reload); return ok and 'reloaded' or ('ERROR: ' .. tostring(err)) end)()\")" </dev/null 2>&1) || { log "Neovim failed at $sock: $result"; exit 1; }
+        case "$result" in *ERROR:*) log "Neovim failed at $sock: $result"; exit 1 ;; esac
+        log "reloaded Neovim at $sock"
+    done
+}
+reload_tmux() {
+    command -v tmux >/dev/null 2>&1 || return 0
+    [ -f "$repo/.tmux.conf" ] || return 0
+    for sock in "${TMUX_TMPDIR:-/tmp}/tmux-$uid"/* "${XDG_RUNTIME_DIR:-/nonexistent}"/tmux*/*; do
+        [ -S "$sock" ] || continue
+        tmux -S "$sock" list-sessions >/dev/null 2>&1 || continue
+        tmux -S "$sock" source-file "$repo/.tmux.conf" || return 1
+        log "reloaded tmux at $sock"
+    done
+}
+reload_ghostty() {
+    command -v gdbus >/dev/null 2>&1 || return 0
+    # NameHasOwner avoids launching Ghostty when no instance is running.
+    owner=$(gdbus call --session --dest org.freedesktop.DBus --object-path /org/freedesktop/DBus \
+        --method org.freedesktop.DBus.NameHasOwner com.mitchellh.ghostty 2>/dev/null) || return 0
+    case "$owner" in *true*) ;; *) return 0 ;; esac
+    gdbus call --session --dest com.mitchellh.ghostty --object-path /com/mitchellh/ghostty \
+        --method org.gtk.Actions.Activate reload-config '[]' '{}' >/dev/null || return 1
+    log 'reloaded Ghostty configuration'
+}
+reload_systemd() {
+    command -v systemctl >/dev/null 2>&1 || return 0
+    systemctl --user show-environment >/dev/null 2>&1 || return 0
+    systemctl --user daemon-reload || return 1
+    log 'reloaded user systemd units'
+}
+failed=0
+for app in nvim tmux ghostty systemd; do
+    case "$app" in
+        nvim) set -- .config/nvim .bin/spaceghost-reload .bin/nvim-session ;;
+        tmux) set -- .tmux.conf .bin/spaceghost-tmux .bin/spaceghost-reload integrations/ffxiv ;;
+        ghostty) set -- .config/ghostty .bin/spaceghost-reload ;;
+        systemd) set -- .config/systemd/user .bin/spaceghost-reload ;;
+    esac
+    if changed "$app" "$@"; then
+        if "reload_$app"; then mark "$app"; else log "$app reload failed; retrying next cycle"; failed=1; fi
+    else
+        mark "$app"
+    fi
+done
+exit "$failed"

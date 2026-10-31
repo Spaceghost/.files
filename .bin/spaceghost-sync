@@ -17,28 +17,26 @@ log() {
     printf '%s\n' "spaceghost-sync: $*" >&2
 }
 
-reload_nvim() {
-    [ "${SPACEGHOST_SYNC_NO_RELOAD:-0}" = 1 ] && return 0
-    command -v nvim >/dev/null 2>&1 || return 0
-    [ -x "$HOME/.bin/nvim-session" ] || return 0
-    sock=$("$HOME/.bin/nvim-session" sock) || return 0
-    [ -S "$sock" ] || return 0
-    if ! nvim --server "$sock" --remote-expr "execute('lua Spaceghost.deck.reload()')" </dev/null >> "$logfile" 2>&1; then
-        log 'Neovim reload failed; will retry next sync'
-        return 1
+# Git's libcurl resolver can fail while the host's system resolver works.
+# Resolve afresh for each request; keep HTTPS hostname/certificate verification.
+git_network() {
+    address=''
+    case $(git -C "$repo" remote get-url origin) in
+        https://github.com/*)
+            if command -v getent >/dev/null 2>&1; then
+                address=$(getent ahostsv4 github.com 2>/dev/null | awk 'NR == 1 { print $1 }')
+            fi ;;
+    esac
+    if [ -n "$address" ]; then
+        git -C "$repo" -c "http.curloptResolve=github.com:443:$address" "$@"
+    else
+        git -C "$repo" "$@"
     fi
-    log 'reloaded Neovim configuration'
 }
 
-reload_systemd() {
+reload_apps() {
     [ "${SPACEGHOST_SYNC_NO_RELOAD:-0}" = 1 ] && return 0
-    command -v systemctl >/dev/null 2>&1 || return 0
-    systemctl --user show-environment >/dev/null 2>&1 || return 0
-    if ! systemctl --user daemon-reload >> "$logfile" 2>&1; then
-        log 'user systemd reload failed; will retry next sync'
-        return 1
-    fi
-    log 'reloaded user systemd units'
+    "$repo/.bin/spaceghost-reload" >> "$logfile" 2>&1
 }
 
 run_sync() {
@@ -56,8 +54,10 @@ run_sync() {
         log 'rebase in progress; leaving it alone'; return 1;
     }
     old=$(git -C "$repo" rev-parse HEAD)
-    if ! git -C "$repo" fetch -q origin base >> "$logfile" 2>&1; then
-        log 'fetch failed; will retry'; return 1
+    if ! git_network fetch -q origin base >> "$logfile" 2>&1; then
+        log 'fetch failed; retrying next cycle (local apps still reload)'
+        reload_apps || return 1
+        return 1
     fi
     remote=$(git -C "$repo" rev-parse refs/remotes/origin/base)
     if [ "$old" != "$remote" ]; then
@@ -80,28 +80,16 @@ run_sync() {
             log "rebased local commits on $(git -C "$repo" rev-parse --short "$remote")"
         fi
     fi
-    new=$(git -C "$repo" rev-parse HEAD)
-    if [ "$new" != "$remote" ]; then
-        if ! git -C "$repo" push origin HEAD:refs/heads/base >> "$logfile" 2>&1; then
-            log 'push raced with another host or failed; will retry'; return 1
+    if [ "$(git -C "$repo" rev-parse HEAD)" != "$remote" ]; then
+        if ! git_network push origin HEAD:refs/heads/base >> "$logfile" 2>&1; then
+            log 'push raced with another host or failed; will retry'
+            reload_apps || return 1
+            return 1
         fi
         log "pushed $(git -C "$repo" rev-parse --short HEAD)"
     fi
-    previous=$(cat "$state/last-head" 2>/dev/null || true)
-    if [ -z "$previous" ] || {
-        git -C "$repo" cat-file -e "$previous^{commit}" 2>/dev/null &&
-        git -C "$repo" diff --name-only "$previous" "$new" -- .config/nvim | grep -q .;
-    }; then
-        reload_nvim || return 1
-    fi
-    if [ -z "$previous" ] || {
-        git -C "$repo" cat-file -e "$previous^{commit}" 2>/dev/null &&
-        git -C "$repo" diff --name-only "$previous" "$new" -- .config/systemd/user | grep -q .;
-    }; then
-        reload_systemd || return 1
-    fi
-    printf '%s\n' "$new" > "$state/last-head.tmp.$$"
-    mv "$state/last-head.tmp.$$" "$state/last-head"
+    reload_apps || return 1
+
 }
 
 install_sync() {

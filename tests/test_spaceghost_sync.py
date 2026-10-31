@@ -52,6 +52,19 @@ class SyncTest(unittest.TestCase):
         self.assertEqual((self.reader / "config").read_text(), "latest\n")
         self.assertEqual((self.reader / "local").read_text(), "unfinished\n")
 
+    def test_network_failure_still_reloads_local_committed_config(self):
+        helper = self.reader / '.bin' / 'spaceghost-reload'
+        helper.parent.mkdir()
+        marker = self.state / 'offline-reloaded'
+        helper.write_text('#!/bin/sh\nprintf reloaded > "$SPACEGHOST_SYNC_STATE/offline-reloaded"\n')
+        helper.chmod(0o755)
+        git('remote', 'set-url', 'origin', str(self.reader / 'missing.git'), cwd=self.reader)
+        env = dict(os.environ, SPACEGHOST_SYNC_REPO=str(self.reader),
+                   SPACEGHOST_SYNC_STATE=str(self.state), SPACEGHOST_SYNC_NO_RELOAD='0')
+        result = subprocess.run([str(SCRIPT), 'run'], env=env, capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(marker.read_text(), 'reloaded')
+
     def test_pushes_a_local_commit(self):
         (self.reader / "config").write_text("from reader\n")
         git("commit", "-am", "reader config", cwd=self.reader)

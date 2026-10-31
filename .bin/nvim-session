@@ -9,13 +9,16 @@
 #   nvim-session sock     print the socket path
 set -eu
 
+# SSH and cron may omit the runtime directory. Recover it before choosing a
+# socket, so every caller finds the already-running server.
+if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d "/run/user/$(id -u)" ]; then
+    XDG_RUNTIME_DIR="/run/user/$(id -u)"; export XDG_RUNTIME_DIR
+fi
 if [ -n "${SPACEGHOST_NVIM_SOCK:-}" ]; then sock="$SPACEGHOST_NVIM_SOCK"
 elif [ -n "${XDG_RUNTIME_DIR:-}" ]; then sock="$XDG_RUNTIME_DIR/nvim-spaceghost.sock"
 else sock="/tmp/nvim-spaceghost-$(id -u).sock"
 fi
 export SPACEGHOST_NVIM_SOCK="$sock"
-# mosh/ssh logins may lack the user-systemd environment; recover it when the runtime dir exists.
-if [ -z "${XDG_RUNTIME_DIR:-}" ] && [ -d "/run/user/$(id -u)" ]; then XDG_RUNTIME_DIR="/run/user/$(id -u)"; export XDG_RUNTIME_DIR; fi
 if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -n "${XDG_RUNTIME_DIR:-}" ] && [ -S "$XDG_RUNTIME_DIR/bus" ]; then
     DBUS_SESSION_BUS_ADDRESS="unix:path=$XDG_RUNTIME_DIR/bus"; export DBUS_SESSION_BUS_ADDRESS
 fi
