@@ -62,6 +62,16 @@ Spaceghost.worker_ui.setup()
 Spaceghost.build.setup()
 Spaceghost.sync.setup()
 
+-- romsort (Spaceghost/romsort) is also a Neovim plugin: :Romsort is its live
+-- dashboard. Loaded only on hosts that have the checkout.
+for _, dir in ipairs({ vim.env.ROMSORT_HOME or '', '/srv/ai/workspaces/romsort/main' }) do
+  if dir ~= '' and vim.uv.fs_stat(dir .. '/plugin/romsort.lua') then
+    vim.opt.rtp:append(dir)
+    if vim.v.vim_did_enter == 1 then vim.cmd.runtime('plugin/romsort.lua') end -- config reload
+    break
+  end
+end
+
 -- Treesitter highlighting for buffers whose parser is installed; silent otherwise.
 vim.api.nvim_create_autocmd('FileType', {
   callback = function(ev) pcall(vim.treesitter.start, ev.buf) end,

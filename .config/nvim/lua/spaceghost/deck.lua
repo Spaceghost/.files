@@ -93,6 +93,10 @@ function M.command_deck()
     { key = '`', label = 'Scratch terminal', action = function() shell.float(nil, { key = 'scratch', title = 'scratch terminal' }) end },
     { key = 'g', label = 'Git observatory', action = M.git_observatory },
     { key = '~', label = 'Process monitor', action = M.monitor },
+    { key = 'R', label = 'ROM library (romsort)', action = function()
+      if vim.fn.exists(':Romsort') == 2 then vim.cmd('Romsort')
+      else vim.notify('romsort is not on this host (no checkout found)', vim.log.levels.WARN) end
+    end },
     { sep = true },
     { key = 'n', label = 'Rebuild native helpers (nelua + zig cc)', action = M.rebuild_native },
     { key = 'r', label = 'Reload configuration', action = M.reload },
