@@ -195,6 +195,11 @@ function M.setup()
   map('~', deck.monitor, 'Process monitor')
   map('r', deck.reload, 'Reload configuration')
   map('[', '<C-\\><C-n>', 'Copy mode (normal mode)', { 't' })
+  map('<Esc>', '<C-\\><C-n>', 'Normal mode (splits, :commands)', { 't' })
+  -- Esc Esc leaves terminal mode from any terminal; a single Esc still reaches
+  -- the program after 'timeoutlen'. Esc in normal mode returns to the shell.
+  vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Normal mode (splits, :commands)' })
+  M.direct_keys[#M.direct_keys + 1] = '<Esc><Esc>'
   map(']', function()
     local text = vim.fn.getreg('"')
     if text ~= '' then vim.api.nvim_chan_send(vim.bo.channel, text) end

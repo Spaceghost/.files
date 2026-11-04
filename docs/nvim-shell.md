@@ -157,7 +157,7 @@ when the statusline shows `REMOTE @HOST`.
 | `a` | attach a machine in a split | `Ctrl-]` | toggle all navigation between local and remote |
 | `[` | copy mode (`Esc` returns) | `]` | paste `"` register into shell |
 | `,` | rename tab | `r` | reload configuration |
-| prefix | send the prefix itself | `Ctrl-n` | leave terminal mode (`Ctrl-\ Ctrl-n`) |
+| prefix | send the prefix itself | `Esc` | normal mode for splits and `:` commands (also `Esc Esc` in any terminal; `Esc` returns) |
 
 `:Shell [tabnew|vnew|new]` opens a shell from the command line.
 
