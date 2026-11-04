@@ -32,3 +32,8 @@ shell-integration-features = no-cursor,sudo,title
 keybind = ctrl+shift+t=new_tab
 keybind = ctrl+shift+n=new_window
 keybind = ctrl+shift+enter=toggle_fullscreen
+
+# let ctrl+enter / ctrl+shift+enter reach the terminal (Claude Code newline)
+keybind = ctrl+enter=unbind
+keybind = ctrl+shift+enter=unbind
+keybind = f11=toggle_fullscreen
