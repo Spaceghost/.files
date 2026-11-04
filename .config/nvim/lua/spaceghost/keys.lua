@@ -2,10 +2,12 @@
 -- Ctrl-\ everywhere; Ctrl-Space in terminals that report it as a key (kitty
 -- keyboard protocol: Ghostty, foot, kitty, Alacritty, WezTerm). Override with
 -- vim.g.spaceghost_prefixes = { '<C-\\>', '<C-Space>', '<C-b>' } before setup.
+-- A Neovim started inside another Neovim's terminal ($NVIM is set) uses Ctrl-b
+-- so its prefix does not collide with the outer instance's.
 local M = {}
 local shell = require('spaceghost.shell')
 
-M.prefixes = vim.g.spaceghost_prefixes or { '<C-\\>', '<C-Space>' }
+M.prefixes = vim.g.spaceghost_prefixes or (vim.env.NVIM and { '<C-b>' } or { '<C-\\>', '<C-Space>' })
 M.direct_keys = {}
 M.prefixed_keys = {}
 
@@ -204,9 +206,17 @@ function M.setup()
     local text = vim.fn.getreg('"')
     if text ~= '' then vim.api.nvim_chan_send(vim.bo.channel, text) end
   end, 'Paste register into shell', { 't' })
-  -- Prefix twice sends the prefix itself to the program in the pane.
+  -- Prefix twice sends the prefix itself to the program in the pane. Write the
+  -- control byte to the channel instead of feeding the key: a fed Ctrl-\ is
+  -- still Neovim's terminal escape, so Ctrl-\ Ctrl-\ Ctrl-n would leave this
+  -- instance instead of reaching a nested one.
   for _, prefix in ipairs(M.prefixes) do
-    vim.keymap.set('t', prefix .. prefix, prefix, { desc = 'Send literal ' .. prefix })
+    local bytes = vim.keycode(prefix)
+    local rhs = prefix
+    if not bytes:find('\128', 1, true) then
+      rhs = function() vim.api.nvim_chan_send(vim.bo.channel, bytes) end
+    end
+    vim.keymap.set('t', prefix .. prefix, rhs, { desc = 'Send literal ' .. prefix })
     M.prefixed_keys[#M.prefixed_keys + 1] = prefix .. prefix
   end
   vim.keymap.set({ 'n', 't' }, '<C-]>', function()
