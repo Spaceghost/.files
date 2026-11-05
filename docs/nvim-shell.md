@@ -47,6 +47,11 @@ shell, add the same block to `~/.bashrc` (see "Install").
 * `nvim-remote` blocks until the buffer is closed (`:q`, `:bd`), so
   `git commit`, `crontab -e`, and `kubectl edit` behave normally. `+N` jumps to
   a line. The buffer opens as a split above the shell that asked for it.
+* A host that boots to a passphrase prompt (bak: `/etc/local.d/bak-unlock.start`
+  runs `sudo bak-unlock-personal` in the tmux session `unlock`) gets that
+  prompt as the first tab, `unlock`, attached and focused; the shell is the
+  second tab. The tab closes itself when the script finishes. No tab appears
+  when the session is gone or Neovim already runs inside tmux.
 
 ## Cockpit
 

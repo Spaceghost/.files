@@ -129,6 +129,20 @@ function M.open(open, opts)
   return vim.api.nvim_get_current_buf()
 end
 
+-- A host that boots with a passphrase prompt (bak: /etc/local.d/bak-unlock.start
+-- opens `sudo bak-unlock-personal` in the tmux session "unlock") shows that
+-- prompt as the first tab of the startup instance, attached, with the cursor
+-- in it. The shell tab stays second. Nothing happens when the session is gone
+-- (already unlocked, or a host without one) or inside tmux already.
+function M.open_unlock()
+  if vim.env.TMUX or vim.fn.executable('tmux') == 0 then return end
+  vim.fn.system({ 'tmux', 'has-session', '-t', '=unlock' })
+  if vim.v.shell_error ~= 0 then return end
+  M.open('0tabnew', { cmd = { 'tmux', 'attach-session', '-t', '=unlock' }, cwd = vim.fn.getcwd() })
+  vim.t.spaceghost_name = 'unlock'
+  vim.b.spaceghost_unlock = true
+end
+
 -- Floating terminal; `key` makes it persistent (toggle) across calls.
 local floats = {}
 function M.float(cmd, opts)
@@ -277,6 +291,7 @@ function M.setup()
       if vim.fn.argc() == 0 and vim.fn.bufnr('$') == 1
         and vim.api.nvim_buf_get_name(0) == '' and not vim.bo.modified then
         M.open(nil, { root = true, cwd = vim.fn.getcwd() })
+        M.open_unlock()
       end
     end,
   })
