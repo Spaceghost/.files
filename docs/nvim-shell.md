@@ -86,7 +86,7 @@ These keys work while typing in a shell and while editing a file:
 | `F2` | Find any pane across all tabs, including attached hosts |
 | `Alt-Left/Down/Up/Right` | Passed through to the terminal application |
 | `Ctrl-PageUp` / `Ctrl-PageDown`, or `Alt-[` / `Alt-]` | Previous / next tab, wrapping at the ends |
-| `Alt-1` through `Alt-9` | Jump directly to a tab |
+| `Alt-1` through `Alt-9` | Jump directly to a tab, or create one new shell tab if it doesn't exist |
 | `Alt-o` | Toggle back to the previous pane, even in another tab |
 | `F1` / `F4` | Field guide / command deck |
 
@@ -152,7 +152,7 @@ when the statusline shows `REMOTE @HOST`.
 | `Space` | command deck | `?` `F1` | field guide |
 | `c` | new tab shell | `s` / `v` | split shell below / right |
 | `h j k l` | focus pane | `H J K L` | resize pane |
-| `n` / `p` | next / previous tab | `1`-`9` | jump to tab |
+| `n` / `p` | next / previous tab | `1`-`9` | jump to tab, or create one shell tab if missing |
 | `Tab` | previous pane across tabs | `w` | searchable tabs + panes + hosts picker |
 | `z` / `=` | zoom / balance | `x` | close pane |
 | `d` | redraw pane and its terminal | | |

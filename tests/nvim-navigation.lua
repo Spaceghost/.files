@@ -87,6 +87,7 @@ test('direct shortcuts and picker work from running terminal input', function()
     lua([[
       vim.opt.runtimepath:prepend(...)
       vim.g.spaceghost_no_shell = true
+      vim.g.spaceghost_prefixes = { '<C-\\>', '<C-Space>' }
       local shell = require('spaceghost.shell')
       shell.setup()
       require('spaceghost.keys').setup()
@@ -99,6 +100,26 @@ test('direct shortcuts and picker work from running terminal input', function()
     wait_for("return vim.api.nvim_get_mode().mode == 't'")
     input('<M-[>')
     wait_for("return vim.fn.tabpagenr() == 1 and vim.api.nvim_get_mode().mode == 't'")
+    input('<M-2>')
+    wait_for("return vim.fn.tabpagenr() == 2 and vim.api.nvim_get_mode().mode == 't'")
+    input('<M-7>')
+    wait_for("return vim.fn.tabpagenr() == 3 and vim.api.nvim_get_mode().mode == 't'")
+    assert(lua("return vim.fn.tabpagenr('$')") == 3, 'missing shortcut must create exactly one tab')
+    assert(lua([[
+      for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+        local buf = vim.api.nvim_win_get_buf(vim.api.nvim_tabpage_get_win(tab))
+        if vim.bo[buf].buftype ~= 'terminal' or not vim.b[buf].spaceghost_shell then return false end
+      end
+      return true
+    ]]), 'created tabs must contain shells')
+    input('<M-2>')
+    wait_for("return vim.fn.tabpagenr() == 2 and vim.api.nvim_get_mode().mode == 't'")
+    input('<M-3>')
+    wait_for("return vim.fn.tabpagenr() == 3 and vim.api.nvim_get_mode().mode == 't'")
+    assert(lua("return vim.fn.tabpagenr('$')") == 3, 'existing tab shortcut created another tab')
+    input([[<C-\>9]])
+    wait_for("return vim.fn.tabpagenr() == 4 and vim.api.nvim_get_mode().mode == 't'")
+    assert(lua("return vim.fn.tabpagenr('$')") == 4, 'missing prefix shortcut must create exactly one tab')
     input('<M-2>')
     wait_for("return vim.fn.tabpagenr() == 2 and vim.api.nvim_get_mode().mode == 't'")
     input('<F2>')
