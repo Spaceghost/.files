@@ -1,0 +1,229 @@
+#!/usr/bin/env python3
+"""Cached FFXIV + XivPiano HUD. Network access happens only in collect/watch."""
+import concurrent.futures
+import datetime
+import fcntl
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import unicodedata
+import urllib.request
+
+CACHE = Path.home() / '.cache/spaceghost/xiv-status.json'
+CONFIG = Path.home() / '.config/spaceghost/xiv-status.json'
+STALE = 45
+
+
+def clean(value, limit=80):
+    text = ' '.join(''.join(c for c in str(value or '')
+                           if c != '#' and not unicodedata.category(c).startswith('C')).split())
+    return text if len(text) <= limit else text[:max(0, limit - 1)] + '…'
+
+
+def clock(seconds):
+    seconds = max(0, int(seconds or 0))
+    return f'{seconds // 60}:{seconds % 60:02}'
+
+
+def render(data, width=160, now=None):
+    now = time.time() if now is None else now
+    width = max(20, min(int(width), 1000))
+    updated = data.get('updated', 0)
+    source = clean(data.get('source', ''), 12).upper()
+    stale = bool(updated) and now - updated > STALE
+    if not updated:
+        game = 'XIV unavailable'
+    elif stale:
+        game = f'XIV / {source} STALE'
+    elif not data.get('online'):
+        game = f'XIV / {source} OFFLINE'
+    else:
+        job = f"{clean(data.get('job'), 4)}{data.get('level', '')}"
+        state = clean(data.get('state', 'ONLINE'), 18)
+        game = f'XIV / {source} {job} {state}'
+        if width >= 130:
+            game += f" HP {data.get('hp', '?')}%"
+        game += ' / ' + clean(data.get('zone', '?'), 30 if width >= 130 else 20)
+        if width >= 170 and data.get('area'):
+            game += ' · ' + clean(data['area'], 22)
+        if width >= 130 and data.get('coords'):
+            game += ' ' + clean(data['coords'], 14)
+    music = data.get('music') or {}
+    if stale or not music or now - music.get('updated', 0) > 15:
+        song = 'PIANO unavailable'
+    elif not music.get('title'):
+        song = 'PIANO stopped'
+    else:
+        song = 'PIANO ' + ('PLAY' if music.get('playing') else 'PAUSE') + ' / '
+        song += clean(music['title'], 45)
+        if width >= 130:
+            song += ' · ' + clean(music.get('artist'), 30)
+            song += ' ' + clock(music.get('positionSeconds')) + '/' + clock(music.get('lengthSeconds'))
+    available = width - 5
+    game_limit = min(len(game), int(available * .58))
+    song_limit = available - game_limit
+    # Restrict each half before styling. External strings cannot become tmux formats.
+    color = '#f3c969' if stale else '#79efc2'
+    return (f'#[fill=#161a2b,bg=#161a2b,fg={color}] ' + clean(game, game_limit)
+            + '#[fg=#8992ad] │ #[fg=#b4a1ff]' + clean(song, song_limit) + ' ')
+
+
+def read_json(path):
+    try:
+        return json.loads(path.read_text(encoding='utf-8-sig'))
+    except (OSError, ValueError):
+        return {}
+
+
+def atomic_write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(dir=path.parent, prefix='.xiv-')
+    try:
+        with os.fdopen(fd, 'w') as stream:
+            json.dump(data, stream, ensure_ascii=False)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def probe(root):
+    """Run on the game machine; credentials never leave it."""
+    root = Path(root).expanduser()
+    config = read_json(root / 'pluginConfigs/XivMcp.json')
+    config.update(read_json(Path.home() / '.config/xiv-mcp/provision.json'))
+    url = 'http://127.0.0.1:' + str(config.get('Port', 41800)) + config.get('Path', '/mcp')
+    headers = {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream'}
+    if config.get('BearerToken'):
+        headers['Authorization'] = 'Bearer ' + config['BearerToken']
+
+    def request(method, params, ident):
+        body = json.dumps({'jsonrpc': '2.0', 'id': ident, 'method': method, 'params': params}).encode()
+        req = urllib.request.Request(url, body, headers)
+        with urllib.request.urlopen(req, timeout=3) as response:
+            if response.headers.get('Mcp-Session-Id'):
+                headers['Mcp-Session-Id'] = response.headers['Mcp-Session-Id']
+            if 'text/event-stream' in response.headers.get('Content-Type', ''):
+                result = next(json.loads(line[5:]) for line in response if line.startswith(b'data:'))
+            else:
+                result = json.loads(response.read())
+        if result.get('error'):
+            raise ValueError('MCP request failed')
+        return result.get('result', {})
+
+    def tool(name, ident):
+        result = request('tools/call', {'name': name, 'arguments': {}}, ident)
+        if result.get('isError'):
+            return {}
+        if result.get('structuredContent'):
+            return result['structuredContent']
+        for item in result.get('content', []):
+            if item.get('type') == 'text':
+                try:
+                    return json.loads(item['text'])
+                except ValueError:
+                    pass
+        return {}
+
+    player, location = {}, {}
+    reachable = False
+    try:
+        init = request('initialize', {'protocolVersion': '2025-03-26', 'capabilities': {},
+                       'clientInfo': {'name': 'spaceghost-tmux', 'version': '1'}}, 1)
+        headers['MCP-Protocol-Version'] = init.get('protocolVersion', '2025-03-26')
+        reachable = True
+        player = tool('get_player', 2)
+        if player.get('name'):
+            location = tool('get_location', 3)
+    except Exception:
+        pass
+    finally:
+        if headers.get('Mcp-Session-Id'):
+            try:
+                urllib.request.urlopen(urllib.request.Request(url, headers=headers, method='DELETE'), timeout=2).close()
+            except Exception:
+                pass
+    music = read_json(root / 'pluginConfigs/XivPiano/now-playing.json')
+    if music:
+        try:
+            music['updated'] = datetime.datetime.fromisoformat(music.pop('updatedAt').replace('Z', '+00:00')).timestamp()
+        except (KeyError, ValueError, TypeError):
+            music = {}
+    coords = location.get('mapCoordinates') or player.get('mapCoordinates') or {}
+    state = ('KO' if player.get('isDead') else 'COMBAT' if player.get('inCombat') else
+             'CASTING' if player.get('isCasting') else (player.get('onlineStatus') or {}).get('name', 'ONLINE'))
+    return {'updated': time.time(), 'reachable': reachable, 'online': bool(player.get('name')),
+            'job': (player.get('job') or {}).get('abbreviation'), 'level': player.get('level'),
+            'hp': (player.get('hp') or {}).get('percent'), 'state': state,
+            'zone': (location.get('territory') or player.get('territory') or {}).get('name'),
+            'area': location.get('area'), 'coords': f"{coords['x']},{coords['y']}" if 'x' in coords and 'y' in coords else '',
+            'music': music}
+
+
+def collect(config):
+    def fetch(source):
+        try:
+            output = subprocess.run(source['command'], capture_output=True, text=True, timeout=18, check=True)
+            data = json.loads(output.stdout)
+            data['source'] = source['name']
+            return data
+        except (OSError, ValueError, subprocess.SubprocessError):
+            return None
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(fetch, config.get('sources', [])))
+    results = [r for r in results if r]
+    # Config order is the tie-breaker when both game clients are logged in.
+    data = next((r for r in results if r.get('online')), None)
+    data = data or next((r for r in results if r.get('reachable')), None)
+    data = data or next(iter(results), None)
+    if data:
+        atomic_write(CACHE, data)
+    else:
+        data = read_json(CACHE)  # Preserve its age; never make an outage look fresh.
+    def publish(command):
+        try:
+            subprocess.run(command, input=json.dumps(data), text=True, stdout=subprocess.DEVNULL,
+                           stderr=subprocess.DEVNULL, timeout=8, check=True)
+        except (OSError, subprocess.SubprocessError):
+            pass  # Remote readers independently mark the old cache stale.
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(publish, config.get('publish', [])))
+    return data
+
+
+def main():
+    mode = sys.argv[1] if len(sys.argv) > 1 else 'render'
+    if mode == 'render':
+        print(render(read_json(CACHE), int(sys.argv[2]) if len(sys.argv) > 2 else 160))
+    elif mode == 'probe':
+        print(json.dumps(probe(sys.argv[2] if len(sys.argv) > 2 else '~/.xlcore')))
+    elif mode == 'ingest':
+        data = json.loads(sys.stdin.read(16384))
+        if not isinstance(data, dict):
+            raise ValueError('Snapshot must be an object')
+        atomic_write(CACHE, data)
+    elif mode in ('watch', 'collect'):
+        config = read_json(CONFIG)
+        if not config.get('sources'):
+            return
+        CACHE.parent.mkdir(parents=True, exist_ok=True)
+        with (CACHE.parent / 'collector.lock').open('w') as lock:
+            try:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return
+            while True:
+                collect(config)
+                if mode == 'collect':
+                    break
+                time.sleep(10)
+    else:
+        raise SystemExit('Usage: spaceghost-xiv-status [render [WIDTH]|probe [GAME_ROOT]|ingest|collect|watch]')
+
+
+if __name__ == '__main__':
+    main()

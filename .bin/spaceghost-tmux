@@ -47,7 +47,7 @@ def main():
         if not source_group or info(target, "#{session_group}") != source_group:
             raise RuntimeError(f"{target} already exists outside the requested session group; left untouched")
         run("set-option", "-t", "=" + target + ":", "@spaceghost-surface", "FFXIV / " + args.view.upper())
-        run("set-option", "-t", "=" + target + ":", "status", "on")
+        run("set-option", "-t", "=" + target + ":", "status", "2")
         run("set-option", "-t", "=" + target + ":", "destroy-unattached", "off")
         run("set-option", "-t", "=" + target + ":", "status-left",
             "#[bg=#b4a1ff,fg=#0b0d16,bold] FFXIV "
