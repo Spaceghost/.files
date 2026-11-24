@@ -236,6 +236,10 @@ def run():
 
 
 def main():
+    if shutil.which('nmcli') and subprocess.run(
+            ['nmcli', '-t', '-f', 'RUNNING', 'general'],
+            capture_output=True, text=True).stdout.strip() == 'running':
+        os.execv(str(Path.home()/'.local/bin/spaceghost-wifi-nm'), ['spaceghost-wifi-nm'])
     runtime = Path(os.environ.get('XDG_RUNTIME_DIR', '/tmp'))
     with (runtime/'spaceghost-wifi-menu.lock').open('w') as lock:
         try:
