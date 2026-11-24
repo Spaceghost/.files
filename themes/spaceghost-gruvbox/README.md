@@ -94,7 +94,9 @@ is marked ●. New WPA/WPA2 personal networks use a masked password prompt;
 open networks ask before connecting. Failed joins restore the previous profile.
 Enterprise, WEP, OWE and WPA3-only networks require advanced system setup.
 
-The picker uses Fuzzel and `wpa_cli` with existing control-socket access, or
+When NetworkManager is running, the picker uses `nmcli` and Fuzzel; NetworkManager must authorize the user to scan and manage connections. Passwords are entered in a masked prompt and supplied through a temporary private file.
+
+Otherwise, the picker uses Fuzzel and `wpa_cli` with existing control-socket access, or
 existing passwordless `doas`/`sudo` access. It adds no privilege rules. On Alpine
 it asks the existing udhcpc process to release/renew its lease after a switch.
 Successful selections are saved in the local WPA configuration and preferred at

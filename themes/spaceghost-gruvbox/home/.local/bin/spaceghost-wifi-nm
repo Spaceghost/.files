@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""Choose and connect to Wi-Fi using the desktop menu."""
+import os
+from pathlib import Path
+import subprocess
+import tempfile
+
+
+def run(args, **kwargs):
+    return subprocess.run(args, text=True, capture_output=True, **kwargs)
+
+
+def choose(rows, prompt, password=False):
+    args = ['fuzzel', '--dmenu', '--prompt', prompt, '--width', '40', '--lines', '8']
+    if password:
+        args.append('--password')
+    result = run(args, input='\n'.join(rows))
+    return result.stdout.rstrip('\n') if result.returncode == 0 else None
+
+
+def fields(line):
+    result, value, escaped = [], '', False
+    for char in line:
+        if escaped:
+            value += char
+            escaped = False
+        elif char == '\\':
+            escaped = True
+        elif char == ':':
+            result.append(value)
+            value = ''
+        else:
+            value += char
+    result.append(value)
+    return result
+
+
+def notify(message):
+    run(['notify-send', 'Wi-Fi', message])
+
+
+def connect(bssid, password=None):
+    args = ['nmcli', '--wait', '30']
+    if password is None:
+        return run(args + ['device', 'wifi', 'connect', bssid])
+    # NetworkManager reads the secret from a private file rather than argv.
+    with tempfile.TemporaryDirectory(prefix='spaceghost-wifi-') as directory:
+        secret = Path(directory)/'password'
+        secret.write_text('802-11-wireless-security.psk:' + password + '\n')
+        secret.chmod(0o600)
+        return run(args + ['--passwd-file', str(secret), 'device', 'wifi', 'connect', bssid])
+
+
+def main():
+    listing = run(['nmcli', '-t', '-f', 'IN-USE,BSSID,SSID,SIGNAL,SECURITY',
+                   'device', 'wifi', 'list', '--rescan', 'yes'])
+    if listing.returncode:
+        notify('Could not scan for networks: ' + listing.stderr.strip())
+        return
+    networks = {}
+    for line in listing.stdout.splitlines():
+        row = fields(line)
+        if len(row) != 5 or not row[2]:
+            continue
+        active, bssid, ssid, signal, security = row
+        label = f'{"● " if active == "*" else ""}{ssid}  ·  {signal}%  ·  {security or "Open"}  ·  {bssid}'
+        networks[label] = (bssid, ssid, security, active)
+    if not networks:
+        notify('No Wi-Fi networks found.')
+        return
+    selected = choose(list(networks), 'Wi-Fi > ')
+    if selected not in networks:
+        return
+    bssid, ssid, security, active = networks[selected]
+    if active == '*':
+        notify('Already connected to ' + ssid)
+        return
+    result = connect(bssid)
+    if result.returncode and security and security != '--':
+        password = choose([], 'Password for ' + ssid + ' > ', password=True)
+        if password is None:
+            return
+        result = connect(bssid, password)
+    if result.returncode:
+        notify('Could not connect to ' + ssid + ': ' + result.stderr.strip())
+    else:
+        notify('Connected to ' + ssid)
+
+
+if __name__ == '__main__':
+    main()
